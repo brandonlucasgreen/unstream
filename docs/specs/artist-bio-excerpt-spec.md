@@ -93,7 +93,8 @@ Plain text only. Bandcamp bio HTML (`<br>`, links) is converted to text on the s
 - Clamp to **3 lines** (web and extension) or **2 lines** (Mac menu-bar popover, where space is tighter; iOS gets 3).
 - If the text fits, show it all with no "More".
 - If it doesn't, show a **More** control that expands inline. Nothing opens until the user asks.
-- Always show a small source line that names the platform: `From Bandcamp ↗`, `From Discogs ↗`, `From Wikipedia · CC BY-SA ↗`. The one exception is a claimed profile's own bio, which reads `From the artist ↗` and links to their `/a/{slug}` page (decided 2026-09-30). The link opens `sourceUrl` in a new tab or the default browser. The labels come from `source` in one small per-client map, so there's no label text in the API response.
+- Show a small source line that names the platform: `From Bandcamp ↗`, `From Discogs ↗`, `From Wikipedia · CC BY-SA ↗`. The link opens `sourceUrl` in a new tab or the default browser. The labels come from `source` in one small per-client map, so there's no label text in the API response.
+- A claimed profile's own bio (`source: 'unstream'`) gets **no source line**. Its `sourceUrl` is the artist's `/a/{slug}` page, which the card already leads to ("View artist page" on web; "Releases & prices", which shows that page's releases in the app, on Mac, iOS and the extension), so a second link only repeats it. It can't need a "Read more" either: claimed bios are capped at 500 characters when saved, under the 1,000-character display cap.
 - No bio: render nothing. No placeholder, no "no bio available".
 
 ### Caching and cost
@@ -129,6 +130,7 @@ The order follows the client priority: the backend first, because every client d
 ## Decisions log
 
 - **2026-09-30 (Brandon):** claimed artists can turn the bio off, with no fallthrough. Short real bios are shown: no character minimum, three words is enough. The source line names the platform, except a claimed profile's own bio, which says "From the artist".
+- **2026-09-30 (Brandon, after trying the Mac dev build):** drop "From the artist" in every client. The card's link to the artist page already does that job; a source line is only useful when the source isn't Unstream itself.
 
 ## Implementation notes (2026-09-30)
 

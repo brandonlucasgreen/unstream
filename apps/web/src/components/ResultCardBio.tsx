@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { ArtistBio } from '../types';
 
-// Names the platform, except for a claimed artist's own words (decided 2026-09-30).
+// Names the platform the bio came from. A claimed artist's own bio ('unstream') gets no source
+// line: the card's "View artist page" already goes to the same page (decided 2026-09-30).
 // Wikipedia's text is CC BY-SA, which asks for the licence alongside the attribution.
-const SOURCE_LABELS: Record<ArtistBio['source'], string> = {
-  unstream: 'From the artist',
+const SOURCE_LABELS: Record<Exclude<ArtistBio['source'], 'unstream'>, string> = {
   bandcamp: 'From Bandcamp',
   discogs: 'From Discogs',
   wikipedia: 'From Wikipedia · CC BY-SA',
@@ -24,8 +24,9 @@ interface ResultCardBioProps {
 }
 
 /**
- * The artist's bio, clamped to three lines with an inline "More", and always a link to where it
- * came from. The server picked it (api/shared/artist-bio.ts); this only draws it, as text.
+ * The artist's bio, clamped to three lines with an inline "More", and a link to where it came
+ * from unless that's the artist's own Unstream page. The server picked it
+ * (api/shared/artist-bio.ts); this only draws it, as text.
  */
 export function ResultCardBio({ bio }: ResultCardBioProps) {
   const textRef = useRef<HTMLDivElement>(null);
@@ -45,6 +46,10 @@ export function ResultCardBio({ bio }: ResultCardBioProps) {
     return () => observer.disconnect();
   }, [bio.text, expanded]);
 
+  const sourceLabel =
+    bio.source !== 'unstream' && isWebUrl(bio.sourceUrl) ? (SOURCE_LABELS[bio.source] ?? 'Source') : null;
+  const showToggle = clamped || expanded;
+
   return (
     <div className="space-y-1">
       <div
@@ -55,33 +60,35 @@ export function ResultCardBio({ bio }: ResultCardBioProps) {
           <p key={i}>{paragraph}</p>
         ))}
       </div>
-      <div className="flex gap-3 text-xs">
-        {(clamped || expanded) && (
-          <button
-            type="button"
-            className="text-accent-primary hover:underline"
-            aria-expanded={expanded}
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpanded(!expanded);
-            }}
-          >
-            {expanded ? 'Less' : 'More'}
-          </button>
-        )}
-        {isWebUrl(bio.sourceUrl) && (
-          <a
-            href={bio.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-text-muted hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {SOURCE_LABELS[bio.source] ?? 'Source'}
-            {bio.truncated ? ' · Read more' : ''} ↗
-          </a>
-        )}
-      </div>
+      {(showToggle || sourceLabel) && (
+        <div className="flex gap-3 text-xs">
+          {showToggle && (
+            <button
+              type="button"
+              className="text-accent-primary hover:underline"
+              aria-expanded={expanded}
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? 'Less' : 'More'}
+            </button>
+          )}
+          {sourceLabel && (
+            <a
+              href={bio.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {sourceLabel}
+              {bio.truncated ? ' · Read more' : ''} ↗
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -12,12 +12,18 @@ const bio: ArtistBio = { text: 'Experimental rock.\n\nFrom Brooklyn.', source: '
 afterEach(cleanup);
 
 describe('ResultCardBio', () => {
-  it("says 'From the artist' for a claimed artist's own bio and links to their page", () => {
-    render(<ResultCardBio bio={bio} />);
-    const link = screen.getByRole('link');
-    expect(link.textContent).toBe('From the artist ↗');
-    expect(link.getAttribute('href')).toBe('https://unstream.stream/a/kid');
+  it("gives a claimed artist's own bio no source line, since the card already links to their page", () => {
+    const { container } = render(<ResultCardBio bio={bio} />);
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(container.textContent).not.toContain('From the artist');
     expect(screen.getByText('From Brooklyn.').tagName).toBe('P');
+  });
+
+  it('names the platform for a bio from elsewhere and links to it', () => {
+    render(<ResultCardBio bio={{ ...bio, source: 'bandcamp', sourceUrl: 'https://kid.bandcamp.com' }} />);
+    const link = screen.getByRole('link');
+    expect(link.textContent).toBe('From Bandcamp ↗');
+    expect(link.getAttribute('href')).toBe('https://kid.bandcamp.com');
   });
 
   it('names the platform and the licence for Wikipedia, and says when the text was cut', () => {
@@ -31,7 +37,7 @@ describe('ResultCardBio', () => {
   });
 
   it('drops a non-web source URL', () => {
-    render(<ResultCardBio bio={{ ...bio, sourceUrl: 'javascript:alert(1)' }} />);
+    render(<ResultCardBio bio={{ ...bio, source: 'bandcamp', sourceUrl: 'javascript:alert(1)' }} />);
     expect(screen.queryByRole('link')).toBeNull();
   });
 });

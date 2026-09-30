@@ -13,9 +13,9 @@ import {
 const bio = { text: 'Experimental rock.\n\nFrom Brooklyn.', source: 'bandcamp', sourceUrl: 'https://kid.bandcamp.com', truncated: false };
 
 describe('bioSourceLabel', () => {
-  it('names the platform, except for the claimed artist', () => {
+  it('names the platform, and has no label for the claimed artist\'s own bio', () => {
     expect(bioSourceLabel('bandcamp')).toBe('From Bandcamp');
-    expect(bioSourceLabel('unstream')).toBe('From the artist');
+    expect(bioSourceLabel('unstream')).toBeNull();
     expect(bioSourceLabel('wikipedia')).toBe('From Wikipedia · CC BY-SA');
   });
 });
@@ -55,6 +55,14 @@ describe('renderArtistBio', () => {
     const link = container.querySelector('a');
     expect(link?.getAttribute('href')).toBe('https://kid.bandcamp.com');
     expect(link?.textContent).toBe('From Bandcamp ↗');
+  });
+
+  it("draws no source line for a claimed artist's own bio", () => {
+    const container = document.createElement('div');
+    renderArtistBio(container, { ...bio, source: 'unstream', sourceUrl: 'https://unstream.stream/a/kid' });
+    expect(container.querySelector('a')).toBeNull();
+    expect(container.textContent).not.toContain('From the artist');
+    expect(container.querySelector('.artist-bio-footer')?.classList.contains('hidden')).toBe(true);
   });
 
   it('refuses a non-web source URL', () => {
