@@ -422,8 +422,8 @@ struct ArtistResultView: View {
 
 }
 
-/// The artist's bio, clamped to a few lines with an inline "More", and always a link to where
-/// it came from. Nothing opens until the reader asks.
+/// The artist's bio, clamped to a few lines with an inline "More", and a link to where it came
+/// from unless that's the artist's own Unstream page. Nothing opens until the reader asks.
 private struct ArtistBioView: View {
     let bio: ArtistBio
     let collapsedLineLimit: Int
@@ -456,28 +456,38 @@ private struct ArtistBioView: View {
                         .accessibilityHidden(true)
                 )
 
-            HStack(spacing: 10) {
-                if isClamped || isExpanded {
-                    Button(isExpanded ? "Less" : "More") { isExpanded.toggle() }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.accentColor)
-                        .accessibilityLabel(isExpanded ? "Show less of the bio" : "Show the whole bio")
-                }
-                if let url = URL(string: bio.sourceUrl) {
-                    Button { onOpenSource(url) } label: {
-                        Label(bio.truncated ? "\(bio.sourceLabel) · Read more" : bio.sourceLabel, systemImage: "arrow.up.right")
-                            .labelStyle(TrailingIconLabelStyle())
+            if showsToggle || sourceLink != nil {
+                HStack(spacing: 10) {
+                    if showsToggle {
+                        Button(isExpanded ? "Less" : "More") { isExpanded.toggle() }
+                            .buttonStyle(.plain)
+                            .foregroundColor(.accentColor)
+                            .accessibilityLabel(isExpanded ? "Show less of the bio" : "Show the whole bio")
                     }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.secondary)
-                    .linkActions(url: url, openTitle: "Open Bio Source", onOpen: { onOpenSource(url) })
-                    #if os(macOS)
-                    .help(bio.sourceUrl)
-                    #endif
+                    if let link = sourceLink {
+                        Button { onOpenSource(link.url) } label: {
+                            Label(bio.truncated ? "\(link.label) · Read more" : link.label, systemImage: "arrow.up.right")
+                                .labelStyle(TrailingIconLabelStyle())
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(.secondary)
+                        .linkActions(url: link.url, openTitle: "Open Bio Source", onOpen: { onOpenSource(link.url) })
+                        #if os(macOS)
+                        .help(bio.sourceUrl)
+                        #endif
+                    }
                 }
+                .font(.smallerText)
             }
-            .font(.smallerText)
         }
+    }
+
+    private var showsToggle: Bool { isClamped || isExpanded }
+
+    /// Nil when there's no source line to draw: a claimed artist's own bio, or an unusable URL.
+    private var sourceLink: (label: String, url: URL)? {
+        guard let label = bio.sourceLabel, let url = URL(string: bio.sourceUrl) else { return nil }
+        return (label, url)
     }
 
     private func heightReader(_ update: @escaping (CGFloat) -> Void) -> some View {

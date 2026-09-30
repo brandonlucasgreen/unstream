@@ -136,7 +136,7 @@ Catalog triggers are all demand-driven — a save, an artist's own button, the a
 
 ### Artist bios
 
-A search or detection result carries one `bio` (`{ text, source, sourceUrl, truncated }`), picked **on the server** by `api/shared/artist-bio.ts` in this order: claimed profile → Bandcamp sidebar → Discogs profile → Wikipedia (via MusicBrainz's Wikidata relation). Clients only render it, as plain text, and label the source by platform ("From the artist" for a claimed bio). Spec: `docs/specs/artist-bio-excerpt-spec.md`. Four rules:
+A search or detection result carries one `bio` (`{ text, source, sourceUrl, truncated }`), picked **on the server** by `api/shared/artist-bio.ts` in this order: claimed profile → Bandcamp sidebar → Discogs profile → Wikipedia (via MusicBrainz's Wikidata relation). Clients only render it, as plain text, and label the source by platform (no source line at all for a claimed bio, whose card already links to the artist's page). Spec: `docs/specs/artist-bio-excerpt-spec.md`. Four rules:
 
 - **`artist_profiles.show_bio = false` means no bio at all**, not a fallback. It shows up on the card as `bioSuppressed`, and clients never fill a claimed card from Phase 2.
 - **Phase 2 fills a gap, never replaces.** Phase 1's sources outrank Phase 2's, and a fill requires an exact name match.

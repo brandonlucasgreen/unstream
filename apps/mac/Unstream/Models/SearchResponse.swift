@@ -39,11 +39,12 @@ struct ArtistBio: Codable, Hashable {
     /// The server cut a long bio short, so the full text is only at `sourceUrl`.
     let truncated: Bool
 
-    /// Names the platform, except for a claimed artist's own words (decided 2026-09-30).
+    /// Names the platform the bio came from. Nil for a claimed artist's own bio: the card's
+    /// "Releases & prices" row already covers their page (decided 2026-09-30).
     /// Wikipedia's text is CC BY-SA, which asks for the licence alongside the attribution.
-    var sourceLabel: String {
+    var sourceLabel: String? {
         switch source {
-        case "unstream": return "From the artist"
+        case "unstream": return nil
         case "bandcamp": return "From Bandcamp"
         case "discogs": return "From Discogs"
         case "wikipedia": return "From Wikipedia · CC BY-SA"

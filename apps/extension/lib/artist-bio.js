@@ -4,16 +4,20 @@
 // so this only decides which result's bio to show, whether Phase 2 may fill an empty one, and
 // how to draw it. Pure DOM, no `chrome.*`, so it can be tested and rendered outside the popup.
 
-/** Names the platform, except for a claimed artist's own words (decided 2026-09-30). */
+/**
+ * Names the platform the bio came from. A claimed artist's own bio ('unstream') gets no source
+ * line: the popup's "Releases & prices" already covers their page (decided 2026-09-30).
+ */
 const SOURCE_LABELS = {
-  unstream: 'From the artist',
   bandcamp: 'From Bandcamp',
   discogs: 'From Discogs',
   // Wikipedia's text is CC BY-SA, which asks for the licence alongside the attribution.
   wikipedia: 'From Wikipedia · CC BY-SA',
 };
 
+/** The source line's label, or null when there should be none. */
 export function bioSourceLabel(source) {
+  if (source === 'unstream') return null;
   return SOURCE_LABELS[source] || 'Source';
 }
 
@@ -61,8 +65,8 @@ function isWebUrl(url) {
 
 /**
  * Draw `bio` into `container`: the text clamped by CSS, a "More" toggle when the clamp is
- * hiding something, and always a link to the source. Text goes in through textContent only —
- * a bio is plain text and must never become markup.
+ * hiding something, and a link to the source unless it's the artist's own Unstream page. Text
+ * goes in through textContent only — a bio is plain text and must never become markup.
  *
  * Call after `container` is visible: whether the clamp hides anything is measured, and a
  * hidden element measures as zero.
@@ -97,18 +101,23 @@ export function renderArtistBio(container, bio) {
   });
   footer.appendChild(toggle);
 
-  if (isWebUrl(bio.sourceUrl)) {
+  const label = bioSourceLabel(bio.source);
+  if (label && isWebUrl(bio.sourceUrl)) {
     const source = document.createElement('a');
     source.className = 'artist-bio-source';
     source.href = bio.sourceUrl;
     source.target = '_blank';
     source.rel = 'noopener noreferrer';
-    source.textContent = `${bioSourceLabel(bio.source)}${bio.truncated ? ' · Read more' : ''} ↗`;
+    source.textContent = `${label}${bio.truncated ? ' · Read more' : ''} ↗`;
     footer.appendChild(source);
   }
 
   container.classList.remove('expanded', 'hidden');
   container.replaceChildren(text, footer);
 
-  if (text.scrollHeight > text.clientHeight + 1) toggle.classList.remove('hidden');
+  // An empty footer would still take its margin, so it only shows once it holds something.
+  const hasSource = footer.childElementCount > 1;
+  const isClamped = text.scrollHeight > text.clientHeight + 1;
+  if (isClamped) toggle.classList.remove('hidden');
+  footer.classList.toggle('hidden', !hasSource && !isClamped);
 }
