@@ -168,6 +168,8 @@ interface PlatformLink {
 
 interface ArtistProfile {
   bio?: string;
+  // False when the artist turned bios off — search then shows none, not a third party's.
+  showBio: boolean;
   customImageUrl?: string;
   websiteUrl?: string;
   featuredEmbed?: string;
@@ -226,6 +228,7 @@ interface LinkRow {
 
 export interface ArtistProfileRow {
   bio: string | null;
+  show_bio: boolean;
   custom_image_url: string | null;
   featured_embed: string | null;
   verified_at: string | null;
@@ -280,7 +283,7 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
     const [profileResult, linksResult] = await Promise.all([
       client
         .from('artist_profiles')
-        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers')
+        .select('bio, show_bio, custom_image_url, featured_embed, verified_at, link_dividers')
         .eq('artist_id', artistId)
         .single(),
       client
@@ -3529,6 +3532,8 @@ export interface BandcampProbeRow {
   release_titles: string[] | null;
   /** Artist photo from the probed page's og:image. */
   image_url: string | null;
+  /** The artist's sidebar bio. '' = checked, none shown; NULL = row predates bios. */
+  bio: string | null;
   /**
    * Slug candidates actually attempted in this probe round.
    *
@@ -3586,7 +3591,7 @@ export async function getBandcampProbe(
   try {
     const { data, error } = await client
       .from('bandcamp_slug_probes')
-      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, image_url, probed_slugs, checked_at')
+      .select('query_norm, artist_url, band_name, band_id, album_count, track_count, matched_slug, verdict, location, release_titles, image_url, bio, probed_slugs, checked_at')
       .eq('query_norm', queryNorm)
       .maybeSingle();
 
@@ -3767,7 +3772,7 @@ export async function getArtistBySlug(
       row.match_confidence === 'claimed'
         ? client
             .from('artist_profiles')
-            .select('bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
+            .select('bio, show_bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
             .eq('artist_id', row.id)
             .single()
         : Promise.resolve({ data: null }),
@@ -3784,6 +3789,7 @@ export async function getArtistBySlug(
 
 interface ProfileRow {
   bio: string | null;
+  show_bio: boolean | null;
   custom_image_url: string | null;
   website_url: string | null;
   featured_embed: string | null;
@@ -3807,6 +3813,8 @@ function artistRowToResult(row: ArtistRow, links: LinkRow[], profileData: Profil
   if (row.match_confidence === 'claimed' && profileData) {
     profile = {
       bio: profileData.bio || undefined,
+      // `!== false`: absent (a pre-migration read) means the default, on.
+      showBio: profileData.show_bio !== false,
       customImageUrl: profileData.custom_image_url || undefined,
       websiteUrl: profileData.website_url || undefined,
       featuredEmbed: profileData.featured_embed || undefined,
@@ -3874,7 +3882,7 @@ export async function getArtistsBySlugs(slugs: string[]): Promise<Map<string, Ar
       claimedIds.length > 0
         ? client
             .from('artist_profiles')
-            .select('artist_id, bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
+            .select('artist_id, bio, show_bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
             .in('artist_id', claimedIds)
         : Promise.resolve({ data: [] }),
     ]);

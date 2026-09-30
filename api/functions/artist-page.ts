@@ -199,6 +199,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       },
       profile: profile ? {
         bio: profile.bio,
+        // The edit page's "show a bio on search results" toggle. Absent column reads as on.
+        showBio: profile.show_bio !== false,
         customImageUrl: profile.custom_image_url,
         featuredEmbed,
         // The SPA picks RichArtistProfile vs UnclaimedQuietCard off this field.

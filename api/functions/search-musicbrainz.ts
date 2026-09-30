@@ -5,33 +5,28 @@ import { Sentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { persistEnrichment, getLinkSuppressions } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
-import { validateQuery, isUrlHostnameAllowed } from './middleware';
-import { normalizeAccents, normalizeForComparison, normalizeSearchQuery, musicBrainzArtistQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
+import { validateQuery } from './middleware';
+import { normalizeForComparison, normalizeSearchQuery, musicBrainzArtistQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
+import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
 
 // Import all shared enrichment functions and types
 import {
-  SocialPlatform,
-  SocialLink,
-  DiscoveredPlatform,
-  DiscoveredPlatformLink,
-  ArtistLocation,
-  isMastodonInstance,
-  isPeerTubeInstance,
-  convertMastodonHandleToUrl,
+  type SocialPlatform,
+  type SocialLink,
+  type DiscoveredPlatformLink,
+  type ArtistLocation,
+  type MusicBrainzArea,
   parseSocialUrl,
-  fetchWikipediaSummary,
+  lookupWikipedia,
   fetchLinktreeLinks,
-  extractDiscogsArtistId,
-  fetchDiscogsSocialLinks,
-  OfficialSiteResult,
+  fetchDiscogsArtist,
   fetchOfficialSiteSocialLinks,
   mergeSocialLinks,
   searchPeerTubeChannels,
   parseLocationString,
   parseMusicBrainzArea,
-  MusicBrainzArea,
   pickLocation,
-  fetchBandcampLocation,
+  fetchBandcampPage,
   checkBandcampSubdomain,
   fetchMirloLocation,
   enrichLocationFallback,
@@ -54,6 +49,14 @@ interface MusicBrainzSearchResponse {
   wikipediaSummary: string | null;
   wikipediaUrl: string | null;
   location?: ArtistLocation;
+  /**
+   * Bio for the MusicBrainz artist: their Bandcamp sidebar, else Discogs, else Wikipedia.
+   * Clients use it only to fill a card that has none — Phase 1's sources outrank these, and a
+   * claimed artist's card is never filled (they may have turned bios off).
+   */
+  bio: ArtistBio | null;
+  /** A bio source didn't answer; the response is then not cached. */
+  bioFetchFailed: boolean;
 }
 
 // Search MusicBrainz for artist info including official website, Discogs, social links, and release history.
@@ -76,6 +79,8 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     wikipediaSummary: null,
     wikipediaUrl: null,
     location: undefined,
+    bio: null,
+    bioFetchFailed: false,
   };
 
   try {
@@ -147,6 +152,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     let discogsUrl: string | null = null;
     let linktreeUrl: string | null = null;
     let wikipediaUrl: string | null = null;
+    let wikidataUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
     let platformUrls: string[] = [];
@@ -207,6 +213,14 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
         }
       }
 
+      // Most artists have a Wikidata relation instead — MusicBrainz moved to those years ago.
+      for (const rel of relations) {
+        if (rel.type === 'wikidata' && rel.url?.resource) {
+          wikidataUrl = rel.url.resource;
+          break;
+        }
+      }
+
       // Extract social links from 'social network' and 'youtube' relation types
       // Also capture Linktree URLs for later scraping
       for (const rel of relations) {
@@ -260,22 +274,34 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
     // Fetch additional social links from Discogs, official site, PeerTube, Wikipedia,
     // and platform locations (Bandcamp, Mirlo) in parallel.
     // Bandcamp location: prefers MB relation URL; falls back to live Bandcamp search by name.
-    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation, bandcampStatus] = await Promise.all([
-      discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
+    const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcamp, mirloLocation, bandcampStatus] = await Promise.all([
+      discogsUrl ? fetchDiscogsArtist(discogsUrl) : Promise.resolve({ socialLinks: [], profile: null, failed: false }),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
-      wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
+      lookupWikipedia(wikipediaUrl, wikidataUrl),
       (async () => {
         // Prefer MusicBrainz's own relation URL, then fall back to the probe.
-        // The probe reads location out of the /music page it already fetched, so this
-        // is at most two sequential requests rather than three — the third fetch used
+        // The probe reads location and bio out of the /music page it already fetched, so
+        // this is at most two sequential requests rather than three — the third fetch used
         // to push the worst case past the function's 10s ceiling.
         if (mbBandcampUrl) {
-          const loc = await fetchBandcampLocation(mbBandcampUrl);
-          if (loc) return loc;
+          const page = await fetchBandcampPage(mbBandcampUrl);
+          if (page?.location) return { location: page.location, bio: page.bio, bioUrl: mbBandcampUrl, failed: false };
+          // No location on the page: the probe may still find one. Keep this page's bio —
+          // it's the account MusicBrainz lists, which outranks a name-derived guess.
+          if (page) {
+            const match = await findBandcampArtist(artist.name, 2500);
+            return { location: match?.location ? parseLocationString(match.location) : null, bio: page.bio, bioUrl: mbBandcampUrl, failed: false };
+          }
         }
         const match = await findBandcampArtist(artist.name, 2500);
-        return match?.location ? parseLocationString(match.location) : null;
+        return {
+          location: match?.location ? parseLocationString(match.location) : null,
+          bio: match?.bio ?? null,
+          bioUrl: match?.url ?? null,
+          // The MB-listed page didn't answer, so its bio is unknown rather than absent.
+          failed: mbBandcampUrl !== undefined,
+        };
       })(),
       fetchMirloLocation(mirloSlug),
       mbBandcampUrl ? checkBandcampSubdomain(mbBandcampUrl) : Promise.resolve('unknown' as const),
@@ -292,7 +318,16 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
     // Pick one source outright — MusicBrainz first, then Bandcamp, then Mirlo. Fields are
     // never combined across sources; see pickLocation.
-    const location = pickLocation(mbLocation, bandcampLocation, mirloLocation);
+    const location = pickLocation(mbLocation, bandcamp.location, mirloLocation);
+
+    // Bandcamp first — the artist's own words — then Discogs, then Wikipedia. A retired
+    // subdomain's bio belongs to an account we no longer link to, so it's dropped with it.
+    const bandcampRetired = mbBandcampUrl !== undefined && bandcampStatus === 'dead' && bandcamp.bioUrl === mbBandcampUrl;
+    const bio = pickBio([
+      bandcampRetired ? null : makeBio('bandcamp', bandcamp.bio, bandcamp.bioUrl),
+      makeBio('discogs', discogsArtist.profile, discogsUrl),
+      wikipediaResult.status === 'found' ? makeBio('wikipedia', wikipediaResult.extract, wikipediaResult.pageUrl) : null,
+    ]);
 
     // If we found a Linktree URL from MusicBrainz or official site, scrape it for additional links
     // Prefer MusicBrainz Linktree (more authoritative), fall back to official site
@@ -307,7 +342,7 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
 
     // Merge all social links (MusicBrainz first, then Discogs, then official site, then Linktree, then PeerTube)
     // PeerTube from Sepia Search comes last so official site / Linktree links take priority
-    const allSocialLinks = mergeSocialLinks(socialLinks, discogsSocialLinks, officialSiteResult.socialLinks, linktreeSocialLinks, peertubeLinks);
+    const allSocialLinks = mergeSocialLinks(socialLinks, discogsArtist.socialLinks, officialSiteResult.socialLinks, linktreeSocialLinks, peertubeLinks);
 
     // Merge discovered platforms from official site + MusicBrainz Subvert URL
     const allDiscoveredPlatforms = [...officialSiteResult.discoveredPlatforms];
@@ -324,9 +359,12 @@ async function searchMusicBrainz(query: string): Promise<MusicBrainzSearchRespon
       socialLinks: allSocialLinks,
       discoveredPlatforms: allDiscoveredPlatforms,
       platformUrls,
-      wikipediaSummary: wikipediaResult?.extract || null,
-      wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
+      wikipediaSummary: wikipediaResult.status === 'found' ? wikipediaResult.extract : null,
+      wikipediaUrl: wikipediaResult.status === 'found' ? wikipediaResult.pageUrl : wikipediaUrl,
       location,
+      bio,
+      // A retired subdomain 404s by definition; that's an answer, not a failure.
+      bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcamp.failed && bandcampStatus !== 'dead'),
     };
   } catch (error: unknown) {
     // A network error or timeout is also "we don't know" rather than "no such artist",
@@ -351,6 +389,8 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
     wikipediaSummary: null,
     wikipediaUrl: null,
     location: undefined,
+    bio: null,
+    bioFetchFailed: false,
   };
 }
 
@@ -380,6 +420,8 @@ function stripSuppressedLinks(
     socialLinks: result.socialLinks.filter(s => !suppressed(s.url)),
     discoveredPlatforms: result.discoveredPlatforms.filter(p => !suppressed(p.url)),
     platformUrls: result.platformUrls.filter(u => !suppressed(u)),
+    // A suppressed link says that page isn't this artist — so neither is its bio.
+    bio: result.bio && suppressed(result.bio.sourceUrl) ? null : result.bio,
   };
 }
 
@@ -415,8 +457,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       () => searchMusicBrainz(normalizedQuery),
       MUSICBRAINZ_CACHE_TTL,
       // null means MusicBrainz did not answer. Never cache that — otherwise one
-      // hiccup makes an artist look link-less for the full 30 minute TTL.
-      data => data !== null,
+      // hiccup makes an artist look link-less for the full 30 minute TTL. A bio source
+      // that didn't answer is the same mistake one field over.
+      data => data !== null && !data.bioFetchFailed,
     );
 
     if (cached) {

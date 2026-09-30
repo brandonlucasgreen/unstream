@@ -4,6 +4,7 @@
 import { cacheGetOrFetch } from '../functions/cache';
 import { isUrlHostnameAllowed } from '../functions/middleware';
 import { findBandcampArtist } from './bandcamp-probe';
+import { parseBandcampBio } from '../functions/search-parsers';
 
 // Social platform types
 export type SocialPlatform =
@@ -151,33 +152,92 @@ export function parseSocialUrl(url: string): SocialLink | null {
   return null;
 }
 
+/**
+ * The outcome of looking up an artist's Wikipedia summary.
+ *
+ * 'none' and 'failed' are different answers and must stay different: 'none' (no article,
+ * a disambiguation page) is safe to cache; 'failed' (timeout, network error, 5xx) is not —
+ * caching it would hide the bio for the whole TTL over one hiccup.
+ */
+export type WikipediaLookup =
+  | { status: 'found'; extract: string; pageUrl: string }
+  | { status: 'none' }
+  | { status: 'failed' };
+
+const WIKIMEDIA_HEADERS = { 'User-Agent': 'Unstream/1.0 (https://unstream.stream)' };
+
 // Fetch a short bio summary from the Wikipedia REST API
-export async function fetchWikipediaSummary(wikipediaUrl: string): Promise<{ extract: string; pageUrl: string } | null> {
+export async function fetchWikipediaSummary(wikipediaUrl: string): Promise<WikipediaLookup> {
+  const match = wikipediaUrl.match(/\/wiki\/(.+)$/);
+  if (!match) return { status: 'none' };
   try {
-    const match = wikipediaUrl.match(/\/wiki\/(.+)$/);
-    if (!match) return null;
-    const title = match[1];
+    // The path segment is already percent-encoded in a MusicBrainz or Wikidata URL.
+    // Decoding first keeps encodeURIComponent from double-encoding it ("%2527").
+    const title = decodeURIComponent(match[1]);
     const response = await globalThis.fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-      {
-        headers: { 'User-Agent': 'Unstream/1.0 (https://unstream.stream)' },
-        signal: AbortSignal.timeout(5000),
-      }
+      { headers: WIKIMEDIA_HEADERS, signal: AbortSignal.timeout(5000) },
     );
-    if (!response.ok) return null;
+    if (response.status === 404) return { status: 'none' };
+    if (!response.ok) return { status: 'failed' };
     const data = await response.json() as {
       type?: string;
       extract?: string;
       content_urls?: { desktop?: { page?: string } };
     };
-    if (data.type === 'disambiguation') return null;
+    if (data.type === 'disambiguation' || !data.extract) return { status: 'none' };
     return {
-      extract: data.extract || '',
+      status: 'found',
+      extract: data.extract,
       pageUrl: data.content_urls?.desktop?.page || wikipediaUrl,
     };
   } catch {
-    return null;
+    return { status: 'failed' };
   }
+}
+
+/**
+ * Resolve a Wikidata item to its English Wikipedia article.
+ *
+ * MusicBrainz moved from direct Wikipedia relations to Wikidata ones years ago, so for most
+ * well-documented artists this is the only route to their article — without it the Wikipedia
+ * summary quietly never fired. Uses wbgetentities filtered to the one enwiki sitelink, a few
+ * hundred bytes, rather than the full entity (which runs to hundreds of KB for a big artist).
+ * Wikimedia's API is governed by its API etiquette (a descriptive User-Agent, serial
+ * requests), not robots.txt, which addresses crawlers of rendered pages — the same basis the
+ * REST summary call above has always relied on.
+ */
+export async function fetchWikipediaUrlFromWikidata(
+  wikidataUrl: string,
+): Promise<{ status: 'found'; url: string } | { status: 'none' } | { status: 'failed' }> {
+  const qid = wikidataUrl.match(/\/(Q\d+)(?:[/?#]|$)/)?.[1];
+  if (!qid) return { status: 'none' };
+  try {
+    const response = await globalThis.fetch(
+      `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=sitelinks/urls&sitefilter=enwiki&format=json`,
+      { headers: WIKIMEDIA_HEADERS, signal: AbortSignal.timeout(2500) },
+    );
+    if (!response.ok) return { status: 'failed' };
+    const data = await response.json() as {
+      entities?: Record<string, { sitelinks?: { enwiki?: { url?: string } } }>;
+    };
+    const url = data.entities?.[qid]?.sitelinks?.enwiki?.url;
+    return url ? { status: 'found', url } : { status: 'none' };
+  } catch {
+    return { status: 'failed' };
+  }
+}
+
+/** Wikipedia summary for an artist, via a direct relation if MusicBrainz has one, else Wikidata. */
+export async function lookupWikipedia(
+  wikipediaUrl: string | null,
+  wikidataUrl: string | null,
+): Promise<WikipediaLookup> {
+  if (wikipediaUrl) return fetchWikipediaSummary(wikipediaUrl);
+  if (!wikidataUrl) return { status: 'none' };
+  const resolved = await fetchWikipediaUrlFromWikidata(wikidataUrl);
+  if (resolved.status !== 'found') return resolved;
+  return fetchWikipediaSummary(resolved.url);
 }
 
 // Fetch and parse links from a Linktree page
@@ -233,12 +293,21 @@ export function extractDiscogsArtistId(discogsUrl: string): string | null {
   return match ? match[1] : null;
 }
 
-// Fetch social links from Discogs API
-export async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<SocialLink[]> {
+/** What one Discogs artist API response yields. */
+export interface DiscogsArtistData {
+  socialLinks: SocialLink[];
+  /** The Discogs bio, still in Discogs markup — see cleanDiscogsProfile. */
+  profile: string | null;
+  /** Discogs didn't answer (non-2xx, network). Not the same as "no profile". */
+  failed: boolean;
+}
+
+// Fetch social links and the bio from the Discogs API — one request answers both.
+export async function fetchDiscogsArtist(discogsUrl: string): Promise<DiscogsArtistData> {
   const socialLinks: SocialLink[] = [];
   const artistId = extractDiscogsArtistId(discogsUrl);
 
-  if (!artistId) return socialLinks;
+  if (!artistId) return { socialLinks, profile: null, failed: false };
 
   try {
     const response = await globalThis.fetch(`https://api.discogs.com/artists/${artistId}`, {
@@ -249,10 +318,11 @@ export async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<Socia
 
     if (!response.ok) {
       console.log('Discogs API failed:', response.status);
-      return socialLinks;
+      // A 404 is a real answer (the artist was removed); anything else is "didn't answer".
+      return { socialLinks, profile: null, failed: response.status !== 404 };
     }
 
-    const data = await response.json() as { urls?: string[] };
+    const data = await response.json() as { urls?: string[]; profile?: string };
     const urls = data.urls || [];
 
     for (const url of urls) {
@@ -261,12 +331,12 @@ export async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<Socia
         socialLinks.push(socialLink);
       }
     }
+    return { socialLinks, profile: data.profile?.trim() || null, failed: false };
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error('Discogs fetch error:', err.message);
+    return { socialLinks, profile: null, failed: true };
   }
-
-  return socialLinks;
 }
 
 // Result type for official site scraping (includes discovered Linktree URL and music platforms)
@@ -649,11 +719,18 @@ export async function checkBandcampSubdomain(
   return data;
 }
 
-// Fetch location from a Bandcamp artist profile page.
+/** What a Bandcamp artist page yields beyond its links. */
+export interface BandcampPageData {
+  location: ArtistLocation | null;
+  /** The artist's sidebar bio, raw text; '' when the page shows none. */
+  bio: string;
+}
+
+// Fetch location and the artist's bio from a Bandcamp artist profile page — one request.
 // Validated against the SSRF allowlist as defense-in-depth.
 // Default cap of 2.5s: this is one page fetch, measured at ~670ms, and it sits on a
 // sequential path inside a function with a 10s ceiling.
-export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 2500): Promise<ArtistLocation | null> {
+export async function fetchBandcampPage(bandcampUrl: string, timeoutMs = 2500): Promise<BandcampPageData | null> {
   if (!isUrlHostnameAllowed(bandcampUrl)) return null;
   try {
     const controller = new AbortController();
@@ -665,6 +742,7 @@ export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 250
     clearTimeout(timeout);
     if (!response.ok) return null;
     const html = await response.text();
+    const bio = parseBandcampBio(html);
 
     // Iterate all JSON-LD blocks; find the MusicGroup entry which carries the artist location
     const jsonLdPattern = /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
@@ -676,7 +754,7 @@ export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 250
         for (const entry of entries) {
           if (entry?.['@type'] === 'MusicGroup') {
             const raw = entry?.foundingLocation?.name || entry?.location?.name;
-            if (raw) return parseLocationString(raw);
+            if (raw) return { location: parseLocationString(raw), bio };
           }
         }
       } catch { /* skip malformed blocks */ }
@@ -684,9 +762,9 @@ export async function fetchBandcampLocation(bandcampUrl: string, timeoutMs = 250
 
     // Fall back to location element in artist header (Bandcamp uses <p class="location ...">)
     const locationMatch = html.match(/<(?:p|div|span)[^>]+class="[^"]*\blocation\b[^"]*"[^>]*>([^<]+)<\/(?:p|div|span)>/);
-    if (locationMatch) return parseLocationString(locationMatch[1].trim());
+    if (locationMatch) return { location: parseLocationString(locationMatch[1].trim()), bio };
 
-    return null;
+    return { location: null, bio };
   } catch {
     return null;
   }

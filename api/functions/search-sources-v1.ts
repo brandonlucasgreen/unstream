@@ -76,6 +76,16 @@ export async function handler(event: NetlifyEvent) {
   try {
     const data = JSON.parse(coreResult.body);
 
+    // Bios aren't part of the v1 contract yet. Wikipedia text is CC BY-SA, and passing it to
+    // API consumers is a licensing decision to document in openapi.yaml on purpose, not a
+    // side effect of the app's search response growing a field.
+    if (Array.isArray(data.results)) {
+      for (const result of data.results as Record<string, unknown>[]) {
+        delete result.bio;
+        delete result.bioSuppressed;
+      }
+    }
+
     if (coreResult.statusCode !== 200) {
       return {
         statusCode: coreResult.statusCode,

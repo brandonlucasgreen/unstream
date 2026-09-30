@@ -6,6 +6,7 @@ import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, g
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
+import { makeBio } from '../shared/artist-bio';
 import {
   type SourceId,
   type LatestRelease,
@@ -32,6 +33,7 @@ import {
   filterAndSort,
   applyMergeOverrides,
   applyLinkSuppressions,
+  attachBios,
   mergeStoredArtistsIntoResults,
   displayNameFromSlug,
   isBandcampSearchLink,
@@ -47,7 +49,7 @@ import {
   type ArtistLocation,
   type SocialPlatform,
   parseSocialUrl,
-  fetchDiscogsSocialLinks,
+  fetchDiscogsArtist,
   fetchOfficialSiteSocialLinks,
   mergeSocialLinks,
   searchPeerTubeChannels,
@@ -55,11 +57,11 @@ import {
   parseMusicBrainzArea,
   type MusicBrainzArea,
   pickLocation,
-  fetchBandcampLocation,
+  fetchBandcampPage,
   checkBandcampSubdomain,
   fetchMirloLocation,
   enrichLocationFallback,
-  fetchWikipediaSummary,
+  lookupWikipedia,
 } from '../search/enrichment';
 
 // Helper to fetch with timeout
@@ -110,6 +112,8 @@ async function searchBandcamp(query: string): Promise<PlatformResult[]> {
     // Artist photo. aggregateResults carries imageUrl from a PlatformResult, so this is
     // what gives results a picture (Bandcamp replaced Qobuz as the image source in #325).
     imageUrl: match.imageUrl ?? undefined,
+    // The artist's own sidebar bio, same page. Attached by attachBios at the very end.
+    bio: match.bio || undefined,
   }];
 }
 
@@ -159,6 +163,7 @@ async function probeBandcampForCandidates(
       url: match.url,
       allReleaseTitles: match.releaseTitles.length > 0 ? match.releaseTitles : undefined,
       imageUrl: match.imageUrl ?? undefined,
+      bio: match.bio || undefined,
     });
   }
   return results;
@@ -358,6 +363,15 @@ interface EnrichedMusicBrainzResult {
   platformUrls: string[];
   wikipediaSummary: string | null;
   wikipediaUrl: string | null;
+  /** Sidebar bio from MB's own Bandcamp relation page; '' when it shows none. */
+  bandcampBio: string | null;
+  /** The Discogs bio, raw markup. */
+  discogsProfile: string | null;
+  /**
+   * A bio source didn't answer (Discogs, Wikipedia or the Bandcamp page). The result is then
+   * kept only for the short failure TTL — a timeout must not hide a bio for 30 minutes.
+   */
+  bioFetchFailed: boolean;
   location: ArtistLocation | undefined;
   /**
    * Partial-match artist names from MB's ranked search results (beyond the top
@@ -410,6 +424,9 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     platformUrls: [],
     wikipediaSummary: null,
     wikipediaUrl: null,
+    bandcampBio: null,
+    discogsProfile: null,
+    bioFetchFailed: false,
     location: undefined,
     suggestedNames: [],
     searchFailed: false,
@@ -495,6 +512,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     let qobuzUrl: string | null = null;
     let linktreeUrl: string | null = null;
     let wikipediaUrl: string | null = null;
+    let wikidataUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
     const seenPlatforms = new Set<SocialPlatform>();
     let platformUrls: string[] = [];
@@ -554,6 +572,15 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       for (const rel of relations) {
         if (rel.type === 'wikipedia' && rel.url?.resource && rel.url.resource.includes('en.wikipedia.org')) {
           wikipediaUrl = rel.url.resource;
+          break;
+        }
+      }
+
+      // Most artists have a Wikidata relation instead — MusicBrainz moved to those years ago.
+      // lookupWikipedia resolves it to the English article when there's no direct link.
+      for (const rel of relations) {
+        if (rel.type === 'wikidata' && rel.url?.resource) {
+          wikidataUrl = rel.url.resource;
           break;
         }
       }
@@ -625,12 +652,12 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
 
     // Fetch enrichment data in parallel
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
-    const [discogsSocialLinks, officialSiteResult, peertubeLink, wikipediaResult, bandcampLocation, mirloLocation, bandcampStatus] = await Promise.all([
-      discogsUrl ? fetchDiscogsSocialLinks(discogsUrl) : Promise.resolve([]),
+    const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcampPage, mirloLocation, bandcampStatus] = await Promise.all([
+      discogsUrl ? fetchDiscogsArtist(discogsUrl) : Promise.resolve({ socialLinks: [], profile: null, failed: false }),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
       searchPeerTubeChannels(artist.name),
-      wikipediaUrl ? fetchWikipediaSummary(wikipediaUrl) : Promise.resolve(null),
-      bandcampUrl ? fetchBandcampLocation(bandcampUrl) : Promise.resolve(null),
+      lookupWikipedia(wikipediaUrl, wikidataUrl),
+      bandcampUrl ? fetchBandcampPage(bandcampUrl) : Promise.resolve(null),
       fetchMirloLocation(mirloSlug),
       // Rides in this existing parallel block, so a confirmed-dead link costs no
       // extra wall-clock — and only runs at all when MB actually has a Bandcamp rel.
@@ -660,7 +687,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     }
 
     // One source, whole — never a city from one and a region from another.
-    const location = pickLocation(mbLocation, bandcampLocation, mirloLocation);
+    const location = pickLocation(mbLocation, bandcampPage?.location ?? null, mirloLocation);
 
     // Scrape Linktree if found
     let linktreeSocialLinks: SocialLink[] = [];
@@ -675,7 +702,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     // Merge all social links
     const allSocialLinks = mergeSocialLinks(
       socialLinks,
-      discogsSocialLinks,
+      discogsArtist.socialLinks,
       officialSiteResult.socialLinks,
       linktreeSocialLinks,
       peertubeLinks
@@ -693,8 +720,12 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       socialLinks: allSocialLinks,
       discoveredPlatforms: officialSiteResult.discoveredPlatforms,
       platformUrls,
-      wikipediaSummary: wikipediaResult?.extract || null,
-      wikipediaUrl: wikipediaResult?.pageUrl || wikipediaUrl,
+      wikipediaSummary: wikipediaResult.status === 'found' ? wikipediaResult.extract : null,
+      wikipediaUrl: wikipediaResult.status === 'found' ? wikipediaResult.pageUrl : wikipediaUrl,
+      // A retired subdomain's bio belongs to nobody we can link to.
+      bandcampBio: bandcampUrl ? bandcampPage?.bio ?? null : null,
+      discogsProfile: discogsArtist.profile,
+      bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcampUrl !== null && bandcampPage === null),
       location,
       suggestedNames: collectMbSuggestions(artists, query, artist.name),
       searchFailed: false,
@@ -1425,19 +1456,21 @@ function musicBrainzConfirmsIdentity(mbData: EnrichedMusicBrainzResult): boolean
 
 // ---------------------------------------------------------------------------
 // Apply enrichment data to aggregated results (adds officialsite, discogs, social links, etc.)
+// Returns the id of the result it enriched, or null — attachBios needs to know which card
+// MusicBrainz's Discogs and Wikipedia bios describe.
 function applyEnrichmentToResults(
   aggregated: AggregatedResult[],
   mbData: EnrichedMusicBrainzResult
-): void {
+): string | null {
   if (!mbData.artistName) {
     // MB-miss path: no confirmed identity, but may still have location from Bandcamp/Mirlo fallback
-    if (!mbData.location) return;
+    if (!mbData.location) return null;
     const queryNorm = normalizeForComparison(mbData.query);
     const exactIdx = aggregated.findIndex(r => r.type === 'artist' && normalizeForComparison(r.name) === queryNorm);
     const bestIdx = exactIdx !== -1 ? exactIdx : aggregated.findIndex(r => r.type === 'artist');
-    if (bestIdx === -1) return;
+    if (bestIdx === -1) return null;
     aggregated[bestIdx].location = mbData.location;
-    return;
+    return null;
   }
 
   const mbNormalized = normalizeForComparison(mbData.artistName);
@@ -1503,7 +1536,7 @@ function applyEnrichmentToResults(
     }
   }
 
-  if (bestMatchIndex === -1) return;
+  if (bestMatchIndex === -1) return null;
 
   const result = aggregated[bestMatchIndex];
   // MB picked this result out of the same-name candidates and is about to attach
@@ -1628,6 +1661,20 @@ function applyEnrichmentToResults(
   result.wikipediaSummary = mbData.wikipediaSummary || undefined;
   result.wikipediaUrl = mbData.wikipediaUrl || undefined;
   result.location = mbData.location || result.location;
+  return result.id;
+}
+
+// Bandcamp bios by subdomain: the probe's (verified against the query) plus the one from
+// MusicBrainz's own Bandcamp relation page, when that account isn't retired.
+function collectBandcampBios(allResults: PlatformResult[], mbData: EnrichedMusicBrainzResult | null): Map<string, string> {
+  const bios = new Map<string, string>();
+  const mbSubdomain = bandcampSubdomainOf(mbData?.bandcampUrl);
+  if (mbSubdomain && mbData?.bandcampBio) bios.set(mbSubdomain, mbData.bandcampBio);
+  for (const result of allResults) {
+    const subdomain = result.sourceId === 'bandcamp' ? bandcampSubdomainOf(result.url) : null;
+    if (subdomain && result.bio) bios.set(subdomain, result.bio);
+  }
+  return bios;
 }
 
 // Main search orchestrator
@@ -1758,8 +1805,9 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   attachAmpwallAndSearchLinks(aggregated, ampwallMatches, mbData);
 
   // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp)
+  let mbResultId: string | null = null;
   if (mbData && mbData.artistName !== null) {
-    applyEnrichmentToResults(aggregated, mbData);
+    mbResultId = applyEnrichmentToResults(aggregated, mbData);
   }
 
   // Phase 2.2: Create MB fallback result for artists not found on any platform
@@ -1833,6 +1881,7 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
         wikipediaUrl: mbData.wikipediaUrl || undefined,
       };
       aggregated.push(mbResult);
+      mbResultId = mbResult.id;
     }
   }
 
@@ -1861,6 +1910,18 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   applyLinkSuppressions(finalMerged, await suppressionsPromise);
 
   const finalResults = filterAndSort(finalMerged, query);
+
+  // Phase 6: Bios. Last, because splits and merges rebuild result objects.
+  attachBios(finalResults, collectBandcampBios(allResults, mbData), mbData && mbData.artistName !== null ? {
+    resultId: mbResultId,
+    discogsUrl: mbData.discogsUrl,
+    officialUrl: mbData.officialUrl,
+    // `?? null`: an 'mb-enriched' cache entry written before bios existed lacks these fields.
+    discogsProfile: mbData.discogsProfile ?? null,
+    wikipediaSummary: mbData.wikipediaSummary,
+    wikipediaUrl: mbData.wikipediaUrl,
+  } : null);
+
   // Enrichment counts as applied only when the identity matched AND the
   // url-rels data actually arrived. Claiming completion on a partial fetch is
   // how artists shipped without their official site: the client saw
@@ -1904,7 +1965,20 @@ export function toStoredResult(
     matchConfidence: claimed ? ('claimed' as const) : ('verified' as const),
     ...(claimed ? { claimedSlug: slug } : { knownSlug: slug }),
     ...(dbArtist.location ? { location: dbArtist.location } : {}),
+    ...(claimed ? claimedBio(dbArtist.profile, slug) : {}),
   };
+}
+
+// A claimed artist's own bio outranks every other source, and their "no bio" switch outranks
+// all of them. With no bio written, the card inherits whatever the live search found — see
+// mergeStoredArtistsIntoResults.
+function claimedBio(
+  profile: { bio?: string; showBio?: boolean } | null | undefined,
+  slug: string,
+): Pick<AggregatedResult, 'bio' | 'bioSuppressed'> {
+  if (profile?.showBio === false) return { bioSuppressed: true };
+  const bio = makeBio('unstream', profile?.bio, `https://unstream.stream/a/${slug}`);
+  return bio ? { bio } : {};
 }
 
 /**

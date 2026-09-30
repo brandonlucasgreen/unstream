@@ -30,6 +30,7 @@ import {
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampBio,
   parseBandcampImage,
   parseBandcampPageLocation,
   parseBandcampReleaseCounts,
@@ -74,6 +75,8 @@ export interface BandcampProbeResult {
   releaseTitles?: string[];
   /** Artist photo from the page's og:image. Replaced Qobuz as the image source. */
   imageUrl?: string;
+  /** The artist's own sidebar bio, raw text; '' when the page shows none. */
+  bio?: string;
   /**
    * Slug candidates actually attempted, in order.
    *
@@ -95,6 +98,7 @@ interface CandidateOutcome {
   location?: string;
   releaseTitles?: string[];
   imageUrl?: string;
+  bio?: string;
   /** Bandcamp asked us to back off. Stop the whole round, don't try more candidates. */
   rateLimited?: boolean;
 }
@@ -160,7 +164,8 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
   const location = parseBandcampPageLocation(html) ?? undefined;
   const releaseTitles = parseBandcampReleaseTitles(html);
   const imageUrl = parseBandcampImage(html) ?? undefined;
-  return { verdict: 'accepted', identity, counts, location, releaseTitles, imageUrl };
+  const bio = parseBandcampBio(html);
+  return { verdict: 'accepted', identity, counts, location, releaseTitles, imageUrl, bio };
 }
 
 /**
@@ -264,6 +269,7 @@ export async function probeBandcampArtist(
       location: outcome.location,
       releaseTitles: outcome.releaseTitles,
       imageUrl: outcome.imageUrl,
+      bio: outcome.bio,
       probedSlugs,
     };
   }
@@ -284,6 +290,11 @@ export interface BandcampArtistMatch {
   releaseTitles: string[];
   /** Artist photo (og:image), or null when the page shows none. */
   imageUrl: string | null;
+  /**
+   * The artist's own sidebar bio, raw text. '' when the page shows none; null only for a
+   * cached row from before bios were read, when the probe has since been unable to answer.
+   */
+  bio: string | null;
 }
 
 /**
@@ -310,19 +321,27 @@ export async function findBandcampArtist(
   // "Mo-Rice" — but their candidate sets differ. Pass the candidates so a negative
   // recorded for a narrower set is not reused for a wider one.
   const cached = await getBandcampProbe(queryNorm, bandcampSlugCandidates(query));
-  if (cached) {
-    return cached.artist_url
-      ? {
-          url: cached.artist_url,
-          bandName: cached.band_name,
-          location: cached.location,
-          releaseTitles: cached.release_titles ?? [],
-          imageUrl: cached.image_url,
-        }
-      : null;
-  }
+  const cachedMatch: BandcampArtistMatch | null = cached?.artist_url
+    ? {
+        url: cached.artist_url,
+        bandName: cached.band_name,
+        location: cached.location,
+        releaseTitles: cached.release_titles ?? [],
+        imageUrl: cached.image_url,
+        bio: cached.bio,
+      }
+    : null;
+
+  // A positive cached before bios were read has bio NULL — "never checked", not "none".
+  // Positives never expire, so without this the artists searched most would never get a
+  // Bandcamp bio. They are re-probed once, and the new row only replaces the old one when
+  // it is accepted again: a challenge or timeout must not cost an artist their Bandcamp link.
+  const needsBio = cachedMatch !== null && cached?.verdict === 'accepted' && cached.bio === null;
+  if (cached && !needsBio) return cachedMatch;
 
   const result = await probeBandcampArtist(query, budgetMs);
+
+  if (needsBio && result.verdict !== 'accepted') return cachedMatch;
 
   // Don't know != not there. Leave the cache empty so we retry next time.
   if (result.verdict === 'undecided') return null;
@@ -339,6 +358,9 @@ export async function findBandcampArtist(
     location: result.location ?? null,
     release_titles: result.releaseTitles ?? null,
     image_url: result.imageUrl ?? null,
+    // '' for "checked, no bio" on every row this code writes, negatives included, so NULL
+    // keeps meaning only "written before bios existed".
+    bio: result.bio ?? '',
     probed_slugs: result.probedSlugs,
   });
 
@@ -349,6 +371,7 @@ export async function findBandcampArtist(
         location: result.location ?? null,
         releaseTitles: result.releaseTitles ?? [],
         imageUrl: result.imageUrl ?? null,
+        bio: result.bio ?? '',
       }
     : null;
 }

@@ -265,6 +265,8 @@ export async function handler(event: {
     newSlug?: string;
     newName?: string;
     bio?: string;
+    // False turns off the bio on search results entirely — no fallback to a third party.
+    showBio?: boolean;
     featuredEmbed?: string | null;
     customImageUrl?: string | null;
     // A `platform: 'divider'` entry is a position marker in the artist's link
@@ -282,6 +284,10 @@ export async function handler(event: {
   const { slug } = body;
   if (!slug) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+  }
+  // Validated before any write, so a bad value can't leave half an update applied.
+  if (body.showBio !== undefined && typeof body.showBio !== 'boolean') {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'showBio must be a boolean' }) };
   }
 
   // Find the artist and verify ownership
@@ -410,6 +416,19 @@ export async function handler(event: {
     if (bioError) {
       console.error('[Profile] Bio update failed:', bioError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio' }) };
+    }
+  }
+
+  // --- Update search-result bio visibility ---
+  if (body.showBio !== undefined) {
+    const { error: showBioError } = await client
+      .from('artist_profiles')
+      .update({ show_bio: body.showBio, updated_at: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    if (showBioError) {
+      console.error('[Profile] Bio visibility update failed:', showBioError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio visibility' }) };
     }
   }
 
