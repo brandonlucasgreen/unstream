@@ -40,6 +40,14 @@ struct PopoverView: View {
     @State private var route: [PopoverRoute] = []
     @FocusState private var searchFieldFocused: Bool
 
+    /// Wide enough for 12pt platform badges to wrap two or three to a row. It was 320 when
+    /// every label was 10pt; the type grew, so the popover did too.
+    static let width: CGFloat = 360
+    /// The scrolling area's cap. With the tabs, field and footer, a full search result measures
+    /// 558 points tall (about 595 with the update row showing), well inside a 13-inch MacBook
+    /// Air's ~920 points below the menu bar.
+    private static let contentMaxHeight: CGFloat = 420
+
     var body: some View {
         VStack(spacing: 0) {
             updateRow
@@ -58,7 +66,7 @@ struct PopoverView: View {
 
             footer
         }
-        .frame(width: 320)
+        .frame(width: Self.width)
         .background(keyboardShortcuts)
         .sheet(isPresented: $showSignIn) {
             SignInView()
@@ -101,31 +109,30 @@ struct PopoverView: View {
 
     private func drillDown(_ current: PopoverRoute) -> some View {
         VStack(spacing: 0) {
-            HStack(spacing: 6) {
-                Button(action: { _ = route.popLast() }) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .font(.caption)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.accentColor)
-                .help("Back")
-
-                Spacer()
-
+            // A ZStack rather than spacers either side, so the title sits at the true centre
+            // whatever width the back button comes out at.
+            ZStack {
                 Text(current.title)
-                    .font(.caption.weight(.semibold))
+                    .font(.headline)
                     .foregroundColor(.secondary)
 
-                Spacer()
+                HStack {
+                    Button(action: { _ = route.popLast() }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Back")
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.accentColor)
+                    .help("Back")
 
-                // Balances the back button so the title sits centred.
-                Color.clear.frame(width: 44, height: 1)
+                    Spacer()
+                }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
 
             Divider()
 
@@ -143,7 +150,7 @@ struct PopoverView: View {
                     }
                 }
             }
-            .frame(maxHeight: 350)
+            .frame(maxHeight: Self.contentMaxHeight)
         }
     }
 
@@ -167,10 +174,9 @@ struct PopoverView: View {
                     Text("Install Unstream \(version)")
                     Spacer()
                 }
-                .font(.caption)
                 .foregroundStyle(Color.accentColor)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 9)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -193,27 +199,28 @@ struct PopoverView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
+                .controlSize(.large)
 
                 newReleasesButton
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 10)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
 
             // Search bar (only visible on search tab)
             if selectedTab == .search {
                 SearchBarView(isFocused: $searchFieldFocused)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 10)
-                    .padding(.bottom, 12)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 14)
             } else {
-                Spacer().frame(height: 10)
+                Spacer().frame(height: 14)
             }
 
             Divider()
 
             // Content area
             ScrollView {
-                VStack(spacing: 12) {
+                VStack(spacing: 14) {
                     if selectedTab == .supportList {
                         // Synced artists from server (if signed in)
                         if auth.isSignedIn {
@@ -236,13 +243,12 @@ struct PopoverView: View {
                                     .font(.title2)
                                     .foregroundColor(.secondary)
                                 Text("Sign in to sync saved artists")
-                                    .font(.caption)
+                                    .font(.callout)
                                     .foregroundColor(.secondary)
                                 Button("Sign In") {
                                     showSignIn = true
                                 }
                                 .buttonStyle(.borderedProminent)
-                                .controlSize(.small)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 20)
@@ -265,12 +271,14 @@ struct PopoverView: View {
                                 ErrorView(message: error)
                             } else if appState.searchResults.isEmpty && !appState.searchQuery.isEmpty {
                                 Text("No results found for \"\(appState.searchQuery)\"")
-                                    .font(.caption)
+                                    .font(.callout)
                                     .foregroundColor(.secondary)
                                     .padding(.vertical, 20)
                             } else {
+                                // No "Search Results" heading: the query is in the field
+                                // directly above, and the room is better spent on the result.
                                 ResultsView(
-                                    title: "Search Results",
+                                    title: nil,
                                     results: appState.searchResults
                                 )
                             }
@@ -291,7 +299,7 @@ struct PopoverView: View {
                                     )
                                 } else {
                                     Text("Searching for platforms...")
-                                        .font(.caption)
+                                        .font(.callout)
                                         .foregroundColor(.secondary)
                                         .padding(.vertical, 8)
                                 }
@@ -307,7 +315,7 @@ struct PopoverView: View {
                 }
                 .padding()
             }
-            .frame(maxHeight: 350)
+            .frame(maxHeight: Self.contentMaxHeight)
             .environment(\.openReleaseGuide) { target in
                 route = [.releaseGuide(target)]
             }
@@ -327,7 +335,7 @@ struct PopoverView: View {
                     // a bar above the search field, where it competed with the task.
                     Button(action: { Task { await auth.signOut() } }) {
                         Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                            .font(.caption2)
+                            .font(.callout)
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -336,7 +344,7 @@ struct PopoverView: View {
 
                     if let email = auth.userEmail {
                         Text(email)
-                            .font(.caption2)
+                            .font(.subheadline)
                             .foregroundColor(.secondary.opacity(0.7))
                             .lineLimit(1)
                             .truncationMode(.middle)
@@ -346,7 +354,7 @@ struct PopoverView: View {
                 } else {
                     Button(action: { showSignIn = true }) {
                         Label("Sign In", systemImage: "person.crop.circle.badge.plus")
-                            .font(.caption2)
+                            .font(.callout)
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -391,14 +399,14 @@ struct PopoverView: View {
                 .help("Settings, feedback, and more")
         }
         .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
     }
 
     /// The way into the unread-releases list, shown only when there are some.
     ///
     /// A bell beside the segmented control rather than a third segment: this is news that comes
     /// and goes, not a place the app always has. When there is nothing unread there is nothing
-    /// to offer, and an always-present empty tab would be a worse trade in a 320-point popover.
+    /// to offer, and an always-present empty tab would be a worse trade in a 360-point popover.
     @ViewBuilder
     private var newReleasesButton: some View {
         let count = releaseAlertManager.newReleases.count
@@ -408,7 +416,7 @@ struct PopoverView: View {
                     Image(systemName: "bell.badge.fill")
                         .foregroundColor(.yellow)
                     Text("\(count)")
-                        .font(.caption.weight(.medium))
+                        .font(.callout.weight(.medium))
                         .foregroundColor(.secondary)
                 }
                 .contentShape(Rectangle())
@@ -519,7 +527,7 @@ struct LoadingView: View {
             ProgressView()
                 .scaleEffect(0.8)
             Text("Searching...")
-                .font(.caption)
+                .font(.callout)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -536,7 +544,7 @@ struct ErrorView: View {
                 .font(.title2)
                 .foregroundColor(.orange)
             Text(message)
-                .font(.caption)
+                .font(.callout)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }

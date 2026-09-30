@@ -13,14 +13,14 @@ struct ResultsView: View {
         VStack(alignment: .leading, spacing: 12) {
             if let title = title {
                 Text(title)
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary)
                     .textCase(.uppercase)
             }
 
             if results.isEmpty {
                 Text("No results found")
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 8)
@@ -63,20 +63,39 @@ struct ArtistResultView: View {
     private let nameFont: Font = .system(size: 14, weight: .semibold)
     private let locationFont: Font = .system(size: 11)
     private let reportFont: Font = .system(size: 11)
+    private let photoSize: CGFloat = 40
+    private let cardPadding: CGFloat = 10
+    private let cardCornerRadius: CGFloat = 8
+    private let sectionSpacing: CGFloat = 10
+    private let badgeSpacing: CGFloat = 6
+    private let releasesRowFont: Font = .caption.weight(.medium)
+    private let headerButtonSpacing: CGFloat = 10
+    private let headerSpacerMinLength: CGFloat? = nil
     private let bioLineLimit = 3
     #else
-    private let headerIconButtonSize: CGFloat = 14
-    private let heartIconSize: CGFloat = 14
-    private let shareIconSize: CGFloat = 13
-    private let nameFont: Font = .headline
-    private let locationFont: Font = .caption
-    private let reportFont: Font = .caption
+    // A 28-point hit area around each header glyph; at 14 the heart and share were easy to miss.
+    private let headerIconButtonSize: CGFloat = 28
+    private let heartIconSize: CGFloat = 15
+    private let shareIconSize: CGFloat = 14
+    private let nameFont: Font = .title3.weight(.semibold)
+    private let locationFont: Font = .callout
+    private let reportFont: Font = .subheadline
+    private let photoSize: CGFloat = 44
+    private let cardPadding: CGFloat = 14
+    private let cardCornerRadius: CGFloat = 12
+    private let sectionSpacing: CGFloat = 12
+    private let badgeSpacing: CGFloat = 8
+    private let releasesRowFont: Font = .body.weight(.medium)
+    // The two 28-point hit areas sit flush — their glyphs still read as separate — so the name
+    // and location keep enough width for "Massachusetts, United States" on one line.
+    private let headerButtonSpacing: CGFloat = 0
+    private let headerSpacerMinLength: CGFloat? = 0
     // The menu-bar popover is the tightest space the app has.
     private let bioLineLimit = 2
     #endif
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: sectionSpacing) {
             // Artist name with photo and save button
             HStack(spacing: 10) {
                 // Artist photo (conditionally shown)
@@ -96,25 +115,27 @@ struct ArtistResultView: View {
                 }
                 .textSelection(.enabled)
 
-                Spacer()
+                Spacer(minLength: headerSpacerMinLength)
 
-                // Share button
-                if !artist.verifiedPlatforms.isEmpty {
-                    shareButton
-                }
+                HStack(spacing: headerButtonSpacing) {
+                    // Share button
+                    if !artist.verifiedPlatforms.isEmpty {
+                        shareButton
+                    }
 
-                Button(action: { supportListManager.toggleArtist(artist) }) {
-                    Image(systemName: isSaved ? "heart.fill" : "heart")
-                        .foregroundColor(isSaved ? .red : .secondary)
-                        .font(.system(size: heartIconSize))
-                        .frame(width: headerIconButtonSize, height: headerIconButtonSize)
-                        .contentShape(Rectangle())
+                    Button(action: { supportListManager.toggleArtist(artist) }) {
+                        Image(systemName: isSaved ? "heart.fill" : "heart")
+                            .foregroundColor(isSaved ? .red : .secondary)
+                            .font(.system(size: heartIconSize))
+                            .frame(width: headerIconButtonSize, height: headerIconButtonSize)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(isSaved ? "Remove \(artist.name) from Saved Artists" : "Add \(artist.name) to Saved Artists")
+                    #if os(macOS)
+                    .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
+                    #endif
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(isSaved ? "Remove \(artist.name) from Saved Artists" : "Add \(artist.name) to Saved Artists")
-                #if os(macOS)
-                .help(isSaved ? "Remove from Saved Artists" : "Add to Saved Artists")
-                #endif
             }
 
             if let bio = artist.bio {
@@ -125,10 +146,10 @@ struct ArtistResultView: View {
             if !artist.verifiedPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Found on \(artist.verifiedPlatforms.count) platform\(artist.verifiedPlatforms.count == 1 ? "" : "s"):")
-                        .font(.caption)
+                        .font(.smallText)
                         .foregroundColor(.secondary)
 
-                    FlowLayout(spacing: 6) {
+                    FlowLayout(spacing: badgeSpacing) {
                         ForEach(artist.verifiedPlatforms) { platform in
                             PlatformBadge(result: platform, onOpen: {
                                 appState.trackLinkClick(artist: artist, platformId: platform.sourceId)
@@ -150,7 +171,7 @@ struct ArtistResultView: View {
             if !artist.socialPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Social:")
-                        .font(.caption)
+                        .font(.smallText)
                         .foregroundColor(.secondary)
 
                     HStack(spacing: 8) {
@@ -182,10 +203,10 @@ struct ArtistResultView: View {
             if !artist.searchOnlyPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Also try:")
-                        .font(.caption)
+                        .font(.smallText)
                         .foregroundColor(.secondary.opacity(0.8))
 
-                    FlowLayout(spacing: 6) {
+                    FlowLayout(spacing: badgeSpacing) {
                         ForEach(artist.searchOnlyPlatforms) { platform in
                             PlatformBadge(result: platform, isSubtle: true, onOpen: {
                                 appState.trackLinkClick(artist: artist, platformId: platform.sourceId)
@@ -207,9 +228,9 @@ struct ArtistResultView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .accessibilityLabel("Report an issue with the result for \(artist.name)")
         }
-        .padding(10)
+        .padding(cardPadding)
         .background(cardBackgroundColor)
-        .cornerRadius(8)
+        .cornerRadius(cardCornerRadius)
         .draggable(artistURL)
         .contextMenu {
             Button(isSaved ? "Remove from Saved Artists" : "Save Artist") {
@@ -255,13 +276,13 @@ struct ArtistResultView: View {
                         .foregroundColor(.secondary.opacity(0.5))
                 }
             }
-            .frame(width: 40, height: 40)
+            .frame(width: photoSize, height: photoSize)
             .clipShape(Circle())
         } else {
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .foregroundColor(.secondary.opacity(0.5))
-                .frame(width: 40, height: 40)
+                .frame(width: photoSize, height: photoSize)
         }
     }
 
@@ -318,11 +339,11 @@ struct ArtistResultView: View {
             Image(systemName: "music.note.list")
                 .foregroundColor(.accentColor)
             Text("Releases & prices")
-                .font(.caption.weight(.medium))
+                .font(releasesRowFont)
                 .foregroundColor(.primary)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.caption2)
+                .font(.smallerText)
                 .foregroundColor(.secondary)
         }
         .padding(.horizontal, 10).padding(.vertical, 8)
@@ -419,7 +440,7 @@ private struct ArtistBioView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(bio.text)
-                .font(.caption)
+                .font(.smallText)
                 .foregroundColor(.primary.opacity(0.85))
                 .lineLimit(isExpanded ? nil : collapsedLineLimit)
                 .fixedSize(horizontal: false, vertical: true)
@@ -428,7 +449,7 @@ private struct ArtistBioView: View {
                 .background(
                     // The same text unclamped, invisible, to learn how tall it would be.
                     Text(bio.text)
-                        .font(.caption)
+                        .font(.smallText)
                         .fixedSize(horizontal: false, vertical: true)
                         .hidden()
                         .background(heightReader { fullHeight = $0 })
@@ -455,7 +476,7 @@ private struct ArtistBioView: View {
                     #endif
                 }
             }
-            .font(.caption2)
+            .font(.smallerText)
         }
     }
 

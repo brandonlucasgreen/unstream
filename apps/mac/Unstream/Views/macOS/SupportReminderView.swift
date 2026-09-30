@@ -11,10 +11,10 @@ struct SupportReminderView: View {
     private static let kofiRed = Color(red: 1.0, green: 0x5E / 255, blue: 0x5B / 255)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Keep Unstream running")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.headline)
 
                 Spacer()
 
@@ -22,7 +22,9 @@ struct SupportReminderView: View {
                     dismiss(days: SupportReminder.snoozeDays)
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.caption.weight(.semibold))
+                        .font(.callout.weight(.semibold))
+                        .frame(width: 20, height: 20)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(.secondary)
@@ -31,7 +33,7 @@ struct SupportReminderView: View {
             }
 
             Text("Unstream is free, with no ads. If it's helped you find artists to support, consider chipping in.")
-                .font(.caption)
+                .font(.callout)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -46,24 +48,23 @@ struct SupportReminderView: View {
                         Image("KofiIcon")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 12, height: 12)
+                            .frame(width: 14, height: 14)
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Self.kofiRed)
-                .controlSize(.small)
                 .accessibilityLabel("Support Unstream on Ko-fi, opens in your browser")
 
                 Button("I already support Unstream") {
                     dismiss(days: SupportReminder.alreadySupportDays)
                 }
                 .buttonStyle(.link)
-                .font(.caption)
+                .font(.callout)
             }
             .padding(.top, 4)
         }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 12).fill(.quaternary.opacity(0.5)))
     }
 
     private func dismiss(days: Int) {

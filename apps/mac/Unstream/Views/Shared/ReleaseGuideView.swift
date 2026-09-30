@@ -34,7 +34,7 @@ extension NewRelease {
 
 /// How a nested view asks its container to show a release's buying guide.
 ///
-/// The menu-bar popover has to drill down *in place* — it is a 320-point popover, not a window,
+/// The menu-bar popover has to drill down *in place* — it is a popover, not a window,
 /// and opening a second window for this was explicitly ruled out — but the alert badge that
 /// triggers it is several views down inside the saved-artists list. An environment action is the
 /// plain way to bridge that without threading a closure through every view in between.
@@ -69,7 +69,7 @@ extension EnvironmentValues {
 /// mistake the old alerts made by linking straight to one shop.
 ///
 /// Pure content, no chrome: the macOS popover wraps this in its own back header, iOS pushes or
-/// presents it. That is what lets the same view fit a 320-point menu-bar popover and a phone.
+/// presents it. That is what lets the same view fit a menu-bar popover and a phone.
 struct ReleaseGuideView: View {
     let target: ReleaseGuideTarget
 
@@ -97,13 +97,13 @@ struct ReleaseGuideView: View {
     private let priceFont: Font = .subheadline.weight(.medium)
     private let formatColumnWidth: CGFloat = 84
     #else
-    private let artworkSize: CGFloat = 60
-    private let outerPadding: CGFloat = 12
-    private let titleFont: Font = .headline
-    private let sourceNameFont: Font = .caption.weight(.semibold)
-    private let formatFont: Font = .caption
-    private let priceFont: Font = .caption.weight(.medium)
-    private let formatColumnWidth: CGFloat = 58
+    private let artworkSize: CGFloat = 72
+    private let outerPadding: CGFloat = 16
+    private let titleFont: Font = .title3.weight(.semibold)
+    private let sourceNameFont: Font = .body.weight(.semibold)
+    private let formatFont: Font = .callout
+    private let priceFont: Font = .callout.weight(.medium)
+    private let formatColumnWidth: CGFloat = 72
     #endif
 
     var body: some View {
@@ -163,7 +163,7 @@ struct ReleaseGuideView: View {
         HStack(spacing: 8) {
             ProgressView().scaleEffect(0.6)
             Text("Checking where to buy…")
-                .font(.caption)
+                .font(.smallText)
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 8)
@@ -181,13 +181,13 @@ struct ReleaseGuideView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(detail?.artist.name ?? target.artistName)
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary)
 
                 HStack(spacing: 6) {
                     if detail?.isUpcoming == true {
                         Text("Upcoming")
-                            .font(.caption2.weight(.semibold))
+                            .font(.smallerText.weight(.semibold))
                             .padding(.horizontal, 6).padding(.vertical, 2)
                             .background(Capsule().fill(Color.accentColor.opacity(0.18)))
                             .foregroundColor(.accentColor)
@@ -197,7 +197,7 @@ struct ReleaseGuideView: View {
                         precision: detail?.release.datePrecision
                     )
                     if !dateText.isEmpty {
-                        Text(dateText).font(.caption2).foregroundColor(.secondary)
+                        Text(dateText).font(.smallerText).foregroundColor(.secondary)
                     }
                 }
             }
@@ -264,7 +264,7 @@ struct ReleaseGuideView: View {
         HStack(spacing: 6) {
             Image(systemName: "star.fill").foregroundColor(.orange)
             Text("Bandcamp Friday — Bandcamp is waiving its cut today.")
-                .font(.caption2)
+                .font(.smallerText)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 10).padding(.vertical, 8)
@@ -290,7 +290,7 @@ struct ReleaseGuideView: View {
                 Text(source.detailCheckedAt == nil
                      ? "Formats and prices not read yet"
                      : "No formats listed")
-                    .font(.caption2)
+                    .font(.smallerText)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 10).padding(.vertical, 7)
             } else {
@@ -319,14 +319,14 @@ struct ReleaseGuideView: View {
     private func payoutPill(_ source: ReleaseDetailSource) -> some View {
         if let percent = source.payoutPercent {
             Text("\(percent) to artist")
-                .font(.caption2)
+                .font(.smallerText)
                 .padding(.horizontal, 5).padding(.vertical, 2)
                 .background(Capsule().fill(Color.green.opacity(0.15)))
                 .foregroundColor(.green)
                 .lineLimit(1)
         } else {
             Text("Payout unknown")
-                .font(.caption2)
+                .font(.smallerText)
                 .padding(.horizontal, 5).padding(.vertical, 2)
                 .background(Capsule().fill(Color.secondary.opacity(0.12)))
                 .foregroundColor(.secondary)
@@ -350,7 +350,7 @@ struct ReleaseGuideView: View {
                 if offer.isBuyable,
                    let payout = ReleaseFormatting.payout(offer.price, offer.currency, payoutPercent) {
                     Text(payout)
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.green)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -360,7 +360,7 @@ struct ReleaseGuideView: View {
 
             if let label = ReleaseFormatting.availabilityLabels[offer.availability] {
                 Text(label)
-                    .font(.caption2)
+                    .font(.smallerText)
                     .foregroundColor(offer.availability == "sold_out" ? .secondary : .orange)
             }
         }
@@ -377,7 +377,7 @@ struct ReleaseGuideView: View {
     private func buyButton(_ source: ReleaseDetailSource) -> some View {
         if let url = URL(string: source.url) {
             Button { open(url) } label: {
-                Text("Buy").font(.caption.weight(.semibold))
+                Text("Buy").font(.smallText.weight(.semibold))
             }
             .buttonStyle(.plain)
             .foregroundColor(.accentColor)
@@ -393,7 +393,7 @@ struct ReleaseGuideView: View {
     private var openOnUnstreamLink: some View {
         if let url = URL(string: detail?.pageUrl ?? webPageURL) {
             Button("Open on Unstream") { open(url) }
-                .font(.caption)
+                .font(.smallText)
                 .buttonStyle(.plain)
                 .foregroundColor(.accentColor)
                 .linkActions(url: url, openTitle: "Open on Unstream", onOpen: { open(url) })
@@ -421,7 +421,7 @@ struct ReleaseGuideView: View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon).foregroundColor(.secondary)
             Text(text)
-                .font(.caption)
+                .font(.smallText)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -432,11 +432,11 @@ struct ReleaseGuideView: View {
         VStack(alignment: .leading, spacing: 6) {
             let freshness = ReleaseFormatting.freshness(detail.release.pricesCheckedAt)
             if !freshness.isEmpty {
-                Text(freshness).font(.caption2).foregroundColor(.secondary)
+                Text(freshness).font(.smallerText).foregroundColor(.secondary)
             }
 
             Text("Payout estimates use each platform's published rates, before payment processing.")
-                .font(.caption2)
+                .font(.smallerText)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 

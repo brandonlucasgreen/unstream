@@ -29,16 +29,16 @@ struct NewReleasesListView: View {
                         .font(.title2)
                         .foregroundColor(.secondary)
                     Text("No new releases")
-                        .font(.caption)
+                        .font(.callout)
                         .foregroundColor(.secondary)
                     Text("We check your saved artists weekly.")
-                        .font(.caption2)
+                        .font(.subheadline)
                         .foregroundColor(.secondary.opacity(0.7))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
             } else {
-                VStack(spacing: 8) {
+                VStack(spacing: 10) {
                     ForEach(releaseAlertManager.newReleases) { release in
                         NewReleaseRow(
                             release: release,
@@ -47,7 +47,7 @@ struct NewReleasesListView: View {
                         )
                     }
                 }
-                .padding(12)
+                .padding(16)
             }
         }
     }
@@ -71,20 +71,20 @@ private struct NewReleaseRow: View {
     var body: some View {
         HStack(spacing: 8) {
             Button(action: open) {
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     Image(systemName: release.isUpcoming ? "calendar" : "sparkles")
                         .foregroundColor(.yellow)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(release.artistName)
-                            .font(.caption.weight(.semibold))
+                            .font(.body.weight(.semibold))
                             .lineLimit(1)
                         Text(release.releaseName)
-                            .font(.caption)
+                            .font(.body)
                             .lineLimit(1)
                         // The price is the reason to click, so it leads once we have one.
                         Text(secondaryLine)
-                            .font(.caption2)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
                     }
@@ -92,7 +92,7 @@ private struct NewReleaseRow: View {
                     Spacer(minLength: 0)
 
                     Image(systemName: release.guideTarget != nil ? "chevron.right" : "arrow.up.right")
-                        .font(.caption2)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 .contentShape(Rectangle())
@@ -104,7 +104,8 @@ private struct NewReleaseRow: View {
             Button(action: onDismiss) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.secondary)
-                    .font(.caption)
+                    .font(.body)
+                    .frame(width: 24, height: 24)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -112,9 +113,9 @@ private struct NewReleaseRow: View {
             .accessibilityLabel("Dismiss \(release.releaseName)")
             .help("Dismiss")
         }
-        .padding(10)
+        .padding(12)
         .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(8)
+        .cornerRadius(10)
         .onHover { isHovering = $0 }
         // Draggable and copyable like every other link in the app — a release is a thing a Mac
         // user drags into a note or a message. Not `linkActions`, because this menu also has to

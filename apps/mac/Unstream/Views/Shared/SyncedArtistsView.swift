@@ -31,10 +31,10 @@ struct SyncedArtistsView: View {
                 .font(.title2)
                 .foregroundColor(.secondary)
             Text("Sign in to sync saved artists")
-                .font(.caption)
+                .font(.smallText)
                 .foregroundColor(.secondary)
             Text("Your saved artists will appear here and stay in sync across devices.")
-                .font(.caption2)
+                .font(.smallerText)
                 .foregroundColor(.secondary.opacity(0.7))
                 .multilineTextAlignment(.center)
         }
@@ -48,17 +48,17 @@ struct SyncedArtistsView: View {
                 ProgressView()
                     .scaleEffect(0.8)
                 Text("Syncing...")
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary)
             } else {
                 Image(systemName: "heart.slash")
                     .font(.title2)
                     .foregroundColor(.secondary)
                 Text("No saved artists yet")
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary)
                 Text("Save artists on unstream.stream and they'll appear here.")
-                    .font(.caption2)
+                    .font(.smallerText)
                     .foregroundColor(.secondary.opacity(0.7))
                     .multilineTextAlignment(.center)
             }
@@ -72,18 +72,18 @@ struct SyncedArtistsView: View {
             if let error = sync.syncError {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle")
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.orange)
                         .accessibilityHidden(true)
                     Text(error)
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.orange)
                     Spacer()
                     Button("Retry") {
                         sync.syncError = nil
                         Task { await sync.pull() }
                     }
-                    .font(.caption2)
+                    .font(.smallerText)
                     .buttonStyle(.plain)
                     .foregroundColor(.accentColor)
                     .accessibilityLabel("Retry syncing saved artists")
@@ -97,7 +97,7 @@ struct SyncedArtistsView: View {
                     ProgressView()
                         .scaleEffect(0.6)
                     Text("Syncing...")
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
@@ -123,9 +123,15 @@ struct SyncedArtistRow: View {
     @State private var safariItem: SafariURL?
     private let nameFont: Font = .system(size: 13, weight: .medium)
     private let badgeFont: Font = .system(size: 9, weight: .medium)
+    private let photoSize: CGFloat = 28
+    private let actionIconSize: CGFloat = 12
+    private let rowPadding: CGFloat = 4
     #else
     private let nameFont: Font = .body.weight(.medium)
-    private let badgeFont: Font = .caption2.weight(.medium)
+    private let badgeFont: Font = .subheadline.weight(.medium)
+    private let photoSize: CGFloat = 32
+    private let actionIconSize: CGFloat = 14
+    private let rowPadding: CGFloat = 6
     #endif
 
     var body: some View {
@@ -142,13 +148,13 @@ struct SyncedArtistRow: View {
                             .foregroundColor(.secondary.opacity(0.5))
                     }
                 }
-                .frame(width: 28, height: 28)
+                .frame(width: photoSize, height: photoSize)
                 .clipShape(Circle())
             } else {
                 Image(systemName: "person.circle.fill")
                     .resizable()
                     .foregroundColor(.secondary.opacity(0.5))
-                    .frame(width: 28, height: 28)
+                    .frame(width: photoSize, height: photoSize)
             }
 
             // Name + claimed badge
@@ -177,8 +183,12 @@ struct SyncedArtistRow: View {
                     }
                 }) {
                     Image(systemName: "arrow.up.right.square")
-                        .font(.system(size: 12))
+                        .font(.system(size: actionIconSize))
                         .foregroundColor(.secondary)
+                        #if os(macOS)
+                        .frame(width: 28, height: 28)
+                        .contentShape(Rectangle())
+                        #endif
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(artist.claimed == true ? "Open \(artist.name)'s artist page" : "Search for \(artist.name)")
@@ -190,8 +200,12 @@ struct SyncedArtistRow: View {
             // Remove
             Button(action: onRemove) {
                 Image(systemName: "heart.slash")
-                    .font(.system(size: 12))
+                    .font(.system(size: actionIconSize))
                     .foregroundColor(.red.opacity(0.7))
+                    #if os(macOS)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+                    #endif
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Remove \(artist.name) from saved")
@@ -199,7 +213,7 @@ struct SyncedArtistRow: View {
             .help("Remove from saved")
             #endif
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, rowPadding)
         .contextMenu {
             if artist.claimed == true, let profileURL = artist.profileURL {
                 Button("Open Artist Page") { openURL(profileURL) }
