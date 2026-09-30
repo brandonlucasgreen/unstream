@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Approved
 ---
 # Artist bio excerpt on search and detection results
 
@@ -37,7 +37,7 @@ The proposal was: Unstream page, then Bandcamp, then MusicBrainz, then Wikidata/
 
 **5. Wikipedia goes last, reached via Wikidata.** It's third-party and written for an encyclopedia, not for fans, and it only covers artists notable enough to have a page. That's the reverse of who Unstream is for, so it's the right fallback, but only a fallback. Its licence (CC BY-SA 4.0) requires attribution, so the source link reads "From Wikipedia" with a licence link, not a bare URL.
 
-**6. "Skip empty" isn't a strong enough filter.** A lot of real Bandcamp bios aren't empty but aren't bios either: `booking: x@y.com`, a list of URLs, "new album out now!", a single emoji. The rule becomes **skip unless usable**: remove URLs, email addresses and handles, collapse whitespace, then require at least ~60 characters that include at least one sentence-ish run of words. The threshold is a constant in one function, tuned against real samples during implementation.
+**6. "Skip empty" isn't a strong enough filter.** A lot of real Bandcamp bios aren't empty but aren't bios either: `booking: x@y.com`, a list of URLs, "new album out now!", a single emoji. The rule becomes **skip unless usable**: remove URLs, email addresses and handles, collapse whitespace, then require **at least three words** of what's left. There's deliberately no character minimum, so a short real bio like "Noise duo from Leeds." is shown (decided 2026-09-30). This removes contact-only and link-only bios and emoji, and lets short promo lines like "new album out now!" through. That's acceptable, because it's still the artist talking.
 
 **7. A bio that couldn't be fetched isn't "no bio".** This is the "never cache uncertainty" trap again, in two places:
 - `fetchWikipediaSummary` returns `null` for a 404, a timeout and a network error alike. The MusicBrainz response is cached for 30 minutes, so one Wikipedia hiccup hides the bio for 30 minutes. It needs to distinguish "no page" (cacheable) from "didn't answer" (not cacheable, via the existing `shouldCache` predicate).
@@ -51,12 +51,21 @@ The proposal was: Unstream page, then Bandcamp, then MusicBrainz, then Wikidata/
 
 ### Source order (final)
 
-1. **Claimed Unstream profile**: `artist_profiles.bio`. Links to `/a/{slug}`.
+1. **Claimed Unstream profile**: `artist_profiles.bio`. Links to `/a/{slug}`. If the artist has turned bios off (see below), the chain **stops here with no bio**. It doesn't fall through to a third-party source.
 2. **Bandcamp**: sidebar bio from a trusted `/music` page. Links to the Bandcamp page.
 3. **Discogs**: `profile` from the artist API, with markup stripped. Links to the Discogs artist page.
 4. **Wikipedia**: summary extract, found via the MusicBrainz → Wikidata → `enwiki` sitelink (a direct Wikipedia relation still counts if one exists). Links to the article, with attribution.
 
 The first source that yields a **usable** bio (decision 6) wins. No merging across sources.
+
+### Claimed artists can opt out of a bio (decided 2026-09-30)
+
+Some artists will want *no* bio shown rather than Wikipedia's or Discogs' version of them. Artists first: they get a switch.
+
+- A new column, `artist_profiles.show_bio BOOLEAN NOT NULL DEFAULT true`, added in a new migration. The existing `artist_profiles` RLS policies already cover the row, so no policy changes are needed. The migration still says so in a comment.
+- The toggle is on `/artist-edit/:slug`, next to the bio field: "Show a bio on search results". Its help text: "If you haven't written one, we'll use your Bandcamp, Discogs or Wikipedia bio."
+- `artist-profile.ts` PUT accepts `showBio`. The owner check is the one already guarding bio updates.
+- With `show_bio = false`, `pickBio` returns nothing for that artist. Phase 2 can't fill it in either: the Phase 2 response carries `bioSuppressed: true` for a claimed, opted-out artist, and each client's one-line fill rule already skips filling when the result came from a claimed profile. That means the fill rule is keyed on "Phase 1 said no bio *and* the artist isn't claimed", not just "empty".
 
 ### Computed on the server, rendered by the clients
 
@@ -84,7 +93,7 @@ Plain text only. Bandcamp bio HTML (`<br>`, links) is converted to text on the s
 - Clamp to **3 lines** (web and extension) or **2 lines** (Mac menu-bar popover, where space is tighter; iOS gets 3).
 - If the text fits, show it all with no "More".
 - If it doesn't, show a **More** control that expands inline. Nothing opens until the user asks.
-- Always show a small source line: `From Bandcamp ↗`, `From the artist ↗` (Unstream), `From Discogs ↗`, `From Wikipedia · CC BY-SA ↗`. It opens `sourceUrl` in a new tab or the default browser. The Unstream source link goes to their artist page, which is where we'd want them anyway.
+- Always show a small source line that names the platform: `From Bandcamp ↗`, `From Discogs ↗`, `From Wikipedia · CC BY-SA ↗`. The one exception is a claimed profile's own bio, which reads `From the artist ↗` and links to their `/a/{slug}` page (decided 2026-09-30). The link opens `sourceUrl` in a new tab or the default browser. The labels come from `source` in one small per-client map, so there's no label text in the API response.
 - No bio: render nothing. No placeholder, no "no bio available".
 
 ### Caching and cost
@@ -92,7 +101,7 @@ Plain text only. Bandcamp bio HTML (`<br>`, links) is converted to text on the s
 - **Bandcamp**: a new nullable `bio TEXT` column on `bandcamp_slug_probes`, following the location precedent: a new migration, RLS unchanged (server-only table, no policies), `''` vs `NULL` as in decision 7. It's written only when a probe row is written anyway, so it adds **zero** Supabase writes. That matters given the disk I/O history.
 - **Discogs**: no new request. Read `profile` from the response `fetchDiscogsSocialLinks` already gets, which means changing its return shape to `{ socialLinks, profile }`.
 - **Wikidata hop**: one extra request, `wbgetentities?ids=Q…&props=sitelinks&sitefilter=enwiki`, then the existing summary fetch. It runs inside the Phase 2 `Promise.all`, sequentially only with its own summary fetch. Both hosts are already in `ALLOWED_OUTBOUND_HOSTNAMES`. It's cached inside the existing 30-minute MusicBrainz entry, so there's **no new Redis command**. Timeout of 2.5s, so it can't push Phase 2 past the function ceiling.
-- **Claimed bio**: already loaded by `getArtistBySlug`, so it's free.
+- **Claimed bio**: already loaded by `getArtistBySlug`, so it's free. `show_bio` rides the same select.
 - The payload is ≤1 KB per result, on one result per search. That's negligible in Redis storage, and it doesn't change the command count.
 
 ### Out of scope for v1
@@ -111,13 +120,12 @@ The order follows the client priority: the backend first, because every client d
 2. **Bandcamp.** Parse the bio in `bandcamp-probe.ts` from the HTML it already has, and in `fetchBandcampLocation`'s page. Add the migration for the `bio` column with `''`/`NULL` semantics. Verify the parser against a real page with one `ingest:try`-style request before relying on it; there's no `/music` sidebar fixture in the repo yet.
 3. **Discogs.** Return `profile` from the existing fetch.
 4. **Wikipedia.** Resolve the Wikidata relation to its `enwiki` sitelink, and make `fetchWikipediaSummary` distinguish "no page" from "failed". Feed that into the MusicBrainz `shouldCache`.
-5. **Wire up.** `toStoredResult` adds the claimed bio. Phase 1 and Phase 2 both call `pickBio`. Also update `api/functions/search-utils.ts` (`AggregatedResult`), `apps/web/src/types/index.ts`, and `apps/mac/Unstream/Models/SearchResponse.swift`. Run `npm run verify`.
-6. **Mac/iOS app.** `ArtistResultView.swift` gets the clamped text, More, and source link. The Phase 2 merge fills it only if it's empty. This ships as a Sparkle release, so bump `CFBundleVersion`.
-7. **Extension.** `popup.js` `renderResults` + `popup.css`, with the same merge rule in `service-worker.js`'s Phase 2 handling. Chrome and Firefox store review add lead time, so submit alongside the Mac release.
-8. **Web.** A new `ResultCardBio.tsx`, matching the `ResultCard*` split, and the one-line fill rule in `mergeWithMusicBrainzData`. Remove the dead `wikipediaSummary` plumbing once the native builds carrying `bio` are out.
+5. **Opt-out.** Add the `show_bio` migration, `showBio` in the `artist-profile.ts` PUT handler plus its test, and the toggle on `ArtistEditPage.tsx`.
+6. **Wire up.** `toStoredResult` adds the claimed bio, or none if the artist opted out. Phase 1 and Phase 2 both call `pickBio`. Also update `api/functions/search-utils.ts` (`AggregatedResult`), `apps/web/src/types/index.ts`, and `apps/mac/Unstream/Models/SearchResponse.swift`. Run `npm run verify`.
+7. **Mac/iOS app.** `ArtistResultView.swift` gets the clamped text, More, and source link. The Phase 2 merge fills it only if it's empty. This ships as a Sparkle release, so bump `CFBundleVersion`.
+8. **Extension.** `popup.js` `renderResults` + `popup.css`, with the same merge rule in `service-worker.js`'s Phase 2 handling. Chrome and Firefox store review add lead time, so submit alongside the Mac release.
+9. **Web.** A new `ResultCardBio.tsx`, matching the `ResultCard*` split, and the one-line fill rule in `mergeWithMusicBrainzData`. Remove the dead `wikipediaSummary` plumbing once the native builds carrying `bio` are out.
 
-## Open questions for Brandon
+## Decisions log
 
-1. **Should a claimed artist be able to turn the bio off?** Today an empty Unstream bio falls through to Bandcamp or Wikipedia. Some artists might deliberately want *no* bio shown rather than a third-party one. Adding a "don't show a bio" toggle is cheap. Artists-first says yes, but it's a product call.
-2. **Should the 60-character usability threshold hide short but real bios** like "Noise duo from Leeds."? The proposal is yes (it's under 60 chars). If you'd rather show those, the threshold drops to ~20 and we rely on the URL/email stripping alone.
-3. **Should the source line name the platform or say "From the artist"?** For Bandcamp it's both. The draft names the platform because that's where the link goes.
+- **2026-09-30 (Brandon):** claimed artists can turn the bio off, with no fallthrough. Short real bios are shown: no character minimum, three words is enough. The source line names the platform, except a claimed profile's own bio, which says "From the artist".
