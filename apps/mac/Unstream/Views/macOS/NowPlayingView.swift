@@ -5,10 +5,12 @@ struct NowPlayingView: View {
     let nowPlaying: NowPlaying
     var artistImageUrl: String? = nil
 
+    private let artworkSize: CGFloat = 56
+
     private var fallbackImage: some View {
-        RoundedRectangle(cornerRadius: 6)
+        RoundedRectangle(cornerRadius: 8)
             .fill(Color.gray.opacity(0.2))
-            .frame(width: 50, height: 50)
+            .frame(width: artworkSize, height: artworkSize)
             .overlay(
                 Image(systemName: "music.note")
                     .foregroundColor(.secondary)
@@ -16,11 +18,11 @@ struct NowPlayingView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("NOW PLAYING")
-                .font(.caption)
+        VStack(alignment: .leading, spacing: 10) {
+            // Title case, like a Mac sidebar section header, rather than tiny capitals.
+            Text("Now Playing")
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.secondary)
-                .textCase(.uppercase)
 
             HStack(spacing: 12) {
                 // Artist photo (or fallback to album artwork if available, then placeholder)
@@ -36,20 +38,20 @@ struct NowPlayingView: View {
                         case .empty:
                             ProgressView()
                                 .scaleEffect(0.6)
-                                .frame(width: 50, height: 50)
+                                .frame(width: artworkSize, height: artworkSize)
                         @unknown default:
                             fallbackImage
                         }
                     }
-                    .frame(width: 50, height: 50)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .frame(width: artworkSize, height: artworkSize)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 } else if let artworkData = nowPlaying.artworkData,
                    let nsImage = NSImage(data: artworkData) {
                     Image(nsImage: nsImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(6)
+                        .frame(width: artworkSize, height: artworkSize)
+                        .cornerRadius(8)
                 } else {
                     fallbackImage
                 }
@@ -64,13 +66,13 @@ struct NowPlayingView: View {
                     }
                     if let title = nowPlaying.title {
                         Text(title)
-                            .font(.callout)
+                            .font(.body)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
                     }
                     if let album = nowPlaying.album {
                         Text(album)
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.secondary.opacity(0.7))
                             .lineLimit(1)
                     }

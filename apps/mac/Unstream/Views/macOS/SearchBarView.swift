@@ -34,13 +34,13 @@ struct SearchBarView: View {
                 .help("Clear search")
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(Color(NSColor.textBackgroundColor))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 6)
+                    RoundedRectangle(cornerRadius: 8)
                         .strokeBorder(Color(NSColor.separatorColor), lineWidth: 1)
                 )
         )
