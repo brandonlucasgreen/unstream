@@ -41,7 +41,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
             <textarea
               value={reportText}
               onChange={(e) => setReportText(e.target.value)}
-              placeholder="e.g., Wrong artist, mismatched platforms, broken link..."
+              placeholder="e.g., Wrong artist, AI-generated, mismatched platforms, broken link..."
               className="w-full px-3 py-2 text-sm bg-bg-secondary border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary/50 resize-none"
               rows={3}
               autoFocus
