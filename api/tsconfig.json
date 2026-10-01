@@ -29,6 +29,7 @@
   // it clean under strict mode.
   "include": [
     "functions/search-sources.ts",
+    "functions/search-musicbrainz.ts",
     "functions/__tests__/to-stored-result.test.ts",
     "functions/artist-profile.ts",
     "functions/me-settings.ts",

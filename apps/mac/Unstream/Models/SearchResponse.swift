@@ -27,6 +27,32 @@ struct ArtistLocation: Codable, Hashable {
     }
 }
 
+/// A short artist bio, picked on the server (api/shared/artist-bio.ts) — one source, never
+/// stitched together. `text` is plain text with paragraphs separated by a blank line; render it
+/// as text, never as markup.
+struct ArtistBio: Codable, Hashable {
+    let text: String
+    /// "unstream" (the claimed artist's own), "bandcamp", "discogs" or "wikipedia".
+    let source: String
+    /// Where the full bio lives. Always present — it's the "read more" link.
+    let sourceUrl: String
+    /// The server cut a long bio short, so the full text is only at `sourceUrl`.
+    let truncated: Bool
+
+    /// Names the platform the bio came from. Nil for a claimed artist's own bio: the card's
+    /// "Releases & prices" row already covers their page (decided 2026-09-30).
+    /// Wikipedia's text is CC BY-SA, which asks for the licence alongside the attribution.
+    var sourceLabel: String? {
+        switch source {
+        case "unstream": return nil
+        case "bandcamp": return "From Bandcamp"
+        case "discogs": return "From Discogs"
+        case "wikipedia": return "From Wikipedia · CC BY-SA"
+        default: return "Source"
+        }
+    }
+}
+
 struct MusicBrainzResponse: Codable {
     let query: String
     let artistName: String?
@@ -34,6 +60,8 @@ struct MusicBrainzResponse: Codable {
     let discogsUrl: String?
     let hasPre2005Release: Bool?
     let socialLinks: [SocialLink]?
+    /// Optional: older deploys don't send it.
+    let bio: ArtistBio?
 }
 
 struct ArtistResult: Codable, Identifiable {
@@ -51,6 +79,10 @@ struct ArtistResult: Codable, Identifiable {
     let knownSlug: String?
     let matchConfidence: String?
     let location: ArtistLocation?
+    /// Optional and decoded leniently — an older deploy doesn't send it.
+    let bio: ArtistBio?
+    /// A claimed artist turned bios off. Phase 2 must not fill one in either.
+    let bioSuppressed: Bool?
     /// The artist takes tips on Unstream now: the row shows Tip, which opens `/tip/{slug}` in the
     /// browser (artist-patronage-spec.md §7). Absent on older deploys.
     var tipsEnabled: Bool? = nil

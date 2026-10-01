@@ -238,6 +238,31 @@ function makeArtistResult(name: string, platforms: SearchResult['platforms'] = [
   };
 }
 
+describe('mergeWithMusicBrainzData bios', () => {
+  const mbBio = { text: 'From Discogs.', source: 'discogs' as const, sourceUrl: 'https://www.discogs.com/artist/1', truncated: false };
+  const liveBio = { text: 'From Bandcamp.', source: 'bandcamp' as const, sourceUrl: 'https://a.bandcamp.com', truncated: false };
+
+  it('fills an empty card of the same name', () => {
+    const merged = mergeWithMusicBrainzData([makeArtistResult('Test Artist')], makeMBData({ bio: mbBio }));
+    expect(merged[0].bio).toEqual(mbBio);
+  });
+
+  it("never replaces Phase 1's bio — its sources outrank Phase 2's", () => {
+    const results = [{ ...makeArtistResult('Test Artist'), bio: liveBio }];
+    expect(mergeWithMusicBrainzData(results, makeMBData({ bio: mbBio }))[0].bio).toEqual(liveBio);
+  });
+
+  it('never fills a claimed card, which may have turned bios off', () => {
+    const results = [{ ...makeArtistResult('Test Artist'), matchConfidence: 'claimed' as const, bioSuppressed: true }];
+    expect(mergeWithMusicBrainzData(results, makeMBData({ bio: mbBio }))[0].bio).toBeUndefined();
+  });
+
+  it('does not hand a near-miss name the bio', () => {
+    const merged = mergeWithMusicBrainzData([makeArtistResult('Test Artists')], makeMBData({ bio: mbBio }));
+    expect(merged[0].bio).toBeUndefined();
+  });
+});
+
 describe('mergeWithMusicBrainzData', () => {
   it('returns results unchanged if artistName is null', () => {
     const results = [makeArtistResult('Test')];

@@ -43,14 +43,13 @@ const AdminVerifyPage = lazyWithRetry(() => import('./pages/AdminVerifyPage.tsx'
 const AdminLinksPage = lazyWithRetry(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
 const AdminReleaseReviewPage = lazyWithRetry(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
 const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
-const GuidesIndexPage = lazyWithRetry(() => import('./pages/GuidesIndexPage.tsx').then(m => ({ default: m.GuidesIndexPage })))
-const GuidePage = lazyWithRetry(() => import('./pages/GuidePage.tsx').then(m => ({ default: m.GuidePage })))
 const DevelopersPage = lazyWithRetry(() => import('./pages/DevelopersPage.tsx').then(m => ({ default: m.DevelopersPage })))
 const PressPage = lazyWithRetry(() => import('./pages/PressPage.tsx').then(m => ({ default: m.PressPage })))
 const ContactPage = lazyWithRetry(() => import('./pages/ContactPage.tsx').then(m => ({ default: m.ContactPage })))
 const ChangelogPage = lazyWithRetry(() => import('./pages/ChangelogPage.tsx').then(m => ({ default: m.ChangelogPage })))
 const ExtensionPage = lazyWithRetry(() => import('./pages/ExtensionPage.tsx').then(m => ({ default: m.ExtensionPage })))
 const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m => ({ default: m.ImportPage })))
+const PlatformsPage = lazyWithRetry(() => import('./pages/PlatformsPage.tsx').then(m => ({ default: m.PlatformsPage })))
 const FaqPage = lazyWithRetry(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
 const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
 const TipPage = lazyWithRetry(() => import('./pages/TipPage.tsx').then(m => ({ default: m.TipPage })))
@@ -119,8 +118,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/support" element={<SupportPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/terms" element={<TermsOfUsePage />} />
-              <Route path="/guides" element={<GuidesIndexPage />} />
-              <Route path="/guides/:slug" element={<GuidePage />} />
+              <Route path="/platforms" element={<PlatformsPage />} />
               <Route path="/admin/merge" element={<AdminMergePage />} />
               <Route path="/admin/verify" element={<AdminVerifyPage />} />
               <Route path="/admin/links" element={<AdminLinksPage />} />

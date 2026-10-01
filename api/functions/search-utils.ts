@@ -1,6 +1,8 @@
 // Pure utility functions and types extracted from search-sources.ts
 // No HTTP, cache, or database dependencies.
 
+import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
+
 export type SourceId =
   | 'bandcamp'
   | 'mirlo'
@@ -50,6 +52,8 @@ export interface PlatformResult {
   // fetchReleasesForDisambiguation skip a refetch — that step shares one 4s budget
   // across platforms, so a redundant request costs another platform its data.
   allReleaseTitles?: string[];
+  // Bandcamp only: the artist's sidebar bio from the page the probe already read.
+  bio?: string;
 }
 
 export interface AggregatedResult {
@@ -99,8 +103,15 @@ export interface AggregatedResult {
     country?: string;
     countryCode?: string;
   };
+  // Deprecated: superseded by `bio`. Still sent so Mac and extension builds from before
+  // bios shipped keep decoding; remove once those have updated.
   wikipediaSummary?: string;
   wikipediaUrl?: string;
+  // Short bio for the card — picked on the server, rendered as plain text by every client.
+  // See api/shared/artist-bio.ts for the source order.
+  bio?: ArtistBio;
+  // A claimed artist turned bios off. Clients must not fill one in from Phase 2 either.
+  bioSuppressed?: boolean;
   // The artist takes tips on Unstream right now, so the card shows a Tip button
   // (docs/specs/artist-patronage-spec.md §3.1). Absent otherwise.
   tipsEnabled?: true;
@@ -581,14 +592,19 @@ export function textMatchScore(name: string, query: string): number {
  * caching that would pin "this artist has no official site / socials" for the
  * TTL. A genuine no-match (artistName null after a successful search) IS
  * cacheable; MB really doesn't know them.
+ *
+ * The same goes for a bio source that didn't answer (Discogs, Wikipedia, the Bandcamp
+ * page): caching that would show no bio, or a lower-priority one, for the full TTL.
  */
 export function isCacheableMbResult(result: {
   searchFailed: boolean;
   artistName: string | null;
   enrichmentComplete: boolean;
+  bioFetchFailed?: boolean;
 }): boolean {
   if (result.searchFailed) return false;
   if (result.artistName !== null && !result.enrichmentComplete) return false;
+  if (result.bioFetchFailed) return false;
   return true;
 }
 
@@ -1092,7 +1108,7 @@ export function mergeStoredArtistsIntoResults(
   const merged = [...results];
   const seenIds = new Set<string>();
 
-  for (const artist of stored) {
+  for (let artist of stored) {
     // The exact-slug and name-contains lookups can both find the same artist.
     if (seenIds.has(artist.id)) continue;
     seenIds.add(artist.id);
@@ -1118,6 +1134,11 @@ export function mergeStoredArtistsIntoResults(
       continue;
     }
 
+    // The claimed card replaces the live one. An artist who hasn't written a bio (and hasn't
+    // turned bios off) still gets the one the live search found for them.
+    if (sameNameIdx !== -1 && !artist.bio && !artist.bioSuppressed && merged[sameNameIdx].bio) {
+      artist = { ...artist, bio: merged[sameNameIdx].bio };
+    }
     if (sameNameIdx !== -1) merged.splice(sameNameIdx, 1);
 
     if (normalizeForComparison(artist.name) === queryNorm) {
@@ -1130,6 +1151,64 @@ export function mergeStoredArtistsIntoResults(
   }
 
   return merged;
+}
+
+// ---------------------------------------------------------------------------
+// Bios
+// ---------------------------------------------------------------------------
+
+/** The MusicBrainz-sourced bio material, and which result it belongs to. */
+export interface MbBioInput {
+  /** The result applyEnrichmentToResults enriched, or the MB fallback card. */
+  resultId: string | null;
+  discogsUrl: string | null;
+  officialUrl: string | null;
+  discogsProfile: string | null;
+  wikipediaSummary: string | null;
+  wikipediaUrl: string | null;
+}
+
+/**
+ * Give each live artist result its bio, in place. Run last, after disambiguation, because
+ * splits and merges rebuild result objects and would drop a bio set earlier.
+ *
+ * Bandcamp bios attach by the result's own Bandcamp subdomain, so a bio only ever sits next
+ * to the account it was read from — and the accounts in `bandcampBios` are ones the probe
+ * verified or MusicBrainz lists. Discogs and Wikipedia bios describe the MusicBrainz artist,
+ * so they attach only to the result MusicBrainz enriched — found by id, or by the Discogs or
+ * official-site link enrichment put on it (a merge can change the id, not the links).
+ * Runs after applyLinkSuppressions, so a bio never outlives the link it came from.
+ *
+ * Claimed cards are left alone: their bio is the artist's own, set by toStoredResult.
+ */
+export function attachBios(
+  results: AggregatedResult[],
+  bandcampBios: Map<string, string>,
+  mb: MbBioInput | null,
+): void {
+  for (const result of results) {
+    if (result.type !== 'artist' || result.matchConfidence === 'claimed') continue;
+
+    const bandcampUrl = result.platforms.find(p => p.sourceId === 'bandcamp' && !isBandcampSearchLink(p.url))?.url;
+    const subdomain = bandcampSubdomainOf(bandcampUrl);
+    const bandcampBio = subdomain ? makeBio('bandcamp', bandcampBios.get(subdomain), bandcampUrl) : null;
+
+    // The Discogs bio needs the Discogs link on the card itself: an admin suppression that
+    // removed the link has said that page isn't this artist, so its bio isn't either.
+    const hasMbDiscogs = mb !== null && mb.discogsUrl !== null && result.platforms.some(p => p.url === mb.discogsUrl);
+    const isMbTarget = mb !== null && (
+      result.id === mb.resultId ||
+      hasMbDiscogs ||
+      (mb.officialUrl !== null && result.platforms.some(p => p.url === mb.officialUrl))
+    );
+
+    const bio = pickBio([
+      bandcampBio,
+      isMbTarget && hasMbDiscogs ? makeBio('discogs', mb.discogsProfile, mb.discogsUrl) : null,
+      isMbTarget ? makeBio('wikipedia', mb.wikipediaSummary, mb.wikipediaUrl) : null,
+    ]);
+    if (bio) result.bio = bio;
+  }
 }
 
 // ---------------------------------------------------------------------------

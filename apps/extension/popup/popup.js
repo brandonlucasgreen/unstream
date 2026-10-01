@@ -6,6 +6,7 @@ import { releaseSlugsFromUrl } from '../lib/release-display.js';
 import { releaseSummaryLine } from '../lib/release-alerts.js';
 import { renderReleaseGuide, guideMessage, guideLink } from '../lib/release-guide.js';
 import { renderArtistReleases } from '../lib/artist-releases.js';
+import { bioTarget, shouldFillBio, renderArtistBio } from '../lib/artist-bio.js';
 import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
 import {
   getCustomSites,
@@ -78,6 +79,7 @@ const elements = {
   searchBtn: document.getElementById('search-btn'),
   artistName: document.getElementById('artist-name'),
   artistLocation: document.getElementById('artist-location'),
+  artistBio: document.getElementById('artist-bio'),
   trackTitle: document.getElementById('track-title'),
   sourceBadge: document.getElementById('source-badge'),
   // Auth
@@ -113,6 +115,8 @@ let currentArtistSlug = null; // resolved slug for current artist
 let currentResults = null;
 let currentSocialLinks = null;
 let currentLocation = null;
+// The result whose bio is shown, kept so Phase 2 can fill it when Phase 1 had none.
+let bioResult = null;
 let newReleases = [];
 let authSession = null; // null = unknown/loading, false = signed out, object = signed in
 
@@ -708,8 +712,10 @@ function showNowPlaying(track) {
   currentArtist = track.artist;
   currentArtistSlug = null; // will be resolved asynchronously
   currentLocation = null;
+  bioResult = null;
   elements.artistName.textContent = track.artist;
   elements.artistLocation.textContent = '';
+  renderArtistBio(elements.artistBio, null);
   elements.trackTitle.textContent = track.title || '';
   elements.sourceBadge.textContent = track.source;
 
@@ -732,7 +738,9 @@ function hideNowPlaying() {
   currentArtistSlug = null;
   currentResults = null;
   currentLocation = null;
+  bioResult = null;
   elements.artistLocation.textContent = '';
+  renderArtistBio(elements.artistBio, null);
   elements.nowPlaying.classList.add('hidden');
   elements.idleState.classList.remove('hidden');
   elements.resultsSection.classList.add('hidden');
@@ -793,6 +801,9 @@ function renderResults(results) {
     || results.find(r => r.type === 'artist' && r.location);
   currentLocation = locationResult?.location || null;
   elements.artistLocation.textContent = formatLocation(currentLocation);
+
+  bioResult = bioTarget(results, currentArtist);
+  renderArtistBio(elements.artistBio, bioResult?.bio);
 
   const allPlatforms = [];
   for (const result of results) {
@@ -902,6 +913,11 @@ async function loadEnrichment(artist) {
       type: 'GET_ENRICHMENT',
       artist,
     });
+
+    if (shouldFillBio(bioResult, enrichment)) {
+      bioResult = { ...bioResult, bio: enrichment.bio };
+      renderArtistBio(elements.artistBio, enrichment.bio);
+    }
 
     if (enrichment && enrichment.socialLinks && enrichment.socialLinks.length > 0) {
       currentSocialLinks = enrichment.socialLinks;

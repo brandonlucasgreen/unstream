@@ -28,6 +28,11 @@ We also link to a number of alternative services that can help you reduce your d
 
 *More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
 
+### What’s Bandcamp Friday?
+A few Fridays a year, Bandcamp waives its revenue share, so artists keep everything except card processing fees: roughly 97% of what you pay instead of the usual 80–85%. Bandcamp announces the dates on [Bandcamp Daily](https://daily.bandcamp.com/features/bandcamp-fridays).
+
+On those days, Unstream shows the Bandcamp Friday payout on every Bandcamp link. If you’ve been meaning to buy something, that’s the day to do it.
+
 ### What are some of the other benefits of moving off a streaming service?
 Lots of them!
 - Save money

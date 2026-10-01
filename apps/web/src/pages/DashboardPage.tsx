@@ -10,6 +10,8 @@ import { SavedArtistsSection } from '../components/SavedArtistsSection';
 import { CollectionSection } from '../components/CollectionSection';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
+import { WelcomeBanner } from '../components/WelcomeBanner';
+import { NewsletterPrompt } from '../components/NewsletterPrompt';
 
 /**
  * The signed-in home, as a composition of sections that each load on their own.
@@ -63,6 +65,10 @@ export function DashboardPage() {
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
+
+          <WelcomeBanner />
+
+          <NewsletterPrompt email={session?.user?.email} source="unstream" />
 
           <ClaimedArtistsSection />
 

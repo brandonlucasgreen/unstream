@@ -7,6 +7,7 @@ import { ResultCardPlatforms } from './ResultCardPlatforms';
 import { LoginInterstitial } from './LoginInterstitial';
 import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
+import { ResultCardBio } from './ResultCardBio';
 import { AdminRemoveLinkDialog } from './AdminRemoveLinkDialog';
 import { TipButton } from './TipButton';
 
@@ -136,6 +137,8 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
       />
 
         <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
+          {result.bio && <ResultCardBio bio={result.bio} />}
+
           {/* Unverified match warning. Only shown for a real conflict — a result
               split off because its releases didn't match a verified sibling. The
               other way to be unverified is having no release data to compare at

@@ -11,6 +11,7 @@
 		0EC3D68464514744CE3AA448 /* BandcampReleaseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43017BB6FDE57EBD35755D7B /* BandcampReleaseChecker.swift */; };
 		0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C40AC0CB901A9F09846258C /* TipJarStore.swift */; };
 		1132043919606896183DF5BC /* IndieArtist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752DBE41E6259FE62017B41D /* IndieArtist.swift */; };
+		11A06DC89FB946CAE553597C /* SmallTextStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F8EEBC6BDB08210CEA0D0C /* SmallTextStyles.swift */; };
 		11B4891578B50BCF51D68613 /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E330692CA1EC213166D9351F /* SearchTab.swift */; platformFilters = (ios, ); };
 		1464F67B443B46825E24D753 /* ReleaseDetailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A74C90B5D9AAB9C4BE4A2BC /* ReleaseDetailService.swift */; };
 		1590E33E06825362DA54B4F0 /* ReleaseGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715AD54711A079021408FD57 /* ReleaseGuideView.swift */; };
@@ -204,6 +205,7 @@
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportReminderView.swift; sourceTree = "<group>"; };
 		F0D10E2D163AD597A2143223 /* ArtistTipButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistTipButton.swift; sourceTree = "<group>"; };
+		F4F8EEBC6BDB08210CEA0D0C /* SmallTextStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallTextStyles.swift; sourceTree = "<group>"; };
 		F7F3423CC7E1B40B24DC4BC7 /* IndieArtistSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtistSuggestionsView.swift; sourceTree = "<group>"; };
 		F8C60F297D83E962E0D769E7 /* SupportListTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListTab.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -318,6 +320,7 @@
 				715AD54711A079021408FD57 /* ReleaseGuideView.swift */,
 				D144E8586F19DBA63C2F37B1 /* SafariView.swift */,
 				AD675AEFDCED8AD330E47C5A /* SignInView.swift */,
+				F4F8EEBC6BDB08210CEA0D0C /* SmallTextStyles.swift */,
 				7EFEA3443AD56B9950B43AAE /* SocialIconButton.swift */,
 				89D2DBDD53C2C9158EA698C4 /* SupportListView.swift */,
 				30CDBA3376D2900CCBE870B2 /* SyncedArtistsView.swift */,
@@ -629,6 +632,7 @@
 				7F078F17D544C2F32A801E60 /* SettingsView.swift in Sources */,
 				461E318C0B5687BD71C42E75 /* ShortcutRecorderView.swift in Sources */,
 				BF58D857FC19F2147E12C7D5 /* SignInView.swift in Sources */,
+				11A06DC89FB946CAE553597C /* SmallTextStyles.swift in Sources */,
 				0038D14301F153EF60346193 /* SocialIconButton.swift in Sources */,
 				49B08E42C2BFF55C8B76C40C /* SparkleUpdater.swift in Sources */,
 				2FD47D4336B60E85FE2E82E7 /* SupportEntry.swift in Sources */,

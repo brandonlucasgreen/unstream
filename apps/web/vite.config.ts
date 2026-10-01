@@ -123,20 +123,23 @@ export default defineConfig({
           /^\/a\//,
           /^\/artist\//,
           /^\/u\//,
-          /^\/guides\//,
+          // Not an edge function any more: /guides and /guides/* are 301s in netlify.toml since the
+          // section was retired (2026-09-27). They stay here so a returning visitor's worker lets
+          // the request through to the redirect instead of serving the cached shell, which would
+          // render a blank page because no SPA route matches.
+          /^\/guides(\/|$)/,
           /^\/search/,
           // Release feeds (.ics/.xml) are served by a Netlify function, not the SPA. Calendar
           // clients never touch the SW, but a user clicking their own feed link in the browser
           // is a navigation, and the cached shell would hand them an HTML page instead of the
           // calendar. /a/ and /u/ above already cover the two public feed shapes.
           /^\/feed\//,
-          // Static RSS feeds copied straight from apps/web/public/ (scripts/generate-guides-feed.ts,
-          // generate-changelog-feed.ts) — not edge functions, but the same navigateFallback trap:
-          // NavigationRoute's default allowlist (`[/./]`) matches every browser navigation
-          // regardless of file extension, so a returning visitor clicking these RSS links from
-          // /guides or /changelog got the cached SPA shell instead of the feed — a blank page,
-          // since no route renders for /guides.xml. /^\/guides\// above only covers /guides/*
-          // pages, not this sibling file.
+          // Static RSS feeds copied straight from apps/web/public/ (generate-changelog-feed.ts, and
+          // guides.xml, frozen since the guides were retired) — not edge functions, but the same
+          // navigateFallback trap: NavigationRoute's default allowlist (`[/./]`) matches every
+          // browser navigation regardless of file extension, so a returning visitor clicking these
+          // RSS links got the cached SPA shell instead of the feed — a blank page, since no route
+          // renders for /guides.xml. /^\/guides(\/|$)/ above doesn't match this sibling file.
           /^\/guides\.xml$/,
           /^\/changelog\.xml$/,
         ],

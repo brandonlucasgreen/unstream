@@ -20,8 +20,8 @@ struct SocialIconButton: View {
     private let buttonSize: CGFloat = 44
     private let iconSize: CGFloat = 20
     #else
-    private let buttonSize: CGFloat = 28
-    private let iconSize: CGFloat = 14
+    private let buttonSize: CGFloat = 32
+    private let iconSize: CGFloat = 16
     #endif
 
     var body: some View {

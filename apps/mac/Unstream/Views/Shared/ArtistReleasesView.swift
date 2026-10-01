@@ -11,7 +11,7 @@ import AppKit
 /// money". Tapping a release opens `ReleaseGuideView`.
 ///
 /// Pure content, no chrome — the macOS popover wraps it in a back header, iOS pushes it. Same
-/// arrangement as `ReleaseGuideView`, which is what lets both fit a 320-point popover.
+/// arrangement as `ReleaseGuideView`, which is what lets both fit the menu-bar popover.
 struct ArtistReleasesView: View {
     let slug: String
     /// What search already knew, so the header renders before the network answers.
@@ -45,12 +45,14 @@ struct ArtistReleasesView: View {
     private let nameFont: Font = .title3.weight(.semibold)
     private let titleFont: Font = .subheadline.weight(.medium)
     private let metaFont: Font = .caption
+    private let rowSpacing: CGFloat = 6
     #else
-    private let artworkSize: CGFloat = 36
-    private let outerPadding: CGFloat = 12
-    private let nameFont: Font = .headline
-    private let titleFont: Font = .caption.weight(.medium)
-    private let metaFont: Font = .caption2
+    private let artworkSize: CGFloat = 44
+    private let outerPadding: CGFloat = 16
+    private let nameFont: Font = .title3.weight(.semibold)
+    private let titleFont: Font = .body.weight(.medium)
+    private let metaFont: Font = .subheadline
+    private let rowSpacing: CGFloat = 8
     #endif
 
     var body: some View {
@@ -58,7 +60,7 @@ struct ArtistReleasesView: View {
             scrollContent
                 .onChange(of: keyboardSelection) { index in
                     // Keep the arrow-key selection visible; otherwise it walks off the bottom of
-                    // a 350-point popover and the keys appear to do nothing.
+                    // the popover's scrolling area and the keys appear to do nothing.
                     guard let index else { return }
                     withAnimation(.easeOut(duration: 0.12)) { proxy.scrollTo(index, anchor: .bottom) }
                 }
@@ -83,7 +85,7 @@ struct ArtistReleasesView: View {
                 case .loading:
                     HStack(spacing: 8) {
                         ProgressView().scaleEffect(0.6)
-                        Text("Loading releases…").font(.caption).foregroundColor(.secondary)
+                        Text("Loading releases…").font(.smallText).foregroundColor(.secondary)
                     }
                     .padding(.vertical, 8)
 
@@ -168,10 +170,10 @@ struct ArtistReleasesView: View {
                 notice("No releases catalogued for this artist yet.")
             } else {
                 Text(releaseCountLabel(page))
-                    .font(.caption2.weight(.semibold))
+                    .font(.smallerText.weight(.semibold))
                     .foregroundColor(.secondary)
 
-                VStack(spacing: 6) {
+                VStack(spacing: rowSpacing) {
                     ForEach(Array(page.releases.enumerated()), id: \.element.id) { index, release in
                         ReleaseListRow(
                             release: release,
@@ -189,7 +191,7 @@ struct ArtistReleasesView: View {
                 // letting the list imply it is the whole catalogue.
                 if page.totalReleases > page.releases.count {
                     Text("Showing \(page.releases.count) of \(page.totalReleases). Open the full page for the rest.")
-                        .font(.caption2)
+                        .font(.smallerText)
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -264,7 +266,7 @@ struct ArtistReleasesView: View {
 
     private func notice(_ text: String) -> some View {
         Text(text)
-            .font(.caption)
+            .font(.smallText)
             .foregroundColor(.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.vertical, 4)
@@ -277,7 +279,7 @@ struct ArtistReleasesView: View {
     private var openOnUnstreamLink: some View {
         if let url = URL(string: "https://unstream.stream/a/\(slug)") {
             Button("Open full page on Unstream") { open(url) }
-                .font(.caption)
+                .font(.smallText)
                 .buttonStyle(.plain)
                 .foregroundColor(.accentColor)
                 .padding(.top, 2)
@@ -321,8 +323,12 @@ private struct ReleaseListRow: View {
 
     #if os(iOS)
     private let titleFont: Font = .subheadline.weight(.medium)
+    private let rowPaddingH: CGFloat = 10
+    private let rowPaddingV: CGFloat = 8
     #else
-    private let titleFont: Font = .caption.weight(.medium)
+    private let titleFont: Font = .body.weight(.medium)
+    private let rowPaddingH: CGFloat = 12
+    private let rowPaddingV: CGFloat = 10
     #endif
 
     private var webURL: URL? {
@@ -343,7 +349,7 @@ private struct ReleaseListRow: View {
                     HStack(spacing: 5) {
                         if release.isUpcoming {
                             Text("Upcoming")
-                                .font(.caption2.weight(.semibold))
+                                .font(.smallerText.weight(.semibold))
                                 .padding(.horizontal, 5).padding(.vertical, 1)
                                 .background(Capsule().fill(Color.accentColor.opacity(0.18)))
                                 .foregroundColor(.accentColor)
@@ -353,11 +359,11 @@ private struct ReleaseListRow: View {
                         // Otherwise the date, which at least says what this is.
                         let summary = release.offerSummary ?? ""
                         if !summary.isEmpty {
-                            Text(summary).font(.caption2).foregroundColor(.green)
+                            Text(summary).font(.smallerText).foregroundColor(.green)
                         } else {
                             let dateText = ReleaseFormatting.date(release.releaseDate, precision: release.datePrecision)
                             if !dateText.isEmpty {
-                                Text(dateText).font(.caption2).foregroundColor(.secondary)
+                                Text(dateText).font(.smallerText).foregroundColor(.secondary)
                             }
                         }
                     }
@@ -366,10 +372,10 @@ private struct ReleaseListRow: View {
                 Spacer(minLength: 0)
 
                 Image(systemName: "chevron.right")
-                    .font(.caption2)
+                    .font(.smallerText)
                     .foregroundColor(.secondary)
             }
-            .padding(.horizontal, 10).padding(.vertical, 8)
+            .padding(.horizontal, rowPaddingH).padding(.vertical, rowPaddingV)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .background(RoundedRectangle(cornerRadius: 8).fill(rowFill))

@@ -3,9 +3,12 @@ import * as Sentry from '@sentry/react';
 
 type Status = 'idle' | 'submitting' | 'pending' | 'already_subscribed' | 'error';
 
+/** Buttondown tags the API accepts — see ALLOWED_SOURCES in api/functions/newsletter-subscribe.ts. */
+export type NewsletterSource = 'changelog' | 'contact' | 'platforms' | 'artist' | 'unstream';
+
 interface NewsletterSignupProps {
   /** Where the signup happened. Sent to Buttondown as a tag; the API rejects anything else. */
-  source: 'changelog' | 'guides' | 'contact';
+  source: NewsletterSource;
   heading?: string;
   blurb: string;
   /** Absolute or root-relative URL of the matching RSS feed, offered as the no-email option. */
@@ -14,7 +17,7 @@ interface NewsletterSignupProps {
 }
 
 /**
- * Email signup for the Unstream newsletter.
+ * Email signup for Brandon's newsletter, Lightbulbs On, which carries Unstream's updates.
  *
  * Posts to our own /api/newsletter/subscribe, which talks to Buttondown server-side — see
  * api/functions/newsletter-subscribe.ts for why it isn't Buttondown's embed.

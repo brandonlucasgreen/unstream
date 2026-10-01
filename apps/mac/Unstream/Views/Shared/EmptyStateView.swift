@@ -14,7 +14,7 @@ struct EmptyStateView: View {
                     .foregroundColor(.secondary)
 
                 Text("Search for an artist above, or start playing music to see results.")
-                    .font(.caption)
+                    .font(.smallText)
                     .foregroundColor(.secondary.opacity(0.7))
                     .multilineTextAlignment(.center)
             }
