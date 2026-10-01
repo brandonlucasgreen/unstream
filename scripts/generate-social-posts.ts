@@ -144,8 +144,30 @@ type DayKind = 'indie' | 'record-math' | 'question' | 'maker' | 'feature';
 /** Posts about one subject. Two or more go to Buffer as a single content item. */
 interface PostGroup {
   title: string;
+  tag: TagKey;
   posts: SocialPost[];
 }
+
+// One Buffer tag per kind of post, so Buffer's analytics can compare them. Prefixed because the
+// organization's tags are shared with Brandon's other channels. ensureTags creates any that are
+// missing, so renaming one here starts a new tag rather than renaming the old.
+const TAGS = {
+  indie: { name: 'unstream: indie spotlight', color: '#FF702C' },
+  'record-math': { name: 'unstream: record math', color: '#FADE2A' },
+  conversation: { name: 'unstream: conversation', color: '#00C8CF' },
+  mission: { name: 'unstream: mission', color: '#D7AAFF' },
+  feature: { name: 'unstream: feature', color: '#CFE7A6' },
+  roundup: { name: 'unstream: roundup', color: '#F3AFB9' },
+} as const;
+type TagKey = keyof typeof TAGS;
+
+const TAG_FOR_KIND: Record<DayKind, TagKey> = {
+  indie: 'indie',
+  'record-math': 'record-math',
+  question: 'conversation',
+  maker: 'mission',
+  feature: 'feature',
+};
 
 interface DayDraft {
   day: number; // 1-7 (Mon-Sun)
@@ -734,8 +756,53 @@ function lengthProblem(post: SocialPost): string | null {
   return post.text.length > limit ? `${post.text.length}/${limit} characters` : null;
 }
 
+/**
+ * Each tag's Buffer id, creating any tag the organization doesn't have yet. Run before anything
+ * is generated: a failure here should stop the run while there is still nothing to roll back.
+ */
+async function ensureTags(organizationId: string): Promise<Record<TagKey, string>> {
+  const existing = new Map<string, string>();
+  let after: string | null = null;
+  do {
+    const result = await bufferGraphQL(`
+      query Tags($organizationId: OrganizationId!, $after: String) {
+        tagsV2(input: { organizationId: $organizationId }, first: 100, after: $after) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { id name } }
+        }
+      }
+    `, { organizationId, after });
+    const page = result.data.tagsV2;
+    for (const edge of page.edges) existing.set(edge.node.name, edge.node.id);
+    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
+  } while (after);
+
+  const ids = {} as Record<TagKey, string>;
+  for (const key of Object.keys(TAGS) as TagKey[]) {
+    const { name, color } = TAGS[key];
+    const found = existing.get(name);
+    if (found) {
+      ids[key] = found;
+      continue;
+    }
+    const result = await bufferGraphQL(`
+      mutation CreateTag($input: CreateTagInput!) {
+        createTag(input: $input) {
+          ... on TagActionSuccess { tag { id } }
+          ... on MutationError { message }
+        }
+      }
+    `, { input: { organizationId, tag: { name, color } } });
+    const created = result.data.createTag;
+    if (!created?.tag) throw new Error(`Couldn't create the Buffer tag "${name}": ${created?.message ?? 'unknown error'}`);
+    console.log(`  Created Buffer tag "${name}"`);
+    ids[key] = created.tag.id;
+  }
+  return ids;
+}
+
 /** Buffer's CreatePostInput for one post. createPost and createContentItem both take it. */
-function postInput(post: SocialPost, channelId: string, date: string, saveToDraft: boolean): Record<string, unknown> {
+function postInput(post: SocialPost, channelId: string, date: string, saveToDraft: boolean, tagId: string): Record<string, unknown> {
   const input: Record<string, unknown> = {
     channelId,
     text: post.text,
@@ -743,6 +810,9 @@ function postInput(post: SocialPost, channelId: string, date: string, saveToDraf
     schedulingType: 'automatic',
     mode: 'customScheduled',
     saveToDraft,
+    // On every post, not only the content item: Buffer doesn't pass an item's tags down to its
+    // posts, and analytics filter on the posts' own tags.
+    tagIds: [tagId],
     assets: post.images.map(image => ({ image: { url: image.url, metadata: { altText: image.altText } } })),
   };
   if (post.platform === 'threads') input.metadata = { threads: { topic: 'Music Threads' } };
@@ -790,6 +860,7 @@ async function createBufferContentItem(
   organizationId: string,
   title: string,
   targetDate: string,
+  tagId: string,
   posts: Record<string, unknown>[]
 ): Promise<BufferResult> {
   const result = await bufferGraphQL(`
@@ -815,7 +886,7 @@ async function createBufferContentItem(
         }
       }
     }
-  `, { input: { organizationId, title, targetDate, posts } });
+  `, { input: { organizationId, title, targetDate, tagIds: [tagId], posts } });
 
   const data = result.data?.createContentItem;
   const created = data?.content?.body?.posts ?? [];
@@ -900,6 +971,7 @@ async function main() {
       process.exit(1);
     }
   }
+  const tagIds = doSchedule && orgId ? await ensureTags(orgId) : null;
 
   const { week, dates } = getWeekDates(weekArg);
   console.log(`\nGenerating posts for week ${week} (${dates[0]} → ${dates[6]})\n`);
@@ -1038,7 +1110,7 @@ async function main() {
     const groups: PostGroup[] = [];
     if (posts.length > 0) {
       const about = artistName ?? subject;
-      groups.push({ title: `${KIND_LABELS[kind]}${about ? `: ${about}` : ''}`, posts });
+      groups.push({ title: `${KIND_LABELS[kind]}${about ? `: ${about}` : ''}`, tag: TAG_FOR_KIND[kind], posts });
     } else {
       console.log(`  Day ${day} (${date}): no ${KIND_LABELS[kind].toLowerCase()} available`);
     }
@@ -1048,12 +1120,13 @@ async function main() {
     if (day === 2) {
       groups.push({
         title: 'LinkedIn weekday post',
+        tag: 'mission',
         posts: [linkedinWeekdayPost(weekNum, { bandcampFridayThisWeek: BANDCAMP_FRIDAY_DATES.includes(dates[4]) })],
       });
     }
     if (day === 4) {
       const roundup = linkedinRoundup(weekIndie);
-      if (roundup) groups.push({ title: 'LinkedIn roundup', posts: [roundup] });
+      if (roundup) groups.push({ title: 'LinkedIn roundup', tag: 'roundup', posts: [roundup] });
       else console.log(`  · Thursday: fewer than two indie artists this week — no LinkedIn roundup`);
     }
 
@@ -1079,7 +1152,7 @@ async function main() {
   console.log(`  - drafts.json (machine-readable)`);
 
   // --- Schedule to Buffer ---
-  if (doSchedule && channelIdsStr && orgId) {
+  if (doSchedule && channelIdsStr && orgId && tagIds) {
     const [threadsId, blueskyId, instagramId, linkedinId] = channelIdsStr.split(',').map(id => id.trim());
     const channels: Record<Platform, string | undefined> = { threads: threadsId, bluesky: blueskyId, linkedin: linkedinId };
     const saveToDraft = !doPublish;
@@ -1114,12 +1187,12 @@ async function main() {
             console.error(`    ✗ ${PLATFORM_LABELS[post.platform]}: too long to send (${problem})`);
             continue;
           }
-          inputs.push(postInput(post, channelId, draft.date, saveToDraft));
+          inputs.push(postInput(post, channelId, draft.date, saveToDraft, tagIds[group.tag]));
         }
         if (inputs.length === 0) continue;
 
         const result = inputs.length > 1
-          ? await createBufferContentItem(orgId, group.title, `${draft.date}T${POST_TIME_UTC.threads}:00Z`, inputs)
+          ? await createBufferContentItem(orgId, group.title, `${draft.date}T${POST_TIME_UTC.threads}:00Z`, tagIds[group.tag], inputs)
           : await createBufferPost(inputs[0]);
 
         for (const post of result.created) {
