@@ -24,6 +24,7 @@ import {
   type ReleaseStatus,
   type ReleaseType,
 } from './release-utils';
+import { normalizeForComparison } from './search-utils';
 
 /** A release ready to be written, with its one known source. */
 export interface IngestedRelease {
@@ -595,8 +596,15 @@ export interface FaircampReleaseCandidate {
   url: string;
 }
 
+export interface FaircampHomeLinks {
+  /** This artist's releases on the page, in page order, capped at FAIRCAMP_MAX_CANDIDATES. */
+  releases: FaircampReleaseCandidate[];
+  /** Release blocks skipped because the page credits them to someone else. */
+  creditedToOthers: number;
+}
+
 /**
- * Find candidate release links on a Faircamp artist homepage.
+ * Find this artist's release links on a Faircamp homepage.
  *
  * Faircamp's generator wraps each release in `<div class="release">`, and on a site hosting more
  * than one artist it puts that release's credited artists in a nested `<div class="release_artists">`
@@ -611,43 +619,150 @@ export interface FaircampReleaseCandidate {
  * its title) and both are accepted, deduped by slug. The fallback for a page with no release
  * blocks at all keeps the old scan, minus artist credits — a markup change should cost coverage,
  * not correctness.
+ *
+ * **Only releases credited to `artistName` are returned.** Faircamp's webring lists every credit
+ * on a site as an artist, and search gave each of those its own artist row linked to the same
+ * site root — so cataloguing that link used to take the *whole site* for each of them. On a label
+ * site that is the label's entire catalogue, filed under whichever row was catalogued first:
+ * measured 2026-10-01, `control freak studio` held all 26 releases on music.control.org, of
+ * which the page credits it with 4. The page says whose each release is, so it is read here,
+ * before the cap, so a label's later releases aren't crowded out by other artists' earlier ones.
+ * See `isFaircampReleaseBy` for the rule.
  */
-export function ingestFaircampHomeLinks(html: string, pageUrl: string): FaircampReleaseCandidate[] {
+export function ingestFaircampHomeLinks(html: string, pageUrl: string, artistName: string): FaircampHomeLinks {
   const out: FaircampReleaseCandidate[] = [];
+  let creditedToOthers = 0;
   const seen = new Set<string>();
 
   let base: URL;
   try {
     base = new URL(pageUrl);
   } catch {
-    return out;
+    return { releases: out, creditedToOthers };
   }
 
   const root = parse(html);
+  const siteName = root.querySelector('meta[property="og:site_name"]')?.getAttribute('content') ?? null;
   const blocks = root.querySelectorAll('div.release');
-  const anchors = (blocks.length > 0 ? blocks.flatMap(b => b.querySelectorAll('a[href]')) : root.querySelectorAll('a[href]'))
-    .filter(a => !isArtistCredit(a));
+  // With no release blocks there are no credits to read either — the fallback scan, as before.
+  let groups: { anchors: HTMLElement[]; credits: FaircampCredits | null }[] = blocks.length > 0
+    ? blocks.map(block => ({ anchors: block.querySelectorAll('a[href]'), credits: faircampCredits(block) }))
+    : [{ anchors: root.querySelectorAll('a[href]'), credits: null }];
 
-  for (const anchor of anchors) {
-    const raw = anchor.getAttribute('href') ?? '';
-    if (!/^[a-z0-9][a-z0-9-]*\/$/i.test(raw)) continue;
+  // A site that credits only one artist is a single-artist site whatever that artist is called
+  // here, and the link to it is the evidence: desolationpark.se credits all 7 releases to
+  // "Desolation Park", while the row linking it is named by its Bandwagon handle. Filtering by
+  // name there would cost that row its whole catalogue and protect nobody.
+  if (creditedArtistCount(groups.map(g => g.credits), siteName) <= 1) {
+    groups = groups.map(g => ({ ...g, credits: null }));
+  }
 
-    const slug = raw.slice(0, -1).toLowerCase();
-    if (FAIRCAMP_NON_RELEASE_SLUGS.has(slug) || seen.has(slug)) continue;
-    seen.add(slug);
-
-    let url: string;
-    try {
-      url = new URL(raw, base).toString();
-    } catch {
+  for (const group of groups) {
+    if (out.length >= FAIRCAMP_MAX_CANDIDATES) break;
+    if (!isFaircampReleaseBy(group.credits?.names ?? null, artistName, siteName)) {
+      creditedToOthers++;
       continue;
     }
 
-    out.push({ slug, url });
-    if (out.length >= FAIRCAMP_MAX_CANDIDATES) break;
+    for (const anchor of group.anchors.filter(a => !isArtistCredit(a))) {
+      const raw = anchor.getAttribute('href') ?? '';
+      if (!/^[a-z0-9][a-z0-9-]*\/$/i.test(raw)) continue;
+
+      const slug = raw.slice(0, -1).toLowerCase();
+      if (FAIRCAMP_NON_RELEASE_SLUGS.has(slug) || seen.has(slug)) continue;
+      seen.add(slug);
+
+      let url: string;
+      try {
+        url = new URL(raw, base).toString();
+      } catch {
+        continue;
+      }
+
+      out.push({ slug, url });
+      if (out.length >= FAIRCAMP_MAX_CANDIDATES) break;
+    }
   }
 
-  return out;
+  return { releases: out, creditedToOthers };
+}
+
+interface FaircampCredits {
+  /** Every name the block might mean — see faircampCredits. Empty when the credit div is. */
+  names: string[];
+  /** The credit line as written, "Tripswyche, Gilli Smyth" — one release's credit, not a name. */
+  whole: string;
+}
+
+/**
+ * What a release block credits, or null when the block has no credit markup at all.
+ *
+ * Faircamp writes credits as links joined by ", " (`<a>Tripswyche</a>, <a>Gilli Smyth</a>`), and
+ * occasionally as bare text ("Various Artists"). Each link's text is a name; so is each
+ * comma-separated piece of the leftover text, and so is the whole text — the last one so a
+ * text-only name that itself contains a comma ("Earth, Wind & Fire") can still match.
+ */
+function faircampCredits(block: HTMLElement): FaircampCredits | null {
+  const div = block.querySelector('.release_artists');
+  if (!div) return null;
+
+  const whole = decodeHtmlEntities(div.text).trim();
+  const linked = div.querySelectorAll('a').map(a => a.text);
+  const unlinked = div.childNodes
+    .filter(node => node.nodeType === 3)
+    .flatMap(node => node.text.split(','));
+  const names = [...linked, ...unlinked, whole]
+    .map(name => decodeHtmlEntities(name).trim())
+    .filter(name => name.length > 0);
+  return { names, whole };
+}
+
+/**
+ * How many distinct credit lines a page has across its releases. An empty credit counts as the
+ * site's own artist, the same reading `isFaircampReleaseBy` gives it. It only has to tell one
+ * artist from several, so "Tripswyche, Gilli Smyth" counting as one line is fine.
+ */
+function creditedArtistCount(creditLists: (FaircampCredits | null)[], siteName: string | null): number {
+  const keys = new Set<string>();
+  for (const credits of creditLists) {
+    if (credits === null) continue;
+    const line = credits.whole || siteName || '';
+    keys.add(normalizeForComparison(line) || line.toLowerCase());
+  }
+  return keys.size;
+}
+
+/**
+ * Whether a release on a Faircamp site belongs to the artist being catalogued.
+ *
+ * - **No credit markup (`null`)**: the page doesn't say, which is every release on a site that
+ *   isn't using credits. Kept — that is the single-artist case, and what ingest always did.
+ * - **Empty credits**: Faircamp leaves the credit div empty for the site's own artist (21 releases
+ *   on music.bedlamsteps.uk: 10 empty, 4 "Bedlam Steps", the rest guests). Kept only when the
+ *   artist *is* the site, by `og:site_name`.
+ * - **Credits**: kept only when one of them is this artist's name. Exact, not "contains":
+ *   "Shannon Curtis vs control.org" is a credit Unstream holds as its own artist row, and a
+ *   listing can belong to only one release, so the collaboration goes to the row named for it
+ *   rather than to whichever of its parts is catalogued first. Under-attribute, never
+ *   over-attribute — a release page asserts who made the record.
+ */
+function isFaircampReleaseBy(credits: string[] | null, artistName: string, siteName: string | null): boolean {
+  if (credits === null) return true;
+  if (credits.length === 0) return siteName !== null && sameArtistName(siteName, artistName);
+  return credits.some(credit => sameArtistName(credit, artistName));
+}
+
+/**
+ * Name equality the way the rest of search compares artists, with one guard: a name with no Latin
+ * letters or digits ("なきそ") normalizes to '' and would equal every other such name, so those
+ * are compared as written instead.
+ */
+function sameArtistName(a: string, b: string): boolean {
+  const keyA = normalizeForComparison(decodeHtmlEntities(a));
+  const keyB = normalizeForComparison(decodeHtmlEntities(b));
+  if (keyA && keyB) return keyA === keyB;
+  const asWritten = (s: string) => decodeHtmlEntities(s).trim().toLowerCase().replace(/\s+/g, ' ');
+  return asWritten(a) === asWritten(b);
 }
 
 /** Is this link one of a release's credited artists rather than the release itself? */
