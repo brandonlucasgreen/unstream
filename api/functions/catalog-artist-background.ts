@@ -466,7 +466,7 @@ async function catalogArtist(
     }
     await catalogMusicBrainz(artistId, artist.name);
     if (artist.faircampUrl) {
-      totalFound += await catalogFaircamp(artistId, artist.faircampUrl, faircampBudget);
+      totalFound += await catalogFaircamp(artistId, artist.name, artist.faircampUrl, faircampBudget);
     }
     if (artist.jamcoopUrl) {
       const { found, detailed } = await catalogJamcoop(artistId, artist.jamcoopUrl, jamcoopBudget);
@@ -699,7 +699,12 @@ async function catalogMusicBrainz(artistId: string, artistName: string): Promise
  * Never throws — an unreachable or oddly-themed Faircamp instance is worth logging, not worth
  * failing an artist whose Bandcamp pass may have already succeeded this run.
  */
-async function catalogFaircamp(artistId: string, faircampUrl: string, budget: FaircampBudget): Promise<number> {
+async function catalogFaircamp(
+  artistId: string,
+  artistName: string,
+  faircampUrl: string,
+  budget: FaircampBudget
+): Promise<number> {
   try {
     if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) return 0;
     budget.fetchesLeft--;
@@ -711,7 +716,12 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
     const homeHtml = await homeResponse.text();
     await scanForDiscoveredLinks(artistId, homeHtml, landedUrl);
 
-    const candidates = ingestFaircampHomeLinks(homeHtml, landedUrl).slice(0, MAX_FAIRCAMP_RELEASES_PER_ARTIST);
+    const home = ingestFaircampHomeLinks(homeHtml, landedUrl, artistName);
+    if (home.creditedToOthers > 0) {
+      // A label or shared site: its other artists' releases are theirs, not this row's.
+      console.log(`[catalog] faircamp skipped ${home.creditedToOthers} release(s) credited to other artists on ${safeHostname(landedUrl)}`);
+    }
+    const candidates = home.releases.slice(0, MAX_FAIRCAMP_RELEASES_PER_ARTIST);
     if (candidates.length === 0) return 0;
 
     const takenSlugs = new Set<string>();
