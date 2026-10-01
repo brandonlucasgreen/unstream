@@ -15,6 +15,10 @@
 -- key the server holds. Production (live key) never sees a test row, and a test account can't
 -- overwrite an artist's live one because the mode is part of the key.
 --
+-- Shipped ahead of the code, in its own PR, so the tips endpoints can be tested locally (`npm run dev`
+-- points at production Supabase) without applying a migration from an unmerged branch — which would
+-- block every later migration on main. Nothing reads these tables until the tips code merges.
+--
 -- Phase 3 (the tab: saved cards, recurring support, the scheduled charge run) adds its own tables
 -- and the scheduled-charge columns on tip_payments in a later migration; none of it is created here.
 
