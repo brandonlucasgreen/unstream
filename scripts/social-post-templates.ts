@@ -156,8 +156,60 @@ export function fullSizeImageUrl(url: string): string {
   return url.replace(/^(https:\/\/f\d\.bcbits\.com\/img\/\w+)_\d+\.(jpg|png)$/, '$1_10.$2');
 }
 
-function artistImages(artist: Pick<ArtistContext, 'name' | 'imageUrl'>): PostImage[] {
-  return artist.imageUrl ? [{ url: fullSizeImageUrl(artist.imageUrl), altText: `Photo of ${artist.name}` }] : [];
+/**
+ * The artist's photo for one platform, or none. Threads and LinkedIn document JPEG and PNG (and
+ * GIF on LinkedIn) as their image formats, not WebP, which is how Mirlo serves its avatars.
+ * Buffer accepts a WebP when it schedules a post, but that says nothing about whether the
+ * network takes it at publish time, so those two get no photo rather than risk the post. Bluesky
+ * takes WebP.
+ */
+function artistImages(artist: Pick<ArtistContext, 'name' | 'imageUrl'>, platform: Platform): PostImage[] {
+  if (!artist.imageUrl) return [];
+  if (platform !== 'bluesky' && /\.webp($|\?)/i.test(artist.imageUrl)) return [];
+  return [{ url: fullSizeImageUrl(artist.imageUrl), altText: `Photo of ${artist.name}` }];
+}
+
+// Letters NFKD doesn't split into a base letter and an accent, spelled the way subdomains do
+// ("trentemoller" for Trentemøller).
+const UNDECOMPOSED_LETTERS: Record<string, string> = { ø: 'o', æ: 'ae', œ: 'oe', ß: 'ss', ł: 'l', đ: 'd' };
+
+function comparableName(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[øæœßłđ]/g, letter => UNDECOMPOSED_LETTERS[letter])
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Whether a Bandcamp address plausibly belongs to the artist it's filed under: the subdomain is
+ * their name, give or take "the", "music", "official" or "band" ("melvinsofficial",
+ * "thelemonheads").
+ *
+ * The prominent artists' Bandcamp links were matched by name when the artist files were
+ * generated, and 161 of 791 point at someone else's page: "venomnoise" for Venom, "emperordnb"
+ * for Emperor, "alanjackson1" for Alan Jackson. A post about one of those tells people that a
+ * famous artist keeps a share of sales from a record they didn't make. This rejects some real
+ * pages ("tmbg" for They Might Be Giants) to keep every false one out — a missing post costs
+ * nothing, and the pool has 630 left for one post a week.
+ */
+export function bandcampMatchesArtist(name: string, url: string): boolean {
+  const match = url.match(/^https:\/\/([a-z0-9-]+)\.bandcamp\.com\/?$/i);
+  if (!match) return false;
+  const subdomain = match[1].toLowerCase().replace(/-/g, '');
+  const full = comparableName(name);
+  const bare = full.replace(/^the/, '');
+  if (!bare) return false;
+  const stems = [full, bare, `the${bare}`];
+  return stems.some(stem =>
+    subdomain === stem
+    || subdomain === `${stem}music`
+    || subdomain === `${stem}official`
+    || subdomain === `${stem}band`
+    || subdomain === `official${stem}`
+  );
 }
 
 /**
@@ -207,7 +259,6 @@ export function indieSpotlight(artist: ArtistContext, opts: { bandcampFriday: bo
   if (!p) return null;
 
   const from = artist.location ? `, from ${artist.location}` : '';
-  const images = artistImages(artist);
   const onBandcampFriday = opts.bandcampFriday && p.id === 'bandcamp';
 
   const threads = fit('threads', [
@@ -224,8 +275,8 @@ export function indieSpotlight(artist: ArtistContext, opts: { bandcampFriday: bo
   ]);
 
   return [
-    { platform: 'threads', text: threads, images },
-    { platform: 'bluesky', text: bluesky, images },
+    { platform: 'threads', text: threads, images: artistImages(artist, 'threads') },
+    { platform: 'bluesky', text: bluesky, images: artistImages(artist, 'bluesky') },
   ];
 }
 
@@ -243,7 +294,6 @@ export function recordMath(artist: ArtistContext, opts: { bandcampFridayTomorrow
   if (!p || !p.payout || !math) return null;
 
   const album = p.release && p.release.type.toLowerCase() === 'album' ? p.release.title : null;
-  const images = artistImages(artist);
 
   if (opts.bandcampFridayTomorrow && p.id === 'bandcamp') {
     const what = album ?? `${artist.name}'s music`;
@@ -251,7 +301,7 @@ export function recordMath(artist: ArtistContext, opts: { bandcampFridayTomorrow
       {
         platform: 'threads',
         text: `Tomorrow is Bandcamp Friday. Bandcamp waives its cut for the day, so buying ${what} there puts nearly everything you pay in ${artist.name}'s pocket.\n\nAny other day it's ${p.payout}. Streaming pays roughly $0.003 a play.\n\n${artist.url}`,
-        images,
+        images: artistImages(artist, 'threads'),
       },
       {
         platform: 'bluesky',
@@ -259,7 +309,7 @@ export function recordMath(artist: ArtistContext, opts: { bandcampFridayTomorrow
           `Tomorrow is Bandcamp Friday: Bandcamp waives its cut, so buying ${what} there puts nearly everything you pay in ${artist.name}'s pocket.\n\n${artist.url}\n\n#BandcampFriday #musicsky`,
           `Tomorrow is Bandcamp Friday: Bandcamp waives its cut, so buying ${what} there puts nearly everything you pay in ${artist.name}'s pocket.\n\n${artist.url}`,
         ]),
-        images,
+        images: artistImages(artist, 'bluesky'),
       },
     ];
   }
@@ -272,7 +322,7 @@ export function recordMath(artist: ArtistContext, opts: { bandcampFridayTomorrow
     {
       platform: 'threads',
       text: `${buying}\n\nOn a $10 album that's at least ${math.take}. At roughly $0.003 a stream, that's around ${math.streams} streams.\n\n${artist.url}`,
-      images,
+      images: artistImages(artist, 'threads'),
     },
     {
       platform: 'bluesky',
@@ -281,7 +331,7 @@ export function recordMath(artist: ArtistContext, opts: { bandcampFridayTomorrow
         `${buying} On a $10 album that's at least ${math.take}, or around ${math.streams} streams.\n\n${artist.url}`,
         `${buying}\n\n${artist.url}`,
       ]),
-      images,
+      images: artistImages(artist, 'bluesky'),
     },
   ];
 }
@@ -461,7 +511,7 @@ export function linkedinRoundup(artists: ArtistContext[]): SocialPost | null {
   return {
     platform: 'linkedin',
     text: `${COUNT_WORDS[listed.length]} independent artists featured on Unstream this week, and where you can buy their music directly:\n\n${lines.join('\n')}\n\nFor scale: a $10 album on Bandcamp pays an artist at least ${take}. Earning that from streaming takes roughly ${streams} plays.\n\n#IndependentMusic`,
-    images: listed.flatMap(artistImages),
+    images: listed.flatMap(a => artistImages(a, 'linkedin')),
     firstComment: `Every place to support them directly:\n${listed.map(a => `${a.name}: ${a.url}`).join('\n')}`,
   };
 }

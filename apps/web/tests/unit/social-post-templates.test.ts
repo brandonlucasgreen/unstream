@@ -6,6 +6,7 @@ import { join } from 'path';
 // publishes on Unstream's behalf every day, so it's tested with the rest.
 import {
   CHARACTER_LIMITS,
+  bandcampMatchesArtist,
   featurePost,
   fullSizeImageUrl,
   indieSpotlight,
@@ -78,6 +79,37 @@ describe('fullSizeImageUrl', () => {
   it('leaves other hosts alone', () => {
     const url = 'https://example.supabase.co/storage/v1/object/public/artist-images/x_23.jpg';
     expect(fullSizeImageUrl(url)).toBe(url);
+  });
+});
+
+describe('bandcampMatchesArtist', () => {
+  it("accepts the artist's own subdomain, give or take the/music/official/band", () => {
+    expect(bandcampMatchesArtist('Death Cab for Cutie', 'https://deathcabforcutie.bandcamp.com')).toBe(true);
+    expect(bandcampMatchesArtist('Melvins', 'https://melvinsofficial.bandcamp.com')).toBe(true);
+    expect(bandcampMatchesArtist('The Lemonheads', 'https://thelemonheadsmusic.bandcamp.com')).toBe(true);
+    expect(bandcampMatchesArtist('The National', 'https://thenational.bandcamp.com')).toBe(true);
+    expect(bandcampMatchesArtist('Trentemøller', 'https://trentemoller.bandcamp.com')).toBe(true);
+  });
+
+  it("rejects another act's page filed under a famous name", () => {
+    expect(bandcampMatchesArtist('Venom', 'https://venomnoise.bandcamp.com')).toBe(false);
+    expect(bandcampMatchesArtist('EMPEROR', 'https://emperordnb.bandcamp.com')).toBe(false);
+    expect(bandcampMatchesArtist('Alan Jackson', 'https://alanjackson1.bandcamp.com')).toBe(false);
+  });
+
+  it('rejects anything that is not a bare Bandcamp subdomain', () => {
+    expect(bandcampMatchesArtist('Venom', 'https://bandcamp.com/search?q=venom')).toBe(false);
+    expect(bandcampMatchesArtist('Venom', 'https://venom.bandcamp.com/album/x')).toBe(false);
+  });
+
+  // The generated files are where the bad links live, so check the two known ones there.
+  it('rejects the mismatched links in the real artist files', () => {
+    for (const slug of ['venom', 'emperor']) {
+      const data = JSON.parse(readFileSync(join(__dirname, `../../../../data/artists/${slug}.json`), 'utf-8'));
+      const artist = Array.isArray(data) ? data[0] : data;
+      const link = artist.platforms.find((p: { sourceId: string }) => p.sourceId === 'bandcamp');
+      expect(bandcampMatchesArtist(artist.name, link.url)).toBe(false);
+    }
   });
 });
 
@@ -163,6 +195,13 @@ describe('indieSpotlight', () => {
 
   it('returns nothing for an artist with nowhere to buy their music', () => {
     expect(indieSpotlight(artist({ platform: null }), { bandcampFriday: false })).toBeNull();
+  });
+
+  it('leaves a WebP photo off Threads but keeps it on Bluesky', () => {
+    const webp = artist({ imageUrl: 'https://cdn.mirlo.space/file/artist-avatars/abc-x600.webp' });
+    const posts = indieSpotlight(webp, { bandcampFriday: false });
+    expect(on(posts, 'threads').images).toEqual([]);
+    expect(on(posts, 'bluesky').images).toHaveLength(1);
   });
 
   it('sends a full-size image with alt text', () => {

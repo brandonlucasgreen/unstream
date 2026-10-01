@@ -577,6 +577,17 @@ Mirlo was 93% in posts against 86-90% on the site, Faircamp 100% against 90-97%.
 the registry. The purchase math uses the low end of a range, so a post never claims more for the
 artist than the site does.
 
+### Prominent artists' Bandcamp links that belong to someone else
+
+The generated artist files (`data/artists/`) matched each prominent artist's Bandcamp page by
+name. The 2026-10-01 regeneration scheduled a post saying Venom, the metal band, keeps 80-85% of
+sales of "empyrean ep" from `venomnoise.bandcamp.com`, which is another act. Measured across the
+791 files: 159 Bandcamp subdomains don't match the artist's name, allowing for "the", "music",
+"official" and "band". Some are real ("tmbg" for They Might Be Giants), many are not
+("emperordnb" for Emperor, "alanjackson1", "nemo1", "sonia666"). Emperor was featured in an
+earlier week. `bandcampMatchesArtist` now keeps only the 632 that match, rejecting some real
+pages to keep false claims out; the files themselves still carry the bad links.
+
 ### Silent failures
 
 On 2026-09-28 Buffer rejected a Bluesky post for length, and the run still reported success.

@@ -47,6 +47,7 @@ import { PLATFORMS } from '../api/shared/platform-registry';
 import {
   CHARACTER_LIMITS,
   UNSTREAM_BASE,
+  bandcampMatchesArtist,
   featurePost,
   indieSpotlight,
   isQuestionWeek,
@@ -1017,7 +1018,14 @@ async function main() {
         .filter(a => {
           if (excluded.slugs.has(a.slug)) return false;
           const data = loadArtistData(a.slug);
-          return !!data && sellingPlatform(data.platforms, a.name, []) !== null;
+          if (!data) return false;
+          const platform = sellingPlatform(data.platforms, a.name, []);
+          if (!platform) return false;
+          // These links were matched by name, and some are another act's page entirely
+          // ("venomnoise" for Venom); bandcampMatchesArtist says why a strict match is the price.
+          if (platform.id !== 'bandcamp') return true;
+          const link = data.platforms.find(p => p.sourceId === 'bandcamp' && !isSearchUrl(p.url));
+          return !!link && bandcampMatchesArtist(a.name, link.url);
         })
         // Retired slugs (accent re-slugs, merges) post at their canonical URL. The manifest slug
         // is kept alongside: the generated data files are keyed by it, so platform lookup still
@@ -1032,7 +1040,7 @@ async function main() {
         'rather than risk featuring a deceased or non-music artist.'
     );
   }
-  console.log(`  ${prominentPool.length} prominent artists with a platform that sells their music\n`);
+  console.log(`  ${prominentPool.length} prominent artists with a platform that sells their music (and, on Bandcamp, a page that's theirs)\n`);
 
   const weekDir = join(SOCIAL_DIR, week);
   if (!existsSync(weekDir)) mkdirSync(weekDir, { recursive: true });
