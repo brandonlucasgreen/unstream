@@ -104,6 +104,9 @@
     "functions/desktop-appcast.ts",
     "functions/desktop-version.ts",
     "functions/__tests__/desktop-appcast.test.ts",
-    "functions/analytics-dashboard.ts"
+    "functions/analytics-dashboard.ts",
+    "functions/social-card.ts",
+    "functions/__tests__/social-card.test.ts",
+    "functions/__tests__/social-card-slides.test.ts"
   ]
 }

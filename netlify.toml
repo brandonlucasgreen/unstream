@@ -47,6 +47,13 @@
   framework = "#custom"
   autoLaunch = false
 
+# The Instagram card renderer reads two kinds of file at runtime, which the bundler can't see
+# through an import: its fonts, and resvg's WebAssembly binary. External, the resvg package ships
+# whole (wasm included) instead of being bundled into JS that can't find its .wasm.
+[functions."social-card"]
+  included_files = ["api/functions/social-card-fonts/*.ttf"]
+  external_node_modules = ["@resvg/resvg-wasm"]
+
 # The staleness probe in buildFreshness.ts compares this file's id against the one baked into
 # the running bundle. A cached response would echo the tab's own build back to it forever, so
 # the banner would never appear. `no-store` on the request isn't enough on its own — the CDN
@@ -243,6 +250,13 @@
 [[redirects]]
   from = "/api/collection/art/*"
   to = "/.netlify/functions/collection-art"
+  status = 200
+
+# Instagram carousel slides for the weekly indie spotlights, drawn from the artist's data on
+# request — see api/functions/social-card.ts. Buffer fetches these when a post publishes.
+[[redirects]]
+  from = "/api/social-card/*"
+  to = "/.netlify/functions/social-card"
   status = 200
 
 # Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the

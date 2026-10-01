@@ -9,10 +9,10 @@
  *   Sat, one week in three   a plain question instead of the spotlight
  *   Sun                      a maker post about Unstream, or a shipped feature
  * The Unstream LinkedIn page gets two posts: Tue (economics) and Thu (the week's artists).
+ * Instagram gets the indie spotlights only, as carousels of cards Unstream draws itself
+ * (/api/social-card, docs/specs/instagram-original-posts-spec.md), in the same Buffer content
+ * item as that day's Threads and Bluesky posts.
  * docs/engineering-history.md ("Social posts") has the measurements behind that shape.
- *
- * Instagram is paused until its posts can be original images: docs/specs/instagram-original-posts-spec.md.
- * Its slot in BUFFER_CHANNEL_IDS is still parsed, so the secret's format doesn't change, but nothing is sent.
  *
  * Output:
  *   data/social-posts/{week}/drafts.json   - All drafts for the week
@@ -44,6 +44,7 @@ import { fileURLToPath } from 'url';
 import { isExcludedArtistSlug } from '../api/lib/excluded-artists';
 import { BANDCAMP_FRIDAY_DATES } from '../api/shared/bandcamp-friday';
 import { PLATFORMS } from '../api/shared/platform-registry';
+import { isSearchUrl, pickCatalogueRelease, type CatalogueRelease } from '../api/shared/social-card';
 import {
   CHARACTER_LIMITS,
   UNSTREAM_BASE,
@@ -54,11 +55,9 @@ import {
   linkedinRoundup,
   linkedinWeekdayPost,
   makerPost,
-  pickCatalogueRelease,
   questionPost,
   recordMath,
   type ArtistContext,
-  type CatalogueRelease,
   type Platform,
   type SellingPlatform,
   type ShippedFeature,
@@ -138,6 +137,7 @@ interface VerifiedArtist {
 interface SocialHandles {
   threads: string | null;   // without the @, e.g. "tommorello"
   bluesky: string | null;   // e.g. "tommorelloofficial.bsky.social"
+  instagram: string | null; // without the @
 }
 
 type DayKind = 'indie' | 'record-math' | 'question' | 'maker' | 'feature';
@@ -191,23 +191,6 @@ interface History {
 const SELLING_PLATFORMS = new Set(['bandcamp', 'faircamp', 'mirlo', 'qobuz', 'ampwall', 'bandwagon', 'jamcoop']);
 
 /**
- * A link that searches a platform for the artist rather than pointing at them — the generated
- * artist files carry some (Ampwall's explore page, DuckDuckGo site: searches). It proves nothing
- * about the artist being there, so a post must not say their music is.
- */
-function isSearchUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname.includes('duckduckgo')
-      || /\/(search|explore)/.test(parsed.pathname)
-      || parsed.searchParams.has('q')
-      || parsed.searchParams.has('query');
-  } catch {
-    return true;
-  }
-}
-
-/**
  * The artist's first selling link in display order, with its registry payout and a record of
  * theirs that's there: from their release catalogue when there is one (verified artists), else
  * the link's own latestRelease (the generated files the prominent artists come from).
@@ -222,7 +205,7 @@ function sellingPlatform(
   const meta = PLATFORMS[link.sourceId];
   const linkTitle = link.latestRelease ? cleanReleaseTitle(link.latestRelease.title, artistName) : null;
   const linkRelease = linkTitle && link.latestRelease
-    ? { title: linkTitle, type: link.latestRelease.type, latest: true }
+    ? { title: linkTitle, type: link.latestRelease.type, latest: true, slug: null, artworkUrl: null }
     : null;
   return {
     id: link.sourceId,
@@ -235,8 +218,9 @@ function sellingPlatform(
 // --- Social handle extraction ---
 
 /**
- * Handles (without the @) from the artist's own Threads and Bluesky links. Instagram handles are
- * deliberately not used on Threads; see threadsName in social-post-templates.ts.
+ * Handles (without the @) from the artist's own social links. Each is used only on its own
+ * network: an Instagram handle on Threads lost its @ when Threads couldn't resolve it (see
+ * threadsName in social-post-templates.ts).
  */
 function extractSocialHandles(platforms: ArtistPlatform[]): SocialHandles {
   const findUrl = (sourceId: string) =>
@@ -245,7 +229,21 @@ function extractSocialHandles(platforms: ArtistPlatform[]): SocialHandles {
   return {
     threads: parseThreadsHandle(findUrl('threads')),
     bluesky: parseBlueskyHandle(findUrl('bluesky')),
+    instagram: parseInstagramHandle(findUrl('instagram')),
   };
+}
+
+/** "kidlightbulbs" from instagram.com/kidlightbulbs/, ignoring share parameters (?igsh=). */
+function parseInstagramHandle(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== 'instagram.com' && !parsed.hostname.endsWith('.instagram.com')) return null;
+    const segment = parsed.pathname.replace(/^\/|\/$/g, '').split('/')[0].replace(/^@/, '');
+    // Post, reel and story links name no account. Instagram handles are letters, digits, . and _.
+    if (['p', 'reel', 'reels', 'explore', 'stories', 'tv'].includes(segment)) return null;
+    return /^[A-Za-z0-9._]{1,30}$/.test(segment) ? segment : null;
+  } catch { return null; }
 }
 
 function parseThreadsHandle(url: string | null): string | null {
@@ -301,7 +299,7 @@ function cleanReleaseTitle(title: string, artistName: string): string | null {
 }
 
 function artistContext(
-  artist: { name: string; imageUrl: string | null },
+  artist: { name: string; slug: string; imageUrl: string | null },
   url: string,
   platforms: ArtistPlatform[],
   location: string | null,
@@ -310,11 +308,13 @@ function artistContext(
   const handles = extractSocialHandles(platforms);
   return {
     name: artist.name,
+    slug: artist.slug,
     url,
     imageUrl: artist.imageUrl,
     location,
     threadsHandle: handles.threads,
     blueskyHandle: handles.bluesky,
+    instagramHandle: handles.instagram,
     platform: sellingPlatform(platforms, artist.name, catalogue),
   };
 }
@@ -576,6 +576,34 @@ async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
   }
 }
 
+/**
+ * The Instagram post with only the cards that render, checked by fetching each one from the live
+ * endpoint: the same request Buffer makes when the post publishes, so it also warms the CDN for
+ * it. A card can fail for reasons only the renderer knows (a photo host off the allowlist, a WebP
+ * it can't decode, an image host that's down), and Buffer would otherwise only find out on
+ * publish day and fail the post there. Null when no card renders.
+ */
+async function withRenderableCards(post: SocialPost, artistName: string): Promise<SocialPost | null> {
+  const rendered = await Promise.all(post.images.map(async image => {
+    const card = new URL(image.url).pathname.split('/').pop();
+    try {
+      const res = await fetch(image.url, { signal: AbortSignal.timeout(30000) });
+      await res.arrayBuffer();
+      if (res.ok && res.headers.get('content-type') === 'image/png') return true;
+      console.log(`    · ${artistName}: Instagram card ${card} didn't render (${res.status}), so it's left out`);
+    } catch (error) {
+      console.log(`    · ${artistName}: Instagram card ${card} didn't render (${error instanceof Error ? error.message : error}), so it's left out`);
+    }
+    return false;
+  }));
+
+  const kept = post.images.filter((_, i) => rendered[i]).map(image => ({ url: image.url, altText: image.altText }));
+  if (kept.length === 0) return null;
+  // The tag goes on whichever card is now first; on a carousel the first image's tags apply to all.
+  const tags = post.images[0].userTags;
+  return { ...post, images: tags ? [{ ...kept[0], userTags: tags }, ...kept.slice(1)] : kept };
+}
+
 // --- Week calculation ---
 
 function getWeekDates(weekStr?: string): { week: string; dates: string[] } {
@@ -748,9 +776,16 @@ async function listChannels() {
   console.log('Order: threads,bluesky,instagram,linkedin\n');
 }
 
-// Threads and Bluesky at 9am ET (8am in winter), LinkedIn on weekday afternoons, where its
-// engagement peaks.
-const POST_TIME_UTC: Record<Platform, string> = { threads: '13:00', bluesky: '13:00', linkedin: '20:00' };
+// Threads, Bluesky and Instagram at 9am ET (8am in winter), LinkedIn on weekday afternoons,
+// where its engagement peaks.
+const POST_TIME_UTC: Record<Platform, string> = { threads: '13:00', bluesky: '13:00', instagram: '13:00', linkedin: '20:00' };
+
+/**
+ * Instagram posts dated before this go to Buffer as drafts even on a --publish run, so the first
+ * week of cards is looked at in Buffer before any goes out on its own. That week is 2026-W42,
+ * generated on Monday 5 October; if this ships after that run, move the date on a week.
+ */
+const INSTAGRAM_DRAFTS_BEFORE = '2026-10-19';
 
 function lengthProblem(post: SocialPost): string | null {
   const limit = CHARACTER_LIMITS[post.platform];
@@ -814,9 +849,12 @@ function postInput(post: SocialPost, channelId: string, date: string, saveToDraf
     // On every post, not only the content item: Buffer doesn't pass an item's tags down to its
     // posts, and analytics filter on the posts' own tags.
     tagIds: [tagId],
-    assets: post.images.map(image => ({ image: { url: image.url, metadata: { altText: image.altText } } })),
+    assets: post.images.map(image => ({
+      image: { url: image.url, metadata: { altText: image.altText, ...(image.userTags ? { userTags: image.userTags } : {}) } },
+    })),
   };
   if (post.platform === 'threads') input.metadata = { threads: { topic: 'Music Threads' } };
+  if (post.platform === 'instagram') input.metadata = { instagram: { type: 'post', shouldShareToFeed: true } };
   if (post.platform === 'linkedin' && post.firstComment) input.metadata = { linkedin: { firstComment: post.firstComment } };
   return input;
 }
@@ -825,6 +863,8 @@ interface BufferResult {
   created: { id: string; status: string; channelId: string }[];
   /** channelId is set when the error belongs to one channel's post. */
   errors: { channelId?: string; message: string }[];
+  /** Set when a content item was created. */
+  contentItemId?: string;
 }
 
 async function createBufferPost(input: Record<string, unknown>): Promise<BufferResult> {
@@ -869,6 +909,7 @@ async function createBufferContentItem(
       createContentItem(input: $input) {
         ... on CreateContentItemSuccess {
           content {
+            id
             body {
               ... on PostContent { posts { id status channelId } }
             }
@@ -891,10 +932,32 @@ async function createBufferContentItem(
 
   const data = result.data?.createContentItem;
   const created = data?.content?.body?.posts ?? [];
-  if (data?.content) return { created, errors: [] };
+  if (data?.content) return { created, errors: [], contentItemId: data.content.id };
 
   const errors: BufferResult['errors'] = data?.errors ?? [];
   return { created, errors: errors.length ? errors : [{ message: data?.message || 'Unknown error' }] };
+}
+
+/**
+ * Put a post that already exists into a content item, so Buffer shows the day's posts together.
+ * Returns the error, or null. Only the grouping is at stake: the post is already scheduled and
+ * tagged either way.
+ */
+async function addPostToContentItem(contentItemId: string, postId: string): Promise<string | null> {
+  try {
+    const result = await bufferGraphQL(`
+      mutation AddPostToContentItem($input: AddPostToContentItemInput!) {
+        addPostToContentItem(input: $input) {
+          ... on AddPostToContentItemSuccess { post { id } }
+          ... on VoidMutationError { message }
+        }
+      }
+    `, { input: { id: contentItemId, postId } });
+    const data = result.data?.addPostToContentItem;
+    return data?.post ? null : (data?.message || 'Unknown error');
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
 }
 
 // --- Markdown output ---
@@ -909,7 +972,7 @@ const KIND_LABELS: Record<DayKind, string> = {
   feature: 'Feature announcement',
 };
 
-const PLATFORM_LABELS: Record<Platform, string> = { threads: 'Threads', bluesky: 'Bluesky', linkedin: 'LinkedIn' };
+const PLATFORM_LABELS: Record<Platform, string> = { threads: 'Threads', bluesky: 'Bluesky', instagram: 'Instagram', linkedin: 'LinkedIn' };
 
 function draftToMarkdown(draft: DayDraft): string {
   const header = [
@@ -925,6 +988,8 @@ function draftToMarkdown(draft: DayDraft): string {
         post.text,
       ];
       if (post.images.length) lines.push('', `**Images:** ${post.images.map(i => i.url).join(', ')}`);
+      const tagged = post.images.flatMap(i => i.userTags ?? []).map(t => `@${t.handle}`);
+      if (tagged.length) lines.push('', `**Tagged:** ${tagged.join(', ')}`);
       if (post.firstComment) lines.push('', `**First comment:**`, '', post.firstComment);
       return lines.join('\n');
     });
@@ -1050,13 +1115,16 @@ async function main() {
   const run: RunPicks = { featured: new Set(), skipped: new Set() };
   // The indie artists posted so far this week, for Thursday's LinkedIn roundup.
   const weekIndie: ArtistContext[] = [];
+  // Instagram posts dropped because none of their cards rendered. Counted as failures when
+  // scheduling: the renderer is broken, and that shouldn't pass as a quiet week.
+  let instagramDropped = 0;
 
   for (let day = 1; day <= 7; day++) {
     const date = dates[day - 1];
     let kind = WEEK_PLAN[day - 1];
     if (day === 6 && isQuestionWeek(weekNum)) kind = 'question';
 
-    // The day's Threads and Bluesky posts share a subject, so they go to Buffer as one group.
+    // The day's posts share a subject, so they go to Buffer as one group.
     const posts: SocialPost[] = [];
     let artistName: string | null = null;
     let artistSlug: string | null = null;
@@ -1079,7 +1147,19 @@ async function main() {
         return { context, posts: spotlight };
       });
       if (picked) {
-        posts.push(...picked.posts);
+        for (const post of picked.posts) {
+          if (post.platform !== 'instagram') {
+            posts.push(post);
+            continue;
+          }
+          const instagram = await withRenderableCards(post, picked.artist.name);
+          if (instagram) {
+            posts.push(instagram);
+          } else {
+            instagramDropped++;
+            console.warn(`  ⚠ ${picked.artist.name}: none of the Instagram cards rendered — no Instagram post`);
+          }
+        }
         weekIndie.push(picked.context);
         artistName = picked.artist.name;
         artistSlug = picked.artist.slug;
@@ -1162,11 +1242,11 @@ async function main() {
   // --- Schedule to Buffer ---
   if (doSchedule && channelIdsStr && orgId && tagIds) {
     const [threadsId, blueskyId, instagramId, linkedinId] = channelIdsStr.split(',').map(id => id.trim());
-    const channels: Record<Platform, string | undefined> = { threads: threadsId, bluesky: blueskyId, linkedin: linkedinId };
+    const channels: Record<Platform, string | undefined> = { threads: threadsId, bluesky: blueskyId, instagram: instagramId, linkedin: linkedinId };
     const saveToDraft = !doPublish;
 
-    if (instagramId) {
-      console.log('\nInstagram is paused (docs/specs/instagram-original-posts-spec.md) — its channel is skipped.');
+    if (doPublish && instagramId && dates[0] < INSTAGRAM_DRAFTS_BEFORE) {
+      console.log(`\nInstagram posts before ${INSTAGRAM_DRAFTS_BEFORE} go to Buffer as drafts, to be reviewed there first.`);
     }
     if (saveToDraft) {
       console.log('\nPushing to Buffer as DRAFTS (review in Buffer dashboard before publishing)...\n');
@@ -1180,12 +1260,13 @@ async function main() {
       if (channelId) labelForChannel.set(channelId, PLATFORM_LABELS[platform]);
     }
 
-    let failures = 0;
+    let failures = instagramId ? instagramDropped : 0;
     for (const draft of drafts) {
       for (const group of draft.groups) {
         console.log(`  ${draft.date} — ${group.title}`);
 
         const inputs: Record<string, unknown>[] = [];
+        let instagramInput: Record<string, unknown> | null = null;
         for (const post of group.posts) {
           const channelId = channels[post.platform];
           if (!channelId) continue;
@@ -1195,21 +1276,41 @@ async function main() {
             console.error(`    ✗ ${PLATFORM_LABELS[post.platform]}: too long to send (${problem})`);
             continue;
           }
-          inputs.push(postInput(post, channelId, draft.date, saveToDraft, tagIds[group.tag]));
+          const draftOnly = saveToDraft || (post.platform === 'instagram' && draft.date < INSTAGRAM_DRAFTS_BEFORE);
+          const input = postInput(post, channelId, draft.date, draftOnly, tagIds[group.tag]);
+          if (post.platform === 'instagram') instagramInput = input;
+          else inputs.push(input);
         }
-        if (inputs.length === 0) continue;
 
-        const result = inputs.length > 1
-          ? await createBufferContentItem(orgId, group.title, `${draft.date}T${POST_TIME_UTC.threads}:00Z`, tagIds[group.tag], inputs)
-          : await createBufferPost(inputs[0]);
-
-        for (const post of result.created) {
-          console.log(`    ✓ ${post.status} — ${labelForChannel.get(post.channelId) ?? post.channelId} (${post.id})`);
+        // Instagram is created on its own and then added to the day's content item. Inside the
+        // item, a variant Buffer rejected would take Threads and Bluesky down with it (validation
+        // is all-or-nothing), and the failure payload doesn't say whether the other posts were
+        // created, so they couldn't safely be sent again. Alone, a rejected Instagram post costs
+        // only itself.
+        const results: BufferResult[] = [];
+        if (inputs.length > 1) {
+          results.push(await createBufferContentItem(orgId, group.title, `${draft.date}T${POST_TIME_UTC.threads}:00Z`, tagIds[group.tag], inputs));
+        } else if (inputs.length === 1) {
+          results.push(await createBufferPost(inputs[0]));
         }
-        for (const error of result.errors) {
-          failures++;
-          const label = error.channelId ? `${labelForChannel.get(error.channelId) ?? error.channelId}: ` : '';
-          console.error(`    ✗ ${label}${error.message}`);
+        const contentItemId = results[0]?.contentItemId;
+        if (instagramInput) {
+          const instagram = await createBufferPost(instagramInput);
+          results.push(instagram);
+          const postId = instagram.created[0]?.id;
+          const groupError = contentItemId && postId ? await addPostToContentItem(contentItemId, postId) : null;
+          if (groupError) console.warn(`    ⚠ Instagram post ${postId} is scheduled but not grouped with the others: ${groupError}`);
+        }
+
+        for (const result of results) {
+          for (const post of result.created) {
+            console.log(`    ✓ ${post.status} — ${labelForChannel.get(post.channelId) ?? post.channelId} (${post.id})`);
+          }
+          for (const error of result.errors) {
+            failures++;
+            const label = error.channelId ? `${labelForChannel.get(error.channelId) ?? error.channelId}: ` : '';
+            console.error(`    ✗ ${label}${error.message}`);
+          }
         }
       }
     }

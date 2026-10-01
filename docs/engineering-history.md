@@ -349,10 +349,10 @@ otherwise recorded as a perfectly ordinary success.
 
 ---
 
-## Local dev: what the two silent-failure traps cost
+## Local dev: what the silent-failure traps cost
 
 **Rules they produced:** delete a key from `.env` rather than leaving it blank; keep
-`--strictPort`.
+`--strictPort`; in a worktree, pass `--functions` with the worktree's own folder.
 
 ### The empty-value shadow
 
@@ -369,6 +369,23 @@ vars` list: a key you need should appear there, not in an `Ignored` line.
 
 `dev:fast` passes `--strictPort` on purpose. See the `[dev]` block in `netlify.toml` for
 why removing it lets another checkout's leftover server answer everything.
+
+### The worktree that served the main checkout
+
+Found 2026-10-01 while building the Instagram card endpoint. In a worktree under
+`.claude/worktrees/`, `npm run dev` answered the new `/api/social-card/*` route with
+`Function not found...` and no error anywhere in the log: 73 functions loaded, the two new
+files didn't. `.netlify/functions-serve/collection-art/collection-art.js` gave it away by
+requiring `./Users/…/Projects/unstream/api/functions/collection-art.js`, the main checkout.
+
+netlify-cli (23.13.3) finds the repository root with `findUp('.git', { type: 'directory' })`.
+A worktree's `.git` is a file, so the search carries on up to the main repo, which these
+worktrees sit inside, and the functions folder resolves there. `--cwd .` doesn't change it;
+`--functions "$PWD/api/functions"` does. A function that exists in both checkouts is the worse
+case: it loads, and runs the main checkout's code. Edge functions resolve the same way, and
+`--functions` doesn't move them (`.netlify/edge-functions-serve/dev.js` still imports
+`…/Projects/unstream/api/edge/*.ts`); netlify dev has no flag for their folder, so edge-function
+work in a worktree can't be checked with `npm run dev` at all.
 
 ### Why there is no preview to fall back on
 
@@ -527,8 +544,9 @@ Dispatch-related repo changes go through the normal branch workflow like everyth
 ## Social posts: what six months of metrics said
 
 **Rules it produced:** spotlights are written for the featured artist to repost; prominent artists
-get one post a week; questions to the audience are occasional; Instagram is paused; payouts come
-from the platform registry; a rejected post fails the run.
+get one post a week; questions to the audience are occasional; Instagram posts are cards Unstream
+draws, for indie artists only; payouts come from the platform registry; a rejected post fails the
+run.
 
 Measured from Buffer's per-post metrics for every post sent from 22 March to 30 September 2026
 (Threads 188 posts, Instagram 177, Bluesky 178, LinkedIn 3).
@@ -569,6 +587,46 @@ The 81 comments looked like bots: 58 of the 66 from July to September were on po
 `#newmusic #newrelease`. The script added those tags to 72 of 75 prominent posts, including dead
 artists' decades-old albums. What restarting would take is in
 `docs/specs/instagram-original-posts-spec.md`.
+
+### Instagram cards: why a function, and what the renderer can't do
+
+Built 2026-10-01 to that spec. Each indie spotlight's Instagram variant is a carousel drawn
+from Unstream's data: who and where to buy, the record, the purchase math, then the photo.
+
+**Not an edge function.** The spec suggested one. Edge functions get 50ms of CPU per request
+(Netlify's documented limit, still listed after the October 2026 move to microVMs). Measured
+with resvg-wasm on an M-series Mac, a text-only slide took ~25ms warm, but a slide with a
+1200px photo took ~100ms to draw and ~30ms more to encode as PNG. Server CPUs are slower. A
+Netlify Function has no CPU cap, and on Node it reaches `db.ts`, the SSRF allowlist and vitest.
+
+**Bundled as CommonJS.** zip-it-and-ship-it builds this `"type": "module"` repo's functions as
+CJS, where `import.meta` is an empty object. That was caught by bundling the function and
+running the bundle from the unzipped folder before anything deployed. The renderer finds its
+fonts with `__dirname` and its wasm with `require.resolve`; `included_files` and
+`external_node_modules` in `netlify.toml` put both beside the bundle.
+
+**What resvg can't decode.** It draws JPEG and PNG, and silently draws nothing for WebP, which is
+how Mirlo serves covers and avatars. Covers have an undocumented `-x1500.jpg` twin (three of
+three checked); avatars don't, so a Mirlo-only artist's photo slide is left out. A glyph none of
+the loaded fonts has also draws as nothing, which is why a name outside Latin script gets no
+cards rather than a blank one.
+
+**Why the platform and release are in the URL.** Buffer fetches images when a post publishes,
+up to twelve days after the Monday run wrote the caption. Recomputing the "latest release" at
+render time would let the card name a newer record than the caption does.
+
+**Why the generator fetches every card first.** Some failures only show at render time: a
+stored artist photo that Bandcamp has since deleted (two of the five artists in a 2026-10-01
+dry run), a host off the allowlist, a WebP. Unchecked, Buffer would find out on publish day and
+fail the whole post. The check drops the card and warms the CDN for Buffer's fetch.
+
+**Why the Instagram post isn't created inside the content item.** `createContentItem` validates
+all-or-nothing, so a rejected Instagram variant would also cost that day's Threads and Bluesky
+spotlights, the posts that actually get reposted. Retrying without it isn't safe either: Buffer's
+schema says the same failure payload comes back when variants failed *after* the item and all
+its variants were created, and nothing in it tells the two apart. So Instagram goes through
+`createPost`, the path the old pipeline used for six months, and `addPostToContentItem` groups it
+afterwards.
 
 ### Payouts drifted from the site's
 
