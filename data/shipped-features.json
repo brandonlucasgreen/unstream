@@ -116,7 +116,7 @@
     "title": "Artist detection on radio and more sites",
     "description": "The browser extension now works on more of the web, especially online radio. Listening to a station like WXPN in your browser? Open the extension on the station's site, turn on detection, and Unstream finds each artist as the songs change. It isn't limited to a built-in list: it works on any site that tells your browser what's playing, so it's worth trying wherever you listen.",
     "date": "2026-09-25",
-    "announced": true
+    "announced": false
   },
   {
     "id": "artist-bios",

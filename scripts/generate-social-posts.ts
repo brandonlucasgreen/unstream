@@ -845,6 +845,28 @@ async function main() {
     return;
   }
 
+  // Checked before anything is generated: history is saved before scheduling, and the workflow
+  // commits it even after a failed run, so a missing secret found later would record artists as
+  // featured whose posts were never sent.
+  const token = process.env.BUFFER_ACCESS_TOKEN;
+  const channelIdsStr = process.env.BUFFER_CHANNEL_IDS;
+  const orgId = process.env.BUFFER_ORG_ID;
+  if (doSchedule) {
+    if (!token) {
+      console.error('\n✗ BUFFER_ACCESS_TOKEN not set. Cannot schedule.');
+      process.exit(1);
+    }
+    if (!orgId) {
+      console.error('\n✗ BUFFER_ORG_ID not set. Content items belong to an organization, so scheduling needs it.');
+      process.exit(1);
+    }
+    if (!channelIdsStr) {
+      console.error('\n✗ BUFFER_CHANNEL_IDS not set. Run with --channels to find your IDs.');
+      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id,linkedin_id');
+      process.exit(1);
+    }
+  }
+
   const { week, dates } = getWeekDates(weekArg);
   console.log(`\nGenerating posts for week ${week} (${dates[0]} → ${dates[6]})\n`);
 
@@ -1023,25 +1045,7 @@ async function main() {
   console.log(`  - drafts.json (machine-readable)`);
 
   // --- Schedule to Buffer ---
-  if (doSchedule) {
-    const token = process.env.BUFFER_ACCESS_TOKEN;
-    const channelIdsStr = process.env.BUFFER_CHANNEL_IDS;
-    const orgId = process.env.BUFFER_ORG_ID;
-
-    if (!token) {
-      console.error('\n✗ BUFFER_ACCESS_TOKEN not set. Cannot schedule.');
-      process.exit(1);
-    }
-    if (!orgId) {
-      console.error('\n✗ BUFFER_ORG_ID not set. Content items belong to an organization, so scheduling needs it.');
-      process.exit(1);
-    }
-    if (!channelIdsStr) {
-      console.error('\n✗ BUFFER_CHANNEL_IDS not set. Run with --channels to find your IDs.');
-      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id,linkedin_id');
-      process.exit(1);
-    }
-
+  if (doSchedule && channelIdsStr && orgId) {
     const [threadsId, blueskyId, instagramId, linkedinId] = channelIdsStr.split(',').map(id => id.trim());
     const channels: Record<Platform, string | undefined> = { threads: threadsId, bluesky: blueskyId, linkedin: linkedinId };
     const saveToDraft = !doPublish;
