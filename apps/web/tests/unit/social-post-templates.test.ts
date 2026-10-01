@@ -14,10 +14,12 @@ import {
   linkedinWeekdayPost,
   makerPost,
   payoutFloor,
+  pickCatalogueRelease,
   purchaseMath,
   questionPost,
   recordMath,
   type ArtistContext,
+  type CatalogueRelease,
   type ShippedFeature,
   type SocialPost,
 } from '../../../../scripts/social-post-templates';
@@ -37,7 +39,7 @@ function artist(overrides: Partial<ArtistContext> = {}): ArtistContext {
       id: 'bandcamp',
       name: 'Bandcamp',
       payout: BANDCAMP_PAYOUT,
-      release: { title: 'Signals', type: 'album' },
+      release: { title: 'Signals', type: 'album', latest: true },
     },
     ...overrides,
   };
@@ -79,6 +81,50 @@ describe('fullSizeImageUrl', () => {
   });
 });
 
+describe('pickCatalogueRelease', () => {
+  function release(overrides: Partial<CatalogueRelease> = {}): CatalogueRelease {
+    return { title: 'Signals', releaseType: 'album', releaseDate: '2025-03-01', status: 'released', sources: [{ platform: 'bandcamp' }], ...overrides };
+  }
+
+  it('names the newest dated release on the platform as the latest', () => {
+    const picked = pickCatalogueRelease([
+      release({ title: 'Older', releaseDate: '2023-05-01' }),
+      release({ title: 'Newest', releaseDate: '2026-02-14', releaseType: 'ep' }),
+      release({ title: 'Undated', releaseDate: null }),
+    ], 'bandcamp');
+    expect(picked).toEqual({ title: 'Newest', type: 'ep', latest: true });
+  });
+
+  it("only considers releases on the platform the post sends people to", () => {
+    const picked = pickCatalogueRelease([
+      release({ title: 'Discogs Only', releaseDate: '2026-09-01', sources: [{ platform: 'discogs' }] }),
+      release({ title: 'On Bandcamp', releaseDate: '2024-01-01' }),
+    ], 'bandcamp');
+    expect(picked?.title).toBe('On Bandcamp');
+  });
+
+  it('falls back to the first undated release in catalogue order, without calling it the latest', () => {
+    const picked = pickCatalogueRelease([
+      release({ title: 'First In Order', releaseDate: null }),
+      release({ title: 'Second', releaseDate: null }),
+    ], 'bandcamp');
+    expect(picked).toEqual({ title: 'First In Order', type: 'album', latest: false });
+  });
+
+  it('skips announced releases, which are pre-orders rather than out', () => {
+    const picked = pickCatalogueRelease([
+      release({ title: 'Coming Soon', releaseDate: '2026-11-20', status: 'announced' }),
+      release({ title: 'Out Now', releaseDate: '2026-01-10' }),
+    ], 'bandcamp');
+    expect(picked?.title).toBe('Out Now');
+  });
+
+  it('returns nothing when the platform has none of their releases', () => {
+    expect(pickCatalogueRelease([], 'bandcamp')).toBeNull();
+    expect(pickCatalogueRelease([release({ sources: [{ platform: 'mirlo' }] })], 'bandcamp')).toBeNull();
+  });
+});
+
 describe('indieSpotlight', () => {
   it('names the release, the platform and the registry payout', () => {
     const threads = on(indieSpotlight(artist(), { bandcampFriday: false }), 'threads');
@@ -87,6 +133,13 @@ describe('indieSpotlight', () => {
       `Their latest album, Signals, is on Bandcamp. Buy it there and ${BANDCAMP_PAYOUT} of what you pay goes to them.\n\n` +
       `Every place to support them directly: https://unstream.stream/a/courstellation`
     );
+  });
+
+  it("names a release without claiming it's the latest when nothing dates it", () => {
+    const undated = artist({ platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'Signals', type: 'album', latest: false } } });
+    const threads = on(indieSpotlight(undated, { bandcampFriday: false }), 'threads');
+    expect(threads.text).toContain('Their album Signals is on Bandcamp.');
+    expect(threads.text).not.toContain('latest');
   });
 
   it('tags a Threads handle after the name, so a mention that fails still reads as a name', () => {
@@ -122,7 +175,7 @@ describe('indieSpotlight', () => {
       name: 'The Extremely Long Named Orchestra of Somewhere Far Away',
       blueskyHandle: 'extremelylongnamedorchestra.bsky.social',
       location: 'Llanfairpwllgwyngyll',
-      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'A Title That Is Very Nearly Sixty Characters Long Indeed', type: 'album' } },
+      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'A Title That Is Very Nearly Sixty Characters Long Indeed', type: 'album', latest: true } },
     });
     const bluesky = on(indieSpotlight(long, { bandcampFriday: false }), 'bluesky');
     withinLimit(bluesky);
@@ -135,7 +188,7 @@ describe('recordMath', () => {
     name: 'Death Cab for Cutie',
     url: 'https://unstream.stream/artist/death-cab-for-cutie',
     location: null,
-    platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'I Built You A Tower', type: 'album' } },
+    platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'I Built You A Tower', type: 'album', latest: true } },
   });
 
   it('frames one album purchase against streams, at the low end of the payout', () => {
@@ -147,7 +200,7 @@ describe('recordMath', () => {
   });
 
   it('only names a release that is an album, since the math is per album', () => {
-    const single = artist({ ...prominent, platform: { ...prominent.platform!, release: { title: 'A Single', type: 'single' } } });
+    const single = artist({ ...prominent, platform: { ...prominent.platform!, release: { title: 'A Single', type: 'single', latest: true } } });
     const threads = on(recordMath(single, { bandcampFridayTomorrow: false }), 'threads');
     expect(threads.text).not.toContain('A Single');
     expect(threads.text).toContain("Buying Death Cab for Cutie's music on Bandcamp");

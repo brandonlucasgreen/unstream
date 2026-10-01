@@ -32,13 +32,57 @@ export interface SocialPost {
   firstComment?: string;
 }
 
-/** Where to buy an artist's music, and what that platform's latest release of theirs is. */
+/** A record of theirs that's on the platform. `latest` only when it's the newest dated one there. */
+export interface FeaturedRelease {
+  title: string;
+  type: string;
+  latest: boolean;
+}
+
+/** Where to buy an artist's music, and a record of theirs that's there. */
 export interface SellingPlatform {
   id: string;
   name: string;
   /** As the registry states it, e.g. "80-85%". Null when the registry has no figure. */
   payout: string | null;
-  release: { title: string; type: string } | null;
+  release: FeaturedRelease | null;
+}
+
+/** One row of an artist's release catalogue, as `/api/artist-page` returns it. */
+export interface CatalogueRelease {
+  title: string;
+  releaseType: string;
+  releaseDate: string | null;
+  status: string;
+  sources: { platform: string }[];
+}
+
+// Past this a title is more likely an ingest artefact than a name, and it would crowd the post.
+const MAX_RELEASE_TITLE_LENGTH = 80;
+
+/**
+ * The record a spotlight names, from the artist's catalogue: the newest dated release on the
+ * platform the post sends people to. Without dates (grid ingest often has none) it falls back to
+ * the catalogue's first release there, which is the artist's own choice when they've arranged
+ * their releases, but isn't called "latest", since nothing says it is.
+ *
+ * Only released records: an announced one is a pre-order, and "their latest album" would claim
+ * it's out.
+ */
+export function pickCatalogueRelease(releases: CatalogueRelease[], platformId: string): FeaturedRelease | null {
+  const onPlatform = releases.filter(r =>
+    r.status === 'released'
+    && r.title.trim().length > 0
+    && r.title.length <= MAX_RELEASE_TITLE_LENGTH
+    && r.sources.some(s => s.platform === platformId)
+  );
+  if (onPlatform.length === 0) return null;
+
+  const newest = onPlatform
+    .filter(r => r.releaseDate)
+    .sort((a, b) => b.releaseDate!.localeCompare(a.releaseDate!))[0];
+  const chosen = newest ?? onPlatform[0];
+  return { title: chosen.title.trim(), type: chosen.releaseType, latest: !!newest };
 }
 
 export interface ArtistContext {
@@ -135,7 +179,11 @@ function blueskyName(artist: ArtistContext): string {
 /** The sentence about where to buy, shared by the Threads and Bluesky spotlights. */
 function spotlightBuyLine(p: SellingPlatform, bandcampFriday: boolean, includeRelease: boolean): string {
   const release = includeRelease ? p.release : null;
-  const latest = release ? `Their latest ${releaseNoun(release.type)}, ${release.title}, is on ${p.name}` : null;
+  const latest = !release
+    ? null
+    : release.latest
+      ? `Their latest ${releaseNoun(release.type)}, ${release.title}, is on ${p.name}`
+      : `Their ${releaseNoun(release.type)} ${release.title} is on ${p.name}`;
 
   if (bandcampFriday && p.id === 'bandcamp') {
     return `${latest ?? 'Their music is on Bandcamp'}, and today is Bandcamp Friday: Bandcamp waives its cut, so nearly everything you pay goes to them.`;

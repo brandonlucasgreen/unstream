@@ -53,9 +53,11 @@ import {
   linkedinRoundup,
   linkedinWeekdayPost,
   makerPost,
+  pickCatalogueRelease,
   questionPost,
   recordMath,
   type ArtistContext,
+  type CatalogueRelease,
   type Platform,
   type SellingPlatform,
   type ShippedFeature,
@@ -182,17 +184,28 @@ function isSearchUrl(url: string): boolean {
   }
 }
 
-/** The artist's first selling link in display order, with its registry payout and latest release. */
-function sellingPlatform(platforms: ArtistPlatform[], artistName: string): SellingPlatform | null {
+/**
+ * The artist's first selling link in display order, with its registry payout and a record of
+ * theirs that's there: from their release catalogue when there is one (verified artists), else
+ * the link's own latestRelease (the generated files the prominent artists come from).
+ */
+function sellingPlatform(
+  platforms: ArtistPlatform[],
+  artistName: string,
+  catalogue: CatalogueRelease[]
+): SellingPlatform | null {
   const link = platforms.find(p => SELLING_PLATFORMS.has(p.sourceId) && !isSearchUrl(p.url));
   if (!link) return null;
   const meta = PLATFORMS[link.sourceId];
-  const title = link.latestRelease ? cleanReleaseTitle(link.latestRelease.title, artistName) : null;
+  const linkTitle = link.latestRelease ? cleanReleaseTitle(link.latestRelease.title, artistName) : null;
+  const linkRelease = linkTitle && link.latestRelease
+    ? { title: linkTitle, type: link.latestRelease.type, latest: true }
+    : null;
   return {
     id: link.sourceId,
     name: meta?.name ?? link.sourceId,
     payout: meta?.payoutPercent ?? null,
-    release: title && link.latestRelease ? { title, type: link.latestRelease.type } : null,
+    release: pickCatalogueRelease(catalogue, link.sourceId) ?? linkRelease,
   };
 }
 
@@ -268,7 +281,8 @@ function artistContext(
   artist: { name: string; imageUrl: string | null },
   url: string,
   platforms: ArtistPlatform[],
-  location: string | null
+  location: string | null,
+  catalogue: CatalogueRelease[]
 ): ArtistContext {
   const handles = extractSocialHandles(platforms);
   return {
@@ -278,7 +292,7 @@ function artistContext(
     location,
     threadsHandle: handles.threads,
     blueskyHandle: handles.bluesky,
-    platform: sellingPlatform(platforms, artist.name),
+    platform: sellingPlatform(platforms, artist.name, catalogue),
   };
 }
 
@@ -503,17 +517,37 @@ async function fetchCanonicalSlugs(): Promise<Map<string, string>> {
   return canonical;
 }
 
+interface IndieLookup {
+  platforms: ArtistPlatform[];
+  location: string | null;
+  releases: CatalogueRelease[];
+}
+
 /**
- * A verified artist's live links and location from the production API. Null means the lookup
- * failed, which is not the same as "nowhere to buy" — the caller skips the artist either way, but
- * says which.
+ * A verified artist's links, location and release catalogue in one request, from the same public
+ * endpoint the artist page uses (`/api/artist-page`; the owner-only `/api/artist-releases` needs
+ * a session). Its links leave out junk search links, the releases come in the artist's own order
+ * and then newest first, and hidden releases are already gone.
+ *
+ * Null means the lookup failed, which is not the same as "nowhere to buy" — the caller skips the
+ * artist either way, but says which.
  */
-async function fetchIndieArtist(slug: string): Promise<{ platforms: ArtistPlatform[]; location: string | null } | null> {
+async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
   try {
-    const res = await fetch(`${UNSTREAM_BASE}/api/artist?slug=${encodeURIComponent(slug)}`);
+    const res = await fetch(`${UNSTREAM_BASE}/api/artist-page?slug=${encodeURIComponent(slug)}`);
     if (!res.ok) return null;
-    const data = await res.json() as { platforms?: ArtistPlatform[]; location?: { city?: string; country?: string } };
-    return { platforms: data.platforms || [], location: data.location?.city || data.location?.country || null };
+    const data = await res.json() as {
+      artist?: { city?: string | null; country?: string | null };
+      links?: { platform: string; url: string }[];
+      socialLinks?: { platform: string; url: string }[];
+      releases?: CatalogueRelease[];
+    };
+    const links = [...(data.links || []), ...(data.socialLinks || [])];
+    return {
+      platforms: links.map(l => ({ sourceId: l.platform, url: l.url })),
+      location: data.artist?.city || data.artist?.country || null,
+      releases: data.releases || [],
+    };
   } catch {
     return null;
   }
@@ -911,7 +945,7 @@ async function main() {
         .filter(a => {
           if (excluded.slugs.has(a.slug)) return false;
           const data = loadArtistData(a.slug);
-          return !!data && sellingPlatform(data.platforms, a.name) !== null;
+          return !!data && sellingPlatform(data.platforms, a.name, []) !== null;
         })
         // Retired slugs (accent re-slugs, merges) post at their canonical URL. The manifest slug
         // is kept alongside: the generated data files are keyed by it, so platform lookup still
@@ -956,7 +990,7 @@ async function main() {
           console.warn(`  ⚠ ${artist.name}: artist lookup failed — trying someone else`);
           return null;
         }
-        const context = artistContext(artist, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location);
+        const context = artistContext(artist, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
         const spotlight = indieSpotlight(context, { bandcampFriday });
         if (!spotlight) {
           console.log(`  · ${artist.name}: nowhere to buy their music yet — trying someone else`);
@@ -977,7 +1011,7 @@ async function main() {
         // re-pointed) canonical one.
         const data = loadArtistData(artist.manifestSlug);
         if (!data) return null;
-        const context = artistContext(artist, `${UNSTREAM_BASE}/artist/${artist.slug}`, data.platforms, null);
+        const context = artistContext(artist, `${UNSTREAM_BASE}/artist/${artist.slug}`, data.platforms, null, []);
         const math = recordMath(context, { bandcampFridayTomorrow });
         return math ? { context, posts: math } : null;
       });
