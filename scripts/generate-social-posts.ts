@@ -1,9 +1,18 @@
 /**
- * Generate and optionally schedule daily artist spotlight posts for social media.
+ * Generate and optionally schedule the week's social posts. The copy itself lives in
+ * scripts/social-post-templates.ts; this file picks the artists, gathers their data and talks to
+ * Buffer.
  *
- * Alternates between:
- *   - Odd days: Independent artist with a verified Unstream page
- *   - Even days: Prominent artist with confirmed links from MusicBrainz data
+ * The week, on Threads and Bluesky:
+ *   Mon, Tue, Wed, Fri, Sat  a verified indie artist (the posts that get reposted)
+ *   Thu                      one prominent artist, framed around what a purchase is worth
+ *   Sat, one week in three   a plain question instead of the spotlight
+ *   Sun                      a maker post about Unstream, or a shipped feature
+ * The Unstream LinkedIn page gets two posts: Tue (economics) and Thu (the week's artists).
+ * docs/engineering-history.md ("Social posts") has the measurements behind that shape.
+ *
+ * Instagram is paused until its posts can be original images: docs/specs/instagram-original-posts-spec.md.
+ * Its slot in BUFFER_CHANNEL_IDS is still parsed, so the secret's format doesn't change, but nothing is sent.
  *
  * Output:
  *   data/social-posts/{week}/drafts.json   - All drafts for the week
@@ -17,9 +26,12 @@
  *   npx tsx scripts/generate-social-posts.ts --schedule --publish    # Push to Buffer for auto-publication
  *   npx tsx scripts/generate-social-posts.ts --channels              # List Buffer channel IDs
  *
+ * Exits non-zero when any post was too long to send or Buffer rejected it, after the rest have
+ * been scheduled and history saved — a rejected post used to leave the run green.
+ *
  * Environment:
  *   BUFFER_ACCESS_TOKEN   - Required for --schedule and --channels
- *   BUFFER_ORG_ID         - Required for --channels
+ *   BUFFER_ORG_ID         - Required for --schedule (content items belong to an organization) and --channels
  *   BUFFER_CHANNEL_IDS    - Required for --schedule (comma-separated: threads,bluesky,instagram,linkedin).
  *                           Positional; leave a slot empty to skip that platform (e.g. "t,b,,l").
  *   SUPABASE_URL          - Optional (falls back to production API)
@@ -30,6 +42,28 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { isExcludedArtistSlug } from '../api/lib/excluded-artists';
+import { BANDCAMP_FRIDAY_DATES } from '../api/shared/bandcamp-friday';
+import { PLATFORMS } from '../api/shared/platform-registry';
+import {
+  CHARACTER_LIMITS,
+  UNSTREAM_BASE,
+  bandcampMatchesArtist,
+  featurePost,
+  indieSpotlight,
+  isQuestionWeek,
+  linkedinRoundup,
+  linkedinWeekdayPost,
+  makerPost,
+  pickCatalogueRelease,
+  questionPost,
+  recordMath,
+  type ArtistContext,
+  type CatalogueRelease,
+  type Platform,
+  type SellingPlatform,
+  type ShippedFeature,
+  type SocialPost,
+} from './social-post-templates';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -38,8 +72,7 @@ const MANIFEST_PATH = join(DATA_DIR, 'artists-manifest.json');
 const ARTIST_LIST_PATH = join(DATA_DIR, 'artist-list.json');
 const HISTORY_PATH = join(SOCIAL_DIR, 'history.json');
 
-const UNSTREAM_BASE = 'https://unstream.stream';
-
+// Non-music Wikidata occupation QIDs — same list used in generate-artist-list.ts
 // Non-music Wikidata occupation QIDs — same list used in generate-artist-list.ts
 const NON_MUSIC_OCCUPATIONS = [
   'Q245068',   // comedian
@@ -103,28 +136,47 @@ interface VerifiedArtist {
 }
 
 interface SocialHandles {
-  threads: string | null;   // e.g. "@tommorello"
-  bluesky: string | null;   // e.g. "@tommorelloofficial.bsky.social"
-  instagram: string | null;  // e.g. "@tommorello"
+  threads: string | null;   // without the @, e.g. "tommorello"
+  bluesky: string | null;   // e.g. "tommorelloofficial.bsky.social"
 }
 
-interface PostDraft {
+type DayKind = 'indie' | 'record-math' | 'question' | 'maker' | 'feature';
+
+/** Posts about one subject. Two or more go to Buffer as a single content item. */
+interface PostGroup {
+  title: string;
+  tag: TagKey;
+  posts: SocialPost[];
+}
+
+// One Buffer tag per kind of post, so Buffer's analytics can compare them. Prefixed because the
+// organization's tags are shared with Brandon's other channels. ensureTags creates any that are
+// missing, so renaming one here starts a new tag rather than renaming the old.
+const TAGS = {
+  indie: { name: 'unstream: indie spotlight', color: '#FF702C' },
+  'record-math': { name: 'unstream: record math', color: '#FADE2A' },
+  conversation: { name: 'unstream: conversation', color: '#00C8CF' },
+  mission: { name: 'unstream: mission', color: '#D7AAFF' },
+  feature: { name: 'unstream: feature', color: '#CFE7A6' },
+  roundup: { name: 'unstream: roundup', color: '#F3AFB9' },
+} as const;
+type TagKey = keyof typeof TAGS;
+
+const TAG_FOR_KIND: Record<DayKind, TagKey> = {
+  indie: 'indie',
+  'record-math': 'record-math',
+  question: 'conversation',
+  maker: 'mission',
+  feature: 'feature',
+};
+
+interface DayDraft {
   day: number; // 1-7 (Mon-Sun)
   date: string; // YYYY-MM-DD
-  artistType: 'indie' | 'prominent' | 'promo';
-  artistName: string;
-  artistSlug: string;
-  unstreamUrl: string;
-  imageUrl: string | null;
-  platforms: string[];
-  latestRelease: string | null;
-  socialHandles: SocialHandles;
-  posts: {
-    threads: string;
-    bluesky: string;
-    instagram: string;
-    linkedin: string;
-  };
+  kind: DayKind;
+  artistName: string | null;
+  artistSlug: string | null;
+  groups: PostGroup[];
 }
 
 interface History {
@@ -132,54 +184,59 @@ interface History {
   lastUpdated: string;
 }
 
-// --- Platform display names ---
+// --- Platforms ---
 
-const PLATFORM_NAMES: Record<string, string> = {
-  bandcamp: 'Bandcamp',
-  faircamp: 'Faircamp',
-  mirlo: 'Mirlo',
-  qobuz: 'Qobuz',
-  ampwall: 'Ampwall',
-  musicbrainz: 'MusicBrainz',
-  discogs: 'Discogs',
-  patreon: 'Patreon',
-  kofi: 'Ko-fi',
-  buymeacoffee: 'Buy Me a Coffee',
-  bandwagon: 'Bandwagon',
-  jamcoop: 'Jam.coop',
-  funkwhale: 'Funkwhale',
-  internetarchive: 'Internet Archive',
-  hoopla: 'Hoopla',
-  freegal: 'Freegal',
-};
+// Platforms that sell music, so a post can say "buy it there". Patronage platforms (Patreon,
+// Ko-fi, Buy Me a Coffee) can't headline a post for that reason.
+const SELLING_PLATFORMS = new Set(['bandcamp', 'faircamp', 'mirlo', 'qobuz', 'ampwall', 'bandwagon', 'jamcoop']);
 
-// Platforms worth highlighting in posts (direct-support platforms)
-const HIGHLIGHT_PLATFORMS = new Set([
-  'bandcamp', 'faircamp', 'mirlo', 'qobuz', 'ampwall',
-  'bandwagon', 'jamcoop', 'patreon', 'kofi', 'buymeacoffee',
-]);
+/**
+ * A link that searches a platform for the artist rather than pointing at them — the generated
+ * artist files carry some (Ampwall's explore page, DuckDuckGo site: searches). It proves nothing
+ * about the artist being there, so a post must not say their music is.
+ */
+function isSearchUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.includes('duckduckgo')
+      || /\/(search|explore)/.test(parsed.pathname)
+      || parsed.searchParams.has('q')
+      || parsed.searchParams.has('query');
+  } catch {
+    return true;
+  }
+}
 
-// Patronage platforms don't sell music, so they can't headline a post — every angle's copy says
-// some variant of "buy their music on X", and "buy their music on Patreon" is false. They still
-// count toward directPlatforms.
-const PATRONAGE_PLATFORMS = new Set(['patreon', 'kofi', 'buymeacoffee']);
-
-// Payout percentages for context (human-readable for social posts)
-const PAYOUT_PCT: Record<string, string> = {
-  bandcamp: '82%',
-  faircamp: '100%',
-  mirlo: '93%',
-  ampwall: '90%',
-  bandwagon: '90%',
-  jamcoop: '85%',
-  // Qobuz intentionally excluded — it's per-stream, not per-sale, which muddies the "buy vs stream" framing
-};
+/**
+ * The artist's first selling link in display order, with its registry payout and a record of
+ * theirs that's there: from their release catalogue when there is one (verified artists), else
+ * the link's own latestRelease (the generated files the prominent artists come from).
+ */
+function sellingPlatform(
+  platforms: ArtistPlatform[],
+  artistName: string,
+  catalogue: CatalogueRelease[]
+): SellingPlatform | null {
+  const link = platforms.find(p => SELLING_PLATFORMS.has(p.sourceId) && !isSearchUrl(p.url));
+  if (!link) return null;
+  const meta = PLATFORMS[link.sourceId];
+  const linkTitle = link.latestRelease ? cleanReleaseTitle(link.latestRelease.title, artistName) : null;
+  const linkRelease = linkTitle && link.latestRelease
+    ? { title: linkTitle, type: link.latestRelease.type, latest: true }
+    : null;
+  return {
+    id: link.sourceId,
+    name: meta?.name ?? link.sourceId,
+    payout: meta?.payoutPercent ?? null,
+    release: pickCatalogueRelease(catalogue, link.sourceId) ?? linkRelease,
+  };
+}
 
 // --- Social handle extraction ---
 
 /**
- * Extract social media handles from platform URLs.
- * Returns @handle strings for Threads, Bluesky, and Instagram.
+ * Handles (without the @) from the artist's own Threads and Bluesky links. Instagram handles are
+ * deliberately not used on Threads; see threadsName in social-post-templates.ts.
  */
 function extractSocialHandles(platforms: ArtistPlatform[]): SocialHandles {
   const findUrl = (sourceId: string) =>
@@ -188,21 +245,7 @@ function extractSocialHandles(platforms: ArtistPlatform[]): SocialHandles {
   return {
     threads: parseThreadsHandle(findUrl('threads')),
     bluesky: parseBlueskyHandle(findUrl('bluesky')),
-    instagram: parseInstagramHandle(findUrl('instagram')),
   };
-}
-
-function parseInstagramHandle(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    if (!parsed.hostname.includes('instagram.com')) return null;
-    // Path: /username/ or /username
-    const segment = parsed.pathname.replace(/^\/|\/$/g, '').split('/')[0];
-    // Reject non-profile paths
-    if (!segment || ['p', 'reel', 'explore', 'stories', 'tv'].includes(segment)) return null;
-    return `@${segment}`;
-  } catch { return null; }
 }
 
 function parseThreadsHandle(url: string | null): string | null {
@@ -215,7 +258,7 @@ function parseThreadsHandle(url: string | null): string | null {
     if (!segment) return null;
     const handle = segment.startsWith('@') ? segment.slice(1) : segment;
     if (!handle) return null;
-    return `@${handle}`;
+    return handle;
   } catch { return null; }
 }
 
@@ -230,11 +273,9 @@ function parseBlueskyHandle(url: string | null): string | null {
     const handle = match[1];
     // Basic sanity: handle should contain a dot (e.g. user.bsky.social or custom.domain)
     if (!handle.includes('.')) return null;
-    return `@${handle}`;
+    return handle;
   } catch { return null; }
 }
-
-// --- Content generation ---
 
 /**
  * Clean up release titles — source data (especially Qobuz) often appends artist
@@ -259,257 +300,26 @@ function cleanReleaseTitle(title: string, artistName: string): string | null {
   return cleaned;
 }
 
-/**
- * Extract the useful bits from platform data for content generation.
- */
-function getContentContext(platforms: ArtistPlatform[], artistName: string) {
-  const directPlatforms = platforms
-    .filter(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'))
-    .map(p => p.sourceId);
-
-  // Artists with only patronage links get topPlatform = undefined, i.e. the no-platform fallback copy
-  const topPlatform = directPlatforms.find(id => !PATRONAGE_PLATFORMS.has(id));
-  const topPlatformName = topPlatform ? (PLATFORM_NAMES[topPlatform] || topPlatform) : null;
-  const payout = topPlatform ? PAYOUT_PCT[topPlatform] : null;
-
-  const rawRelease = platforms
-    .map(p => p.latestRelease)
-    .filter(Boolean)
-    .sort((a, b) => {
-      const dateA = a?.releaseDate ? new Date(a.releaseDate).getTime() : 0;
-      const dateB = b?.releaseDate ? new Date(b.releaseDate).getTime() : 0;
-      return dateB - dateA;
-    })[0];
-
-  // Clean the release title (Qobuz often appends artist name).
-  // If the title is too garbled, drop the release entirely.
-  const cleanedTitle = rawRelease ? cleanReleaseTitle(rawRelease.title, artistName) : null;
-  const latestRelease = rawRelease && cleanedTitle
-    ? { ...rawRelease, title: cleanedTitle }
-    : undefined;
-
-  return { directPlatforms, topPlatform, topPlatformName, payout, latestRelease };
-}
-
-/**
- * Build platform-specific post drafts for an artist.
- *
- * Voice notes (from voice-and-positioning.md):
- *   Threads: Most personal. Off-the-cuff, lowercase OK. Thoughts shared with
- *            people you're already in conversation with. No hashtags (use Tags).
- *   Bluesky: Casual, direct, tight (300 chars). Lead with hook.
- *            Community hashtags at end.
- *   Instagram: Caption under the artist image. Can breathe a bit more.
- *              Personal but slightly more structured.
- *   LinkedIn: The Unstream company page. Same substance, more formal register:
- *             complete sentences, sentence case, proper punctuation, no slang or
- *             "i built" (the page speaks as Unstream). Plain artist names — a
- *             LinkedIn mention needs a company/member URN, not an @handle.
- *             A few CamelCase hashtags at the end.
- */
-function generateDrafts(
-  artist: { name: string; slug: string; imageUrl: string | null },
-  artistType: 'indie' | 'prominent',
+function artistContext(
+  artist: { name: string; imageUrl: string | null },
+  url: string,
   platforms: ArtistPlatform[],
-  dayOfWeek: number,
-  handles: SocialHandles
-): PostDraft['posts'] {
-  const unstreamUrl = artistType === 'indie'
-    ? `${UNSTREAM_BASE}/a/${artist.slug}`
-    : `${UNSTREAM_BASE}/artist/${artist.slug}`;
-
-  const ctx = getContentContext(platforms, artist.name);
-  const angle = dayOfWeek % 4;
-
-  // Use handles in place of artist name on matching platforms.
-  // Threads can tag Instagram handles too (same Meta namespace).
-  const tTag = handles.threads || handles.instagram;
-  const bTag = handles.bluesky;
-  const iTag = handles.instagram;
-
-  // Tagged name for first mention on each platform; falls back to plain name.
-  const tName = tTag || artist.name;
-  const bName = bTag || artist.name;
-  const iName = iTag || artist.name;
-  const lName = artist.name;
-
-  let threads: string;
-  let bluesky: string;
-  let instagram: string;
-  let linkedin: string;
-
-  if (artistType === 'indie') {
-    // --- INDIE / VERIFIED ---
-    // These are smaller artists who claimed their Unstream page.
-    // Voice: genuine discovery, like recommending a band to a friend.
-    switch (angle) {
-      case 0: // thinking-out-loud discovery
-        if (ctx.topPlatformName && ctx.payout) {
-          threads = `${tName} claimed their page on Unstream and i've been poking around their ${ctx.topPlatformName} — ${ctx.payout} of every sale goes straight to them. that's the whole idea.\n\n${unstreamUrl}`;
-        } else {
-          threads = `${tName} claimed their page on Unstream. all their direct-support links in one spot, no streaming middlemen.\n\n${unstreamUrl}`;
-        }
-        bluesky = ctx.topPlatformName
-          ? `${bName} is on ${ctx.topPlatformName} and has a page on Unstream with all their direct links.\n\n${unstreamUrl}`
-          : `${bName} has a page on Unstream — all their direct-support links in one spot.\n\n${unstreamUrl}`;
-        instagram = ctx.topPlatformName
-          ? `${iName} has a verified page on Unstream.\n\nYou can buy their music directly on ${ctx.topPlatformName}${ctx.payout ? ` where they keep ${ctx.payout}` : ''} — or check all their links in one place.\n\n${unstreamUrl}`
-          : `${iName} has a verified page on Unstream — every link you need to support them directly, no streaming required.\n\n${unstreamUrl}`;
-        if (ctx.topPlatformName && ctx.payout) {
-          linkedin = `${lName} has claimed their verified page on Unstream. Their music is available on ${ctx.topPlatformName}, where ${ctx.payout} of every sale goes directly to the artist.\n\nThat is the idea behind Unstream: making it easy to find where your money does the most for the people who made the music.\n\n${unstreamUrl}`;
-        } else if (ctx.topPlatformName) {
-          linkedin = `${lName} has claimed their verified page on Unstream. You can buy their music directly on ${ctx.topPlatformName}, and every one of their direct-support links is collected in one place.\n\n${unstreamUrl}`;
-        } else {
-          linkedin = `${lName} has claimed their verified page on Unstream, which collects every place you can support them directly, without a streaming service in the middle.\n\n${unstreamUrl}`;
-        }
-        break;
-
-      case 1: // payout angle, conversational
-        if (ctx.topPlatformName && ctx.payout) {
-          threads = `${tName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. on Spotify they'd get about $0.003 per stream. pretty big difference.\n\n${unstreamUrl}`;
-          bluesky = `${bName} on ${ctx.topPlatformName}: ${ctx.payout} per sale. On Spotify: ~$0.003 per stream. That adds up.\n\n${unstreamUrl}`;
-          instagram = `${iName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}.\n\nOn Spotify they'd get about $0.003 per stream.\n\nOne album purchase does more than thousands of streams.\n\n${unstreamUrl}`;
-          linkedin = `${lName} keeps ${ctx.payout} of every sale on ${ctx.topPlatformName}. On Spotify, they would earn roughly $0.003 per stream.\n\nA single album purchase does more for an independent artist than thousands of streams.\n\n${unstreamUrl}`;
-        } else {
-          threads = `you can buy ${tName}'s music directly and they get most of the money. or you can stream it and they get fractions of a penny. worth thinking about.\n\n${unstreamUrl}`;
-          bluesky = `You can buy ${bName}'s music directly — they get way more than streaming would ever pay them.\n\n${unstreamUrl}`;
-          instagram = `You can buy ${iName}'s music directly and they get most of the money.\n\nOr you can stream it and they get fractions of a penny.\n\nAll their links: ${unstreamUrl}`;
-          linkedin = `When you buy ${lName}'s music directly, most of the money goes to them. When you stream it, they receive a fraction of a cent per play.\n\nAll of their direct-support links are on Unstream.\n\n${unstreamUrl}`;
-        }
-        break;
-
-      case 2: // has music on platform
-        if (ctx.topPlatformName) {
-          threads = `${tName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout}` : ''}. that's what direct support looks like.\n\n${unstreamUrl}`;
-          bluesky = `${bName} has music on ${ctx.topPlatformName} — buy it where the money goes to the artist.\n\n${unstreamUrl}`;
-          instagram = `${iName} has music on ${ctx.topPlatformName} you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''} instead of adding another fraction-of-a-penny stream.\n\n${unstreamUrl}`;
-          linkedin = `${lName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? `, and they keep ${ctx.payout} of every sale` : ''}. That does far more for the artist than another stream worth a fraction of a cent.\n\n${unstreamUrl}`;
-        } else {
-          // fallback: warm recommendation. No platform sells music here (none listed, or only
-          // patronage), so this says "support", not "buy".
-          const n = ctx.directPlatforms.length;
-          const places = n === 0 ? 'a few places' : n === 1 ? 'a place' : `${n} places`;
-          threads = `been looking at ${tName}'s page on Unstream — they've got ${places} where you can support them directly. worth a look 👀\n\n${unstreamUrl}`;
-          bluesky = `${bName} on Unstream — all their direct-support links in one spot.\n\n${unstreamUrl}`;
-          instagram = `${iName} has a verified page on Unstream with all their direct-support links.\n\nSkip the stream, support them for real.\n\n${unstreamUrl}`;
-          linkedin = `${lName} has a verified page on Unstream that lists every place you can support them directly.\n\n${unstreamUrl}`;
-        }
-        break;
-
-      default: // casual nudge
-        threads = `if you like ${tName}, go buy their music instead of streaming it. they have a page on Unstream with all their direct links.\n\n${unstreamUrl}`;
-        bluesky = `If you like ${bName}, buy their music instead of streaming it.\n\n${unstreamUrl}`;
-        instagram = `If you like ${iName}, you can support them directly instead of streaming.\n\nAll their links in one place:\n${unstreamUrl}`;
-        linkedin = `If you enjoy ${lName}'s music, consider buying it rather than streaming it. Their verified Unstream page lists every place to support them directly.\n\n${unstreamUrl}`;
-    }
-  } else {
-    // --- PROMINENT / MUSICBRAINZ ---
-    // These are bigger names people already know. The angle: "did you know
-    // you can just... buy their music? and they get way more of your money?"
-    switch (angle) {
-      case 0: // genuine surprise — did you know?
-        if (ctx.topPlatformName) {
-          threads = `did you know you can just... buy ${tName}'s music? like, on ${ctx.topPlatformName}? ${ctx.payout ? `they get ${ctx.payout} of it` : 'and they get way more of your money'} compared to the fraction of a penny per stream.\n\n${unstreamUrl}`;
-          bluesky = `Did you know you can buy ${bName}'s music on ${ctx.topPlatformName}? ${ctx.payout ? `${ctx.payout} to the artist` : 'Way more than streaming pays'}.\n\n${unstreamUrl}`;
-        } else {
-          threads = `did you know you can just... buy ${tName}'s music online? and they get way more of your money than from streaming?\n\n${unstreamUrl}`;
-          bluesky = `Did you know you can buy ${bName}'s music directly? Way more goes to them than streaming.\n\n${unstreamUrl}`;
-        }
-        instagram = `You probably already listen to ${iName}.\n\nBut did you know you can buy their music directly${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}? ${ctx.payout ? `They get ${ctx.payout} of every sale` : 'They get way more of your money'} compared to what streaming pays.\n\n${unstreamUrl}`;
-        linkedin = `You may already listen to ${lName}, but did you know you can also buy their music directly${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}? ${ctx.payout ? `They receive ${ctx.payout} of every sale, compared with a fraction of a cent per stream.` : 'A purchase earns them far more than the fraction of a cent they receive per stream.'}\n\n${unstreamUrl}`;
-        break;
-
-      case 1: // the math
-        if (ctx.topPlatformName && ctx.payout) {
-          threads = `one ${ctx.topPlatformName} purchase of a ${artist.name} album does more for them than mass streaming it for years. they keep ${ctx.payout}. on streaming apps, they get about $0.003 every time you press play.\n\n${unstreamUrl}`;
-          bluesky = `One ${ctx.topPlatformName} purchase of ${bName} > years of streaming. ${ctx.payout} vs ~$0.003/play.\n\n${unstreamUrl}`;
-          linkedin = `A single ${ctx.topPlatformName} purchase of a ${lName} album does more for them than years of streaming. They keep ${ctx.payout} of the sale; streaming services pay them roughly $0.003 each time you press play.\n\n${unstreamUrl}`;
-        } else {
-          threads = `one album purchase does more for ${tName} than streaming them for years. on streaming apps they get about $0.003 every time you press play. buying it? they keep most of it.\n\n${unstreamUrl}`;
-          bluesky = `One album purchase does more for ${bName} than years of streaming. ~$0.003 per play vs keeping most of the sale.\n\n${unstreamUrl}`;
-          linkedin = `A single album purchase does more for ${lName} than years of streaming. Streaming services pay roughly $0.003 per play, while a direct purchase lets the artist keep most of the sale.\n\n${unstreamUrl}`;
-        }
-        instagram = `One album purchase does more for ${iName} than streaming them for years.\n\nStreaming: ~$0.003 per play\nBuying${ctx.topPlatformName ? ` on ${ctx.topPlatformName}` : ''}: ${ctx.payout ? `${ctx.payout} goes to them` : 'they keep most of it'}\n\n${unstreamUrl}`;
-        break;
-
-      case 2: // has music on platform
-        if (ctx.topPlatformName) {
-          threads = `${tName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}. way better than what streaming pays them.\n\n${unstreamUrl}`;
-          bluesky = `${bName} has music on ${ctx.topPlatformName} you can buy directly. ${ctx.payout ? `${ctx.payout} to the artist.` : 'Way more than streaming pays.'}\n\n${unstreamUrl}`;
-          instagram = `${iName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? ` — they keep ${ctx.payout} of every sale` : ''}.\n\nWay better than what streaming pays them.\n\n${unstreamUrl}`;
-          linkedin = `${lName} has music on ${ctx.topPlatformName} that you can buy directly${ctx.payout ? `, and they keep ${ctx.payout} of every sale` : ''}. That is considerably more than streaming pays them.\n\n${unstreamUrl}`;
-        } else {
-          threads = `you can buy ${tName}'s music directly online and they get way more out of it than streaming would ever pay them. worth knowing about.\n\n${unstreamUrl}`;
-          bluesky = `You can buy ${bName}'s music directly. They get way more than streaming pays.\n\n${unstreamUrl}`;
-          instagram = `You can buy ${iName}'s music directly online and they get way more than the fractions of a penny streaming pays.\n\nAll their links: ${unstreamUrl}`;
-          linkedin = `You can buy ${lName}'s music directly online, and they earn considerably more from a purchase than streaming would ever pay them.\n\n${unstreamUrl}`;
-        }
-        break;
-
-      default: // earnest nudge
-        if (ctx.topPlatformName) {
-          threads = `${tName} is on ${ctx.topPlatformName}. you can buy their music there and they get ${ctx.payout || 'most of it'}. if you're a fan, that's a pretty good way to show it.\n\n${unstreamUrl}`;
-          bluesky = `${bName} is on ${ctx.topPlatformName}. Buy their music there. Or stream it for ~$0.003. Your call.\n\n${unstreamUrl}`;
-          linkedin = `${lName} is on ${ctx.topPlatformName}. When you buy their music there, they receive ${ctx.payout ? `${ctx.payout} of the sale` : 'most of the sale'}. For fans who want to support them, it is one of the most effective ways to do it.\n\n${unstreamUrl}`;
-        } else {
-          threads = `you can buy ${tName}'s music directly online — they get way more out of it than streaming. if you're a fan, it's worth looking into.\n\n${unstreamUrl}`;
-          bluesky = `You can buy ${bName}'s music directly — they get way more than streaming pays.\n\n${unstreamUrl}`;
-          linkedin = `You can buy ${lName}'s music directly online, and they earn far more from it than streaming pays. If you are a fan, it is worth a look.\n\n${unstreamUrl}`;
-        }
-        instagram = `${iName} is on ${ctx.topPlatformName || 'platforms where artists keep most of the money'}.\n\nYou can buy their music directly${ctx.payout ? ` and they get ${ctx.payout}` : ''}. Or you can stream it for fractions of a penny. Your call.\n\n${unstreamUrl}`;
-    }
-  }
-
-  // --- Hashtags & tags ---
-
-  // Bluesky: community hashtags for discoverability
-  const bskyTags = ['#musicsky', '#fairtrademusic'];
-  if (artistType === 'indie') bskyTags.push('#indiemusic');
-  if (ctx.latestRelease) bskyTags.push('#newmusic');
-  bskyTags.push('#supportartists');
-  bluesky += `\n\n${bskyTags.join(' ')}`;
-
-  // Instagram: hashtags appended to caption
-  const igTags = ['#music', '#fairtrademusic', '#supportartists'];
-  if (artistType === 'indie') igTags.push('#indiemusic', '#independentmusic');
-  if (ctx.latestRelease) igTags.push('#newmusic', '#newrelease');
-  if (ctx.topPlatform === 'bandcamp') igTags.push('#bandcamp');
-  igTags.push('#buymusic');
-  instagram += `\n\n${igTags.join(' ')}`;
-
-  // LinkedIn: a few CamelCase hashtags — more than three or four reads as spam there
-  const liTags = ['#MusicIndustry', '#SupportArtists'];
-  if (artistType === 'indie') liTags.push('#IndependentMusic');
-  if (ctx.latestRelease) liTags.push('#NewMusic');
-  linkedin += `\n\n${liTags.join(' ')}`;
-
-  // Threads: no hashtags in post body (use Tags feature via Buffer metadata).
-  // The Threads topic "Music Threads" is applied at schedule time, not in text.
-
-  // Enforce character limits with warnings (don't auto-truncate — human should trim)
-  if (bluesky.length > 300) {
-    console.warn(`  ⚠ Bluesky draft for ${artist.name} over limit (${bluesky.length}/300) — needs manual trim`);
-  }
-  if (threads.length > 500) {
-    console.warn(`  ⚠ Threads draft for ${artist.name} over limit (${threads.length}/500) — needs manual trim`);
-  }
-
-  if (linkedin.length > 3000) {
-    console.warn(`  ⚠ LinkedIn draft for ${artist.name} over limit (${linkedin.length}/3000) — needs manual trim`);
-  }
-
-  return { threads, bluesky, instagram, linkedin };
+  location: string | null,
+  catalogue: CatalogueRelease[]
+): ArtistContext {
+  const handles = extractSocialHandles(platforms);
+  return {
+    name: artist.name,
+    url,
+    imageUrl: artist.imageUrl,
+    location,
+    threadsHandle: handles.threads,
+    blueskyHandle: handles.bluesky,
+    platform: sellingPlatform(platforms, artist.name, catalogue),
+  };
 }
 
-// --- Promo post generation ---
-
-interface ShippedFeature {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  announced: boolean;
-}
+// --- Shipped features ---
 
 const SHIPPED_FEATURES_PATH = join(DATA_DIR, 'shipped-features.json');
 
@@ -525,104 +335,6 @@ function markFeatureAnnounced(featureId: string) {
     feature.announced = true;
     writeFileSync(SHIPPED_FEATURES_PATH, JSON.stringify(features, null, 2));
   }
-}
-
-/**
- * Generate a feature announcement post for a recently shipped feature.
- * Voice: sideways/personal announcement, not "we're excited to announce."
- */
-function generateFeaturePost(feature: ShippedFeature): PostDraft['posts'] {
-  const url = UNSTREAM_BASE;
-
-  // These are starting-point drafts — the voice here is intentionally
-  // understated. You'll want to edit these to feel more natural for
-  // whatever the feature actually is.
-  // feature.description should read well after "new on Unstream:" — write it
-  // as a standalone blurb, not a sentence that starts with "Unstream".
-  const threads = `new on Unstream: ${feature.description}\n\n${url}`;
-  const bluesky = `New on Unstream: ${feature.description}\n\n${url}\n\n#musicsky #fairtrademusic #supportartists`;
-  const instagram = `New on Unstream:\n\n${feature.description}\n\n${url}\n\n#music #fairtrademusic #supportartists #indiemusic #buymusic`;
-  // feature.description is already written in full sentences, which LinkedIn needs
-  const linkedin = `New on Unstream: ${feature.description}\n\n${url}\n\n#MusicIndustry #SupportArtists #IndependentMusic`;
-
-  return { threads, bluesky, instagram, linkedin };
-}
-
-/**
- * Generate a weekly promotional post about Unstream itself.
- * If there's an unannounced shipped feature, promotes that instead.
- * Otherwise rotates through general promo angles.
- *
- * Voice: sideways/personal, never "check out our product" —
- * more like thinking out loud about why it exists.
- */
-function generatePromoPost(weekNumber: number): { posts: PostDraft['posts']; featureId?: string } {
-  // Check for unannounced features first
-  const features = loadShippedFeatures();
-  const unannounced = features.find(f => !f.announced);
-
-  if (unannounced) {
-    return { posts: generateFeaturePost(unannounced), featureId: unannounced.id };
-  }
-
-  // General promo rotation
-  const angle = weekNumber % 6;
-  const url = UNSTREAM_BASE;
-
-  let threads: string;
-  let bluesky: string;
-  let instagram: string;
-  let linkedin: string;
-
-  switch (angle) {
-    case 0: // what it does
-      threads = `i built a free tool that searches 17+ platforms to help you find where to buy music directly from artists. no account, no tracking, no paywall.\n\n${url}`;
-      bluesky = `Free tool that searches 17+ platforms to find where to buy music directly from artists. No account needed.\n\n${url}`;
-      instagram = `Unstream searches 17+ alternative music platforms to help you find where to buy music directly from artists.\n\nNo account. No tracking. No paywall. Just a way to get more money to the people who make the music.\n\n${url}`;
-      linkedin = `Unstream is a free tool that searches more than 17 platforms to show you where to buy music directly from artists. There is no account to create, no tracking and no paywall.\n\n${url}`;
-      break;
-
-    case 1: // the why
-      threads = `the average Spotify stream pays an artist about $0.003. one Bandcamp purchase can equal thousands of streams. that's why i made Unstream — it finds where you can buy an artist's music directly.\n\n${url}`;
-      bluesky = `$0.003 per Spotify stream. One Bandcamp purchase = thousands of streams. That's why Unstream exists.\n\n${url}`;
-      instagram = `The average Spotify stream pays an artist about $0.003.\n\nOne album purchase on Bandcamp is worth thousands of streams.\n\nUnstream helps you find where to buy music directly from the artists you love.\n\n${url}`;
-      linkedin = `The average Spotify stream pays an artist about $0.003, while a single Bandcamp purchase can be worth thousands of streams. That gap is why Unstream exists: it shows you where to buy an artist's music directly.\n\n${url}`;
-      break;
-
-    case 2: // artist pages
-      threads = `artists can claim their page on Unstream for free — it puts all your direct-support links in one place. Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.\n\n${url}/artists`;
-      bluesky = `Artists: claim your free page on Unstream. All your direct-support links in one place.\n\n${url}/artists`;
-      instagram = `If you're an artist, you can claim your page on Unstream for free.\n\nIt puts all your direct-support links in one place — Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.\n\n${url}/artists`;
-      linkedin = `Artists can claim their Unstream page for free. It brings every direct-support link together in one place, whether that is Bandcamp, Faircamp, Mirlo, Patreon or anywhere else.\n\n${url}/artists`;
-      break;
-
-    case 3: // open source / indie
-      threads = `Unstream is free, open source, and built by one person. no VC funding, no data harvesting, no premium tier. the whole point is getting more money to artists, not less.\n\n${url}`;
-      bluesky = `Unstream is free, open source, and built by one person. The whole point is getting more money to artists.\n\n${url}`;
-      instagram = `Unstream is free, open source, and built by one person.\n\nNo VC funding. No data harvesting. No premium tier.\n\nThe whole point is getting more money to artists, not less.\n\n${url}`;
-      linkedin = `Unstream is free, open source and built by one person. It has no venture funding, no data harvesting and no premium tier. The goal is to get more money to artists, not less.\n\n${url}`;
-      break;
-
-    case 4: // how it works
-      threads = `search for any artist on Unstream and it checks 17+ platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in a few seconds. shows you where to buy their music directly — with payout percentages so you know where your money goes.\n\n${url}`;
-      bluesky = `Search any artist on Unstream → it checks 17+ platforms and shows where to buy their music directly, with payout percentages.\n\n${url}`;
-      instagram = `Search for any artist on Unstream.\n\nIt checks 17+ platforms — Bandcamp, Faircamp, Mirlo, Qobuz, and more — in seconds — and shows you where to buy their music directly, with transparent payout percentages.\n\n${url}`;
-      linkedin = `Search for any artist on Unstream, and within a few seconds it checks more than 17 platforms, including Bandcamp, Faircamp, Mirlo and Qobuz. The results show where you can buy their music directly, with payout percentages so you know where your money goes.\n\n${url}`;
-      break;
-
-    default: // the pitch, earnest
-      threads = `if you listen to music and care about the people who make it, this might be useful to you. Unstream finds where you can support any artist directly instead of streaming.\n\n${url}`;
-      bluesky = `If you care about the people who make the music you listen to — Unstream finds where to support them directly.\n\n${url}`;
-      instagram = `If you listen to music and care about the people who make it, this might be useful.\n\nUnstream finds where you can support any artist directly instead of streaming.\n\nFree. No account needed.\n\n${url}`;
-      linkedin = `If you listen to music and care about the people who make it, Unstream may be useful to you. It finds where you can support any artist directly instead of streaming.\n\n${url}`;
-  }
-
-  // Hashtags
-  bluesky += '\n\n#musicsky #fairtrademusic #supportartists #indiemusic';
-  instagram += '\n\n#music #fairtrademusic #supportartists #indiemusic #buymusic #bandcamp';
-  linkedin += '\n\n#MusicIndustry #SupportArtists #IndependentMusic';
-
-  return { posts: { threads, bluesky, instagram, linkedin } };
 }
 
 // --- Data loading ---
@@ -828,6 +540,42 @@ async function fetchCanonicalSlugs(): Promise<Map<string, string>> {
   return canonical;
 }
 
+interface IndieLookup {
+  platforms: ArtistPlatform[];
+  location: string | null;
+  releases: CatalogueRelease[];
+}
+
+/**
+ * A verified artist's links, location and release catalogue in one request, from the same public
+ * endpoint the artist page uses (`/api/artist-page`; the owner-only `/api/artist-releases` needs
+ * a session). Its links leave out junk search links, the releases come in the artist's own order
+ * and then newest first, and hidden releases are already gone.
+ *
+ * Null means the lookup failed, which is not the same as "nowhere to buy" — the caller skips the
+ * artist either way, but says which.
+ */
+async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
+  try {
+    const res = await fetch(`${UNSTREAM_BASE}/api/artist-page?slug=${encodeURIComponent(slug)}`);
+    if (!res.ok) return null;
+    const data = await res.json() as {
+      artist?: { city?: string | null; country?: string | null };
+      links?: { platform: string; url: string }[];
+      socialLinks?: { platform: string; url: string }[];
+      releases?: CatalogueRelease[];
+    };
+    const links = [...(data.links || []), ...(data.socialLinks || [])];
+    return {
+      platforms: links.map(l => ({ sourceId: l.platform, url: l.url })),
+      location: data.artist?.city || data.artist?.country || null,
+      releases: data.releases || [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 // --- Week calculation ---
 
 function getWeekDates(weekStr?: string): { week: string; dates: string[] } {
@@ -904,6 +652,47 @@ function pickArtist<T extends { slug: string; name: string; imageUrl: string | n
   return null;
 }
 
+// How many artists a slot tries before giving up on it: each failed try is an artist with nowhere
+// to buy, or a lookup that failed, and those are skipped for the rest of the run.
+const MAX_PICK_ATTEMPTS = 8;
+
+/** Artists this run has already used up: featured in an earlier slot, or skipped. */
+interface RunPicks {
+  featured: Set<string>;
+  skipped: Set<string>;
+}
+
+/**
+ * Pick an artist for a slot and build their posts, moving on to another artist when `build`
+ * returns null. Only an artist who actually gets posts is marked featured.
+ *
+ * Nobody already featured or skipped this run is offered again. Without that, a pool whose only
+ * unfeatured artists were skipped ones made pickArtist start a new cycle, and the same artist went
+ * out four days running. A new cycle also empties history, so this week's earlier picks are put
+ * back afterwards; otherwise next week could pick them again.
+ */
+async function pickSpotlight<T extends { slug: string; name: string; imageUrl: string | null }>(
+  pool: T[],
+  history: History,
+  run: RunPicks,
+  build: (artist: T) => Promise<{ context: ArtistContext; posts: SocialPost[] } | null>
+): Promise<{ artist: T; context: ArtistContext; posts: SocialPost[] } | null> {
+  for (let attempt = 0; attempt < MAX_PICK_ATTEMPTS; attempt++) {
+    const artist = pickArtist(pool.filter(a => !run.featured.has(a.slug) && !run.skipped.has(a.slug)), history);
+    if (!artist) return null;
+    const built = await build(artist);
+    if (built) {
+      run.featured.add(artist.slug);
+      for (const slug of run.featured) {
+        if (!history.featured.includes(slug)) history.featured.push(slug);
+      }
+      return { artist, ...built };
+    }
+    run.skipped.add(artist.slug);
+  }
+  return null;
+}
+
 // --- Buffer GraphQL integration ---
 // Uses Buffer's GraphQL API at https://api.buffer.com
 // Docs: https://developers.buffer.com
@@ -959,33 +748,86 @@ async function listChannels() {
   console.log('Order: threads,bluesky,instagram,linkedin\n');
 }
 
-interface CreatePostOpts {
-  channelId: string;
-  text: string;
-  dueAt: string;
-  imageUrl?: string | null;
-  saveToDraft: boolean;
-  metadata?: Record<string, unknown>;
+// Threads and Bluesky at 9am ET (8am in winter), LinkedIn on weekday afternoons, where its
+// engagement peaks.
+const POST_TIME_UTC: Record<Platform, string> = { threads: '13:00', bluesky: '13:00', linkedin: '20:00' };
+
+function lengthProblem(post: SocialPost): string | null {
+  const limit = CHARACTER_LIMITS[post.platform];
+  return post.text.length > limit ? `${post.text.length}/${limit} characters` : null;
 }
 
-async function createBufferPost(opts: CreatePostOpts) {
+/**
+ * Each tag's Buffer id, creating any tag the organization doesn't have yet. Run before anything
+ * is generated: a failure here should stop the run while there is still nothing to roll back.
+ */
+async function ensureTags(organizationId: string): Promise<Record<TagKey, string>> {
+  const existing = new Map<string, string>();
+  let after: string | null = null;
+  do {
+    const result = await bufferGraphQL(`
+      query Tags($organizationId: OrganizationId!, $after: String) {
+        tagsV2(input: { organizationId: $organizationId }, first: 100, after: $after) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { id name } }
+        }
+      }
+    `, { organizationId, after });
+    const page = result.data.tagsV2;
+    for (const edge of page.edges) existing.set(edge.node.name, edge.node.id);
+    after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
+  } while (after);
+
+  const ids = {} as Record<TagKey, string>;
+  for (const key of Object.keys(TAGS) as TagKey[]) {
+    const { name, color } = TAGS[key];
+    const found = existing.get(name);
+    if (found) {
+      ids[key] = found;
+      continue;
+    }
+    const result = await bufferGraphQL(`
+      mutation CreateTag($input: CreateTagInput!) {
+        createTag(input: $input) {
+          ... on TagActionSuccess { tag { id } }
+          ... on MutationError { message }
+        }
+      }
+    `, { input: { organizationId, tag: { name, color } } });
+    const created = result.data.createTag;
+    if (!created?.tag) throw new Error(`Couldn't create the Buffer tag "${name}": ${created?.message ?? 'unknown error'}`);
+    console.log(`  Created Buffer tag "${name}"`);
+    ids[key] = created.tag.id;
+  }
+  return ids;
+}
+
+/** Buffer's CreatePostInput for one post. createPost and createContentItem both take it. */
+function postInput(post: SocialPost, channelId: string, date: string, saveToDraft: boolean, tagId: string): Record<string, unknown> {
   const input: Record<string, unknown> = {
-    channelId: opts.channelId,
-    text: opts.text,
-    dueAt: opts.dueAt,
+    channelId,
+    text: post.text,
+    dueAt: `${date}T${POST_TIME_UTC[post.platform]}:00Z`,
     schedulingType: 'automatic',
     mode: 'customScheduled',
-    saveToDraft: opts.saveToDraft,
+    saveToDraft,
+    // On every post, not only the content item: Buffer doesn't pass an item's tags down to its
+    // posts, and analytics filter on the posts' own tags.
+    tagIds: [tagId],
+    assets: post.images.map(image => ({ image: { url: image.url, metadata: { altText: image.altText } } })),
   };
+  if (post.platform === 'threads') input.metadata = { threads: { topic: 'Music Threads' } };
+  if (post.platform === 'linkedin' && post.firstComment) input.metadata = { linkedin: { firstComment: post.firstComment } };
+  return input;
+}
 
-  if (opts.imageUrl) {
-    input.assets = [{ image: { url: opts.imageUrl } }];
-  }
+interface BufferResult {
+  created: { id: string; status: string; channelId: string }[];
+  /** channelId is set when the error belongs to one channel's post. */
+  errors: { channelId?: string; message: string }[];
+}
 
-  if (opts.metadata) {
-    input.metadata = opts.metadata;
-  }
-
+async function createBufferPost(input: Record<string, unknown>): Promise<BufferResult> {
   const result = await bufferGraphQL(`
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
@@ -1004,63 +846,98 @@ async function createBufferPost(opts: CreatePostOpts) {
 
   const data = result.data?.createPost;
   if (data?.post) {
-    return { success: true, id: data.post.id, status: data.post.status };
+    return { created: [{ id: data.post.id, status: data.post.status, channelId: String(input.channelId) }], errors: [] };
   }
-  return { success: false, error: data?.message || 'Unknown error' };
+  return { created: [], errors: [{ channelId: String(input.channelId), message: data?.message || 'Unknown error' }] };
+}
+
+/**
+ * One subject on several channels, created as one Buffer content item holding a post per
+ * channel, so Buffer shows it as one piece of content. Validation is all-or-nothing: an invalid
+ * variant creates nothing, which is why over-long posts are dropped before this is called.
+ * (createContentItem is an early-preview API; createPost stays in use for single posts.)
+ */
+async function createBufferContentItem(
+  organizationId: string,
+  title: string,
+  targetDate: string,
+  tagId: string,
+  posts: Record<string, unknown>[]
+): Promise<BufferResult> {
+  const result = await bufferGraphQL(`
+    mutation CreateContentItem($input: CreateContentItemInput!) {
+      createContentItem(input: $input) {
+        ... on CreateContentItemSuccess {
+          content {
+            body {
+              ... on PostContent { posts { id status channelId } }
+            }
+          }
+        }
+        ... on CreateContentItemFailure {
+          message
+          errors {
+            ... on CreateContentItemVariantInvalidInputError { channelId message }
+            ... on CreateContentItemVariantLimitReachedError { channelId message }
+            ... on CreateContentItemVariantNotFoundError { channelId message }
+            ... on InvalidInputError { message }
+            ... on LimitReachedError { message }
+            ... on NotFoundError { message }
+          }
+        }
+      }
+    }
+  `, { input: { organizationId, title, targetDate, tagIds: [tagId], posts } });
+
+  const data = result.data?.createContentItem;
+  const created = data?.content?.body?.posts ?? [];
+  if (data?.content) return { created, errors: [] };
+
+  const errors: BufferResult['errors'] = data?.errors ?? [];
+  return { created, errors: errors.length ? errors : [{ message: data?.message || 'Unknown error' }] };
 }
 
 // --- Markdown output ---
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-function draftToMarkdown(draft: PostDraft): string {
-  const dayName = DAY_NAMES[draft.day - 1];
-  const typeLabels = { indie: 'Indie (Verified Unstream)', prominent: 'Prominent (MusicBrainz)', promo: 'Unstream Promo' };
-  const typeLabel = typeLabels[draft.artistType];
+const KIND_LABELS: Record<DayKind, string> = {
+  indie: 'Indie spotlight',
+  'record-math': 'Record math (prominent artist)',
+  question: 'Question',
+  maker: 'Maker post',
+  feature: 'Feature announcement',
+};
 
-  return `# ${dayName}, ${draft.date}
+const PLATFORM_LABELS: Record<Platform, string> = { threads: 'Threads', bluesky: 'Bluesky', linkedin: 'LinkedIn' };
 
-**Artist:** ${draft.artistName}
-**Type:** ${typeLabel}
-**Unstream:** ${draft.unstreamUrl}
-**Platforms:** ${draft.platforms.join(', ')}
-${draft.latestRelease ? `**Latest release:** ${draft.latestRelease}\n` : ''}${draft.imageUrl ? `**Image:** ${draft.imageUrl}\n` : ''}**Handles:** ${[
-    draft.socialHandles.threads ? `Threads: ${draft.socialHandles.threads}` : null,
-    draft.socialHandles.bluesky ? `Bluesky: ${draft.socialHandles.bluesky}` : null,
-    draft.socialHandles.instagram ? `IG: ${draft.socialHandles.instagram}` : null,
-  ].filter(Boolean).join(' | ') || '(none found)'}
+function draftToMarkdown(draft: DayDraft): string {
+  const header = [
+    `# ${DAY_NAMES[draft.day - 1]}, ${draft.date}: ${KIND_LABELS[draft.kind]}`,
+    draft.artistName ? `\n**Artist:** ${draft.artistName} (${draft.artistSlug})` : '',
+  ].join('');
 
----
+  const sections = draft.groups.map(group => {
+    const posts = group.posts.map(post => {
+      const lines = [
+        `### ${PLATFORM_LABELS[post.platform]} (${post.text.length}/${CHARACTER_LIMITS[post.platform]} chars)`,
+        '',
+        post.text,
+      ];
+      if (post.images.length) lines.push('', `**Images:** ${post.images.map(i => i.url).join(', ')}`);
+      if (post.firstComment) lines.push('', `**First comment:**`, '', post.firstComment);
+      return lines.join('\n');
+    });
+    return `## ${group.title}\n\n${posts.join('\n\n')}`;
+  });
 
-## Threads (${draft.posts.threads.length}/500 chars)
-
-${draft.posts.threads}
-
----
-
-## Bluesky (${draft.posts.bluesky.length}/300 chars)
-
-${draft.posts.bluesky}
-
----
-
-## Instagram
-
-${draft.posts.instagram}
-
----
-
-## LinkedIn (${draft.posts.linkedin.length}/3000 chars)
-
-${draft.posts.linkedin}
-
----
-
-*Edit these drafts, then run with --schedule to push to Buffer.*
-`;
+  return `${header}\n\n---\n\n${sections.join('\n\n---\n\n')}\n\n---\n\n*Edit these drafts, then run with --schedule to push to Buffer.*\n`;
 }
 
 // --- Main ---
+
+// Mon-Sun. Saturday becomes a question one week in three (isQuestionWeek).
+const WEEK_PLAN: DayKind[] = ['indie', 'indie', 'indie', 'record-math', 'indie', 'indie', 'maker'];
 
 async function main() {
   const args = process.argv.slice(2);
@@ -1073,6 +950,29 @@ async function main() {
     await listChannels();
     return;
   }
+
+  // Checked before anything is generated: history is saved before scheduling, and the workflow
+  // commits it even after a failed run, so a missing secret found later would record artists as
+  // featured whose posts were never sent.
+  const token = process.env.BUFFER_ACCESS_TOKEN;
+  const channelIdsStr = process.env.BUFFER_CHANNEL_IDS;
+  const orgId = process.env.BUFFER_ORG_ID;
+  if (doSchedule) {
+    if (!token) {
+      console.error('\n✗ BUFFER_ACCESS_TOKEN not set. Cannot schedule.');
+      process.exit(1);
+    }
+    if (!orgId) {
+      console.error('\n✗ BUFFER_ORG_ID not set. Content items belong to an organization, so scheduling needs it.');
+      process.exit(1);
+    }
+    if (!channelIdsStr) {
+      console.error('\n✗ BUFFER_CHANNEL_IDS not set. Run with --channels to find your IDs.');
+      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id,linkedin_id');
+      process.exit(1);
+    }
+  }
+  const tagIds = doSchedule && orgId ? await ensureTags(orgId) : null;
 
   const { week, dates } = getWeekDates(weekArg);
   console.log(`\nGenerating posts for week ${week} (${dates[0]} → ${dates[6]})\n`);
@@ -1119,7 +1019,13 @@ async function main() {
           if (excluded.slugs.has(a.slug)) return false;
           const data = loadArtistData(a.slug);
           if (!data) return false;
-          return data.platforms.some(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'));
+          const platform = sellingPlatform(data.platforms, a.name, []);
+          if (!platform) return false;
+          // These links were matched by name, and some are another act's page entirely
+          // ("venomnoise" for Venom); bandcampMatchesArtist says why a strict match is the price.
+          if (platform.id !== 'bandcamp') return true;
+          const link = data.platforms.find(p => p.sourceId === 'bandcamp' && !isSearchUrl(p.url));
+          return !!link && bandcampMatchesArtist(a.name, link.url);
         })
         // Retired slugs (accent re-slugs, merges) post at their canonical URL. The manifest slug
         // is kept alongside: the generated data files are keyed by it, so platform lookup still
@@ -1134,136 +1040,114 @@ async function main() {
         'rather than risk featuring a deceased or non-music artist.'
     );
   }
-  console.log(`  ${prominentPool.length} prominent artists with direct-support platforms\n`);
+  console.log(`  ${prominentPool.length} prominent artists with a platform that sells their music (and, on Bandcamp, a page that's theirs)\n`);
 
   const weekDir = join(SOCIAL_DIR, week);
   if (!existsSync(weekDir)) mkdirSync(weekDir, { recursive: true });
 
-  const drafts: PostDraft[] = [];
-
-  // Parse week number for promo post rotation
+  const drafts: DayDraft[] = [];
   const weekNum = parseInt(week.split('-W')[1], 10);
+  const run: RunPicks = { featured: new Set(), skipped: new Set() };
+  // The indie artists posted so far this week, for Thursday's LinkedIn roundup.
+  const weekIndie: ArtistContext[] = [];
 
   for (let day = 1; day <= 7; day++) {
     const date = dates[day - 1];
+    let kind = WEEK_PLAN[day - 1];
+    if (day === 6 && isQuestionWeek(weekNum)) kind = 'question';
 
-    // Day 7 (Sunday): promotional post about Unstream itself
-    // If there's an unannounced shipped feature, promote that; otherwise general promo.
-    if (day === 7) {
-      const promo = generatePromoPost(weekNum);
-      const isFeature = !!promo.featureId;
-      const draft: PostDraft = {
-        day,
-        date,
-        artistType: 'promo',
-        artistName: 'Unstream',
-        artistSlug: 'unstream',
-        unstreamUrl: UNSTREAM_BASE,
-        imageUrl: null,
-        platforms: [],
-        latestRelease: null,
-        socialHandles: { threads: null, bluesky: null, instagram: null },
-        posts: promo.posts,
-      };
-      drafts.push(draft);
+    // The day's Threads and Bluesky posts share a subject, so they go to Buffer as one group.
+    const posts: SocialPost[] = [];
+    let artistName: string | null = null;
+    let artistSlug: string | null = null;
+    let subject: string | null = null;
 
-      if (isFeature) {
-        markFeatureAnnounced(promo.featureId!);
-        console.log(`  📢 ${DAY_NAMES[day - 1]} ${date}: Feature announcement — "${promo.featureId}"`);
-      } else {
-        console.log(`  📢 ${DAY_NAMES[day - 1]} ${date}: Unstream promo (angle ${weekNum % 6})`);
-      }
-
-      writeFileSync(join(weekDir, `day-${day}.md`), draftToMarkdown(draft));
-      continue;
-    }
-
-    // Days 1-6: alternate indie (odd) / prominent (even)
-    const isIndie = day % 2 === 1; // Mon=indie, Tue=prominent, Wed=indie...
-
-    let artist: { slug: string; name: string; imageUrl: string | null } | null = null;
-    let artistType: 'indie' | 'prominent';
-    let platforms: ArtistPlatform[] = [];
-
-    if (isIndie && verifiedArtists.length > 0) {
-      artistType = 'indie';
-      artist = pickArtist(verifiedArtists, history);
-      if (artist) {
-        // Fetch platform data from production API
-        try {
-          const res = await fetch(`${UNSTREAM_BASE}/api/artist?slug=${artist.slug}`);
-          if (res.ok) {
-            const data = await res.json();
-            platforms = data.platforms || [];
-          }
-        } catch {
-          // Fallback: no platform data, still generate post
+    if (kind === 'indie') {
+      const bandcampFriday = BANDCAMP_FRIDAY_DATES.includes(date);
+      const picked = await pickSpotlight(verifiedArtists, history, run, async artist => {
+        const lookup = await fetchIndieArtist(artist.slug);
+        if (!lookup) {
+          console.warn(`  ⚠ ${artist.name}: artist lookup failed — trying someone else`);
+          return null;
         }
-      }
-    } else {
-      artistType = 'prominent';
-      const picked = pickArtist(prominentPool, history);
+        const context = artistContext(artist, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
+        const spotlight = indieSpotlight(context, { bandcampFriday });
+        if (!spotlight) {
+          console.log(`  · ${artist.name}: nowhere to buy their music yet — trying someone else`);
+          return null;
+        }
+        return { context, posts: spotlight };
+      });
       if (picked) {
-        artist = picked;
+        posts.push(...picked.posts);
+        weekIndie.push(picked.context);
+        artistName = picked.artist.name;
+        artistSlug = picked.artist.slug;
+      }
+    } else if (kind === 'record-math') {
+      const bandcampFridayTomorrow = BANDCAMP_FRIDAY_DATES.includes(dates[day] ?? '');
+      const picked = await pickSpotlight(prominentPool, history, run, async artist => {
         // Data files are keyed by the manifest slug; the post URL uses the (possibly
         // re-pointed) canonical one.
-        const data = loadArtistData(picked.manifestSlug);
-        if (data) platforms = data.platforms;
+        const data = loadArtistData(artist.manifestSlug);
+        if (!data) return null;
+        const context = artistContext(artist, `${UNSTREAM_BASE}/artist/${artist.slug}`, data.platforms, null, []);
+        const math = recordMath(context, { bandcampFridayTomorrow });
+        return math ? { context, posts: math } : null;
+      });
+      if (picked) {
+        posts.push(...picked.posts);
+        artistName = picked.artist.name;
+        artistSlug = picked.artist.slug;
+      }
+    } else if (kind === 'question') {
+      posts.push(...questionPost(weekNum));
+    } else {
+      // Sunday: an unannounced shipped feature if there is one, otherwise the maker rotation.
+      const feature = loadShippedFeatures().find(f => !f.announced);
+      if (feature) {
+        kind = 'feature';
+        subject = feature.title;
+        posts.push(...featurePost(feature));
+        markFeatureAnnounced(feature.id);
+      } else {
+        posts.push(...makerPost(weekNum));
       }
     }
 
-    if (!artist) {
-      console.log(`  Day ${day} (${date}): No ${isIndie ? 'indie' : 'prominent'} artist available — skipping`);
-      continue;
+    const groups: PostGroup[] = [];
+    if (posts.length > 0) {
+      const about = artistName ?? subject;
+      groups.push({ title: `${KIND_LABELS[kind]}${about ? `: ${about}` : ''}`, tag: TAG_FOR_KIND[kind], posts });
+    } else {
+      console.log(`  Day ${day} (${date}): no ${KIND_LABELS[kind].toLowerCase()} available`);
     }
 
-    // Mark as featured
-    if (!history.featured.includes(artist.slug)) {
-      history.featured.push(artist.slug);
+    // The LinkedIn page: Tuesday's weekday post, Thursday's roundup of Monday to Wednesday. Each
+    // is its own subject, so its own group.
+    if (day === 2) {
+      groups.push({
+        title: 'LinkedIn weekday post',
+        tag: 'mission',
+        posts: [linkedinWeekdayPost(weekNum, { bandcampFridayThisWeek: BANDCAMP_FRIDAY_DATES.includes(dates[4]) })],
+      });
+    }
+    if (day === 4) {
+      const roundup = linkedinRoundup(weekIndie);
+      if (roundup) groups.push({ title: 'LinkedIn roundup', tag: 'roundup', posts: [roundup] });
+      else console.log(`  · Thursday: fewer than two indie artists this week — no LinkedIn roundup`);
     }
 
-    const highlightPlatforms = platforms
-      .filter(p => HIGHLIGHT_PLATFORMS.has(p.sourceId) && !p.url.includes('duckduckgo'))
-      .map(p => PLATFORM_NAMES[p.sourceId] || p.sourceId);
+    if (groups.length === 0) continue;
 
-    const rawRelease = platforms
-      .map(p => p.latestRelease)
-      .filter(Boolean)
-      .sort((a, b) => {
-        const dateA = a?.releaseDate ? new Date(a.releaseDate).getTime() : 0;
-        const dateB = b?.releaseDate ? new Date(b.releaseDate).getTime() : 0;
-        return dateB - dateA;
-      })[0];
-
-    const cleanedTitle = rawRelease
-      ? cleanReleaseTitle(rawRelease.title, artist.name)
-      : null;
-
-    const socialHandles = extractSocialHandles(platforms);
-    const posts = generateDrafts(artist, artistType, platforms, day, socialHandles);
-
-    const draft: PostDraft = {
-      day,
-      date,
-      artistType,
-      artistName: artist.name,
-      artistSlug: artist.slug,
-      unstreamUrl: artistType === 'indie'
-        ? `${UNSTREAM_BASE}/a/${artist.slug}`
-        : `${UNSTREAM_BASE}/artist/${artist.slug}`,
-      imageUrl: artist.imageUrl,
-      platforms: highlightPlatforms,
-      latestRelease: cleanedTitle ? `${cleanedTitle} (${rawRelease!.type})` : null,
-      socialHandles,
-      posts,
-    };
-
+    const draft: DayDraft = { day, date, kind, artistName, artistSlug, groups };
     drafts.push(draft);
+    console.log(`  ${DAY_NAMES[day - 1]} ${date}: ${groups.map(g => g.title).join(' + ')}`);
+    for (const post of groups.flatMap(g => g.posts)) {
+      const problem = lengthProblem(post);
+      if (problem) console.warn(`    ⚠ ${PLATFORM_LABELS[post.platform]} post is too long (${problem}) — needs a manual trim`);
+    }
 
-    const typeIcon = artistType === 'indie' ? '🎸' : '🎵';
-    console.log(`  ${typeIcon} ${DAY_NAMES[day - 1]} ${date}: ${artist.name} (${artistType})`);
-
-    // Write individual day markdown
     writeFileSync(join(weekDir, `day-${day}.md`), draftToMarkdown(draft));
   }
 
@@ -1276,93 +1160,64 @@ async function main() {
   console.log(`  - drafts.json (machine-readable)`);
 
   // --- Schedule to Buffer ---
-  if (doSchedule) {
-    const token = process.env.BUFFER_ACCESS_TOKEN;
-    const channelIdsStr = process.env.BUFFER_CHANNEL_IDS;
-
-    if (!token) {
-      console.error('\n✗ BUFFER_ACCESS_TOKEN not set. Cannot schedule.');
-      process.exit(1);
-    }
-    if (!channelIdsStr) {
-      console.error('\n✗ BUFFER_CHANNEL_IDS not set. Run with --channels to find your IDs.');
-      console.error('  Set as: BUFFER_CHANNEL_IDS=threads_id,bluesky_id,instagram_id,linkedin_id');
-      process.exit(1);
-    }
-
+  if (doSchedule && channelIdsStr && orgId && tagIds) {
     const [threadsId, blueskyId, instagramId, linkedinId] = channelIdsStr.split(',').map(id => id.trim());
+    const channels: Record<Platform, string | undefined> = { threads: threadsId, bluesky: blueskyId, linkedin: linkedinId };
     const saveToDraft = !doPublish;
 
+    if (instagramId) {
+      console.log('\nInstagram is paused (docs/specs/instagram-original-posts-spec.md) — its channel is skipped.');
+    }
     if (saveToDraft) {
       console.log('\nPushing to Buffer as DRAFTS (review in Buffer dashboard before publishing)...\n');
     } else {
       console.log('\nScheduling to Buffer for PUBLICATION...\n');
     }
 
+    const labelForChannel = new Map<string, string>();
+    for (const platform of Object.keys(channels) as Platform[]) {
+      const channelId = channels[platform];
+      if (channelId) labelForChannel.set(channelId, PLATFORM_LABELS[platform]);
+    }
+
+    let failures = 0;
     for (const draft of drafts) {
-      // Schedule at 12:00 PM ET each day
-      const dueAt = `${draft.date}T13:00:00Z`; // 8 AM ET = 1 PM UTC
+      for (const group of draft.groups) {
+        console.log(`  ${draft.date} — ${group.title}`);
 
-      const results = [];
-
-      if (threadsId) {
-        const result = await createBufferPost({
-          channelId: threadsId,
-          text: draft.posts.threads,
-          dueAt,
-          imageUrl: draft.imageUrl,
-          saveToDraft,
-          metadata: { threads: { topic: 'Music Threads' } },
-        });
-        results.push({ platform: 'Threads', ...result });
-      }
-      if (blueskyId) {
-        const result = await createBufferPost({
-          channelId: blueskyId,
-          text: draft.posts.bluesky,
-          dueAt,
-          imageUrl: draft.imageUrl,
-          saveToDraft,
-        });
-        results.push({ platform: 'Bluesky', ...result });
-      }
-      if (instagramId) {
-        // Instagram requires an image — use placeholder + save as draft if none available
-        const hasImage = !!draft.imageUrl;
-        const igImage = draft.imageUrl || `${UNSTREAM_BASE}/og-image.png`;
-        const result = await createBufferPost({
-          channelId: instagramId,
-          text: draft.posts.instagram,
-          dueAt,
-          imageUrl: igImage,
-          saveToDraft,
-          metadata: { instagram: { type: 'post', shouldShareToFeed: true } },
-        });
-        if (!hasImage && result.success) {
-          result.status = 'draft (needs image)';
+        const inputs: Record<string, unknown>[] = [];
+        for (const post of group.posts) {
+          const channelId = channels[post.platform];
+          if (!channelId) continue;
+          const problem = lengthProblem(post);
+          if (problem) {
+            failures++;
+            console.error(`    ✗ ${PLATFORM_LABELS[post.platform]}: too long to send (${problem})`);
+            continue;
+          }
+          inputs.push(postInput(post, channelId, draft.date, saveToDraft, tagIds[group.tag]));
         }
-        results.push({ platform: 'Instagram', ...result });
-      }
-      if (linkedinId) {
-        const result = await createBufferPost({
-          channelId: linkedinId,
-          text: draft.posts.linkedin,
-          dueAt,
-          imageUrl: draft.imageUrl,
-          saveToDraft,
-        });
-        results.push({ platform: 'LinkedIn', ...result });
-      }
+        if (inputs.length === 0) continue;
 
-      const ok = results.every(r => r.success);
-      console.log(`  ${ok ? '✓' : '⚠'} ${draft.date} — ${draft.artistName}`);
-      for (const r of results) {
-        const label = r.success ? `✓ ${r.status || 'ok'}` : `✗ ${r.error}`;
-        console.log(`    ${label} — ${r.platform}${r.id ? ` (${r.id})` : ''}`);
+        const result = inputs.length > 1
+          ? await createBufferContentItem(orgId, group.title, `${draft.date}T${POST_TIME_UTC.threads}:00Z`, tagIds[group.tag], inputs)
+          : await createBufferPost(inputs[0]);
+
+        for (const post of result.created) {
+          console.log(`    ✓ ${post.status} — ${labelForChannel.get(post.channelId) ?? post.channelId} (${post.id})`);
+        }
+        for (const error of result.errors) {
+          failures++;
+          const label = error.channelId ? `${labelForChannel.get(error.channelId) ?? error.channelId}: ` : '';
+          console.error(`    ✗ ${label}${error.message}`);
+        }
       }
     }
 
-    if (saveToDraft) {
+    if (failures > 0) {
+      console.error(`\n✗ ${failures} post(s) were not sent. Everything else is scheduled and history is saved.\n`);
+      process.exitCode = 1;
+    } else if (saveToDraft) {
       console.log('\n✓ Drafts pushed to Buffer. Review and approve them in the Buffer dashboard.');
       console.log('  To schedule directly instead: add --publish flag.\n');
     } else {

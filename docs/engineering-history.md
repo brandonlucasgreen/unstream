@@ -523,3 +523,74 @@ keeps rendering the historical feed. See `data/dispatch/README.md` for the full 
 
 The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 Dispatch-related repo changes go through the normal branch workflow like everything else.
+
+## Social posts: what six months of metrics said
+
+**Rules it produced:** spotlights are written for the featured artist to repost; prominent artists
+get one post a week; questions to the audience are occasional; Instagram is paused; payouts come
+from the platform registry; a rejected post fails the run.
+
+Measured from Buffer's per-post metrics for every post sent from 22 March to 30 September 2026
+(Threads 188 posts, Instagram 177, Bluesky 178, LinkedIn 3).
+
+### Why wording isn't the lever
+
+On Threads the four artist-post templates landed at median views of 35, 39, 42 and 44, so the
+wording barely moved anything. Artist posts sat at ~40 median views every month from April on.
+What moved a post was a repost or quote: median 100 views with one, 38 without. Tagged indie
+artists produced them: 34% of tagged indie posts got a repost or quote, against 10% untagged.
+For prominent artists it was 5–7% whether they were tagged or not. Fame didn't help: Steve Reich
+got 566 views, while Lucinda Williams, Buzzcocks and The Wombats each got 17.
+
+Posts about Unstream itself (Sunday, text only, first person) got a median of **254 views**,
+six times an artist post. The launch-day "Hi! I'm Brandon" thread got 930. Repeats didn't wear
+out: the $0.003 post did 251 views the first time and 313 the second.
+
+### Why prominent artists are down to one post a week
+
+All 791 artists in that pool headline Bandcamp, so their posts were "[name] + Bandcamp + 82% +
+$0.003" with only the name changing. None reposted. The pool also needed a Wikidata check that
+excluded 529 of them as non-music or deceased. One post a week, framed around one album's
+purchase math, keeps the useful part.
+
+### The Threads @ that disappeared
+
+Without a Threads link, the script used to tag an artist's Instagram handle on Threads. When
+Threads finds no account by that name, it publishes the post with the @ removed. Buffer still
+held `@modestmouse` while the post was scheduled. 31 posts went out reading like "ko has music
+on Bandcamp" or "ianhunterdotcom has music on Bandcamp". Posts now lead with the name and only
+tag a handle taken from the artist's own Threads link.
+
+### Instagram
+
+Median reach was 3 accounts, with 2 follows in 177 posts. The likely cause is Instagram's
+30 April 2026 change, which stops recommending accounts that mostly post other people's photos.
+The 81 comments looked like bots: 58 of the 66 from July to September were on posts tagged
+`#newmusic #newrelease`. The script added those tags to 72 of 75 prominent posts, including dead
+artists' decades-old albums. What restarting would take is in
+`docs/specs/instagram-original-posts-spec.md`.
+
+### Payouts drifted from the site's
+
+The script kept its own payout table, and it disagreed with `api/shared/platform-registry.ts`:
+Mirlo was 93% in posts against 86-90% on the site, Faircamp 100% against 90-97%. Posts now read
+the registry. The purchase math uses the low end of a range, so a post never claims more for the
+artist than the site does.
+
+### Prominent artists' Bandcamp links that belong to someone else
+
+The generated artist files (`data/artists/`) matched each prominent artist's Bandcamp page by
+name. The 2026-10-01 regeneration scheduled a post saying Venom, the metal band, keeps 80-85% of
+sales of "empyrean ep" from `venomnoise.bandcamp.com`, which is another act. Measured across the
+791 files: 159 Bandcamp subdomains don't match the artist's name, allowing for "the", "music",
+"official" and "band". Some are real ("tmbg" for They Might Be Giants), many are not
+("emperordnb" for Emperor, "alanjackson1", "nemo1", "sonia666"). Emperor was featured in an
+earlier week. `bandcampMatchesArtist` now keeps only the 632 that match, rejecting some real
+pages to keep false claims out; the files themselves still carry the bad links.
+
+### Silent failures
+
+On 2026-09-28 Buffer rejected a Bluesky post for length, and the run still reported success.
+Instagram posts with no artist image were logged as drafts but actually scheduled, carrying the
+generic Unstream image. The run now exits non-zero when any post isn't sent, and the workflow
+still commits history after a partial failure.
