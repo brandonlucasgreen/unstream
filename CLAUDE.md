@@ -235,6 +235,15 @@ Routed in `netlify.toml`: `/` → `og-metadata`; `/artist/*` and `/a/*` → `art
 
 `/artists` is SPA-only after UNS-98; `artist-directory-page` was removed. Edge functions run on Deno and import from URLs (`edge.netlify.com`, `esm.sh`) — they can't import from `api/functions/`, so shared constants get duplicated or pulled from `api/shared/`.
 
+### Social posts
+
+`schedule-social-posts.yml` runs `scripts/generate-social-posts.ts` every Monday, scheduling the following week to Buffer. The copy lives in `scripts/social-post-templates.ts` (pure, tested in `apps/web/tests/unit/`); the generator picks artists and talks to Buffer. Each day's Threads and Bluesky posts go out as one Buffer **content item** (`createContentItem`, an early-preview API); single posts use `createPost`. Four rules, measured in `docs/engineering-history.md`:
+
+- **Spotlights are written for the artist to repost**, because reposts by indie artists are the only distribution that has worked. Prominent artists get one post a week, untagged.
+- **Tag on Threads only with a handle from the artist's own Threads link.** An Instagram handle that Threads can't resolve is published with its @ stripped.
+- **Payouts come from `platform-registry.ts`**, never a local table; the purchase math uses the low end of a range.
+- **Instagram is paused** until posts can be original images (`docs/specs/instagram-original-posts-spec.md`). The LinkedIn page gets two posts a week; Brandon's personal LinkedIn is never posted to.
+
 ### The Dispatch
 
 A weekly music-industry briefing. **The workflow changed on 2026-04-17:** it is delivered to the `#unstream-dispatch` Discord channel by a scheduled agent, and RSS publishing was retired — nothing new is written to `data/dispatch/`. What remains is the archive plus `scripts/generate-dispatch-feed.ts`, which still runs at build time so `/dispatch.xml` renders the historical feed.
