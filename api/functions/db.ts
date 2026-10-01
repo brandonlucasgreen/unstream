@@ -1371,6 +1371,38 @@ async function getExistingSources(client: SupabaseClient, releaseIds: string[]):
 }
 
 /**
+ * The stored release that already holds this platform listing, if any — checked before any
+ * title match, because the platform's own id is a stronger identity than our reading of its
+ * title. `UNIQUE (platform, external_id)` already lets a listing belong to only one release, so
+ * this can't merge anything the table doesn't already assert.
+ *
+ * Without it, a listing whose title stopped matching its release's `match_key` — Faircamp and
+ * Mirlo append "(single)", "(EP)", "[Compilation]" — was treated as a new release: a row was
+ * inserted (and, on the fuzzy paths, flagged for review), then its source write hit the unique
+ * constraint and failed, leaving a release with no sources at all. Merging that phantom away in
+ * `/admin/release-review` only deleted it until the next scheduled re-catalogue made it again,
+ * which is how the queue held the same pairs week after week (found 2026-10-01: all nine pairs
+ * in the queue were this).
+ *
+ * Linear over the artist's sources, read live from `existingSources` so a source written earlier
+ * in the same pass counts too.
+ */
+export function findReleaseBySource<T extends { id: string }>(
+  existing: T[],
+  existingSources: ExistingSourceMap,
+  platform: string,
+  externalId: string | null
+): T | undefined {
+  if (!externalId) return undefined;
+  for (const source of existingSources.values()) {
+    if (source.platform === platform && source.external_id === externalId) {
+      return existing.find(row => row.id === source.release_id);
+    }
+  }
+  return undefined;
+}
+
+/**
  * Write one release's source row — or don't, when writing it would change nothing.
  *
  * The one place every ingest path goes through to write `release_sources`, so the two rules below
@@ -1493,8 +1525,11 @@ export async function persistReleases(
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      // Title identity, not `(release_type, match_key)` identity — see findExactReleaseMatch.
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first (see findReleaseBySource), then title identity — not
+      // `(release_type, match_key)` identity, see findExactReleaseMatch.
+      const prior =
+        findReleaseBySource(existing, existingSources, release.source.platform, release.source.externalId) ??
+        findExactReleaseMatch(existing, release);
       const curated = new Set(prior?.curated_fields ?? []);
 
       let releaseId: string;
@@ -1509,7 +1544,13 @@ export async function persistReleases(
         // held — six indexes each — even when the title was byte-identical, which it almost always
         // is. With the comparison, an unchanged release now falls through to an empty patch and
         // does no write at all. See PERSIST_REFRESH_FLOOR_MS for the same problem on `artists`.
-        if (!curated.has('title') && release.title !== prior.title) patch.title = release.title;
+        //
+        // Only when the match keys agree: a release found by its source id may carry a title
+        // that normalizes differently, and writing it would leave `title` and `match_key`
+        // describing two different strings. The stored title stays until a human changes it.
+        if (!curated.has('title') && release.title !== prior.title && release.matchKey === prior.match_key) {
+          patch.title = release.title;
+        }
         if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
           patch.artwork_url = release.artworkUrl;
         }
@@ -2234,7 +2275,10 @@ export async function persistFaircampReleases(
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'faircamp', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2387,7 +2431,10 @@ export async function persistJamcoopReleases(
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'jamcoop', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2562,7 +2609,10 @@ export async function persistMirloReleases(
     const written: PersistedRelease[] = [];
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'mirlo', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
