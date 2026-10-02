@@ -26,6 +26,7 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
     wikipediaSummary: null,
     wikipediaUrl: null,
     location: undefined,
+    bandcampSubdomain: null,
     bio: null,
     bioFetchFailed: false,
   };

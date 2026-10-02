@@ -471,6 +471,13 @@ export interface MusicBrainzSearchResponse {
   wikipediaUrl: string | null;
   location?: ArtistLocation;
   /**
+   * The Bandcamp subdomain MusicBrainz says is this artist's, even when that account is
+   * retired. A client must not merge this enrichment into a result on a different
+   * subdomain: that is a same-name stranger (bandcampSubdomainConflicts). Added after
+   * the shipped app builds, which ignore it.
+   */
+  bandcampSubdomain: string | null;
+  /**
    * Bio for the MusicBrainz artist: their Bandcamp sidebar, else Discogs, else Wikipedia.
    * Clients use it only to fill a card that has none — Phase 1's sources outrank these, and a
    * claimed artist's card is never filled (they may have turned bios off).
@@ -516,6 +523,8 @@ export function toMusicBrainzResponse(enrichment: EnrichedMusicBrainzResult): Mu
     wikipediaSummary: enrichment.wikipediaSummary,
     wikipediaUrl: enrichment.wikipediaUrl,
     location: enrichment.location,
+    // `?? null`: cache entries written before the field existed lack it.
+    bandcampSubdomain: enrichment.bandcampSubdomain ?? null,
     // Bandcamp first — the artist's own words — then Discogs, then Wikipedia. bandcampBio
     // is already null when the subdomain is retired. `?? null`: cache entries written
     // before bios existed lack the fields.

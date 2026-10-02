@@ -183,9 +183,53 @@ describe('mergeStoredArtistsIntoResults', () => {
 
   it('attaches a known slug through article-insensitive name matching too', () => {
     const live = generic('Argent Grub');
-    const merged = mergeStoredArtistsIntoResults([live], [known('The Argent Grub', 'the-argent-grub')], 'argent');
+    // Same Bandcamp account as the live result, as a row persisted from an earlier search of
+    // this artist would have; only the article differs. (A different account would be a
+    // different artist — see the Honeycrush cases below.)
+    const stored = { ...known('The Argent Grub', 'the-argent-grub'), platforms: live.platforms };
+    const merged = mergeStoredArtistsIntoResults([live], [stored], 'argent');
     expect(merged).toHaveLength(1);
     expect(merged[0].id).toBe(live.id);
     expect(merged[0].knownSlug).toBe('the-argent-grub');
+  });
+
+  // Honeycrush (Brooklyn, a stored verified row) vs Honey Crush (Orlando, the probe's live
+  // hit on honeycrush.bandcamp.com). Same normalized name, different Bandcamp accounts.
+  describe('a same-name live result on a different Bandcamp account', () => {
+    const known = (name: string, slug: string, bandcampUrl: string): AggregatedResult => ({
+      id: `known-${slug}`,
+      name,
+      type: 'artist',
+      platforms: [{ sourceId: 'bandcamp', url: bandcampUrl }],
+      matchConfidence: 'verified',
+      knownSlug: slug,
+    });
+
+    it("does not hand the stored artist's page to the stranger, and lists both", () => {
+      const results = [generic('Honey Crush')]; // honeycrush.bandcamp.com
+      const merged = mergeStoredArtistsIntoResults(
+        results, [known('Honeycrush', 'honeycrush', 'https://honeyyycrush.bandcamp.com/')], 'honeycrush',
+      );
+      expect(merged.map(r => r.id)).toEqual(['honeycrush', 'known-honeycrush']);
+      expect(merged[0].knownSlug).toBeUndefined();
+    });
+
+    it('does not let a claimed profile replace the stranger', () => {
+      const claimedBrooklyn: AggregatedResult = {
+        ...claimed('Honeycrush', 'honeycrush'),
+        platforms: [{ sourceId: 'bandcamp', url: 'https://honeyyycrush.bandcamp.com/' }],
+      };
+      const merged = mergeStoredArtistsIntoResults([generic('Honey Crush')], [claimedBrooklyn], 'honeycrush');
+      expect(merged).toHaveLength(2);
+      expect(merged.some(r => r.name === 'Honey Crush' && r.matchConfidence === 'verified')).toBe(true);
+    });
+
+    it('still treats the same Bandcamp account as the same artist', () => {
+      const merged = mergeStoredArtistsIntoResults(
+        [generic('Honey Crush')], [known('Honey Crush', 'honey-crush', 'https://honeycrush.bandcamp.com')], 'honey crush',
+      );
+      expect(merged).toHaveLength(1);
+      expect(merged[0].knownSlug).toBe('honey-crush');
+    });
   });
 });

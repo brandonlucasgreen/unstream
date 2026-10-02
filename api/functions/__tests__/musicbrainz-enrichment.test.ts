@@ -174,6 +174,12 @@ describe('toMusicBrainzResponse', () => {
     expect(response!.bio?.source).toBe('wikipedia');
   });
 
+  it("passes on MusicBrainz's Bandcamp account, so clients can refuse a same-name stranger", () => {
+    // Kept even though the account is retired: it still says which account is theirs.
+    const response = toMusicBrainzResponse(enrichment({ bandcampUrl: null, bandcampSubdomain: 'honeyyycrush' }));
+    expect(response!.bandcampSubdomain).toBe('honeyyycrush');
+  });
+
   it('tolerates cache entries written before bios existed', () => {
     const old = enrichment();
     delete (old as Partial<EnrichedMusicBrainzResult>).bandcampBio;

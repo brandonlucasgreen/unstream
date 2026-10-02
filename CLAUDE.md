@@ -84,6 +84,8 @@ Two-phase.
 
 **Artists we already hold are shown first.** The web client calls `GET /api/search/stored` (`search-stored.ts`, database reads only) alongside Phase 1 and renders those claimed and verified cards while the fan-out runs. Both endpoints build them with `findStoredArtists` (`stored-artists.ts`), so the early cards carry the same ids as the full results' and are updated in place under `key={result.id}`. Keep it that way: `ResultCard` records a search appearance on a claimed artist's dashboard each time one *mounts*, so an id that differs between the two would count every search twice.
 
+**Same name, different Bandcamp account = different artist.** Wherever two results meet by name — MusicBrainz enrichment on the server (`applyEnrichmentToResults`) and in the browser (`mergeWithMusicBrainzData`), and stored artists folded into live results (`mergeStoredArtistsIntoResults`) — a Bandcamp subdomain on both sides that differs means they stay separate cards (`bandcampSubdomainConflicts`, `api/shared/bandcamp-identity.ts`, shared by Node and the web client). Honeycrush (Brooklyn) / Honey Crush (Orlando) is the standing example; deferring MusicBrainz to Phase 2 once reintroduced it because the browser merge lacked the check.
+
 Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, then merged and deduplicated.
 
 `search-sources.ts` holds orchestration and per-platform fetchers, and is already large. `search-utils.ts` holds the pure helpers (`aggregateResults`, `splitSuspiciousPlatforms`, `mergeByReleaseOverlap`, `filterAndSort`, `applyMergeOverrides`) and `search-parsers.ts` the per-platform parsers. **Prefer adding logic there with a test over growing `search-sources.ts`.**
