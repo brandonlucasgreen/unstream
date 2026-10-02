@@ -170,9 +170,16 @@ Today one `SUPABASE_URL` serves both auth and data. Split them:
 
 ## 5. Phase 1: set up DigitalOcean (about an hour, agent-run)
 
-1. **Create the database cluster.** Pick **the same Postgres major version as hosted** (run
-   `SELECT version();` on hosted first):
-   `doctl databases create unstream-db --engine pg --version <major> --region nyc3 --size db-s-1vcpu-1gb --num-nodes 1`
+1. **Create the database cluster on Postgres 18**, the newest DigitalOcean offers. Moving
+   between hosts is a dump and restore anyway, and restoring an older version's dump into a newer
+   server is the standard upgrade path. Starting on the newest version buys the longest support
+   window before the next major upgrade. Take the dump with a **v18 `pg_dump` client** (§6.2).
+   `doctl databases create unstream-db --engine pg --version 18 --region nyc3 --size db-s-1vcpu-1gb --num-nodes 1`
+
+   **Add-ons offered at creation: take none.** The managed caching (Valkey), Kafka and
+   OpenSearch options are separate clusters at their own monthly price. Upstash stays (§8).
+   Nothing in Unstream needs Kafka's event streaming. Internal artist-name search is Postgres
+   `pg_trgm`, which a 98 MB database runs cheaply, so OpenSearch would have nothing to do.
 2. **Set the maintenance window** to a low-traffic hour
    (`doctl databases maintenance-window update`). DigitalOcean applies minor updates then.
 3. **Recreate the pieces of Supabase the schema expects.** Keep this as one SQL file in
@@ -238,13 +245,14 @@ Today one `SUPABASE_URL` serves both auth and data. Split them:
 ## 6. Phase 2: rehearse (a few evenings)
 
 1. **Record from hosted:**
-   - Postgres and PostgREST versions.
+   - Postgres and PostgREST versions (PostgREST's decides the image tag in §5.5).
    - Which schema each extension lives in:
      `SELECT extname, extnamespace::regnamespace FROM pg_extension;`
    - The pg_cron jobs: `SELECT jobname, schedule, command FROM cron.job;`
    - Row counts per table.
-2. **Dump from hosted** through the session pooler connection string:
-   `pg_dump -Fc --no-owner --schema=public --schema=supabase_migrations`.
+2. **Dump from hosted** through the session pooler connection string, using a **v18 `pg_dump`**
+   (a newer `pg_dump` reads an older server; an older one can't produce a dump v18 is guaranteed
+   to accept): `pg_dump -Fc --no-owner --schema=public --schema=supabase_migrations`.
    `supabase_migrations` carries the applied-migration history, so `db push` knows where it is.
 3. **Restore into DigitalOcean** from a machine temporarily allowed through the firewall.
    - Restore into the database pg_cron is configured for; that's `defaultdb` unless DigitalOcean
@@ -373,5 +381,7 @@ Expect a few minutes a month when nothing's wrong, about the same as Supabase.
   (like `upstash-keepalive.yml`) is cheap insurance.
 - **Netlify functions region.** The latency numbers assume `us-east-2`. Confirm in site settings.
 - **Version pairing.** A PostgREST major version that differs from hosted's could change edge
-  behaviour `supabase-js` relies on (count headers, upsert conflict handling). Match it, and let
-  the rehearsal catch the rest.
+  behaviour `supabase-js` relies on (count headers, upsert conflict handling). Match it where
+  you can, and pick a release whose notes list Postgres 18 support. Hosted is on an older
+  Postgres, so the move is also a major-version upgrade: the rehearsal's full walk-through
+  (§6.5) is what proves nothing in the schema or queries changed behaviour.
