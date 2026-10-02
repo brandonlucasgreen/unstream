@@ -1,0 +1,63 @@
+name: Industry digest
+
+# Compiles the weekly industry digest and publishes it to the `industry-digest` branch as
+# feed.xml. See scripts/industry-digest/README.md.
+#
+# The output goes to its own branch, never to main: a commit to main would deploy the website
+# for a file that isn't part of it, and the digest is meant to be unlisted. The branch is
+# created on the first run.
+#
+# Secret:   OLLAMA_API_KEY  (ollama.com → Settings → Keys)
+# Variable: DIGEST_MODEL    (optional; an Ollama cloud model, default gpt-oss:120b)
+
+on:
+  schedule:
+    # Fridays 11:17 UTC (7:17am ET). Off the hour because scheduled runs on :00 queue longest.
+    - cron: '17 11 * * 5'
+  workflow_dispatch: # Re-running in the same ISO week replaces that week's issue, same guid.
+
+permissions:
+  contents: write
+
+concurrency:
+  group: industry-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check out the digest branch
+        run: |
+          if git fetch --depth=1 origin industry-digest; then
+            git worktree add -B industry-digest digest FETCH_HEAD
+          else
+            echo "No industry-digest branch yet — starting it."
+            git worktree add --orphan -b industry-digest digest
+          fi
+
+      - name: Compile the digest
+        env:
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          DIGEST_MODEL: ${{ vars.DIGEST_MODEL }}
+        run: npx tsx scripts/industry-digest/run.ts --out digest
+
+      - name: Publish
+        working-directory: digest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "Nothing to publish"; exit 0; }
+          git commit -m "Industry digest $(date -u +'%G-W%V')"
+          git push origin industry-digest
