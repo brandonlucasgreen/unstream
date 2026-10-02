@@ -84,6 +84,68 @@ describe('getMusicBrainzEnrichment', () => {
   });
 });
 
+describe('getMusicBrainzEnrichment: Bandcamp from the artist\'s own site', () => {
+  // Honeycrush (Brooklyn): MusicBrainz lists honeyyycrush.bandcamp.com, retired; the band
+  // moved to honeycrush-online.bandcamp.com, which their own site links (alongside a label's
+  // account, which must not be taken for theirs).
+  const RETIRED = 'https://honeyyycrush.bandcamp.com/';
+  const SITE = 'https://honeycrush.example/';
+
+  function mockHoneycrush(siteHtml: string) {
+    return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input);
+      if (url.startsWith('https://musicbrainz.org/ws/2/artist/?query=')) {
+        return json({ artists: [{ id: MBID, name: 'Honeycrush', score: 100 }] });
+      }
+      if (url.startsWith(`https://musicbrainz.org/ws/2/artist/${MBID}`)) {
+        return json({
+          relations: [
+            { type: 'official homepage', url: { resource: SITE } },
+            { type: 'bandcamp', url: { resource: RETIRED } },
+          ],
+          'release-groups': [],
+        });
+      }
+      if (url === SITE) return new Response(siteHtml, { status: 200 });
+      if (init?.method === 'HEAD' && url.startsWith(RETIRED)) {
+        return new Response(null, { status: 303, headers: { Location: 'https://bandcamp.com/signup?new_domain=honeyyycrush' } });
+      }
+      if (init?.method === 'HEAD' && url.startsWith('https://honeycrush-online.bandcamp.com')) {
+        return new Response(null, { status: 200 });
+      }
+      return new Response('not found', { status: 404 });
+    });
+  }
+
+  it("uses the account the artist's site links when MusicBrainz's is retired", async () => {
+    mockHoneycrush(`
+      <a href="https://sacredbones.bandcamp.com/album/compilation">Our label</a>
+      <a href="https://honeycrush-online.bandcamp.com/album/new-record">Buy the record</a>
+    `);
+
+    const { data } = await getMusicBrainzEnrichment('honeycrush');
+
+    expect(data.bandcampUrl).toBe('https://honeycrush-online.bandcamp.com/');
+    // The current account is what identifies them now — still a different account from
+    // honeycrush.bandcamp.com (Honey Crush, Orlando), so the two stay apart.
+    expect(data.bandcampSubdomain).toBe('honeycrush-online');
+    expect(data.platformUrls).toContain('https://honeycrush-online.bandcamp.com/');
+    expect(data.platformUrls).not.toContain(RETIRED);
+    expect(data.platformUrls.some(u => u.includes('sacredbones'))).toBe(false);
+    // Its page was never fetched, which is not a failed bio source.
+    expect(data.bioFetchFailed).toBe(false);
+  });
+
+  it('keeps the retired claim when the site links no account of theirs', async () => {
+    mockHoneycrush('<a href="https://sacredbones.bandcamp.com/">Our label</a>');
+
+    const { data } = await getMusicBrainzEnrichment('honeycrush');
+
+    expect(data.bandcampUrl).toBeNull();
+    expect(data.bandcampSubdomain).toBe('honeyyycrush');
+  });
+});
+
 describe('peekMusicBrainzEnrichment', () => {
   it('returns the cached enrichment without fetching', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');

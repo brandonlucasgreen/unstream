@@ -21,6 +21,7 @@ import {
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
   isBandcampSearchLink,
+  pickArtistBandcampUrl,
 } from '../search-utils';
 
 describe('bandcampSubdomainOf', () => {
@@ -148,5 +149,42 @@ describe('checkBandcampSubdomain', () => {
     await checkBandcampSubdomain('https://honeycrushing.bandcamp.com/');
     const [, init] = vi.mocked(globalThis.fetch).mock.calls[0];
     expect(init).toMatchObject({ method: 'HEAD', redirect: 'manual' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// pickArtistBandcampUrl — a Bandcamp account from the artist's own site or Linktree
+// ---------------------------------------------------------------------------
+
+describe('pickArtistBandcampUrl', () => {
+  it("finds Honeycrush's new account, which no name-derived guess reaches", () => {
+    expect(pickArtistBandcampUrl(
+      ['https://honeycrush-online.bandcamp.com/album/some-record'],
+      'Honeycrush',
+    )).toBe('https://honeycrush-online.bandcamp.com/');
+  });
+
+  it('accepts an account named exactly for the artist, hyphens or not', () => {
+    expect(pickArtistBandcampUrl(['https://kid-lightbulbs.bandcamp.com/'], 'Kid Lightbulbs'))
+      .toBe('https://kid-lightbulbs.bandcamp.com/');
+  });
+
+  it("skips a label's or collaborator's account and keeps looking", () => {
+    expect(pickArtistBandcampUrl(
+      ['https://sacredbones.bandcamp.com/album/x', 'https://officialjackwhite.bandcamp.com/'],
+      'Jack White',
+    )).toBe('https://officialjackwhite.bandcamp.com/');
+  });
+
+  it('does not let a short name match inside an unrelated subdomain', () => {
+    expect(pickArtistBandcampUrl(['https://rachelsongs.bandcamp.com/'], 'Ra')).toBeNull();
+    expect(pickArtistBandcampUrl(['https://ra.bandcamp.com/'], 'Ra')).toBe('https://ra.bandcamp.com/');
+  });
+
+  it('ignores bandcamp.com itself and non-Bandcamp links', () => {
+    expect(pickArtistBandcampUrl(
+      ['https://bandcamp.com/honeycrush', 'https://honeycrush.example.com/'],
+      'Honeycrush',
+    )).toBeNull();
   });
 });

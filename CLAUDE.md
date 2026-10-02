@@ -96,6 +96,8 @@ Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, t
 
 **Verify both identity and substance.** A slug existing doesn't mean it's the right artist; a name matching doesn't mean it's a real presence — parked, empty accounts match `beyonce`, `sufjan`, `jackwhite`. Verdicts: `accepted`, `absent`, `rejected_empty`, `rejected_name`, `undecided`.
 
+**The probe can only find a subdomain derived from the name.** An account like `honeycrush-online` (Honeycrush, Brooklyn) is reachable only through a link: MusicBrainz's Bandcamp relation, or — when that is missing or retired — a Bandcamp link on the artist's own official site or Linktree, accepted only if the subdomain carries the artist's name (`pickArtistBandcampUrl`) and isn't retired.
+
 Outcomes — **including negatives** — are cached in `bandcamp_slug_probes` (migrations 025–028 plus `20260727090000_bandcamp-probe-probed-slugs.sql`). The `probed_slugs` column records which slugs were actually tried, so a cached negative can't hide an artist whose name has a hyphen.
 
 ### Never cache uncertainty

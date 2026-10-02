@@ -695,6 +695,32 @@ export function isBandcampSearchLink(url: string): boolean {
 // Moved to api/shared so the web client's MusicBrainz merge applies the same identity rule.
 export { bandcampSubdomainOf, bandcampSubdomainConflicts };
 
+/**
+ * The artist's own Bandcamp account among links found on their official site or Linktree,
+ * as an account root URL, or null.
+ *
+ * MusicBrainz relations go stale: Honeycrush (Brooklyn) moved to `honeycrush-online`, which
+ * nothing derived from the name could guess, while MB still lists the retired `honeyyycrush`.
+ * The artist's own site is the next-best word on which account is theirs. But a site also
+ * links labels, collaborators and the records it is selling, so an account counts only when
+ * its subdomain carries the artist's name: equal to it, or containing it ("honeycrush-online",
+ * "officialjackwhite"). Containment needs a name of 4+ characters — a short one like "Ra"
+ * turns up inside unrelated subdomains.
+ */
+export function pickArtistBandcampUrl(urls: string[], artistName: string): string | null {
+  const name = normalizeForComparison(artistName);
+  if (!name) return null;
+  for (const url of urls) {
+    const subdomain = bandcampSubdomainOf(url);
+    if (!subdomain) continue;
+    const squashed = subdomain.replace(/-/g, '');
+    if (squashed === name || (name.length >= 4 && squashed.includes(name))) {
+      return `https://${subdomain}.bandcamp.com/`;
+    }
+  }
+  return null;
+}
+
 // Platforms where "no releases" is reliable evidence of a different artist
 export const RELIABLE_RELEASE_PLATFORMS = new Set(['bandcamp']);
 

@@ -15,6 +15,7 @@ import {
   collectMbSuggestions,
   isCacheableMbResult,
   pickQobuzUrl,
+  pickArtistBandcampUrl,
   bandcampSubdomainOf,
   musicBrainzArtistQuery,
 } from './search-utils';
@@ -371,7 +372,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
     const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcampPage, mirloLocation, bandcampStatus] = await Promise.all([
       discogsUrl ? fetchDiscogsArtist(discogsUrl) : Promise.resolve({ socialLinks: [], profile: null, failed: false }),
-      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
+      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [], bandcampUrls: [] }),
       searchPeerTubeChannels(artist.name),
       lookupWikipedia(wikipediaUrl, wikidataUrl),
       bandcampUrl ? fetchBandcampPage(bandcampUrl) : Promise.resolve(null),
@@ -408,9 +409,28 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
 
     // Scrape Linktree if found
     let linktreeSocialLinks: SocialLink[] = [];
+    let linktreeBandcampUrls: string[] = [];
     const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
     if (finalLinktreeUrl) {
-      linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
+      const linktree = await fetchLinktreeLinks(finalLinktreeUrl);
+      linktreeSocialLinks = linktree.socialLinks;
+      linktreeBandcampUrls = linktree.bandcampUrls;
+    }
+
+    // No live Bandcamp from MusicBrainz — none listed, or the listed one retired: take the
+    // account the artist's own site or Linktree links, if it carries their name. That is how
+    // Honeycrush (Brooklyn) is found at `honeycrush-online` while MB still lists the retired
+    // `honeyyycrush`; nothing derived from the name could guess it. Still checked for
+    // retirement — a site can be as out of date as MusicBrainz.
+    let siteBandcampUrl: string | null = null;
+    if (!bandcampUrl) {
+      const candidate = pickArtistBandcampUrl([...officialSiteResult.bandcampUrls, ...linktreeBandcampUrls], artist.name);
+      if (candidate && (await checkBandcampSubdomain(candidate)) !== 'dead') {
+        console.log(`[MusicBrainz] Using Bandcamp from "${artist.name}"'s own site or Linktree: ${candidate}`);
+        siteBandcampUrl = candidate;
+        // platformUrls is where both the server and the web client read MB's Bandcamp from.
+        platformUrls = [...platformUrls, candidate];
+      }
     }
 
     // Collect PeerTube link
@@ -430,8 +450,10 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       artistName: artist.name,
       officialUrl,
       discogsUrl,
-      bandcampUrl,
-      bandcampSubdomain: bandcampSubdomainOf(mbClaimedBandcampUrl),
+      bandcampUrl: bandcampUrl ?? siteBandcampUrl,
+      // The account the artist is on now when their site names one; otherwise MB's claim,
+      // kept even when retired, since it still says which account is theirs.
+      bandcampSubdomain: bandcampSubdomainOf(siteBandcampUrl ?? mbClaimedBandcampUrl),
       qobuzUrl,
       hasPre2005Release,
       socialLinks: allSocialLinks,
@@ -439,7 +461,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       platformUrls,
       wikipediaSummary: wikipediaResult.status === 'found' ? wikipediaResult.extract : null,
       wikipediaUrl: wikipediaResult.status === 'found' ? wikipediaResult.pageUrl : wikipediaUrl,
-      // A retired subdomain's bio belongs to nobody we can link to.
+      // A retired subdomain's bio belongs to nobody we can link to. A site-sourced account's
+      // page was never fetched, so it has no bio here (and that isn't a failure).
       bandcampBio: bandcampUrl ? bandcampPage?.bio ?? null : null,
       discogsProfile: discogsArtist.profile,
       bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcampUrl !== null && bandcampPage === null),
