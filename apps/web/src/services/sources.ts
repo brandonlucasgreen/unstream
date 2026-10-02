@@ -550,6 +550,24 @@ async function searchSingle(query: string, deferEnrichment = false): Promise<Sea
   }
 }
 
+/**
+ * The claimed and verified artists Unstream already holds for a query — database reads
+ * only, so it answers well before the full search. Shown while that search runs; the
+ * full results carry the same cards under the same ids and replace them in place.
+ * An empty list on any failure: this is a preview, and the full search still runs.
+ */
+export async function fetchStoredArtists(query: string): Promise<SearchResult[]> {
+  try {
+    const response = await fetch(`/api/search/stored?query=${encodeURIComponent(query)}`);
+    if (!response.ok) return [];
+    const data = await response.json() as { results?: SearchResult[] };
+    return data.results ?? [];
+  } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.storedArtists' } });
+    return [];
+  }
+}
+
 // Search all platforms via the unified API
 // Handles multi-artist queries by searching each artist separately and merging results
 export async function searchPlatforms(query: string): Promise<SearchResponse> {

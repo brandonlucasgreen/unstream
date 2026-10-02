@@ -8,7 +8,7 @@ import { Header } from './components/Header';
 import { LoadingLabel, SkeletonScreen } from './components/Skeleton';
 import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
-import { sources, sourceCategories, searchPlatforms, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
+import { sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
@@ -149,11 +149,23 @@ function App() {
     setIsEnriching(false);
     setError(null);
     setHasSearched(true);
+    // Cleared rather than left behind the skeleton: stored artists for this query may
+    // render before the full search finishes, and must not appear beside the last one's.
+    setResults([]);
 
     // Update URL with search query for shareable links
     setSearchParams({ q: query }, { replace: true });
 
     analytics.trackSearch();
+
+    // Artists we already hold (claimed and verified) come straight from the database,
+    // so show them while the platforms are still being searched. Ignored once the full
+    // results are in — those already include the same cards.
+    let fullResultsArrived = false;
+    fetchStoredArtists(query).then(stored => {
+      if (currentSearchRef.current !== searchId || fullResultsArrived || stored.length === 0) return;
+      setResults(stored);
+    });
 
     try {
       // Phase 1: Fast search (returns in ~1-2s without MusicBrainz)
@@ -162,7 +174,11 @@ function App() {
       // Check if this is still the current search
       if (currentSearchRef.current !== searchId) return;
 
-      setResults(response.results);
+      fullResultsArrived = true;
+      // The full results always contain the stored artists, so an empty response with
+      // stored cards on screen means the search failed (searchPlatforms swallows errors
+      // into an empty list). Keep what we have rather than replacing it with "No results".
+      setResults(prev => (response.results.length === 0 && prev.length > 0 ? prev : response.results));
       setIsLoading(false);
       analytics.trackSearchResults(response.results.length > 0, response.results.length);
 
@@ -337,7 +353,7 @@ function App() {
           {/* Results */}
           {hasSearched && !error && (
             <div className="mt-8">
-              {isLoading ? (
+              {isLoading && results.length === 0 ? (
                 <SkeletonScreen label="Searching platforms">
                   <div className="space-y-4">
                     <LoadingLabel>Searching platforms...</LoadingLabel>
@@ -347,9 +363,13 @@ function App() {
               ) : results.length > 0 ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
-                    <p className="text-text-muted text-sm">
-                      Found {results.length} result{results.length !== 1 ? 's' : ''}
-                    </p>
+                    {isLoading ? (
+                      <LoadingLabel>Searching more platforms...</LoadingLabel>
+                    ) : (
+                      <p className="text-text-muted text-sm">
+                        Found {results.length} result{results.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
                     <div className="flex items-center gap-4">
                       {isEnriching && <LoadingLabel>Loading more sources...</LoadingLabel>}
                       {/* In PWA mode the SearchBar's own Reset already does this. */}

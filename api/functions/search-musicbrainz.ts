@@ -36,7 +36,7 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
  *
  * Applied to the response *after* the cache read, never inside the cached
  * function: a suppression added today must take effect on the next request
- * rather than waiting out a week-long cache entry. Phase 1 does the same at the
+ * rather than waiting out a day-long cache entry. Phase 1 does the same at the
  * end of its own pipeline (applyLinkSuppressions), but this endpoint's links are
  * merged into the results client-side, so they need their own pass — otherwise a
  * removed link reappears the moment enrichment lands.

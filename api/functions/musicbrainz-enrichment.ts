@@ -40,11 +40,10 @@ import {
   lookupWikipedia,
 } from '../search/enrichment';
 
-// An artist's MusicBrainz data changes rarely, and on a miss this is the slowest leg of
-// a search, so a successful answer is kept for a week. "No such artist" is an answer
-// too and is kept as long — an artist newly added to MusicBrainz can take up to a week
-// to pick up enrichment.
-const MB_ENRICHMENT_CACHE_TTL = 7 * 24 * 60 * 60;
+// On a miss this is the slowest leg of a search, so an answer is kept for a day. Not
+// longer: "no such artist" is an answer too, cached as long, and new artists add
+// themselves to MusicBrainz all the time — a week left them unenriched for a week.
+const MB_ENRICHMENT_CACHE_TTL = 24 * 60 * 60;
 // Failures and partial answers: long enough that an outage doesn't cost every search
 // the full chain, short enough that a transient blip clears in a minute.
 const MB_FAILURE_CACHE_TTL = 60;
@@ -81,7 +80,7 @@ export interface EnrichedMusicBrainzResult {
   discogsProfile: string | null;
   /**
    * A bio source didn't answer (Discogs, Wikipedia or the Bandcamp page). The result is then
-   * kept only for the short failure TTL — a timeout must not hide a bio for a week.
+   * kept only for the short failure TTL — a timeout must not hide a bio for a day.
    */
   bioFetchFailed: boolean;
   location: ArtistLocation | undefined;
