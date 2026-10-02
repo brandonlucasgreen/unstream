@@ -12,6 +12,64 @@ Auth and the pooler, and a disk that throttles after bursts. It wedged on 2026-0
 rounds of I/O work (`supabase-disk-io-investigation.md`) have been rationing around it. The
 database itself is 98 MB.
 
+## Picking this back up
+
+**Where things stand (2026-10-02):** a DigitalOcean account exists with nothing in it: no
+database, no app, no API token, and $0 a month. No code has changed. This document is the only
+artifact.
+
+**Already settled.** Don't re-decide these unless something below has changed:
+
+| Choice | Setting |
+|---|---|
+| Database | DigitalOcean Managed PostgreSQL, **Postgres 18**, region **NYC3** |
+| Database size | Shared CPU, **1 vCPU / 1 GB / 10 GiB**, **1 node**, no standby, no read-only nodes |
+| Add-ons at creation | **None.** No Valkey caching, Kafka or OpenSearch (§5.1 says why). |
+| REST layer | PostgREST on App Platform, the $5 shared 512 MB size, 1 instance |
+| Domain | `db.unstream.stream` |
+| Auth | Stays on hosted Supabase (free) |
+| Redis | Stays on Upstash |
+| Ruled out | Hetzner, any self-run VPS, the Mac Studio (§1). Supabase Pro is the fallback. |
+
+**Re-check before starting.** These drift:
+1. **Prices** for the two DigitalOcean products. Their pricing pages couldn't be read when this
+   was written.
+2. **Database size:** run query 1 of the round 6 measurement pack in
+   `supabase-disk-io-investigation.md`. If the database has grown past ~500 MB, start on the
+   2 GB plan instead.
+3. **New data call sites:** `grep -rlE "SUPABASE_(URL|SERVICE_KEY)" api scripts .github`.
+   Compare against the §4 list; anything new needs the same treatment.
+4. **Hosted versions:** Postgres and PostgREST. The PostgREST version decides the image tag.
+5. **Netlify's functions region,** which the latency assumptions depend on.
+
+**The steps, in order.** "Agent" means a Claude session working from this doc.
+
+| # | Step | Who | Effort | Cost starts? |
+|---|---|---|---|---|
+| 1 | §4 no-op code change: the `DATA_API_*` env split with its fallback, the two Auth-admin fixes, `/api/health/db`. | Agent opens a PR; you review | One session | No |
+| 2 | §4 migration dropping the 8 `auth.users` foreign keys, plus `scripts/delete-user-data.ts`. Confirm `supabase-migrate.yml` goes green after merge. | Agent; you review | Same PR or the next | No |
+| 3 | Scoped API token with **no delete** (§2 #2) → GitHub secret `DIGITALOCEAN_ACCESS_TOKEN`, and to the agent session. Turn on two-factor if it isn't already. | You | 10 min | No |
+| 4 | R2 or B2 bucket; an `age` key pair with the private key in your password manager; an uptime monitor account. | You | 15 min | No |
+| 5 | §5 setup: cluster, role and helper SQL, PostgREST app, firewall, alerts. | Agent, with the token | ~1 hour | **Yes, ~$20/mo** |
+| 6 | DNS: `db.unstream.stream` CNAME → the app's URL. | You | 5 min | — |
+| 7 | §6 rehearsal. | Agent; you do the `npm run dev` walk-through | A few evenings | — |
+| 8 | §7 cutover, at a low-traffic hour. | Agent, you watching | ~1 hour | — |
+| 9 | Two weeks later, §7 "closing out". | Agent | 30 min | — |
+| 10 | §8: turn the catalogue dials back up, one at a time. | Agent; you decide each | Ongoing | — |
+
+**Steps 1–4 cost nothing and can land any time,** even while this stays on hold. Doing them early
+shrinks the eventual move to steps 5–9.
+
+**To start a session on it, paste:**
+
+```
+Read docs/specs/digitalocean-database-plan.md, starting with "Picking this back up".
+We're resuming the database move. Run the re-checks, report anything that changed,
+then start step <N>.
+```
+
+---
+
 ## The short version
 
 - **What moves:** Postgres goes to DigitalOcean Managed PostgreSQL. PostgREST, the REST layer

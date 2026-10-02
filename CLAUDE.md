@@ -247,6 +247,8 @@ Supabase Auth with magic links and password sign-in. Auth state is managed via `
 
 Schema lives in `supabase/schema.sql`; changes ship as timestamp-prefixed files in `supabase/migrations/` (e.g. `20260726120000_bandcamp-slug-probes.sql`), and **filename order is what Supabase applies**. The sequential `-- Migration NNN` header comments and the older `migration-NNN-*.sql` copies are historical reference only — the sequence has gaps. Don't edit historical migrations.
 
+**A move off Supabase's free database is planned and on hold:** `docs/specs/digitalocean-database-plan.md` (DigitalOcean Managed PostgreSQL for data, auth staying on Supabase). Its "Picking this back up" section lists the settled choices, what to re-check, and the steps in order. Read it before proposing a database move or plan upgrade.
+
 When adding a table or column: new migration, RLS policies included, `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, comments explaining the change. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
 **Auto-deploy:** `supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` touching `supabase/migrations/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
