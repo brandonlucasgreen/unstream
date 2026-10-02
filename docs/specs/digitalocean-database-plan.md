@@ -1,8 +1,12 @@
 # Moving the database to DigitalOcean (auth stays on Supabase)
 
 **Date:** 2026-09-26
-**Status:** Decided: DigitalOcean Managed PostgreSQL, with PostgREST on App Platform. Nothing is
-set up or changed yet.
+**Status:** On hold (2026-10-02). The destination is decided (DigitalOcean Managed PostgreSQL,
+with PostgREST on App Platform), but nothing is set up or changed. The free Supabase database is
+coping since release-catalogue writes were wound down, and the owner is waiting for recurring
+revenue to cover the ~$20 a month. **Pick this up when** any of these happens: recurring revenue
+covers it; Supabase's disk I/O warning returns; the instance wedges again; or the catalogue
+dials (§8) need turning back up.
 **Why:** the free Nano instance is the ceiling: 0.5 GB shared between Postgres, PostgREST,
 Auth and the pooler, and a disk that throttles after bursts. It wedged on 2026-09-19, and six
 rounds of I/O work (`supabase-disk-io-investigation.md`) have been rationing around it. The
