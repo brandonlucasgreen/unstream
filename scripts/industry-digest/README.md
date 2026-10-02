@@ -3,7 +3,12 @@
 A weekly digest of music-industry news relevant to Unstream, compiled by an Ollama cloud model
 and published as an RSS feed. It's for Brandon, not for the site: unlisted, not private.
 
-**Feed:** https://raw.githubusercontent.com/brandonlucasgreen/unstream/industry-digest/feed.xml
+**Feed:** https://unstream.stream/digest/feed.xml
+
+`api/functions/digest-feed.ts` relays the branch's `feed.xml` there with an RSS Content-Type and
+`X-Robots-Tag: noindex`, cached at the CDN for an hour — so a new issue can take up to an hour to
+show up. Nothing on the site links to it and it isn't in the sitemap. The raw copy
+(https://raw.githubusercontent.com/brandonlucasgreen/unstream/industry-digest/feed.xml) works too.
 
 ## How it runs
 
@@ -29,9 +34,9 @@ shows it once.
   in the run summary). A hallucinated story can't arrive with a plausible URL.
 - **Its own branch, not `main`.** A commit to `main` deploys the website (a Netlify build
   each Friday for a file that isn't part of the site) and would put the digest in the repo
-  everyone reads. The branch holds only the digest; the repo is public, so the raw URL works in
-  any feed reader without a login. Anyone who goes browsing the repo's branches can find it,
-  which is the meaning of unlisted.
+  everyone reads. The branch holds only the digest, and `digest-feed.ts` reads it live, so a new
+  issue appears at `/digest/feed.xml` without a deploy. Anyone who knows the URL or goes browsing
+  the repo's branches can find it, which is the meaning of unlisted.
 - **Feeds first, search second.** Feeds have dates; search results don't, so the model is told
   to keep a search result only if its text shows it's from this week.
 - **One dead feed doesn't stop the run.** It's a warning in the run summary's source table. The

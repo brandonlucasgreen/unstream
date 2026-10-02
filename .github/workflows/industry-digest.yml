@@ -1,7 +1,8 @@
 name: Industry digest
 
 # Compiles the weekly industry digest and publishes it to the `industry-digest` branch as
-# feed.xml. See scripts/industry-digest/README.md.
+# feed.xml, which api/functions/digest-feed.ts serves at unstream.stream/digest/feed.xml.
+# See scripts/industry-digest/README.md.
 #
 # The output goes to its own branch, never to main: a commit to main would deploy the website
 # for a file that isn't part of it, and the digest is meant to be unlisted. The branch is
