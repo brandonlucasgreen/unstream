@@ -262,6 +262,12 @@ A weekly music-industry briefing. **The workflow changed on 2026-04-17:** it is 
 
 The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 
+### Industry digest
+
+A separate, unlisted weekly digest for Brandon: `industry-digest.yml` runs `scripts/industry-digest/` every Friday, an Ollama cloud model compiles it, and it is published as `feed.xml` on the **`industry-digest` branch** — never `main`, never `apps/web/public/`, so it is not on the site and costs no deploy. The model cites numbered stories and never writes a URL; keep it that way. Detail in `scripts/industry-digest/README.md`.
+
+`ALLOWED_OUTBOUND_HOSTNAMES` doesn't apply: that allowlist guards the site's functions against user-supplied URLs, and this script fetches only the fixed feeds in `sources.ts` and `ollama.com`.
+
 ### API middleware & security
 
 `api/functions/middleware.ts` centralizes CORS (`buildCorsHeaders` / `buildPublicCorsHeaders`), auth (`authenticateBearer`, `authenticateAdmin`, `authenticateApiKey`), query validation (`validateQuery`), v1 envelopes (`v1Response`), and SSRF protection.
