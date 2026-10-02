@@ -438,6 +438,13 @@
   to = "/.netlify/functions/feed-releases"
   status = 200
 
+# The industry digest's feed (digest-feed.ts). Unlisted; above the SPA catch-all for the same
+# reason as the release feeds.
+[[redirects]]
+  from = "/digest/feed.xml"
+  to = "/.netlify/functions/digest-feed"
+  status = 200
+
 [[redirects]]
   from = "/api/me/feed-token"
   to = "/.netlify/functions/me-feed-token"

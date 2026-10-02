@@ -388,6 +388,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
   'images.subvert.fm',
   'cdn.jam.coop',
+  // The industry digest's feed, relayed by digest-feed.ts from the repo's industry-digest
+  // branch. That function fetches one constant URL; nothing user-supplied reaches this host.
+  'raw.githubusercontent.com',
 ]);
 
 /**

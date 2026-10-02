@@ -42,6 +42,8 @@
     "functions/__tests__/newsletter-subscribe.test.ts",
     "functions/me-recent-releases.ts",
     "functions/feed-releases.ts",
+    "functions/digest-feed.ts",
+    "functions/__tests__/digest-feed.test.ts",
     "functions/release-detail.ts",
     "functions/redis.ts",
     "functions/cache.ts",
