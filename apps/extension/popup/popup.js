@@ -7,6 +7,7 @@ import { releaseSummaryLine } from '../lib/release-alerts.js';
 import { renderReleaseGuide, guideMessage, guideLink } from '../lib/release-guide.js';
 import { renderArtistReleases } from '../lib/artist-releases.js';
 import { bioTarget, shouldFillBio, renderArtistBio } from '../lib/artist-bio.js';
+import { enrichmentIsAnotherArtist } from '../lib/bandcamp-identity.js';
 import { signInWithPassword, signInWithOtp, signOut, getStoredSession, getAccessToken, getDeviceId } from '../lib/supabase.js';
 import {
   getCustomSites,
@@ -913,6 +914,14 @@ async function loadEnrichment(artist) {
       type: 'GET_ENRICHMENT',
       artist,
     });
+
+    // MusicBrainz matched a same-name artist on another Bandcamp account (Honeycrush in
+    // Brooklyn vs Honey Crush in Orlando). Their bio and socials don't belong here — and
+    // would be saved with this artist if the fan saved them.
+    if (enrichmentIsAnotherArtist(currentResults, enrichment)) {
+      currentSocialLinks = null;
+      return;
+    }
 
     if (shouldFillBio(bioResult, enrichment)) {
       bioResult = { ...bioResult, bio: enrichment.bio };
