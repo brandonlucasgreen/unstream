@@ -30,6 +30,8 @@
   "include": [
     "functions/search-sources.ts",
     "functions/search-musicbrainz.ts",
+    "functions/search-stored.ts",
+    "functions/__tests__/search-stored.test.ts",
     "functions/__tests__/to-stored-result.test.ts",
     "functions/artist-profile.ts",
     "functions/me-settings.ts",

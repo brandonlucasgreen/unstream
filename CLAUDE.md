@@ -77,8 +77,14 @@ npm run migrate:link|migrate:dry-run|migrate:list        # Supabase CLI, --linke
 
 Two-phase.
 
-- **Phase 1** — `GET /api/search/sources` → `search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, returns results. Applies MusicBrainz enrichment server-side when it lands in time; `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
+- **Phase 1** — `GET /api/search/sources` → `search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, returns results. Applies MusicBrainz enrichment server-side when it has it; `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
 - **Phase 2** — `GET /api/search/musicbrainz` → `search-musicbrainz.ts`. Official sites, socials, location, release verification, Qobuz links. Merged client-side by `mergeWithMusicBrainzData` in `apps/web/src/services/sources.ts`.
+
+**Both phases share one MusicBrainz enrichment and one cache entry** (`musicbrainz-enrichment.ts`, key `mb-enriched`, kept a day — not longer, since "no such artist" is cached too and new artists join MusicBrainz constantly). On a miss it is the slowest leg of a search by far, so a client that runs Phase 2 sends `enrichment=deferred` and Phase 1 only *reads* that cache, never fetches: on a miss it returns without MusicBrainz and Phase 2 fills the cache for the next search. Only the web client's single-artist search defers today. Everything else — v1 API, Discord bot, edge pages, `generate-artist-data`, shipped Mac and extension builds, the web client's multi-artist split — never makes the Phase 2 call, so it must keep waiting inline; don't make deferral the default. Each Phase 1 logs a `[search-timing]` line and sends a `Server-Timing` header with per-phase durations; read those before guessing where a slow search went.
+
+**Artists we already hold are shown first.** The web client calls `GET /api/search/stored` (`search-stored.ts`, database reads only) alongside Phase 1 and renders those claimed and verified cards while the fan-out runs. Both endpoints build them with `findStoredArtists` (`stored-artists.ts`), so the early cards carry the same ids as the full results' and are updated in place under `key={result.id}`. Keep it that way: `ResultCard` records a search appearance on a claimed artist's dashboard each time one *mounts*, so an id that differs between the two would count every search twice.
+
+**Same name, different Bandcamp account = different artist.** Wherever two results meet by name — MusicBrainz enrichment on the server (`applyEnrichmentToResults`) and in the browser (`mergeWithMusicBrainzData`), and stored artists folded into live results (`mergeStoredArtistsIntoResults`) — a Bandcamp subdomain on both sides that differs means they stay separate cards (`bandcampSubdomainConflicts`, `api/shared/bandcamp-identity.ts`, shared by Node and the web client). Honeycrush (Brooklyn) / Honey Crush (Orlando) is the standing example; deferring MusicBrainz to Phase 2 once reintroduced it because the browser merge lacked the check.
 
 Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, then merged and deduplicated.
 
@@ -89,6 +95,8 @@ Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, t
 `bandcamp.com/search` is behind a Fastly bot challenge and `Disallow`ed in robots.txt, so it cannot be used. `api/search/bandcamp-probe.ts` derives candidate slugs from the query and requests `<slug>.bandcamp.com/music` (robots-permitted), resolving identity (`data-band`), release counts, location, titles and photo in one request per candidate.
 
 **Verify both identity and substance.** A slug existing doesn't mean it's the right artist; a name matching doesn't mean it's a real presence — parked, empty accounts match `beyonce`, `sufjan`, `jackwhite`. Verdicts: `accepted`, `absent`, `rejected_empty`, `rejected_name`, `undecided`.
+
+**The probe can only find a subdomain derived from the name.** An account like `honeycrush-online` (Honeycrush, Brooklyn) is reachable only through a link: MusicBrainz's Bandcamp relation, or — when that is missing or retired — a Bandcamp link on the artist's own official site or Linktree, accepted only if the subdomain carries the artist's name (`pickArtistBandcampUrl`) and isn't retired.
 
 Outcomes — **including negatives** — are cached in `bandcamp_slug_probes` (migrations 025–028 plus `20260727090000_bandcamp-probe-probed-slugs.sql`). The `probed_slugs` column records which slugs were actually tried, so a cached negative can't hide an artist whose name has a hyphen.
 

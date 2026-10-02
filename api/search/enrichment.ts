@@ -5,6 +5,7 @@ import { cacheGetOrFetch } from '../functions/cache';
 import { isUrlHostnameAllowed } from '../functions/middleware';
 import { findBandcampArtist } from './bandcamp-probe';
 import { parseBandcampBio } from '../functions/search-parsers';
+import { bandcampSubdomainOf } from '../shared/bandcamp-identity';
 
 // Social platform types
 export type SocialPlatform =
@@ -241,9 +242,16 @@ export async function lookupWikipedia(
 }
 
 // Fetch and parse links from a Linktree page
-export async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLink[]> {
+export interface LinktreeResult {
+  socialLinks: SocialLink[];
+  /** Every Bandcamp link on the page, unfiltered — see pickArtistBandcampUrl. */
+  bandcampUrls: string[];
+}
+
+export async function fetchLinktreeLinks(linktreeUrl: string): Promise<LinktreeResult> {
   const socialLinks: SocialLink[] = [];
   const seenPlatforms = new Set<SocialPlatform>();
+  const bandcampUrls: string[] = [];
 
   try {
     const response = await globalThis.fetch(linktreeUrl, {
@@ -255,7 +263,7 @@ export async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLin
 
     if (!response.ok) {
       console.log('Linktree fetch failed:', response.status);
-      return socialLinks;
+      return { socialLinks, bandcampUrls };
     }
 
     const html = await response.text();
@@ -271,6 +279,11 @@ export async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLin
       // Skip Linktree internal links and non-http URLs
       if (!url.startsWith('http') || url.includes('linktr.ee')) continue;
 
+      if (bandcampSubdomainOf(url)) {
+        if (!bandcampUrls.includes(url)) bandcampUrls.push(url);
+        continue;
+      }
+
       const socialLink = parseSocialUrl(url);
       if (socialLink && !seenPlatforms.has(socialLink.platform)) {
         seenPlatforms.add(socialLink.platform);
@@ -284,7 +297,7 @@ export async function fetchLinktreeLinks(linktreeUrl: string): Promise<SocialLin
     console.error('Linktree fetch error:', err.message);
   }
 
-  return socialLinks;
+  return { socialLinks, bandcampUrls };
 }
 
 // Extract Discogs artist ID from URL (e.g., https://www.discogs.com/artist/3840 -> 3840)
@@ -344,6 +357,8 @@ export interface OfficialSiteResult {
   socialLinks: SocialLink[];
   linktreeUrl: string | null;
   discoveredPlatforms: DiscoveredPlatformLink[];
+  /** Every Bandcamp link on the page, unfiltered — see pickArtistBandcampUrl. */
+  bandcampUrls: string[];
 }
 
 // Fetch social links from an artist's official website
@@ -353,6 +368,7 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
   const discoveredPlatforms: DiscoveredPlatformLink[] = [];
   const seenDiscoveredPlatforms = new Set<DiscoveredPlatform>();
   let linktreeUrl: string | null = null;
+  const bandcampUrls: string[] = [];
 
   try {
     const response = await globalThis.fetch(officialUrl, {
@@ -364,7 +380,7 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
 
     if (!response.ok) {
       console.log('Official site fetch failed:', response.status);
-      return { socialLinks, linktreeUrl, discoveredPlatforms };
+      return { socialLinks, linktreeUrl, discoveredPlatforms, bandcampUrls };
     }
 
     const html = await response.text();
@@ -407,6 +423,13 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
       if (url.includes('linktr.ee') && !linktreeUrl) {
         linktreeUrl = url;
         console.log(`[Official Site] Found Linktree: ${linktreeUrl}`);
+        continue;
+      }
+
+      // Bandcamp links are collected, not trusted: a site links labels and collaborators
+      // too, so the caller keeps only an account carrying the artist's name.
+      if (bandcampSubdomainOf(url)) {
+        if (!bandcampUrls.includes(url)) bandcampUrls.push(url);
         continue;
       }
 
@@ -454,7 +477,7 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
     console.error('Official site fetch error:', err.message);
   }
 
-  return { socialLinks, linktreeUrl, discoveredPlatforms };
+  return { socialLinks, linktreeUrl, discoveredPlatforms, bandcampUrls };
 }
 
 // Merge social links from multiple sources, deduplicating by platform

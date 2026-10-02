@@ -167,6 +167,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/search/stored"
+  to = "/.netlify/functions/search-stored"
+  status = 200
+
+[[redirects]]
   from = "/api/suggest"
   to = "/.netlify/functions/search-suggest"
   status = 200

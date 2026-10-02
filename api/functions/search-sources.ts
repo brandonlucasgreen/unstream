@@ -2,11 +2,11 @@ import { parse } from 'node-html-parser';
 import { Sentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
-import { persistSearchResults, getArtistBySlug, getArtistsBySlugs, artistSlug, getMergeOverrides, getLinkSuppressions, findKnownArtistSlugsByName } from './db';
+import { persistSearchResults, artistSlug, getMergeOverrides, getLinkSuppressions } from './db';
+import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { parseMirloArtistSearch } from './search-parsers';
-import { makeBio } from '../shared/artist-bio';
 import {
   type SourceId,
   type LatestRelease,
@@ -21,13 +21,10 @@ import {
   isExactNameMatch,
   filterNameOnlyMapToExact,
   looksLikeOpaqueId,
-  collectMbSuggestions,
-  isCacheableMbResult,
   CURATED_PLATFORMS,
   collectReleaseTitles,
   aggregateResults,
   attachAmpwallAndSearchLinks,
-  pickQobuzUrl,
   splitSuspiciousPlatforms,
   mergeByReleaseOverlap,
   filterAndSort,
@@ -39,30 +36,15 @@ import {
   isBandcampSearchLink,
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
-  musicBrainzArtistQuery,
 } from './search-utils';
 
-// Import shared enrichment functions
 import {
-  type SocialLink,
-  type DiscoveredPlatformLink,
-  type ArtistLocation,
-  type SocialPlatform,
-  parseSocialUrl,
-  fetchDiscogsArtist,
-  fetchOfficialSiteSocialLinks,
-  mergeSocialLinks,
-  searchPeerTubeChannels,
-  fetchLinktreeLinks,
-  parseMusicBrainzArea,
-  type MusicBrainzArea,
-  pickLocation,
-  fetchBandcampPage,
-  checkBandcampSubdomain,
-  fetchMirloLocation,
-  enrichLocationFallback,
-  lookupWikipedia,
-} from '../search/enrichment';
+  getMusicBrainzEnrichment,
+  peekMusicBrainzEnrichment,
+  musicBrainzEnrichmentCacheKey,
+  type EnrichedMusicBrainzResult,
+} from './musicbrainz-enrichment';
+import { SearchTimer } from './search-timing';
 
 // Helper to fetch with timeout
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 3000): Promise<Response> {
@@ -335,407 +317,6 @@ async function searchBandwagon(query: string): Promise<Map<string, NameOnlyEntry
   }
 
   return results;
-}
-
-// Helper to delay execution (for rate limiting)
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// MusicBrainz enriched result interface with full enrichment data
-interface EnrichedMusicBrainzResult {
-  query: string;
-  artistName: string | null;
-  officialUrl: string | null;
-  discogsUrl: string | null;
-  bandcampUrl: string | null;
-  /**
-   * The Bandcamp subdomain MusicBrainz says belongs to this artist, recorded even when
-   * the account behind it has been retired and `bandcampUrl` was therefore dropped.
-   *
-   * MB is authoritative about *which* account is the artist's, independent of whether
-   * that account still exists — so a probe hit on a different subdomain is evidence of
-   * a different artist, not a better link. See `bandcampSubdomainConflicts`.
-   */
-  bandcampSubdomain: string | null;
-  qobuzUrl: string | null;
-  hasPre2005Release: boolean;
-  socialLinks: SocialLink[];
-  discoveredPlatforms: DiscoveredPlatformLink[];
-  platformUrls: string[];
-  wikipediaSummary: string | null;
-  wikipediaUrl: string | null;
-  /** Sidebar bio from MB's own Bandcamp relation page; '' when it shows none. */
-  bandcampBio: string | null;
-  /** The Discogs bio, raw markup. */
-  discogsProfile: string | null;
-  /**
-   * A bio source didn't answer (Discogs, Wikipedia or the Bandcamp page). The result is then
-   * kept only for the short failure TTL — a timeout must not hide a bio for 30 minutes.
-   */
-  bioFetchFailed: boolean;
-  location: ArtistLocation | undefined;
-  /**
-   * Partial-match artist names from MB's ranked search results (beyond the top
-   * hit), e.g. "Goodnight Argent" for the query "argent". Discovery candidates
-   * only — they are verified against Bandcamp before becoming results.
-   */
-  suggestedNames: string[];
-  /** The MB search itself failed (network / non-2xx). We know nothing. */
-  searchFailed: boolean;
-  /**
-   * The url-rels lookup for the matched artist succeeded. When false with a
-   * non-null artistName, the identity is known but officialUrl/socialLinks may
-   * be missing purely because a fetch failed — the response must say
-   * enrichment is still pending, or the client never retries and the artist
-   * renders bare (this is how Radiohead shipped without its official site).
-   */
-  enrichmentComplete: boolean;
-}
-
-// Cached wrapper around the MusicBrainz enrichment fetch. MB data for an
-// artist changes rarely, and the uncached path costs 2+ rate-limit delays plus
-// several fetches — the single slowest leg of the fan-out. Failures and
-// partial enrichments are never cached (see isCacheableMbResult).
-async function searchMusicBrainz(query: string, prefetched?: Promise<PrefetchedCache>): Promise<EnrichedMusicBrainzResult> {
-  const cacheKey = artistCacheKey('mb-enriched', query);
-  const { data } = await cacheGetOrFetch<EnrichedMusicBrainzResult>(
-    cacheKey,
-    () => fetchMusicBrainzEnrichment(query),
-    PLATFORM_CACHE_TTL,
-    isCacheableMbResult,
-    PLATFORM_FAILURE_CACHE_TTL,
-    prefetched,
-  );
-  return data;
-}
-
-// Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
-async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicBrainzResult> {
-  const emptyResult: EnrichedMusicBrainzResult = {
-    query,
-    artistName: null,
-    officialUrl: null,
-    discogsUrl: null,
-    bandcampUrl: null,
-    bandcampSubdomain: null,
-    qobuzUrl: null,
-    hasPre2005Release: false,
-    socialLinks: [],
-    discoveredPlatforms: [],
-    platformUrls: [],
-    wikipediaSummary: null,
-    wikipediaUrl: null,
-    bandcampBio: null,
-    discogsProfile: null,
-    bioFetchFailed: false,
-    location: undefined,
-    suggestedNames: [],
-    searchFailed: false,
-    enrichmentComplete: true,
-  };
-
-  try {
-    // Search for artist. MB is Lucene-backed and its ranked list is the one real
-    // search engine in the fan-out: the top hit drives enrichment (strict gates
-    // below), the rest become discovery candidates via collectMbSuggestions.
-    const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=5`;
-
-    const response = await globalThis.fetch(searchUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    if (!response.ok) {
-      console.log('MusicBrainz artist search failed:', response.status);
-      return { ...emptyResult, searchFailed: true };
-    }
-
-    const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
-    const artists = data.artists || [];
-
-    if (artists.length === 0) {
-      console.log('[MusicBrainz] No results, falling back to Bandcamp/Mirlo location');
-      return { ...emptyResult, location: await enrichLocationFallback(query) };
-    }
-
-    const artist = artists[0];
-    // Only consider exact/near-exact matches for enrichment. Lower-scored hits are
-    // still worth reporting as discovery candidates — they just don't get to claim
-    // the MB identity (official site, socials, location) for themselves.
-    if (artist.score < 95) {
-      console.log(`[MusicBrainz] Low confidence match (score ${artist.score}), falling back to Bandcamp/Mirlo location`);
-      return {
-        ...emptyResult,
-        suggestedNames: collectMbSuggestions(artists, query),
-        location: await enrichLocationFallback(query),
-      };
-    }
-
-    // Verify the returned artist name actually matches the query.
-    //
-    // Must use normalizeForComparison, which strips accents. A bare
-    // .replace(/[^a-z0-9]/g, '') *deletes* accented letters instead: MusicBrainz returns
-    // "Tanerélle" -> "tanerlle" while the query arrives already accent-normalized as
-    // "Tanerelle" -> "tanerelle", so every accented artist name failed this check and
-    // lost all MB enrichment — including their Qobuz link, which MB is now the only
-    // source of.
-    const queryNormalized = normalizeForComparison(query);
-    const artistNormalized = normalizeForComparison(artist.name);
-    const isNameMatch = queryNormalized === artistNormalized ||
-      queryNormalized.includes(artistNormalized) && artistNormalized.length > queryNormalized.length * 0.7 ||
-      artistNormalized.includes(queryNormalized) && queryNormalized.length > artistNormalized.length * 0.7;
-
-    if (!isNameMatch) {
-      console.log('[MusicBrainz] Top match does not match the query, falling back to Bandcamp/Mirlo location');
-      return {
-        ...emptyResult,
-        suggestedNames: collectMbSuggestions(artists, query),
-        location: await enrichLocationFallback(query),
-      };
-    }
-
-    // Wait 1.1 seconds to respect MusicBrainz rate limit
-    await delay(1100);
-
-    // Fetch artist details with URL relations
-    const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels&fmt=json`;
-
-    const artistResponse = await globalThis.fetch(artistUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    let officialUrl: string | null = null;
-    let discogsUrl: string | null = null;
-    let bandcampUrl: string | null = null;
-    let qobuzUrl: string | null = null;
-    let linktreeUrl: string | null = null;
-    let wikipediaUrl: string | null = null;
-    let wikidataUrl: string | null = null;
-    const socialLinks: SocialLink[] = [];
-    const seenPlatforms = new Set<SocialPlatform>();
-    let platformUrls: string[] = [];
-
-    let mbLocation: ArtistLocation | undefined;
-
-    if (artistResponse.ok) {
-      const artistData = await artistResponse.json() as {
-        relations?: { type: string; url?: { resource: string } }[];
-        country?: string;
-        area?: MusicBrainzArea;
-        'begin-area'?: MusicBrainzArea;
-      };
-
-      mbLocation = parseMusicBrainzArea(
-        artistData.area,
-        artistData['begin-area'],
-        artistData.country,
-      );
-
-      const relations = artistData.relations || [];
-
-      // Look for official homepage
-      for (const rel of relations) {
-        if (rel.type === 'official homepage' && rel.url?.resource) {
-          officialUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Look for Discogs link
-      for (const rel of relations) {
-        if (rel.type === 'discogs' && rel.url?.resource) {
-          discogsUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Look for Bandcamp link
-      for (const rel of relations) {
-        if (rel.type === 'bandcamp' && rel.url?.resource) {
-          bandcampUrl = rel.url.resource;
-          break;
-        }
-        if (!bandcampUrl && rel.url?.resource) {
-          try {
-            const hostname = new URL(rel.url.resource).hostname;
-            if (hostname.endsWith('.bandcamp.com')) {
-              bandcampUrl = rel.url.resource;
-              break;
-            }
-          } catch {}
-        }
-      }
-
-      // Look for English Wikipedia link
-      for (const rel of relations) {
-        if (rel.type === 'wikipedia' && rel.url?.resource && rel.url.resource.includes('en.wikipedia.org')) {
-          wikipediaUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Most artists have a Wikidata relation instead — MusicBrainz moved to those years ago.
-      // lookupWikipedia resolves it to the English article when there's no direct link.
-      for (const rel of relations) {
-        if (rel.type === 'wikidata' && rel.url?.resource) {
-          wikidataUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Extract social links from 'social network' and 'youtube' relation types
-      for (const rel of relations) {
-        if ((rel.type === 'social network' || rel.type === 'youtube') && rel.url?.resource) {
-          const url = rel.url.resource;
-          if (url.includes('linktr.ee') && !linktreeUrl) {
-            linktreeUrl = url;
-            console.log(`[MusicBrainz] Found Linktree: ${linktreeUrl}`);
-            continue;
-          }
-          const socialLink = parseSocialUrl(url);
-          if (socialLink && !seenPlatforms.has(socialLink.platform)) {
-            seenPlatforms.add(socialLink.platform);
-            socialLinks.push(socialLink);
-          }
-        }
-      }
-
-      // Extract platform URLs for disambiguation
-      const platformRelTypes = new Set([
-        'bandcamp', 'streaming music', 'purchase for download',
-        'download for free', 'free streaming',
-      ]);
-      for (const rel of relations) {
-        if (rel.url?.resource && platformRelTypes.has(rel.type)) {
-          platformUrls.push(rel.url.resource);
-        }
-      }
-      if (platformUrls.length > 0) {
-        console.log(`[MusicBrainz] Found ${platformUrls.length} platform URLs`);
-      }
-      qobuzUrl = pickQobuzUrl(platformUrls);
-      if (qobuzUrl) {
-        console.log(`[MusicBrainz] Found Qobuz link: ${qobuzUrl}`);
-      }
-    }
-
-    await delay(1100);
-
-    // Check if artist has pre-2005 releases
-    const releasesUrl = `https://musicbrainz.org/ws/2/release-group/?artist=${artist.id}&fmt=json&limit=20`;
-
-    const releasesResponse = await globalThis.fetch(releasesUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
-
-    let hasPre2005Release = false;
-
-    if (releasesResponse.ok) {
-      const releasesData = await releasesResponse.json() as { 'release-groups'?: { 'first-release-date'?: string }[] };
-      const releaseGroups = releasesData['release-groups'] || [];
-
-      for (const rg of releaseGroups) {
-        const firstReleaseDate = rg['first-release-date'];
-        if (firstReleaseDate) {
-          const year = parseInt(firstReleaseDate.substring(0, 4), 10);
-          if (year < 2005) {
-            hasPre2005Release = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // Fetch enrichment data in parallel
-    const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
-    const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcampPage, mirloLocation, bandcampStatus] = await Promise.all([
-      discogsUrl ? fetchDiscogsArtist(discogsUrl) : Promise.resolve({ socialLinks: [], profile: null, failed: false }),
-      officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [] }),
-      searchPeerTubeChannels(artist.name),
-      lookupWikipedia(wikipediaUrl, wikidataUrl),
-      bandcampUrl ? fetchBandcampPage(bandcampUrl) : Promise.resolve(null),
-      fetchMirloLocation(mirloSlug),
-      // Rides in this existing parallel block, so a confirmed-dead link costs no
-      // extra wall-clock — and only runs at all when MB actually has a Bandcamp rel.
-      bandcampUrl ? checkBandcampSubdomain(bandcampUrl) : Promise.resolve('unknown' as const),
-    ]);
-
-    // Drop a retired subdomain here, at the single point where MB's Bandcamp link enters
-    // the pipeline, rather than at each of the four places that later read it. Only a
-    // confirmed 'dead' is dropped; 'unknown' keeps the old behaviour of trusting MB.
-    // Captured before the dead-link drop below: the identity claim outlives the account.
-    const mbClaimedBandcampUrl = bandcampUrl;
-
-    if (bandcampUrl && bandcampStatus === 'dead') {
-      console.log(`[MusicBrainz] Dropping retired Bandcamp subdomain for "${artist.name}": ${bandcampUrl}`);
-      platformUrls = platformUrls.filter(u => u !== bandcampUrl);
-      // MB is the only place this artist's Bandcamp account is recorded, and the record
-      // is stale. Worth knowing about: the fix is an edit upstream, not in our code.
-      const shouldCapture = await checkSentryDedup(`dead-bandcamp:${bandcampUrl}`, 7 * 24 * 60 * 60);
-      if (shouldCapture) {
-        Sentry.captureMessage('MusicBrainz Bandcamp relation points at a retired subdomain', {
-          level: 'info',
-          extra: { artist: artist.name, bandcampUrl, query },
-          tags: { platform: 'bandcamp' },
-        });
-      }
-      bandcampUrl = null;
-    }
-
-    // One source, whole — never a city from one and a region from another.
-    const location = pickLocation(mbLocation, bandcampPage?.location ?? null, mirloLocation);
-
-    // Scrape Linktree if found
-    let linktreeSocialLinks: SocialLink[] = [];
-    const finalLinktreeUrl = linktreeUrl || officialSiteResult.linktreeUrl;
-    if (finalLinktreeUrl) {
-      linktreeSocialLinks = await fetchLinktreeLinks(finalLinktreeUrl);
-    }
-
-    // Collect PeerTube link
-    const peertubeLinks: SocialLink[] = peertubeLink ? [peertubeLink] : [];
-
-    // Merge all social links
-    const allSocialLinks = mergeSocialLinks(
-      socialLinks,
-      discogsArtist.socialLinks,
-      officialSiteResult.socialLinks,
-      linktreeSocialLinks,
-      peertubeLinks
-    );
-
-    return {
-      query,
-      artistName: artist.name,
-      officialUrl,
-      discogsUrl,
-      bandcampUrl,
-      bandcampSubdomain: bandcampSubdomainOf(mbClaimedBandcampUrl),
-      qobuzUrl,
-      hasPre2005Release,
-      socialLinks: allSocialLinks,
-      discoveredPlatforms: officialSiteResult.discoveredPlatforms,
-      platformUrls,
-      wikipediaSummary: wikipediaResult.status === 'found' ? wikipediaResult.extract : null,
-      wikipediaUrl: wikipediaResult.status === 'found' ? wikipediaResult.pageUrl : wikipediaUrl,
-      // A retired subdomain's bio belongs to nobody we can link to.
-      bandcampBio: bandcampUrl ? bandcampPage?.bio ?? null : null,
-      discogsProfile: discogsArtist.profile,
-      bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcampUrl !== null && bandcampPage === null),
-      location,
-      suggestedNames: collectMbSuggestions(artists, query, artist.name),
-      searchFailed: false,
-      enrichmentComplete: artistResponse.ok,
-    };
-  } catch (error: unknown) {
-    const err = error as { name?: string; message?: string };
-    console.error('MusicBrainz search error:', err.name, err.message);
-    return { ...emptyResult, searchFailed: true };
-  }
 }
 
 // Search Mirlo through its public artist search API.
@@ -1680,7 +1261,12 @@ function collectBandcampBios(allResults: PlatformResult[], mbData: EnrichedMusic
 // Main search orchestrator
 // ---------------------------------------------------------------------------
 
-async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
+async function searchAllPlatforms(
+  query: string,
+  mode: SearchMode,
+  deferEnrichment: boolean,
+  timer: SearchTimer,
+): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
   // Merge overrides come from Supabase and are needed in Phase 2.5 — start the
   // fetch now so it rides along with the platform fan-out instead of adding a
   // round-trip afterwards. getMergeOverrides catches its own errors ([] on failure).
@@ -1702,21 +1288,38 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
     artistCacheKey('patreon', query),
     artistCacheKey('beatport', query),
     artistCacheKey('even', query),
-    artistCacheKey('mb-enriched', query),
+    musicBrainzEnrichmentCacheKey(query),
   ]);
+
+  // MusicBrainz enrichment is the slowest leg by far on a cache miss — a search, a 1.1s
+  // rate-limit gap, a lookup, then Discogs, Wikipedia, the official site and Linktree.
+  // A client that runs Phase 2 asks us not to wait for it: we use the cached answer if
+  // there is one and otherwise return without it (hasPendingEnrichment), and Phase 2
+  // fetches it and fills the shared cache for the next search. Everyone else (v1 API,
+  // Discord, edge pages, older app builds) still gets the full answer inline.
+  const mbStartedAt = Date.now();
+  const mbPromise: Promise<EnrichedMusicBrainzResult | null> = deferEnrichment
+    ? peekMusicBrainzEnrichment(query, prefetched).then(data => {
+        timer.record('mb', Date.now() - mbStartedAt, data ? 'cached' : 'deferred');
+        return data;
+      })
+    : getMusicBrainzEnrichment(query, prefetched).then(({ data, cached }) => {
+        timer.record('mb', Date.now() - mbStartedAt, cached ? 'cached' : 'fetched');
+        return data;
+      });
 
   // Phase 1: Search all platforms in parallel and aggregate Bandcamp/Mirlo results
   const [bandcampResults, bandwagonResults, mirloResults, faircampResults, jamcoopResults, patreonResults, ampwallResults, beatportResults, evenResults, musicbrainzResult] = await Promise.allSettled([
-    searchBandcamp(query),
-    searchBandwagon(query),
-    searchMirlo(query, prefetched),
-    searchFaircamp(query),
-    searchJamcoop(query),
-    searchPatreon(query, prefetched),
-    searchAmpwall(query),
-    searchBeatport(query, prefetched),
-    searchEven(query, prefetched),
-    searchMusicBrainz(query, prefetched),
+    timer.time('bandcamp', searchBandcamp(query)),
+    timer.time('bandwagon', searchBandwagon(query)),
+    timer.time('mirlo', searchMirlo(query, prefetched)),
+    timer.time('faircamp', searchFaircamp(query)),
+    timer.time('jamcoop', searchJamcoop(query)),
+    timer.time('patreon', searchPatreon(query, prefetched)),
+    timer.time('ampwall', searchAmpwall(query)),
+    timer.time('beatport', searchBeatport(query, prefetched)),
+    timer.time('even', searchEven(query, prefetched)),
+    mbPromise,
   ]);
 
   // UC6: Capture partial platform failures for monitoring
@@ -1795,7 +1398,7 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
     const existingBandcampUrls = new Set(
       (bandcampResults.status === 'fulfilled' ? bandcampResults.value : []).map(r => r.url)
     );
-    const discoveredBandcamp = await probeBandcampForCandidates(query, candidateNames, existingBandcampUrls);
+    const discoveredBandcamp = await timer.time('probe', probeBandcampForCandidates(query, candidateNames, existingBandcampUrls));
     allResults.push(...discoveredBandcamp);
   }
 
@@ -1894,12 +1497,12 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   }
 
   // Phase 3: Fetch releases, then disambiguate using release data
-  await fetchReleasesForDisambiguation(aggregated);
+  await timer.time('releases', fetchReleasesForDisambiguation(aggregated));
   const disambiguated = splitSuspiciousPlatforms(aggregated);
   const merged = mergeByReleaseOverlap(disambiguated);
 
   // Phase 4: Attach deferred name-only platforms, filter, and sort
-  await attachNameOnlyPlatforms(merged, nameOnlyMaps);
+  await timer.time('name-only', attachNameOnlyPlatforms(merged, nameOnlyMaps));
   // Re-merge: new results from Phase 4 may overlap with existing ones
   const finalMerged = mergeByReleaseOverlap(merged);
 
@@ -1928,57 +1531,6 @@ async function searchAllPlatforms(query: string, mode: SearchMode): Promise<{ re
   // hasPendingEnrichment: false and never called Phase 2 to fill the gap.
   const enrichmentApplied = mbData !== null && mbData.artistName !== null && mbData.enrichmentComplete;
   return { results: finalResults, enrichmentApplied };
-}
-
-// Shape a DB artist row into a result card. Claimed rows become full profile
-// cards (custom image, /a/ page link); verified rows become plain result cards
-// with the links a past search persisted, and carry a knownSlug so the
-// frontend can link to the pre-generated /artist/ page. Unverified rows are
-// rejected — that confidence level is where junk from name-only matches
-// accumulates.
-//
-// The card's slug is the row's canonical one, never the query-derived slug the
-// caller searched under: getArtistBySlug matches tolerantly (query "me:she" →
-// slug "me-she" → stored slug "meshe"), and a card linking to the query slug
-// 404s at /a/me-she — the 2026-09-19 bug report from me:she.
-export function toStoredResult(
-  dbArtist: Awaited<ReturnType<typeof getArtistBySlug>>,
-): AggregatedResult | null {
-  if (!dbArtist) return null;
-  const claimed = dbArtist.matchConfidence === 'claimed';
-  if (!claimed && dbArtist.matchConfidence !== 'verified') return null;
-  const slug = dbArtist.slug;
-  return {
-    // The known- prefix marks a card served from the DB rather than resolved
-    // live; the persist step skips these so re-serving stored data can't
-    // refresh updated_at and mask genuine staleness.
-    id: claimed ? `claimed-${slug}` : `known-${slug}`,
-    name: dbArtist.name,
-    type: 'artist' as const,
-    imageUrl: dbArtist.profile?.customImageUrl || dbArtist.imageUrl,
-    platforms: dbArtist.platforms.map(p => ({
-      sourceId: p.sourceId as SourceId,
-      url: p.url,
-      displayName: p.displayName,
-      latestRelease: p.latestRelease,
-    })),
-    matchConfidence: claimed ? ('claimed' as const) : ('verified' as const),
-    ...(claimed ? { claimedSlug: slug } : { knownSlug: slug }),
-    ...(dbArtist.location ? { location: dbArtist.location } : {}),
-    ...(claimed ? claimedBio(dbArtist.profile, slug) : {}),
-  };
-}
-
-// A claimed artist's own bio outranks every other source, and their "no bio" switch outranks
-// all of them. With no bio written, the card inherits whatever the live search found — see
-// mergeStoredArtistsIntoResults.
-function claimedBio(
-  profile: { bio?: string; showBio?: boolean } | null | undefined,
-  slug: string,
-): Pick<AggregatedResult, 'bio' | 'bioSuppressed'> {
-  if (profile?.showBio === false) return { bioSuppressed: true };
-  const bio = makeBio('unstream', profile?.bio, `https://unstream.stream/a/${slug}`);
-  return bio ? { bio } : {};
 }
 
 /**
@@ -2012,6 +1564,7 @@ export function attachArtistPageSlugs(results: AggregatedResult[]): void {
 
 // Netlify function handler
 export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+  const timer = new SearchTimer();
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
   // Skip rate limiting when called internally from v1 wrappers (which do their own check).
@@ -2039,45 +1592,23 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   // typed the query, so fuzzy is the default.
   const mode: SearchMode = event.queryStringParameters?.mode === 'exact' ? 'exact' : 'fuzzy';
 
+  // 'deferred' is sent only by clients that call /api/search/musicbrainz themselves when
+  // hasPendingEnrichment is true — they would rather see results now and enrichment a
+  // moment later. Absent, we wait for MusicBrainz as before: the v1 API, the Discord bot,
+  // the edge-rendered pages and shipped app builds never make that second call.
+  const deferEnrichment = event.queryStringParameters?.enrichment === 'deferred';
+
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
     const normalizedQuery = normalizeSearchQuery(query);
 
-    // Known artists are looked up two ways, both concurrent with the platform
-    // fan-out: claimed profiles by exact slug of the query (covers queries that
-    // ARE the artist's name), and any known artist by name-contains — a partial
-    // query like "patrick" must surface Patrick Hardy when a past search already
-    // resolved and persisted him, and "lightbulbs" must surface the claimed
-    // kid-lightbulbs profile instead of a generic scraped card.
-    const slug = artistSlug(normalizedQuery);
-    const claimedExactPromise: Promise<AggregatedResult | null> = getArtistBySlug(slug)
-      .then(dbArtist => dbArtist?.matchConfidence === 'claimed' ? toStoredResult(dbArtist) : null)
-      .catch(err => {
-        console.error('[DB] Claimed artist lookup failed:', err);
-        return null;
-      });
-    // Name-contains is a fuzzy-only channel: a detection query IS the artist's
-    // exact name, so a known artist merely containing it is someone else.
-    // Resolved as ONE batched lookup: per-slug getArtistBySlug calls cost 2-3
-    // queries each, which made this channel 12-18 reads per fuzzy search. The
-    // slugs stay in ranked order — the map lookup preserves it.
-    const knownByNamePromise: Promise<AggregatedResult[]> = mode === 'exact'
-      ? Promise.resolve([])
-      : findKnownArtistSlugsByName(normalizedQuery)
-        .then(async slugs => {
-          const bySlug = await getArtistsBySlugs(slugs);
-          return slugs.map(s => toStoredResult(bySlug.get(s) ?? null));
-        })
-        .then(list => list.filter((r): r is AggregatedResult => r !== null))
-        .catch(err => {
-          console.error('[DB] Known artist name search failed:', err);
-          return [];
-        });
+    // Claimed and verified artists we already hold, looked up concurrently with the
+    // platform fan-out and folded in at the end. The web client also fetches these on
+    // their own from /api/search/stored, to show them before the fan-out finishes.
+    const storedArtistsPromise = timer.time('stored', findStoredArtists(normalizedQuery, mode));
 
-    const searchResult = await searchAllPlatforms(normalizedQuery, mode);
-    const claimedExact = await claimedExactPromise;
-    const knownByName = await knownByNamePromise;
-    const storedArtists = claimedExact ? [claimedExact, ...knownByName] : knownByName;
+    const searchResult = await searchAllPlatforms(normalizedQuery, mode, deferEnrichment, timer);
+    const storedArtists = await storedArtistsPromise;
     const results = searchResult.results;
 
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
@@ -2118,9 +1649,9 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // DB) and known- cards (served FROM the DB — persisting them back would
     // refresh updated_at without re-verifying anything).
     try {
-      await persistSearchResults(finalResults.filter(r =>
+      await timer.time('persist', persistSearchResults(finalResults.filter(r =>
         r.matchConfidence !== 'claimed' && !r.id.startsWith('known-')
-      ));
+      )));
     } catch (err) {
       console.error('[DB] Background persist failed:', err);
     }
@@ -2158,12 +1689,15 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       ? 's-maxage=60, stale-while-revalidate=300'
       : 's-maxage=300, stale-while-revalidate=3600';
 
+    console.log(`[search-timing] query=${JSON.stringify(normalizedQuery)} mode=${mode}${deferEnrichment ? ' deferred' : ''} ${timer.toLogLine()}`);
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': cacheControl,
+        'Server-Timing': timer.toServerTiming(),
       },
       body: JSON.stringify(response),
     };

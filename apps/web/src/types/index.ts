@@ -146,6 +146,9 @@ export interface MusicBrainzData {
   location?: ArtistLocation;
   // Only fills a card with none — see mergeWithMusicBrainzData.
   bio?: ArtistBio | null;
+  // The Bandcamp account MusicBrainz lists for this artist, even if retired. A result on a
+  // different subdomain is a same-name stranger and must not be enriched.
+  bandcampSubdomain?: string | null;
 }
 
 // Search state
