@@ -77,8 +77,10 @@ npm run migrate:link|migrate:dry-run|migrate:list        # Supabase CLI, --linke
 
 Two-phase.
 
-- **Phase 1** — `GET /api/search/sources` → `search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, returns results. Applies MusicBrainz enrichment server-side when it lands in time; `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
+- **Phase 1** — `GET /api/search/sources` → `search-sources.ts`. Fans out across platforms in parallel (~1-2s), aggregates, disambiguates, returns results. Applies MusicBrainz enrichment server-side when it has it; `hasPendingEnrichment` tells the client whether Phase 2 is still needed.
 - **Phase 2** — `GET /api/search/musicbrainz` → `search-musicbrainz.ts`. Official sites, socials, location, release verification, Qobuz links. Merged client-side by `mergeWithMusicBrainzData` in `apps/web/src/services/sources.ts`.
+
+**Both phases share one MusicBrainz enrichment and one cache entry** (`musicbrainz-enrichment.ts`, key `mb-enriched`, kept a week). On a miss it is the slowest leg of a search by far, so a client that runs Phase 2 sends `enrichment=deferred` and Phase 1 only *reads* that cache, never fetches: on a miss it returns without MusicBrainz and Phase 2 fills the cache for the next search. Only the web client's single-artist search defers today. Everything else — v1 API, Discord bot, edge pages, `generate-artist-data`, shipped Mac and extension builds, the web client's multi-artist split — never makes the Phase 2 call, so it must keep waiting inline; don't make deferral the default. Each Phase 1 logs a `[search-timing]` line and sends a `Server-Timing` header with per-phase durations; read those before guessing where a slow search went.
 
 Multi-artist queries ("Artist feat. Artist2") are split, searched in parallel, then merged and deduplicated.
 

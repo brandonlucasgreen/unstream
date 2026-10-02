@@ -523,10 +523,16 @@ export function mergeSearchResponses(responses: SearchResponse[], originalQuery:
 }
 
 /**
- * Perform a single search API call
+ * Perform a single search API call.
+ *
+ * `deferEnrichment` tells the server not to wait for an uncached MusicBrainz lookup —
+ * results come back in a second or two with hasPendingEnrichment set, and App.tsx
+ * fetches the enrichment itself from /api/search/musicbrainz. Only for a query whose
+ * response reaches that Phase 2 call.
  */
-async function searchSingle(query: string): Promise<SearchResponse> {
+async function searchSingle(query: string, deferEnrichment = false): Promise<SearchResponse> {
   const params = new URLSearchParams({ query });
+  if (deferEnrichment) params.set('enrichment', 'deferred');
 
   try {
     const response = await fetch(`/api/search/sources?${params.toString()}`);
@@ -551,7 +557,7 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
 
   // If single artist (no separators found), do a simple search
   if (artistQueries.length === 1) {
-    return searchSingle(query);
+    return searchSingle(query, true);
   }
 
   // Multi-artist query: search for the full query AND each individual artist
@@ -563,7 +569,9 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
   const uniqueQueries = [...new Set(allQueries.map(q => q.toLowerCase()))]
     .map(lowerQ => allQueries.find(q => q.toLowerCase() === lowerQ)!);
 
-  // Search all queries in parallel
+  // Search all queries in parallel. Not deferred: the merged response carries no
+  // hasPendingEnrichment, so Phase 2 never runs for the individual artists and the
+  // server has to enrich each one inline.
   const responses = await Promise.all(uniqueQueries.map(q => searchSingle(q)));
 
   // Merge and deduplicate results
