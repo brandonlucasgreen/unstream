@@ -1,6 +1,6 @@
 # Instagram: original posts, or none
 
-**Status:** not started. Instagram is paused in `scripts/generate-social-posts.ts` until this is built.
+**Status:** built 2026-10-01. The cards are drawn by `api/functions/social-card.ts` (a Netlify Function, not an edge function: see "Instagram cards" in `docs/engineering-history.md` for the CPU measurement). The carousel is added to the indie spotlight in `scripts/generate-social-posts.ts`, and goes to Buffer as drafts until `INSTAGRAM_DRAFTS_BEFORE`. Step 4, watching Account Status for 30 days, is still to do.
 
 ## Why Instagram is paused
 
@@ -34,7 +34,7 @@ Buffer fetches every image at publish time. Images must therefore be at **public
 
 ## The build
 
-1. **Render the cards** in an edge function, e.g. `/social-card/{slug}/{n}.png`, from the same data the artist page uses. Deno can render SVG to PNG with a WASM renderer imported from `esm.sh`; that is a new dependency, so check its size against the edge bundle limit. Rendering on request means there's nothing to store or clean up, and Buffer's fetch is the only caller.
+1. **Render the cards** in an edge function, e.g. `/social-card/{slug}/{n}.png`, from the same data the artist page uses. Deno can render SVG to PNG with a WASM renderer imported from `esm.sh`; that is a new dependency, so check its size against the edge bundle limit. Rendering on request means there's nothing to store or clean up, and Buffer's fetch is the only caller. *As built: a Netlify Function at `/api/social-card/{slug}/{slide}.png`, because a photo slide needs more than the edge's 50ms of CPU.*
 2. **Add the Instagram variant** to the indie spotlight group in `generate-social-posts.ts`:
    - card URLs as the assets;
    - the artist in `userTags` when they have an Instagram link;
@@ -44,5 +44,5 @@ Buffer fetches every image at publish time. Images must therefore be at **public
 
 ## Open questions
 
-- Should the card carry the artist's own claimed image when they set one (`custom_image_url`), rather than the Bandcamp photo?
-- Press photos are usually the photographer's copyright. Check this before putting them on a slide, even credited.
+- ~~Should the card carry the artist's own claimed image when they set one (`custom_image_url`)?~~ Yes, as built: the photo slide uses the artist page's own choice, which is the claimed image when there is one.
+- Press photos are usually the photographer's copyright. **Still open.** As built, the photo is the last slide, fitted rather than cropped, and credited to where it came from ("Photo from their Bandcamp page"), the same image the Threads and Bluesky posts already attach. It isn't credited to a photographer, because Unstream doesn't know who took it. Dropping the slide is a one-line change in `cardSlides`.

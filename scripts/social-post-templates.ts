@@ -10,18 +10,36 @@
  *
  * Payouts are read from api/shared/platform-registry.ts, the same figures the site shows. The
  * posts used to carry their own copy of them and drifted (Mirlo at 93% against the site's 86-90%).
+ *
+ * Instagram gets the indie spotlights only, as a carousel of cards Unstream draws itself
+ * (api/shared/social-card.ts): six months of press photos reached a median of 3 accounts, after
+ * Instagram stopped recommending accounts that mostly post other people's photos.
  */
 
 import { PLATFORMS } from '../api/shared/platform-registry';
+import {
+  ARTIST_TAG_POSITION,
+  cardAltText,
+  cardSlides,
+  fullSizeImageUrl,
+  payoutFloor,
+  purchaseMath,
+  releaseNoun,
+  socialCardUrl,
+  type CardData,
+  type FeaturedRelease,
+} from '../api/shared/social-card';
 
 export const UNSTREAM_BASE = 'https://unstream.stream';
 
-export const CHARACTER_LIMITS = { threads: 500, bluesky: 300, linkedin: 3000 } as const;
+export const CHARACTER_LIMITS = { threads: 500, bluesky: 300, instagram: 2200, linkedin: 3000 } as const;
 export type Platform = keyof typeof CHARACTER_LIMITS;
 
 export interface PostImage {
   url: string;
   altText: string;
+  /** Instagram only: accounts tagged on the image, at 0-1 fractions of its width and height. */
+  userTags?: { handle: string; x: number; y: number }[];
 }
 
 export interface SocialPost {
@@ -30,13 +48,6 @@ export interface SocialPost {
   images: PostImage[];
   /** LinkedIn only. Company-page posts with a link in the body reach fewer people, so it goes here. */
   firstComment?: string;
-}
-
-/** A record of theirs that's on the platform. `latest` only when it's the newest dated one there. */
-export interface FeaturedRelease {
-  title: string;
-  type: string;
-  latest: boolean;
 }
 
 /** Where to buy an artist's music, and a record of theirs that's there. */
@@ -48,45 +59,9 @@ export interface SellingPlatform {
   release: FeaturedRelease | null;
 }
 
-/** One row of an artist's release catalogue, as `/api/artist-page` returns it. */
-export interface CatalogueRelease {
-  title: string;
-  releaseType: string;
-  releaseDate: string | null;
-  status: string;
-  sources: { platform: string }[];
-}
-
-// Past this a title is more likely an ingest artefact than a name, and it would crowd the post.
-const MAX_RELEASE_TITLE_LENGTH = 80;
-
-/**
- * The record a spotlight names, from the artist's catalogue: the newest dated release on the
- * platform the post sends people to. Without dates (grid ingest often has none) it falls back to
- * the catalogue's first release there, which is the artist's own choice when they've arranged
- * their releases, but isn't called "latest", since nothing says it is.
- *
- * Only released records: an announced one is a pre-order, and "their latest album" would claim
- * it's out.
- */
-export function pickCatalogueRelease(releases: CatalogueRelease[], platformId: string): FeaturedRelease | null {
-  const onPlatform = releases.filter(r =>
-    r.status === 'released'
-    && r.title.trim().length > 0
-    && r.title.length <= MAX_RELEASE_TITLE_LENGTH
-    && r.sources.some(s => s.platform === platformId)
-  );
-  if (onPlatform.length === 0) return null;
-
-  const newest = onPlatform
-    .filter(r => r.releaseDate)
-    .sort((a, b) => b.releaseDate!.localeCompare(a.releaseDate!))[0];
-  const chosen = newest ?? onPlatform[0];
-  return { title: chosen.title.trim(), type: chosen.releaseType, latest: !!newest };
-}
-
 export interface ArtistContext {
   name: string;
+  slug: string;
   /** Their Unstream page. */
   url: string;
   imageUrl: string | null;
@@ -95,11 +70,10 @@ export interface ArtistContext {
   /** Only a handle taken from the artist's own Threads link — never their Instagram one (see threadsName). */
   threadsHandle: string | null;
   blueskyHandle: string | null;
+  /** From the artist's own Instagram link. Tagged on Instagram only. */
+  instagramHandle: string | null;
   platform: SellingPlatform | null;
 }
-
-// The per-stream figure every post compares against. Spotify's average, widely reported.
-const STREAM_PAYOUT_DOLLARS = 0.003;
 
 // --- Small helpers ---
 
@@ -112,48 +86,6 @@ function fit(platform: Platform, candidates: string[]): string {
 /** Rotation through a list by week number. */
 function pick<T>(items: T[], index: number): T {
   return items[index % items.length];
-}
-
-function releaseNoun(type: string): string {
-  switch (type.toLowerCase()) {
-    case 'album': return 'album';
-    case 'ep': return 'EP';
-    case 'single': return 'single';
-    case 'track': return 'track';
-    default: return 'release';
-  }
-}
-
-/**
- * The low end of a registry payout ("80-85%" → 0.8, "~70%" → 0.7). The purchase math uses the
- * floor so a post never claims more for the artist than the site does.
- */
-export function payoutFloor(payout: string): number | null {
-  const match = payout.match(/\d+(\.\d+)?/);
-  return match ? Number(match[0]) / 100 : null;
-}
-
-/** "$8", "$8.50" */
-function dollars(amount: number): string {
-  return Number.isInteger(amount) ? `$${amount}` : `$${amount.toFixed(2)}`;
-}
-
-/** What the artist gets from a $10 album at this payout, and how many streams pay the same. */
-export function purchaseMath(payout: string): { take: string; streams: string } | null {
-  const floor = payoutFloor(payout);
-  if (floor === null) return null;
-  const take = Math.round(10 * floor * 100) / 100;
-  const streams = Math.round(take / STREAM_PAYOUT_DOLLARS / 100) * 100;
-  return { take: dollars(take), streams: streams.toLocaleString('en-US') };
-}
-
-/**
- * Bandcamp image URLs carry a size code; the stored ones are mostly 300×300 (_23), which looks
- * soft in a feed. _10 is the 1200px rendition Bandcamp itself links for a full-size view. Anything
- * that isn't a Bandcamp image is returned as it is.
- */
-export function fullSizeImageUrl(url: string): string {
-  return url.replace(/^(https:\/\/f\d\.bcbits\.com\/img\/\w+)_\d+\.(jpg|png)$/, '$1_10.$2');
 }
 
 /**
@@ -246,7 +178,49 @@ function spotlightBuyLine(p: SellingPlatform, bandcampFriday: boolean, includeRe
   return `You can buy their music directly on ${p.name}.`;
 }
 
-// --- Indie spotlight (Mon, Tue, Wed, Fri, Sat on Threads and Bluesky) ---
+// --- Indie spotlight (Mon, Tue, Wed, Fri, Sat on Threads, Bluesky and Instagram) ---
+
+/**
+ * The Instagram spotlight: a carousel of cards drawn from Unstream's own data (see
+ * api/shared/social-card.ts), with the artist tagged on the first so it lands in their tagged
+ * posts and they can reshare it. Tagged indie artists resharing were the only Instagram posts
+ * that reached more than about ten accounts.
+ *
+ * Three hashtags at most, and never #newmusic or #newrelease: those were wrong on 72 of 75
+ * prominent-artist posts and drew 58 of the 66 bot comments from July to September.
+ *
+ * Null when there are no cards to post, which is only when the card fonts can't draw the name.
+ */
+function instagramSpotlight(artist: ArtistContext, p: SellingPlatform, opts: { bandcampFriday: boolean }): SocialPost | null {
+  const card: CardData = {
+    artistName: artist.name,
+    location: artist.location,
+    platform: { id: p.id, name: p.name, payout: p.payout },
+    release: p.release,
+    imageUrl: artist.imageUrl,
+  };
+  const slides = cardSlides(card);
+  if (slides.length === 0) return null;
+
+  const handle = artist.instagramHandle;
+  const images: PostImage[] = slides.map((slide, i) => ({
+    url: socialCardUrl(UNSTREAM_BASE, artist.slug, slide, p.id, p.release?.slug ?? null),
+    altText: cardAltText(slide, card),
+    ...(i === 0 && handle ? { userTags: [{ handle, ...ARTIST_TAG_POSITION }] } : {}),
+  }));
+
+  const name = handle ? `${artist.name} (@${handle})` : artist.name;
+  const from = artist.location ? `, from ${artist.location}` : '';
+  const platformTag = opts.bandcampFriday && p.id === 'bandcamp' ? '#BandcampFriday' : `#${p.name.replace(/[^A-Za-z0-9]/g, '')}`;
+  // Captions aren't links on Instagram, so the address is written to be read, not clicked.
+  const address = artist.url.replace(/^https:\/\//, '');
+
+  return {
+    platform: 'instagram',
+    text: `Today's artist: ${name}${from}.\n\n${spotlightBuyLine(p, opts.bandcampFriday, true)}\n\nEvery place to support them directly: ${address}\n\n${platformTag} #indiemusic #supportartists`,
+    images,
+  };
+}
 
 /**
  * A verified indie artist, written so they'd want to repost it: who they are, where they're from,
@@ -274,9 +248,11 @@ export function indieSpotlight(artist: ArtistContext, opts: { bandcampFriday: bo
     `Today's artist: ${artist.name}.\n\n${spotlightBuyLine(p, opts.bandcampFriday, false)}\n\n${artist.url}`,
   ]);
 
+  const instagram = instagramSpotlight(artist, p, opts);
   return [
     { platform: 'threads', text: threads, images: artistImages(artist, 'threads') },
     { platform: 'bluesky', text: bluesky, images: artistImages(artist, 'bluesky') },
+    ...(instagram ? [instagram] : []),
   ];
 }
 

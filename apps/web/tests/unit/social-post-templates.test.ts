@@ -8,22 +8,24 @@ import {
   CHARACTER_LIMITS,
   bandcampMatchesArtist,
   featurePost,
-  fullSizeImageUrl,
   indieSpotlight,
   isQuestionWeek,
   linkedinRoundup,
   linkedinWeekdayPost,
   makerPost,
-  payoutFloor,
-  pickCatalogueRelease,
-  purchaseMath,
   questionPost,
   recordMath,
   type ArtistContext,
-  type CatalogueRelease,
   type ShippedFeature,
   type SocialPost,
 } from '../../../../scripts/social-post-templates';
+import {
+  fullSizeImageUrl,
+  payoutFloor,
+  pickCatalogueRelease,
+  purchaseMath,
+  type CatalogueRelease,
+} from '../../../../api/shared/social-card';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 
 const BANDCAMP_PAYOUT = PLATFORMS.bandcamp.payoutPercent!;
@@ -31,19 +33,25 @@ const BANDCAMP_PAYOUT = PLATFORMS.bandcamp.payoutPercent!;
 function artist(overrides: Partial<ArtistContext> = {}): ArtistContext {
   return {
     name: 'Courstellation',
+    slug: 'courstellation',
     url: 'https://unstream.stream/a/courstellation',
     imageUrl: 'https://f4.bcbits.com/img/0042724752_23.jpg',
     location: 'Phoenix',
     threadsHandle: null,
     blueskyHandle: null,
+    instagramHandle: null,
     platform: {
       id: 'bandcamp',
       name: 'Bandcamp',
       payout: BANDCAMP_PAYOUT,
-      release: { title: 'Signals', type: 'album', latest: true },
+      release: { title: 'Signals', type: 'album', latest: true, slug: 'signals', artworkUrl: 'https://f4.bcbits.com/img/a0370958576_2.jpg' },
     },
     ...overrides,
   };
+}
+
+function release(title: string, type: string, latest: boolean) {
+  return { title, type, latest, slug: null, artworkUrl: null };
 }
 
 function on(posts: SocialPost[] | null, platform: SocialPost['platform']): SocialPost {
@@ -114,46 +122,55 @@ describe('bandcampMatchesArtist', () => {
 });
 
 describe('pickCatalogueRelease', () => {
-  function release(overrides: Partial<CatalogueRelease> = {}): CatalogueRelease {
-    return { title: 'Signals', releaseType: 'album', releaseDate: '2025-03-01', status: 'released', sources: [{ platform: 'bandcamp' }], ...overrides };
+  function catalogued(overrides: Partial<CatalogueRelease> = {}): CatalogueRelease {
+    return {
+      slug: 'signals',
+      title: 'Signals',
+      releaseType: 'album',
+      releaseDate: '2025-03-01',
+      status: 'released',
+      artworkUrl: null,
+      sources: [{ platform: 'bandcamp' }],
+      ...overrides,
+    };
   }
 
   it('names the newest dated release on the platform as the latest', () => {
     const picked = pickCatalogueRelease([
-      release({ title: 'Older', releaseDate: '2023-05-01' }),
-      release({ title: 'Newest', releaseDate: '2026-02-14', releaseType: 'ep' }),
-      release({ title: 'Undated', releaseDate: null }),
+      catalogued({ title: 'Older', releaseDate: '2023-05-01' }),
+      catalogued({ title: 'Newest', slug: 'newest', releaseDate: '2026-02-14', releaseType: 'ep', artworkUrl: 'https://f4.bcbits.com/img/a1_2.jpg' }),
+      catalogued({ title: 'Undated', releaseDate: null }),
     ], 'bandcamp');
-    expect(picked).toEqual({ title: 'Newest', type: 'ep', latest: true });
+    expect(picked).toEqual({ title: 'Newest', type: 'ep', latest: true, slug: 'newest', artworkUrl: 'https://f4.bcbits.com/img/a1_2.jpg' });
   });
 
   it("only considers releases on the platform the post sends people to", () => {
     const picked = pickCatalogueRelease([
-      release({ title: 'Discogs Only', releaseDate: '2026-09-01', sources: [{ platform: 'discogs' }] }),
-      release({ title: 'On Bandcamp', releaseDate: '2024-01-01' }),
+      catalogued({ title: 'Discogs Only', releaseDate: '2026-09-01', sources: [{ platform: 'discogs' }] }),
+      catalogued({ title: 'On Bandcamp', releaseDate: '2024-01-01' }),
     ], 'bandcamp');
     expect(picked?.title).toBe('On Bandcamp');
   });
 
   it('falls back to the first undated release in catalogue order, without calling it the latest', () => {
     const picked = pickCatalogueRelease([
-      release({ title: 'First In Order', releaseDate: null }),
-      release({ title: 'Second', releaseDate: null }),
+      catalogued({ title: 'First In Order', slug: 'first-in-order', releaseDate: null }),
+      catalogued({ title: 'Second', releaseDate: null }),
     ], 'bandcamp');
-    expect(picked).toEqual({ title: 'First In Order', type: 'album', latest: false });
+    expect(picked).toEqual({ title: 'First In Order', type: 'album', latest: false, slug: 'first-in-order', artworkUrl: null });
   });
 
   it('skips announced releases, which are pre-orders rather than out', () => {
     const picked = pickCatalogueRelease([
-      release({ title: 'Coming Soon', releaseDate: '2026-11-20', status: 'announced' }),
-      release({ title: 'Out Now', releaseDate: '2026-01-10' }),
+      catalogued({ title: 'Coming Soon', releaseDate: '2026-11-20', status: 'announced' }),
+      catalogued({ title: 'Out Now', releaseDate: '2026-01-10' }),
     ], 'bandcamp');
     expect(picked?.title).toBe('Out Now');
   });
 
   it('returns nothing when the platform has none of their releases', () => {
     expect(pickCatalogueRelease([], 'bandcamp')).toBeNull();
-    expect(pickCatalogueRelease([release({ sources: [{ platform: 'mirlo' }] })], 'bandcamp')).toBeNull();
+    expect(pickCatalogueRelease([catalogued({ sources: [{ platform: 'mirlo' }] })], 'bandcamp')).toBeNull();
   });
 });
 
@@ -168,7 +185,7 @@ describe('indieSpotlight', () => {
   });
 
   it("names a release without claiming it's the latest when nothing dates it", () => {
-    const undated = artist({ platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'Signals', type: 'album', latest: false } } });
+    const undated = artist({ platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: release('Signals', 'album', false) } });
     const threads = on(indieSpotlight(undated, { bandcampFriday: false }), 'threads');
     expect(threads.text).toContain('Their album Signals is on Bandcamp.');
     expect(threads.text).not.toContain('latest');
@@ -214,11 +231,77 @@ describe('indieSpotlight', () => {
       name: 'The Extremely Long Named Orchestra of Somewhere Far Away',
       blueskyHandle: 'extremelylongnamedorchestra.bsky.social',
       location: 'Llanfairpwllgwyngyll',
-      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'A Title That Is Very Nearly Sixty Characters Long Indeed', type: 'album', latest: true } },
+      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: release('A Title That Is Very Nearly Sixty Characters Long Indeed', 'album', true) },
     });
     const bluesky = on(indieSpotlight(long, { bandcampFriday: false }), 'bluesky');
     withinLimit(bluesky);
     expect(bluesky.text).not.toContain('#musicsky');
+  });
+});
+
+describe('indieSpotlight on Instagram', () => {
+  const CARD = 'https://unstream.stream/api/social-card/courstellation';
+
+  it('is a carousel of Unstream-drawn cards, photo last, each with alt text', () => {
+    const instagram = on(indieSpotlight(artist(), { bandcampFriday: false }), 'instagram');
+    expect(instagram.images.map(i => i.url)).toEqual([
+      `${CARD}/buy.png?platform=bandcamp&release=signals`,
+      `${CARD}/record.png?platform=bandcamp&release=signals`,
+      `${CARD}/math.png?platform=bandcamp&release=signals`,
+      `${CARD}/photo.png?platform=bandcamp&release=signals`,
+    ]);
+    expect(instagram.images[0].altText).toBe(`Courstellation, from Phoenix. Buy their music on Bandcamp, where ${BANDCAMP_PAYOUT} of what you pay goes to the artist.`);
+    for (const image of instagram.images) expect(image.altText.length).toBeGreaterThan(10);
+  });
+
+  it('names the release, the platform and the registry payout, and stays within the caption limit', () => {
+    const instagram = on(indieSpotlight(artist(), { bandcampFriday: false }), 'instagram');
+    expect(instagram.text).toBe(
+      `Today's artist: Courstellation, from Phoenix.\n\n` +
+      `Their latest album, Signals, is on Bandcamp. Buy it there and ${BANDCAMP_PAYOUT} of what you pay goes to them.\n\n` +
+      `Every place to support them directly: unstream.stream/a/courstellation\n\n` +
+      `#Bandcamp #indiemusic #supportartists`
+    );
+    withinLimit(instagram);
+  });
+
+  it('carries at most three hashtags, never the ones that drew bots', () => {
+    for (const bandcampFriday of [false, true]) {
+      const instagram = on(indieSpotlight(artist(), { bandcampFriday }), 'instagram');
+      const tags = instagram.text.match(/#\w+/g) ?? [];
+      expect(tags.length).toBeLessThanOrEqual(3);
+      expect(tags.map(t => t.toLowerCase())).not.toContain('#newmusic');
+      expect(tags.map(t => t.toLowerCase())).not.toContain('#newrelease');
+    }
+    expect(on(indieSpotlight(artist(), { bandcampFriday: true }), 'instagram').text).toContain('#BandcampFriday');
+  });
+
+  it('tags the artist on the first card only, and only from their own Instagram link', () => {
+    const tagged = on(indieSpotlight(artist({ instagramHandle: 'courstellation' }), { bandcampFriday: false }), 'instagram');
+    expect(tagged.images[0].userTags).toEqual([{ handle: 'courstellation', x: 0.5, y: 0.4 }]);
+    expect(tagged.images.slice(1).every(i => !i.userTags)).toBe(true);
+    expect(tagged.text).toContain('Courstellation (@courstellation)');
+
+    const untagged = on(indieSpotlight(artist({ threadsHandle: 'courstellation' }), { bandcampFriday: false }), 'instagram');
+    expect(untagged.images.every(i => !i.userTags)).toBe(true);
+    expect(untagged.text).not.toContain('@');
+  });
+
+  it('leaves out the record card when the release has no artwork or no catalogue entry', () => {
+    const noArt = artist({ platform: { id: 'mirlo', name: 'Mirlo', payout: '86-90%', release: release('Signals', 'album', true) } });
+    const urls = on(indieSpotlight(noArt, { bandcampFriday: false }), 'instagram').images.map(i => i.url);
+    expect(urls.some(u => u.includes('/record.png'))).toBe(false);
+    expect(urls[0]).toBe(`${CARD}/buy.png?platform=mirlo`);
+  });
+
+  it("posts nothing on Instagram when the cards' fonts can't draw the name", () => {
+    const posts = indieSpotlight(artist({ name: '坂本龍一' }), { bandcampFriday: false });
+    expect(posts?.map(p => p.platform)).toEqual(['threads', 'bluesky']);
+  });
+
+  it('is for indie artists only: the prominent artist of the week gets none', () => {
+    const prominent = artist({ url: 'https://unstream.stream/artist/death-cab-for-cutie', name: 'Death Cab for Cutie' });
+    expect(recordMath(prominent, { bandcampFridayTomorrow: false })?.some(p => p.platform === 'instagram')).toBe(false);
   });
 });
 
@@ -227,7 +310,7 @@ describe('recordMath', () => {
     name: 'Death Cab for Cutie',
     url: 'https://unstream.stream/artist/death-cab-for-cutie',
     location: null,
-    platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { title: 'I Built You A Tower', type: 'album', latest: true } },
+    platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: release('I Built You A Tower', 'album', true) },
   });
 
   it('frames one album purchase against streams, at the low end of the payout', () => {
@@ -239,7 +322,7 @@ describe('recordMath', () => {
   });
 
   it('only names a release that is an album, since the math is per album', () => {
-    const single = artist({ ...prominent, platform: { ...prominent.platform!, release: { title: 'A Single', type: 'single', latest: true } } });
+    const single = artist({ ...prominent, platform: { ...prominent.platform!, release: release('A Single', 'single', true) } });
     const threads = on(recordMath(single, { bandcampFridayTomorrow: false }), 'threads');
     expect(threads.text).not.toContain('A Single');
     expect(threads.text).toContain("Buying Death Cab for Cutie's music on Bandcamp");

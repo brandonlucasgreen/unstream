@@ -381,6 +381,13 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // Discord
   'discord.com',
   'discordapp.com',
+  // Image CDNs, fetched only to draw Instagram cards (social-card.ts): artist photos and release
+  // covers as the platforms store them. Faircamp covers already pass the faircamp rule below,
+  // and Mirlo's are on cdn.mirlo.space, covered above.
+  '*.bcbits.com',              // Bandcamp's image host
+  'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
+  'images.subvert.fm',
+  'cdn.jam.coop',
 ]);
 
 /**
