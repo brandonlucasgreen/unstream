@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+<title>Unstream Dispatch</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/</link>
+<description>Weekly watch on independent music platforms and streaming economics, from Unstream.</description>
+<language>en</language>
+<lastBuildDate>Fri, 02 Oct 2026 01:56:59 +0000</lastBuildDate>
+<atom:link href="https://brandonlucasgreen.github.io/unstream/dispatch/feed.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"/>
+<item>
+<title>Weekly Unstream Dispatch, week of September 14</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/2026-09-14.html</link>
+<guid isPermaLink="false">urn:unstream-dispatch:2026-09-14</guid>
+<pubDate>Mon, 14 Sep 2026 07:00:00 -0400</pubDate>
+<description> Weekly Unstream Dispatch, week of September 14 
+ Platform watch 
+ 
+  Bandcamp : Business as usual. September Bandcamp Friday came and went (Sept 4). Editorial still running daily. Total fan payouts crossed $1.8B. No product or policy changes detected this week. Songtradr ownersh</description>
+<content:encoded><![CDATA[<p>Weekly Unstream Dispatch, week of September 14</p>
+<h2>Platform watch</h2>
+<ul>
+<li><strong>Bandcamp</strong>: Business as usual. September Bandcamp Friday came and went (Sept 4). Editorial still running daily. Total fan payouts crossed $1.8B. No product or policy changes detected this week. Songtradr ownership remains quiet — the Reddit speculation about Bandcamp&#x27;s future hinges on AI gutting Songtradr&#x27;s sync business, but that&#x27;s still conjecture. 15% digital cut remains the standard.</li>
+</ul>
+<ul>
+<li><strong>Ampwall</strong>: Profiled in Hypebot&#x27;s &quot;7 Platforms That Put Artists Back in Charge&quot; (Sep 4). Still $10/year for 5 hours of audio, 5% transaction cut. Public benefit company, no ads/crypto/AI music. 1,000+ artists. Community-governed feature pipeline. Solid niche, still small.</li>
+</ul>
+<ul>
+<li><strong>Mirlo</strong>: Big move — <strong>FairPlayer integration went live Aug 10</strong>. Mirlo artists can now opt into federated streaming via FairPlayer, which aggregates music from Mirlo and Faircamp into a single browsable player. Artists control how many free plays before a purchase prompt. This is the most concrete step toward a federated indie music ecosystem any platform has taken. Mirlo is organized as a worker co-op and open source.</li>
+</ul>
+<ul>
+<li><strong>Faircamp</strong>: Still the most radical option — free, nonprofit static site generator. No central catalog, no marketplace, no platform lock-in. You host it yourself, you connect your own payment tools. Featured alongside Mirlo and Ampwall in Hypebot&#x27;s roundup.</li>
+</ul>
+<h2>Emerging &amp; alternative</h2>
+<ul>
+<li><strong>Vocana</strong>: Still in public beta. User-centric royalty model (your subscription dollars go to artists you actually listen to). Partnered with MassiveMusic and Symphonic for onboarding. Press page shows coverage from Forbes, Music Ally, TechRadar, Attack Magazine — decent media footprint for a platform that hasn&#x27;t formally launched yet. No hard launch date or funding news this week.</li>
+</ul>
+<ul>
+<li><strong>Subvert</strong>: Profiled in Hypebot&#x27;s Sept 4 piece. Marketplace collectively owned by artists/labels/supporters/workers. 0% platform fee — buyers pay, sellers keep purchase price after processing. Optional contributions from buyers. One-member-one-vote governance. Still early; vapor risk is real but the structure is interesting.</li>
+</ul>
+<ul>
+<li><strong>EVEN</strong>: Sells early access and bundles (music, merch, memberships) at artist-set prices. 20% digital cut, 15% memberships, 5% merch. Not a streaming alternative — more like a direct-to-fan storefront that treats streaming as the end of a release cycle. Luminate-reportable for chart eligibility.</li>
+</ul>
+<ul>
+<li><strong>Sleeve</strong>: Artist website builder that also handles email lists, stores, memberships. No platform fee (payment processing still applies). Free tier up to 250 email subscribers. Interesting for Unstream as a data-ownership play.</li>
+</ul>
+<ul>
+<li><strong>Audius</strong>: Hypebot profile notes 250M+ streams and millions of monthly users. Still the only decentralized streaming platform with real scale. $AUDIO token remains a learning curve for non-crypto artists. Proves the model can attract users — doesn&#x27;t prove it can pay artists well.</li>
+</ul>
+<h2>Fediverse &amp; decentralized</h2>
+<ul>
+<li><strong>FairPlayer + Mirlo</strong>: The FairPlayer integration is the week&#x27;s most significant fediverse development. It&#x27;s a federated streaming layer that makes music from Mirlo and Faircamp discoverable in one player — no central platform required. Artists opt in and set free-play limits. This is the architecture that ActivityPub music projects have been theorizing about; someone actually shipped it.</li>
+</ul>
+<ul>
+<li><strong>Faircamp</strong>: Still the go-to for self-hosters. No central platform to federate from, but FairPlayer can discover Faircamp sites, making it the decentralized catalog layer.</li>
+</ul>
+<h2>Streaming economics</h2>
+<ul>
+<li><strong>Spotify</strong>: Loud &amp; Clear 2026 update shows $11B+ paid out in 2025, lifetime total $70B. 13,800+ artists at $100K+/year. The 100,000th artist earned $7,300 — up from $350 a decade ago, which sounds great until you realize that&#x27;s still poverty-level income. Spotify also removed <strong>75 million AI/spam tracks</strong> over the past year as part of its fraud crackdown. Meanwhile, Q2 earnings showed 14% revenue growth but a weaker Q3 profit forecast — Spotify is spending heavily on AI features and marketing. Premium subs hit 293M, MAUs 761M.</li>
+</ul>
+<ul>
+<li><strong>Streaming fraud is now a $2B/year problem.</strong> IFPI launched the <strong>Streaming Integrity Initiative</strong> on Sep 14, backed by 24 companies (Sony, UMG, Warner, RouteNote, FUGA, CD Baby, etc.). Five commitments: verify rights/KYC, vet content for fraud and AI risks, act against repeat offenders, share intelligence, and continuously strengthen detection. This is the first coordinated, cross-industry baseline — and notably, DistroKid did NOT sign on.</li>
+</ul>
+<ul>
+<li><strong>Deezer</strong>: AI-generated music exceeded <strong>50% of daily uploads</strong> by June 2026, averaging 90,000 AI tracks/day. But only 1-3% of actual streams. 85% of AI track streams were flagged as fraudulent and demonetized.</li>
+</ul>
+<ul>
+<li><strong>Luminate</strong>: ~150,000 tracks uploaded daily across platforms. 20% of all music on streaming services has received almost no listenership. Luminate is developing in-house AI detection, taking aggregated signals from Apple, Spotify, and Deezer.</li>
+</ul>
+<ul>
+<li><strong>UMG sues DistroKid</strong> (Sep 15): Federal lawsuit alleging deceptive trade practices and copyright infringement. UMG calls DistroKid an &quot;AI slop pipeline,&quot; citing 1,000 specific infringements including unauthorized remixes of Ellie Goulding and Sam Smith tracks. Seeking up to $150K per work in statutory damages. DistroKid says it &quot;strongly disagrees.&quot; This is the week&#x27;s biggest story — it directly targets the largest indie distributor&#x27;s role in flooding platforms.</li>
+</ul>
+<ul>
+<li><strong>Apple Music</strong>: iOS 27 adds custom artist logos and color themes for artist pages. Small but meaningful for brand identity on a platform that&#x27;s historically been rigid about visual presentation.</li>
+</ul>
+<ul>
+<li><strong>RIAA Mid-Year 2026</strong>: US recorded music hit $6B in H1, up 6.9% YoY. Streaming $4.9B (82%), paid subs $3.4B (+6.4%), physical jumped 25.9% (vinyl +17.7%, CDs +58.6%). 90M paid subscriptions, a record. Sync up 18.2%.</li>
+</ul>
+<ul>
+<li><strong>YouTube Music</strong>: Foundry Class of 2026 expanded to 40 artists from 14 countries. Grants + partner support. Still one of the few DSPs investing directly in independent artist development.</li>
+</ul>
+<h2>Industry pulse</h2>
+<ul>
+<li><strong>Streaming fraud goes mainstream</strong>: The FT, IFPI, and UMG&#x27;s lawsuit all landed in the same week. The narrative has shifted from &quot;emerging problem&quot; to &quot;coordinated industry response.&quot; ~10% of streams are estimated fraudulent, costing ~$2B/year. The industry is no longer just talking — it&#x27;s suing, organizing, and legislating.</li>
+</ul>
+<ul>
+<li><strong>AI music volume is staggering but consumption is low</strong>: Deezer&#x27;s data is the clearest snapshot: AI tracks are half of uploads but 1-3% of streams. The real problem isn&#x27;t AI music finding an audience — it&#x27;s fraud bots inflating AI tracks to siphon royalties. The distinction matters for policy.</li>
+</ul>
+<ul>
+<li><strong>German court rules Suno infringed copyright</strong> (July 2026): A German court found Suno liable for copyright infringement. Still early, but it&#x27;s the first major jurisdiction ruling against an AI music generator on copyright grounds.</li>
+</ul>
+<ul>
+<li><strong>Artists and songwriters push back on AI opt-in</strong>: A global coalition of artists, songwriters, and managers released a statement insisting on consent-based AI licensing: no default opt-ins, no terms imposed without genuine choice. This tension between &quot;AI deals&quot; and &quot;artist consent&quot; is going to escalate.</li>
+</ul>
+<ul>
+<li><strong>Spotify&#x27;s AI spending squeeze</strong>: Q3 profit forecast came in below expectations as Spotify invests in AI features. The bet is that AI-driven recommendations and tools will drive engagement; the risk is that it cannibalizes margins without improving per-stream payouts for artists.</li>
+</ul>
+<h2>Unstream implications</h2>
+<ul>
+<li><strong>The Mirlo/FairPlayer federated model is the architecture to watch.</strong> FairPlayer aggregating music from self-hosted Faircamp sites and Mirlo into one discoverable player — with artist-controlled free-play limits — is exactly the kind of interoperability Unstream should be thinking about. If Unstream isn&#x27;t planning federation/ActivityPub integration, now is the time. The indie ecosystem is clearly moving toward interconnectedness over siloed platforms.</li>
+</ul>
+<ul>
+<li><strong>&quot;Human-made&quot; is becoming a market differentiator.</strong> With AI tracks at 50%+ of uploads and fraud at 10% of streams, verified human artistry has real marketing value. Unstream should consider how to make &quot;human-made&quot; verifiable and visible — not just as a label, but as a trust signal that carries weight with listeners and artists alike. This is Unstream&#x27;s lane.</li>
+</ul>
+<ul>
+<li><strong>The DistroKid lawsuit changes the distribution landscape.</strong> Whether UMG wins or settles, the pressure on distributors to KYC and vet uploads is going to intensify. Smaller distributors will have to invest in detection. This could push more artists toward direct-to-fan platforms (Bandcamp, Mirlo, Ampwall, Unstream) as the friction of traditional distribution increases.</li>
+</ul>
+<ul>
+<li><strong>Sleeve&#x27;s no-fee email list model is worth studying.</strong> Artist-owned data, exportable lists, no platform cut. If Unstream doesn&#x27;t already offer email list management and fan data export, that&#x27;s table stakes now.</li>
+</ul>
+<ul>
+<li><strong>Vocana&#x27;s user-centric model still hasn&#x27;t launched fully.</strong> There&#x27;s a window here for Unstream to establish its own payout narrative before Vocana goes wide.</li>
+</ul>
+<ul>
+<li><strong>Spotify&#x27;s $10/track fraud penalty and 1,000-stream minimum are hurting small artists</strong> ($40M/year redirected from long-tail artists). Unstream should explicitly position its payout model as an alternative that doesn&#x27;t penalize the smallest artists for fraud they didn&#x27;t commit.</li>
+</ul>
+<ul>
+<li><strong>Physical is growing fast</strong> (vinyl +17.7%, CDs +58.6%). If Unstream has any physical fulfillment or merch integration, now is a good time to highlight it.</li>
+</ul>
+<h2>Confidence</h2>
+<ul>
+<li><strong>Confirmed</strong>: IFPI Streaming Integrity Initiative (press release, Sep 14). UMG v. DistroKid lawsuit (Variety, Music Week, Sep 15). Spotify 75M track removal (Spotify exec statement). Deezer AI upload stats (Deezer press releases, Apr &amp; Jul 2026). Luminate 150K daily tracks (Billboard podcast, Sep 17). RIAA mid-year figures (official report, Sep 1). Mirlo/FairPlayer integration (Mirlo blog, Aug 10). Apple Music iOS 27 artist customization (RouteNote, Sep 16). YouTube Music Foundry expansion (YouTube blog, Sep 17).</li>
+</ul>
+<ul>
+<li><strong>Well-sourced but interpretive</strong>: The $2B/year fraud estimate (IFPI + Beatdapp, cross-referenced with Chartlex analysis). Spotify&#x27;s Q3 profit outlook (Reuters, Yahoo Finance). Vocana&#x27;s market position (multiple press mentions but no hard launch metrics).</li>
+</ul>
+<ul>
+<li><strong>Speculation/rumor</strong>: Reddit speculation about Bandcamp&#x27;s future under Songtradr. Whether DistroKid will settle or fight the UMG lawsuit. The actual consumer appetite for user-centric streaming models (Vocana&#x27;s bet). Whether FairPlayer&#x27;s federated approach will gain meaningful listener adoption.</li>
+</ul>
+<p>To stop or manage this job, send me a new message (e.g. &quot;stop reminder Weekly Unstream Market Digest (Fri 7am)&quot;).</p>]]></content:encoded>
+</item>
+<item>
+<title>Weekly Unstream Dispatch, week of September 7</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/2026-09-07.html</link>
+<guid isPermaLink="false">urn:unstream-dispatch:2026-09-07</guid>
+<pubDate>Mon, 07 Sep 2026 07:00:00 -0400</pubDate>
+<description> Platform watch 
+ 
+  Bandcamp : Quiet week. September 4 was a Bandcamp Friday — no changes to platform pricing, policy, or ownership to report. The Songtradr era continues without notable incident or improvement. ( daily.bandcamp.com ) 
+ 
+ 
+  Ampwall : Growing steadily, now claim</description>
+<content:encoded><![CDATA[<h2>Platform watch</h2>
+<ul>
+<li><strong>Bandcamp</strong>: Quiet week. September 4 was a Bandcamp Friday — no changes to platform pricing, policy, or ownership to report. The Songtradr era continues without notable incident or improvement. (<a href="https://daily.bandcamp.com/features/bandcamp-fridays">daily.bandcamp.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Ampwall</strong>: Growing steadily, now claims 1,000+ bands/artists. Still a public benefit company, artist-owned, $10/yr for 5 hours of audio, 5% transaction cut. The community angle (Discord integration, direct dev access) remains its differentiator vs. Bandcamp&#x27;s corporate neglect. Recent blog post explicitly positions itself as &quot;the Bandcamp alternative&quot; post-Songtradr. (<a href="https://ampwall.com/a/precaria/news/ampwall-as-an-alternative-to-bandcamp-2026-07-02">ampwall.com</a>, <a href="https://www.hypebot.com/7-digital-music-platforms-that-put-artists-back-in-charge/">hypebot.com</a>)</li>
+</ul>
+<ul>
+<li><strong>SoundCloud</strong>: Launched direct music sales in beta (Aug 27), rolling out widely this fall. This is a direct shot at Bandcamp&#x27;s storefront model from a platform with massive existing reach. Worth watching whether the revenue split is competitive. (<a href="https://newindustryfocus.com/articles/artists-can-now-sell-their-music-directly-on-soundcloud">newindustryfocus.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Notes.fm</strong>: Expanded this week with Stripe-powered financial accounts and a new &quot;Releases&quot; feature streamlining distribution and publishing admin. Moving toward becoming a full artist business stack, not just a tool. (<a href="https://newindustryfocus.com/articles/notes-fm-expands-platform-with-stripe-powered-financial-accounts">newindustryfocus.com</a>)</li>
+</ul>
+<h2>Emerging &amp; alternative</h2>
+<ul>
+<li><strong>Nina Protocol</strong>: <strong>Dead.</strong> The Solana-based web3 music platform announced it&#x27;s shutting down and merging into SoundCloud. Artists can migrate releases via a tool on Nina&#x27;s site and get a free SoundCloud Artist Pro subscription through year-end. The editorial archive will be &quot;preserved&quot; by SoundCloud. This is the highest-profile web3 music shutdown yet — Nina had real community and curation. The exit validates the thesis that token-gated music alone doesn&#x27;t sustain a platform; distribution beats ideology. (<a href="https://www.ninaprotocol.com/">ninaprotocol.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Sound.xyz</strong>: Also <strong>dead.</strong> Went offline January 16, 2026. Team is now building Vault.fm (closed beta). On-chain collectibles remain accessible via Splits.org for fund withdrawals, but the storefront is gone. Two major web3 music platforms down in 2026. (<a href="https://www.sound.xyz/">sound.xyz</a>)</li>
+</ul>
+<ul>
+<li><strong>Vocana</strong>: Still in public beta as an indie-only streaming platform with user-centric payout model. Forbes specifically named it as a &quot;specialized music service&quot; to watch in 2026. Partnership with Symphonic for early artist access. The question remains whether user-centric royalties actually attract listeners or just attract artists who want fairer math. (<a href="https://www.vocana.co/press">vocana.co</a>, <a href="https://www.forbes.com/sites/billrosenblatt/2025/12/30/what-comes-after-streaming-music-services-2026-will-offer-clues/">forbes.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Mirlo</strong>: Open-source, federated Bandcamp alternative. Interview on DIY Conspiracy highlights its self-hosting philosophy and interoperability focus. Explicitly recommends Faircamp for artists who want full independence. Still early, still niche, but the federated model is genuinely different from everything else. (<a href="https://diyconspiracy.net/mirlo-interview/">diyconspiracy.net</a>)</li>
+</ul>
+<ul>
+<li><strong>Faircamp</strong>: Highlighted in Hypebot&#x27;s &quot;7 Platforms That Put Artists Back in Charge&quot; as the most radical option — not a marketplace, just a static site generator. Free, nonprofit, no account, no central catalog. The &quot;artist becomes the platform&quot; play. Requires technical chops that most artists don&#x27;t have. (<a href="https://www.hypebot.com/7-digital-music-platforms-that-put-artists-back-in-charge/">hypebot.com</a>)</li>
+</ul>
+<h2>Fediverse &amp; decentralized</h2>
+<ul>
+<li><strong>Mirlo&#x27;s federated model</strong> is the only ActivityPub-adjacent music distribution story with momentum right now. Funkwhale had no notable news this week. PeerTube music channels remain a niche curiosity. The fediverse music stack is still more theory than practice.</li>
+</ul>
+<h2>Streaming economics</h2>
+<ul>
+<li><strong>Luminate 2026 Midyear Report</strong> (the big one this week): Global on-demand audio streams hit 2.8 trillion in H1 2026, up 9.8% YoY. US growth slower at 4.8%. Dance/Electronic is the top US growth genre. English-language streaming share fell to a historic low of 87.1% in the US; Spanish-language streams now represent 9.4%. CD sales surged 16% (6.7% ex-K-pop). Indie sector growing streaming share in mid-to-lower volume tiers. The macro story: streaming growth is accelerating globally but flattening in the US, and physical formats are not dying. (<a href="https://luminatedata.com/blog/luminate-2026-midyear-report-trends-in-music-television-film/">luminatedata.com</a>, <a href="https://apnews.com/article/streaming-music-tv-netflix-luminate-midyear-4516213bc46fdafb557ffe645c086edf">apnews.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Spotify</strong>: Claims $11B in 2025 payouts. Per-stream rate still $0.003–$0.005. Minimum payout threshold of €50 remains in effect. The payout numbers are real but the per-stream math hasn&#x27;t moved. Putting on an R&amp;B festival in Dallas (&quot;RNB X Live&quot;) — the platform-as-promoter strategy continues. (<a href="https://newsroom.spotify.com/2026-01-28/2025-music-industry-payouts-whats-next-for-artists/">newsroom.spotify.com</a>, <a href="https://artyfile.com/blog/spotify-payout-per-stream-2026">artyfile.com</a>)</li>
+</ul>
+<ul>
+<li><strong>Forbes analysis (Bill Rosenblatt)</strong>: Argues 2026 is the inflection year where streaming&#x27;s dominance levels off in Western markets. US streaming revenue was flat (inflation-adjusted) 2023–H1 2025, total revenue actually down 1.7% H1 2024→H1 2025. AI-generated tracks are flooding services — Deezer reports 50K/day pure AI tracks by late 2025, with 70% of fraudulent streams being AI tracks. At current pace, AI-generated tracks will outnumber human-created ones by mid-2026. Predicts rise of curated/specialized services. (<a href="https://www.forbes.com/sites/billrosenblatt/2025/12/30/what-comes-after-streaming-music-services-2026-will-offer-clues/">forbes.com</a>)</li>
+</ul>
+<h2>Industry pulse</h2>
+<ul>
+<li><strong>Wixen v. Meta dismissed (for now)</strong>: Federal judge tossed Wixen&#x27;s $100M+ copyright infringement lawsuit against Meta for failing to adequately allege standing under the Copyright Act. Key holding: a copyright co-owner can&#x27;t unilaterally grant exclusive licenses that override other co-owners&#x27; rights. Wixen has until September 18 to file an amended complaint. The defamation and tort claims weren&#x27;t addressed. Meta is also fighting suits from Epidemic Sound and Eminem&#x27;s publisher. This matters because it&#x27;s the highest-profile test of whether publishers can force platforms into better licensing — and the answer so far is &quot;not easily.&quot; (<a href="https://www.digitalmusicnews.com/2026/09/09/wixen-meta-lawsuit-dismissed/">digitalmusicnews.com</a>)</li>
+</ul>
+<ul>
+<li><strong>AI music in the charts</strong>: Luminate reports the highest-ranking AI-assisted song globally is Chill77 &amp; Unjaps&#x27; &quot;Papaoutai (Afro Soul)&quot; at #282 with 210.7M global audio streams in H1 2026. Not a takeover, but a foothold. Meanwhile, 54% of US musicians express positive feelings toward AI tools; only 35% of non-musicians agree. The artist community is more AI-curious than the general public.</li>
+</ul>
+<ul>
+<li><strong>CD surge</strong>: 16% growth in US CD sales, 6.7% ex-K-pop. This isn&#x27;t just collectible K-pop — physical is genuinely back as a superfandom channel. Vinyl only grew 2.4%.</li>
+</ul>
+<h2>Unstream implications</h2>
+<ul>
+<li><strong>The web3 music shakeout is real.</strong> Nina and Sound.xyz both gone. Vault.fm (Sound&#x27;s successor) is the only web3-adjacent project still standing, and it&#x27;s pivoting away from the public-facing storefront model. Unstream should not chase blockchain distribution — the market has spoken.</li>
+</ul>
+<ul>
+<li><strong>SoundCloud selling music directly is a competitive signal.</strong> If SoundCloud becomes a Bandcamp competitor with 190+ countries of reach, that&#x27;s the most credible threat to Bandcamp&#x27;s core business since Songtradr. Unstream should track the revenue split when it&#x27;s published and consider whether SoundCloud&#x27;s storefront features affect where indie artists spend their energy.</li>
+</ul>
+<ul>
+<li><strong>CD and physical are a superfandom channel, not nostalgia.</strong> 16% CD growth, Luminate data showing 20% of US music listeners qualify as superfans who engage 5+ ways — physical merchandise is a superfan product. If Unstream has any physical fulfillment plans, the data supports it.</li>
+</ul>
+<ul>
+<li><strong>AI content flooding is an opportunity for curated platforms.</strong> Deezer&#x27;s data (50K AI tracks/day, 70% of fraud is AI-generated) means discoverability on algorithmic platforms is about to get worse. Platforms that promise human-only catalogs have a selling point. Unstream&#x27;s value proposition should lean hard into &quot;no AI spam, real artists only.&quot;</li>
+</ul>
+<ul>
+<li><strong>Spanish-language content is a growth vector.</strong> 9.4% of US streams, historic low for English, Latin genres climbing. If Unstream&#x27;s catalog strategy isn&#x27;t considering bilingual/Latino artists, it should.</li>
+</ul>
+<h2>Confidence</h2>
+<ul>
+<li><strong>Confirmed</strong>: Luminate data, Wixen dismissal order, Nina/Sound.xyz shutdowns, SoundCloud direct sales beta, Vocana public beta, Ampwall pricing/stats, Bandcamp Friday dates.</li>
+<li><strong>Informed analysis</strong>: Forbes Rosenblatt piece on streaming plateau is well-sourced editorial opinion; the US revenue flatline claim cites RIAA data but I haven&#x27;t independently verified the inflation-adjusted numbers. Deezer&#x27;s AI track counts are self-reported.</li>
+<li><strong>Speculation</strong>: Whether SoundCloud&#x27;s direct sales will meaningfully compete with Bandcamp, whether Vault.fm will ship anything meaningful, whether Vocana will find an audience beyond artists who want fairer payout math.</li>
+</ul>
+<p>To stop or manage this job, send me a new message (e.g. &quot;stop reminder Weekly Unstream Market Digest (Fri 7am)&quot;).</p>]]></content:encoded>
+</item>
+<item>
+<title>Weekly Unstream Dispatch, week of September 4</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/2026-09-04.html</link>
+<guid isPermaLink="false">urn:unstream-dispatch:2026-09-04</guid>
+<pubDate>Fri, 04 Sep 2026 07:00:00 -0400</pubDate>
+<description> Platform watch 
+ 
+  Bandcamp : Bandcamp Friday today (Sep 4). Otherwise a quiet week — no new feature launches, policy changes, or ownership news. The post-Songtradr hangover persists: the engineering team is reportedly decimated, and the platform continues to coast on brand equ</description>
+<content:encoded><![CDATA[<h3>Platform watch</h3>
+<ul>
+<li><strong>Bandcamp</strong>: Bandcamp Friday today (Sep 4). Otherwise a quiet week — no new feature launches, policy changes, or ownership news. The post-Songtradr hangover persists: the engineering team is reportedly decimated, and the platform continues to coast on brand equity and inertia rather than investment. The Bandcamp Daily editorial is still publishing, which is something, but the platform hasn&#x27;t shipped meaningful product updates in months. For Unstream, Bandcamp&#x27;s stasis is both a vulnerability (artists stuck on a declining platform) and an opportunity (artists are actively looking elsewhere). Source: blog.bandcamp.com</li>
+</ul>
+<ul>
+<li><strong>SoundCloud</strong>: Big move — SoundCloud launched a <strong>direct music sales</strong> beta on Aug 26, letting ~200 US-based Artist Pro creators sell downloads directly from their profiles with <strong>zero commission</strong>. Fans buy and download without leaving SoundCloud. This is a direct shot at Bandcamp&#x27;s core value prop. SoundCloud already has 250K+ artists linking 2.4M tracks to external storefronts, sending 500K+ users off-platform annually to buy music. This closes that loop. If rolled out fully, it makes SoundCloud a two-sided market (streaming + direct sales) that could siphon artists who&#x27;ve been tolerating Bandcamp&#x27;s lack of development. Separately, SoundCloud <strong>acquired Nina Protocol</strong> (see Emerging section). Sources: musicbusinessworldwide.com, weraveyou.com</li>
+</ul>
+<ul>
+<li><strong>Ampwall</strong>: Still active, still community-focused. A July 2026 blog post explicitly positions Ampwall as &quot;an alternative to Bandcamp&quot; — lower fees, public benefit company structure, direct dev team access. Claiming 1,000+ bands and thousands of registered fans. No major updates this week. The DIY community testimonials are genuine, but scale remains tiny. Source: ampwall.com</li>
+</ul>
+<ul>
+<li><strong>Mirlo</strong>: Quiet week for releases, but the <strong>FairPlayer integration</strong> (announced Aug 10) is the most interesting federated music story right now. Mirlo artists who opt in can have their music discoverable alongside Faircamp artists in FairPlayer, a federated streaming front-end. It&#x27;s not a separate streaming service — more like a &quot;food court&quot; where listeners sample from multiple indie stores. This is exactly the kind of interoperability Unstream should be watching closely. Default platform cut is 10%, artists can set it to 0%. Source: mirlo.space</li>
+</ul>
+<ul>
+<li><strong>Qobuz / Beatport / Patreon / Discogs</strong>: No significant news this week.</li>
+</ul>
+<h3>Emerging &amp; alternative</h3>
+<ul>
+<li><strong>SoundCloud acquires Nina Protocol</strong>: Announced Jul 22. Nina Protocol shut down after five years, admitting it couldn&#x27;t find &quot;a path to sustainability at its current size.&quot; SoundCloud bought what was left — primarily the editorial archive, genre map, and artist migration pipeline. Nina artists get free SoundCloud Artist Pro through end of 2026. Nina&#x27;s team is not transferring over. Key takeaway: even the most principled blockchain music platform couldn&#x27;t sustain itself. The &quot;100% royalties + community revenue share&quot; model didn&#x27;t pencil out. Source: musically.com, pitchfork.com</li>
+</ul>
+<ul>
+<li><strong>Sound.xyz</strong>: Gone. Site now says &quot;Sound.xyz is offline as of January 16, 2026.&quot; The NFT minting platform pivoted to a subscription product called Sound Premium before shutting down entirely. Another Web3 music casualty. Source: sound.xyz</li>
+</ul>
+<ul>
+<li><strong>Subvert.fm</strong>: Publicly launched May 12, 2026, as a cooperatively-owned music marketplace. Now claims 29,000+ member-owners. It&#x27;s a D2C sales platform (not streaming), structured as a Colorado cooperative. Artists and labels sell digital music and merch directly; supporters can become co-owners. Early days, but the co-op model is gaining real traction as a differentiator from VC-backed alternatives. Worth watching. Source: subvert.fm, Wikipedia</li>
+</ul>
+<ul>
+<li><strong>EVEN</strong>: The UMG-backed superfan platform. In February 2026, EVEN signed a multi-year deal with Universal Music Group to serve as UMG&#x27;s D2C infrastructure, letting UMG artists sell music, merch, and experiences directly through EVEN. EVEN claims 500K+ onboarded artists and 3,000+ labels. The UMG deal gives EVEN massive label-side reach, but it&#x27;s fundamentally a major-label tool, not an indie play. Source: musicbusinessworldwide.com</li>
+</ul>
+<ul>
+<li><strong>Vocana</strong>: Still in public beta. The &quot;indie-only streaming platform&quot; with user-centric payouts and social discovery features. Partnerships with Symphonic and CD Baby for early access. Forbes named it as one of the &quot;specialized music services&quot; to watch. No major launch or funding news this week. Source: vocana.co, forbes.com</li>
+</ul>
+<ul>
+<li><strong>Ampled</strong>: Dead. Closed end of 2023. (Confirming for the record.)</li>
+<li><strong>Resonate</strong>: Dead. Closed before Ampled.</li>
+</ul>
+<h3>Fediverse &amp; decentralized</h3>
+<ul>
+<li><strong>Mirlo + FairPlayer</strong>: Covered above. This is the real story. FairPlayer acts as a federated discovery layer, pulling music from both Mirlo and Faircamp instances into one player. It&#x27;s a working proof-of-concept for ActivityPub-style music interoperability — exactly the model Unstream should be studying (or joining). Source: mirlo.space, fairplayer.org</li>
+</ul>
+<ul>
+<li><strong>Funkwhale</strong>: No significant news this week. The project remains active but niche — a self-hosted, federated music platform primarily used for personal libraries and freely licensed content. Not a commercial storefront option. Source: funkwhale.audio</li>
+</ul>
+<ul>
+<li><strong>Jam.coop</strong>: The cooperatively-owned music store is live and functional. Small catalog, community-driven. Sits alongside Mirlo, Subvert, and Ampwall in the growing &quot;music co-op&quot; ecosystem. Source: jam.coop</li>
+</ul>
+<h3>Streaming economics</h3>
+<ul>
+<li><strong>RIAA Mid-Year 2026</strong>: US recorded music revenue hit <strong>$6 billion</strong> in H1 2026, up 6.9% YoY. Streaming remains 82% of total revenue at $4.9B (+4.7%). Paid subscriptions grew 5.5% in units to 111.1M and 7.8% in value to $3.1B. Physical formats also up: vinyl +17.7% to $554M, CDs +58.6% to $171M. The CD spike is notable — Luminate reported a 16% increase in CD unit sales too. Downloads down 12.7%. Source: billboard.com, musicrow.com</li>
+</ul>
+<ul>
+<li><strong>Spotify AI Persona badge</strong>: Rolling out mid-September. Synthetic artist profiles will get labeled &quot;Likely AI Persona&quot; and <strong>excluded from editorial and algorithmic recommendations by default</strong> unless a listener already follows them. This is distinct from Apple&#x27;s approach — Spotify targets *artist identity*, not *use of AI tools*. Real musicians using AI in production are not affected. This is a significant policy move: it effectively quarantines AI-generated artist accounts from discovery. Source: routenote.com/blog</li>
+</ul>
+<ul>
+<li><strong>Apple Music &quot;Made With AI&quot; labels</strong>: Coming later in 2026. Labels and distributors must disclose when AI created a &quot;material portion&quot; of content. Covers AI-generated music, artwork, and music videos. Different philosophy from Spotify — Apple is tagging *content*, not *identity*. Source: routenote.com/blog</li>
+</ul>
+<ul>
+<li><strong>Spotify x Merlin fan-made remixes</strong>: Spotify signed a licensing deal with Merlin (indie label/distributor body) on Aug 4 for its upcoming AI-powered fan remix tool, extending beyond the existing UMG deal. Kobalt also signed on Aug 13. Premium subscribers will be able to create licensed covers and remixes, with participating songwriters/artists sharing in the revenue. Source: newsroom.spotify.com</li>
+</ul>
+<ul>
+<li><strong>Spotify per-stream rate</strong>: Still averaging ~$0.004/stream in 2026. No changes. Source: artyfile.com</li>
+</ul>
+<ul>
+<li><strong>YouTube Partner Program</strong>: Major threshold increases coming Feb 2027 — 8,000 watch hours (up from 4,000) or 20M Shorts views (up from 10M) to monetize. Shorts creators must maintain 10M views per 90 days to keep earning. This will squeeze smaller music creators on YouTube. Source: routenote.com/blog</li>
+</ul>
+<ul>
+<li><strong>SoundCloud direct sales</strong>: 0% commission on direct track sales (beta, ~200 artists). Payment processing fees still apply (Stripe). If this scales, it&#x27;s a meaningful alternative to Bandcamp&#x27;s 10-15% cut. Source: weraveyou.com</li>
+</ul>
+<h3>Industry pulse</h3>
+<ul>
+<li><strong>Sony Music Publishing &amp; Warner Chappell sue Anthropic</strong>: Filed Aug 28 in N. District of California. Multi-billion-dollar lawsuit alleging mass copyright infringement — claiming Anthropic used tens of thousands of musical compositions (including &quot;All I Want for Christmas Is You,&quot; &quot;Eye of the Tiger,&quot; &quot;Uptown Funk&quot;) to train Claude. Seeking up to $150K per work infringed. This joins existing suits from UMG, Concord, and BMG. Anthropic previously settled with authors for $1.5B. The question at the heart: can AI companies train on copyrighted works without a license? Source: routenote.com/blog</li>
+</ul>
+<ul>
+<li><strong>Jason Isbell class action against Suno</strong>: Filed Sep 3. Artists continue to litigate against generative AI music platforms. Source: musicrow.com</li>
+</ul>
+<ul>
+<li><strong>Deezer AI upload data</strong>: Over 50% of new daily uploads to Deezer are now identified as AI-generated. But AI tracks account for only 1-3% of actual streams. The volume-to-engagement gap is the key stat here. Source: routenote.com/blog (via Deezer)</li>
+</ul>
+<ul>
+<li><strong>Germany grassroots ticket levy pilot</strong>: A national pilot program for a grassroots-led ticket levy system launched in late August — potentially a model for other markets to fund small venues. Source: iqmagazine.com</li>
+</ul>
+<h3>Unstream implications</h3>
+<ul>
+<li><strong>FairPlayer/Mirlo federation is the model to study or join.</strong> The federated discovery layer — where listeners browse music across multiple independent storefronts in one interface — is exactly what the indie music ecosystem needs. If Unstream isn&#x27;t already talking to the Mirlo/FairPlayer folks, start. If Unstream can expose its catalog via FairPlayer or a similar ActivityPub protocol, it gets free federated discovery.</li>
+</ul>
+<ul>
+<li><strong>SoundCloud&#x27;s zero-commission direct sales beta is the competitive benchmark.</strong> SoundCloud is now offering what Bandcamp charges 10-15% for, at 0% (minus processing). Unstream&#x27;s pricing model needs to be clear about why artists should pay Unstream instead of using SoundCloud&#x27;s free option. Community, curation, and fediverse integration are the differentiators — not price.</li>
+</ul>
+<ul>
+<li><strong>AI labeling is becoming table stakes.</strong> Both Spotify and Apple are rolling out AI transparency features this fall. If Unstream accepts user uploads, it should have an AI disclosure policy ready — ideally one that matches or exceeds the major platforms&#x27; standards. Being ahead on transparency builds trust with the artist community.</li>
+</ul>
+<ul>
+<li><strong>The co-op wave is real.</strong> Subvert (29K members, just launched May 2026), Jam.coop, Mirlo — the cooperative ownership model for music platforms is gaining momentum. Unstream should consider how its governance model positions it relative to this movement. If Unstream isn&#x27;t a co-op, it should be able to articulate why not without sounding like a VC pitch.</li>
+</ul>
+<ul>
+<li><strong>Web3 music is dead.</strong> Sound.xyz: offline. Nina Protocol: acquired for parts by SoundCloud. Audius token: down 95%. Royal.io: shut down. OneOf: collapsed. The 2021-2022 Web3 music cycle burned $300M+ in VC and produced zero sustainable businesses. Unstream should not touch tokens, NFTs, or blockchain-based royalty schemes. The artists who won during that window used Spotify + Bandcamp + email, not blockchain.</li>
+</ul>
+<ul>
+<li><strong>CDs are back (?).</strong> A 58.6% increase in CD revenue is weird and worth monitoring. Probably a collector/hobbyist phenomenon rather than a structural shift, but physical format diversification matters for Unstream if it ever handles merch.</li>
+</ul>
+<ul>
+<li><strong>Spotify&#x27;s fan remix tool is expanding fast.</strong> With UMG, Merlin, and now Kobalt all signed on, Spotify is building a licensed remix ecosystem. This could become a discovery and engagement vector. Unstream should think about whether fan remixing/covers fit its model — and if so, how to do it without requiring artists to opt into Spotify&#x27;s ecosystem.</li>
+</ul>
+<h3>Confidence</h3>
+<ul>
+<li><strong>Confirmed (reporting):</strong> RIAA H1 2026 numbers, Spotify AI Persona badge, Apple &quot;Made With AI&quot; labels, SoundCloud direct sales beta, SoundCloud/Nina acquisition, Sony/Warner Chappell v. Anthropic, Spotify/Merlin/Kobalt remix licensing, YouTube YPP threshold changes, Subvert launch, Mirlo/FairPlayer integration, EVEN/UMG deal.</li>
+<li><strong>Confirmed (platform status):</strong> Sound.xyz offline, Ampled closed, Resonate closed, Nina Protocol wound down.</li>
+<li><strong>Speculation/analysis:</strong> CD revival sustainability, SoundCloud direct sales scaling timeline, long-term impact of AI labeling on discovery economics, whether Subvert&#x27;s co-op model can sustain beyond initial enthusiasm.</li>
+<li><strong>Rumor:</strong> Nothing significant this week.</li>
+</ul>
+<p>To stop or manage this job, send me a new message (e.g. &quot;stop reminder Weekly Unstream Market Digest (Fri 7am)&quot;).</p>]]></content:encoded>
+</item>
+<item>
+<title>Weekly Unstream Dispatch, week of August 21</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/2026-08-21.html</link>
+<guid isPermaLink="false">urn:unstream-dispatch:2026-08-21</guid>
+<pubDate>Fri, 21 Aug 2026 07:00:00 -0400</pubDate>
+<description> Platform watch 
+ 
+  Bandcamp : Quiet week. Bandcamp Friday ran August 7 with no ownership or policy changes to report. The Songtradr era continues to be stable-status-quo — no new controversy, no new features. Bandcamp&amp;#x27;s Daily editorial is publishing as normal. The platform</description>
+<content:encoded><![CDATA[<h2>Platform watch</h2>
+<ul>
+<li><strong>Bandcamp</strong>: Quiet week. Bandcamp Friday ran August 7 with no ownership or policy changes to report. The Songtradr era continues to be stable-status-quo — no new controversy, no new features. Bandcamp&#x27;s Daily editorial is publishing as normal. The platform remains the default &quot;sell your music&quot; option for indies but is losing ground to alternatives that offer better UI, higher audio quality, and no AI-ties baggage.</li>
+</ul>
+<ul>
+<li><strong>Mirlo</strong>: Growing. A December 2025 in-depth interview with DIY Conspiracy confirms Mirlo is run as a worker co-op (unpaid volunteers still, but structurally solid). They&#x27;ve nearly reached feature parity with Bandcamp&#x27;s core digital-store functionality and are now pivoting toward federation and decentralization — the next phase. Mirlo&#x27;s default take is 10%, but artists can set it to 0%. Notably, in mid-August Mirlo posted about <strong>FairPlayer</strong>, a new discovery tool that aggregates music from both Mirlo *and* Faircamp artists, hinting at cross-platform federation. This is the most interesting platform-level development this week for Unstream&#x27;s ecosystem.</li>
+</ul>
+<ul>
+<li><strong>Ampwall</strong>: Still active and positioning itself as the audiophile&#x27;s Bandcamp alternative. A July 2026 artist post highlights two selling points: 24-bit/48kHz upload and download support (no quality degradation), and an anti-AI stance. &quot;We share similar values&quot; on AI, says the artist. Ampwall&#x27;s fee structure and modern UI continue to attract artists who&#x27;ve left Bandcamp. Low awareness outside niche circles but strong loyalty among users.</li>
+</ul>
+<ul>
+<li><strong>Patreon / Qobuz / Beatport / Discords</strong>: Nothing significant this week. No policy shifts, no pricing changes detected.</li>
+</ul>
+<h2>Emerging &amp; alternative</h2>
+<ul>
+<li><strong>Sound.xyz</strong>: <strong>Dead.</strong> The site now displays a notice: &quot;Sound.xyz is now offline as of January 16, 2026.&quot; The web3 music minting experiment is over. Another reminder that crypto-native music platforms have an extremely high failure rate.</li>
+</ul>
+<ul>
+<li><strong>Nina Protocol</strong>: <strong>Winding down.</strong> The Solana-based music protocol confirmed it is sunsetting. Existing releases remain accessible but no new activity is being onboarded. Two major web3 music platforms exiting in 2026 — the space is consolidating hard toward traditional direct-to-fan models.</li>
+</ul>
+<ul>
+<li><strong>Vocana</strong>: A Forbes piece from late 2025 identified Vocana as a new entrant in the &quot;specialized music services&quot; space, focused on indie artists, currently in beta. No fresh news this week. Still worth watching but no adoption signals yet.</li>
+</ul>
+<ul>
+<li><strong>Ampled / Resonate</strong>: Both confirmed closed/shuttered in Mirlo&#x27;s interview — they&#x27;re cited as predecessors whose lessons informed Mirlo&#x27;s design. Not returning.</li>
+</ul>
+<ul>
+<li><strong>Audius</strong>: Still operational, no meaningful news this week.</li>
+</ul>
+<h2>Fediverse &amp; decentralized</h2>
+<ul>
+<li><strong>Mirlo + Faircamp federation</strong>: The biggest signal this week. Mirlo&#x27;s Instagram post about &quot;FairPlayer&quot; — a discovery tool that pulls artists from both Mirlo *and* Faircamp (the static-site, self-hosted Bandcamp alternative) — is the first real move toward cross-platform music discovery in the fediverse/indie ecosystem. If this works, it proves that federated music discovery doesn&#x27;t need a single platform.</li>
+</ul>
+<ul>
+<li><strong>Funkwhale</strong>: No new developments this week. Still active as a federated (ActivityPub) music hosting project, but adoption remains small and development is slow. The Reddit-fediverse thread about wanting a &quot;federated Bandcamp&quot; confirms ongoing demand but Funkwhale isn&#x27;t positioned to fill it — it&#x27;s more of a self-hosted Spotify than a Bandcamp.</li>
+</ul>
+<h2>Streaming economics</h2>
+<ul>
+<li><strong>Spotify — &quot;AI Persona&quot; label (Aug 11)</strong>: Starting mid-September, Spotify will badge AI-generated artist profiles with an &quot;AI Persona&quot; label. These profiles will be <strong>excluded from algorithmic recommendations</strong>. Spotify will allow self-disclosure but will also apply the label via human moderators using AI detection tools. This is a meaningful move: it functionally quarantines AI slop from the discovery pipeline. Confirmed reporting. <a href="https://variety.com/2026/music/news/spotify-strikes-back-against-ai-artists-ai-persona-label-1236831790/">Variety</a></li>
+</ul>
+<ul>
+<li><strong>Apple Music — &quot;Made With AI&quot; labels (Aug 20)</strong>: Apple Music will begin labeling songs where &quot;a material portion of the content&quot; was created using AI. Unlike Tidal&#x27;s approach (which bans royalties for AI content), Apple places the disclosure burden on labels and distributors. Apple&#x27;s VP Oliver Schusser said earlier this year that &quot;more than a third&quot; of uploads are &quot;100% AI.&quot; Confirmed. <a href="https://variety.com/2026/music/news/apple-music-to-label-ai-made-tracks-1236839371/">Variety</a></li>
+</ul>
+<ul>
+<li><strong>Tidal — AI music ban from royalties (June 29, policy effective July 15)</strong>: Tidal will label AI-generated music and <strong>ban royalty payouts</strong> for wholly AI-generated tracks. The most aggressive stance of any major streamer. Tidal receives &quot;an overwhelming amount of AI-generated music from 3rd party distributors,&quot; per Tidal lead Robert Andersen. Confirmed. <a href="https://variety.com/2026/music/news/tidal-label-ai-generated-music-ban-royalties-from-ai-songs-1236798543/">Variety</a></li>
+</ul>
+<ul>
+<li><strong>RIAA/IFPI/Grammys/SAG-AFTRA — Unified AI labeling framework (July 10)</strong>: A coalition of major industry bodies introduced two track-level labels: &quot;AI-Generated&quot; and &quot;AI-Assisted.&quot; Voluntary framework. Spotify and Apple Music are taking their own approaches rather than adopting this exactly. Deezer welcomed it but didn&#x27;t commit. The DiMA (streaming services&#x27; trade group) said it&#x27;s watching closely. Confirmed. <a href="https://variety.com/2026/music/news/ifpi-riaa-grammys-sag-aftra-labeling-program-ai-music-1236806377/">Variety</a></li>
+</ul>
+<h2>Industry pulse</h2>
+<ul>
+<li><strong>EU AI Act enforcement begins August 2, 2026</strong>: This is now live. GPAI providers (Suno, Udio, ElevenLabs, etc.) must publish training data summaries. AI-generated audio distributed in the EU must be machine-detectable and disclosed. Distributors operating in EU markets are accountable at point of upload. Penalties up to €15M or 3% global turnover. Fewer than 8% of indie artists could accurately describe their disclosure obligations, per Chartlex. This is the biggest regulatory story of the year for music and it just went into effect. <a href="https://www.chartlex.com/blog/business/eu-ai-act-music-enforcement-aug-2026">Chartlex</a></li>
+</ul>
+<ul>
+<li><strong>Protect Working Musicians Act (H.R. 8994)</strong>: Introduced May 21, 2026 by Rep. Deborah Ross (D-NC). Would allow individual music creators earning under $1M/year to collectively negotiate licensing terms with dominant platforms (&gt;$100M revenue) and AI companies. Still in committee. No floor vote scheduled. <a href="https://www.congress.gov/bill/119th-congress/house-bill/8994">Congress.gov</a></li>
+</ul>
+<ul>
+<li><strong>Udio &amp; GRAI license UMG-backed patents (Aug 20)</strong>: Music IP Holdings (a UMG/Liquidax joint venture) licensed 24+ patents covering AI music generation, moderation, watermarking, and monetization to Udio and GRAI. This signals UMG&#x27;s strategy: don&#x27;t just sue AI companies — build a licensing infrastructure so rightsholders get paid when AI generates derivative works. Exclusive reporting. <a href="https://variety.com/2026/biz/news/ai-music-udio-grai-patents-umg-backed-music-ip-holdings-1236838763/">Variety</a></li>
+</ul>
+<ul>
+<li><strong>Latin and country surging</strong>: Luminate/RIAA data shows Latin and country accounted for 180.3 billion streams in H1 2026 in the US, followed by rock (137.2B) and pop (87B). Not directly actionable for Unstream but confirms genre diversification continues.</li>
+</ul>
+<h2>Unstream implications</h2>
+<ul>
+<li><strong>AI transparency is now table stakes.</strong> Three major streamers (Spotify, Apple Music, Tidal) have committed to AI labeling in the past 8 weeks, and the EU just made it legally mandatory for EU distribution. Unstream should build AI-disclosure fields into its artist upload flow now — not because Unstream hosts AI content, but because artists distributing through Unstream to Spotify/Apple/Tidal will need to tag correctly or risk being penalized. This is a compliance feature that differentiates from Bandcamp (which has been silent on AI).</li>
+</ul>
+<ul>
+<li><strong>FairPlayer / cross-platform discovery is the model to study.</strong> Mirlo&#x27;s experiment aggregating discovery across Mirlo + Faircamp is exactly the kind of interoperability Unstream should be thinking about. If Unstream can expose a discoverable feed (RSS, ActivityPub, or even just a well-structured JSON API), it becomes part of this emerging federated discovery layer rather than an isolated silo.</li>
+</ul>
+<ul>
+<li><strong>Sound.xyz and Nina Protocol are both dead.</strong> The web3 music era is over. Don&#x27;t build blockchain infrastructure. Build cooperative, open-standards infrastructure instead. Mirlo&#x27;s co-op model is the one with momentum.</li>
+</ul>
+<ul>
+<li><strong>Tidal&#x27;s &quot;no royalties for AI&quot; stance is the boldest.</strong> If Unstream wants to position as artist-first, a clear policy on AI-generated content — even a simple one like requiring human-creation disclosure — would be on brand. Tidal&#x27;s approach (ban AI royalties entirely) is extreme but resonates with Ampwall&#x27;s positioning too. The market is clearly splitting between &quot;AI is fine, just label it&quot; (Spotify/Apple) and &quot;AI content doesn&#x27;t deserve royalties&quot; (Tidal). Unstream should pick a side and state it.</li>
+</ul>
+<ul>
+<li><strong>EU AI Act enforcement is now live.</strong> If Unstream has any EU-bound distribution or artists, the August 2 compliance deadline has passed. Unstream should consider publishing a brief guide for artists about EU AI disclosure requirements — it&#x27;s a content marketing opportunity and a genuine service to artists who (per Chartlex) overwhelmingly don&#x27;t understand the new rules.</li>
+</ul>
+<h2>Confidence</h2>
+<ul>
+<li><strong>Confirmed</strong>: Spotify AI Persona label (mid-September rollout), Apple Music &quot;Made With AI&quot; labels, Tidal AI royalty ban, RIAA/IFPI AI labeling framework, EU AI Act enforcement date, Sound.xyz closure, Nina Protocol wind-down, Udio/GRAI patent licensing, Mirlo FairPlayer discovery feature, Protect Working Musicians Act introduction.</li>
+<li><strong>Speculation</strong>: Whether Spotify/Apple will ultimately adopt the RIAA&#x27;s specific &quot;AI-Generated&quot;/&quot;AI-Assisted&quot; labels vs. their own taxonomy. Whether the Protect Working Musicians Act will move out of committee (unlikely this session).</li>
+<li><strong>Rumor</strong>: Vocana&#x27;s current status — last visible signal was a Forbes mention as &quot;in beta&quot; in late 2025. May still be alive, may be dormant.</li>
+</ul>
+<p>To stop or manage this job, send me a new message (e.g. &quot;stop reminder Weekly Unstream Market Digest (Fri 7am)&quot;).</p>]]></content:encoded>
+</item>
+<item>
+<title>Weekly Unstream Dispatch, week of August 9</title>
+<link>https://brandonlucasgreen.github.io/unstream/dispatch/2026-08-09.html</link>
+<guid isPermaLink="false">urn:unstream-dispatch:2026-08-09</guid>
+<pubDate>Sun, 09 Aug 2026 07:00:00 -0400</pubDate>
+<description> Platform watch 
+ 
+  Bandcamp : Rolling out several meaningful updates. Added a Subsonic API implementation (beta) so fans can stream their Bandcamp collections through clients like Amperfy, Feishin, and Submariner. Added a &amp;quot;filter by artists you follow&amp;quot; feature in Disc</description>
+<content:encoded><![CDATA[<h2>Platform watch</h2>
+<ul>
+<li><strong>Bandcamp</strong>: Rolling out several meaningful updates. Added a Subsonic API implementation (beta) so fans can stream their Bandcamp collections through clients like Amperfy, Feishin, and Submariner. Added a &quot;filter by artists you follow&quot; feature in Discover. Launched built-in shipping label purchase/printing via EasyPost for US and Canadian sellers. Added publishing rights fields (songwriter, publisher, ISWC) to track/album metadata. Also declared a hardline AI policy: music &quot;generated wholly or in substantial part by AI&quot; is banned. Still rolling out the Stripe payment migration from PayPal. No sign of stagnation under Songtradr — these are real product moves, not just maintenance. Sources: <a href="https://blog.bandcamp.com/">blog.bandcamp.com</a></li>
+</ul>
+<ul>
+<li><strong>Spotify</strong>: Q2 2026 earnings hit 300M Premium subscribers and 777M MAUs, €4.8B revenue (+14% Y/Y), gross margin 33.4%. The big story this week: signed Kobalt as the third major rights holder (after UMG and Merlin) for its upcoming AI-powered fan-made covers and remixes tool, which will be a paid Premium add-on. Participation is opt-in per songwriter, but the framing around &quot;consent, credit, compensation&quot; is Spotify&#x27;s attempt to get ahead of the AI trust deficit. Also launched &quot;Talk to Spotify&quot; conversational AI beta for Premium users and expanded AI DJ to 75+ markets. Sources: <a href="https://newsroom.spotify.com/2026-08-04/spotify-q2-2026-earnings/">newsroom.spotify.com</a>, <a href="https://routenote.com/blog/spotify-kobalt-ai-covers-remixes/">routenote.com</a></li>
+</ul>
+<ul>
+<li><strong>Deezer</strong>: Partnered with Winamp to power a new premium streaming service inside the next-gen Winamp Player, launching H1 2027. Winamp claims 40M+ active desktop users. This is a white-label deal — Deezer provides the catalogue and infrastructure, Winamp builds the consumer brand. Interesting because it reunites local-library and streaming listening in one app, which is a niche Spotify doesn&#x27;t serve well. Sources: <a href="https://routenote.com/blog/deezer-winamp-partnership/">routenote.com</a></li>
+</ul>
+<h2>Emerging &amp; alternative</h2>
+<ul>
+<li><strong>Vocana</strong>: Entered public beta roughly a year ago (Aug 2025) with user-centric payouts and CD Baby/DistroKid distribution deals. Still in beta as of early 2026. Music Ally&#x27;s take was blunt: &quot;inventive product development and smart marketing on a budget unlikely to match the Spotifys of the world will be required.&quot; No major updates found this week. The user-centric payout model remains Vocana&#x27;s differentiator, but adoption signals are quiet.</li>
+</ul>
+<ul>
+<li><strong>Ampwall</strong>: Public benefit company, ~1,000+ bands and artists on the platform, $10/year for artists, 5% cut + PayPal fees. Positioning as the anti-Bandcamp for artists who want lower fees and modern UX under artist/DIY ownership. No new developments this week.</li>
+</ul>
+<ul>
+<li><strong>Mirlo</strong>: Open-source, prix-libre (pay-what-you-want) model, building toward federated infrastructure. Interview earlier this year described it as &quot;the Bandcamp alternative building federative&quot; tools. Still early, still niche, but the open-source angle is genuinely different from Ampwall&#x27;s approach.</li>
+</ul>
+<h2>Fediverse &amp; decentralized</h2>
+<ul>
+<li><strong>Funkwhale</strong>: Still active as the main ActivityPub music platform, but no significant news or releases this week. Community on Reddit continues to discuss it primarily as self-hosted personal music storage/NAS rather than a discovery platform. The gap between Funkwhale&#x27;s capabilities and what artists actually need (audience, commerce) remains wide.</li>
+</ul>
+<ul>
+<li>No new ActivityPub music projects emerged this week.</li>
+</ul>
+<h2>Streaming economics</h2>
+<ul>
+<li><strong>Spotify price hikes continuing</strong>: The Aug 2025 global price increases (US went $10.99→$11.99, then $11.99→$12.99 in Jan 2026) are now settled in. More revenue per sub, but per-stream rates haven&#x27;t meaningfully improved for artists — labels and Spotify still take their cut first.</li>
+</ul>
+<ul>
+<li><strong>PRS for Music moved to monthly streaming royalties</strong> (effective Aug 15, 2025). UK songwriters and publishers now get paid monthly instead of quarterly for streaming. This is a structural win for cash flow. If you&#x27;re UK-based and collecting PRS, this matters.</li>
+</ul>
+<ul>
+<li><strong>Indie bands quitting Spotify</strong>: The &quot;Spotify exodus of 2025&quot; saw Deerhoof, Xiu Xiu, Godspeed You! Black Emperor, King Gizzard, and Hotline TNT all pull music — triggered by Daniel Ek&#x27;s €600M investment in Helsing, an AI defense company. GY!BE went further, leaving all platforms except Bandcamp. Source: <a href="https://www.theguardian.com/culture/2025/aug/29/indie-bands-are-quitting-spotify-what-could-it-mean-for-the-future-of-music-streaming">The Guardian</a></li>
+</ul>
+<ul>
+<li><strong>Instagram locked livestreaming behind 1,000+ followers</strong>, cutting off small artists from a key discovery tool.</li>
+</ul>
+<h2>Industry pulse</h2>
+<ul>
+<li><strong>IFPI + major/indie labels propose AI music chart rules</strong> (Aug 10, 2026): A coalition including Sony, UMG, WMG, Believe, BMG, Concord, HYBE, Mom+Pop and others proposed that AI-assisted recordings should only chart if they (1) use authorized AI services, (2) are &quot;substantially human-made,&quot; and (3) don&#x27;t raise chart manipulation concerns. IFPI rolled out three core principles globally. The &quot;substantially human-made&quot; language is deliberately vague — expect fights over where the line sits. Sources: <a href="https://routenote.com/blog/music-industry-proposes-ai-music-chart-rules/">routenote.com</a></li>
+</ul>
+<ul>
+<li><strong>Suno published &quot;responsible AI&quot; principles</strong> (Aug 10, 2026): Download limits to prevent mass distribution to streaming platforms, audio watermarking and fingerprinting, updated community guidelines prohibiting impersonation and unauthorized uploads. This follows GEMA&#x27;s copyright lawsuit win against Suno in a German court. Suno says it&#x27;s trying to draw a line between creative tool and mass-production pipeline, but the unresolved question remains: what copyrighted music trained their models? Sources: <a href="https://routenote.com/blog/suno-responsible-ai-music-principles/">routenote.com</a></li>
+</ul>
+<ul>
+<li><strong>Deezer: AI-generated tracks now &gt;50% of new daily uploads</strong> at peak (~90,000/day), but only 1–3% of actual streams. 85% of streams on fully AI tracks were fraudulent in 2025. This is the data point that justifies the chart rule proposals.</li>
+</ul>
+<ul>
+<li><strong>Global music industry revenue hit $47.1B in 2025</strong> (8.6% growth), driven by streaming. Paid streaming subscriptions reached 856M–921M depending on the metric. Source: <a href="https://www.mediaplaynews.com/global-music-industry-topped-47-billion-dollars-in-2025-revenue-led-by-streaming/">mediaplaynews.com</a></li>
+</ul>
+<h2>Unstream implications</h2>
+<ul>
+<li><strong>Bandcamp&#x27;s Subsonic API is a trust move.</strong> Letting fans stream their purchased collections through third-party clients means Bandcamp is choosing interoperability over lock-in. If Unstream supports or integrates with Subsonic-compatible protocols, it&#x27;s a natural alignment with the same philosophy.</li>
+</ul>
+<ul>
+<li><strong>The AI chart rules + Suno watermarking + Deezer tagging = a emerging infrastructure for &quot;AI transparency.&quot;</strong> Unstream should consider how it wants to label or filter AI-generated content now, before external frameworks impose it. Being proactive on provenance metadata (human-made, AI-assisted, AI-generated) positions you well.</li>
+</ul>
+<ul>
+<li><strong>Spotify&#x27;s AI covers/remixes tool is going live.</strong> It&#x27;s a paid Premium feature with opt-in from rightsholders. This creates a new category of &quot;fan-made derivative content&quot; that lives inside Spotify&#x27;s ecosystem. If Unstream offers any remix/derivative features, the contrast in who controls it and who gets paid matters.</li>
+</ul>
+<ul>
+<li><strong>The indie Spotify boycott set a precedent.</strong> Five notable bands left Spotify over ethics, not economics. GY!BE stayed only on Bandcamp. This validates the market for artist-first, ethics-transparent platforms. Unstream&#x27;s value prop isn&#x27;t just &quot;better economics&quot; — it&#x27;s &quot;you don&#x27;t have to compromise your values.&quot;</li>
+</ul>
+<ul>
+<li><strong>Winamp + Deezer is a reminder that &quot;local files + streaming&quot; is underserved.</strong> Listeners who own music and want it alongside streaming catalog have no great option from the majors. If Unstream has any local-collection or library-management features, that&#x27;s a real differentiator.</li>
+</ul>
+<h2>Confidence</h2>
+<ul>
+<li><strong>Confirmed</strong>: Spotify Q2 2026 numbers, Spotify-Kobalt deal, Deezer-Winamp partnership, IFPI chart principles, Suno responsible AI announcement, Bandcamp feature updates, GEMA v. Suno ruling, Deezer AI upload stats, PRS monthly payouts, indie band Spotify exits.</li>
+<li><strong>Likely but unverified</strong>: Vocana is still in beta without meaningful adoption updates. Ampwall user counts (~1,000 bands) come from their own marketing and may be generous.</li>
+<li><strong>Speculation</strong>: Whether Spotify&#x27;s AI covers/remixes tool will meaningfully change fan behavior or become a novelty. Whether the Winamp + Deezer product actually ships on time in H1 2027.</li>
+</ul>
+<p>To stop or manage this job, send me a new message (e.g. &quot;stop reminder Weekly Unstream Market Digest (Fri 7am)&quot;).</p>]]></content:encoded>
+</item>
+</channel>
+</rss>
