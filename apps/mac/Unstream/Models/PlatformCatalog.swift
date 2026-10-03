@@ -1,6 +1,10 @@
 import Foundation
 
-// MARK: - Single source of truth for platform display metadata
+// MARK: - Platform display metadata
+//
+// The app's copy of api/shared/platform-registry.ts, which is the source of truth: names, colors
+// and payouts must match it (apps/web/tests/unit/platform-registry-copies.test.ts checks the
+// payouts). The icons are SF Symbols, since the registry's emoji don't suit native UI.
 
 /// Configuration for a platform's display properties
 struct PlatformConfig {
@@ -30,9 +34,12 @@ let platformCatalog: [String: PlatformConfig] = [
     // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
     // so cheap releases pay out less. See api/shared/platform-registry.ts.
     "jamcoop": PlatformConfig(name: "Jam.coop", icon: "guitars", color: "#D97706", searchOnly: false, artistPayoutPercent: "82-85%"),
+    "beatport": PlatformConfig(name: "Beatport", icon: "slider.vertical.3", color: "#01FF95", searchOnly: false, artistPayoutPercent: "55-70%"),
+    "even": PlatformConfig(name: "EVEN", icon: "music.mic", color: "#000000", searchOnly: false, artistPayoutPercent: "~80%"),
     "freegal": PlatformConfig(name: "Freegal", icon: "building.columns", color: "#00A651", searchOnly: false),
     "hoopla": PlatformConfig(name: "Hoopla", icon: "books.vertical", color: "#E31837", searchOnly: false),
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false, artistPayoutPercent: "86-90%"),
+    "liberapay": PlatformConfig(name: "Liberapay", icon: "hands.clap", color: "#F6C915", searchOnly: false, artistPayoutPercent: "~97%"),
     // Search-only platforms
     "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#1E1E24", searchOnly: true, artistPayoutPercent: "92-95%"),
     "subvert": PlatformConfig(name: "Subvert", icon: "globe", color: "#D9DBDD", searchOnly: true, artistPayoutPercent: "97%"),
@@ -41,6 +48,7 @@ let platformCatalog: [String: PlatformConfig] = [
     // Official
     "officialsite": PlatformConfig(name: "Official Site", icon: "star", color: "#71717A", searchOnly: false),
     "discogs": PlatformConfig(name: "Discogs", icon: "opticaldisc", color: "#333333", searchOnly: false),
+    "wikipedia": PlatformConfig(name: "Wikipedia", icon: "book", color: "#636466", searchOnly: false),
     // Social platforms
     "instagram": PlatformConfig(name: "Instagram", icon: "camera", color: "#E4405F", searchOnly: false),
     "facebook": PlatformConfig(name: "Facebook", icon: "person.2", color: "#1877F2", searchOnly: false),
@@ -50,6 +58,7 @@ let platformCatalog: [String: PlatformConfig] = [
     "bluesky": PlatformConfig(name: "Bluesky", icon: "cloud", color: "#0085FF", searchOnly: false),
     "mastodon": PlatformConfig(name: "Mastodon", icon: "bubble.left.and.bubble.right", color: "#6364FF", searchOnly: false),
     "peertube": PlatformConfig(name: "PeerTube", icon: "play.circle", color: "#F1680D", searchOnly: false),
+    "newsletter": PlatformConfig(name: "Newsletter", icon: "envelope", color: "#666666", searchOnly: false),
     // Fallback for artist-added custom links (other, other_*)
     "other": PlatformConfig(name: "Link", icon: "globe", color: "#888888", searchOnly: false),
 ]
