@@ -2033,12 +2033,6 @@ export async function persistDiscogsReleases(
     const byMasterId = new Map(
       existing.filter(r => r.discogs_master_id).map(r => [r.discogs_master_id as string, r])
     );
-    const byType = new Map<string, ExistingRow[]>();
-    for (const row of existing) {
-      const bucket = byType.get(row.release_type);
-      if (bucket) bucket.push(row);
-      else byType.set(row.release_type, [row]);
-    }
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
@@ -2083,9 +2077,11 @@ export async function persistDiscogsReleases(
       // merge — insert a new row below and flag both sides, with each pointing at the other
       // via `flagged_against_release_id` so an admin queue can show the pair without having
       // to re-run the fuzzy match to reconstruct what triggered it.
-      const fuzzy = prior
-        ? null
-        : findFuzzyReleaseMatch(byType.get(release.releaseType) ?? [], release);
+      //
+      // Searched across every stored release, not just those of this one's type, same as tier 2
+      // above and every other source: Discogs types 92% of its masters 'other', so scoping by
+      // type meant a near-match against a Bandcamp 'album' was never put in front of a human.
+      const fuzzy = prior ? null : findFuzzyReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
@@ -2164,9 +2160,6 @@ export async function persistDiscogsReleases(
         };
         byMasterId.set(release.masterId, createdRow);
         existing.push(createdRow);
-        const bucket = byType.get(release.releaseType);
-        if (bucket) bucket.push(createdRow);
-        else byType.set(release.releaseType, [createdRow]);
       }
 
       const source = await upsertReleaseSource(
@@ -2188,8 +2181,6 @@ export async function persistDiscogsReleases(
           const row = createdRow;
           byMasterId.delete(release.masterId);
           existing.splice(existing.indexOf(row), 1);
-          const bucket = byType.get(release.releaseType);
-          if (bucket) bucket.splice(bucket.indexOf(row), 1);
           discarded++;
         }
         continue;
