@@ -28,6 +28,12 @@ import { readFileSync, writeFileSync, existsSync, statSync, mkdirSync } from 'fs
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { isExcludedArtistSlug } from '../api/lib/excluded-artists';
+import {
+  mergeWithMusicBrainzData,
+  normalizeForComparison,
+  type MusicBrainzData,
+  type SearchResult,
+} from './artist-data-merge';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -82,47 +88,10 @@ interface ArtistEntry {
   musicbrainzId: string;
 }
 
-interface PlatformLink {
-  sourceId: string;
-  url: string;
-  allReleaseTitles?: string[];
-  latestRelease?: {
-    title: string;
-    type: string;
-    url: string;
-    imageUrl?: string;
-    releaseDate?: string;
-  };
-}
-
-interface SearchResult {
-  id: string;
-  name: string;
-  artist?: string;
-  type: 'artist' | 'album' | 'track';
-  imageUrl?: string;
-  platforms: PlatformLink[];
-  matchConfidence?: 'verified' | 'unverified';
-}
-
 interface SearchResponse {
   query: string;
   results: SearchResult[];
   hasPendingEnrichment?: boolean;
-}
-
-interface SocialLink {
-  platform: string;
-  url: string;
-}
-
-interface MusicBrainzData {
-  query: string;
-  artistName: string | null;
-  officialUrl: string | null;
-  discogsUrl: string | null;
-  hasPre2005Release: boolean;
-  socialLinks: SocialLink[];
 }
 
 interface ManifestEntry {
@@ -131,100 +100,6 @@ interface ManifestEntry {
   imageUrl: string | null;
   platformCount: number;
   lastUpdated: string;
-}
-
-function normalizeForComparison(str: string): string {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
-function mergeWithMusicBrainzData(results: SearchResult[], mbData: MusicBrainzData): SearchResult[] {
-  if (!mbData.artistName) return results;
-
-  const mbNormalized = normalizeForComparison(mbData.artistName);
-
-  return results.map(result => {
-    if (result.type !== 'artist') return result;
-
-    const resultNormalized = normalizeForComparison(result.name);
-    const isMatch =
-      resultNormalized === mbNormalized ||
-      resultNormalized.includes(mbNormalized) ||
-      mbNormalized.includes(resultNormalized);
-
-    if (!isMatch) return result;
-
-    const newPlatforms = [...result.platforms];
-
-    if (mbData.officialUrl && !newPlatforms.some(p => p.sourceId === 'officialsite')) {
-      newPlatforms.push({ sourceId: 'officialsite', url: mbData.officialUrl });
-    }
-    if (mbData.discogsUrl && !newPlatforms.some(p => p.sourceId === 'discogs')) {
-      newPlatforms.push({ sourceId: 'discogs', url: mbData.discogsUrl });
-    }
-    if (mbData.hasPre2005Release) {
-      if (!newPlatforms.some(p => p.sourceId === 'hoopla')) {
-        newPlatforms.push({
-          sourceId: 'hoopla',
-          url: `https://www.hoopladigital.com/search?q=${encodeURIComponent(result.name)}&type=music`,
-        });
-      }
-      if (!newPlatforms.some(p => p.sourceId === 'freegal')) {
-        newPlatforms.push({
-          sourceId: 'freegal',
-          url: `https://www.freegalmusic.com/search-page/${encodeURIComponent(result.name)}`,
-        });
-      }
-    }
-
-    if (mbData.socialLinks && mbData.socialLinks.length > 0) {
-      for (const social of mbData.socialLinks) {
-        const existingIndex = newPlatforms.findIndex(p => p.sourceId === social.platform);
-        if (existingIndex === -1) {
-          newPlatforms.push({ sourceId: social.platform, url: social.url });
-        } else {
-          const existingUrl = newPlatforms[existingIndex].url.toLowerCase();
-          const isSearchUrl = existingUrl.includes('duckduckgo.com') ||
-            existingUrl.includes('/search') ||
-            existingUrl.includes('?q=') ||
-            existingUrl.includes('?query=') ||
-            existingUrl.includes('/explore');
-          if (isSearchUrl) {
-            newPlatforms[existingIndex] = { sourceId: social.platform, url: social.url };
-          }
-        }
-      }
-    }
-
-    // Sort platforms
-    const searchOnlyPlatforms = new Set(['ampwall', 'kofi', 'buymeacoffee']);
-    const officialPlatforms = new Set(['officialsite', 'discogs', 'hoopla', 'freegal']);
-    const socialPlatforms = new Set(['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'bluesky', 'mastodon', 'peertube']);
-    newPlatforms.sort((a, b) => {
-      const aIsSocial = socialPlatforms.has(a.sourceId);
-      const bIsSocial = socialPlatforms.has(b.sourceId);
-      if (aIsSocial && !bIsSocial) return 1;
-      if (!aIsSocial && bIsSocial) return -1;
-      if (aIsSocial && bIsSocial) {
-        const order = ['instagram', 'tiktok', 'youtube', 'peertube', 'threads', 'bluesky', 'mastodon', 'facebook'];
-        return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
-      }
-      const aIsOfficial = officialPlatforms.has(a.sourceId);
-      const bIsOfficial = officialPlatforms.has(b.sourceId);
-      if (aIsOfficial && bIsOfficial) {
-        const order = ['officialsite', 'discogs', 'hoopla', 'freegal'];
-        return order.indexOf(a.sourceId) - order.indexOf(b.sourceId);
-      }
-      if (aIsOfficial) return 1;
-      if (bIsOfficial) return -1;
-      const aIsSearchOnly = searchOnlyPlatforms.has(a.sourceId);
-      const bIsSearchOnly = searchOnlyPlatforms.has(b.sourceId);
-      if (aIsSearchOnly && !bIsSearchOnly) return 1;
-      if (!aIsSearchOnly && bIsSearchOnly) return -1;
-      return 0;
-    });
-
-    return { ...result, platforms: newPlatforms };
-  });
 }
 
 async function fetchWithRetry(url: string, label: string): Promise<Response> {
