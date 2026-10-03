@@ -26,7 +26,7 @@ export const MAX_GOAL_TITLE_LENGTH = 80;
  * Bumped when the artist addendum's wording changes, so the change can be re-accepted. Stored on
  * artist_tip_accounts.addendum_version.
  */
-export const ARTIST_ADDENDUM_VERSION = '2026-09-28';
+export const ARTIST_ADDENDUM_VERSION = '2026-10-03';
 
 export interface TipBreakdown {
   /** What the fan chose to give the artist. */

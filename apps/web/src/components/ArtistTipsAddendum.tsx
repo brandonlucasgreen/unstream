@@ -9,7 +9,7 @@ export function ArtistTipsAddendum() {
       <ul className="list-disc ml-4 space-y-1">
         <li>Fans pay you directly, into your own Stripe account. You're the seller of record, and tips are for your music.</li>
         <li>Stripe's processing fees come out of your Stripe balance. Unstream's fee is 0% unless you choose to share up to 5%.</li>
-        <li>Refunds and disputes are yours to handle, in your Stripe dashboard. Refunding a tip also refunds any Unstream fee on it.</li>
+        <li>Refunds, chargebacks and disputes are yours, not Unstream's. You handle them in your Stripe dashboard, and refunded or disputed amounts and Stripe's dispute fees come out of your Stripe balance. Refunding a tip also returns any Unstream fee on it.</li>
         <li>Goals are trackers, not pledges: say so honestly, and don't promise fans a refund if a goal isn't met.</li>
         <li>You're responsible for any taxes on what you receive.</li>
         <li>Unstream reviews each artist's first setup, and can switch tips off for abuse or for a profile that misrepresents who runs it.</li>

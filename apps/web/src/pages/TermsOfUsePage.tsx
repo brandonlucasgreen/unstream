@@ -24,7 +24,7 @@ export function TermsOfUsePage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: September 28, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: October 3, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -410,10 +410,22 @@ export function TermsOfUsePage() {
               </P>
               <P>
                 Stripe processes your card details under its own terms; we never see them. Because the artist is
-                the seller, refunds and disputes are between you and the artist, handled through their Stripe
-                account — contact the artist, or us at support@unstream.stream and we'll pass it on. We may
-                switch off tips for an artist at any time, for example if a profile was claimed by someone who
-                isn't the artist.
+                the seller, any refund, chargeback or payment dispute is between you and the artist, and is
+                handled through the artist's own Stripe account. Unstream doesn't issue refunds, can't reverse a
+                payment, and isn't responsible for an artist's decision on a refund or dispute. To ask for a
+                refund, contact the artist; if you can't reach them, email support@unstream.stream and we'll pass
+                your request on. If an artist refunds a tip, Unstream returns its share of the fee on it.
+              </P>
+              <P>
+                If you take tips as an artist, you are the seller of each tip and the merchant of record for it.
+                You're responsible for refunds, chargebacks and disputes on the tips you receive — including any
+                amount Stripe takes back from your balance and Stripe's dispute fees — and for responding to them;
+                for helping fans with questions about their tips; and for any taxes on what you receive. Unstream
+                isn't liable for any of these. Your Stripe account is also governed by Stripe's own terms.
+              </P>
+              <P>
+                We may switch off tips for an artist at any time, for example if a profile was claimed by someone
+                who isn't the artist, or for abuse.
               </P>
             </Section>
 
