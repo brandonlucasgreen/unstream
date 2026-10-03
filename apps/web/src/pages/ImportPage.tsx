@@ -5,7 +5,7 @@ import { Footer } from '../components/Footer';
 
 export function ImportPage() {
   useEffect(() => {
-    document.title = 'Import Your Music Library — Find artists on direct-support platforms | Unstream';
+    document.title = 'Import Your Music Library — Find where to buy your artists\' music | Unstream';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
       metaDesc.setAttribute('content', 'See which artists from your Spotify, Apple Music, or Last.fm library are available on Bandcamp, Mirlo, Faircamp, and other platforms that pay artists fairly.');
@@ -36,7 +36,7 @@ export function ImportPage() {
           <div className="bg-accent-primary/5 rounded-2xl p-8 border border-accent-primary/20 text-center">
             <p className="text-sm font-medium text-accent-primary uppercase tracking-wider mb-2">Coming soon</p>
             <p className="text-text-secondary">
-              We're building a way to connect your Spotify, Apple Music, or Last.fm library and instantly discover which of your artists are on Bandcamp, Mirlo, Faircamp, and other direct-support platforms.
+              We're building a way to connect your Spotify, Apple Music, or Last.fm library and instantly discover which of your artists are on Bandcamp, Mirlo, Faircamp, and other platforms where you can buy their music outright.
             </p>
           </div>
 
@@ -58,7 +58,7 @@ export function ImportPage() {
                 <div>
                   <p className="font-medium text-text-primary">We match your artists across platforms</p>
                   <p className="text-sm text-text-secondary mt-1">
-                    Unstream searches every artist in your library across 17+ alternative platforms and shows you which ones have direct-support options.
+                    Unstream searches every artist in your library across 17+ alternative platforms and shows you which ones you can buy from or support directly.
                   </p>
                 </div>
               </div>
