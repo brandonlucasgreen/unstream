@@ -62,6 +62,10 @@ struct MusicBrainzResponse: Codable {
     let socialLinks: [SocialLink]?
     /// Optional: older deploys don't send it.
     let bio: ArtistBio?
+    /// The Bandcamp subdomain MusicBrainz lists for this artist, even when that account is
+    /// retired. A result on a different subdomain is a same-name stranger and must not be
+    /// enriched — see `UnstreamAPI.bandcampSubdomainConflicts`. Optional: older deploys don't send it.
+    let bandcampSubdomain: String?
 }
 
 struct ArtistResult: Codable, Identifiable {

@@ -102,6 +102,29 @@ actor UnstreamAPI {
         return str.lowercased().filter { $0.isLetter || $0.isNumber }
     }
 
+    // MARK: - Bandcamp identity
+    //
+    // Mirrors api/shared/bandcamp-identity.ts (backend and web) and
+    // apps/extension/lib/bandcamp-identity.js; BandcampIdentityTests pins the same cases.
+    // Honeycrush (Brooklyn) and Honey Crush (Orlando) normalize to the same name, so the name
+    // alone grafted Brooklyn's site, socials and bio onto Orlando's card. Which Bandcamp
+    // account each side names is what tells them apart.
+
+    /// The subdomain of a `*.bandcamp.com` URL, or nil for anything else (custom domains included).
+    static func bandcampSubdomain(of urlString: String?) -> String? {
+        guard let urlString, let host = URL(string: urlString)?.host?.lowercased(),
+              host.hasSuffix(".bandcamp.com") else { return nil }
+        let subdomain = String(host.dropLast(".bandcamp.com".count))
+        return subdomain.isEmpty ? nil : subdomain
+    }
+
+    /// Both sides name a Bandcamp subdomain and they differ. Absence is not conflict.
+    static func bandcampSubdomainConflicts(_ mbSubdomain: String?, _ resultUrl: String?) -> Bool {
+        guard let mb = mbSubdomain?.lowercased(), !mb.isEmpty,
+              let probed = bandcampSubdomain(of: resultUrl) else { return false }
+        return mb != probed
+    }
+
     func mergeWithMusicBrainzData(results: [ArtistResult], mbData: MusicBrainzResponse) -> [ArtistResult] {
         guard let artistName = mbData.artistName else { return results }
 
@@ -118,6 +141,10 @@ actor UnstreamAPI {
                           mbNormalized.contains(resultNormalized)
 
             guard isMatch else { return result }
+
+            // Same name, different Bandcamp account: a homonym, not the artist MusicBrainz matched.
+            let bandcampUrl = result.platforms.first(where: { $0.sourceId == "bandcamp" })?.url
+            guard !UnstreamAPI.bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampUrl) else { return result }
 
             var newPlatforms = result.platforms
 
