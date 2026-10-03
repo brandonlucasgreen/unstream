@@ -391,6 +391,10 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // The industry digest's feed, relayed by digest-feed.ts from the repo's industry-digest
   // branch. That function fetches one constant URL; nothing user-supplied reaches this host.
   'raw.githubusercontent.com',
+  // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
+  // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
+  // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.
+  'api.stripe.com',
 ]);
 
 /**

@@ -113,14 +113,6 @@ export function ClaimedArtistsSection() {
                   >
                     View
                   </Link>
-                  {/* Reachable from the profile editor too, but releases are the thing an
-                      artist comes back to correct — worth one click from here. */}
-                  <Link
-                    to={`/artist-edit/${profile.slug}/releases`}
-                    className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                  >
-                    Releases
-                  </Link>
                 </div>
               </div>
             </div>

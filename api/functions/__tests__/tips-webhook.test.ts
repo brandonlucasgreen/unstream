@@ -1,0 +1,260 @@
+// /api/tips/webhook — the only writer of payments. Locked here: nothing is processed without a
+// valid Connect signature (including over a base64 body), a paid session records one payment and
+// one ledger entry however often Stripe replays it, a session from the wrong account is refused,
+// and refunds, disputes and account changes are mirrored.
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { createHmac } from 'node:crypto';
+import { createFakeDb, type FakeDb } from './fake-supabase';
+
+let db: FakeDb;
+const mocks = vi.hoisted(() => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
+vi.mock('../db', () => ({ getClient: () => db.client }));
+vi.mock('../../lib/sentry', () => ({ Sentry: mocks }));
+
+import { handler } from '../tips-webhook';
+
+const SECRET = 'whsec_connect_test';
+
+function deliver(evt: Record<string, unknown>, opts: { base64?: boolean; secret?: string } = {}) {
+  const raw = JSON.stringify(evt);
+  const t = Math.floor(Date.now() / 1000);
+  const sig = createHmac('sha256', opts.secret ?? SECRET).update(`${t}.${raw}`).digest('hex');
+  return handler({
+    httpMethod: 'POST',
+    headers: { 'stripe-signature': `t=${t},v1=${sig}` },
+    body: opts.base64 ? Buffer.from(raw).toString('base64') : raw,
+    isBase64Encoded: opts.base64,
+  });
+}
+
+const paidSession = (metadata: Record<string, string> = {}, extra: Record<string, unknown> = {}) => ({
+  id: 'evt_1',
+  type: 'checkout.session.completed',
+  livemode: false,
+  account: 'acct_artist',
+  data: {
+    object: {
+      id: 'cs_1',
+      payment_status: 'paid',
+      payment_intent: 'pi_1',
+      amount_total: 546,
+      currency: 'usd',
+      metadata: {
+        unstream_kind: 'one_off', unstream_artist_id: 'artist-1', unstream_amount_cents: '500',
+        unstream_application_fee_cents: '0', ...metadata,
+      },
+      ...extra,
+    },
+  },
+});
+
+beforeEach(() => {
+  db = createFakeDb();
+  db.unique.tip_payments = [['stripe_payment_intent_id']];
+  db.tables.artist_tip_accounts = [{ artist_id: 'artist-1', livemode: false, stripe_account_id: 'acct_artist', fee_basis_points: 0, charges_enabled: false }];
+  db.tables.saved_artists = [{ user_id: 'fan-1', artist_id: 'artist-1', supported: false }];
+  vi.resetAllMocks();
+  process.env.STRIPE_CONNECT_WEBHOOK_SECRET = SECRET;
+});
+
+describe('signature', () => {
+  it('rejects a bad signature and writes nothing', async () => {
+    const res = await deliver(paidSession(), { secret: 'whsec_wrong' });
+    expect(res.statusCode).toBe(400);
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
+  });
+
+  it('verifies over the decoded body when Netlify base64-encodes it', async () => {
+    const res = await deliver(paidSession(), { base64: true });
+    expect(res.statusCode).toBe(200);
+    expect(db.tables.tip_payments).toHaveLength(1);
+  });
+
+  it('refuses to run without its secret configured', async () => {
+    delete process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
+    expect((await deliver(paidSession())).statusCode).toBe(500);
+  });
+});
+
+describe('checkout.session.completed', () => {
+  it('records the payment and one ledger entry, with the goal and fan', async () => {
+    const goal = '11111111-1111-4111-8111-111111111111';
+    await deliver(paidSession({ unstream_goal_id: goal, unstream_fan_user_id: 'fan-1' }));
+
+    expect(db.tables.tip_payments).toHaveLength(1);
+    expect(db.tables.tip_payments[0]).toMatchObject({
+      artist_id: 'artist-1', stripe_account_id: 'acct_artist', stripe_payment_intent_id: 'pi_1',
+      amount_cents: 500, gross_cents: 546, application_fee_cents: 0, status: 'succeeded',
+      channel: 'checkout', livemode: false, fan_user_id: 'fan-1',
+    });
+    expect(db.tables.support_entries).toEqual([expect.objectContaining({
+      user_id: 'fan-1', artist_id: 'artist-1', amount_cents: 500, source: 'checkout', goal_id: goal,
+      payment_id: db.tables.tip_payments[0].id,
+    })]);
+    // Spec §3.3: the first payment marks a saved artist supported.
+    expect(db.tables.saved_artists[0].supported).toBe(true);
+  });
+
+  it('is a no-op on replay: still one payment, one entry', async () => {
+    await deliver(paidSession());
+    const again = await deliver(paidSession());
+    expect(again.statusCode).toBe(200);
+    expect(JSON.parse(again.body).note).toBe('already recorded');
+    expect(db.tables.tip_payments).toHaveLength(1);
+    expect(db.tables.support_entries).toHaveLength(1);
+  });
+
+  it('records a signed-out tip with no user', async () => {
+    await deliver(paidSession());
+    expect(db.tables.tip_payments[0].fan_user_id).toBeNull();
+    expect(db.tables.support_entries[0].user_id).toBeNull();
+  });
+
+  it('refuses a session from an account that isn’t this artist’s', async () => {
+    const evt = { ...paidSession(), account: 'acct_someone_else' };
+    const res = await deliver(evt);
+    expect(JSON.parse(res.body).note).toBe('account mismatch');
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
+    expect(mocks.captureMessage).toHaveBeenCalled();
+  });
+
+  it('refuses a live event against a test-mode account', async () => {
+    await deliver({ ...paidSession(), livemode: true });
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
+  });
+
+  it('ignores sessions that aren’t Unstream tips or aren’t paid', async () => {
+    await deliver(paidSession({ unstream_kind: 'something_else' }));
+    await deliver(paidSession({}, { payment_status: 'unpaid' }));
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
+  });
+
+  it('records the fee the payment was created with, even if the artist changed it since', async () => {
+    // 2026-10-03 in the sandbox: checkout at 5% ($5.76, 29¢ fee), fee switched to 0%, then paid.
+    db.tables.artist_tip_accounts[0].fee_basis_points = 0;
+    await deliver(paidSession({ unstream_application_fee_cents: '29' }, { amount_total: 576 }));
+    expect(db.tables.tip_payments[0].application_fee_cents).toBe(29);
+  });
+
+  it('refuses a session whose fee is unusable, so Stripe retries and Sentry hears about it', async () => {
+    for (const fee of ['abc', '-1', '9999']) {
+      expect((await deliver(paidSession({ unstream_application_fee_cents: fee }, { amount_total: 576 }))).statusCode).toBe(500);
+    }
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
+  });
+
+  it('asks Stripe for the fee when the session predates storing it (paid across a deploy)', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: 'pi_1', application_fee_amount: 29 })));
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const evt = paidSession({}, { amount_total: 576 });
+      delete (evt.data.object.metadata as Record<string, string>).unstream_application_fee_cents;
+      expect((await deliver(evt)).statusCode).toBe(200);
+      expect(db.tables.tip_payments[0].application_fee_cents).toBe(29);
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe('https://api.stripe.com/v1/payment_intents/pi_1');
+      expect(init.headers['Stripe-Account']).toBe('acct_artist');
+    } finally {
+      vi.unstubAllGlobals();
+      delete process.env.STRIPE_SECRET_KEY;
+    }
+  });
+});
+
+describe('status changes', () => {
+  beforeEach(async () => { await deliver(paidSession()); });
+
+  it('marks a fully refunded charge refunded, and leaves a partial refund alone', async () => {
+    await deliver({ id: 'evt_2', type: 'charge.refunded', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1', refunded: false } } });
+    expect(db.tables.tip_payments[0].status).toBe('succeeded');
+    await deliver({ id: 'evt_3', type: 'charge.refunded', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1', refunded: true } } });
+    expect(db.tables.tip_payments[0].status).toBe('refunded');
+  });
+
+  it('marks a disputed charge disputed', async () => {
+    await deliver({ id: 'evt_4', type: 'charge.dispute.created', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1' } } });
+    expect(db.tables.tip_payments[0].status).toBe('disputed');
+  });
+});
+
+describe('accounts', () => {
+  it('mirrors account.updated', async () => {
+    await deliver({ id: 'evt_5', type: 'account.updated', livemode: false, account: 'acct_artist', data: { object: { id: 'acct_artist', charges_enabled: true, details_submitted: true, country: 'GB' } } });
+    expect(db.tables.artist_tip_accounts[0]).toMatchObject({ charges_enabled: true, details_submitted: true, country: 'GB' });
+  });
+
+  it('switches tips off and clears approval when the artist disconnects Unstream', async () => {
+    Object.assign(db.tables.artist_tip_accounts[0], { charges_enabled: true, tips_enabled: true, tips_approved_at: '2026-09-01' });
+    await deliver({ id: 'evt_6', type: 'account.application.deauthorized', livemode: false, account: 'acct_artist', data: { object: {} } });
+    expect(db.tables.artist_tip_accounts[0]).toMatchObject({ charges_enabled: false, tips_enabled: false, tips_approved_at: null });
+  });
+});
+
+describe('a refund hands back Unstream’s fee', () => {
+  const fetchMock = vi.fn();
+  // Stripe's application fee object, as GET /v1/application_fees/{id} returns it.
+  let fee = { amount: 29, amount_refunded: 0 };
+  const refundEvent = (charge: Record<string, unknown>) => ({
+    id: 'evt_r', type: 'charge.refunded', livemode: false, account: 'acct_artist',
+    data: { object: { payment_intent: 'pi_1', application_fee: 'fee_1', amount: 576, ...charge } },
+  });
+  const feeRefunds = () => fetchMock.mock.calls.filter(([url, init]) => String(url).endsWith('/v1/application_fees/fee_1/refunds') && init.method === 'POST');
+
+  beforeEach(async () => {
+    await deliver(paidSession({ unstream_application_fee_cents: '29' }, { amount_total: 576 }));
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    fee = { amount: 29, amount_refunded: 0 };
+    fetchMock.mockReset();
+    fetchMock.mockImplementation((_url: string, init: { method: string; body?: string }) => {
+      if (init.method === 'POST') {
+        fee.amount_refunded += Number(new URLSearchParams(init.body).get('amount'));
+        return Promise.resolve(new Response(JSON.stringify({ id: 'fr_1' })));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ id: 'fee_1', ...fee })));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+
+  it('returns the whole fee on a full refund, on Unstream’s own account, idempotently', async () => {
+    const res = await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(res.statusCode).toBe(200);
+    expect(db.tables.tip_payments[0].status).toBe('refunded');
+    const [[, init]] = feeRefunds();
+    expect(new URLSearchParams(init.body).get('amount')).toBe('29');
+    expect(init.headers['Stripe-Account']).toBeUndefined();
+    expect(init.headers['Idempotency-Key']).toBe('fee-refund:fee_1:29');
+  });
+
+  it('returns a share of the fee on a partial refund, and the rest when it becomes full', async () => {
+    await deliver(refundEvent({ refunded: false, amount_refunded: 288 }));
+    expect(db.tables.tip_payments[0].status).toBe('succeeded');
+    expect(fee.amount_refunded).toBe(15); // round(29 × 288 / 576)
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(fee.amount_refunded).toBe(29);
+  });
+
+  it('never returns the fee twice when Stripe replays the event', async () => {
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(feeRefunds()).toHaveLength(1);
+    expect(fee.amount_refunded).toBe(29);
+  });
+
+  it('leaves the artist’s own sales alone: no application fee, no Stripe call', async () => {
+    await deliver(refundEvent({ payment_intent: 'pi_artists_own_sale', application_fee: null, refunded: true, amount_refunded: 576 }));
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(db.tables.tip_payments[0].status).toBe('succeeded');
+  });
+
+  it('fails the event so Stripe retries when the fee refund itself fails', async () => {
+    fetchMock.mockImplementation((_url: string, init: { method: string }) => Promise.resolve(
+      init.method === 'POST'
+        ? new Response(JSON.stringify({ error: { message: 'boom' } }), { status: 500 })
+        : new Response(JSON.stringify({ id: 'fee_1', ...fee })),
+    ));
+    expect((await deliver(refundEvent({ refunded: true, amount_refunded: 576 }))).statusCode).toBe(500);
+  });
+});

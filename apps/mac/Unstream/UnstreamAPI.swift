@@ -189,7 +189,7 @@ actor UnstreamAPI {
                 result.matchConfidence != "claimed" && resultNormalized == mbNormalized
             let bio = fillsBio ? mbData.bio : result.bio
 
-            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, knownSlug: result.knownSlug, matchConfidence: result.matchConfidence, location: result.location, bio: bio, bioSuppressed: result.bioSuppressed)
+            return ArtistResult(id: result.id, name: result.name, type: result.type, imageUrl: result.imageUrl, platforms: newPlatforms, claimedSlug: result.claimedSlug, knownSlug: result.knownSlug, matchConfidence: result.matchConfidence, location: result.location, bio: bio, bioSuppressed: result.bioSuppressed, tipsEnabled: result.tipsEnabled)
         }
     }
 

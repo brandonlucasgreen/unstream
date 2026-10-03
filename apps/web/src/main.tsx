@@ -32,6 +32,8 @@ const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => 
 const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
+const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
+const ArtistSettingsLayout = lazyWithRetry(() => import('./pages/ArtistSettingsLayout.tsx').then(m => ({ default: m.ArtistSettingsLayout })))
 const ArtistDirectoryPage = lazyWithRetry(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
 const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
@@ -52,6 +54,8 @@ const ImportPage = lazyWithRetry(() => import('./pages/ImportPage.tsx').then(m =
 const PlatformsPage = lazyWithRetry(() => import('./pages/PlatformsPage.tsx').then(m => ({ default: m.PlatformsPage })))
 const FaqPage = lazyWithRetry(() => import('./pages/FaqPage.tsx').then(m => ({ default: m.FaqPage })))
 const SettingsPage = lazyWithRetry(() => import('./pages/SettingsPage.tsx').then(m => ({ default: m.SettingsPage })))
+const TipPage = lazyWithRetry(() => import('./pages/TipPage.tsx').then(m => ({ default: m.TipPage })))
+const TipThanksPage = lazyWithRetry(() => import('./pages/TipThanksPage.tsx').then(m => ({ default: m.TipThanksPage })))
 const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
 const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 
@@ -110,8 +114,12 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
-              <Route path="/artist-edit/:slug/releases" element={<ArtistReleasesPage />} />
+              {/* One frame for the three artist settings tabs, so switching tabs swaps only the content. */}
+              <Route path="/artist-edit/:slug" element={<ArtistSettingsLayout />}>
+                <Route index element={<ArtistEditPage />} />
+                <Route path="tips" element={<ArtistTipsPage />} />
+                <Route path="releases" element={<ArtistReleasesPage />} />
+              </Route>
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/known-artists" element={<KnownArtistsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
@@ -132,6 +140,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/changelog" element={<ChangelogPage />} />
               <Route path="/faq" element={<FaqPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/tip/thanks" element={<TipThanksPage />} />
+              <Route path="/tip/:slug" element={<TipPage />} />
               <Route path="/u/:handle" element={<PublicSavedArtistsPage />} />
             </Routes>
           </Suspense>

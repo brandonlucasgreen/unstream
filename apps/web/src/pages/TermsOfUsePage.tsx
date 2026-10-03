@@ -24,7 +24,7 @@ export function TermsOfUsePage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: September 27, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: October 3, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -93,7 +93,7 @@ export function TermsOfUsePage() {
               </P>
               <P>
                 The Service is free to use. There is no paid tier, no subscription, and nothing you have to buy to get
-                the whole product. Donations and in-app tips are covered in section 13.
+                the whole product. Donations and in-app tips are covered in section 13, and tipping artists in section 14.
               </P>
             </Section>
 
@@ -391,7 +391,45 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={14} title="Emails we send you">
+            <Section n={14} title="Tipping artists">
+              <P>
+                Some artists take tips through Unstream. When you tip an artist, you are paying that artist
+                directly, for their music: the payment is made to the artist's own Stripe account, and the artist
+                is the seller. Unstream is not a party to that payment, and never receives, holds or forwards the
+                money.
+              </P>
+              <P>
+                An artist may choose to share a fee of up to 5% of each tip with Unstream. It's their choice,
+                it's zero unless they turn it on, and the tip page shows it before you pay, along with Stripe's
+                processing fee and what reaches the artist.
+              </P>
+              <P>
+                Tips are unconditional. An artist's goal ("help me press this on vinyl") is a tracker, not a
+                pledge: your tip goes to the artist straight away whether or not the goal is ever reached, and
+                closing a goal doesn't refund anyone.
+              </P>
+              <P>
+                Stripe processes your card details under its own terms; we never see them. Because the artist is
+                the seller, any refund, chargeback or payment dispute is between you and the artist, and is
+                handled through the artist's own Stripe account. Unstream doesn't issue refunds, can't reverse a
+                payment, and isn't responsible for an artist's decision on a refund or dispute. To ask for a
+                refund, contact the artist; if you can't reach them, email support@unstream.stream and we'll pass
+                your request on. If an artist refunds a tip, Unstream returns its share of the fee on it.
+              </P>
+              <P>
+                If you take tips as an artist, you are the seller of each tip and the merchant of record for it.
+                You're responsible for refunds, chargebacks and disputes on the tips you receive — including any
+                amount Stripe takes back from your balance and Stripe's dispute fees — and for responding to them;
+                for helping fans with questions about their tips; and for any taxes on what you receive. Unstream
+                isn't liable for any of these. Your Stripe account is also governed by Stripe's own terms.
+              </P>
+              <P>
+                We may switch off tips for an artist at any time, for example if a profile was claimed by someone
+                who isn't the artist, or for abuse.
+              </P>
+            </Section>
+
+            <Section n={15} title="Emails we send you">
               <P>
                 We send transactional email you can't opt out of while you have an account: sign-in links, password
                 resets, and notices about your account or these Terms.
@@ -403,7 +441,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={15} title="Availability and changes to the Service">
+            <Section n={16} title="Availability and changes to the Service">
               <P>
                 The Service is offered on a best-effort basis by a small independent project. There's no uptime
                 commitment and no support-response guarantee. Things break, upstream platforms change their pages, and
@@ -416,7 +454,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={16} title="Suspension and termination">
+            <Section n={17} title="Suspension and termination">
               <P>
                 You can stop using the Service whenever you like, and delete your account by emailing
                 support@unstream.stream.
@@ -429,12 +467,12 @@ export function TermsOfUsePage() {
               </P>
               <P>
                 On termination, your public sharing page comes down and your account data is deleted, subject to the
-                backup and legal-record exceptions in section 8. Sections 8, 11, 17, 18, 19, 20, and 22 survive
+                backup and legal-record exceptions in section 8. Sections 8, 11, 18, 19, 20, 21, and 23 survive
                 termination.
               </P>
             </Section>
 
-            <Section n={17} title="Disclaimers">
+            <Section n={18} title="Disclaimers">
               <P>
                 The Service is provided "as is" and "as available", without warranties of any kind, whether express,
                 implied, or statutory. To the fullest extent the law allows, we disclaim the implied warranties of
@@ -451,7 +489,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={18} title="Limitation of liability">
+            <Section n={19} title="Limitation of liability">
               <P>
                 To the fullest extent permitted by law, Unstream and anyone operating it won't be liable for indirect,
                 incidental, special, consequential, exemplary, or punitive damages, or for lost profits, lost data,
@@ -475,7 +513,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={19} title="Your responsibility for claims you cause">
+            <Section n={20} title="Your responsibility for claims you cause">
               <P>
                 If someone brings a claim against us because of Your Content, your use of the Service, or your breach
                 of these Terms — for example, a claim that a bio or photo you uploaded infringes their rights, or that
@@ -485,7 +523,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={20} title="Disputes and governing law">
+            <Section n={21} title="Disputes and governing law">
               <P>
                 <strong>Talk to us first.</strong> Before starting any formal proceeding, email
                 support@unstream.stream describing the problem and what you'd like done about it. Most things get
@@ -504,7 +542,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={21} title="Changes to these Terms">
+            <Section n={22} title="Changes to these Terms">
               <P>
                 We may update these Terms as the Service changes. When we do, we'll update the "Last updated" date at
                 the top of this page.
@@ -517,7 +555,7 @@ export function TermsOfUsePage() {
               </P>
             </Section>
 
-            <Section n={22} title="Everything else">
+            <Section n={23} title="Everything else">
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>
                   <strong>Whole agreement.</strong> These Terms and the Privacy Policy are the entire agreement between
@@ -546,7 +584,7 @@ export function TermsOfUsePage() {
               </ul>
             </Section>
 
-            <Section n={23} title="Contact">
+            <Section n={24} title="Contact">
               <P>
                 Questions, corrections, takedown notices, account deletion, or anything else about these Terms:{' '}
                 <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">

@@ -49,4 +49,14 @@ export interface ArtistPagePayload {
   /** Total before the cap, so the UI can say how many are not shown. */
   releaseCount?: number;
   bandcampFriday: boolean;
+  /** Whether the artist takes tips now, and their open goals. Older cached responses omit it. */
+  tips?: { enabled: boolean; goals: TipGoal[] };
+}
+
+export interface TipGoal {
+  id: string;
+  title: string;
+  targetCents: number;
+  raisedCents: number;
+  status: 'open' | 'closed';
 }

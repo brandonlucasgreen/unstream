@@ -9,6 +9,7 @@ import { ResultCardSocial } from './ResultCardSocial';
 import { ResultCardActions } from './ResultCardActions';
 import { ResultCardBio } from './ResultCardBio';
 import { AdminRemoveLinkDialog } from './AdminRemoveLinkDialog';
+import { TipButton } from './TipButton';
 
 import {
   categorizePlatforms,
@@ -118,6 +119,10 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
+  // Tipping on Unstream comes before every platform link: it's the most direct support a fan can
+  // give (Brandon, 2026-10-03). Only for an artist taking tips.
+  const tipSlug = result.type === 'artist' && result.tipsEnabled ? (result.claimedSlug || result.knownSlug) : undefined;
+
   return (
     <div className="result-card group relative">
       <ResultCardHeader
@@ -159,6 +164,13 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
               canPlay={canPlay}
               previewUrl={previewUrl}
             />
+          )}
+
+          {tipSlug && (
+            <div>
+              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Tip directly</h4>
+              <TipButton slug={tipSlug} artistName={result.name} />
+            </div>
           )}
 
           {/* Platform links */}
