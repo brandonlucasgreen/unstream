@@ -1,5 +1,5 @@
 // Shared constants for the Unstream extension.
-// PAYOUT_PERCENTAGES must be kept in sync with apps/web/src/services/sources.ts.
+// PAYOUT_PERCENTAGES must match api/shared/platform-registry.ts.
 // Run `npm run sync:bandcamp-dates` after updating Bandcamp Friday dates in the web app.
 
 // Where a release alert is allowed to send someone. Guards both the popup's link and the
@@ -33,15 +33,20 @@ export const SOURCE_CONFIG = {
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
   liberapay: { icon: '🤝', name: 'Liberapay' },
   ampwall: { icon: '🔊', name: 'Ampwall' },
+  subvert: { icon: '🌐', name: 'Subvert' },
+  beatport: { icon: '🎛️', name: 'Beatport' },
+  even: { icon: '🎤', name: 'EVEN' },
   hoopla: { icon: '🎧', name: 'Hoopla' },
   freegal: { icon: '🎵', name: 'Freegal' },
 };
 
-// Keep in sync with artistPayoutPercent in apps/web/src/services/sources.ts
+// Must match payoutPercent in api/shared/platform-registry.ts, the source of truth
+// (apps/web/tests/unit/platform-registry-copies.test.ts checks every registry payout is here).
 export const PAYOUT_PERCENTAGES = {
   bandcamp: '80-85%',
   mirlo: '86-90%',
   ampwall: '92-95%',
+  subvert: '97%',
   faircamp: '90-97%',
   patreon: '86-90%',
   buymeacoffee: '~92%',
@@ -49,6 +54,7 @@ export const PAYOUT_PERCENTAGES = {
   liberapay: '~97%',
   qobuz: '~70%',
   beatport: '55-70%',
+  even: '~80%',
   // Range, not a flat 85%: 15% fee with a 20p minimum (https://jam.coop/docs/about),
   // so cheap releases pay out less. See api/shared/platform-registry.ts.
   jamcoop: '82-85%',

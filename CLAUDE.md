@@ -161,7 +161,7 @@ A search or detection result carries one `bio` (`{ text, source, sourceUrl, trun
 grep -r "PLATFORM_INFO" api/edge/ apps/web/src/
 ```
 
-`apps/web/src/services/sources.ts` mirrors the registry by hand (it isn't derived from it, and has drifted before) and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync. That grep doesn't find the other hand-kept tables, which need the same change: the extension's `apps/extension/lib/constants.js`, the Mac app's `Models/PlatformCatalog.swift`, and `api/functions/platforms-list.ts` (behind `/api/v1/platforms`).
+`apps/web/src/services/sources.ts` mirrors the registry by hand (it isn't derived from it, and has drifted before) and adds client-only fields (description, `searchUrlTemplate`, `hasEmbed`, `searchOnly`). Keep the shared fields in sync. That grep doesn't find the other hand-kept tables, which need the same change: the extension's `apps/extension/lib/constants.js`, the Mac app's `Models/PlatformCatalog.swift`, and `api/functions/platforms-list.ts` (behind `/api/v1/platforms`). `platform-registry-copies.test.ts` fails when `sources.ts`, the extension or the Mac catalog disagrees with a registry payout or is missing one; a Mac or extension fix reaches users only with that app's next release.
 
 ### Local dev: the full stack, and the fast shim
 
