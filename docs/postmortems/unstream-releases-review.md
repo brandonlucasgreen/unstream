@@ -326,7 +326,7 @@ Related, and worth deciding explicitly: **`noindex` release pages until they cle
 
 `netlify.toml` routes `/a/*` → `artist-page-static`. `/a/{artist}/{release-slug}` matches that pattern, so today it would render as an artist page with the slug `"artist/release"`. A new `path = "/a/:artist/:release"` edge route must be declared *before* `/a/*`, and Netlify edge-route precedence with overlapping patterns needs verifying on a deploy preview rather than assumed.
 
-Also keep §"one route, one renderer" in view: `/a/:slug` is pure SSR with no React hydration. The release page must be the same — pure SSR — or it reopens the bifurcation bug class documented in `docs/retros/UNS-100-bifurcation-retro.md`.
+Also keep §"one route, one renderer" in view: `/a/:slug` is pure SSR with no React hydration. The release page must be the same — pure SSR — or it reopens the bifurcation bug class documented in `docs/postmortems/UNS-100-bifurcation-retro.md`.
 
 ### G. Data-model gaps
 

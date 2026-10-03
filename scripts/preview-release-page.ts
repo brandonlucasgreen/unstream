@@ -13,7 +13,7 @@
  * WHY THIS EXISTS
  *
  * `npm run dev` cannot show you this page. The Vite dev server doesn't run edge functions at
- * all (see "Local dev API vs production API" in CLAUDE.md), and `netlify dev` — which does —
+ * all (see "Local dev: the full stack, and the fast shim" in CLAUDE.md), and `netlify dev` — which does —
  * reads the production Supabase, where the `releases` table is empty until demand-driven
  * cataloging has run for an artist. So the one thing you'd want to look at is the one thing
  * neither of those can show you.
