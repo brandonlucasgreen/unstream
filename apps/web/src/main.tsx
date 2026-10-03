@@ -60,6 +60,8 @@ function ArtistLoginRedirect() {
   return <Navigate to="/login" replace />
 }
 
+// The artist dashboard merged into /dashboard. The route stays for old bookmarks and links in
+// emails already sent.
 function ArtistDashboardRedirect() {
   return <Navigate to="/dashboard" replace />
 }

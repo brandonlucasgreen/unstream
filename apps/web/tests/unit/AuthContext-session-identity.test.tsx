@@ -133,7 +133,7 @@ describe('AuthContext session identity', () => {
   // The guard keys on the access token, which is right for the session and wrong for the
   // user: Supabase fires USER_UPDATED with fresh metadata on the *same* token, and that is
   // exactly what updatePassword() produces. Guarding setUser on the token left hasPassword
-  // stale, so PasswordSection kept offering "Set password" to someone who had just set one.
+  // stale, so the password form kept offering "Set password" to someone who had just set one.
   it('propagates updated user metadata that arrives on the same token', async () => {
     await renderSignedIn();
     expect(hasPasswordSeen[hasPasswordSeen.length - 1]).toBe(false);

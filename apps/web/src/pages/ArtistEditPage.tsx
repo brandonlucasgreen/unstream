@@ -462,7 +462,7 @@ export function ArtistEditPage() {
               </Link>
             </div>
             <Link
-              to="/artist-dashboard"
+              to="/dashboard"
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Back to dashboard
@@ -832,7 +832,7 @@ export function ArtistEditPage() {
               {form.saving ? 'Saving...' : 'Save changes'}
             </button>
             <Link
-              to="/artist-dashboard"
+              to="/dashboard"
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Cancel
