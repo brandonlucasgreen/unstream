@@ -545,8 +545,8 @@ Dispatch-related repo changes go through the normal branch workflow like everyth
 
 **Rules it produced:** spotlights are written for the featured artist to repost; prominent artists
 get one post a week; questions to the audience are occasional; Instagram posts are cards Unstream
-draws, for indie artists only; payouts come from the platform registry; a rejected post fails the
-run.
+draws, for indie artists only; payouts come from the platform registry; a photo its host has
+deleted is left off; a rejected post fails the run.
 
 Measured from Buffer's per-post metrics for every post sent from 22 March to 30 September 2026
 (Threads 188 posts, Instagram 177, Bluesky 178, LinkedIn 3).
@@ -645,6 +645,28 @@ sales of "empyrean ep" from `venomnoise.bandcamp.com`, which is another act. Mea
 ("emperordnb" for Emperor, "alanjackson1", "nemo1", "sonia666"). Emperor was featured in an
 earlier week. `bandcampMatchesArtist` now keeps only the 632 that match, rejecting some real
 pages to keep false claims out; the files themselves still carry the bad links.
+
+### Artist photos that no longer exist
+
+A 2026-10-01 dry run picked five indie artists, and two of their stored photos 404'd at every
+Bandcamp size. Measured the next day, with one request per photo: 12 of the 139 verified artists
+(12 of the 109 with a Bandcamp-hosted photo) had stored photos that 404 at both the stored size
+and the full size the posts send. The 13 YouTube photos were all live. Threads and Bluesky posts
+carried those URLs to Buffer, which fetches images on publish day and fails the post if one is
+missing.
+
+The cause is upstream. `persistSearchResults` never writes to a claimed artist's row, so a verified
+artist's `image_url` stays what search found when they claimed, and when they change their Bandcamp
+photo, Bandcamp deletes the old file. The artist page hides a dead photo behind a letter avatar,
+but its `og:image` still points at it. Refreshing `image_url` would carve an exception into
+"enrichment never writes to a claimed row", so on 2026-10-02 it was left for a follow-up and the
+generator was fixed on its own.
+
+The generator now checks each picked artist's photo first (`livePhotoUrl`,
+`scripts/social-post-photos.ts`). Only a 404 or 410 drops it. The four Mirlo and Backblaze avatars
+returned `200 application/octet-stream` for real WebP files, so a generic content type isn't
+treated as missing either. A timeout or 5xx keeps the photo, because Buffer tries it again on
+publish day.
 
 ### Silent failures
 
