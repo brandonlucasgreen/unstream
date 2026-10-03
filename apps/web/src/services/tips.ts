@@ -76,3 +76,25 @@ export async function connectStripe(token: string, slug: string, opts: { country
   const { url } = await call<{ url: string }>(token, '/api/tips/connect', { method: 'POST', body: JSON.stringify({ slug, ...opts }) });
   return url;
 }
+
+// ---------------------------------------------------------------------------------------------
+// The fan's side: what the tip page and the tip window show before sending them to Stripe.
+// ---------------------------------------------------------------------------------------------
+
+export interface TipPageData {
+  artist: { id: string; slug: string; name: string; imageUrl: string | null };
+  takingTips: boolean;
+  feeBasisPoints?: number;
+  goals?: TipGoal[];
+  presetsCents?: number[];
+  minCents?: number;
+  maxCents?: number;
+}
+
+/** GET /api/tips/checkout?slug= — public. Throws TipsApiError, with the status (404: no such artist). */
+export async function getTipPage(slug: string): Promise<TipPageData> {
+  const r = await fetch(`/api/tips/checkout?slug=${encodeURIComponent(slug)}`);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new TipsApiError((body as { error?: string }).error ?? `HTTP ${r.status}`, r.status);
+  return body as TipPageData;
+}

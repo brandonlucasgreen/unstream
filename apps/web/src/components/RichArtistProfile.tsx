@@ -1,9 +1,8 @@
 import { Fragment, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
-import { TipButton } from './TipButton';
+import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
 import { SocialIcon } from './SocialIcon';
@@ -366,13 +365,15 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             </h2>
             <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
             {payload.tips.goals.map(goal => (
-              <Link
+              <TipLink
                 key={goal.id}
-                to={`/tip/${payload.artist.slug}?goal=${goal.id}`}
+                slug={payload.artist.slug}
+                artistName={payload.artist.name}
+                goalId={goal.id}
                 className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
               >
                 <GoalProgress goal={goal} />
-              </Link>
+              </TipLink>
             ))}
           </div>
         )}
