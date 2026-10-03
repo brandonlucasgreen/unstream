@@ -225,6 +225,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
                 <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
                 <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
+                <li><strong>Stripe</strong> — tips to artists. You pay the artist through their own Stripe account; Stripe handles your card details and we never see them. We keep a record that a tip happened, its amount and, if you were signed in, your account.</li>
                 <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
               </ul>
               <P>

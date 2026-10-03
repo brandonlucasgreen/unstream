@@ -3,7 +3,7 @@
 // and releases for an unclaimed one.
 // This is the data source for the React SPA artist page (UNS-102).
 
-import { getArtistProfileBySlug, getArtistReleases, resolveArtistSlugAlias } from './db';
+import { getArtistProfileBySlug, getArtistReleases, getClient, resolveArtistSlugAlias } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
@@ -12,6 +12,7 @@ import { isBandcampFriday } from '../shared/bandcamp-friday';
 import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
+import { getGoals, getTipsLiveSlugs } from './tips-db';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -167,7 +168,14 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // here bounds the payload, not what a fan can reach: six pages, which covers every catalogue
     // measured so far (16 for Sufjan Stevens, 13 for Explosions in the Sky, 33 for the largest
     // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
-    const { releases, total: releaseCount } = await getArtistReleases(artistRow.id, 60);
+    // Whether the artist takes tips, read alongside the releases. A failed read shows no Tip
+    // button (reported inside getTipsLiveSlugs) rather than failing the page.
+    const [{ releases, total: releaseCount }, tipsLive] = await Promise.all([
+      getArtistReleases(artistRow.id, 60),
+      getTipsLiveSlugs([artistRow.slug]),
+    ]);
+    const tipsEnabled = tipsLive?.has(artistRow.slug) ?? false;
+    const goals = tipsEnabled ? await readOpenGoals(artistRow.id) : [];
 
     // "from $8 · ≈$6.80 to artist", and the platforms ordered artist-paying-first.
     //
@@ -211,6 +219,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       releases: releasesWithSummary,
       releaseCount,
       bandcampFriday: bcFriday,
+      // Tip links to /tip/{slug} when true. Goals only while taking tips.
+      tips: { enabled: tipsEnabled, goals },
     };
 
     return {
@@ -232,5 +242,16 @@ export async function handler(event: { queryStringParameters?: Record<string, st
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'Internal server error' }),
     };
+  }
+}
+/** Open goals for the page. Decoration: a failed read shows none rather than failing the page. */
+async function readOpenGoals(artistId: string) {
+  const client = getClient();
+  if (!client) return [];
+  try {
+    return await getGoals(client, artistId, { openOnly: true });
+  } catch (err) {
+    Sentry.captureException(err, { extra: { context: 'artist-page.goals' } });
+    return [];
   }
 }

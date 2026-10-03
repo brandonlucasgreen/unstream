@@ -6,6 +6,7 @@ import { persistSearchResults, artistSlug, getMergeOverrides, getLinkSuppression
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
+import { getTipsLiveSlugs } from './tips-db';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
   type SourceId,
@@ -36,6 +37,8 @@ import {
   isBandcampSearchLink,
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
+  attachTipsEnabled,
+  resultPageSlug,
 } from './search-utils';
 
 import {
@@ -1670,6 +1673,14 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     // prevent. One definition, on the server.
     //
     attachArtistPageSlugs(finalResults);
+
+    // Which of these artists take tips, so a result card can show Tip without a request per
+    // card. One read for the whole page; an empty set, with no read, while tips are off.
+    const artistSlugs = finalResults
+      .filter(r => r.type === 'artist')
+      .map(resultPageSlug)
+      .filter((s): s is string => !!s);
+    attachTipsEnabled(finalResults, await getTipsLiveSlugs(artistSlugs));
 
     const response: SearchResponse = {
       query, // Return original query for display

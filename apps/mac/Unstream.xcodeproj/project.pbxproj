@@ -79,6 +79,7 @@
 		DAE01DF2F57D1D3074895182 /* SavedArtistsSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B733B6764210C3CAE08F12E0 /* SavedArtistsSync.swift */; };
 		DAF5726D4B93EA321E5D4643 /* MediaObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385B09E1C63EAE37830E8A04 /* MediaObserver.swift */; platformFilters = (macos, ); };
 		DBADE16054FA85BD2B41A041 /* SupportReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */; platformFilters = (macos, ); };
+		EF5907C3389995E53DEBE83A /* ArtistTipButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0D10E2D163AD597A2143223 /* ArtistTipButton.swift */; platformFilters = (macos, ); };
 		DEAB976819E6E900B9C1114A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC148A11F868801384A78672 /* AppState.swift */; };
 		E4239CF7D84048CD92446197 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590FD31A0B703B21FFCCBEA7 /* ShareViewController.swift */; };
 		E7D6B491DE0D9B5CB5ACF98C /* SyncedArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CDBA3376D2900CCBE870B2 /* SyncedArtistsView.swift */; };
@@ -203,6 +204,7 @@
 		EEEE83E95439F19BFC679216 /* ScrobbleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrobbleManager.swift; sourceTree = "<group>"; };
 		EF4E58F91C106A97A5179125 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportReminderView.swift; sourceTree = "<group>"; };
+		F0D10E2D163AD597A2143223 /* ArtistTipButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistTipButton.swift; sourceTree = "<group>"; };
 		F4F8EEBC6BDB08210CEA0D0C /* SmallTextStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallTextStyles.swift; sourceTree = "<group>"; };
 		F7F3423CC7E1B40B24DC4BC7 /* IndieArtistSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndieArtistSuggestionsView.swift; sourceTree = "<group>"; };
 		F8C60F297D83E962E0D769E7 /* SupportListTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportListTab.swift; sourceTree = "<group>"; };
@@ -420,6 +422,7 @@
 				9B2D53C4C4BBA92385BF4F0A /* SettingsView.swift */,
 				1CDD15E71A80A31952A7720C /* ShortcutRecorderView.swift */,
 				F23652EA5014C08DC2CA1249 /* SupportReminderView.swift */,
+				F0D10E2D163AD597A2143223 /* ArtistTipButton.swift */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -638,6 +641,7 @@
 				2DAD19C15BCCBCC785AC823F /* SupportListView.swift in Sources */,
 				58812848E0C7D0D21F9044BF /* SupportReminder.swift in Sources */,
 				DBADE16054FA85BD2B41A041 /* SupportReminderView.swift in Sources */,
+				EF5907C3389995E53DEBE83A /* ArtistTipButton.swift in Sources */,
 				E7D6B491DE0D9B5CB5ACF98C /* SyncedArtistsView.swift in Sources */,
 				0F9D0A7FD89742003BD8D140 /* TipJarStore.swift in Sources */,
 				EAD31F1949071C4F694741C3 /* TipJarView.swift in Sources */,

@@ -113,6 +113,9 @@ export interface AggregatedResult {
   bio?: ArtistBio;
   // A claimed artist turned bios off. Clients must not fill one in from Phase 2 either.
   bioSuppressed?: boolean;
+  // The artist takes tips on Unstream right now, so the card shows a Tip button
+  // (docs/specs/artist-patronage-spec.md §3.1). Absent otherwise.
+  tipsEnabled?: true;
 }
 
 export interface SearchResponse {
@@ -1224,3 +1227,17 @@ export function filterAndSort(results: AggregatedResult[], query: string): Aggre
   return filtered;
 }
 
+
+/** The slug an artist result's page lives at, if it has one. */
+export function resultPageSlug(result: AggregatedResult): string | undefined {
+  return result.claimedSlug || result.knownSlug;
+}
+
+/** Mark the results whose artist is taking tips, in place. `live` is null when the read failed. */
+export function attachTipsEnabled(results: AggregatedResult[], live: Set<string> | null): void {
+  if (!live || live.size === 0) return;
+  for (const result of results) {
+    const slug = resultPageSlug(result);
+    if (slug && live.has(slug)) result.tipsEnabled = true;
+  }
+}

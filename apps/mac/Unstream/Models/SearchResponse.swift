@@ -87,6 +87,9 @@ struct ArtistResult: Codable, Identifiable {
     let bio: ArtistBio?
     /// A claimed artist turned bios off. Phase 2 must not fill one in either.
     let bioSuppressed: Bool?
+    /// The artist takes tips on Unstream now: the row shows Tip, which opens `/tip/{slug}` in the
+    /// browser (artist-patronage-spec.md §7). Absent on older deploys.
+    var tipsEnabled: Bool? = nil
 
     /// Where this artist's page lives, claimed or not. Nil means the search couldn't place them —
     /// an unverified result, which nothing persists, so there is no page to open.

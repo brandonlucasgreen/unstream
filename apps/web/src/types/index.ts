@@ -106,6 +106,8 @@ export interface SearchResult {
   bioSuppressed?: boolean;
   // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
   location?: ArtistLocation;
+  // The artist takes tips on Unstream right now: show Tip (→ /tip/{slug}).
+  tipsEnabled?: boolean;
 }
 
 // API response from /api/search/sources
