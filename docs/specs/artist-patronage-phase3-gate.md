@@ -1,10 +1,10 @@
 ---
-status: Blocked
+status: Passed
 ---
 # Artist patronage: the Phase 3 gate
 
 **Written:** 2026-09-28
-**Status:** Blocked. Phase 3 (the tab) has not been built.
+**Status:** Passed in Stripe test mode, 2026-10-03 — Phase 3 is technically possible as designed. It has not been built; whether and when to build it is Brandon's call.
 **Spec:** [artist-patronage-spec.md](artist-patronage-spec.md) §3.2 and §4, "Saved cards".
 
 ## What has to be true before building the tab
@@ -60,11 +60,33 @@ Phase 3 code, tables or workflow were written.
 
 ## Results
 
-_Not run yet._
+Run 2026-10-03 against the "Unstream sandbox" platform and its test Standard connected account
+`acct_1UMIM56Jf9EICqvf` (Kid Lightbulbs, onboarded through Manage Tips), API version `2025-03-31.basil`.
 
 | Check | Outcome |
 |---|---|
-| | |
+| 1. clone to connected account | ok (`pm_1UMaoq6Jf9EICqvfNqq2ZgP5`) |
+| 1. off-session direct charge of the clone | `succeeded` (`pi_3UMaoq6Jf9EICqvf1J1J5vtN`) |
+| 2a. second charge of the same clone, no connected Customer | `invalid_request_error`: "The provided PaymentMethod was previously used with a PaymentIntent without Customer attachment… It may not be used again." |
+| 2b. fresh clone, charged | `succeeded` (`pi_3UMaor6Jf9EICqvf1qjpvv2v`) |
+| 2c. clone on a connected Customer, first charge | `succeeded` (`pi_3UMaot6Jf9EICqvf0CpE2hj7`) |
+| 2c. clone on a connected Customer, second charge | `succeeded` (`pi_3UMaou6Jf9EICqvf0RFOZMZk`) |
+| 3. SCA card, off-session | `authentication_required`: "This payment requires authentication…" |
+
+**What it means**
+
+- **Check 1 passes: the gate is open.** A card saved on the platform can be cloned to an artist's
+  Standard account and charged there off-session as a direct charge, so the tab stays on the right side
+  of spec §2 — no money passes through Unstream's balance.
+- **2a fails, as expected.** An unattached clone is single-use.
+- **2b works, so no extra table.** Each monthly run clones the fan's card afresh for each artist. The
+  `fan_connected_customers` alternative (2c, which also works) isn't needed.
+- **3 confirms the SCA fallback.** An off-session charge on a card that needs authentication returns
+  `authentication_required`; the run emails the fan a link to hosted Checkout on the artist's account
+  for that amount, as the spec describes.
+
+The run also showed these charges reaching the Connect webhook, which ignored them (no Unstream
+metadata) — the artist's other payments on the same account are left alone.
 
 ## Phase 3 once the gate passes
 

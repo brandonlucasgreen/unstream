@@ -221,7 +221,7 @@ Spec: `docs/specs/artist-patronage-spec.md`. **Money never sits in Unstream's St
 - **Tips are private to the admin account** (`canSetUpTips` in `tips-db.ts`, Brandon 2026-10-03: "not ready for other artists"): only `ADMIN_EMAIL` sees Manage Tips or can connect Stripe, even with a live key, and fans only get a Tip button for an artist an admin approved. Opening tips to artists is deleting that gate, deliberately.
 - **Tips ship dark:** with no `STRIPE_SECRET_KEY`, the Manage Tips tab doesn't appear (`/api/tips/settings?summary=1` says so) and no Tip button appears anywhere.
 - **Artist settings are tabs:** `/artist-edit/:slug` (Edit Profile), `/tips` (Manage Tips), `/releases` (Manage Releases), nested routes under `ArtistSettingsLayout`, which stays mounted across tab switches (header, name and tabs don't redraw; only the content area loads). The dashboard card keeps only Edit, View and the stats. Stripe onboarding returns to `/tips`.
-- **Phase 3 (the tab) is gated** on `docs/specs/artist-patronage-phase3-gate.md` — run `scripts/stripe-verify-clone.ts` in test mode first.
+- **Phase 3 (the tab): the gate passed** in test mode on 2026-10-03 (`docs/specs/artist-patronage-phase3-gate.md`): cloning a saved card to an artist's account and charging it off-session works, and a fresh clone per run needs no extra table. Not built; building it is Brandon's decision.
 
 ### Release dedup: what identity is, and what the date is for
 
