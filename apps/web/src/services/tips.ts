@@ -13,6 +13,7 @@ export interface TipTotals {
 
 export interface TipSettings {
   available: boolean;
+  artistName: string;
   livemode: boolean;
   state: TipsState;
   foreignAccount: boolean;
@@ -40,6 +41,12 @@ export class TipsApiError extends Error {
     super(message);
     this.status = status;
   }
+}
+
+/** Whether the server takes tips at all (it has a Stripe key) — decides if the Manage Tips tab shows. */
+export async function getTipsAvailable(token: string): Promise<boolean> {
+  const { available } = await call<{ available: boolean }>(token, '/api/tips/settings?summary=1');
+  return available;
 }
 
 export function getTipSettings(token: string, slug: string): Promise<TipSettings> {

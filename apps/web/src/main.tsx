@@ -32,6 +32,7 @@ const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => 
 const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
+const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
 const ArtistDirectoryPage = lazyWithRetry(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
 const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
@@ -111,6 +112,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/artist-edit/:slug" element={<ArtistEditPage />} />
+              <Route path="/artist-edit/:slug/tips" element={<ArtistTipsPage />} />
               <Route path="/artist-edit/:slug/releases" element={<ArtistReleasesPage />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/known-artists" element={<KnownArtistsPage />} />

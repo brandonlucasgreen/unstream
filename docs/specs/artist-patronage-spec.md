@@ -310,7 +310,7 @@ Not legal advice. The reasoning in `artist-tips-spec.md` §5 holds and is summar
 
 ## 8. Artist experience
 
-In `ArtistDashboardPage.tsx`, per claimed profile:
+In the artist settings area's **Manage Tips** tab (`/artist-edit/:slug/tips`, `ArtistTipsPage.tsx`), per claimed profile. *Moved off the dashboard 2026-10-02 (Brandon): the dashboard already serves artists and listeners and was getting crowded.*
 
 1. **Demand** — always shown, before and after connecting: "I'd tip them" count, Play my city top cities.
 2. **Not connected** — explanation, the fee table, "Connect Stripe" → Account Link. An unsupported country
@@ -530,7 +530,7 @@ when, not about build time.
 | SSRF | `middleware.ts` — `api.stripe.com` in `ALLOWED_OUTBOUND_HOSTNAMES` |
 | Artist page | `api/edge/artist-page-static.ts` — Tip link, Play my city link, counts, open goals |
 | Year in support, public | `api/edge/u-handle.ts` — `/u/{handle}/{year}` and its share image |
-| SPA | `TipPage.tsx`, `TipThanksPage.tsx`, `SupportSettingsPage.tsx` (the tab), `YearInSupportPage.tsx`; `ResultCard*`; `ArtistDashboardPage.tsx` |
+| SPA | `TipPage.tsx`, `TipThanksPage.tsx`, `SupportSettingsPage.tsx` (the tab), `YearInSupportPage.tsx`; `ResultCard*`; `ArtistTipsPage.tsx` (Manage Tips tab) |
 | Registry | `api/shared/platform-registry.ts` — Unstream tips as a patronage entry; payout shown as the live net % |
 | Mac | `Views/macOS/NowPlayingView.swift`, `Views/Shared/ArtistResultView.swift` — Tip sheet, Play my city; `patron` state in `SupportListView.swift` |
 | Extension | `apps/extension/popup/` — links out to `/tip/{slug}` and the artist page |

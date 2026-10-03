@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAnalytics } from './ArtistAnalytics';
-import { ArtistTipsPanel } from './ArtistTipsPanel';
 
 // The artist half of the dashboard: the profiles this user has claimed, with their stats.
 //
@@ -114,19 +113,10 @@ export function ClaimedArtistsSection() {
                   >
                     View
                   </Link>
-                  {/* Reachable from the profile editor too, but releases are the thing an
-                      artist comes back to correct — worth one click from here. */}
-                  <Link
-                    to={`/artist-edit/${profile.slug}/releases`}
-                    className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                  >
-                    Releases
-                  </Link>
                 </div>
               </div>
             </div>
             <ArtistAnalytics slug={profile.slug} />
-            <ArtistTipsPanel slug={profile.slug} />
           </div>
         ))}
       </div>

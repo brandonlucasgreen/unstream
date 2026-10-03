@@ -170,6 +170,8 @@ export async function handler(event: {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
+        // For the artist settings header, which this page shares with the profile and tips tabs.
+        artistName: owned.artistName,
         releases,
         catalog: {
           state: stateResult.ok ? stateResult.state : null,

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import { ArtistSettingsHeader } from '../components/ArtistSettingsHeader';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { PlatformIcon } from '../components/PlatformIcon';
@@ -90,6 +92,7 @@ export function ArtistReleasesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [catalog, setCatalog] = useState<CatalogInfo | null>(null);
+  const [artistName, setArtistName] = useState<string | undefined>(undefined);
   const [pendingOrder, setPendingOrder] = useState<string[] | null>(null);
 
   const fetchReleases = useCallback(async () => {
@@ -110,6 +113,7 @@ export function ArtistReleasesPage() {
       const data = await response.json();
       setReleases(data.releases || []);
       setCatalog(data.catalog ?? null);
+      setArtistName(data.artistName);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'artistReleases.fetch' } });
       setError(err instanceof Error ? err.message : 'Failed to load releases.');
@@ -178,23 +182,15 @@ export function ArtistReleasesPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
       <Header />
-      <div className="px-4 py-8">
+      <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-6">
-          <div>
-            <Link
-              to={`/artist-edit/${slug}`}
-              className="text-sm text-text-muted hover:text-text-primary transition-colors"
-            >
-              &larr; Back to profile
-            </Link>
-            <h1 className="font-display text-2xl font-bold text-text-primary mt-1">Manage Releases</h1>
-            <p className="text-text-muted text-sm mt-1">
-              Hide anything that isn't yours, fix a title or date, merge a duplicate, add
-              something we missed, or put them in the order you want fans to see.
-            </p>
-          </div>
+          {slug && <ArtistSettingsHeader slug={slug} artistName={artistName} active="releases" />}
+          <p className="text-text-muted text-sm">
+            Hide anything that isn't yours, fix a title or date, merge a duplicate, add
+            something we missed, or put them in the order you want fans to see.
+          </p>
 
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
@@ -318,7 +314,8 @@ export function ArtistReleasesPage() {
             </>
           )}
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

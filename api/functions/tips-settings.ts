@@ -42,6 +42,12 @@ export async function handler(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
 
+  // The artist settings header asks only whether to show the Manage Tips tab. It's the same answer for
+  // everyone, so it needs no profile, database or Stripe read.
+  if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
+    return respond(200, { available: !!stripeMode() });
+  }
+
   const client = getClient();
   if (!client) return respond(500, { error: 'Database not configured' });
 
@@ -62,11 +68,11 @@ export async function handler(event: HandlerEvent) {
   const artistId = owned.artistId!;
 
   try {
-    if (event.httpMethod === 'GET') return respond(200, await readSettings(client, artistId, user.userId));
+    if (event.httpMethod === 'GET') return respond(200, await readSettings(client, artistId, owned.artistName!, user.userId));
 
     switch (body.action) {
       case 'update':
-        return await updateSettings(client, artistId, user.userId, body);
+        return await updateSettings(client, artistId, owned.artistName!, user.userId, body);
       case 'createGoal':
         return await createGoal(client, artistId, body);
       case 'closeGoal':
@@ -130,7 +136,7 @@ async function readTotals(client: SupabaseClient, artistId: string, since: strin
   return { count, grossCents, netCents, applicationFeeCents: feeCents };
 }
 
-async function readSettings(client: SupabaseClient, artistId: string, userId: string) {
+async function readSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string) {
   const stored = stripeMode() ? await getTipAccount(client, artistId) : null;
   // A previous owner's account is never shown or used as this owner's — not its state, not its totals.
   const account = stored && stored.user_id === userId ? await refreshFromStripe(client, stored) : null;
@@ -142,6 +148,7 @@ async function readSettings(client: SupabaseClient, artistId: string, userId: st
 
   return {
     available: !!stripeMode(),
+    artistName,
     livemode: isLiveMode(),
     state: tipsState(account),
     // So the dashboard can say "contact us" instead of offering a Connect button that will 409.
@@ -156,7 +163,7 @@ async function readSettings(client: SupabaseClient, artistId: string, userId: st
   };
 }
 
-async function updateSettings(client: SupabaseClient, artistId: string, userId: string, body: Record<string, unknown>) {
+async function updateSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string, body: Record<string, unknown>) {
   const account = await getTipAccount(client, artistId);
   if (!account || account.user_id !== userId) return respond(409, { error: 'Connect Stripe first' });
 
@@ -177,7 +184,7 @@ async function updateSettings(client: SupabaseClient, artistId: string, userId: 
   const { error } = await client.from('artist_tip_accounts').update(patch)
     .eq('artist_id', artistId).eq('livemode', account.livemode);
   if (error) throw new Error(`artist_tip_accounts update failed: ${error.message}`);
-  return respond(200, await readSettings(client, artistId, userId));
+  return respond(200, await readSettings(client, artistId, artistName, userId));
 }
 
 async function createGoal(client: SupabaseClient, artistId: string, body: Record<string, unknown>) {

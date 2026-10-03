@@ -1,41 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import * as Sentry from '@sentry/react';
-import { useAuth } from '../contexts/AuthContext';
 import { ArtistTipsAddendum } from './ArtistTipsAddendum';
 import { TipGoalsEditor } from './TipGoalsEditor';
-import { connectStripe, getTipSettings, updateTipSettings, type TipSettings } from '../services/tips';
+import { connectStripe, updateTipSettings, type TipSettings } from '../services/tips';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 
-// The artist dashboard's tips panel (docs/specs/artist-patronage-spec.md §8, states 2–5).
-// Renders nothing while tips aren't configured on the server (no Stripe key), so this ships dark.
+// The Manage Tips tab's content (docs/specs/artist-patronage-spec.md §8, states 2–5). ArtistTipsPage
+// loads the settings and hands them in; this renders them and saves changes.
 
 const FEE_OPTIONS = [0, 100, 200, 300, 400, 500];
 const OTHER_COUNTRY = 'other';
 
-export function ArtistTipsPanel({ slug }: { slug: string }) {
-  const { session } = useAuth();
-  const [settings, setSettings] = useState<TipSettings | null>(null);
-  const [failed, setFailed] = useState(false);
+export function ArtistTipsPanel({ slug, token, settings, onChange }: {
+  slug: string;
+  token: string;
+  settings: TipSettings;
+  onChange: (settings: TipSettings) => void;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (!session) return;
-    let cancelled = false;
-    getTipSettings(session.access_token, slug)
-      .then(s => { if (!cancelled) setSettings(s); })
-      .catch(err => {
-        if (cancelled) return;
-        Sentry.captureException(err, { extra: { context: 'ArtistTipsPanel.load', slug } });
-        setFailed(true);
-      });
-    return () => { cancelled = true; };
-  }, [session, slug]);
-
-  if (!session || (!failed && (!settings || !settings.available))) return null;
-
-  const token = session.access_token;
   const goToStripe = async (opts: { country?: string; acceptAddendum?: boolean }) => {
     setBusy(true);
     setError(null);
@@ -50,7 +34,7 @@ export function ArtistTipsPanel({ slug }: { slug: string }) {
     setBusy(true);
     setError(null);
     try {
-      setSettings(await updateTipSettings(token, slug, patch));
+      onChange(await updateTipSettings(token, slug, patch));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save');
     } finally {
@@ -59,13 +43,11 @@ export function ArtistTipsPanel({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="mt-4 pt-4 border-t border-border/50 space-y-3">
-      <h3 className="text-xs font-medium text-text-muted uppercase tracking-wider">
-        Tips {settings && !settings.livemode && <span className="normal-case text-yellow-600">(Stripe test mode)</span>}
-      </h3>
-      {failed || !settings ? (
-        <p className="text-sm text-text-muted">Couldn't load tips right now. Try refreshing.</p>
-      ) : settings.foreignAccount ? (
+    <div className="space-y-4">
+      {!settings.livemode && (
+        <p className="text-xs text-yellow-600">Stripe test mode: no real money moves.</p>
+      )}
+      {settings.foreignAccount ? (
         <p className="text-sm text-text-secondary">
           This profile has a Stripe account connected by a previous owner. Email support@unstream.stream and we'll sort it out.
         </p>
@@ -111,7 +93,7 @@ export function ArtistTipsPanel({ slug }: { slug: string }) {
             </div>
           )}
 
-          <TipGoalsEditor token={token} slug={slug} goals={settings.goals} onChange={goals => setSettings({ ...settings, goals })} />
+          <TipGoalsEditor token={token} slug={slug} goals={settings.goals} onChange={goals => onChange({ ...settings, goals })} />
 
           <div className="flex flex-wrap gap-3 text-sm">
             <Link to={`/tip/${slug}`} className="text-accent-primary hover:underline">See what fans see</Link>

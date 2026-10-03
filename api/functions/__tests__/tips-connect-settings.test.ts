@@ -88,6 +88,19 @@ describe('tips-connect', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('sends the artist back to the Manage Tips tab, not the dashboard', async () => {
+    db.tables.artist_tip_accounts = [account({ charges_enabled: false })];
+    process.env.URL = 'http://localhost:8888';
+    try {
+      await connect({ slug: 'kid-lightbulbs' });
+    } finally {
+      delete process.env.URL;
+    }
+    const form = new URLSearchParams(fetchMock.mock.calls[0][1].body);
+    expect(form.get('return_url')).toBe('http://localhost:8888/artist-edit/kid-lightbulbs/tips?stripe=return');
+    expect(form.get('refresh_url')).toBe('http://localhost:8888/artist-edit/kid-lightbulbs/tips?stripe=refresh');
+  });
+
   it('reuses an existing account: a fresh link, no second account', async () => {
     db.tables.artist_tip_accounts = [account({ charges_enabled: false })];
     await connect({ slug: 'kid-lightbulbs' });
@@ -168,6 +181,24 @@ describe('tips-settings', () => {
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'x'.repeat(81), targetCents: 1000 })).statusCode).toBe(400);
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 50 })).statusCode).toBe(400);
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: '<b>Vinyl</b>', targetCents: 1000 })).statusCode).toBe(400);
+  });
+
+  it('returns the artist name for the settings header', async () => {
+    expect(JSON.parse((await get()).body).artistName).toBe('Kid Lightbulbs');
+  });
+
+  it('answers the tab check without reading the profile, database or Stripe', async () => {
+    const summary = async () => (await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    }))!;
+    expect(JSON.parse((await summary()).body)).toEqual({ available: true });
+    delete process.env.STRIPE_SECRET_KEY;
+    expect(JSON.parse((await summary()).body)).toEqual({ available: false });
+    expect(mocks.resolveOwnedArtist).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    // Still signed-in only.
+    mocks.authenticateBearer.mockResolvedValue(null);
+    expect((await summary()).statusCode).toBe(401);
   });
 
   it('checks ownership on every call', async () => {

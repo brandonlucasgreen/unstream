@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
 import { Header } from '../components/Header';
+import { ArtistSettingsHeader } from '../components/ArtistSettingsHeader';
 import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
@@ -444,30 +445,7 @@ export function ArtistEditPage() {
 
       <main className="flex-1 p-6">
         <div className="max-w-2xl mx-auto space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Edit {form.artistName}</h1>
-              <Link
-                to={`/a/${form.currentSlug}`}
-                className="text-sm text-accent-primary hover:underline"
-              >
-                View live profile
-              </Link>
-              {' · '}
-              <Link
-                to={`/artist-edit/${form.currentSlug}/releases`}
-                className="text-sm text-accent-primary hover:underline"
-              >
-                Manage releases
-              </Link>
-            </div>
-            <Link
-              to="/artist-dashboard"
-              className="text-sm text-text-muted hover:text-text-primary transition-colors"
-            >
-              Back to dashboard
-            </Link>
-          </div>
+          <ArtistSettingsHeader slug={form.currentSlug} artistName={form.originalName} active="profile" />
 
           {form.error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
@@ -832,7 +810,7 @@ export function ArtistEditPage() {
               {form.saving ? 'Saving...' : 'Save changes'}
             </button>
             <Link
-              to="/artist-dashboard"
+              to="/dashboard"
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Cancel

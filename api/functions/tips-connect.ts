@@ -5,8 +5,8 @@
 //   country         ISO-2, one Stripe supports. Only read when the account is first created.
 //   acceptAddendum  the artist addendum checkbox; required when the account is first created.
 // Returns { url } — a Stripe-hosted Account Link. The artist completes onboarding on Stripe and
-// comes back to /dashboard; account.updated (tips-webhook) and tips-settings GET both sync the
-// account's state.
+// comes back to the Manage Tips tab (/artist-edit/:slug/tips); account.updated (tips-webhook) and
+// tips-settings GET both sync the account's state.
 //
 // The account is Standard with Stripe as the controller of fees, losses and requirement
 // collection: the artist is the merchant of record, pays Stripe's fees, owns refunds and disputes
@@ -103,8 +103,8 @@ export async function handler(event: HandlerEvent) {
     const link = await stripeRequest<StripeAccountLink>('POST', '/v1/account_links', {
       account: account!.stripe_account_id,
       type: 'account_onboarding',
-      refresh_url: `${siteUrl()}/dashboard?tips=refresh&slug=${encodeURIComponent(slug)}`,
-      return_url: `${siteUrl()}/dashboard?tips=return&slug=${encodeURIComponent(slug)}`,
+      refresh_url: `${siteUrl()}/artist-edit/${encodeURIComponent(slug)}/tips?stripe=refresh`,
+      return_url: `${siteUrl()}/artist-edit/${encodeURIComponent(slug)}/tips?stripe=return`,
     });
     return respond(200, { url: link.url });
   } catch (err) {
