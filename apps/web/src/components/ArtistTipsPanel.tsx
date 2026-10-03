@@ -10,6 +10,8 @@ import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 
 const FEE_OPTIONS = [0, 100, 200, 300, 400, 500];
 const OTHER_COUNTRY = 'other';
+// The dashboard card's View button, so secondary actions look the same across the artist pages.
+const SECONDARY_BUTTON = 'inline-flex items-center min-h-11 px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors';
 
 export function ArtistTipsPanel({ slug, token, settings, onChange }: {
   slug: string;
@@ -83,7 +85,7 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={settings.tipsEnabled} disabled={busy} onChange={e => update({ tipsEnabled: e.target.checked })} />
             Take tips on Unstream
-            {settings.tipsEnabled && settings.state === 'awaiting_approval' && <span className="text-text-muted">(live once approved)</span>}
+            {settings.tipsEnabled && settings.state === 'awaiting_approval' && <span className="text-text-muted">(goes live once Unstream has checked your setup)</span>}
           </label>
           <label className="flex flex-wrap items-center gap-2 text-sm">
             Unstream's share
@@ -107,10 +109,10 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
 
           <TipGoalsEditor token={token} slug={slug} goals={settings.goals} onChange={goals => onChange({ ...settings, goals })} />
 
-          <div className="flex flex-wrap gap-3 text-sm">
-            <Link to={`/tip/${slug}`} className="text-accent-primary hover:underline">See what fans see</Link>
-            <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
-              Payouts, refunds and receipts in Stripe →
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/tip/${slug}`} className={SECONDARY_BUTTON}>See what fans see</Link>
+            <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" className={SECONDARY_BUTTON}>
+              Payouts, refunds and receipts in Stripe ↗
             </a>
           </div>
         </div>
