@@ -58,49 +58,6 @@ export function ArtistProfileSkeleton() {
   );
 }
 
-/** One saved/claimed artist card, as shown on the dashboard. */
-function ArtistCardSkeleton() {
-  return (
-    <div className="p-4 rounded-lg bg-bg-secondary border border-border">
-      <div className="flex gap-4">
-        <SkeletonCircle className="w-16 h-16 flex-shrink-0" />
-        <div className="flex-1 min-w-0 space-y-2">
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-3 w-1/2" />
-          <div className="flex gap-2 pt-2">
-            <Skeleton className="h-8 w-16 rounded-lg" />
-            <Skeleton className="h-8 w-24 rounded-lg" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** The signed-in dashboard: claimed profiles above a grid of saved artists. */
-export function DashboardSkeleton() {
-  return (
-    <div className="space-y-8">
-      <Skeleton className="h-7 w-40" />
-
-      <section>
-        <Skeleton className="h-5 w-32 mb-4" />
-        <ArtistCardSkeleton />
-      </section>
-
-      <section>
-        <Skeleton className="h-5 w-36 mb-4" />
-        <Skeleton className="h-12 w-full rounded-lg mb-4" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }, (_, i) => (
-            <ArtistCardSkeleton key={i} />
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
 /** A compact list of artist rows — the directory and public saved-artist lists. */
 export function ArtistRowsSkeleton({ count = 8 }: { count?: number }) {
   return (
