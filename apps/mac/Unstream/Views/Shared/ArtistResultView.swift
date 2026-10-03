@@ -142,6 +142,15 @@ struct ArtistResultView: View {
                 ArtistBioView(bio: bio, collapsedLineLimit: bioLineLimit, onOpenSource: openBioSource)
             }
 
+            // Tip, for an artist taking tips on Unstream: before every platform badge, since it's the
+            // most direct support a fan can give (Brandon, 2026-10-03). macOS only: no patronage
+            // surface ships on iOS (artist-patronage-spec.md §7).
+            #if os(macOS)
+            if artist.tipsEnabled == true, let slug = artist.pageSlug {
+                ArtistTipButton(slug: slug, artistName: artist.name)
+            }
+            #endif
+
             // Verified platforms section
             if !artist.verifiedPlatforms.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
@@ -158,14 +167,6 @@ struct ArtistResultView: View {
                     }
                 }
             }
-
-            // Tip, for an artist taking tips on Unstream. macOS only: no patronage surface ships on
-            // iOS (artist-patronage-spec.md §7).
-            #if os(macOS)
-            if artist.tipsEnabled == true, let slug = artist.pageSlug {
-                ArtistTipButton(slug: slug, artistName: artist.name)
-            }
-            #endif
 
             // The way from "I found them" to "here's what their records cost".
             //

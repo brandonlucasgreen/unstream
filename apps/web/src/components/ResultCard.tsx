@@ -119,8 +119,8 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
-  // The Tip button leads the patronage row (spec §3.1: it sits there, first), only for an artist
-  // taking tips on Unstream.
+  // Tipping on Unstream comes before every platform link: it's the most direct support a fan can
+  // give (Brandon, 2026-10-03). Only for an artist taking tips.
   const tipSlug = result.type === 'artist' && result.tipsEnabled ? (result.claimedSlug || result.knownSlug) : undefined;
 
   return (
@@ -166,6 +166,13 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
             />
           )}
 
+          {tipSlug && (
+            <div>
+              <h4 className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Tip directly</h4>
+              <TipButton slug={tipSlug} artistName={result.name} />
+            </div>
+          )}
+
           {/* Platform links */}
           {categorized.marketplace.length > 0 && (
             <ResultCardPlatforms
@@ -174,12 +181,11 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
               onRemoveLink={handleRemoveLink}
             />
           )}
-          {(categorized.patronage.length > 0 || tipSlug) && (
+          {categorized.patronage.length > 0 && (
             <ResultCardPlatforms
               platforms={categorized.patronage}
               category="patronage"
               onRemoveLink={handleRemoveLink}
-              leading={tipSlug && <div><TipButton slug={tipSlug} artistName={result.name} /></div>}
             />
           )}
           {categorized.decentralized.length > 0 && (

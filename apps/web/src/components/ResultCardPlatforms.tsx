@@ -9,8 +9,6 @@ interface ResultCardPlatformsProps {
   compact?: boolean;
   /** Admin-only: when set, each badge gets a remove control. */
   onRemoveLink?: (platform: PlatformLink) => void;
-  /** Rendered under the heading, before the pills — the patronage row's Tip button. */
-  leading?: React.ReactNode;
 }
 
 function PlatformBadge({ platform, onRemoveLink }: { platform: PlatformLink; onRemoveLink?: (platform: PlatformLink) => void }) {
@@ -42,7 +40,7 @@ function PlatformBadge({ platform, onRemoveLink }: { platform: PlatformLink; onR
   );
 }
 
-export function ResultCardPlatforms({ platforms, category, compact = false, onRemoveLink, leading }: ResultCardPlatformsProps) {
+export function ResultCardPlatforms({ platforms, category, compact = false, onRemoveLink }: ResultCardPlatformsProps) {
   const [showAll, setShowAll] = useState(false);
 
   // If compact mode, limit to 4 platforms, otherwise show all
@@ -51,7 +49,7 @@ export function ResultCardPlatforms({ platforms, category, compact = false, onRe
     : platforms;
   const hasMore = compact && platforms.length > 4;
 
-  if (platforms.length === 0 && !leading) return null;
+  if (platforms.length === 0) return null;
 
   return (
     <div className="space-y-2">
@@ -60,12 +58,11 @@ export function ResultCardPlatforms({ platforms, category, compact = false, onRe
           {category}
         </h4>
       )}
-      {leading}
-      {visiblePlatforms.length > 0 && <div className="platform-pill-row">
+      <div className="platform-pill-row">
         {visiblePlatforms.map(platform => (
           <PlatformBadge key={platform.sourceId} platform={platform} onRemoveLink={onRemoveLink} />
         ))}
-      </div>}
+      </div>
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}

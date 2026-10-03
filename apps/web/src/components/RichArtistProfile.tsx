@@ -297,6 +297,28 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
 
       {/* Content container */}
       <div className="pb-8">
+        {/* Tips on Unstream, with the artist's open goals (spec §3.1, §3.4). First, before the bio and every
+            platform link: the most direct support a fan can give (Brandon, 2026-10-03). Only while they take tips. */}
+        {payload.tips?.enabled && (
+          <div className="mb-6 space-y-3">
+            <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
+              Tip directly
+            </h2>
+            <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
+            {payload.tips.goals.map(goal => (
+              <TipLink
+                key={goal.id}
+                slug={payload.artist.slug}
+                artistName={payload.artist.name}
+                goalId={goal.id}
+                className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
+              >
+                <GoalProgress goal={goal} />
+              </TipLink>
+            ))}
+          </div>
+        )}
+
         {/* Bio */}
         {profile?.bio && (
           <p className="text-text-muted text-sm mb-6 whitespace-pre-line">
@@ -354,27 +376,6 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                 </Fragment>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Tips on Unstream, with the artist's open goals (spec §3.1, §3.4). Only while they take tips. */}
-        {payload.tips?.enabled && (
-          <div className="mt-6 space-y-3">
-            <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
-              Tip directly
-            </h2>
-            <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
-            {payload.tips.goals.map(goal => (
-              <TipLink
-                key={goal.id}
-                slug={payload.artist.slug}
-                artistName={payload.artist.name}
-                goalId={goal.id}
-                className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
-              >
-                <GoalProgress goal={goal} />
-              </TipLink>
-            ))}
           </div>
         )}
 

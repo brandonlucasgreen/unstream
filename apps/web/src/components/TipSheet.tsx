@@ -6,7 +6,8 @@ import { getTipPage, type TipPageData } from '../services/tips';
 // The tip window: the /tip/{slug} form opened over search results or the artist page, so a fan tips
 // without leaving where they are until Stripe's own payment page. A native <dialog> shown modally,
 // which gives focus handling, Escape to close and an inert page behind it. Centred on wider screens,
-// a sheet from the bottom on phones.
+// a sheet from the bottom on phones. `m-auto` is load-bearing: Tailwind's reset zeroes the margin the
+// browser centres a <dialog> with, which pins it to the top-left corner.
 
 export function TipSheet({ slug, artistName, goalId, onClose }: {
   slug: string;
@@ -48,7 +49,7 @@ export function TipSheet({ slug, artistName, goalId, onClose }: {
         if (e.target === e.currentTarget) close();
       }}
       onKeyDown={e => e.stopPropagation()}
-      className="w-full max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-2xl border border-border bg-bg-primary text-text-primary shadow-xl backdrop:bg-black/60 max-sm:max-w-none max-sm:mb-0 max-sm:rounded-b-none"
+      className="m-auto w-full max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-2xl border border-border bg-bg-primary text-text-primary shadow-xl backdrop:bg-black/60 max-sm:max-w-none max-sm:mb-0 max-sm:rounded-b-none"
     >
       <div className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">

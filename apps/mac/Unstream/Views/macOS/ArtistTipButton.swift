@@ -12,10 +12,11 @@ struct ArtistTipButton: View {
 
     var body: some View {
         Button(action: openTipPage) {
-            Label("Tip", systemImage: "heart.fill")
+            Label("Tip \(artistName)", systemImage: "heart.fill")
+                .lineLimit(1)
         }
-        .buttonStyle(.bordered)
-        .controlSize(.small)
+        // Filled, like the web's Tip button: the most prominent action on the row.
+        .buttonStyle(.borderedProminent)
         .help("Tip \(artistName) in your browser. The payment goes straight to their Stripe account.")
     }
 
