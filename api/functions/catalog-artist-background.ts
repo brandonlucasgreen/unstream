@@ -23,8 +23,10 @@ import {
   recordCatalogOutcome,
   attachDiscoveredSource,
   type CatalogTrigger,
+  type ArtistForCatalog,
   type PersistedRelease,
 } from './db';
+import { refreshDeadArtistPhoto } from './artist-photo-refresh';
 import { linkCollectionItemsForArtist } from './collection-matching';
 import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
@@ -448,7 +450,7 @@ async function catalogArtist(
 
   if (artist.bandcampUrl) {
     try {
-      const { found, detailed } = await catalogBandcamp(artistId, artist.bandcampUrl, budget);
+      const { found, detailed } = await catalogBandcamp(artistId, artist.bandcampUrl, artist, budget);
       totalFound += found;
       totalDetailed += detailed;
     } catch (error) {
@@ -510,7 +512,8 @@ async function catalogArtist(
 }
 
 /**
- * The Bandcamp pass: grid, then a budgeted detail pass over individual release pages.
+ * The Bandcamp pass: grid, then a budgeted detail pass over individual release pages. The grid
+ * page also carries the artist's current photo, which repairs a stored one Bandcamp has deleted.
  *
  * @throws on a genuine failure — a bot challenge or an unreachable fetch — so the caller can
  * tell "Bandcamp declined to answer" apart from "Bandcamp said zero releases".
@@ -518,6 +521,7 @@ async function catalogArtist(
 async function catalogBandcamp(
   artistId: string,
   storedUrl: string,
+  artist: ArtistForCatalog,
   budget: DetailBudget
 ): Promise<{ found: number; detailed: number }> {
   // The stored URL is not automatically trustworthy: a claimed artist can save any http(s)
@@ -550,6 +554,8 @@ async function catalogBandcamp(
     if (outcome.reason === 'bot_challenge') throw new Error('bandcamp bot challenge');
     return { found: 0, detailed: 0 };
   }
+
+  await refreshDeadArtistPhoto(artistId, artist, html);
 
   const written = await persistReleases(artistId, outcome.releases);
   const detailed = await catalogDetails(written, landedUrl, budget);

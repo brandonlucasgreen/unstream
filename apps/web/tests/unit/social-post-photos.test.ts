@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // The weekly posts' photo check lives in scripts/ beside the generator that uses it; see
 // social-post-templates.test.ts for why those scripts are tested with the web app.
-import { checkPhoto, livePhotoUrl, photoVerdict } from '../../../../scripts/social-post-photos';
+import { checkPhoto, livePhotoUrl } from '../../../../scripts/social-post-photos';
+import { photoVerdict } from '../../../../api/shared/artist-photo';
 
 // Cases measured against the verified pool on 2026-10-02: Bandcamp answers a deleted photo with a
 // 404 page, and Mirlo serves real WebP avatars as application/octet-stream.

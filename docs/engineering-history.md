@@ -658,15 +658,36 @@ missing.
 The cause is upstream. `persistSearchResults` never writes to a claimed artist's row, so a verified
 artist's `image_url` stays what search found when they claimed, and when they change their Bandcamp
 photo, Bandcamp deletes the old file. The artist page hides a dead photo behind a letter avatar,
-but its `og:image` still points at it. Refreshing `image_url` would carve an exception into
-"enrichment never writes to a claimed row", so on 2026-10-02 it was left for a follow-up and the
-generator was fixed on its own.
+but its `og:image` still points at it.
 
 The generator now checks each picked artist's photo first (`livePhotoUrl`,
 `scripts/social-post-photos.ts`). Only a 404 or 410 drops it. The four Mirlo and Backblaze avatars
 returned `200 application/octet-stream` for real WebP files, so a generic content type isn't
 treated as missing either. A timeout or 5xx keeps the photo, because Buffer tries it again on
 publish day.
+
+The same day, the catalogue pass took on the repair (`refreshDeadArtistPhoto`,
+`api/functions/artist-photo-refresh.ts`). It already fetches the artist's Bandcamp `/music` page,
+whose `og:image` is the photo search would store today, so the repair costs no Bandcamp request.
+It writes to a claimed row, which enrichment otherwise never does. That was accepted because
+`image_url` was never the artist's choice: what they choose is `artist_profiles.custom_image_url`,
+which is shown instead wherever it's set and which the pass doesn't touch. The guards:
+
+- **Only the host's own 404 or 410 counts**, under the same rule as the posts (`photoVerdict`,
+  `api/shared/artist-photo.ts`). The stored photo is checked only when the page shows a different
+  one, so the usual pass makes no extra request.
+- **The page must be the artist's.** A stored Bandcamp link can be a label's page, whose photo is
+  the label's, so the page's band name has to pass `namesMatch`, the check the probe applied when
+  it first stored the photo.
+- **Nothing is filled in.** An artist with no stored photo gets none, since adding one isn't a
+  repair.
+- **`updated_at` is left alone.** It means "last verified against live sources", and only the
+  photo was checked.
+
+How many of the 12 it repairs, and how soon, wasn't measured: the read-only production query was
+blocked. A repair shows in the catalogue function's log as "stored photo is gone ... replaced",
+and an artist is reached only on their next catalogue pass, which the cooldown keeps at least
+seven days after their last one.
 
 ### Silent failures
 

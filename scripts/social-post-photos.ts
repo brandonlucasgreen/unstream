@@ -4,29 +4,16 @@
  * Posts attach the photo by URL, and Buffer fetches it when the post publishes, up to twelve days
  * after the Monday run. A photo the host has since deleted fails the post on publish day, so the
  * artist's spotlight is lost rather than going out without a picture. On 2026-10-02, 12 of the 139
- * verified artists' stored photos 404'd, all on Bandcamp: a claimed artist's `image_url` is never
- * refreshed (persistSearchResults skips claimed rows), so it goes stale when they change their photo.
+ * verified artists' stored photos 404'd, all on Bandcamp. The catalogue pass now replaces those from
+ * the artist's Bandcamp page (api/functions/artist-photo-refresh.ts), but a photo can still be
+ * deleted between passes, and nothing refreshes the prominent artists' generated files.
  *
- * Only a definite answer from the host takes a photo off a post. A timeout, a network error or a
- * 5xx says nothing about the photo, so it stays and Buffer tries it again on publish day, when the
- * host is likely back (CLAUDE.md, "Never cache uncertainty": a failed lookup is not a negative result).
+ * Only a definite answer from the host takes a photo off a post (photoVerdict): a timeout or a 5xx
+ * keeps it, and Buffer tries it again on publish day, when the host is likely back.
  */
 
+import { photoVerdict, type PhotoVerdict } from '../api/shared/artist-photo';
 import { fullSizeImageUrl } from '../api/shared/social-card';
-
-export type PhotoVerdict = 'live' | 'gone' | 'unknown';
-
-/**
- * What one response says about a photo: 404 or 410 is gone, a success carrying an image is live.
- * Everything else is unknown. A 403 or 429 may be about the request rather than the photo, and a
- * success that doesn't say it's an image is still often one: Mirlo serves its WebP avatars as
- * `application/octet-stream`.
- */
-export function photoVerdict(status: number, contentType: string | null): PhotoVerdict {
-  if (status === 404 || status === 410) return 'gone';
-  if (status >= 200 && status < 300 && contentType?.startsWith('image/')) return 'live';
-  return 'unknown';
-}
 
 const PHOTO_TIMEOUT_MS = 15000;
 

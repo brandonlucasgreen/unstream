@@ -1870,6 +1870,10 @@ export async function persistReleaseDetail(
 /** What the catalog passes need before they can start. */
 export interface ArtistForCatalog {
   name: string;
+  /** The photo search stored, which the Bandcamp pass replaces if its host has deleted it. */
+  imageUrl: string | null;
+  /** A claimed artist's own photo. Shown instead of `imageUrl` wherever there is one. */
+  customImageUrl: string | null;
   bandcampUrl: string | null;
   discogsUrl: string | null;
   faircampUrl: string | null;
@@ -1891,7 +1895,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
 
   try {
     const [{ data: artistRow, error: artistError }, { data: linkRows, error: linkError }] = await Promise.all([
-      client.from('artists').select('name').eq('id', artistId).maybeSingle(),
+      client.from('artists').select('name, image_url, artist_profiles(custom_image_url)').eq('id', artistId).maybeSingle(),
       client
         .from('artist_links')
         .select('platform, url')
@@ -1912,8 +1916,18 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
     const links = ((linkRows as { platform: string; url: string }[] | null) || []).filter(l =>
       isCatalogueableLink(l.platform, l.url)
     );
+    const row = artistRow as {
+      name: string;
+      image_url: string | null;
+      artist_profiles: { custom_image_url: string | null } | { custom_image_url: string | null }[] | null;
+    };
+    // artist_id is unique on artist_profiles, so PostgREST embeds one object (null when unclaimed).
+    // An array is accepted too: misreading the shape would silently ignore an artist's own photo.
+    const profile = Array.isArray(row.artist_profiles) ? row.artist_profiles[0] : row.artist_profiles;
     return {
-      name: (artistRow as { name: string }).name,
+      name: row.name,
+      imageUrl: row.image_url,
+      customImageUrl: profile?.custom_image_url ?? null,
       bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
       discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
       faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
@@ -1925,6 +1939,33 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
     console.error('[DB] getArtistForCatalog error:', error);
     return null;
   }
+}
+
+/**
+ * Replace an artist's stored photo, but only if it is still the one the caller found gone: a search
+ * that stored a new photo in the meantime wins. The one write the catalogue pass makes to a claimed
+ * artist's row, and safe for the same reason it's allowed: `image_url` is what search found, never
+ * something the artist chose (theirs is `artist_profiles.custom_image_url`, which this doesn't touch).
+ * Leaves `updated_at` alone, since it means "last verified against live sources", not "changed".
+ *
+ * Returns whether a row changed.
+ */
+export async function replaceArtistPhoto(artistId: string, goneUrl: string, newUrl: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  const { data, error } = await client
+    .from('artists')
+    .update({ image_url: newUrl })
+    .eq('id', artistId)
+    .eq('image_url', goneUrl)
+    .select('id');
+
+  if (error) {
+    console.error('[DB] replaceArtistPhoto failed:', error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
 }
 
 interface DiscogsReleaseToPersist {
