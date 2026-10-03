@@ -44,6 +44,17 @@ export interface Goal {
 }
 
 /**
+ * Tips are private while Brandon tests them (2026-10-03): only the admin account (ADMIN_EMAIL) can
+ * see Manage Tips or connect Stripe. Fans can only reach a Tip button for an artist an admin has
+ * approved, so this one check keeps the whole feature to the admin's own profiles even with a live
+ * Stripe key. Opening tips to artists means deleting this gate and its callers' checks.
+ */
+export function canSetUpTips(email: string): boolean {
+  const admin = process.env.ADMIN_EMAIL;
+  return !!admin && email.toLowerCase() === admin.toLowerCase();
+}
+
+/**
  * Where an artist stands, from the artist's own point of view (spec §8). Before Stripe enables
  * charges there are three cases, and only 'onboarding' is one the artist can fix by going back to
  * Stripe: 'stripe_review' means Stripe has everything and is checking it, 'stripe_declined' means

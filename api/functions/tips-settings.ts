@@ -14,7 +14,7 @@ import { getClient, resolveOwnedArtist } from './db';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
-import { getGoals, getTipAccount, stripeHold, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
+import { canSetUpTips, getGoals, getTipAccount, stripeHold, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
 import { TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
 import {
   MAX_GOAL_TITLE_LENGTH,
@@ -42,10 +42,11 @@ export async function handler(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
 
-  // The artist settings header asks only whether to show the Manage Tips tab. It's the same answer for
-  // everyone, so it needs no profile, database or Stripe read.
+  // The artist settings header asks only whether to show the Manage Tips tab: Stripe configured, and
+  // (while tips are private) the caller is the admin. No profile, database or Stripe read.
+  const tipsOpenToCaller = !!stripeMode() && canSetUpTips(user.email);
   if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
-    return respond(200, { available: !!stripeMode() });
+    return respond(200, { available: tipsOpenToCaller });
   }
 
   const client = getClient();
@@ -66,6 +67,12 @@ export async function handler(event: HandlerEvent) {
   const owned = await resolveOwnedArtist(String(slug), user.userId);
   if (!owned.ok) return respond(owned.status, { error: owned.error });
   const artistId = owned.artistId!;
+
+  // Private for now (canSetUpTips): anyone else gets the page's "not available" state, and no writes.
+  if (!tipsOpenToCaller) {
+    if (event.httpMethod === 'GET') return respond(200, { available: false, artistName: owned.artistName });
+    return respond(403, { error: "Tips aren't open to artists yet" });
+  }
 
   try {
     if (event.httpMethod === 'GET') return respond(200, await readSettings(client, artistId, owned.artistName!, user.userId));

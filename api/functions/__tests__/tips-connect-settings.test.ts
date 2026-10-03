@@ -42,6 +42,8 @@ beforeEach(() => {
   mocks.authenticateBearer.mockResolvedValue(OWNER);
   mocks.resolveOwnedArtist.mockResolvedValue({ ok: true, status: 200, artistId: 'artist-1', artistName: 'Kid Lightbulbs' });
   process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+  // Tips are admin-only for now (canSetUpTips); the owner in these tests is the admin.
+  process.env.ADMIN_EMAIL = OWNER.email;
   fetchMock.mockReset();
   fetchMock.mockImplementation((url: string) => Promise.resolve(new Response(JSON.stringify(
     url.endsWith('/v1/accounts') ? { id: 'acct_new', country: 'US', charges_enabled: false }
@@ -50,7 +52,7 @@ beforeEach(() => {
   ))));
   vi.stubGlobal('fetch', fetchMock);
 });
-afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; delete process.env.ADMIN_EMAIL; });
 
 const account = (overrides: Record<string, unknown> = {}) => ({
   artist_id: 'artist-1', livemode: false, stripe_account_id: 'acct_new', user_id: 'owner-1',
@@ -230,5 +232,33 @@ describe('tips-settings', () => {
     mocks.resolveOwnedArtist.mockResolvedValue({ ok: false, status: 403, error: 'You do not own this profile' });
     expect((await get()).statusCode).toBe(403);
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 0 })).statusCode).toBe(403);
+  });
+});
+
+describe('tips are private to the admin for now', () => {
+  const ARTIST = { userId: 'owner-1', email: 'another-artist@example.com' };
+
+  it('hides Manage Tips from any other artist, even with Stripe configured', async () => {
+    mocks.authenticateBearer.mockResolvedValue(ARTIST);
+    const summary = await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    });
+    expect(JSON.parse(summary!.body)).toEqual({ available: false });
+    expect(JSON.parse((await get()).body)).toEqual({ available: false, artistName: 'Kid Lightbulbs' });
+  });
+
+  it('refuses another artist’s changes and Stripe connection, before touching Stripe or the database', async () => {
+    mocks.authenticateBearer.mockResolvedValue(ARTIST);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000 })).statusCode).toBe(403);
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(db.tables.artist_tip_accounts ?? []).toEqual([]);
+    expect(db.tables.artist_goals ?? []).toEqual([]);
+  });
+
+  it('stays closed when ADMIN_EMAIL isn’t set at all', async () => {
+    delete process.env.ADMIN_EMAIL;
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
   });
 });

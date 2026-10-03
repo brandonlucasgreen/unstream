@@ -16,7 +16,7 @@ import { getClient, resolveOwnedArtist } from './db';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, StripeError, type StripeAccount, type StripeAccountLink } from './stripe';
-import { getTipAccount } from './tips-db';
+import { canSetUpTips, getTipAccount } from './tips-db';
 import { siteUrl, TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
 import { ARTIST_ADDENDUM_VERSION, isStripeConnectCountry } from '../shared/tips';
 import { Sentry } from '../lib/sentry';
@@ -36,6 +36,8 @@ export async function handler(event: HandlerEvent) {
   const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
+  // Private for now: only the admin can connect a Stripe account (see canSetUpTips).
+  if (!canSetUpTips(user.email)) return respond(403, { error: "Tips aren't open to artists yet" });
 
   if (!stripeMode()) return respond(503, { error: 'Tips are not available yet' });
   const client = getClient();
