@@ -63,6 +63,7 @@ import {
   type ShippedFeature,
   type SocialPost,
 } from './social-post-templates';
+import { livePhotoUrl } from './social-post-photos';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -1138,7 +1139,9 @@ async function main() {
           console.warn(`  ⚠ ${artist.name}: artist lookup failed — trying someone else`);
           return null;
         }
-        const context = artistContext(artist, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
+        // A stored photo the host has deleted would fail the post on publish day; see livePhotoUrl.
+        const imageUrl = await livePhotoUrl(artist);
+        const context = artistContext({ ...artist, imageUrl }, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
         const spotlight = indieSpotlight(context, { bandcampFriday });
         if (!spotlight) {
           console.log(`  · ${artist.name}: nowhere to buy their music yet — trying someone else`);
@@ -1171,7 +1174,8 @@ async function main() {
         // re-pointed) canonical one.
         const data = loadArtistData(artist.manifestSlug);
         if (!data) return null;
-        const context = artistContext(artist, `${UNSTREAM_BASE}/artist/${artist.slug}`, data.platforms, null, []);
+        const imageUrl = await livePhotoUrl(artist);
+        const context = artistContext({ ...artist, imageUrl }, `${UNSTREAM_BASE}/artist/${artist.slug}`, data.platforms, null, []);
         const math = recordMath(context, { bandcampFridayTomorrow });
         return math ? { context, posts: math } : null;
       });
