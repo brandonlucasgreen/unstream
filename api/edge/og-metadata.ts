@@ -1,4 +1,4 @@
-import { Context } from "https://edge.netlify.com";
+import type { Context } from "https://edge.netlify.com";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 // Perform search to get first artist image
@@ -33,13 +33,22 @@ async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ im
   }
 }
 
-// Generate HTML with OG meta tags (no meta refresh — crawlers read OG tags directly)
-function generateOgHtml(query: string, imageUrl?: string, artistName?: string): string {
+// Edge functions run on Deno and can't import from api/functions, so each keeps its own copy.
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Generate HTML with OG meta tags (no meta refresh — crawlers read OG tags directly).
+// The query comes from the URL and the name and image from a search result, so all three
+// are escaped before they reach the page. Exported for the test.
+export function generateOgHtml(query: string, imageUrl?: string, artistName?: string): string {
   const displayName = artistName || query;
-  const title = `${displayName} on Unstream - Find music on alternative platforms`;
-  const description = `Find ${displayName} on Bandcamp, Qobuz, and other ethical music platforms. Support artists directly.`;
+  const title = escapeHtml(`${displayName} on Unstream - Find music on alternative platforms`);
+  const description = escapeHtml(`Find ${displayName} on Bandcamp, Qobuz, and other ethical music platforms. Support artists directly.`);
+  // encodeURIComponent leaves ' alone, so the URL is escaped for the attribute too.
+  const pageUrl = escapeHtml(`https://unstream.stream/?q=${encodeURIComponent(query)}`);
   // Use artist image if available, otherwise no image (let platform use default)
-  const ogImage = imageUrl || '';
+  const ogImage = imageUrl ? escapeHtml(imageUrl) : '';
 
   const imageMetaTags = ogImage ? `
   <meta property="og:image" content="${ogImage}">
@@ -54,13 +63,13 @@ function generateOgHtml(query: string, imageUrl?: string, artistName?: string): 
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://unstream.stream/?q=${encodeURIComponent(query)}">
+  <meta property="og:url" content="${pageUrl}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">${imageMetaTags}
 
   <!-- Twitter -->
   <meta name="twitter:card" content="${ogImage ? 'summary_large_image' : 'summary'}">
-  <meta name="twitter:url" content="https://unstream.stream/?q=${encodeURIComponent(query)}">
+  <meta name="twitter:url" content="${pageUrl}">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
 </head>
