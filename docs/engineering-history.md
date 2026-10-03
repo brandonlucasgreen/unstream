@@ -349,10 +349,10 @@ otherwise recorded as a perfectly ordinary success.
 
 ---
 
-## Local dev: what the two silent-failure traps cost
+## Local dev: what the silent-failure traps cost
 
 **Rules they produced:** delete a key from `.env` rather than leaving it blank; keep
-`--strictPort`.
+`--strictPort`; in a worktree, pass `--functions` with the worktree's own folder.
 
 ### The empty-value shadow
 
@@ -369,6 +369,23 @@ vars` list: a key you need should appear there, not in an `Ignored` line.
 
 `dev:fast` passes `--strictPort` on purpose. See the `[dev]` block in `netlify.toml` for
 why removing it lets another checkout's leftover server answer everything.
+
+### The worktree that served the main checkout
+
+Found 2026-10-01 while building the Instagram card endpoint. In a worktree under
+`.claude/worktrees/`, `npm run dev` answered the new `/api/social-card/*` route with
+`Function not found...` and no error anywhere in the log: 73 functions loaded, the two new
+files didn't. `.netlify/functions-serve/collection-art/collection-art.js` gave it away by
+requiring `./Users/…/Projects/unstream/api/functions/collection-art.js`, the main checkout.
+
+netlify-cli (23.13.3) finds the repository root with `findUp('.git', { type: 'directory' })`.
+A worktree's `.git` is a file, so the search carries on up to the main repo, which these
+worktrees sit inside, and the functions folder resolves there. `--cwd .` doesn't change it;
+`--functions "$PWD/api/functions"` does. A function that exists in both checkouts is the worse
+case: it loads, and runs the main checkout's code. Edge functions resolve the same way, and
+`--functions` doesn't move them (`.netlify/edge-functions-serve/dev.js` still imports
+`…/Projects/unstream/api/edge/*.ts`); netlify dev has no flag for their folder, so edge-function
+work in a worktree can't be checked with `npm run dev` at all.
 
 ### Why there is no preview to fall back on
 
@@ -523,3 +540,158 @@ keeps rendering the historical feed. See `data/dispatch/README.md` for the full 
 
 The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 Dispatch-related repo changes go through the normal branch workflow like everything else.
+
+## Social posts: what six months of metrics said
+
+**Rules it produced:** spotlights are written for the featured artist to repost; prominent artists
+get one post a week; questions to the audience are occasional; Instagram posts are cards Unstream
+draws, for indie artists only; payouts come from the platform registry; a photo its host has
+deleted is left off; a rejected post fails the run.
+
+Measured from Buffer's per-post metrics for every post sent from 22 March to 30 September 2026
+(Threads 188 posts, Instagram 177, Bluesky 178, LinkedIn 3).
+
+### Why wording isn't the lever
+
+On Threads the four artist-post templates landed at median views of 35, 39, 42 and 44, so the
+wording barely moved anything. Artist posts sat at ~40 median views every month from April on.
+What moved a post was a repost or quote: median 100 views with one, 38 without. Tagged indie
+artists produced them: 34% of tagged indie posts got a repost or quote, against 10% untagged.
+For prominent artists it was 5–7% whether they were tagged or not. Fame didn't help: Steve Reich
+got 566 views, while Lucinda Williams, Buzzcocks and The Wombats each got 17.
+
+Posts about Unstream itself (Sunday, text only, first person) got a median of **254 views**,
+six times an artist post. The launch-day "Hi! I'm Brandon" thread got 930. Repeats didn't wear
+out: the $0.003 post did 251 views the first time and 313 the second.
+
+### Why prominent artists are down to one post a week
+
+All 791 artists in that pool headline Bandcamp, so their posts were "[name] + Bandcamp + 82% +
+$0.003" with only the name changing. None reposted. The pool also needed a Wikidata check that
+excluded 529 of them as non-music or deceased. One post a week, framed around one album's
+purchase math, keeps the useful part.
+
+### The Threads @ that disappeared
+
+Without a Threads link, the script used to tag an artist's Instagram handle on Threads. When
+Threads finds no account by that name, it publishes the post with the @ removed. Buffer still
+held `@modestmouse` while the post was scheduled. 31 posts went out reading like "ko has music
+on Bandcamp" or "ianhunterdotcom has music on Bandcamp". Posts now lead with the name and only
+tag a handle taken from the artist's own Threads link.
+
+### Instagram
+
+Median reach was 3 accounts, with 2 follows in 177 posts. The likely cause is Instagram's
+30 April 2026 change, which stops recommending accounts that mostly post other people's photos.
+The 81 comments looked like bots: 58 of the 66 from July to September were on posts tagged
+`#newmusic #newrelease`. The script added those tags to 72 of 75 prominent posts, including dead
+artists' decades-old albums. What restarting would take is in
+`docs/specs/instagram-original-posts-spec.md`.
+
+### Instagram cards: why a function, and what the renderer can't do
+
+Built 2026-10-01 to that spec. Each indie spotlight's Instagram variant is a carousel drawn
+from Unstream's data: who and where to buy, the record, the purchase math, then the photo.
+
+**Not an edge function.** The spec suggested one. Edge functions get 50ms of CPU per request
+(Netlify's documented limit, still listed after the October 2026 move to microVMs). Measured
+with resvg-wasm on an M-series Mac, a text-only slide took ~25ms warm, but a slide with a
+1200px photo took ~100ms to draw and ~30ms more to encode as PNG. Server CPUs are slower. A
+Netlify Function has no CPU cap, and on Node it reaches `db.ts`, the SSRF allowlist and vitest.
+
+**Bundled as CommonJS.** zip-it-and-ship-it builds this `"type": "module"` repo's functions as
+CJS, where `import.meta` is an empty object. That was caught by bundling the function and
+running the bundle from the unzipped folder before anything deployed. The renderer finds its
+fonts with `__dirname` and its wasm with `require.resolve`; `included_files` and
+`external_node_modules` in `netlify.toml` put both beside the bundle.
+
+**What resvg can't decode.** It draws JPEG and PNG, and silently draws nothing for WebP, which is
+how Mirlo serves covers and avatars. Covers have an undocumented `-x1500.jpg` twin (three of
+three checked); avatars don't, so a Mirlo-only artist's photo slide is left out. A glyph none of
+the loaded fonts has also draws as nothing, which is why a name outside Latin script gets no
+cards rather than a blank one.
+
+**Why the platform and release are in the URL.** Buffer fetches images when a post publishes,
+up to twelve days after the Monday run wrote the caption. Recomputing the "latest release" at
+render time would let the card name a newer record than the caption does.
+
+**Why the generator fetches every card first.** Some failures only show at render time: a
+stored artist photo that Bandcamp has since deleted (two of the five artists in a 2026-10-01
+dry run), a host off the allowlist, a WebP. Unchecked, Buffer would find out on publish day and
+fail the whole post. The check drops the card and warms the CDN for Buffer's fetch.
+
+**Why the Instagram post isn't created inside the content item.** `createContentItem` validates
+all-or-nothing, so a rejected Instagram variant would also cost that day's Threads and Bluesky
+spotlights, the posts that actually get reposted. Retrying without it isn't safe either: Buffer's
+schema says the same failure payload comes back when variants failed *after* the item and all
+its variants were created, and nothing in it tells the two apart. So Instagram goes through
+`createPost`, the path the old pipeline used for six months, and `addPostToContentItem` groups it
+afterwards.
+
+### Payouts drifted from the site's
+
+The script kept its own payout table, and it disagreed with `api/shared/platform-registry.ts`:
+Mirlo was 93% in posts against 86-90% on the site, Faircamp 100% against 90-97%. Posts now read
+the registry. The purchase math uses the low end of a range, so a post never claims more for the
+artist than the site does.
+
+### Prominent artists' Bandcamp links that belong to someone else
+
+The generated artist files (`data/artists/`) matched each prominent artist's Bandcamp page by
+name. The 2026-10-01 regeneration scheduled a post saying Venom, the metal band, keeps 80-85% of
+sales of "empyrean ep" from `venomnoise.bandcamp.com`, which is another act. Measured across the
+791 files: 159 Bandcamp subdomains don't match the artist's name, allowing for "the", "music",
+"official" and "band". Some are real ("tmbg" for They Might Be Giants), many are not
+("emperordnb" for Emperor, "alanjackson1", "nemo1", "sonia666"). Emperor was featured in an
+earlier week. `bandcampMatchesArtist` now keeps only the 632 that match, rejecting some real
+pages to keep false claims out; the files themselves still carry the bad links.
+
+### Artist photos that no longer exist
+
+A 2026-10-01 dry run picked five indie artists, and two of their stored photos 404'd at every
+Bandcamp size. Measured the next day, with one request per photo: 12 of the 139 verified artists
+(12 of the 109 with a Bandcamp-hosted photo) had stored photos that 404 at both the stored size
+and the full size the posts send. The 13 YouTube photos were all live. Threads and Bluesky posts
+carried those URLs to Buffer, which fetches images on publish day and fails the post if one is
+missing.
+
+The cause is upstream. `persistSearchResults` never writes to a claimed artist's row, so a verified
+artist's `image_url` stays what search found when they claimed, and when they change their Bandcamp
+photo, Bandcamp deletes the old file. The artist page hides a dead photo behind a letter avatar,
+but its `og:image` still points at it.
+
+The generator now checks each picked artist's photo first (`livePhotoUrl`,
+`scripts/social-post-photos.ts`). Only a 404 or 410 drops it. The four Mirlo and Backblaze avatars
+returned `200 application/octet-stream` for real WebP files, so a generic content type isn't
+treated as missing either. A timeout or 5xx keeps the photo, because Buffer tries it again on
+publish day.
+
+The same day, the catalogue pass took on the repair (`refreshDeadArtistPhoto`,
+`api/functions/artist-photo-refresh.ts`). It already fetches the artist's Bandcamp `/music` page,
+whose `og:image` is the photo search would store today, so the repair costs no Bandcamp request.
+It writes to a claimed row, which enrichment otherwise never does. That was accepted because
+`image_url` was never the artist's choice: what they choose is `artist_profiles.custom_image_url`,
+which is shown instead wherever it's set and which the pass doesn't touch. The guards:
+
+- **Only the host's own 404 or 410 counts**, under the same rule as the posts (`photoVerdict`,
+  `api/shared/artist-photo.ts`). The stored photo is checked only when the page shows a different
+  one, so the usual pass makes no extra request.
+- **The page must be the artist's.** A stored Bandcamp link can be a label's page, whose photo is
+  the label's, so the page's band name has to pass `namesMatch`, the check the probe applied when
+  it first stored the photo.
+- **Nothing is filled in.** An artist with no stored photo gets none, since adding one isn't a
+  repair.
+- **`updated_at` is left alone.** It means "last verified against live sources", and only the
+  photo was checked.
+
+How many of the 12 it repairs, and how soon, wasn't measured: the read-only production query was
+blocked. A repair shows in the catalogue function's log as "stored photo is gone ... replaced",
+and an artist is reached only on their next catalogue pass, which the cooldown keeps at least
+seven days after their last one.
+
+### Silent failures
+
+On 2026-09-28 Buffer rejected a Bluesky post for length, and the run still reported success.
+Instagram posts with no artist image were logged as drafts but actually scheduled, carrying the
+generic Unstream image. The run now exits non-zero when any post isn't sent, and the workflow
+still commits history after a partial failure.

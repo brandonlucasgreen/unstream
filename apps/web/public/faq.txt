@@ -8,25 +8,29 @@ I built Unstream to serve both of these purposes: help fellow listeners find bet
 ### What’s the problem with streaming? Why are the platforms Unstream recommends better than Spotify / Apple Music / my streaming app of choice?
 Well, for one, the owners of these platforms don’t [actively invest in militarization efforts](https://faroutmagazine.co.uk/spotify-ceo-daniel-ek-chairman-ai-military-million-investment/) 😅
 
-But Spotify and its former CEO are not the only problems with the streaming model for music. Streaming is a consumer-friendly service offering access to almost the entire history of recorded music in a convenient subscription, but a tiny fraction of your subscription actually goes to the artists who make the music – and you have no control over _which_ artists they go to. 
+But Spotify and its former CEO are not the only problems with the streaming model for music. Streaming is a consumer-friendly service offering access to almost the entire history of recorded music in a convenient subscription, but a tiny fraction of your subscription actually goes to the artists who make the music – and you have no control over _which_ artists they go to.
 
 The exceptions are artists with hundreds of thousands of monthly listeners or more; while many are rightfully deserving of those listeners, the economics of streaming (especially on Spotify) disproportionately benefit those artists thanks to the outsized influence of the 3 major record labels. Smaller artists are effectively shut out from making money in the streaming ecosystem, and increasingly shut out of promotional opportunities to even grow their audience in this ecosystem as well thanks to an increased focus on AI and algorithms. What’s more: streaming platforms, and the incentives they run on, are being flooded with AI-generated music, often created solely for the purposes of exploiting streaming algorithms and capturing more listeners (and thus revenue).
 
-The platforms suggested by Unstream primarily focus on a _direct-support_ model, meaning you pay to _own_ an artist’s music (or support them with a monthly subscription) and the majority of your payment goes to the rights holder of the music – which in many cases is the artist themselves. 
+Most of the platforms suggested by Unstream follow a _purchase-to-own_ model: you buy an artist’s music outright, so it’s yours to keep, and the majority of your payment goes to the rights holder of the music. In many cases that’s the artist themselves, but if they’re signed to a label, the label is paid and the artist gets their share under their deal.
+
+Others follow a _direct-support_ model: you pay the artist themselves, whether it’s a one-off tip or a monthly membership (on platforms like Patreon, Ko-fi, or Buy Me a Coffee), and most of that money goes straight to them.
 
 We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
 
 ### How much money does the artist get when I buy their music?
-- **Faircamp sites:** varies, based on the artist’s preferred payment method (typically ~90-97% of sale price)
-- **Ampwall:** ~92-95% of sale price [(source)](https://ampwall.com/selling)
-- **Mirlo:** ~86-90% of sale price [(source)](https://mirlo.space/pages/about)
-- **Bandcamp:** ~80-85% of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
-- **Qobuz:** ~70% of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
-- **Patreon:** ~86-90% of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
-- **Buy Me a Coffee:** ~92% of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
-- **Ko-fi:** ~97% of tips, ~92% of sales [(source)](https://help.ko-fi.com/hc/en-us/articles/360002506494-Does-Ko-fi-take-a-fee)
+- Faircamp sites: varies, based on the artist’s preferred payment method (typically ~90-97% of sale price)
+- **Subvert:** **97%** of sale price [(source)](https://www.subvert.fm/docs/faq)
+- **Ampwall:** **92-95%** of sale price [(source)](https://ampwall.com/selling)
+- **Mirlo:** **86-90%** of sale price [(source)](https://mirlo.space/pages/about)
+- **Bandcamp:** **80-85%** of sale price [(source)](https://bandcamp.com/fair_trade_music_policy)
+- **Jam.coop:** **82-85%** of sale price — a 15% fee with a 20p minimum, so cheaper releases pay out a little less [(source)](https://jam.coop/docs/about)
+- **Qobuz:** **70%** of sale price [(source)](https://www.reddit.com/r/audiophile/comments/esy440/comment/ffcxlql/)
+- **Patreon:** **86-90%** of sales or memberships [(source)](https://support.patreon.com/hc/en-us/articles/11111747095181-Creator-fees-overview)
+- **Buy Me a Coffee:** **92%** of sales or memberships [(source)](https://help.buymeacoffee.com/en/articles/8105744-how-to-calculate-charges-on-your-payment)
+- **Ko-fi:** **97%** of tips / **92%** of sales [(source)](https://help.ko-fi.com/en/articles/360002506494-Does-Ko-fi-take-a-fee)
 
-*More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit. 
+*More info:* All online transactions involving a credit card transaction incur credit card fees, which are typically ~2.9% of the purchase price, plus an additional 30 cents. This is always applied on top of a platform’s fee, which is why the above percentage values vary a bit.
 
 ### What’s Bandcamp Friday?
 A few Fridays a year, Bandcamp waives its revenue share, so artists keep everything except card processing fees: roughly 97% of what you pay instead of the usual 80–85%. Bandcamp announces the dates on [Bandcamp Daily](https://daily.bandcamp.com/features/bandcamp-fridays).
@@ -55,20 +59,30 @@ Unstream uses the [Musicbrainz](https://musicbrainz.org) database as a source to
 ### I have a Faircamp site but it’s not appearing in the results. Why?
 Unstream uses the [Faircamp Webring](http://faircamp.webr.ing) as a source for finding Faircamp sites for independent artists. If your Faircamp site isn’t appearing in the results, consider joining the webring [at this link](https://faircamp.webr.ing/#instructions). Or, you can [email me](mailto:support@unstream.stream) your Faircamp URL and I’ll have it added to the results.
 
-### What data does Unstream track?
-Virtually nothing. We track visit and visitor counts, by location and source (ie. where you came to Unstream from), but no personal data is captured.
+### What data does Unstream track? Are my searches anonymous?
+**Your searches are not linked to you.** There’s no search history attached to your account, because we never build one — signing in doesn’t change that. We do keep the search terms themselves for a short while, cached so the next person looking for the same artist doesn’t cost a dozen platforms another round of requests, but there’s nothing stored alongside them that says who searched. Search terms are deliberately kept out of our analytics and our server logs.
+
+**Without an account, nothing identifies you.** We count visits and page views through [GoatCounter](https://www.goatcounter.com), which is cookie-free and doesn’t track you between sites, and we count things like “a search returned no results” so we can tell what’s broken. The stats artists see on their dashboard are pure daily totals — how many searches an artist appeared in, how many clicks each platform link got — with no user, no session, and no IP attached to them.
+
+**With an account, we store what the account is for:** your email address, the artists you’ve saved, and any notes you added, so they can sync between the website, the extension and the apps. A username and a location are optional extras, and both are private until you choose to share your list.
+
+We don’t sell any of it, we don’t run ads, and there are no third-party trackers on the site. The [privacy policy](/privacy-policy) is the long version, and it’s specific rather than vague — it names every place data goes and how long each thing is kept. You can ask for a copy of everything we hold on you, or ask us to delete it, by [emailing support](mailto:support@unstream.stream).
 
 ### I am ethically opposed to AI in music. Is AI at all used in Unstream?
-No AI is implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music. 
+No AI features are implemented in the Unstream app. The app neither uses AI models to recommend artists nor is intended to promote artists creating AI-generated music.
+
+Unstream shows policy badges for platforms that have formal written policies about AI-generated music (like Bandcamp, Subvert, and Mirlo). These informational badges make it easy to see which platforms are taking a stand to protect human artistry.
+
+Parts of Unstream were built and maintained with the help of AI coding tools like Claude Code and OpenCode.
 
 ### Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?
-Not yet, but I may consider building any or all of these in the future! Feel free to suggest or up-vote any of these ideas on the [Unstream feedback board](https://unstream.featurebase.app).
+Yes! Unstream is available for [macOS](https://github.com/brandonlucasgreen/unstream/releases/latest), [Chrome](https://chromewebstore.google.com/detail/unstream/ekgpnodajpmdfcbdnbmgcichhbaipnmc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/), and [the web](https://unstream.stream).
 
 ### I’d like to request a feature or improvement. How can I do that?
-Head over to the [Unstream feedback board](https://unstream.featurebase.app) and share your idea! You can also upvote other people’s ideas.
+Feel free to [open an issue](https://github.com/brandonlucasgreen/unstream/issues) on GitHub to suggest something new or [email me](mailto:support@unstream.stream).
 
 ### I’m having an issue using Unstream. How can I report it?
-If it’s urgent, just [let me know via email](mailto:support@unstream.stream) and I’ll try and fix it asap. 
+If it’s urgent, just [let me know via email](mailto:support@unstream.stream) and I’ll try and fix it asap.
 
 ### I love using Unstream, how can I best support the app?
 Unstream is totally free to use, but please consider [supporting it on Ko-fi](https://ko-fi.com/bgreenlol)!

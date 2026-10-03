@@ -321,5 +321,5 @@ CREATE INDEX idx_user_public_ids_public_handle ON user_public_ids (public_handle
 - `apps/web/src/components/ResultCard.tsx` — artist presentation primitive to reuse (PR 2).
 - `api/functions/saved-artists.ts` — current saved-artists API surface; the new endpoints follow the same patterns (PR 2).
 - `~/projects/unstream/CLAUDE.md` — Engineering principles + "One route, one renderer" rule.
-- `~/projects/unstream/docs/retros/UNS-100-bifurcation-retro.md` — context on why single-renderer matters.
+- `~/projects/unstream/docs/postmortems/UNS-100-bifurcation-retro.md` — context on why single-renderer matters.
 - Supabase auth docs for `updateUser({ password })` (PR 1) — verify the current-password verification pattern before implementing.

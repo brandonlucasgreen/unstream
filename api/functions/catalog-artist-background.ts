@@ -23,8 +23,10 @@ import {
   recordCatalogOutcome,
   attachDiscoveredSource,
   type CatalogTrigger,
+  type ArtistForCatalog,
   type PersistedRelease,
 } from './db';
+import { refreshDeadArtistPhoto } from './artist-photo-refresh';
 import { linkCollectionItemsForArtist } from './collection-matching';
 import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
 import { safeFetch, safeHostname } from './safe-fetch';
@@ -448,7 +450,7 @@ async function catalogArtist(
 
   if (artist.bandcampUrl) {
     try {
-      const { found, detailed } = await catalogBandcamp(artistId, artist.bandcampUrl, budget);
+      const { found, detailed } = await catalogBandcamp(artistId, artist.bandcampUrl, artist, budget);
       totalFound += found;
       totalDetailed += detailed;
     } catch (error) {
@@ -466,7 +468,7 @@ async function catalogArtist(
     }
     await catalogMusicBrainz(artistId, artist.name);
     if (artist.faircampUrl) {
-      totalFound += await catalogFaircamp(artistId, artist.faircampUrl, faircampBudget);
+      totalFound += await catalogFaircamp(artistId, artist.name, artist.faircampUrl, faircampBudget);
     }
     if (artist.jamcoopUrl) {
       const { found, detailed } = await catalogJamcoop(artistId, artist.jamcoopUrl, jamcoopBudget);
@@ -510,7 +512,8 @@ async function catalogArtist(
 }
 
 /**
- * The Bandcamp pass: grid, then a budgeted detail pass over individual release pages.
+ * The Bandcamp pass: grid, then a budgeted detail pass over individual release pages. The grid
+ * page also carries the artist's current photo, which repairs a stored one Bandcamp has deleted.
  *
  * @throws on a genuine failure — a bot challenge or an unreachable fetch — so the caller can
  * tell "Bandcamp declined to answer" apart from "Bandcamp said zero releases".
@@ -518,6 +521,7 @@ async function catalogArtist(
 async function catalogBandcamp(
   artistId: string,
   storedUrl: string,
+  artist: ArtistForCatalog,
   budget: DetailBudget
 ): Promise<{ found: number; detailed: number }> {
   // The stored URL is not automatically trustworthy: a claimed artist can save any http(s)
@@ -550,6 +554,8 @@ async function catalogBandcamp(
     if (outcome.reason === 'bot_challenge') throw new Error('bandcamp bot challenge');
     return { found: 0, detailed: 0 };
   }
+
+  await refreshDeadArtistPhoto(artistId, artist, html);
 
   const written = await persistReleases(artistId, outcome.releases);
   const detailed = await catalogDetails(written, landedUrl, budget);
@@ -699,7 +705,12 @@ async function catalogMusicBrainz(artistId: string, artistName: string): Promise
  * Never throws — an unreachable or oddly-themed Faircamp instance is worth logging, not worth
  * failing an artist whose Bandcamp pass may have already succeeded this run.
  */
-async function catalogFaircamp(artistId: string, faircampUrl: string, budget: FaircampBudget): Promise<number> {
+async function catalogFaircamp(
+  artistId: string,
+  artistName: string,
+  faircampUrl: string,
+  budget: FaircampBudget
+): Promise<number> {
   try {
     if (budget.fetchesLeft <= 0 || Date.now() > budget.deadline) return 0;
     budget.fetchesLeft--;
@@ -711,7 +722,12 @@ async function catalogFaircamp(artistId: string, faircampUrl: string, budget: Fa
     const homeHtml = await homeResponse.text();
     await scanForDiscoveredLinks(artistId, homeHtml, landedUrl);
 
-    const candidates = ingestFaircampHomeLinks(homeHtml, landedUrl).slice(0, MAX_FAIRCAMP_RELEASES_PER_ARTIST);
+    const home = ingestFaircampHomeLinks(homeHtml, landedUrl, artistName);
+    if (home.creditedToOthers > 0) {
+      // A label or shared site: its other artists' releases are theirs, not this row's.
+      console.log(`[catalog] faircamp skipped ${home.creditedToOthers} release(s) credited to other artists on ${safeHostname(landedUrl)}`);
+    }
+    const candidates = home.releases.slice(0, MAX_FAIRCAMP_RELEASES_PER_ARTIST);
     if (candidates.length === 0) return 0;
 
     const takenSlugs = new Set<string>();

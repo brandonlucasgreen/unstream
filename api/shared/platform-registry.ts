@@ -190,6 +190,9 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#F6C915',
     icon: '🤝',
     category: 'patronage',
+    // Liberapay takes no cut; only the card processor's fee comes off, which Liberapay puts at
+    // ~3% on average for Stripe (https://liberapay.com/about/faq).
+    payoutPercent: '~97%',
     homepageUrl: 'https://liberapay.com',
   },
 

@@ -38,7 +38,7 @@ export function ResetPasswordPage() {
         setError(updateError);
       } else {
         setSuccess(true);
-        setTimeout(() => navigate('/artist-dashboard', { replace: true }), 2000);
+        setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.resetPasswordSubmit' } });

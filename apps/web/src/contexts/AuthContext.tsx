@@ -110,9 +110,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // The *user* propagates whether or not the token changed. Supabase fires
       // USER_UPDATED with fresh metadata on the same token — that's the event
       // updatePassword() produces when it sets has_password — so guarding this on the
-      // token would leave `hasPassword` (line ~348) stale and PasswordSection showing
-      // "Set password" to someone who had just set one. Safe to do unguarded because
-      // nothing keys an *effect* on `user`: Header renders it, PasswordSection reads a
+      // token would leave `hasPassword` (line ~348) stale and the /settings password form
+      // showing "Set password" to someone who had just set one. Safe to do unguarded because
+      // nothing keys an *effect* on `user`: Header renders it, PasswordChangeForm reads a
       // derived boolean. It costs a render, not a refetch. `session` is the identity
       // that six /settings panels fetch on, and that's the one the guard below protects.
       setUser(newSession?.user ?? null);

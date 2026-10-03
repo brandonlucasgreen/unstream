@@ -20,9 +20,9 @@ export function PasswordChangeForm({ accessToken, hasPassword }: PasswordChangeF
 
   // Changing an existing password goes through /api/me/password, which verifies the old
   // one. Setting a first password can't: there is nothing to verify against. It uses
-  // supabase.auth.updateUser instead — the same call ResetPasswordPage and PasswordSection
-  // make — which Supabase authorizes on the session alone and which stamps has_password,
-  // so /settings shows the change form from then on.
+  // supabase.auth.updateUser instead — the same call ResetPasswordPage makes — which Supabase
+  // authorizes on the session alone and which stamps has_password, so /settings shows the
+  // change form from then on.
   //
   // Deliberately NOT done by making current_password optional on /api/me/password: the
   // only thing that endpoint could check to allow the omission is user_metadata.has_password,

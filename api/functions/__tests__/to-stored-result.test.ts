@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toStoredResult } from '../search-sources';
+import { toStoredResult } from '../stored-artists';
 
 // Minimal stand-in for getArtistBySlug's return shape — toStoredResult only
 // reads these fields, so no DB/network mocking is needed for a pure function.

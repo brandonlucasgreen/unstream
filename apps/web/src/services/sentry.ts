@@ -73,6 +73,30 @@ export function isInjectedNativeBridgeError(message: string): boolean {
 }
 
 /**
+ * True when Supabase's auth lock error couldn't be built because something replaced
+ * the page's global `Error`.
+ *
+ * Supabase auth refreshes the session on a timer, inside a cross-tab lock it asks for
+ * with no wait. When another tab holds it, auth-js throws
+ * `NavigatorLockAcquireTimeoutError` and catches it again by its `isAcquireTimeout`
+ * flag — routine. Its constructor sets that flag on what `super()` returns, and a
+ * real `Error` always accepts a new property. This message means the `Error` our
+ * bundle extended wasn't the browser's: a script injected before ours (automation
+ * tooling or an anti-fingerprinting extension) wrapped it to hand back non-extensible
+ * objects. The constructor itself then throws, the TypeError has no
+ * `isAcquireTimeout`, and it escapes the timer as an unhandled rejection.
+ * Reproduced against auth-js 2.99.1 by wrapping `Error` that way; untouched, it
+ * constructs fine. The first report (2026-10-02) had no breadcrumbs past Sentry's
+ * init and an `Etc/Unknown` timezone, which is what headless browsers report.
+ *
+ * Both parts are required so an `isAcquireTimeout` failure for any other reason, or
+ * a non-extensible object of our own, still reports.
+ */
+export function isTamperedErrorConstructorError(message: string): boolean {
+  return message.includes('isAcquireTimeout') && message.toLowerCase().includes('not extensible')
+}
+
+/**
  * The exact wording each engine uses when a `fetch()` never produced a response.
  *
  * These are whole messages, not fragments — see `isDroppedRequestError` for why
@@ -207,6 +231,11 @@ export function initSentry(): void {
 
       // Somebody else's script failing inside our page. Not our bug to fix.
       if (isInjectedNativeBridgeError(errorMessage)) {
+        return null
+      }
+
+      // Somebody else's script replaced Error before ours loaded. Same story.
+      if (isTamperedErrorConstructorError(errorMessage)) {
         return null
       }
 

@@ -14,7 +14,7 @@ interface NewsletterPromptProps {
 }
 
 /**
- * A one-time Lightbulbs On invitation on /dashboard and /artist-dashboard. It's how fans are asked
+ * A one-time Lightbulbs On invitation on /dashboard. It's how fans are asked
  * at all (the sign-in page doesn't ask, see NewsletterCheckbox) and how accounts from before the
  * claim-flow checkbox are asked. Shown until they subscribe or say no thanks, then never again on
  * this browser. A brand-new account sees it under WelcomeBanner on /dashboard, which does the

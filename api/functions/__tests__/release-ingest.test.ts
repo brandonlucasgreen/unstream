@@ -831,20 +831,21 @@ function faircampPurchaseHtml(opts: { min?: string; max?: string; fixedText?: st
 }
 
 describe('ingestFaircampHomeLinks', () => {
-  it('finds bare relative release links and resolves them against the page URL', () => {
-    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
-    expect(out).toEqual([
+  const KL = 'https://music.kidlightbulbs.com/';
+
+  it('finds the artist\'s bare relative release links and resolves them against the page URL', () => {
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, KL, 'Kid Lightbulbs');
+    expect(out.releases).toEqual([
       { slug: 'ruined-castle', url: 'https://music.kidlightbulbs.com/ruined-castle/' },
       { slug: 'infinite-normal', url: 'https://music.kidlightbulbs.com/infinite-normal/' },
-      { slug: 'solo-piano', url: 'https://music.kidlightbulbs.com/solo-piano/' },
     ]);
   });
 
   it('excludes known non-release paths and anything with a query string or external host', () => {
-    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
-    expect(out.map(o => o.slug)).not.toContain('subscribe');
-    expect(out.some(o => o.url.includes('simonrepp'))).toBe(false);
-    expect(out.some(o => o.url.includes('favicon'))).toBe(false);
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, KL, 'Kid Lightbulbs');
+    expect(out.releases.map(o => o.slug)).not.toContain('subscribe');
+    expect(out.releases.some(o => o.url.includes('simonrepp'))).toBe(false);
+    expect(out.releases.some(o => o.url.includes('favicon'))).toBe(false);
   });
 
   // The bug this guards: on a site hosting more than one artist, the per-release artist credits
@@ -852,9 +853,9 @@ describe('ingestFaircampHomeLinks', () => {
   // Lucas Green" as albums. Nothing on the linked page says otherwise — an artist page and a
   // release page both publish an og:title — so it has to be caught here.
   it('never treats a release block\'s artist credits as releases', () => {
-    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, 'https://music.kidlightbulbs.com/');
-    expect(out.map(o => o.slug)).not.toContain('kl');
-    expect(out.map(o => o.slug)).not.toContain('blg');
+    const out = ingestFaircampHomeLinks(FAIRCAMP_HOME_HTML, KL, 'Kid Lightbulbs');
+    expect(out.releases.map(o => o.slug)).not.toContain('kl');
+    expect(out.releases.map(o => o.slug)).not.toContain('blg');
   });
 
   it('falls back to a whole-page scan when there are no release blocks, still minus credits', () => {
@@ -864,14 +865,103 @@ describe('ingestFaircampHomeLinks', () => {
         <li><a href="in-winter/">in winter/borders</a><div class="release_artists"><a href="kl/">Kid Lightbulbs</a></div></li>
       </ol>
     </body></html>`;
-    const out = ingestFaircampHomeLinks(noBlocks, 'https://music.kidlightbulbs.com/');
-    expect(out.map(o => o.slug)).toEqual(['in-winter']);
+    const out = ingestFaircampHomeLinks(noBlocks, KL, 'Kid Lightbulbs');
+    expect(out.releases.map(o => o.slug)).toEqual(['in-winter']);
   });
 
   it('deduplicates a repeated link and caps at the candidate ceiling', () => {
     const manyLinks = Array.from({ length: 40 }, (_, i) => `<a href="release-${i}/">R${i}</a>`).join('');
-    const out = ingestFaircampHomeLinks(`<html>${manyLinks}</html>`, 'https://x.example.com/');
-    expect(out.length).toBeLessThanOrEqual(30);
+    const out = ingestFaircampHomeLinks(`<html>${manyLinks}</html>`, 'https://x.example.com/', 'Anyone');
+    expect(out.releases.length).toBeLessThanOrEqual(30);
+  });
+});
+
+// Found 2026-10-01: Faircamp's webring lists every credit on a site as an artist, search gave each
+// credit its own artist row linked to the site root, and cataloguing that link took the whole site
+// for each row. On music.control.org, `control freak studio` held all 26 releases, 4 of them its
+// own; six other rows were left holding source-less copies. These blocks are the live markup.
+describe('ingestFaircampHomeLinks on a site hosting several artists', () => {
+  const block = (slug: string, credits: string) =>
+    `<div class="release"><a href="${slug}/"><img src="${slug}/cover_320.jpg"></a><a href="${slug}/">${slug}</a>` +
+    `<div class="release_artists">${credits}</div></div>`;
+  const site = (siteName: string, ...blocks: string[]) =>
+    `<!doctype html><html><head><meta property="og:site_name" content="${siteName}"></head><body>${blocks.join('')}</body></html>`;
+  const LABEL = site(
+    'control freak studio / control.org',
+    block('replicate1', '<a href="control-org/">control.org</a>'),
+    block('onethread', '<a href="shannon-curtis-vs-control-org/">Shannon Curtis vs control.org</a>'),
+    block('studio-one', '<a href="control-freak-studio/">control freak studio</a>'),
+    block('sp-one', '<a href="sp-united/">SP UNITED</a>'),
+  );
+  const slugs = (html: string, artist: string) =>
+    ingestFaircampHomeLinks(html, 'https://music.control.org/', artist).releases.map(r => r.slug);
+
+  it('returns only the releases the page credits to this artist', () => {
+    expect(slugs(LABEL, 'control freak studio')).toEqual(['studio-one']);
+    expect(slugs(LABEL, 'control.org')).toEqual(['replicate1']);
+  });
+
+  it('counts what it skipped, so the catalogue log can say why a label row got less', () => {
+    expect(ingestFaircampHomeLinks(LABEL, 'https://music.control.org/', 'control.org').creditedToOthers).toBe(3);
+  });
+
+  it('matches names the way search does, ignoring case and punctuation', () => {
+    // "spunited" is a real artist row, made from the same credit as "SP UNITED".
+    expect(slugs(LABEL, 'spunited')).toEqual(['sp-one']);
+  });
+
+  it('gives a collaboration to the row named for it, not to each of its parts', () => {
+    expect(slugs(LABEL, 'Shannon Curtis')).toEqual([]);
+    expect(slugs(LABEL, 'Shannon Curtis vs control.org')).toEqual(['onethread']);
+  });
+
+  it('matches any one of several credited artists', () => {
+    const html = site('Tryptophonic Records', block('flying-teapot', '<a href="tripswyche/">Tripswyche</a>, <a href="gilli-smyth/">Gilli Smyth</a>'));
+    expect(slugs(html, 'Gilli Smyth')).toEqual(['flying-teapot']);
+    expect(slugs(html, 'Tripswyche')).toEqual(['flying-teapot']);
+  });
+
+  it('reads a credit written as plain text, including one that contains a comma', () => {
+    const html = site('Futzle', block('compilation', 'Various Artists'), block('boogie', 'Earth, Wind &amp; Fire'));
+    expect(slugs(html, 'Various Artists')).toEqual(['compilation']);
+    expect(slugs(html, 'Earth, Wind & Fire')).toEqual(['boogie']);
+  });
+
+  it('decodes entities on both sides, so a webring name stored with &amp; still matches', () => {
+    const html = site('faircamp.thurk.org', block('duet', '<a href="tr/">Tim Rowe &amp; Flavigula</a>'), block('solo', '<a href="f/">Flavigula</a>'));
+    expect(slugs(html, 'Tim Rowe &amp; Flavigula')).toEqual(['duet']);
+    expect(slugs(html, 'Flavigula')).toEqual(['solo']);
+  });
+
+  it('gives an uncredited release to the artist the site is named for, and to nobody else', () => {
+    const html = site('Bedlam Steps', block('own-record', ''), block('guest', '<a href="nonalogue/">Nonalogue</a>'));
+    expect(slugs(html, 'Bedlam Steps')).toEqual(['own-record']);
+    expect(slugs(html, 'Nonalogue')).toEqual(['guest']);
+    expect(slugs(html, 'Idle Worker')).toEqual([]);
+  });
+
+  it('does not let names with no Latin letters match each other', () => {
+    const html = site('aerror.net', block('nakiso-record', '<a href="nakiso/">なきそ</a>'), block('fon-record', '<a href="fon/">fon</a>'));
+    expect(slugs(html, 'なきそ')).toEqual(['nakiso-record']);
+    expect(slugs(html, 'ふぉん')).toEqual([]);
+  });
+
+  it('keeps everything on a site that credits only one artist, whatever the row is called', () => {
+    // desolationpark.se: every release credited to "Desolation Park", linked from a row named by
+    // its Bandwagon handle. The link is the evidence there; the name can't be.
+    const html = site('Desolation Park', block('one', '<a href="dp/">Desolation Park</a>'), block('two', '<a href="dp/">Desolation Park</a>'));
+    expect(slugs(html, '@678118c00e4542fb753a7a6f')).toEqual(['one', 'two']);
+  });
+
+  it('counts the site\'s uncredited releases as its own artist when deciding it hosts several', () => {
+    const html = site('Bedlam Steps', block('own-record', ''), block('own-again', '<a href="bs/">Bedlam Steps</a>'));
+    expect(slugs(html, 'Someone Else')).toEqual(['own-record', 'own-again']);
+  });
+
+  it('filters before the cap, so an artist late on a long label page is still reached', () => {
+    const others = Array.from({ length: 35 }, (_, i) => block(`other-${i}`, '<a href="c2/">C2</a>'));
+    const html = site('control freak studio / control.org', ...others, block('late-one', '<a href="dj-mindstalker/">dj mindstalker</a>'));
+    expect(slugs(html, 'dj mindstalker')).toEqual(['late-one']);
   });
 });
 

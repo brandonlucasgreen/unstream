@@ -1371,6 +1371,38 @@ async function getExistingSources(client: SupabaseClient, releaseIds: string[]):
 }
 
 /**
+ * The stored release that already holds this platform listing, if any — checked before any
+ * title match, because the platform's own id is a stronger identity than our reading of its
+ * title. `UNIQUE (platform, external_id)` already lets a listing belong to only one release, so
+ * this can't merge anything the table doesn't already assert.
+ *
+ * Without it, a listing whose title stopped matching its release's `match_key` — Faircamp and
+ * Mirlo append "(single)", "(EP)", "[Compilation]" — was treated as a new release: a row was
+ * inserted (and, on the fuzzy paths, flagged for review), then its source write hit the unique
+ * constraint and failed, leaving a release with no sources at all. Merging that phantom away in
+ * `/admin/release-review` only deleted it until the next scheduled re-catalogue made it again,
+ * which is how the queue held the same pairs week after week (found 2026-10-01: all nine pairs
+ * in the queue were this).
+ *
+ * Linear over the artist's sources, read live from `existingSources` so a source written earlier
+ * in the same pass counts too.
+ */
+export function findReleaseBySource<T extends { id: string }>(
+  existing: T[],
+  existingSources: ExistingSourceMap,
+  platform: string,
+  externalId: string | null
+): T | undefined {
+  if (!externalId) return undefined;
+  for (const source of existingSources.values()) {
+    if (source.platform === platform && source.external_id === externalId) {
+      return existing.find(row => row.id === source.release_id);
+    }
+  }
+  return undefined;
+}
+
+/**
  * Write one release's source row — or don't, when writing it would change nothing.
  *
  * The one place every ingest path goes through to write `release_sources`, so the two rules below
@@ -1441,7 +1473,12 @@ async function upsertReleaseSource(
     ? await client.from('release_sources').update(row).eq('id', prior.id).select('id, url, external_id, source, detail_checked_at').single()
     : await client.from('release_sources').insert(row).select('id, url, external_id, source, detail_checked_at').single();
 
-  if (error || !data) return null;
+  if (error || !data) {
+    // 23505 here almost always means another release — usually another *artist's* — already
+    // holds this listing, since `UNIQUE (platform, external_id)` is global.
+    console.error('[DB] upsertReleaseSource failed:', error?.code, error?.message);
+    return null;
+  }
 
   // Keep the map honest for the rest of this pass, so a second release resolving to the same
   // source doesn't insert over the top of a row this call just wrote.
@@ -1454,6 +1491,40 @@ async function upsertReleaseSource(
   });
 
   return { id: written.id, url: written.url, detail_checked_at: written.detail_checked_at };
+}
+
+/**
+ * Delete a release row this pass inserted moments ago, because its source write then failed.
+ *
+ * A release with no source is a page with nowhere to buy the record — the outcome
+ * `persistMusicBrainzEnrichment` refuses to create on purpose — and the ingest paths insert the
+ * row *before* the fallible source write, so a failure used to leave exactly that behind. Measured
+ * 2026-10-01: 676 of 31,496 releases had no sources, ~600 of them because the listing already
+ * belonged to a different artist's release (a Faircamp label site linked from several artist rows,
+ * or two rows for one artist sharing a Bandcamp link), which `UNIQUE (platform, external_id)`
+ * rejects. They rendered on artist pages, release pages and feeds.
+ *
+ * Only ever called on a row inserted in the same pass, before anything could reference it: the
+ * fuzzy partner is flagged only after the source write succeeds, so there is no review flag to
+ * undo. Returns false when the delete itself fails, which leaves the row behind and is logged.
+ */
+async function discardUnsourcedRelease(client: SupabaseClient, releaseId: string, caller: string): Promise<boolean> {
+  const { error } = await client.from('releases').delete().eq('id', releaseId);
+  if (error) {
+    console.error(`[DB] ${caller} could not discard source-less release`, releaseId, error.message);
+    return false;
+  }
+  return true;
+}
+
+/** One Sentry event per pass, not per release: an alias artist row can collide on every listing. */
+function reportDiscardedReleases(artistId: string, platform: string, count: number): void {
+  if (count === 0) return;
+  Sentry.captureMessage('[catalog] new releases discarded: source write failed', {
+    level: 'warning',
+    tags: { area: 'release-catalog', kind: 'unsourced-release-discarded', platform },
+    extra: { artistId, count },
+  });
 }
 
 export async function persistReleases(
@@ -1491,13 +1562,18 @@ export async function persistReleases(
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
+    let discarded = 0;
 
     for (const release of releases) {
-      // Title identity, not `(release_type, match_key)` identity — see findExactReleaseMatch.
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first (see findReleaseBySource), then title identity — not
+      // `(release_type, match_key)` identity, see findExactReleaseMatch.
+      const prior =
+        findReleaseBySource(existing, existingSources, release.source.platform, release.source.externalId) ??
+        findExactReleaseMatch(existing, release);
       const curated = new Set(prior?.curated_fields ?? []);
 
       let releaseId: string;
+      let createdRow: ExistingRow | null = null;
 
       if (prior) {
         const patch: Record<string, unknown> = {};
@@ -1509,7 +1585,13 @@ export async function persistReleases(
         // held — six indexes each — even when the title was byte-identical, which it almost always
         // is. With the comparison, an unchanged release now falls through to an empty patch and
         // does no write at all. See PERSIST_REFRESH_FLOOR_MS for the same problem on `artists`.
-        if (!curated.has('title') && release.title !== prior.title) patch.title = release.title;
+        //
+        // Only when the match keys agree: a release found by its source id may carry a title
+        // that normalizes differently, and writing it would leave `title` and `match_key`
+        // describing two different strings. The stored title stays until a human changes it.
+        if (!curated.has('title') && release.title !== prior.title && release.matchKey === prior.match_key) {
+          patch.title = release.title;
+        }
         if (!curated.has('artwork_url') && release.artworkUrl && !prior.artwork_url) {
           patch.artwork_url = release.artworkUrl;
         }
@@ -1555,7 +1637,7 @@ export async function persistReleases(
         }
         releaseId = (inserted as { id: string }).id;
         // Visible to the rest of this batch, so two titles that normalize alike don't both insert.
-        existing.push({
+        createdRow = {
           id: releaseId,
           slug,
           title: release.title,
@@ -1565,7 +1647,8 @@ export async function persistReleases(
           date_precision: release.datePrecision,
           artwork_url: release.artworkUrl,
           curated_fields: [],
-        });
+        };
+        existing.push(createdRow);
       }
 
       const source = await upsertReleaseSource(
@@ -1579,6 +1662,10 @@ export async function persistReleases(
 
       if (!source) {
         console.error('[DB] persistReleases source write failed for release', releaseId);
+        if (createdRow && (await discardUnsourcedRelease(client, releaseId, 'persistReleases'))) {
+          existing.splice(existing.indexOf(createdRow), 1);
+          discarded++;
+        }
         continue;
       }
 
@@ -1591,6 +1678,7 @@ export async function persistReleases(
       });
     }
 
+    reportDiscardedReleases(artistId, releases[0].source.platform, discarded);
     return written;
   } catch (error) {
     console.error('[DB] persistReleases error:', error);
@@ -1782,6 +1870,10 @@ export async function persistReleaseDetail(
 /** What the catalog passes need before they can start. */
 export interface ArtistForCatalog {
   name: string;
+  /** The photo search stored, which the Bandcamp pass replaces if its host has deleted it. */
+  imageUrl: string | null;
+  /** A claimed artist's own photo. Shown instead of `imageUrl` wherever there is one. */
+  customImageUrl: string | null;
   bandcampUrl: string | null;
   discogsUrl: string | null;
   faircampUrl: string | null;
@@ -1803,7 +1895,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
 
   try {
     const [{ data: artistRow, error: artistError }, { data: linkRows, error: linkError }] = await Promise.all([
-      client.from('artists').select('name').eq('id', artistId).maybeSingle(),
+      client.from('artists').select('name, image_url, artist_profiles(custom_image_url)').eq('id', artistId).maybeSingle(),
       client
         .from('artist_links')
         .select('platform, url')
@@ -1824,8 +1916,18 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
     const links = ((linkRows as { platform: string; url: string }[] | null) || []).filter(l =>
       isCatalogueableLink(l.platform, l.url)
     );
+    const row = artistRow as {
+      name: string;
+      image_url: string | null;
+      artist_profiles: { custom_image_url: string | null } | { custom_image_url: string | null }[] | null;
+    };
+    // artist_id is unique on artist_profiles, so PostgREST embeds one object (null when unclaimed).
+    // An array is accepted too: misreading the shape would silently ignore an artist's own photo.
+    const profile = Array.isArray(row.artist_profiles) ? row.artist_profiles[0] : row.artist_profiles;
     return {
-      name: (artistRow as { name: string }).name,
+      name: row.name,
+      imageUrl: row.image_url,
+      customImageUrl: profile?.custom_image_url ?? null,
       bandcampUrl: links.find(l => l.platform === 'bandcamp')?.url ?? null,
       discogsUrl: links.find(l => l.platform === 'discogs')?.url ?? null,
       faircampUrl: links.find(l => l.platform === 'faircamp')?.url ?? null,
@@ -1837,6 +1939,33 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
     console.error('[DB] getArtistForCatalog error:', error);
     return null;
   }
+}
+
+/**
+ * Replace an artist's stored photo, but only if it is still the one the caller found gone: a search
+ * that stored a new photo in the meantime wins. The one write the catalogue pass makes to a claimed
+ * artist's row, and safe for the same reason it's allowed: `image_url` is what search found, never
+ * something the artist chose (theirs is `artist_profiles.custom_image_url`, which this doesn't touch).
+ * Leaves `updated_at` alone, since it means "last verified against live sources", not "changed".
+ *
+ * Returns whether a row changed.
+ */
+export async function replaceArtistPhoto(artistId: string, goneUrl: string, newUrl: string): Promise<boolean> {
+  const client = getClient();
+  if (!client) return false;
+
+  const { data, error } = await client
+    .from('artists')
+    .update({ image_url: newUrl })
+    .eq('id', artistId)
+    .eq('image_url', goneUrl)
+    .select('id');
+
+  if (error) {
+    console.error('[DB] replaceArtistPhoto failed:', error.message);
+    return false;
+  }
+  return (data?.length ?? 0) > 0;
 }
 
 interface DiscogsReleaseToPersist {
@@ -1904,12 +2033,6 @@ export async function persistDiscogsReleases(
     const byMasterId = new Map(
       existing.filter(r => r.discogs_master_id).map(r => [r.discogs_master_id as string, r])
     );
-    const byType = new Map<string, ExistingRow[]>();
-    for (const row of existing) {
-      const bucket = byType.get(row.release_type);
-      if (bucket) bucket.push(row);
-      else byType.set(row.release_type, [row]);
-    }
     const takenSlugs = new Set(existing.map(r => r.slug));
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
@@ -1934,6 +2057,7 @@ export async function persistDiscogsReleases(
     }
 
     const written: PersistedRelease[] = [];
+    let discarded = 0;
 
     for (const release of releases) {
       let prior = byMasterId.get(release.masterId);
@@ -1953,12 +2077,15 @@ export async function persistDiscogsReleases(
       // merge — insert a new row below and flag both sides, with each pointing at the other
       // via `flagged_against_release_id` so an admin queue can show the pair without having
       // to re-run the fuzzy match to reconstruct what triggered it.
-      const fuzzy = prior
-        ? null
-        : findFuzzyReleaseMatch(byType.get(release.releaseType) ?? [], release);
+      //
+      // Searched across every stored release, not just those of this one's type, same as tier 2
+      // above and every other source: Discogs types 92% of its masters 'other', so scoping by
+      // type meant a near-match against a Bandcamp 'album' was never put in front of a human.
+      const fuzzy = prior ? null : findFuzzyReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
+      let createdRow: ExistingRow | null = null;
 
       if (prior) {
         const curated = new Set(prior.curated_fields ?? []);
@@ -2020,7 +2147,7 @@ export async function persistDiscogsReleases(
         releaseId = (inserted as { id: string }).id;
         curatedFields = [];
 
-        const createdRow: ExistingRow = {
+        createdRow = {
           id: releaseId,
           slug,
           title: release.title,
@@ -2033,20 +2160,6 @@ export async function persistDiscogsReleases(
         };
         byMasterId.set(release.masterId, createdRow);
         existing.push(createdRow);
-        const bucket = byType.get(release.releaseType);
-        if (bucket) bucket.push(createdRow);
-        else byType.set(release.releaseType, [createdRow]);
-
-        // The reverse direction: fuzzy's own id wasn't known until the new row above existed,
-        // so this side is written second. Never merge — flagging both sides is the whole
-        // point of tier 3.
-        if (fuzzy) {
-          const { error: flagError } = await client
-            .from('releases')
-            .update({ needs_review: true, flagged_against_release_id: releaseId })
-            .eq('id', fuzzy.id);
-          if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
-        }
       }
 
       const source = await upsertReleaseSource(
@@ -2062,7 +2175,27 @@ export async function persistDiscogsReleases(
 
       if (!source) {
         console.error('[DB] persistDiscogsReleases source write failed for release', releaseId);
+        // Typically a master credited to two artists (a collaboration or split) that the other
+        // artist's release already holds — the source table allows it on only one release.
+        if (createdRow && (await discardUnsourcedRelease(client, releaseId, 'persistDiscogsReleases'))) {
+          const row = createdRow;
+          byMasterId.delete(release.masterId);
+          existing.splice(existing.indexOf(row), 1);
+          discarded++;
+        }
         continue;
+      }
+
+      // The reverse direction: fuzzy's own id wasn't known until the new row existed, so this
+      // side is written second — and only once the new row has its source, so a row discarded
+      // above can't leave its partner flagged against nothing. Never merge — flagging both
+      // sides is the whole point of tier 3.
+      if (createdRow && fuzzy) {
+        const { error: flagError } = await client
+          .from('releases')
+          .update({ needs_review: true, flagged_against_release_id: releaseId })
+          .eq('id', fuzzy.id);
+        if (flagError) console.error('[DB] persistDiscogsReleases fuzzy-flag failed:', flagError.message);
       }
 
       written.push({
@@ -2074,6 +2207,7 @@ export async function persistDiscogsReleases(
       });
     }
 
+    reportDiscardedReleases(artistId, 'discogs', discarded);
     return written;
   } catch (error) {
     console.error('[DB] persistDiscogsReleases error:', error);
@@ -2232,12 +2366,18 @@ export async function persistFaircampReleases(
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
+    let discarded = 0;
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'faircamp', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
+      let createdRow: ExistingRow | null = null;
+      let fuzzyPartnerId: string | null = null;
 
       if (prior) {
         const curated = new Set(prior.curated_fields ?? []);
@@ -2286,7 +2426,7 @@ export async function persistFaircampReleases(
         releaseId = (inserted as { id: string }).id;
         curatedFields = [];
 
-        const createdRow: ExistingRow = {
+        createdRow = {
           id: releaseId,
           slug,
           match_key: release.matchKey,
@@ -2295,20 +2435,27 @@ export async function persistFaircampReleases(
           curated_fields: [],
         };
         existing.push(createdRow);
-
-        if (fuzzy) {
-          const { error: flagError } = await client
-            .from('releases')
-            .update({ needs_review: true, flagged_against_release_id: releaseId })
-            .eq('id', fuzzy.id);
-          if (flagError) console.error('[DB] persistFaircampReleases fuzzy-flag failed:', flagError.message);
-        }
+        fuzzyPartnerId = fuzzy?.id ?? null;
       }
 
       const source = await upsertReleaseSource(client, releaseId, 'faircamp', release.externalUrl, release.externalUrl, existingSources);
       if (!source) {
         console.error('[DB] persistFaircampReleases source write failed for release', releaseId);
+        if (createdRow && (await discardUnsourcedRelease(client, releaseId, 'persistFaircampReleases'))) {
+          existing.splice(existing.indexOf(createdRow), 1);
+          discarded++;
+        }
         continue;
+      }
+
+      // Flagged only once the new row has its source, so a discarded row can't leave its
+      // partner flagged against nothing.
+      if (fuzzyPartnerId) {
+        const { error: flagError } = await client
+          .from('releases')
+          .update({ needs_review: true, flagged_against_release_id: releaseId })
+          .eq('id', fuzzyPartnerId);
+        if (flagError) console.error('[DB] persistFaircampReleases fuzzy-flag failed:', flagError.message);
       }
 
       written.push({
@@ -2320,6 +2467,7 @@ export async function persistFaircampReleases(
       });
     }
 
+    reportDiscardedReleases(artistId, 'faircamp', discarded);
     return written;
   } catch (error) {
     console.error('[DB] persistFaircampReleases error:', error);
@@ -2385,12 +2533,18 @@ export async function persistJamcoopReleases(
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
+    let discarded = 0;
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'jamcoop', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
+      let createdRow: ExistingRow | null = null;
+      let fuzzyPartnerId: string | null = null;
 
       if (prior) {
         const curated = new Set(prior.curated_fields ?? []);
@@ -2449,7 +2603,7 @@ export async function persistJamcoopReleases(
         releaseId = (inserted as { id: string }).id;
         curatedFields = [];
 
-        const createdRow: ExistingRow = {
+        createdRow = {
           id: releaseId,
           slug,
           match_key: release.matchKey,
@@ -2460,14 +2614,7 @@ export async function persistJamcoopReleases(
           curated_fields: [],
         };
         existing.push(createdRow);
-
-        if (fuzzy) {
-          const { error: flagError } = await client
-            .from('releases')
-            .update({ needs_review: true, flagged_against_release_id: releaseId })
-            .eq('id', fuzzy.id);
-          if (flagError) console.error('[DB] persistJamcoopReleases fuzzy-flag failed:', flagError.message);
-        }
+        fuzzyPartnerId = fuzzy?.id ?? null;
       }
 
       const source = await upsertReleaseSource(
@@ -2480,7 +2627,21 @@ export async function persistJamcoopReleases(
       );
       if (!source) {
         console.error('[DB] persistJamcoopReleases source write failed for release', releaseId);
+        if (createdRow && (await discardUnsourcedRelease(client, releaseId, 'persistJamcoopReleases'))) {
+          existing.splice(existing.indexOf(createdRow), 1);
+          discarded++;
+        }
         continue;
+      }
+
+      // Flagged only once the new row has its source, so a discarded row can't leave its
+      // partner flagged against nothing.
+      if (fuzzyPartnerId) {
+        const { error: flagError } = await client
+          .from('releases')
+          .update({ needs_review: true, flagged_against_release_id: releaseId })
+          .eq('id', fuzzyPartnerId);
+        if (flagError) console.error('[DB] persistJamcoopReleases fuzzy-flag failed:', flagError.message);
       }
 
       written.push({
@@ -2492,6 +2653,7 @@ export async function persistJamcoopReleases(
       });
     }
 
+    reportDiscardedReleases(artistId, 'jamcoop', discarded);
     return written;
   } catch (error) {
     console.error('[DB] persistJamcoopReleases error:', error);
@@ -2560,12 +2722,18 @@ export async function persistMirloReleases(
     const existingSources = await getExistingSources(client, existing.map(r => r.id));
 
     const written: PersistedRelease[] = [];
+    let discarded = 0;
 
     for (const release of releases) {
-      const prior = findExactReleaseMatch(existing, release);
+      // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
+      const prior =
+        findReleaseBySource(existing, existingSources, 'mirlo', release.externalUrl) ??
+        findExactReleaseMatch(existing, release);
 
       let releaseId: string;
       let curatedFields: string[];
+      let createdRow: ExistingRow | null = null;
+      let fuzzyPartnerId: string | null = null;
 
       if (prior) {
         const curated = new Set(prior.curated_fields ?? []);
@@ -2624,7 +2792,7 @@ export async function persistMirloReleases(
         releaseId = (inserted as { id: string }).id;
         curatedFields = [];
 
-        const createdRow: ExistingRow = {
+        createdRow = {
           id: releaseId,
           slug,
           match_key: release.matchKey,
@@ -2635,14 +2803,7 @@ export async function persistMirloReleases(
           curated_fields: [],
         };
         existing.push(createdRow);
-
-        if (fuzzy) {
-          const { error: flagError } = await client
-            .from('releases')
-            .update({ needs_review: true, flagged_against_release_id: releaseId })
-            .eq('id', fuzzy.id);
-          if (flagError) console.error('[DB] persistMirloReleases fuzzy-flag failed:', flagError.message);
-        }
+        fuzzyPartnerId = fuzzy?.id ?? null;
       }
 
       const source = await upsertReleaseSource(
@@ -2655,7 +2816,21 @@ export async function persistMirloReleases(
       );
       if (!source) {
         console.error('[DB] persistMirloReleases source write failed for release', releaseId);
+        if (createdRow && (await discardUnsourcedRelease(client, releaseId, 'persistMirloReleases'))) {
+          existing.splice(existing.indexOf(createdRow), 1);
+          discarded++;
+        }
         continue;
+      }
+
+      // Flagged only once the new row has its source, so a discarded row can't leave its
+      // partner flagged against nothing.
+      if (fuzzyPartnerId) {
+        const { error: flagError } = await client
+          .from('releases')
+          .update({ needs_review: true, flagged_against_release_id: releaseId })
+          .eq('id', fuzzyPartnerId);
+        if (flagError) console.error('[DB] persistMirloReleases fuzzy-flag failed:', flagError.message);
       }
 
       written.push({
@@ -2667,6 +2842,7 @@ export async function persistMirloReleases(
       });
     }
 
+    reportDiscardedReleases(artistId, 'mirlo', discarded);
     return written;
   } catch (error) {
     console.error('[DB] persistMirloReleases error:', error);

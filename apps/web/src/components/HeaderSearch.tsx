@@ -9,7 +9,7 @@ import { SuggestionList } from './SuggestionList';
  * Submitting navigates to /?q=… rather than rendering results in place. The
  * homepage is the app's only search renderer, and /search already belongs to
  * the noscript-search edge function — pointing a second renderer at that URL is
- * the bifurcation trap in docs/retros/UNS-100-bifurcation-retro.md.
+ * the bifurcation trap in docs/postmortems/UNS-100-bifurcation-retro.md.
  *
  * The input value stays inside this component on purpose. Lifting it into
  * Header (or a context) would re-render whichever page is mounted on every

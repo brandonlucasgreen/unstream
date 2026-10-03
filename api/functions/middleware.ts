@@ -381,6 +381,16 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // Discord
   'discord.com',
   'discordapp.com',
+  // Image CDNs, fetched only to draw Instagram cards (social-card.ts): artist photos and release
+  // covers as the platforms store them. Faircamp covers already pass the faircamp rule below,
+  // and Mirlo's are on cdn.mirlo.space, covered above.
+  '*.bcbits.com',              // Bandcamp's image host
+  'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
+  'images.subvert.fm',
+  'cdn.jam.coop',
+  // The industry digest's feed, relayed by digest-feed.ts from the repo's industry-digest
+  // branch. That function fetches one constant URL; nothing user-supplied reaches this host.
+  'raw.githubusercontent.com',
   // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.

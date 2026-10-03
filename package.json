@@ -36,6 +36,7 @@
     "migrate:list": "supabase migration list --linked"
   },
   "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2",
     "@sentry/node": "^10.56.0",
     "@sentry/react": "^10.56.0",
     "@supabase/supabase-js": "^2.99.1",
@@ -64,6 +65,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "fast-xml-parser": "^5.11.2",
     "globals": "^16.5.0",
     "jsdom": "^29.1.1",
     "marked": "^18.0.0",

@@ -3,6 +3,7 @@
 // The sources below add client-only fields (description, searchUrlTemplate, hasEmbed, aiPolicy, etc.).
 import type { Source, SourceId, SearchResponse, SearchResult } from '../types';
 import * as Sentry from '@sentry/react';
+import { bandcampSubdomainOf, bandcampSubdomainConflicts } from '../../../../api/shared/bandcamp-identity';
 
 export const sources: Record<SourceId, Source> = {
   bandcamp: {
@@ -523,10 +524,16 @@ export function mergeSearchResponses(responses: SearchResponse[], originalQuery:
 }
 
 /**
- * Perform a single search API call
+ * Perform a single search API call.
+ *
+ * `deferEnrichment` tells the server not to wait for an uncached MusicBrainz lookup —
+ * results come back in a second or two with hasPendingEnrichment set, and App.tsx
+ * fetches the enrichment itself from /api/search/musicbrainz. Only for a query whose
+ * response reaches that Phase 2 call.
  */
-async function searchSingle(query: string): Promise<SearchResponse> {
+async function searchSingle(query: string, deferEnrichment = false): Promise<SearchResponse> {
   const params = new URLSearchParams({ query });
+  if (deferEnrichment) params.set('enrichment', 'deferred');
 
   try {
     const response = await fetch(`/api/search/sources?${params.toString()}`);
@@ -544,6 +551,24 @@ async function searchSingle(query: string): Promise<SearchResponse> {
   }
 }
 
+/**
+ * The claimed and verified artists Unstream already holds for a query — database reads
+ * only, so it answers well before the full search. Shown while that search runs; the
+ * full results carry the same cards under the same ids and replace them in place.
+ * An empty list on any failure: this is a preview, and the full search still runs.
+ */
+export async function fetchStoredArtists(query: string): Promise<SearchResult[]> {
+  try {
+    const response = await fetch(`/api/search/stored?query=${encodeURIComponent(query)}`);
+    if (!response.ok) return [];
+    const data = await response.json() as { results?: SearchResult[] };
+    return data.results ?? [];
+  } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.storedArtists' } });
+    return [];
+  }
+}
+
 // Search all platforms via the unified API
 // Handles multi-artist queries by searching each artist separately and merging results
 export async function searchPlatforms(query: string): Promise<SearchResponse> {
@@ -551,7 +576,7 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
 
   // If single artist (no separators found), do a simple search
   if (artistQueries.length === 1) {
-    return searchSingle(query);
+    return searchSingle(query, true);
   }
 
   // Multi-artist query: search for the full query AND each individual artist
@@ -563,7 +588,9 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
   const uniqueQueries = [...new Set(allQueries.map(q => q.toLowerCase()))]
     .map(lowerQ => allQueries.find(q => q.toLowerCase() === lowerQ)!);
 
-  // Search all queries in parallel
+  // Search all queries in parallel. Not deferred: the merged response carries no
+  // hasPendingEnrichment, so Phase 2 never runs for the individual artists and the
+  // server has to enrich each one inline.
   const responses = await Promise.all(uniqueQueries.map(q => searchSingle(q)));
 
   // Merge and deduplicate results
@@ -638,6 +665,12 @@ export function buildMusicBrainzFallbackResult(
   const encoded = encodeURIComponent(name);
 
   const platforms: import('../types').PlatformLink[] = [];
+  // The Bandcamp account MusicBrainz lists, when it has one. Phase 2 has already dropped a
+  // retired subdomain from platformUrls, so this is a live artist page, not a guess.
+  const bandcampUrl = mbData.platformUrls?.find(u => bandcampSubdomainOf(u) !== null);
+  if (bandcampUrl) {
+    platforms.push({ sourceId: 'bandcamp', url: bandcampUrl });
+  }
   if (mbData.officialUrl) {
     platforms.push({ sourceId: 'officialsite', url: mbData.officialUrl });
   }
@@ -659,10 +692,10 @@ export function buildMusicBrainzFallbackResult(
     { sourceId: 'buymeacoffee', url: 'https://buymeacoffee.com/explore-creators' },
   );
 
-  // This card is built only when no platform returned anything, so it is always
-  // the only result on the page — there is nothing to cross-check it against and
-  // nothing for it to conflict with. MusicBrainz naming the artist and handing
-  // over their real links is the verification.
+  // This card exists because no result is this artist — either nothing came back, or
+  // only same-name strangers on other Bandcamp accounts did. There are no releases to
+  // cross-check, so MusicBrainz naming the artist and handing over their real links is
+  // the verification.
   const confirmed = musicBrainzConfirmsIdentity(mbData);
 
   return {
@@ -711,7 +744,16 @@ export function mergeWithMusicBrainzData(
       resultNormalized === mbNormalized ||
       (resultNormalized.includes(mbNormalized) && mbNormalized.length > resultNormalized.length * 0.7) ||
       (mbNormalized.includes(resultNormalized) && resultNormalized.length > mbNormalized.length * 0.7);
-    if (isMatch) matchingIndices.push(i);
+    if (!isMatch) continue;
+
+    // Same name, different Bandcamp account: a homonym, not this artist. Merging would graft
+    // the MusicBrainz artist's location, socials and Wikipedia entry onto a stranger — the
+    // Honeycrush (Brooklyn) / Honey Crush (Orlando) report. Same rule as the server's
+    // applyEnrichmentToResults.
+    const bandcampUrl = result.platforms.find(p => p.sourceId === 'bandcamp')?.url;
+    if (bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampUrl)) continue;
+
+    matchingIndices.push(i);
   }
 
   // Disambiguate: use MusicBrainz platform URLs (bandcamp, streaming, etc.) to find
@@ -756,6 +798,14 @@ export function mergeWithMusicBrainzData(
         }
       }
     }
+  }
+
+  // No result is this artist: nothing matched the name, or every same-name result is on
+  // another Bandcamp account. Give the MusicBrainz artist a card of their own, as the server
+  // does when it enriches inline (Phase 2.2 in search-sources.ts), rather than dropping them.
+  if (bestMatchIndex === -1) {
+    const fallback = buildMusicBrainzFallbackResult(mbData);
+    return fallback && !results.some(r => r.id === fallback.id) ? [...results, fallback] : results;
   }
 
   return results.map((result, index) => {

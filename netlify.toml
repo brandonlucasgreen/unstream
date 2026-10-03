@@ -29,7 +29,7 @@
 
 # `netlify dev` — the local full stack, and what `npm run dev` runs. Serves the real functions
 # and edge functions on :8888 in front of Vite, so local behaviour matches production instead of
-# the drifted `apps/web/server/` shim (see "Local dev API vs production API" in CLAUDE.md).
+# the drifted `apps/web/server/` shim (see "Local dev: the full stack, and the fast shim" in CLAUDE.md).
 #
 # `targetPort` must match the port in `dev:fast`, and that script passes `--strictPort` on
 # purpose. Without it Vite silently moves to the next free port when 5173 is taken, `netlify dev`
@@ -46,6 +46,13 @@
   port = 8888
   framework = "#custom"
   autoLaunch = false
+
+# The Instagram card renderer reads two kinds of file at runtime, which the bundler can't see
+# through an import: its fonts, and resvg's WebAssembly binary. External, the resvg package ships
+# whole (wasm included) instead of being bundled into JS that can't find its .wasm.
+[functions."social-card"]
+  included_files = ["api/functions/social-card-fonts/*.ttf"]
+  external_node_modules = ["@resvg/resvg-wasm"]
 
 # The staleness probe in buildFreshness.ts compares this file's id against the one baked into
 # the running bundle. A cached response would echo the tab's own build back to it forever, so
@@ -160,6 +167,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/search/stored"
+  to = "/.netlify/functions/search-stored"
+  status = 200
+
+[[redirects]]
   from = "/api/suggest"
   to = "/.netlify/functions/search-suggest"
   status = 200
@@ -270,6 +282,13 @@
 [[redirects]]
   from = "/api/collection/art/*"
   to = "/.netlify/functions/collection-art"
+  status = 200
+
+# Instagram carousel slides for the weekly indie spotlights, drawn from the artist's data on
+# request — see api/functions/social-card.ts. Buffer fetches these when a post publishes.
+[[redirects]]
+  from = "/api/social-card/*"
+  to = "/.netlify/functions/social-card"
   status = 200
 
 # Newsletter signup. Proxies to Buttondown server-side so the API key stays out of the
@@ -444,6 +463,13 @@
 [[redirects]]
   from = "/a/:artist/releases.ics"
   to = "/.netlify/functions/feed-releases"
+  status = 200
+
+# The industry digest's feed (digest-feed.ts). Unlisted; above the SPA catch-all for the same
+# reason as the release feeds.
+[[redirects]]
+  from = "/digest/feed.xml"
+  to = "/.netlify/functions/digest-feed"
   status = 200
 
 [[redirects]]

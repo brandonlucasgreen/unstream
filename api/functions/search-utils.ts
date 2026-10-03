@@ -1,6 +1,7 @@
 // Pure utility functions and types extracted from search-sources.ts
 // No HTTP, cache, or database dependencies.
 
+import { bandcampSubdomainOf, bandcampSubdomainConflicts } from '../shared/bandcamp-identity';
 import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
 
 export type SourceId =
@@ -694,49 +695,33 @@ export function isSearchOnlyLink(p: { sourceId: SourceId; url: string }): boolea
 export function isBandcampSearchLink(url: string): boolean {
   return url.includes('bandcamp.com/search');
 }
+// Moved to api/shared so the web client's MusicBrainz merge applies the same identity rule.
+export { bandcampSubdomainOf, bandcampSubdomainConflicts };
 
 /**
- * The subdomain of a `*.bandcamp.com` URL, or null for anything else.
+ * The artist's own Bandcamp account among links found on their official site or Linktree,
+ * as an account root URL, or null.
  *
- * Custom domains deliberately return null: `artist.com` may well be a Bandcamp site,
- * but we cannot tell from the URL, and guessing would make the identity comparison
- * below produce false conflicts.
+ * MusicBrainz relations go stale: Honeycrush (Brooklyn) moved to `honeycrush-online`, which
+ * nothing derived from the name could guess, while MB still lists the retired `honeyyycrush`.
+ * The artist's own site is the next-best word on which account is theirs. But a site also
+ * links labels, collaborators and the records it is selling, so an account counts only when
+ * its subdomain carries the artist's name: equal to it, or containing it ("honeycrush-online",
+ * "officialjackwhite"). Containment needs a name of 4+ characters — a short one like "Ra"
+ * turns up inside unrelated subdomains.
  */
-export function bandcampSubdomainOf(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const { hostname } = new URL(url);
-    if (!hostname.endsWith('.bandcamp.com')) return null;
-    return hostname.slice(0, -'.bandcamp.com'.length).toLowerCase() || null;
-  } catch {
-    return null;
+export function pickArtistBandcampUrl(urls: string[], artistName: string): string | null {
+  const name = normalizeForComparison(artistName);
+  if (!name) return null;
+  for (const url of urls) {
+    const subdomain = bandcampSubdomainOf(url);
+    if (!subdomain) continue;
+    const squashed = subdomain.replace(/-/g, '');
+    if (squashed === name || (name.length >= 4 && squashed.includes(name))) {
+      return `https://${subdomain}.bandcamp.com/`;
+    }
   }
-}
-
-/**
- * Whether MusicBrainz and the subdomain probe disagree about which Bandcamp account
- * belongs to an artist.
- *
- * The probe matches on name, so a homonym passes it: searching "Honeycrush" accepts
- * `honeycrush.bandcamp.com`, a real and unrelated Orlando band called "Honey Crush",
- * because the names normalize identically and the account has releases. Both of the
- * probe's checks did their job; neither can see that this is someone else.
- *
- * MusicBrainz can. When MB names a specific Bandcamp subdomain for the artist and the
- * probe matched a different one, they are two different accounts, and the MB artist's
- * location, socials and Wikipedia entry do not belong on the probe's result. This holds
- * even when MB's own link is retired — the claim identifies the artist, the HTTP status
- * only says whether the page still loads.
- *
- * Returns false unless both sides actually named a subdomain. Absence is not conflict.
- */
-export function bandcampSubdomainConflicts(
-  mbSubdomain: string | null | undefined,
-  resultUrl: string | null | undefined,
-): boolean {
-  const probed = bandcampSubdomainOf(resultUrl);
-  if (!mbSubdomain || !probed) return false;
-  return mbSubdomain.toLowerCase() !== probed;
+  return null;
 }
 
 // Platforms where "no releases" is reliable evidence of a different artist
@@ -1113,11 +1098,20 @@ export function mergeStoredArtistsIntoResults(
     if (seenIds.has(artist.id)) continue;
     seenIds.add(artist.id);
 
+    // A live result with the same name on a different Bandcamp account is a different
+    // artist (Honeycrush in Brooklyn vs Honey Crush in Orlando), so it neither covers this
+    // one nor inherits their page. Without a Bandcamp link on both sides there is no
+    // evidence either way, and the name decides as before.
+    const storedSubdomain = bandcampSubdomainOf(artist.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+    const isSameArtist = (r: AggregatedResult) =>
+      !bandcampSubdomainConflicts(storedSubdomain, r.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+
     const sameNameIdx = merged.findIndex(r =>
       r.type === 'artist' &&
       r.matchConfidence !== 'claimed' &&
       (normalizeForComparison(r.name) === normalizeForComparison(artist.name) ||
-        namesEqualIgnoringArticles(r.name, artist.name))
+        namesEqualIgnoringArticles(r.name, artist.name)) &&
+      isSameArtist(r)
     );
 
     if (artist.matchConfidence !== 'claimed') {
@@ -1128,7 +1122,7 @@ export function mergeStoredArtistsIntoResults(
         if (artist.knownSlug && !merged[sameNameIdx].knownSlug) {
           merged[sameNameIdx] = { ...merged[sameNameIdx], knownSlug: artist.knownSlug };
         }
-      } else if (!merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name))) {
+      } else if (!merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name) && isSameArtist(r))) {
         merged.push(artist);
       }
       continue;
