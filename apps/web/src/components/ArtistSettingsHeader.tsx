@@ -23,21 +23,22 @@ export function ArtistSettingsHeader({ slug, artistName, active }: {
   active: ArtistSettingsTab;
 }) {
   const token = useAuth().session?.access_token;
-  // Tips ship dark: the tab appears only once the server has a Stripe key. On the tips tab itself
-  // there's nothing to ask — the page shows its own "not available" state.
-  const [tipsAvailable, setTipsAvailable] = useState(active === 'tips');
+  // Tips ship dark: the tab appears only once the server has a Stripe key. Asked once per visit —
+  // this header stays mounted across tab switches. On the tips tab itself the tab always shows; the
+  // page has its own "not available" state.
+  const [tipsAvailable, setTipsAvailable] = useState(false);
 
   useEffect(() => {
-    if (active === 'tips' || !token) return;
+    if (!token) return;
     let cancelled = false;
     // A failed check hides the tab rather than breaking the page, and is reported.
     getTipsAvailable(token)
       .then(available => { if (!cancelled) setTipsAvailable(available === true); })
       .catch(err => Sentry.captureException(err, { extra: { context: 'ArtistSettingsHeader.tipsAvailable' } }));
     return () => { cancelled = true; };
-  }, [active, token]);
+  }, [token]);
 
-  const tabs = TABS.filter(tab => tab.id !== 'tips' || tipsAvailable);
+  const tabs = TABS.filter(tab => tab.id !== 'tips' || tipsAvailable || active === 'tips');
 
   return (
     <div className="space-y-4">

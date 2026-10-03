@@ -2,11 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { ArtistSettingsHeader } from '../components/ArtistSettingsHeader';
-import { PageSkeleton } from '../components/PageSkeleton';
-import { FormSkeleton } from '../components/LoadingSkeletons';
+import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { PlatformIcon } from '../components/PlatformIcon';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/release-display';
@@ -93,6 +89,7 @@ export function ArtistReleasesPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [catalog, setCatalog] = useState<CatalogInfo | null>(null);
   const [artistName, setArtistName] = useState<string | undefined>(undefined);
+  useReportArtistName(artistName);
   const [pendingOrder, setPendingOrder] = useState<string[] | null>(null);
 
   const fetchReleases = useCallback(async () => {
@@ -182,140 +179,131 @@ export function ArtistReleasesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <Header />
-      <main className="flex-1 p-6">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {slug && <ArtistSettingsHeader slug={slug} artistName={artistName} active="releases" />}
-          <p className="text-text-muted text-sm">
-            Hide anything that isn't yours, fix a title or date, merge a duplicate, add
-            something we missed, or put them in the order you want fans to see.
-          </p>
+    <div className="space-y-6">
+      <p className="text-text-muted text-sm">
+        Hide anything that isn't yours, fix a title or date, merge a duplicate, add
+        something we missed, or put them in the order you want fans to see.
+      </p>
 
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-              {error}
+      {error && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <TabSkeleton label="Loading releases" />
+      ) : (
+        <>
+          {/* Above the list, not below it: scanning is where an artist starts, and on a real
+              catalogue the bottom of the page is a long scroll away. */}
+          {catalog && (
+            <CatalogNowPanel
+              slug={slug}
+              token={session?.access_token}
+              catalog={catalog}
+              onFinished={fetchReleases}
+            />
+          )}
+
+          <button
+            onClick={() => setShowAddForm(v => !v)}
+            className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm font-medium hover:bg-bg-hover transition-colors"
+          >
+            {showAddForm ? 'Cancel' : '+ Add a release we missed'}
+          </button>
+
+          {showAddForm && (
+            <AddReleaseForm
+              busy={actionLoading === 'create'}
+              onCreate={async input => {
+                const created = await runAction('create', { action: 'create', ...input });
+                if (created) setShowAddForm(false);
+              }}
+            />
+          )}
+
+          {ordered.length > 1 && (
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-xs text-text-muted">
+                Fans see your releases in this order. Use the arrows to arrange them — anything
+                catalogued later is added to the end.
+              </p>
+              {hasCustomOrder && (
+                <button
+                  onClick={resetOrder}
+                  disabled={actionLoading === 'resetOrder'}
+                  className="text-xs text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
+                >
+                  {actionLoading === 'resetOrder' ? 'Resetting...' : 'Reset to newest first'}
+                </button>
+              )}
             </div>
           )}
 
-          {loading ? (
-            <PageSkeleton label="Loading releases">
-              <FormSkeleton sections={2} fields={2} />
-            </PageSkeleton>
+          {ordered.length === 0 ? (
+            <p className="text-text-muted text-sm">No releases catalogued yet.</p>
           ) : (
-            <>
-              {/* Above the list, not below it: scanning is where an artist starts, and on a real
-                  catalogue the bottom of the page is a long scroll away. */}
-              {catalog && (
-                <CatalogNowPanel
-                  slug={slug}
-                  token={session?.access_token}
-                  catalog={catalog}
-                  onFinished={fetchReleases}
-                />
-              )}
-
-              <button
-                onClick={() => setShowAddForm(v => !v)}
-                className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-sm font-medium hover:bg-bg-hover transition-colors"
-              >
-                {showAddForm ? 'Cancel' : '+ Add a release we missed'}
-              </button>
-
-              {showAddForm && (
-                <AddReleaseForm
-                  busy={actionLoading === 'create'}
-                  onCreate={async input => {
-                    const created = await runAction('create', { action: 'create', ...input });
-                    if (created) setShowAddForm(false);
+            <div className="space-y-3">
+              {ordered.map((release, index) => (
+                <ReleaseCard
+                  key={release.id}
+                  release={release}
+                  editing={editingId === release.id}
+                  actionLoading={actionLoading}
+                  showReorder={ordered.length > 1}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < ordered.length - 1}
+                  onMoveUp={() => moveRelease(index, -1)}
+                  onMoveDown={() => moveRelease(index, 1)}
+                  onToggleEdit={() => setEditingId(editingId === release.id ? null : release.id)}
+                  onHide={() =>
+                    runAction(`hide-${release.id}`, {
+                      action: release.isHidden ? 'unhide' : 'hide',
+                      releaseId: release.id,
+                    })
+                  }
+                  onDismiss={() => runAction(`dismiss-${release.id}`, { action: 'dismiss', releaseId: release.id })}
+                  onMerge={(keepId, dropId) => runAction(`merge-${keepId}`, { action: 'merge', keepId, dropId })}
+                  onUpdate={async patch => {
+                    const saved = await runAction(`update-${release.id}`, {
+                      action: 'update',
+                      releaseId: release.id,
+                      ...patch,
+                    });
+                    if (saved) setEditingId(null);
                   }}
+                  onAddLink={(platform, url) =>
+                    runAction(`addlink-${release.id}`, { action: 'addLink', releaseId: release.id, platform, url })
+                  }
                 />
-              )}
-
-              {ordered.length > 1 && (
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="text-xs text-text-muted">
-                    Fans see your releases in this order. Use the arrows to arrange them — anything
-                    catalogued later is added to the end.
-                  </p>
-                  {hasCustomOrder && (
-                    <button
-                      onClick={resetOrder}
-                      disabled={actionLoading === 'resetOrder'}
-                      className="text-xs text-text-muted hover:text-text-primary transition-colors disabled:opacity-50"
-                    >
-                      {actionLoading === 'resetOrder' ? 'Resetting...' : 'Reset to newest first'}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {ordered.length === 0 ? (
-                <p className="text-text-muted text-sm">No releases catalogued yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {ordered.map((release, index) => (
-                    <ReleaseCard
-                      key={release.id}
-                      release={release}
-                      editing={editingId === release.id}
-                      actionLoading={actionLoading}
-                      showReorder={ordered.length > 1}
-                      canMoveUp={index > 0}
-                      canMoveDown={index < ordered.length - 1}
-                      onMoveUp={() => moveRelease(index, -1)}
-                      onMoveDown={() => moveRelease(index, 1)}
-                      onToggleEdit={() => setEditingId(editingId === release.id ? null : release.id)}
-                      onHide={() =>
-                        runAction(`hide-${release.id}`, {
-                          action: release.isHidden ? 'unhide' : 'hide',
-                          releaseId: release.id,
-                        })
-                      }
-                      onDismiss={() => runAction(`dismiss-${release.id}`, { action: 'dismiss', releaseId: release.id })}
-                      onMerge={(keepId, dropId) => runAction(`merge-${keepId}`, { action: 'merge', keepId, dropId })}
-                      onUpdate={async patch => {
-                        const saved = await runAction(`update-${release.id}`, {
-                          action: 'update',
-                          releaseId: release.id,
-                          ...patch,
-                        });
-                        if (saved) setEditingId(null);
-                      }}
-                      onAddLink={(platform, url) =>
-                        runAction(`addlink-${release.id}`, { action: 'addLink', releaseId: release.id, platform, url })
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Sticky, because a rearranged release can be a long scroll away from the top of
-                  a real catalogue — and an unsaved order that looks saved is the whole failure
-                  mode worth designing out here. */}
-              {pendingOrder && (
-                <div className="sticky bottom-4 flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface border border-border shadow-lg">
-                  <span className="text-sm text-text-primary">Your new order isn't saved yet.</span>
-                  <button
-                    onClick={saveOrder}
-                    disabled={actionLoading === 'reorder'}
-                    className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition-colors disabled:opacity-50"
-                  >
-                    {actionLoading === 'reorder' ? 'Saving...' : 'Save order'}
-                  </button>
-                  <button
-                    onClick={() => setPendingOrder(null)}
-                    className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors"
-                  >
-                    Discard
-                  </button>
-                </div>
-              )}
-            </>
+              ))}
+            </div>
           )}
-        </div>
-      </main>
-      <Footer />
+
+          {/* Sticky, because a rearranged release can be a long scroll away from the top of
+              a real catalogue — and an unsaved order that looks saved is the whole failure
+              mode worth designing out here. */}
+          {pendingOrder && (
+            <div className="sticky bottom-4 flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface border border-border shadow-lg">
+              <span className="text-sm text-text-primary">Your new order isn't saved yet.</span>
+              <button
+                onClick={saveOrder}
+                disabled={actionLoading === 'reorder'}
+                className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition-colors disabled:opacity-50"
+              >
+                {actionLoading === 'reorder' ? 'Saving...' : 'Save order'}
+              </button>
+              <button
+                onClick={() => setPendingOrder(null)}
+                className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors"
+              >
+                Discard
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

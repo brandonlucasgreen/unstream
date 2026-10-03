@@ -202,7 +202,7 @@ Spec: `docs/specs/artist-patronage-spec.md`. **Money never sits in Unstream's St
 - **Phase 2 (one-off tips):** `stripe.ts` (fetch client behind the SSRF allowlist, signature check), `tips-db.ts` (`tipEligibility` is the single definition of "can take a tip"), `tips-connect|settings|checkout|webhook.ts`, `admin-tips.ts`. Fee math in `api/shared/tips.ts`, used by server and tip page alike; the server recomputes every figure.
 - **`livemode` on every Stripe-backed row.** `npm run dev` writes to production Supabase with a test key, so accounts are keyed `(artist_id, livemode)` and every read filters on the key's mode (`isLiveMode()`). Test keys in every Netlify context but Production.
 - **Tips ship dark:** with no `STRIPE_SECRET_KEY`, the Manage Tips tab doesn't appear (`/api/tips/settings?summary=1` says so) and no Tip button appears anywhere.
-- **Artist settings are tabs:** `/artist-edit/:slug` (Edit Profile), `/tips` (Manage Tips), `/releases` (Manage Releases), each its own route sharing `ArtistSettingsHeader`. The dashboard card keeps only Edit, View and the stats. Stripe onboarding returns to `/tips`.
+- **Artist settings are tabs:** `/artist-edit/:slug` (Edit Profile), `/tips` (Manage Tips), `/releases` (Manage Releases), nested routes under `ArtistSettingsLayout`, which stays mounted across tab switches (header, name and tabs don't redraw; only the content area loads). The dashboard card keeps only Edit, View and the stats. Stripe onboarding returns to `/tips`.
 - **Phase 3 (the tab) is gated** on `docs/specs/artist-patronage-phase3-gate.md` — run `scripts/stripe-verify-clone.ts` in test mode first.
 
 ### Release dedup: what identity is, and what the date is for

@@ -4,11 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
-import { Header } from '../components/Header';
-import { ArtistSettingsHeader } from '../components/ArtistSettingsHeader';
-import { Footer } from '../components/Footer';
-import { PageSkeleton } from '../components/PageSkeleton';
-import { FormSkeleton } from '../components/LoadingSkeletons';
+import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import type { SourceId } from '../types';
 
 // A divider entry is a horizontal rule on the public artist page, not a link.
@@ -150,6 +146,8 @@ export function ArtistEditPage() {
   const navigate = useNavigate();
   const { session, isLoading: authLoading } = useAuth();
   const [form, dispatch] = useReducer(formReducer, initialFormState);
+  // The saved name, not the field being typed in, so the header doesn't change mid-edit.
+  useReportArtistName(form.originalName || undefined);
 
   // Convenience setters
   const set = <K extends keyof FormState>(field: K, value: FormState[K]) =>
@@ -423,13 +421,7 @@ export function ArtistEditPage() {
     }
   }
 
-  if (form.loading) {
-    return (
-      <PageSkeleton label="Loading artist profile">
-        <FormSkeleton sections={3} fields={2} />
-      </PageSkeleton>
-    );
-  }
+  if (form.loading) return <TabSkeleton label="Loading artist profile" />;
 
   const usedPlatforms = new Set(form.links.map(l => l.platform));
 
@@ -439,441 +431,430 @@ export function ArtistEditPage() {
     form.removeConfirmText.trim().toLowerCase() === form.originalName.trim().toLowerCase();
 
   return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+    <div className="space-y-8">
+      {form.error && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          {form.error}
+        </div>
+      )}
 
-      <Header />
+      {form.success && (
+        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+          {form.success}
+        </div>
+      )}
 
-      <main className="flex-1 p-6">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <ArtistSettingsHeader slug={form.currentSlug} artistName={form.originalName} active="profile" />
+      {/* Artist Name */}
+      <section className="space-y-2">
+        <label htmlFor="name" className="block text-sm font-medium">
+          Artist Name
+        </label>
+        <input
+          id="name"
+          type="text"
+          value={form.artistName}
+          onChange={e => {
+            set('artistName', e.target.value);
+            set('nameWarningConfirmed', false);
+          }}
+          className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
+        />
+        {form.artistName !== form.originalName && (() => {
+          const level = getNameChangeWarning(form.originalName, form.artistName);
+          if (level === 'error') {
+            return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
+          }
+          if (level === 'warn') {
+            return <p className="text-xs text-amber-400">This is a significant change from "{form.originalName}". You'll be asked to confirm when saving.</p>;
+          }
+          return <p className="text-xs text-text-muted">Name will be updated from "{form.originalName}".</p>;
+        })()}
+      </section>
 
-          {form.error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {form.error}
+      {/* Profile Photo */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium">Profile Photo</h2>
+        <div className="flex items-start gap-4">
+          {(form.customImageUrl || form.imageUrl) ? (
+            <img
+              src={form.customImageUrl || form.imageUrl || ''}
+              alt={form.artistName}
+              className="w-20 h-20 rounded-full object-cover border border-border"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-muted text-2xl">
+              {form.artistName.charAt(0).toUpperCase()}
             </div>
           )}
-
-          {form.success && (
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-              {form.success}
-            </div>
-          )}
-
-          {/* Artist Name */}
-          <section className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium">
-              Artist Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={form.artistName}
-              onChange={e => {
-                set('artistName', e.target.value);
-                set('nameWarningConfirmed', false);
-              }}
-              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
-            />
-            {form.artistName !== form.originalName && (() => {
-              const level = getNameChangeWarning(form.originalName, form.artistName);
-              if (level === 'error') {
-                return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
-              }
-              if (level === 'warn') {
-                return <p className="text-xs text-amber-400">This is a significant change from "{form.originalName}". You'll be asked to confirm when saving.</p>;
-              }
-              return <p className="text-xs text-text-muted">Name will be updated from "{form.originalName}".</p>;
-            })()}
-          </section>
-
-          {/* Profile Photo */}
-          <section className="space-y-3">
-            <h2 className="text-sm font-medium">Profile Photo</h2>
-            <div className="flex items-start gap-4">
-              {(form.customImageUrl || form.imageUrl) ? (
-                <img
-                  src={form.customImageUrl || form.imageUrl || ''}
-                  alt={form.artistName}
-                  className="w-20 h-20 rounded-full object-cover border border-border"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-bg-secondary border border-border flex items-center justify-center text-text-muted text-2xl">
-                  {form.artistName.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div className="flex-1 space-y-2">
-                <p className="text-xs text-text-muted">
-                  Pull a photo from one of your linked platforms, or it will use the default from your search results.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {form.links
-                    .filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim())
-                    .map(l => {
-                      const platformLabel = ALL_PLATFORMS.find(p => p.id === l.platform)?.name || l.platform;
-                      return (
-                        <button
-                          key={l.platform}
-                          onClick={() => handleFetchAvatar(l.platform, l.url)}
-                          disabled={form.fetchingAvatar !== null}
-                          className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm text-text-muted hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-50"
-                        >
-                          {form.fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformLabel} photo`}
-                        </button>
-                      );
-                    })}
-                  {form.links.filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim()).length === 0 && (
-                    <p className="text-xs text-text-muted">
-                      Add a Bandcamp, YouTube, or Mirlo link to pull a photo from that platform.
-                    </p>
-                  )}
-                </div>
-                {form.customImageUrl && (
-                  <button
-                    onClick={() => set('customImageUrl', null)}
-                    className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    Remove custom photo
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Slug */}
-          <section className="space-y-2">
-            <label htmlFor="slug" className="block text-sm font-medium">
-              Profile URL
-            </label>
-            <div className="flex items-center gap-1">
-              <span className="text-text-muted text-sm">unstream.stream/a/</span>
-              <input
-                id="slug"
-                type="text"
-                value={form.newSlug}
-                onChange={e => set('newSlug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                className="flex-1 px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
-              />
-            </div>
-            {form.newSlug !== form.currentSlug && (
-              <p className="text-xs text-amber-400">
-                Changing your slug will update your profile URL. Old links will stop working.
-              </p>
-            )}
-          </section>
-
-          {/* Bio */}
-          <section className="space-y-2">
-            <label htmlFor="bio" className="block text-sm font-medium">
-              Bio <span className="text-text-muted font-normal">({form.bio.length}/500)</span>
-            </label>
-            <textarea
-              id="bio"
-              value={form.bio}
-              onChange={e => set('bio', e.target.value.slice(0, 500))}
-              rows={3}
-              placeholder="Tell fans about your music..."
-              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
-            />
-            <label className="flex items-start gap-2 pt-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.showBio}
-                onChange={e => set('showBio', e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded accent-accent-primary flex-shrink-0"
-              />
-              <span className="text-sm">
-                Show a bio on search results
-                <span className="block text-xs text-text-muted">
-                  If you haven't written one, we'll use your Bandcamp, Discogs or Wikipedia bio.
-                </span>
-              </span>
-            </label>
-          </section>
-
-          {/* Location */}
-          <section className="space-y-2">
-            <label className="block text-sm font-medium">Location</label>
+          <div className="flex-1 space-y-2">
             <p className="text-xs text-text-muted">
-              Helps fans find you and disambiguates you from other artists with the same name.
+              Pull a photo from one of your linked platforms, or it will use the default from your search results.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                id="city"
-                type="text"
-                value={form.city}
-                onChange={e => set('city', e.target.value.slice(0, 100))}
-                placeholder="City"
-                aria-label="City"
-                className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
-              />
-              <input
-                id="country"
-                type="text"
-                value={form.country}
-                onChange={e => set('country', e.target.value.slice(0, 100))}
-                placeholder="Country"
-                aria-label="Country"
-                className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
-              />
-            </div>
-          </section>
-
-          {/* Featured Embed */}
-          <section className="space-y-2">
-            <label htmlFor="embed" className="block text-sm font-medium">
-              Featured Release
-            </label>
-            <p className="text-xs text-text-muted">
-              Paste an embed code from Bandcamp, Faircamp, Spotify, SoundCloud, or other platforms. Only <code className="bg-bg-secondary px-1 rounded">&lt;iframe&gt;</code> embeds are supported.
-            </p>
-            <textarea
-              id="embed"
-              value={form.featuredEmbed}
-              onChange={e => set('featuredEmbed', e.target.value)}
-              rows={3}
-              placeholder='<iframe style="border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/..." seamless></iframe>'
-              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none font-mono text-xs"
-            />
-            {form.featuredEmbed && (
-              <div className="space-y-2">
-                <p className="text-xs text-text-muted">Preview:</p>
-                <div
-                  className="rounded-lg overflow-hidden border border-border"
-                  dangerouslySetInnerHTML={{ __html: form.featuredEmbed }}
-                />
-                <button
-                  onClick={() => set('featuredEmbed', '')}
-                  className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Remove embed
-                </button>
-              </div>
-            )}
-          </section>
-
-          {/* Platform Links */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium">Platform Links</h2>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={addLink}
-                  className="text-sm text-accent-primary hover:underline"
-                >
-                  + Add platform
-                </button>
-                <button
-                  onClick={addOtherLink}
-                  className="text-sm text-text-muted hover:text-text-primary transition-colors"
-                >
-                  + Add other link
-                </button>
-                <button
-                  onClick={addDivider}
-                  className="text-sm text-text-muted hover:text-text-primary transition-colors"
-                  title="Add a horizontal divider to group your links"
-                >
-                  + Add divider
-                </button>
-              </div>
-            </div>
-
-            <p className="text-xs text-text-muted">
-              Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
-            </p>
-
-            <p className="text-xs text-text-muted">
-              Dividers draw a horizontal line between links on your artist page, so you can group them. Move them with the arrows like any other row — social links always appear in their own "Follow" section, so a divider next to one moves to the nearest gap.
-            </p>
-
-            {form.links.length === 0 && (
-              <p className="text-text-muted text-sm py-4 text-center">
-                No links yet. Click "Add platform" to add your first link.
-              </p>
-            )}
-
-            <div className="space-y-2">
-              {form.links.map((link, index) => {
-                const streamingWarning = getStreamingWarning(link.url);
-                const isOther = link.platform === 'other';
-                const isDivider = link.platform === DIVIDER_PLATFORM;
-
-                return (
-                  <div key={index} className="space-y-1">
-                    <div
-                      className={`flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border ${streamingWarning ? 'border-amber-500/30' : 'border-border'}`}
+            <div className="flex flex-wrap gap-2">
+              {form.links
+                .filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim())
+                .map(l => {
+                  const platformLabel = ALL_PLATFORMS.find(p => p.id === l.platform)?.name || l.platform;
+                  return (
+                    <button
+                      key={l.platform}
+                      onClick={() => handleFetchAvatar(l.platform, l.url)}
+                      disabled={form.fetchingAvatar !== null}
+                      className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-sm text-text-muted hover:text-text-primary hover:border-border-hover transition-colors disabled:opacity-50"
                     >
-                      {/* Reorder buttons */}
-                      <div className="flex flex-col gap-0.5">
-                        <button
-                          onClick={() => moveLink(index, -1)}
-                          disabled={index === 0}
-                          className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                          title="Move up"
-                        >
-                          ▲
-                        </button>
-                        <button
-                          onClick={() => moveLink(index, 1)}
-                          disabled={index === form.links.length - 1}
-                          className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                          title="Move down"
-                        >
-                          ▼
-                        </button>
-                      </div>
-
-                      {isDivider ? (
-                        /* Divider: renders as a horizontal rule on the public page */
-                        <div className="flex-1 flex items-center gap-3 min-w-0">
-                          <span className="text-xs uppercase tracking-wider text-text-muted">Divider</span>
-                          <span className="flex-1 border-t border-border" />
-                        </div>
-                      ) : isOther ? (
-                        /* Custom link: name input + URL */
-                        <div className="flex-1 flex items-center gap-2 min-w-0">
-                          <input
-                            type="text"
-                            value={link.displayName || ''}
-                            onChange={e => updateLink(index, 'displayName', e.target.value)}
-                            placeholder="Link name"
-                            className="w-28 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary"
-                          />
-                          <input
-                            type="url"
-                            value={link.url}
-                            onChange={e => updateLink(index, 'url', e.target.value)}
-                            placeholder="https://..."
-                            className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
-                          />
-                        </div>
-                      ) : (
-                        /* Platform link: selector + URL */
-                        <>
-                          <select
-                            value={link.platform}
-                            onChange={e => updateLink(index, 'platform', e.target.value)}
-                            className="px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent-primary"
-                          >
-                            {ALL_PLATFORMS.filter(p => p.id !== 'other').map(p => (
-                              <option
-                                key={p.id}
-                                value={p.id}
-                                disabled={usedPlatforms.has(p.id) && p.id !== link.platform}
-                              >
-                                {p.name}
-                              </option>
-                            ))}
-                          </select>
-
-                          <input
-                            type="url"
-                            value={link.url}
-                            onChange={e => updateLink(index, 'url', e.target.value)}
-                            placeholder="https://..."
-                            className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
-                          />
-                        </>
-                      )}
-
-                      {/* Remove button */}
-                      <button
-                        onClick={() => removeLink(index)}
-                        className="text-text-muted hover:text-red-400 transition-colors p-1"
-                        title={isDivider ? 'Remove divider' : 'Remove link'}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Streaming service warning */}
-                    {streamingWarning && (
-                      <p className="text-xs text-amber-400 px-3">
-                        {streamingWarning}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
+                      {form.fetchingAvatar === l.platform ? 'Loading...' : `Use ${platformLabel} photo`}
+                    </button>
+                  );
+                })}
+              {form.links.filter(l => AVATAR_PLATFORMS.has(l.platform) && l.url.trim()).length === 0 && (
+                <p className="text-xs text-text-muted">
+                  Add a Bandcamp, YouTube, or Mirlo link to pull a photo from that platform.
+                </p>
+              )}
             </div>
-          </section>
+            {form.customImageUrl && (
+              <button
+                onClick={() => set('customImageUrl', null)}
+                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              >
+                Remove custom photo
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
 
-          {/* Save */}
-          <div className="flex items-center gap-4 pt-4 border-t border-border">
+      {/* Slug */}
+      <section className="space-y-2">
+        <label htmlFor="slug" className="block text-sm font-medium">
+          Profile URL
+        </label>
+        <div className="flex items-center gap-1">
+          <span className="text-text-muted text-sm">unstream.stream/a/</span>
+          <input
+            id="slug"
+            type="text"
+            value={form.newSlug}
+            onChange={e => set('newSlug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+            className="flex-1 px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
+          />
+        </div>
+        {form.newSlug !== form.currentSlug && (
+          <p className="text-xs text-amber-400">
+            Changing your slug will update your profile URL. Old links will stop working.
+          </p>
+        )}
+      </section>
+
+      {/* Bio */}
+      <section className="space-y-2">
+        <label htmlFor="bio" className="block text-sm font-medium">
+          Bio <span className="text-text-muted font-normal">({form.bio.length}/500)</span>
+        </label>
+        <textarea
+          id="bio"
+          value={form.bio}
+          onChange={e => set('bio', e.target.value.slice(0, 500))}
+          rows={3}
+          placeholder="Tell fans about your music..."
+          className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none"
+        />
+        <label className="flex items-start gap-2 pt-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.showBio}
+            onChange={e => set('showBio', e.target.checked)}
+            className="w-4 h-4 mt-0.5 rounded accent-accent-primary flex-shrink-0"
+          />
+          <span className="text-sm">
+            Show a bio on search results
+            <span className="block text-xs text-text-muted">
+              If you haven't written one, we'll use your Bandcamp, Discogs or Wikipedia bio.
+            </span>
+          </span>
+        </label>
+      </section>
+
+      {/* Location */}
+      <section className="space-y-2">
+        <label className="block text-sm font-medium">Location</label>
+        <p className="text-xs text-text-muted">
+          Helps fans find you and disambiguates you from other artists with the same name.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input
+            id="city"
+            type="text"
+            value={form.city}
+            onChange={e => set('city', e.target.value.slice(0, 100))}
+            placeholder="City"
+            aria-label="City"
+            className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+          />
+          <input
+            id="country"
+            type="text"
+            value={form.country}
+            onChange={e => set('country', e.target.value.slice(0, 100))}
+            placeholder="Country"
+            aria-label="Country"
+            className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary"
+          />
+        </div>
+      </section>
+
+      {/* Featured Embed */}
+      <section className="space-y-2">
+        <label htmlFor="embed" className="block text-sm font-medium">
+          Featured Release
+        </label>
+        <p className="text-xs text-text-muted">
+          Paste an embed code from Bandcamp, Faircamp, Spotify, SoundCloud, or other platforms. Only <code className="bg-bg-secondary px-1 rounded">&lt;iframe&gt;</code> embeds are supported.
+        </p>
+        <textarea
+          id="embed"
+          value={form.featuredEmbed}
+          onChange={e => set('featuredEmbed', e.target.value)}
+          rows={3}
+          placeholder='<iframe style="border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/..." seamless></iframe>'
+          className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-accent-primary resize-none font-mono text-xs"
+        />
+        {form.featuredEmbed && (
+          <div className="space-y-2">
+            <p className="text-xs text-text-muted">Preview:</p>
+            <div
+              className="rounded-lg overflow-hidden border border-border"
+              dangerouslySetInnerHTML={{ __html: form.featuredEmbed }}
+            />
             <button
-              onClick={handleSave}
-              disabled={form.saving}
-              className="px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+              onClick={() => set('featuredEmbed', '')}
+              className="text-xs text-red-400 hover:text-red-300 transition-colors"
             >
-              {form.saving ? 'Saving...' : 'Save changes'}
+              Remove embed
             </button>
-            <Link
-              to="/dashboard"
+          </div>
+        )}
+      </section>
+
+      {/* Platform Links */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium">Platform Links</h2>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={addLink}
+              className="text-sm text-accent-primary hover:underline"
+            >
+              + Add platform
+            </button>
+            <button
+              onClick={addOtherLink}
               className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
-              Cancel
-            </Link>
+              + Add other link
+            </button>
+            <button
+              onClick={addDivider}
+              className="text-sm text-text-muted hover:text-text-primary transition-colors"
+              title="Add a horizontal divider to group your links"
+            >
+              + Add divider
+            </button>
           </div>
+        </div>
 
-          {/* Danger zone — removing the claim lives here rather than on the dashboard, where it
-              sat one click away from Edit and View. */}
-          <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-red-400">Danger zone</h2>
-            <p className="text-xs text-text-muted">
-              Removing {form.originalName} takes this artist off your account. Your bio, profile
-              photo, featured release and link dividers are deleted, and unstream.stream/a/
-              {form.currentSlug} goes back to being an unclaimed page built from search results.
-              Your platform links stay on it. You can claim the page again later.
-            </p>
+        <p className="text-xs text-text-muted">
+          Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
+        </p>
 
-            {!form.removeOpen ? (
-              <button
-                onClick={() => set('removeOpen', true)}
-                className="px-4 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
-              >
-                Remove this artist
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <label htmlFor="remove-confirm" className="block text-xs text-text-muted">
-                  Type <span className="font-medium text-text-primary">{form.originalName}</span> to confirm.
-                </label>
-                <input
-                  id="remove-confirm"
-                  type="text"
-                  value={form.removeConfirmText}
-                  onChange={e => set('removeConfirmText', e.target.value)}
-                  autoComplete="off"
-                  className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-red-500/50"
-                />
-                <div className="flex items-center gap-4">
+        <p className="text-xs text-text-muted">
+          Dividers draw a horizontal line between links on your artist page, so you can group them. Move them with the arrows like any other row — social links always appear in their own "Follow" section, so a divider next to one moves to the nearest gap.
+        </p>
+
+        {form.links.length === 0 && (
+          <p className="text-text-muted text-sm py-4 text-center">
+            No links yet. Click "Add platform" to add your first link.
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {form.links.map((link, index) => {
+            const streamingWarning = getStreamingWarning(link.url);
+            const isOther = link.platform === 'other';
+            const isDivider = link.platform === DIVIDER_PLATFORM;
+
+            return (
+              <div key={index} className="space-y-1">
+                <div
+                  className={`flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border ${streamingWarning ? 'border-amber-500/30' : 'border-border'}`}
+                >
+                  {/* Reorder buttons */}
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => moveLink(index, -1)}
+                      disabled={index === 0}
+                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                      title="Move up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      onClick={() => moveLink(index, 1)}
+                      disabled={index === form.links.length - 1}
+                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                      title="Move down"
+                    >
+                      ▼
+                    </button>
+                  </div>
+
+                  {isDivider ? (
+                    /* Divider: renders as a horizontal rule on the public page */
+                    <div className="flex-1 flex items-center gap-3 min-w-0">
+                      <span className="text-xs uppercase tracking-wider text-text-muted">Divider</span>
+                      <span className="flex-1 border-t border-border" />
+                    </div>
+                  ) : isOther ? (
+                    /* Custom link: name input + URL */
+                    <div className="flex-1 flex items-center gap-2 min-w-0">
+                      <input
+                        type="text"
+                        value={link.displayName || ''}
+                        onChange={e => updateLink(index, 'displayName', e.target.value)}
+                        placeholder="Link name"
+                        className="w-28 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary"
+                      />
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={e => updateLink(index, 'url', e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
+                      />
+                    </div>
+                  ) : (
+                    /* Platform link: selector + URL */
+                    <>
+                      <select
+                        value={link.platform}
+                        onChange={e => updateLink(index, 'platform', e.target.value)}
+                        className="px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+                      >
+                        {ALL_PLATFORMS.filter(p => p.id !== 'other').map(p => (
+                          <option
+                            key={p.id}
+                            value={p.id}
+                            disabled={usedPlatforms.has(p.id) && p.id !== link.platform}
+                          >
+                            {p.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={e => updateLink(index, 'url', e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
+                      />
+                    </>
+                  )}
+
+                  {/* Remove button */}
                   <button
-                    onClick={handleRemoveArtist}
-                    disabled={form.removing || !removeConfirmed}
-                    className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-500/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={() => removeLink(index)}
+                    className="text-text-muted hover:text-red-400 transition-colors p-1"
+                    title={isDivider ? 'Remove divider' : 'Remove link'}
                   >
-                    {form.removing ? 'Removing...' : 'Remove this artist'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      set('removeOpen', false);
-                      set('removeConfirmText', '');
-                    }}
-                    disabled={form.removing}
-                    className="text-sm text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    Cancel
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
-              </div>
-            )}
-          </section>
-        </div>
-      </main>
 
-      <Footer />
+                {/* Streaming service warning */}
+                {streamingWarning && (
+                  <p className="text-xs text-amber-400 px-3">
+                    {streamingWarning}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Save */}
+      <div className="flex items-center gap-4 pt-4 border-t border-border">
+        <button
+          onClick={handleSave}
+          disabled={form.saving}
+          className="px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        >
+          {form.saving ? 'Saving...' : 'Save changes'}
+        </button>
+        <Link
+          to="/dashboard"
+          className="text-sm text-text-muted hover:text-text-primary transition-colors"
+        >
+          Cancel
+        </Link>
+      </div>
+
+      {/* Danger zone — removing the claim lives here rather than on the dashboard, where it
+          sat one click away from Edit and View. */}
+      <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-red-400">Danger zone</h2>
+        <p className="text-xs text-text-muted">
+          Removing {form.originalName} takes this artist off your account. Your bio, profile
+          photo, featured release and link dividers are deleted, and unstream.stream/a/
+          {form.currentSlug} goes back to being an unclaimed page built from search results.
+          Your platform links stay on it. You can claim the page again later.
+        </p>
+
+        {!form.removeOpen ? (
+          <button
+            onClick={() => set('removeOpen', true)}
+            className="px-4 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+          >
+            Remove this artist
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <label htmlFor="remove-confirm" className="block text-xs text-text-muted">
+              Type <span className="font-medium text-text-primary">{form.originalName}</span> to confirm.
+            </label>
+            <input
+              id="remove-confirm"
+              type="text"
+              value={form.removeConfirmText}
+              onChange={e => set('removeConfirmText', e.target.value)}
+              autoComplete="off"
+              className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border text-text-primary focus:outline-none focus:border-red-500/50"
+            />
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleRemoveArtist}
+                disabled={form.removing || !removeConfirmed}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-500/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {form.removing ? 'Removing...' : 'Remove this artist'}
+              </button>
+              <button
+                onClick={() => {
+                  set('removeOpen', false);
+                  set('removeConfirmText', '');
+                }}
+                disabled={form.removing}
+                className="text-sm text-text-muted hover:text-text-primary transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

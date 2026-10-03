@@ -2,8 +2,9 @@
 // The artist settings tabs (/artist-edit/:slug, /tips, /releases).
 //
 // What's worth locking: tips ship dark, so the Manage Tips tab appears only when the server says it
-// has a Stripe key — and a failed check hides it rather than breaking the page. The current tab is
-// marked for screen readers, and every tab links to its own route.
+// has a Stripe key — and a failed check hides it rather than breaking the page. It asks once per
+// visit, since the header stays mounted across tab switches. The current tab is marked for screen
+// readers, and every tab links to its own route.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -61,10 +62,25 @@ describe('ArtistSettingsHeader', () => {
     expect(tabNames()).toEqual(['Edit Profile', 'Manage Releases']);
   });
 
-  it('marks the current tab, and asks nothing on the tips tab itself', () => {
+  it('marks the current tab, and keeps Manage Tips while on it even if tips are dark', async () => {
+    mockFetch.mockResolvedValue(new Response(JSON.stringify({ available: false })));
     renderHeader('tips');
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
     expect(screen.getByRole('link', { name: 'Manage Tips' }).getAttribute('aria-current')).toBe('page');
     expect(screen.getByRole('link', { name: 'Edit Profile' }).getAttribute('aria-current')).toBeNull();
-    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('asks once, not again on every tab switch', async () => {
+    mockFetch.mockResolvedValue(new Response(JSON.stringify({ available: true })));
+    const { rerender } = renderHeader('profile');
+    await waitFor(() => expect(tabNames()).toContain('Manage Tips'));
+    for (const active of ['tips', 'releases', 'profile'] as const) {
+      rerender(
+        <MemoryRouter>
+          <ArtistSettingsHeader slug="kid-lightbulbs" artistName="Kid Lightbulbs" active={active} />
+        </MemoryRouter>
+      );
+    }
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });
