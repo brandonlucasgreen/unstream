@@ -139,7 +139,7 @@ describe('checkout.session.completed', () => {
 
   it('refuses a session without a usable fee, so Stripe retries and Sentry hears about it', async () => {
     for (const fee of [undefined, 'abc', '-1', '9999']) {
-      const metadata = fee === undefined ? {} : { unstream_application_fee_cents: fee };
+      const metadata: Record<string, string> = fee === undefined ? {} : { unstream_application_fee_cents: fee };
       const evt = paidSession(metadata, { amount_total: 576 });
       if (fee === undefined) delete (evt.data.object.metadata as Record<string, string>).unstream_application_fee_cents;
       expect((await deliver(evt)).statusCode).toBe(500);
