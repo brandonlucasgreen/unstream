@@ -350,8 +350,8 @@ const MAKER_POSTS: { threads: string; bluesky: string }[] = [
     bluesky: `$0.003 per Spotify stream. One Bandcamp purchase can equal thousands of streams. That's why I made Unstream.`,
   },
   {
-    threads: `Artists can claim their page on Unstream for free. It puts all your direct-support links in one place: Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.`,
-    bluesky: `Artists: claim your free page on Unstream. All your direct-support links in one place.`,
+    threads: `Artists can claim their page on Unstream for free. It gathers every link where fans can buy your music or support you: Bandcamp, Faircamp, Mirlo, Patreon, whatever you've got.`,
+    bluesky: `Artists: claim your free page on Unstream. Every link where fans can buy your music or support you, in one place.`,
   },
   {
     threads: `Unstream is free, open source, and built by one person. No VC funding, no data harvesting, no premium tier. The whole point is getting more money to artists, not less.`,
@@ -449,7 +449,7 @@ function linkedinEconomics(): string[] {
     `Most "support artists" advice ends with "stream them more." The math says otherwise.\n\nA stream pays an artist roughly $0.003. A $10 album on Bandcamp pays them at least ${take}, around ${streams} streams' worth.\n\nUnstream is a free tool that shows where to buy any artist's music directly across 17+ platforms, along with what each platform pays the artist.`,
     payoutComparison(),
     `Unstream is free and built by one person. It has no investors, no data harvesting and no premium tier, for fans or for artists.\n\nThe goal is simple: get more of the money fans spend on music to the people who make it.`,
-    `Independent artists can claim their Unstream page for free. A verified page gathers every direct-support link in one place, from Bandcamp and Mirlo to Faircamp and Patreon, and shows fans which option pays the artist most.`,
+    `Independent artists can claim their Unstream page for free. A verified page gathers every link where fans can buy their music or support them, from Bandcamp and Mirlo to Faircamp and Patreon, and shows fans which option pays the artist most.`,
     `Search for any artist on Unstream and within a few seconds it checks more than 17 platforms, including Bandcamp, Faircamp, Mirlo and Jam.coop. The results show where you can buy their music directly, and roughly what share of each sale reaches the artist.`,
   ];
 }

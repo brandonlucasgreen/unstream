@@ -45,7 +45,7 @@ function getStreamingWarning(url: string): string | null {
   if (!url.trim()) return null;
   for (const { pattern, name } of STREAMING_PATTERNS) {
     if (pattern.test(url)) {
-      return `This looks like a ${name} link. Unstream focuses on platforms where artists earn a higher share of revenue. You can still add this link, but consider prioritizing direct-support platforms.`;
+      return `This looks like a ${name} link. Unstream focuses on platforms where artists earn a higher share of revenue. You can still add this link, but consider leading with platforms where fans buy your music or support you directly.`;
     }
   }
   return null;
@@ -701,7 +701,7 @@ export function ArtistEditPage() {
             </div>
 
             <p className="text-xs text-text-muted">
-              Unstream highlights platforms where artists earn a larger share. We recommend prioritizing direct-support platforms like Bandcamp, Mirlo, and Faircamp over major streaming services.
+              Unstream highlights platforms where artists earn a larger share. We recommend prioritizing platforms where fans buy your music outright, like Bandcamp, Mirlo, and Faircamp, over major streaming services.
             </p>
 
             <p className="text-xs text-text-muted">
