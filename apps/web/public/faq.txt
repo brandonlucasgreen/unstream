@@ -12,7 +12,9 @@ But Spotify and its former CEO are not the only problems with the streaming mode
 
 The exceptions are artists with hundreds of thousands of monthly listeners or more; while many are rightfully deserving of those listeners, the economics of streaming (especially on Spotify) disproportionately benefit those artists thanks to the outsized influence of the 3 major record labels. Smaller artists are effectively shut out from making money in the streaming ecosystem, and increasingly shut out of promotional opportunities to even grow their audience in this ecosystem as well thanks to an increased focus on AI and algorithms. What’s more: streaming platforms, and the incentives they run on, are being flooded with AI-generated music, often created solely for the purposes of exploiting streaming algorithms and capturing more listeners (and thus revenue).
 
-The platforms suggested by Unstream primarily focus on a _direct-support_ model, meaning you pay to _own_ an artist’s music (or support them with a monthly subscription) and the majority of your payment goes to the rights holder of the music – which in many cases is the artist themselves.
+Most of the platforms suggested by Unstream follow a _purchase-to-own_ model: you buy an artist’s music outright, so it’s yours to keep, and the majority of your payment goes to the rights holder of the music. In many cases that’s the artist themselves, but if they’re signed to a label, the label is paid and the artist gets their share under their deal.
+
+Others follow a _direct-support_ model: you pay the artist themselves, whether it’s a one-off tip or a monthly membership (on platforms like Patreon, Ko-fi, or Buy Me a Coffee), and most of that money goes straight to them.
 
 We also link to a number of alternative services that can help you reduce your dependency on streaming, such as _more artist-friendly_ streaming/downloading platforms (like Qobuz) or renting music through your local library (via the services Hoopla and Freegal).
 
