@@ -121,6 +121,9 @@ async function createCheckout(event: HandlerEvent) {
     unstream_kind: 'one_off',
     unstream_artist_id: artist.id,
     unstream_amount_cents: String(amountCents),
+    // The fee this payment carries, so the webhook records what Stripe actually took even if the
+    // artist changes their fee before the fan finishes paying.
+    unstream_application_fee_cents: String(breakdown.applicationFeeCents),
     ...(goalId ? { unstream_goal_id: goalId } : {}),
     ...(fan ? { unstream_fan_user_id: fan.userId } : {}),
   };

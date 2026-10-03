@@ -83,6 +83,9 @@ describe('POST — creating the payment', () => {
     const form = sentForm();
     expect(form.get('line_items[0][price_data][unit_amount]')).toBe('1000');
     expect(form.get('payment_intent_data[application_fee_amount]')).toBe('50');
+    // …and carries that fee in the metadata the webhook records it from.
+    expect(form.get('metadata[unstream_application_fee_cents]')).toBe('50');
+    expect(form.get('payment_intent_data[metadata][unstream_application_fee_cents]')).toBe('50');
   });
 
   it('refuses amounts outside $3–$500 before touching Stripe', async () => {

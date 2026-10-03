@@ -100,7 +100,14 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
   const artistId = str(metadata.unstream_artist_id);
   const amountCents = Number(metadata.unstream_amount_cents);
   const grossCents = Number(session.amount_total);
-  if (!paymentIntentId || !artistId || !Number.isInteger(amountCents) || !Number.isInteger(grossCents)) {
+  // The fee checkout put on this payment. Not recomputed from the artist's setting: they can change
+  // it between the session being created and the fan paying, and the record has to match what Stripe
+  // took (found 2026-10-03: a 5% session paid after a switch to 0% was recorded with no fee).
+  const applicationFeeCents = Number(metadata.unstream_application_fee_cents);
+  if (
+    !paymentIntentId || !artistId || !Number.isInteger(amountCents) || !Number.isInteger(grossCents)
+    || !Number.isInteger(applicationFeeCents) || applicationFeeCents < 0 || applicationFeeCents > grossCents
+  ) {
     throw new Error('checkout.session.completed missing Unstream metadata');
   }
 
@@ -108,7 +115,7 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
   // not proof of whose payment it was.
   const { data: account, error: accountError } = await client
     .from('artist_tip_accounts')
-    .select('artist_id, fee_basis_points')
+    .select('artist_id')
     .eq('stripe_account_id', evt.account ?? '')
     .eq('livemode', evt.livemode)
     .maybeSingle();
@@ -121,10 +128,6 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
     return 'account mismatch';
   }
 
-  // The fee Unstream actually takes is whatever the session was created with; recompute it the
-  // same way checkout did rather than trusting a figure from the event body.
-  const feeBps = (account as { fee_basis_points: number }).fee_basis_points;
-  const applicationFeeCents = feeBps > 0 ? Math.round(grossCents * (feeBps / 10000)) : 0;
   const fanUserId = str(metadata.unstream_fan_user_id);
 
   const { data: payment, error: insertError } = await client

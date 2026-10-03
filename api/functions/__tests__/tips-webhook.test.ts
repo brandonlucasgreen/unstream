@@ -40,7 +40,10 @@ const paidSession = (metadata: Record<string, string> = {}, extra: Record<string
       payment_intent: 'pi_1',
       amount_total: 546,
       currency: 'usd',
-      metadata: { unstream_kind: 'one_off', unstream_artist_id: 'artist-1', unstream_amount_cents: '500', ...metadata },
+      metadata: {
+        unstream_kind: 'one_off', unstream_artist_id: 'artist-1', unstream_amount_cents: '500',
+        unstream_application_fee_cents: '0', ...metadata,
+      },
       ...extra,
     },
   },
@@ -127,10 +130,21 @@ describe('checkout.session.completed', () => {
     expect(db.tables.tip_payments ?? []).toHaveLength(0);
   });
 
-  it('records the fee from the artist’s setting', async () => {
-    db.tables.artist_tip_accounts[0].fee_basis_points = 500;
-    await deliver(paidSession({}, { amount_total: 1000 }));
-    expect(db.tables.tip_payments[0].application_fee_cents).toBe(50);
+  it('records the fee the payment was created with, even if the artist changed it since', async () => {
+    // 2026-10-03 in the sandbox: checkout at 5% ($5.76, 29¢ fee), fee switched to 0%, then paid.
+    db.tables.artist_tip_accounts[0].fee_basis_points = 0;
+    await deliver(paidSession({ unstream_application_fee_cents: '29' }, { amount_total: 576 }));
+    expect(db.tables.tip_payments[0].application_fee_cents).toBe(29);
+  });
+
+  it('refuses a session without a usable fee, so Stripe retries and Sentry hears about it', async () => {
+    for (const fee of [undefined, 'abc', '-1', '9999']) {
+      const metadata = fee === undefined ? {} : { unstream_application_fee_cents: fee };
+      const evt = paidSession(metadata, { amount_total: 576 });
+      if (fee === undefined) delete (evt.data.object.metadata as Record<string, string>).unstream_application_fee_cents;
+      expect((await deliver(evt)).statusCode).toBe(500);
+    }
+    expect(db.tables.tip_payments ?? []).toHaveLength(0);
   });
 });
 
