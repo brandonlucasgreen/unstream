@@ -29,7 +29,7 @@
 
 # `netlify dev` — the local full stack, and what `npm run dev` runs. Serves the real functions
 # and edge functions on :8888 in front of Vite, so local behaviour matches production instead of
-# the drifted `apps/web/server/` shim (see "Local dev API vs production API" in CLAUDE.md).
+# the drifted `apps/web/server/` shim (see "Local dev: the full stack, and the fast shim" in CLAUDE.md).
 #
 # `targetPort` must match the port in `dev:fast`, and that script passes `--strictPort` on
 # purpose. Without it Vite silently moves to the next free port when 5173 is taken, `netlify dev`

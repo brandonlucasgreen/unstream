@@ -212,7 +212,7 @@ export default async function handler(request: Request, context: Context) {
 
     // Real browsers get the SPA, same as a client-side <Link> navigation from /artists would
     // render — so a direct load and an in-app click produce the same UI (see
-    // docs/retros/UNS-100-bifurcation-retro.md). Only crawlers, which either can't run JS
+    // docs/postmortems/UNS-100-bifurcation-retro.md). Only crawlers, which either can't run JS
     // (social previews) or benefit from content that doesn't wait on a client fetch (indexing),
     // get this static render.
     const userAgent = request.headers.get('user-agent');

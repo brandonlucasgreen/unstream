@@ -3,7 +3,7 @@
 // Models after api/edge/artist-page-static.ts — same pattern, same RLS-aware data fetching.
 // Real browsers get the SPA (PublicSavedArtistsPage.tsx), same as a client-side <Link>
 // navigation would render, so a direct load and an in-app click produce the same UI (see
-// docs/retros/UNS-100-bifurcation-retro.md). Only crawlers get this static render.
+// docs/postmortems/UNS-100-bifurcation-retro.md). Only crawlers get this static render.
 
 import { Context } from "https://edge.netlify.com";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";

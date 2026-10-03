@@ -1,5 +1,5 @@
 // Shared bot detection for edge functions that must serve real browsers the SPA (so a direct
-// load renders exactly the same UI as client-side navigation — see docs/retros/UNS-100-bifurcation-retro.md)
+// load renders exactly the same UI as client-side navigation — see docs/postmortems/UNS-100-bifurcation-retro.md)
 // while still handing crawlers a fully populated, no-JS-required HTML page for SEO/link previews.
 
 // Social media crawlers: don't execute JS, only need OG/Twitter meta tags for link previews.

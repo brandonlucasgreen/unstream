@@ -8,7 +8,7 @@
 // **Pure SSR, and only SSR.** This URL is rendered here and nowhere else. The SPA must never
 // try to take it over: one route with two renderers is the UNS-100 bifurcation class that
 // produced a run of back-button and bfcache bugs where every fix partially reverted the last
-// (see docs/retros/UNS-100-bifurcation-retro.md). Nothing on this page hydrates or re-renders
+// (see docs/postmortems/UNS-100-bifurcation-retro.md). Nothing on this page hydrates or re-renders
 // client-side — the only script anywhere in it is an inline image-error fallback.
 //
 // **Route precedence.** netlify.toml declares this *before* `/a/*`, because `/a/*` also matches
