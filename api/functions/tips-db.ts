@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { isLiveMode, stripeMode } from './stripe';
+import { isLiveMode, stripeMode, type StripeAccount } from './stripe';
 import { Sentry } from '../lib/sentry';
 
 export interface TipAccountRow {
@@ -43,12 +43,42 @@ export interface Goal {
   status: 'open' | 'closed';
 }
 
-/** Where an artist stands, from the artist's own point of view (spec §8). */
-export type TipsState = 'not_connected' | 'onboarding' | 'awaiting_approval' | 'connected';
+/**
+ * Where an artist stands, from the artist's own point of view (spec §8). Before Stripe enables
+ * charges there are three cases, and only 'onboarding' is one the artist can fix by going back to
+ * Stripe: 'stripe_review' means Stripe has everything and is checking it, 'stripe_declined' means
+ * Stripe turned the account down.
+ */
+export type TipsState =
+  | 'not_connected'
+  | 'onboarding'
+  | 'stripe_review'
+  | 'stripe_declined'
+  | 'awaiting_approval'
+  | 'connected';
 
-export function tipsState(account: TipAccountRow | null): TipsState {
+/** Why an account isn't taking charges yet, read from Stripe's live account object. */
+export type StripeHold = 'needs_details' | 'in_review' | 'declined';
+
+export function stripeHold(account: StripeAccount): StripeHold {
+  const requirements = account.requirements ?? {};
+  if ((requirements.disabled_reason ?? '').startsWith('rejected')) return 'declined';
+  const due = [...(requirements.currently_due ?? []), ...(requirements.past_due ?? [])];
+  if (!account.details_submitted || due.length > 0) return 'needs_details';
+  return 'in_review';
+}
+
+/**
+ * `hold` comes from Stripe's live account and is only known while charges are off; without it (the
+ * Stripe read failed, or nobody asked) an account that can't take charges reads as 'onboarding'.
+ */
+export function tipsState(account: TipAccountRow | null, hold: StripeHold | null = null): TipsState {
   if (!account) return 'not_connected';
-  if (!account.charges_enabled) return 'onboarding';
+  if (!account.charges_enabled) {
+    if (hold === 'in_review') return 'stripe_review';
+    if (hold === 'declined') return 'stripe_declined';
+    return 'onboarding';
+  }
   if (!account.tips_approved_at) return 'awaiting_approval';
   return 'connected';
 }

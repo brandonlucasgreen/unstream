@@ -53,6 +53,18 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
         </p>
       ) : settings.state === 'not_connected' ? (
         <ConnectForm countries={settings.countries} busy={busy} onConnect={goToStripe} />
+      ) : settings.state === 'stripe_review' ? (
+        <div className="space-y-2 text-sm">
+          <p>Stripe has your details and is checking them. That usually takes a few minutes, sometimes a day or two.</p>
+          <p className="text-text-secondary">There's nothing you need to do. Stripe emails you if it needs anything, and this page updates once it's done.</p>
+        </div>
+      ) : settings.state === 'stripe_declined' ? (
+        <div className="space-y-2 text-sm">
+          <p>Stripe didn't approve this account, so it can't take payments.</p>
+          <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+            See why in your Stripe dashboard →
+          </a>
+        </div>
       ) : settings.state === 'onboarding' ? (
         <div className="space-y-2">
           <p className="text-sm">Stripe needs a few more details before fans can tip you.</p>

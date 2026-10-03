@@ -155,6 +155,11 @@ export interface StripeAccount {
   business_profile?: { name?: string | null; url?: string | null } | null;
   settings?: { dashboard?: { display_name?: string | null } | null } | null;
   email?: string | null;
+  requirements?: {
+    currently_due?: string[] | null;
+    past_due?: string[] | null;
+    disabled_reason?: string | null;
+  } | null;
 }
 
 export interface StripeAccountLink {

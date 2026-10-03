@@ -2,7 +2,13 @@
 
 import type { TipGoal } from '../types/artist-page';
 
-export type TipsState = 'not_connected' | 'onboarding' | 'awaiting_approval' | 'connected';
+export type TipsState =
+  | 'not_connected'
+  | 'onboarding'
+  | 'stripe_review'
+  | 'stripe_declined'
+  | 'awaiting_approval'
+  | 'connected';
 
 export interface TipTotals {
   count: number;

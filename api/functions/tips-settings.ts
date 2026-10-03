@@ -14,7 +14,7 @@ import { getClient, resolveOwnedArtist } from './db';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
-import { getGoals, getTipAccount, tipsState, type TipAccountRow } from './tips-db';
+import { getGoals, getTipAccount, stripeHold, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
 import { TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
 import {
   MAX_GOAL_TITLE_LENGTH,
@@ -88,11 +88,14 @@ export async function handler(event: HandlerEvent) {
 
 /**
  * Pull the account's state from Stripe while it isn't live yet, so an artist coming back from
- * onboarding sees it without waiting on the webhook. Once charges are enabled, account.updated is
- * the only sync — no Stripe call per dashboard view.
+ * onboarding sees it without waiting on the webhook, along with why charges are still off (`hold`).
+ * Once charges are enabled, account.updated is the only sync — no Stripe call per dashboard view.
  */
-async function refreshFromStripe(client: SupabaseClient, account: TipAccountRow): Promise<TipAccountRow> {
-  if (account.charges_enabled) return account;
+async function refreshFromStripe(
+  client: SupabaseClient,
+  account: TipAccountRow,
+): Promise<{ account: TipAccountRow; hold: StripeHold | null }> {
+  if (account.charges_enabled) return { account, hold: null };
   try {
     const remote = await stripeRequest<StripeAccount>('GET', `/v1/accounts/${encodeURIComponent(account.stripe_account_id)}`);
     const patch = {
@@ -104,11 +107,11 @@ async function refreshFromStripe(client: SupabaseClient, account: TipAccountRow)
       await client.from('artist_tip_accounts').update(patch)
         .eq('artist_id', account.artist_id).eq('livemode', account.livemode);
     }
-    return { ...account, ...patch };
+    return { account: { ...account, ...patch }, hold: patch.charges_enabled ? null : stripeHold(remote) };
   } catch (err) {
     // The dashboard still renders from what's stored; the webhook will catch up.
     Sentry.captureException(err, { extra: { context: 'tips-settings.refreshFromStripe' } });
-    return account;
+    return { account, hold: null };
   }
 }
 
@@ -139,7 +142,8 @@ async function readTotals(client: SupabaseClient, artistId: string, since: strin
 async function readSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string) {
   const stored = stripeMode() ? await getTipAccount(client, artistId) : null;
   // A previous owner's account is never shown or used as this owner's — not its state, not its totals.
-  const account = stored && stored.user_id === userId ? await refreshFromStripe(client, stored) : null;
+  const refreshed = stored && stored.user_id === userId ? await refreshFromStripe(client, stored) : null;
+  const account = refreshed?.account ?? null;
   const [goals, month, allTime] = await Promise.all([
     getGoals(client, artistId, { openOnly: false }),
     account ? readTotals(client, artistId, startOfMonthUtc()) : null,
@@ -150,7 +154,7 @@ async function readSettings(client: SupabaseClient, artistId: string, artistName
     available: !!stripeMode(),
     artistName,
     livemode: isLiveMode(),
-    state: tipsState(account),
+    state: tipsState(account, refreshed?.hold ?? null),
     // So the dashboard can say "contact us" instead of offering a Connect button that will 409.
     foreignAccount: !!stored && !account,
     tipsEnabled: account?.tips_enabled ?? false,

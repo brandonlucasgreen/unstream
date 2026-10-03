@@ -144,6 +144,31 @@ describe('tips-settings', () => {
     expect(db.tables.artist_tip_accounts[0].charges_enabled).toBe(true);
   });
 
+  it('tells "Stripe needs more from you" apart from "Stripe is reviewing" and "Stripe declined"', async () => {
+    const stripeSays = (requirements: Record<string, unknown>) => {
+      db.tables.artist_tip_accounts = [account({ charges_enabled: false, details_submitted: true })];
+      fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({
+        id: 'acct_new', charges_enabled: false, details_submitted: true, country: 'US', requirements,
+      })));
+    };
+    // The real sandbox account on 2026-10-02: onboarding done, but the full SSN still owed.
+    stripeSays({ currently_due: ['individual.id_number'], past_due: ['individual.id_number'], disabled_reason: 'requirements.past_due' });
+    expect(JSON.parse((await get()).body).state).toBe('onboarding');
+
+    stripeSays({ currently_due: [], past_due: [], disabled_reason: 'requirements.pending_verification' });
+    expect(JSON.parse((await get()).body).state).toBe('stripe_review');
+
+    stripeSays({ currently_due: [], past_due: [], disabled_reason: 'rejected.other' });
+    expect(JSON.parse((await get()).body).state).toBe('stripe_declined');
+  });
+
+  it('falls back to "needs details" when Stripe can’t be read, and reports it', async () => {
+    db.tables.artist_tip_accounts = [account({ charges_enabled: false, details_submitted: true })];
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'boom' } }), { status: 500 }));
+    expect(JSON.parse((await get()).body).state).toBe('onboarding');
+    expect(mocks.captureException).toHaveBeenCalled();
+  });
+
   it('hides a previous owner’s account and its totals', async () => {
     db.tables.artist_tip_accounts = [account({ user_id: 'previous-owner', tips_approved_at: '2026-09-01' })];
     const body = JSON.parse((await get()).body);
