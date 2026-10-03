@@ -3,7 +3,7 @@
 // one ledger entry however often Stripe replays it, a session from the wrong account is refused,
 // and refunds, disputes and account changes are mirrored.
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createHmac } from 'node:crypto';
 import { createFakeDb, type FakeDb } from './fake-supabase';
 
@@ -137,14 +137,29 @@ describe('checkout.session.completed', () => {
     expect(db.tables.tip_payments[0].application_fee_cents).toBe(29);
   });
 
-  it('refuses a session without a usable fee, so Stripe retries and Sentry hears about it', async () => {
-    for (const fee of [undefined, 'abc', '-1', '9999']) {
-      const metadata: Record<string, string> = fee === undefined ? {} : { unstream_application_fee_cents: fee };
-      const evt = paidSession(metadata, { amount_total: 576 });
-      if (fee === undefined) delete (evt.data.object.metadata as Record<string, string>).unstream_application_fee_cents;
-      expect((await deliver(evt)).statusCode).toBe(500);
+  it('refuses a session whose fee is unusable, so Stripe retries and Sentry hears about it', async () => {
+    for (const fee of ['abc', '-1', '9999']) {
+      expect((await deliver(paidSession({ unstream_application_fee_cents: fee }, { amount_total: 576 }))).statusCode).toBe(500);
     }
     expect(db.tables.tip_payments ?? []).toHaveLength(0);
+  });
+
+  it('asks Stripe for the fee when the session predates storing it (paid across a deploy)', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: 'pi_1', application_fee_amount: 29 })));
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const evt = paidSession({}, { amount_total: 576 });
+      delete (evt.data.object.metadata as Record<string, string>).unstream_application_fee_cents;
+      expect((await deliver(evt)).statusCode).toBe(200);
+      expect(db.tables.tip_payments[0].application_fee_cents).toBe(29);
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe('https://api.stripe.com/v1/payment_intents/pi_1');
+      expect(init.headers['Stripe-Account']).toBe('acct_artist');
+    } finally {
+      vi.unstubAllGlobals();
+      delete process.env.STRIPE_SECRET_KEY;
+    }
   });
 });
 
@@ -174,5 +189,72 @@ describe('accounts', () => {
     Object.assign(db.tables.artist_tip_accounts[0], { charges_enabled: true, tips_enabled: true, tips_approved_at: '2026-09-01' });
     await deliver({ id: 'evt_6', type: 'account.application.deauthorized', livemode: false, account: 'acct_artist', data: { object: {} } });
     expect(db.tables.artist_tip_accounts[0]).toMatchObject({ charges_enabled: false, tips_enabled: false, tips_approved_at: null });
+  });
+});
+
+describe('a refund hands back Unstream’s fee', () => {
+  const fetchMock = vi.fn();
+  // Stripe's application fee object, as GET /v1/application_fees/{id} returns it.
+  let fee = { amount: 29, amount_refunded: 0 };
+  const refundEvent = (charge: Record<string, unknown>) => ({
+    id: 'evt_r', type: 'charge.refunded', livemode: false, account: 'acct_artist',
+    data: { object: { payment_intent: 'pi_1', application_fee: 'fee_1', amount: 576, ...charge } },
+  });
+  const feeRefunds = () => fetchMock.mock.calls.filter(([url, init]) => String(url).endsWith('/v1/application_fees/fee_1/refunds') && init.method === 'POST');
+
+  beforeEach(async () => {
+    await deliver(paidSession({ unstream_application_fee_cents: '29' }, { amount_total: 576 }));
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    fee = { amount: 29, amount_refunded: 0 };
+    fetchMock.mockReset();
+    fetchMock.mockImplementation((_url: string, init: { method: string; body?: string }) => {
+      if (init.method === 'POST') {
+        fee.amount_refunded += Number(new URLSearchParams(init.body).get('amount'));
+        return Promise.resolve(new Response(JSON.stringify({ id: 'fr_1' })));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ id: 'fee_1', ...fee })));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+
+  it('returns the whole fee on a full refund, on Unstream’s own account, idempotently', async () => {
+    const res = await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(res.statusCode).toBe(200);
+    expect(db.tables.tip_payments[0].status).toBe('refunded');
+    const [[, init]] = feeRefunds();
+    expect(new URLSearchParams(init.body).get('amount')).toBe('29');
+    expect(init.headers['Stripe-Account']).toBeUndefined();
+    expect(init.headers['Idempotency-Key']).toBe('fee-refund:fee_1:29');
+  });
+
+  it('returns a share of the fee on a partial refund, and the rest when it becomes full', async () => {
+    await deliver(refundEvent({ refunded: false, amount_refunded: 288 }));
+    expect(db.tables.tip_payments[0].status).toBe('succeeded');
+    expect(fee.amount_refunded).toBe(15); // round(29 × 288 / 576)
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(fee.amount_refunded).toBe(29);
+  });
+
+  it('never returns the fee twice when Stripe replays the event', async () => {
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    await deliver(refundEvent({ refunded: true, amount_refunded: 576 }));
+    expect(feeRefunds()).toHaveLength(1);
+    expect(fee.amount_refunded).toBe(29);
+  });
+
+  it('leaves the artist’s own sales alone: no application fee, no Stripe call', async () => {
+    await deliver(refundEvent({ payment_intent: 'pi_artists_own_sale', application_fee: null, refunded: true, amount_refunded: 576 }));
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(db.tables.tip_payments[0].status).toBe('succeeded');
+  });
+
+  it('fails the event so Stripe retries when the fee refund itself fails', async () => {
+    fetchMock.mockImplementation((_url: string, init: { method: string }) => Promise.resolve(
+      init.method === 'POST'
+        ? new Response(JSON.stringify({ error: { message: 'boom' } }), { status: 500 })
+        : new Response(JSON.stringify({ id: 'fee_1', ...fee })),
+    ));
+    expect((await deliver(refundEvent({ refunded: true, amount_refunded: 576 }))).statusCode).toBe(500);
   });
 });

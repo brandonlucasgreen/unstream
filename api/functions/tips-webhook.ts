@@ -15,7 +15,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { verifyStripeSignature, type StripeEvent } from './stripe';
+import { stripeRequest, verifyStripeSignature, type StripeEvent } from './stripe';
 import { Sentry } from '../lib/sentry';
 
 const HEADERS = { 'Content-Type': 'application/json' };
@@ -79,7 +79,7 @@ export async function handleEvent(client: SupabaseClient, evt: StripeEvent): Pro
     case 'payment_intent.payment_failed':
       return setStatus(client, str(obj.id), 'failed');
     case 'charge.refunded':
-      return obj.refunded === true ? setStatus(client, str(obj.payment_intent), 'refunded') : 'partial refund, left as is';
+      return recordRefund(client, obj);
     case 'charge.dispute.created':
       return setStatus(client, str(obj.payment_intent), 'disputed');
     case 'account.updated':
@@ -100,14 +100,7 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
   const artistId = str(metadata.unstream_artist_id);
   const amountCents = Number(metadata.unstream_amount_cents);
   const grossCents = Number(session.amount_total);
-  // The fee checkout put on this payment. Not recomputed from the artist's setting: they can change
-  // it between the session being created and the fan paying, and the record has to match what Stripe
-  // took (found 2026-10-03: a 5% session paid after a switch to 0% was recorded with no fee).
-  const applicationFeeCents = Number(metadata.unstream_application_fee_cents);
-  if (
-    !paymentIntentId || !artistId || !Number.isInteger(amountCents) || !Number.isInteger(grossCents)
-    || !Number.isInteger(applicationFeeCents) || applicationFeeCents < 0 || applicationFeeCents > grossCents
-  ) {
+  if (!paymentIntentId || !artistId || !Number.isInteger(amountCents) || !Number.isInteger(grossCents)) {
     throw new Error('checkout.session.completed missing Unstream metadata');
   }
 
@@ -126,6 +119,18 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
       extra: { eventId: evt.id },
     });
     return 'account mismatch';
+  }
+
+  // The fee this payment carries. Never recomputed from the artist's setting: they can change it
+  // between the session being created and the fan paying, and the record has to match what Stripe
+  // took (found 2026-10-03: a 5% session paid after a switch to 0% was recorded with no fee).
+  // Checkout stores it in the metadata; a session created before it did (one paid across a deploy)
+  // has none, so Stripe's own figure on the PaymentIntent is read instead.
+  const applicationFeeCents = metadata.unstream_application_fee_cents !== undefined
+    ? Number(metadata.unstream_application_fee_cents)
+    : await chargedApplicationFee(paymentIntentId, evt.account!);
+  if (!Number.isInteger(applicationFeeCents) || applicationFeeCents < 0 || applicationFeeCents > grossCents) {
+    throw new Error('checkout.session.completed has an unusable application fee');
   }
 
   const fanUserId = str(metadata.unstream_fan_user_id);
@@ -180,6 +185,50 @@ async function markSupported(client: SupabaseClient, userId: string, artistId: s
     .eq('artist_id', artistId)
     .eq('supported', false);
   if (error) Sentry.captureMessage('[tips-webhook] mark supported failed', { level: 'warning', extra: { error: error.message } });
+}
+
+/** What Stripe actually took as Unstream's fee on a payment: application_fee_amount, 0 when none. */
+async function chargedApplicationFee(paymentIntentId: string, stripeAccount: string): Promise<number> {
+  const intent = await stripeRequest<{ application_fee_amount?: number | null }>(
+    'GET', `/v1/payment_intents/${encodeURIComponent(paymentIntentId)}`, {}, { stripeAccount },
+  );
+  return intent.application_fee_amount ?? 0;
+}
+
+/**
+ * A refund — usually the artist's, from their own Stripe dashboard. A full refund drops the payment
+ * out of goals and totals. Either way Unstream hands back its fee in proportion (spec §5, and the
+ * artist addendum promises it): Stripe doesn't return a platform's fee when a connected account
+ * refunds a direct charge, so without this it would stay in Unstream's balance (found 2026-10-03 in
+ * the sandbox: a refunded $5.76 tip left the 29¢ fee unrefunded).
+ *
+ * Only a charge carrying an application fee is Unstream's tip — the artist's own sales on the same
+ * account carry none and are left alone. Replays are safe: the amount still owed is worked out from
+ * what Stripe has already refunded, and the request is idempotent on (fee, total owed).
+ */
+async function recordRefund(client: SupabaseClient, charge: Obj): Promise<string> {
+  const note = charge.refunded === true
+    ? await setStatus(client, str(charge.payment_intent), 'refunded')
+    : 'partial refund, status left as is';
+
+  const feeId = str(charge.application_fee);
+  const amount = Number(charge.amount);
+  const amountRefunded = Number(charge.amount_refunded);
+  if (!feeId || !Number.isInteger(amount) || amount <= 0 || !Number.isInteger(amountRefunded)) return note;
+
+  // The fee is a platform object, so these calls are on Unstream's own account (no Stripe-Account).
+  const fee = await stripeRequest<{ amount: number; amount_refunded: number }>(
+    'GET', `/v1/application_fees/${encodeURIComponent(feeId)}`,
+  );
+  const owed = Math.min(fee.amount, Math.round(fee.amount * amountRefunded / amount));
+  const toReturn = owed - fee.amount_refunded;
+  if (toReturn <= 0) return `${note}; fee already returned`;
+  await stripeRequest(
+    'POST', `/v1/application_fees/${encodeURIComponent(feeId)}/refunds`,
+    { amount: toReturn },
+    { idempotencyKey: `fee-refund:${feeId}:${owed}` },
+  );
+  return `${note}; returned ${toReturn}¢ of Unstream's fee`;
 }
 
 async function setStatus(client: SupabaseClient, paymentIntentId: string | null, status: string): Promise<string> {
