@@ -122,6 +122,8 @@
     "functions/tips-checkout.ts",
     "functions/tips-webhook.ts",
     "functions/admin-tips.ts",
+    "functions/me-tips.ts",
+    "functions/__tests__/me-tips.test.ts",
     "functions/__tests__/tips-math.test.ts",
     "functions/__tests__/stripe-client.test.ts",
     "functions/__tests__/tips-checkout.test.ts",

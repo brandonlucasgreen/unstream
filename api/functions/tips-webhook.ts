@@ -3,7 +3,8 @@
 //
 // Configure in Stripe as a *Connect* webhook ("events on connected accounts"), with its signing
 // secret in STRIPE_CONNECT_WEBHOOK_SECRET. Events handled:
-//   checkout.session.completed            a one-off tip was paid → tip_payments + support_entries
+//   checkout.session.completed            a one-off tip was paid → tip_payments + support_entries,
+//                                         and the fan's receipt (sendReceipt)
 //   payment_intent.succeeded / .payment_failed   status sync
 //   charge.refunded, charge.dispute.created      status sync; progress and totals drop them
 //   account.updated                       mirror charges_enabled / details_submitted / country
@@ -16,6 +17,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { stripeRequest, verifyStripeSignature, type StripeEvent } from './stripe';
+import { markArtistSupported } from './tips-db';
 import { Sentry } from '../lib/sentry';
 
 const HEADERS = { 'Content-Type': 'application/json' };
@@ -171,20 +173,45 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
   });
   if (entryError) throw new Error(`support_entries insert failed: ${entryError.message}`);
 
+  // Only the insert that created the payment gets here, so a replayed event never re-sends it.
+  await sendReceipt(evt.account!, paymentIntentId, session);
+
   // Spec §3.3: a signed-in fan's first successful payment marks the artist supported, if they
   // have them saved. Best effort — the payment is recorded either way.
-  if (fanUserId) await markSupported(client, fanUserId, artistId);
+  if (fanUserId) await markArtistSupported(client, fanUserId, artistId);
   return 'recorded';
 }
 
-async function markSupported(client: SupabaseClient, userId: string, artistId: string) {
-  const { error } = await client
-    .from('saved_artists')
-    .update({ supported: true, supported_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('artist_id', artistId)
-    .eq('supported', false);
-  if (error) Sentry.captureMessage('[tips-webhook] mark supported failed', { level: 'warning', extra: { error: error.message } });
+/**
+ * Make sure the fan gets a receipt. On a direct charge Stripe sends one only if the *artist* has
+ * turned on receipts in their own Stripe settings, which Unstream can't see; a signed-out fan with no
+ * receipt has no record of the payment and no address to ask for a refund. Setting `receipt_email` on
+ * the charge makes Stripe send the artist's receipt whatever their settings (live mode only — test
+ * mode never emails).
+ *
+ * The address is the one the fan typed into Checkout. It passes through here to Stripe and is never
+ * stored or logged (spec §9: no fan PII). Skipped when the charge already has a receipt address or
+ * a receipt number, i.e. Stripe sent one; if the artist's own receipt hasn't gone out by the time
+ * this runs, the fan gets two, which beats none.
+ *
+ * Best effort: the payment is already recorded, and a failure here must not make Stripe retry the
+ * event (the retry would stop at "already recorded" and never reach this anyway).
+ */
+async function sendReceipt(stripeAccount: string, paymentIntentId: string, session: Obj): Promise<void> {
+  const details = (session.customer_details ?? {}) as Obj;
+  const email = str(details.email);
+  if (!email) return;
+  try {
+    const intent = await stripeRequest<{ latest_charge?: { id: string; receipt_email?: string | null; receipt_number?: string | null } | string | null }>(
+      'GET', `/v1/payment_intents/${encodeURIComponent(paymentIntentId)}`, { expand: ['latest_charge'] }, { stripeAccount },
+    );
+    const charge = intent.latest_charge;
+    if (!charge || typeof charge === 'string') throw new Error('PaymentIntent has no expanded charge');
+    if (charge.receipt_email || charge.receipt_number) return;
+    await stripeRequest('POST', `/v1/charges/${encodeURIComponent(charge.id)}`, { receipt_email: email }, { stripeAccount });
+  } catch (err) {
+    Sentry.captureException(err, { extra: { context: 'tips-webhook.sendReceipt', paymentIntentId } });
+  }
 }
 
 /** What Stripe actually took as Unstream's fee on a payment: application_fee_amount, 0 when none. */

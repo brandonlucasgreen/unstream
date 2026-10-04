@@ -229,3 +229,18 @@ export async function getGoals(client: SupabaseClient, artistId: string, opts: {
     status: r.status,
   }));
 }
+
+/**
+ * Spec §3.3: a fan's first successful payment marks the artist supported in their saved artists, if
+ * they have them saved. Called when a signed-in tip is recorded and when a fan saves a signed-out tip
+ * to their account afterwards. Best effort: the payment is recorded either way.
+ */
+export async function markArtistSupported(client: SupabaseClient, userId: string, artistId: string): Promise<void> {
+  const { error } = await client
+    .from('saved_artists')
+    .update({ supported: true, supported_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('artist_id', artistId)
+    .eq('supported', false);
+  if (error) Sentry.captureMessage('[tips-db] mark supported failed', { level: 'warning', extra: { error: error.message } });
+}

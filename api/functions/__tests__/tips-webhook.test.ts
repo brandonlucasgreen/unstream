@@ -258,3 +258,62 @@ describe('a refund hands back Unstream’s fee', () => {
     expect((await deliver(refundEvent({ refunded: true, amount_refunded: 576 }))).statusCode).toBe(500);
   });
 });
+
+describe('the fan’s receipt', () => {
+  const fetchMock = vi.fn();
+  let charge: Record<string, unknown>;
+  const withEmail = () => paidSession({}, { customer_details: { email: 'fan@example.com' } });
+  const receiptUpdates = () => fetchMock.mock.calls.filter(([url, init]) => String(url).endsWith('/v1/charges/ch_1') && init.method === 'POST');
+
+  beforeEach(() => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    charge = { id: 'ch_1', receipt_email: null, receipt_number: null };
+    fetchMock.mockReset();
+    fetchMock.mockImplementation((_url: string, init: { method: string }) => Promise.resolve(new Response(JSON.stringify(
+      init.method === 'GET' ? { id: 'pi_1', latest_charge: charge } : { id: 'ch_1' },
+    ))));
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+
+  it('has Stripe send the artist’s receipt to the address the fan gave Checkout', async () => {
+    await deliver(withEmail());
+    const [getUrl, getInit] = fetchMock.mock.calls[0];
+    expect(getUrl).toBe('https://api.stripe.com/v1/payment_intents/pi_1?expand%5B0%5D=latest_charge');
+    expect(getInit.headers['Stripe-Account']).toBe('acct_artist');
+    const [[, init]] = receiptUpdates();
+    expect(new URLSearchParams(init.body).get('receipt_email')).toBe('fan@example.com');
+    expect(init.headers['Stripe-Account']).toBe('acct_artist');
+  });
+
+  it('never stores the address', async () => {
+    await deliver(withEmail());
+    expect(JSON.stringify(db.tables)).not.toContain('fan@example.com');
+  });
+
+  it('leaves it alone when Stripe already sent one', async () => {
+    charge.receipt_number = '1234-5678';
+    await deliver(withEmail());
+    expect(receiptUpdates()).toHaveLength(0);
+  });
+
+  it('sends it once, not again on a replayed event', async () => {
+    await deliver(withEmail());
+    await deliver(withEmail());
+    expect(receiptUpdates()).toHaveLength(1);
+  });
+
+  it('does nothing without an address', async () => {
+    await deliver(paidSession());
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('still records the tip when the receipt fails, and doesn’t make Stripe retry', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify({ error: { message: 'boom' } }), { status: 500 })));
+    const res = await deliver(withEmail());
+    expect(res.statusCode).toBe(200);
+    expect(db.tables.tip_payments).toHaveLength(1);
+    expect(mocks.captureException).toHaveBeenCalled();
+    expect(JSON.stringify(mocks.captureException.mock.calls)).not.toContain('fan@example.com');
+  });
+});

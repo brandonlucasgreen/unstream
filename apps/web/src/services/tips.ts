@@ -1,4 +1,5 @@
-// Client for the artist side of tips: /api/tips/settings and /api/tips/connect.
+// Client for tips: the artist side (/api/tips/settings, /api/tips/connect), the tip page
+// (/api/tips/checkout) and a fan's own record (/api/me/tips).
 
 import type { TipGoal } from '../types/artist-page';
 
@@ -97,4 +98,41 @@ export async function getTipPage(slug: string): Promise<TipPageData> {
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new TipsApiError((body as { error?: string }).error ?? `HTTP ${r.status}`, r.status);
   return body as TipPageData;
+}
+
+// ---------------------------------------------------------------------------------------------
+// A fan's own record: /api/me/tips.
+// ---------------------------------------------------------------------------------------------
+
+export interface FanTip {
+  id: string;
+  artistName: string;
+  artistSlug: string;
+  /** What the fan chose to give the artist. */
+  amountCents: number;
+  /** What the fan paid, including any fees they covered. */
+  paidCents: number;
+  currency: string;
+  status: 'succeeded' | 'refunded' | 'disputed';
+  goalTitle: string | null;
+  createdAt: string;
+}
+
+export async function getMyTips(token: string): Promise<FanTip[]> {
+  const { tips } = await call<{ tips: FanTip[] }>(token, '/api/me/tips');
+  return tips;
+}
+
+/**
+ * Save a tip paid while signed out to this account, from the Checkout Session id Stripe put in the
+ * /tip/thanks URL. 'pending' means Stripe has the payment but Unstream hasn't recorded it yet, so
+ * the caller should try again shortly. Throws TipsApiError otherwise (404, 409 someone else's, 410
+ * too old).
+ */
+export async function claimTip(token: string, sessionId: string, artistSlug: string): Promise<'saved' | 'pending'> {
+  const { status } = await call<{ status: 'saved' | 'pending' }>(token, '/api/me/tips', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, artistSlug }),
+  });
+  return status;
 }

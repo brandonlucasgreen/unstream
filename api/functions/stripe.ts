@@ -174,6 +174,8 @@ export interface StripeCheckoutSession {
   amount_total?: number | null;
   currency?: string | null;
   livemode?: boolean;
+  /** Unix seconds. */
+  created?: number;
   metadata?: Record<string, string> | null;
 }
 

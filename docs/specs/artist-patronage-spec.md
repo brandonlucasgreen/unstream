@@ -406,6 +406,9 @@ city_interest             -- Play my city
 - **`city_key`** is the lowercased, trimmed city with its country. Free-text cities are messy, so the
   input suggests existing keys as the fan types (§11 open question 5).
 - **No fan PII:** no emails, names or card data. `fan_user_id` and `user_id` are the only links.
+  One pass-through, decided by Brandon 2026-10-03: the webhook hands the email the fan typed into
+  Checkout back to Stripe as the charge's `receipt_email`, so the artist's receipt reaches a
+  signed-out fan whatever the artist's own receipt settings. It is never stored or logged.
 - **Why `livemode`:** `npm run dev` writes to production Supabase. Test-mode payments made locally land in
   the same tables and have to be excluded from everything real.
 - **Paging:** the charge run and any artist-wide aggregate use `readAllPages`. PostgREST truncates silently
