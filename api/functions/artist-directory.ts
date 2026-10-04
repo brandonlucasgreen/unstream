@@ -91,6 +91,29 @@ export async function handler(event: { queryStringParameters?: Record<string, st
   //     the index was overclaiming outright;
   //   * artists who have died — 107 of them, whose estates do still sell the music, but who the
   //     surrounding copy addresses as though they were here to be supported.
+  // scope=aliases maps retired slugs (accent re-slugs, merges) to the artist's current slug.
+  // Public on purpose: every alias is already a working redirect, so this says nothing a visitor
+  // can't learn by following one. It exists so the weekly social-posts Action can post canonical
+  // URLs without holding the service key (`artist_slug_aliases` is server-only under RLS).
+  // Read once a week, so no Redis entry: the CDN window above is plenty.
+  if (event.queryStringParameters?.scope === 'aliases') {
+    const result = await readAllPages<{ alias: string; artists: { slug: string } | null }>(
+      (from, to) =>
+        supabase
+          .from('artist_slug_aliases')
+          .select('alias, artists!inner(slug)')
+          .range(from, to),
+      'artist slug aliases'
+    );
+    if (!result.ok) {
+      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch aliases' }) };
+    }
+    const aliases = result.rows
+      .filter(row => row.alias && row.artists?.slug)
+      .map(row => ({ alias: row.alias, slug: row.artists!.slug }));
+    return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ aliases }) };
+  }
+
   if (event.queryStringParameters?.scope === 'known') {
     // Redis-cached: this is the single largest-volume read in the codebase — every verified
     // artist WITH their links embedded, ~3 paged requests of 1,000 rows each — behind only a
