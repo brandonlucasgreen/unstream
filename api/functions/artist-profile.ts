@@ -9,6 +9,7 @@ import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry } from '../lib/sentry';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
+import { safeEmbedStyle } from '../shared/embed-style';
 
 function getServiceClient() {
   return getClient();
@@ -85,7 +86,8 @@ export function sanitizeEmbed(raw: string | null, ownedHostnames: string[] = [])
 
   if (widthMatch) safeAttrs.width = widthMatch[1];
   if (heightMatch) safeAttrs.height = heightMatch[1];
-  if (styleMatch) safeAttrs.style = styleMatch[1];
+  const style = styleMatch ? safeEmbedStyle(styleMatch[1]) : null;
+  if (style) safeAttrs.style = style;
   if (allowMatch) safeAttrs.allow = allowMatch[1];
 
   // Build clean iframe from whitelist

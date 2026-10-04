@@ -72,7 +72,8 @@ export function decryptCredential(blob: string): string {
     throw new Error('Malformed credential ciphertext');
   }
   const [iv, authTag, ciphertext] = parts.map(p => Buffer.from(p, 'base64'));
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
+  // Pin the tag length: setAuthTag otherwise accepts a truncated tag.
+  const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: 16 });
   decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
 }

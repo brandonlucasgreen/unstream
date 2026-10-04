@@ -47,4 +47,20 @@ describe('sanitizeEmbed', () => {
   it('returns null when there is no iframe tag at all', () => {
     expect(sanitizeEmbed('https://bandcamp.com/EmbeddedPlayer/album=123/')).toBeNull();
   });
+
+  // A pasted style used to be copied through whole, so position:fixed and a z-index made the
+  // embed cover the artist page with whatever the embedded site showed.
+  it('keeps sizing and border from a pasted style and drops positioning', () => {
+    const html = '<iframe style="position:fixed; inset:0; z-index:99999; border: 0; width: 100%; height: 120px;" src="https://bandcamp.com/EmbeddedPlayer/album=1/"></iframe>';
+    const out = sanitizeEmbed(html) ?? '';
+    expect(out).toContain('style="border: 0; width: 100%; height: 120px"');
+    expect(out).not.toContain('position');
+    expect(out).not.toContain('z-index');
+    expect(out).not.toContain('inset');
+  });
+
+  it('drops a style value that carries a function', () => {
+    const html = '<iframe style="width: calc(100vw); height: 120px" src="https://bandcamp.com/EmbeddedPlayer/album=1/"></iframe>';
+    expect(sanitizeEmbed(html)).toContain('style="height: 120px"');
+  });
 });

@@ -222,6 +222,15 @@ describe('buildIcs', () => {
     expect(lines).toContain('ATTACH;FMTTYPE=image/jpeg:https://x.test/a,b.jpg');
   });
 
+  // The URL parser drops CR/LF while validating, so they can survive into a stored artwork
+  // URL; unescaped in ATTACH they would start new calendar lines (a forged VEVENT).
+  it('drops an artwork URL carrying line breaks instead of writing it', () => {
+    const forged = 'https://x.test/a.jpg\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:Forged';
+    const ics = buildIcs([release({ artworkUrl: forged })], 'Cal', NOW);
+    expect(ics).not.toContain('SUMMARY:Forged');
+    expect(logicalLines(ics).some(l => l.startsWith('ATTACH'))).toBe(false);
+  });
+
   it('omits the price line rather than inventing one when no offer is known', () => {
     const lines = logicalLines(buildIcs([release({ offerSummary: '' })], 'Cal', NOW));
     const description = lines.find(l => l.startsWith('DESCRIPTION:')) ?? '';

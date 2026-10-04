@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // `enrichment=deferred` is how a client that makes that Phase 2 call says so. What must hold:
 //   - deferred: no MusicBrainz request at all on a cache miss, and hasPendingEnrichment set so
 //     the client does make the Phase 2 call;
-//   - not deferred (the v1 API, Discord, the edge pages, shipped app builds): MusicBrainz is
+//   - not deferred (the v1 API, the edge pages, shipped app builds): MusicBrainz is
 //     still fetched inline, because those callers never make a second call.
 
 vi.mock('../redis', () => ({

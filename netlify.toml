@@ -398,11 +398,6 @@
   to = "/.netlify/functions/admin-artist-duplicates"
   status = 200
 
-[[redirects]]
-  from = "/api/discord/interaction"
-  to = "/.netlify/functions/discord-interaction"
-  status = 200
-
 # V1 Public API routes
 [[redirects]]
   from = "/api/v1/search"

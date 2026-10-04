@@ -6,9 +6,9 @@
 // matters: cataloging one artist costs one Bandcamp request, and the search that triggered it
 // must not wait for it.
 //
-// Authenticated with a shared secret. The Discord background function in this repo has no
-// auth, and copying that here would be a mistake: an open endpoint that makes Unstream crawl
-// Bandcamp on demand is exactly the amplifier the check-releases hardening existed to close.
+// Authenticated with a shared secret. An open endpoint that makes Unstream crawl Bandcamp on
+// demand is exactly the amplifier the check-releases hardening existed to close. (The removed
+// Discord bot's background function had no auth, and was itself exploitable for it.)
 
 import {
   claimArtistForCatalog,

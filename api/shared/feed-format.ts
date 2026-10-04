@@ -150,7 +150,9 @@ const IMAGE_MIME: Record<string, string> = {
  * its commas to `\,` would corrupt the address. Same reason `URL:` below is unescaped.
  */
 function artworkAttachLine(artworkUrl: string | null): string | null {
-  if (!artworkUrl) return null;
+  // Unescaped, so a stored URL carrying a CR or LF (the URL parser drops them while
+  // validating, so they survive into the row) would start new calendar lines. Drop it.
+  if (!artworkUrl || /[\x00-\x1f\x7f]/.test(artworkUrl)) return null;
   const ext = artworkUrl.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
   const mime = IMAGE_MIME[ext];
   return mime ? `ATTACH;FMTTYPE=${mime}:${artworkUrl}` : `ATTACH:${artworkUrl}`;

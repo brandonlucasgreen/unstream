@@ -33,6 +33,7 @@ export function ClaimPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [artistName, setArtistName] = useState('');
   const [discoveredLinks, setDiscoveredLinks] = useState(0);
+  const [linkBackFound, setLinkBackFound] = useState(false);
   const [alreadyVerified, setAlreadyVerified] = useState(false);
 
   // Review step state
@@ -201,6 +202,13 @@ export function ClaimPage() {
       });
 
       const data = await response.json();
+      // The link-back passed, but on a site we don't hold for this artist: a person reviews it.
+      if (response.ok && data.pendingReview) {
+        setLinkBackFound(true);
+        setStep('manual-review-submitted');
+        setLoading(false);
+        return;
+      }
       if (!response.ok || !data.verified) {
         setError(data.error || 'Verification failed');
         setLoading(false);
@@ -429,7 +437,7 @@ export function ClaimPage() {
           )}
 
           {step === 'manual-review-submitted' && (
-            <ClaimManualReviewSubmittedStep slug={slug} email={email} />
+            <ClaimManualReviewSubmittedStep slug={slug} email={email} linkBackFound={linkBackFound} />
           )}
 
           {step === 'review' && (

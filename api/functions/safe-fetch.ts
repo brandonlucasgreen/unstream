@@ -80,7 +80,11 @@ export async function resolvesToPublicAddress(hostname: string): Promise<boolean
  * follow a link found inside fetched content you must additionally confine it (e.g. to the
  * host you landed on). See `checkBandcamp` in check-releases.ts for that pattern.
  */
-export async function safeFetch(url: string, timeoutMs: number = 5000): Promise<Response | null> {
+export async function safeFetch(
+  url: string,
+  timeoutMs: number = 5000,
+  headers: Record<string, string> = {},
+): Promise<Response | null> {
   let current = url;
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
@@ -99,7 +103,7 @@ export async function safeFetch(url: string, timeoutMs: number = 5000): Promise<
     let response: Response;
     try {
       response = await fetch(current, {
-        headers: { 'User-Agent': FETCH_USER_AGENT },
+        headers: { 'User-Agent': FETCH_USER_AGENT, ...headers },
         redirect: 'manual',
         signal: controller.signal,
       });

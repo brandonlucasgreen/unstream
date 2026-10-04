@@ -272,6 +272,11 @@ describe('isPrivateIpAddress', () => {
     ['::ffff:127.0.0.1', 'IPv4-mapped loopback, dotted'],
     ['::ffff:7f00:1', 'IPv4-mapped loopback, hex groups (how Node normalizes it)'],
     ['::ffff:a9fe:a9fe', 'IPv4-mapped metadata address'],
+    ['::7f00:1', 'IPv4-compatible loopback'],
+    ['::a9fe:a9fe', 'IPv4-compatible metadata address'],
+    ['64:ff9b::a9fe:a9fe', 'NAT64-wrapped metadata address'],
+    ['2002:a9fe:a9fe::1', '6to4-wrapped metadata address'],
+    ['ff02::1', 'IPv6 multicast'],
     ['not-an-address', 'unparseable'],
     ['', 'empty'],
   ])('treats %s as private (%s)', addr => {

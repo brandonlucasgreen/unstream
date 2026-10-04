@@ -3,12 +3,14 @@
 //   action: 'start'  — create a pending claim (requires auth)
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Sentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
 import { escapeHtml } from '../lib/html';
+import { safeFetch } from './safe-fetch';
+import { websiteMatchesKnownLink } from './claim-verification';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -57,7 +59,12 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   return { userId: data.user.id, email: data.user.email || '' };
 }
 
-// Validate a URL is safe for server-side fetching (SSRF protection)
+// Some artist sites sit behind bot protection that turns away anything but a browser.
+const BROWSER_USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
+
+// Early, string-only validation so the claimant gets a specific error message. Not the SSRF
+// boundary: every fetch goes through safeFetch, which re-validates each hop by resolution.
 function isUrlSafeToFetch(urlString: string): { safe: boolean; reason?: string } {
   let parsed: URL;
   try {
@@ -121,19 +128,18 @@ async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult
     return { result: null, error: { type: 'ssrf_blocked', message: urlCheck.reason || 'URL not allowed' } };
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
-    const response = await fetch(websiteUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-      },
-      signal: controller.signal,
-      redirect: 'follow',
+    // safeFetch re-checks every redirect hop and refuses names that resolve to private
+    // addresses; isUrlSafeToFetch above is only a string check on the URL as typed.
+    const response = await safeFetch(websiteUrl, 10000, {
+      'User-Agent': BROWSER_USER_AGENT,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
     });
+
+    if (!response) {
+      return { result: null, error: { type: 'ssrf_blocked', message: 'URL not allowed' } };
+    }
 
     if (!response.ok) {
       return { result: null, error: { type: 'not_ok', message: `Your website returned HTTP ${response.status}. Make sure the URL is correct and publicly accessible.` } };
@@ -154,8 +160,6 @@ async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult
     return { result: { links, html } };
   } catch {
     return { result: null, error: { type: 'fetch_failed', message: "We couldn't reach your website. Make sure the URL is correct and the site is publicly accessible." } };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -228,19 +232,10 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
     return null;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
-    const response = await fetch(pageUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-      },
-      signal: controller.signal,
-      redirect: 'follow',
-    });
+    const response = await safeFetch(pageUrl, 10000, { 'User-Agent': BROWSER_USER_AGENT });
 
-    if (!response.ok) return null;
+    if (!response?.ok) return null;
     const html = await response.text();
 
     if (platform === 'bandcamp') {
@@ -299,8 +294,6 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
     return null;
   } catch {
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -310,6 +303,60 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Authorization, Content-Type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+// How long a claim in progress holds the artist against someone else starting one.
+const PENDING_CLAIM_HOLD_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * A claim whose link-back passed on a website we don't already hold for the artist: file it
+ * for manual review instead of verifying. Idempotent: a second verify finds the pending request.
+ */
+async function queueClaimForReview(
+  client: SupabaseClient,
+  claim: { artistId: string; artistName: string; slug: string; userId: string; email: string; websiteUrl: string }
+) {
+  const pendingResponse = {
+    statusCode: 200,
+    headers: CORS_HEADERS,
+    body: JSON.stringify({
+      verified: false,
+      pendingReview: true,
+      message: 'We found the link on your website. Because it isn\'t a site we already have on record for this artist, a person will review your claim, usually within a few days.',
+    }),
+  };
+
+  const { data: existingRequest } = await client
+    .from('verification_requests')
+    .select('id')
+    .eq('artist_id', claim.artistId)
+    .eq('user_id', claim.userId)
+    .eq('status', 'pending')
+    .maybeSingle();
+  if (existingRequest) return pendingResponse;
+
+  const { error } = await client.from('verification_requests').insert({
+    artist_id: claim.artistId,
+    user_id: claim.userId,
+    email: claim.email.toLowerCase().trim(),
+    message: `[Automatic] Link-back found on ${claim.websiteUrl}, but that site isn't one we hold for this artist from MusicBrainz or Bandcamp. Check it is really theirs before approving.`,
+    status: 'pending',
+  });
+
+  if (error) {
+    console.error('[Claim] Failed to queue claim for review:', error);
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'We couldn\'t submit your claim for review. Please try again.' }),
+    };
+  }
+
+  Sentry.captureMessage('Claim queued for review: website not on record', {
+    level: 'info',
+    extra: { artistSlug: claim.slug, artistName: claim.artistName, websiteUrl: claim.websiteUrl },
+  });
+  return pendingResponse;
+}
 
 export async function handler(event: {
   httpMethod: string;
@@ -404,7 +451,7 @@ export async function handler(event: {
     // Check if already claimed by someone else
     const { data: existingProfile } = await client
       .from('artist_profiles')
-      .select('user_id, verified_at')
+      .select('user_id, verified_at, updated_at')
       .eq('artist_id', artist.id)
       .single();
 
@@ -413,6 +460,24 @@ export async function handler(event: {
         statusCode: 409,
         headers: CORS_HEADERS,
         body: JSON.stringify({ error: 'This artist has already been claimed' }),
+      };
+    }
+
+    // There is one profile row per artist, so starting a claim used to overwrite anyone else's
+    // claim in progress. Hold a recent one; an abandoned one can be taken over after a week.
+    if (
+      existingProfile &&
+      !existingProfile.verified_at &&
+      existingProfile.user_id !== userId &&
+      existingProfile.updated_at &&
+      Date.now() - new Date(existingProfile.updated_at).getTime() < PENDING_CLAIM_HOLD_MS
+    ) {
+      return {
+        statusCode: 409,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          error: 'Someone else started claiming this artist in the last few days. If this is you, use "Request manual review" and we\'ll sort it out.',
+        }),
       };
     }
 
@@ -432,9 +497,9 @@ export async function handler(event: {
       };
     }
 
-    // Use the email provided by the frontend, or fall back to the authenticated user's email.
-    // The frontend email may be empty if the page reloaded after magic link redirect.
-    const email = (body.email || authUser.email || '').toLowerCase().trim();
+    // Always the signed-in account's address: a body-supplied one let the claimant choose
+    // where the server sends the claim email.
+    const email = authUser.email.toLowerCase().trim();
 
     // Upsert the profile (allows retrying the claim flow)
     // verification_code is a legacy NOT NULL column — populate it with a random value
@@ -449,6 +514,7 @@ export async function handler(event: {
           website_url: websiteUrl,
           verification_code: crypto.randomUUID(),
           verified_at: null,
+          updated_at: new Date().toISOString(),
         },
         { onConflict: 'artist_id' }
       );
@@ -602,6 +668,24 @@ export async function handler(event: {
       };
     }
 
+    // The link-back proves control of this website, not that it is the artist's. Approve
+    // instantly only when it's a site we already hold for them; otherwise queue a review.
+    const { data: existingLinks } = await client
+      .from('artist_links')
+      .select('platform, url, source')
+      .eq('artist_id', artist.id);
+
+    if (!websiteMatchesKnownLink(profile.website_url, existingLinks || [])) {
+      return await queueClaimForReview(client, {
+        artistId: artist.id,
+        artistName: artist.name,
+        slug,
+        userId,
+        email: authUser.email,
+        websiteUrl: profile.website_url,
+      });
+    }
+
     // Verification passed! Discover platform links from the website.
     const discoveredLinks = identifyPlatformLinks(links);
 
@@ -635,11 +719,6 @@ export async function handler(event: {
     }
 
     // Add website as officialsite link
-    const { data: existingLinks } = await client
-      .from('artist_links')
-      .select('platform, url')
-      .eq('artist_id', artist.id);
-
     const existingPlatforms = new Set((existingLinks || []).map(l => l.platform));
 
     if (!existingPlatforms.has('officialsite')) {
@@ -819,7 +898,7 @@ export async function handler(event: {
       };
     }
 
-    const userEmail = body.email || authUser.email || '';
+    const userEmail = authUser.email;
 
     const { error: insertError } = await client
       .from('verification_requests')
@@ -844,7 +923,7 @@ export async function handler(event: {
       level: 'info',
       extra: { artistSlug: slug, artistName: artist.name, userId, messageLength: message?.trim().length || 0 },
     });
-    console.log(`[Claim] Manual verification request submitted for "${artist.name}" by ${userEmail}`);
+    console.log(`[Claim] Manual verification request submitted for "${artist.name}" by user ${userId}`);
 
     return {
       statusCode: 200,

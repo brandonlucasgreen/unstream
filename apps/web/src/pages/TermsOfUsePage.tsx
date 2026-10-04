@@ -24,7 +24,7 @@ export function TermsOfUsePage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: October 3, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -68,8 +68,8 @@ export function TermsOfUsePage() {
             <Section n={1} title="Agreement to these terms">
               <P>
                 These Terms of Use ("Terms") are an agreement between you and Unstream. They cover the website at
-                unstream.stream, the Unstream browser extension, the Unstream apps for macOS and iOS, the Unstream
-                Discord bot, our public API, and any other service we offer that links to this page (together, the
+                unstream.stream, the Unstream browser extension, the Unstream apps for macOS and iOS, our public
+                API, and any other service we offer that links to this page (together, the
                 "Service").
               </P>
               <P>
@@ -317,10 +317,6 @@ export function TermsOfUsePage() {
                 same thing, and sync your saved artists if you sign in. Apple's App Store terms apply alongside these
                 Terms, and Apple isn't responsible for the apps — we are. Optional scrobbling to ListenBrainz only
                 happens if you connect it, and is governed by ListenBrainz's own terms.
-              </P>
-              <P>
-                <strong>Discord bot.</strong> Adding the bot to a server means these Terms apply to that use too, along
-                with Discord's terms. Server admins are responsible for what happens in their server.
               </P>
               <P>
                 Where a component of the Service is also published as open source, the licence on that source code
