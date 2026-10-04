@@ -4,6 +4,7 @@
 // Returns the new username on success, or a friendly error on failure.
 
 import { getClient } from './db';
+import { isReservedHandle } from '../lib/reserved-handles';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
 // CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
@@ -67,6 +68,10 @@ export async function handler(event: {
       headers: CORS_HEADERS,
       body: JSON.stringify({ error: 'Username must be 3-20 characters, lowercase letters, numbers, and hyphens. No leading or trailing hyphens.' }),
     };
+  }
+
+  if (isReservedHandle(username)) {
+    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'This username is reserved' }) };
   }
 
   try {

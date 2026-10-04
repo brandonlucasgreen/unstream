@@ -332,7 +332,9 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
               Featured Release
             </h2>
-            <div className="rounded-xl overflow-hidden">
+            {/* contain:paint clips even a position:fixed child, so an embed saved before its
+                style was filtered still can't cover the page. */}
+            <div className="rounded-xl overflow-hidden [contain:paint]">
               <div dangerouslySetInnerHTML={{ __html: profile.featuredEmbed }} />
             </div>
           </div>

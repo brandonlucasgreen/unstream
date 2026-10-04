@@ -45,7 +45,7 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
       }
 
       const normalizedEmail = email.toLowerCase().trim();
-      console.log(`[artist-auth] Login request for email: ${normalizedEmail}`);
+      console.log('[artist-auth] Login request');
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

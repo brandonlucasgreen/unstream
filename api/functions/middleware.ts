@@ -498,6 +498,11 @@ export function isPrivateIpAddress(address: string): boolean {
     if (addr === '::' || addr === '::1') return true;
     const lead = parseInt(addr.split(':')[0] || '0', 16);
     if (!Number.isFinite(lead)) return true;
+    // 0000::/16 is all reserved, including IPv4-compatible ::a.b.c.d (::7f00:1 is loopback).
+    if (lead === 0) return true;
+    if (lead === 0x2002) return true; // 2002::/16 6to4 wraps an arbitrary IPv4, private included
+    if (lead === 0x64 && addr.startsWith('64:ff9b:')) return true; // NAT64 64:ff9b::/96, likewise
+    if ((lead & 0xff00) === 0xff00) return true; // ff00::/8 multicast
     if ((lead & 0xfe00) === 0xfc00) return true; // fc00::/7 unique-local
     if ((lead & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
     return false;

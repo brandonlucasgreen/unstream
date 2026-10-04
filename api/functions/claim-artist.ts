@@ -9,6 +9,7 @@ import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
 import { escapeHtml } from '../lib/html';
+import { safeFetch } from './safe-fetch';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -57,7 +58,12 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   return { userId: data.user.id, email: data.user.email || '' };
 }
 
-// Validate a URL is safe for server-side fetching (SSRF protection)
+// Some artist sites sit behind bot protection that turns away anything but a browser.
+const BROWSER_USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36';
+
+// Early, string-only validation so the claimant gets a specific error message. Not the SSRF
+// boundary: every fetch goes through safeFetch, which re-validates each hop by resolution.
 function isUrlSafeToFetch(urlString: string): { safe: boolean; reason?: string } {
   let parsed: URL;
   try {
@@ -121,19 +127,18 @@ async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult
     return { result: null, error: { type: 'ssrf_blocked', message: urlCheck.reason || 'URL not allowed' } };
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
-    const response = await fetch(websiteUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-      },
-      signal: controller.signal,
-      redirect: 'follow',
+    // safeFetch re-checks every redirect hop and refuses names that resolve to private
+    // addresses; isUrlSafeToFetch above is only a string check on the URL as typed.
+    const response = await safeFetch(websiteUrl, 10000, {
+      'User-Agent': BROWSER_USER_AGENT,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
     });
+
+    if (!response) {
+      return { result: null, error: { type: 'ssrf_blocked', message: 'URL not allowed' } };
+    }
 
     if (!response.ok) {
       return { result: null, error: { type: 'not_ok', message: `Your website returned HTTP ${response.status}. Make sure the URL is correct and publicly accessible.` } };
@@ -154,8 +159,6 @@ async function scrapeWebsite(websiteUrl: string): Promise<{ result: ScrapeResult
     return { result: { links, html } };
   } catch {
     return { result: null, error: { type: 'fetch_failed', message: "We couldn't reach your website. Make sure the URL is correct and the site is publicly accessible." } };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -228,19 +231,10 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
     return null;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
-    const response = await fetch(pageUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-      },
-      signal: controller.signal,
-      redirect: 'follow',
-    });
+    const response = await safeFetch(pageUrl, 10000, { 'User-Agent': BROWSER_USER_AGENT });
 
-    if (!response.ok) return null;
+    if (!response?.ok) return null;
     const html = await response.text();
 
     if (platform === 'bandcamp') {
@@ -299,8 +293,6 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
     return null;
   } catch {
     return null;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -844,7 +836,7 @@ export async function handler(event: {
       level: 'info',
       extra: { artistSlug: slug, artistName: artist.name, userId, messageLength: message?.trim().length || 0 },
     });
-    console.log(`[Claim] Manual verification request submitted for "${artist.name}" by ${userEmail}`);
+    console.log(`[Claim] Manual verification request submitted for "${artist.name}" by user ${userId}`);
 
     return {
       statusCode: 200,

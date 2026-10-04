@@ -1,6 +1,13 @@
 // Netlify Background Function (the `-background` suffix makes it async).
 // Receives artist search request from discord-interaction, calls the search API,
 // formats results as a Discord embed, and PATCHes the followup message.
+//
+// Every function is publicly reachable at /.netlify/functions/<name>, so this one only
+// accepts calls carrying INTERNAL_FUNCTION_SECRET (sent by discord-interaction, which has
+// already checked Discord's signature). The ids it puts into the webhook path are checked
+// too: the request is sent with the bot token, so a `../` in them would aim it elsewhere.
+
+import { isInternalRequest } from './middleware';
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || '';
 
@@ -49,7 +56,14 @@ interface DiscordEmbed {
   thumbnail?: { url: string };
 }
 
-export async function handler(event: { body: string | null }) {
+const DISCORD_ID_PATTERN = /^\d+$/;
+// No `/`, and long enough that it can't be a `.` or `..` path segment (real tokens are ~200 chars).
+const INTERACTION_TOKEN_PATTERN = /^[A-Za-z0-9._-]{20,}$/;
+
+export async function handler(event: { body: string | null; headers?: Record<string, string | undefined> }) {
+  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
+    return { statusCode: 401 };
+  }
   if (!event.body) return { statusCode: 400 };
 
   const { interaction_token, application_id, artist_name, resolve_url } = JSON.parse(event.body) as {
@@ -58,6 +72,13 @@ export async function handler(event: { body: string | null }) {
     artist_name?: string;
     resolve_url?: string;
   };
+
+  if (
+    typeof application_id !== 'string' || !DISCORD_ID_PATTERN.test(application_id) ||
+    typeof interaction_token !== 'string' || !INTERACTION_TOKEN_PATTERN.test(interaction_token)
+  ) {
+    return { statusCode: 400 };
+  }
 
   const webhookUrl = `https://discord.com/api/v10/webhooks/${application_id}/${interaction_token}/messages/@original`;
   const siteUrl = process.env.URL || 'https://unstream.stream';

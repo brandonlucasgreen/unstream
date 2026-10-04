@@ -16,6 +16,12 @@ vi.mock('../redis', () => ({
   reportRedisFailure: vi.fn(),
 }));
 
+// The artist's own site is fetched through safeFetch, which resolves the host first; the
+// `.example` hosts here would never resolve, so answer with a public address.
+vi.mock('dns/promises', () => ({
+  lookup: vi.fn(async () => [{ address: '93.184.216.34', family: 4 }]),
+}));
+
 import {
   getMusicBrainzEnrichment,
   peekMusicBrainzEnrichment,

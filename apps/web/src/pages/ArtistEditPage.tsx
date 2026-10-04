@@ -28,6 +28,25 @@ const ALL_PLATFORMS: { id: string; name: string; category: string }[] = [
   { id: 'other', name: 'Other', category: 'other' },
 ];
 
+// The preview shows an iframe built from the pasted code's src and height, never the pasted
+// HTML itself: rendering it raw ran whatever was pasted (an `<img onerror>` "embed code" sent
+// by someone posing as support) with the artist signed in. The server's sanitizeEmbed decides
+// what is actually saved.
+function embedPreviewFrame(raw: string): { src: string; height: string } | null {
+  const srcMatch = raw.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+  if (!srcMatch) return null;
+  try {
+    if (new URL(srcMatch[1]).protocol !== 'https:') return null;
+  } catch {
+    return null;
+  }
+  const height =
+    raw.match(/\bheight=["'](\d+)(?:px)?["']/i)?.[1] ??
+    raw.match(/height:\s*(\d+)px/i)?.[1] ??
+    '120';
+  return { src: srcMatch[1], height };
+}
+
 // Streaming service URL patterns for soft warnings
 const STREAMING_PATTERNS: { pattern: RegExp; name: string }[] = [
   { pattern: /open\.spotify\.com|spotify\.link/i, name: 'Spotify' },
@@ -622,10 +641,26 @@ export function ArtistEditPage() {
         {form.featuredEmbed && (
           <div className="space-y-2">
             <p className="text-xs text-text-muted">Preview:</p>
-            <div
-              className="rounded-lg overflow-hidden border border-border"
-              dangerouslySetInnerHTML={{ __html: form.featuredEmbed }}
-            />
+            <div className="rounded-lg overflow-hidden border border-border">
+              {(() => {
+                const frame = embedPreviewFrame(form.featuredEmbed);
+                return frame ? (
+                  <iframe
+                    src={frame.src}
+                    title="Embed preview"
+                    width="100%"
+                    height={frame.height}
+                    style={{ border: 0, display: 'block' }}
+                    loading="lazy"
+                    sandbox="allow-scripts allow-same-origin allow-popups"
+                  />
+                ) : (
+                  <p className="p-3 text-xs text-text-muted">
+                    This doesn't look like an iframe embed code with an https address.
+                  </p>
+                );
+              })()}
+            </div>
             <button
               onClick={() => set('featuredEmbed', '')}
               className="text-xs text-red-400 hover:text-red-300 transition-colors"

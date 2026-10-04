@@ -1,20 +1,9 @@
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { safeFetch } from './safe-fetch';
 
-// Helper to fetch with timeout
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 5000): Promise<Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    return response;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
+// The url parameter comes straight from the request, so both fetches go through safeFetch,
+// which refuses internal and private-network targets on every redirect hop. It isn't
+// confined to *.bandcamp.com: release links can be a Bandcamp Pro artist's custom domain.
 
 // Fetch Bandcamp embed data for an artist, album, or track URL
 async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title: string } | null> {
@@ -23,13 +12,9 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
     const isAlbumUrl = url.includes('/album/');
     const isTrackUrl = url.includes('/track/');
 
-    const response = await fetchWithTimeout(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 5000);
+    const response = await safeFetch(url, 5000);
 
-    if (!response.ok) return null;
+    if (!response?.ok) return null;
 
     const html = await response.text();
 
@@ -79,13 +64,9 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
     const baseUrl = url.replace(/\/$/, '').replace(/\/music$/, '');
     const itemUrl = baseUrl + itemPath;
 
-    const itemResponse = await fetchWithTimeout(itemUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 5000);
+    const itemResponse = await safeFetch(itemUrl, 5000);
 
-    if (!itemResponse.ok) return null;
+    if (!itemResponse?.ok) return null;
 
     const itemHtml = await itemResponse.text();
 

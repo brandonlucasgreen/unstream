@@ -6,6 +6,7 @@ import { persistSearchResults, artistSlug, getMergeOverrides, getLinkSuppression
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
+import { safeFetch } from './safe-fetch';
 import { getTipsLiveSlugs } from './tips-db';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
@@ -428,13 +429,11 @@ async function searchFaircamp(query: string): Promise<Map<string, NameOnlyEntry>
 // Faircamp sites use a consistent static HTML structure: div.release > a (second <a> is the title)
 async function getFaircampReleaseTitles(url: string): Promise<string[]> {
   try {
-    const response = await fetchWithTimeout(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 4000);
+    // Domains come from the third-party Faircamp webring directory, so this goes through
+    // safeFetch: a listed domain that resolves into private space is refused.
+    const response = await safeFetch(url, 4000);
 
-    if (!response.ok) return [];
+    if (!response?.ok) return [];
 
     const html = await response.text();
     const root = parse(html);

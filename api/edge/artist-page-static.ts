@@ -5,6 +5,7 @@ import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
+import { safeEmbedStyle } from "../shared/embed-style.ts";
 
 /**
  * How many releases to list before summarising the rest.
@@ -164,7 +165,8 @@ function buildSafeEmbed(featuredEmbed: string | null): string {
   let iframeAttrs = `src="${escapeHtml(src)}" sandbox="allow-scripts allow-same-origin" loading="lazy"`;
   if (widthMatch) iframeAttrs += ` width="${escapeHtml(widthMatch[1])}"`;
   if (heightMatch) iframeAttrs += ` height="${escapeHtml(heightMatch[1])}"`;
-  if (styleMatch) iframeAttrs += ` style="${escapeHtml(styleMatch[1])}"`;
+  const style = styleMatch ? safeEmbedStyle(styleMatch[1]) : null;
+  if (style) iframeAttrs += ` style="${escapeHtml(style)}"`;
   if (/\ballowfullscreen\b/i.test(featuredEmbed)) iframeAttrs += ' allowfullscreen';
 
   return `<div style="border-radius:12px;overflow:hidden"><iframe ${iframeAttrs}></iframe></div>`;

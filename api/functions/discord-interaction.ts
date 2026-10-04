@@ -108,7 +108,10 @@ export async function handler(event: {
       // Fire off background search with URL to resolve
       fetch(`${siteUrl}/.netlify/functions/discord-search-background`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.INTERNAL_FUNCTION_SECRET || ''}`,
+        },
         body: JSON.stringify({
           interaction_token: body.token,
           application_id: body.application_id,
@@ -140,7 +143,10 @@ export async function handler(event: {
     // Fire off background search (fire-and-forget)
     fetch(`${siteUrl}/.netlify/functions/discord-search-background`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.INTERNAL_FUNCTION_SECRET || ''}`,
+      },
       body: JSON.stringify({
         interaction_token: body.token,
         application_id: body.application_id,

@@ -3,6 +3,7 @@
 
 import { cacheGetOrFetch } from '../functions/cache';
 import { isUrlHostnameAllowed } from '../functions/middleware';
+import { safeFetch } from '../functions/safe-fetch';
 import { findBandcampArtist } from './bandcamp-probe';
 import { parseBandcampBio } from '../functions/search-parsers';
 import { bandcampSubdomainOf } from '../shared/bandcamp-identity';
@@ -254,15 +255,12 @@ export async function fetchLinktreeLinks(linktreeUrl: string): Promise<LinktreeR
   const bandcampUrls: string[] = [];
 
   try {
-    const response = await globalThis.fetch(linktreeUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-      signal: AbortSignal.timeout(5000),
-    });
+    // The URL comes from MusicBrainz (anyone can edit it) or from scraped markup, so it
+    // goes through safeFetch: no internal or private-network targets, on any redirect hop.
+    const response = await safeFetch(linktreeUrl, 5000);
 
-    if (!response.ok) {
-      console.log('Linktree fetch failed:', response.status);
+    if (!response?.ok) {
+      console.log('Linktree fetch failed:', response?.status ?? 'refused');
       return { socialLinks, bandcampUrls };
     }
 
@@ -371,15 +369,12 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
   const bandcampUrls: string[] = [];
 
   try {
-    const response = await globalThis.fetch(officialUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-      signal: AbortSignal.timeout(5000),
-    });
+    // The URL comes from MusicBrainz (anyone can edit it) or from scraped markup, so it
+    // goes through safeFetch: no internal or private-network targets, on any redirect hop.
+    const response = await safeFetch(officialUrl, 5000);
 
-    if (!response.ok) {
-      console.log('Official site fetch failed:', response.status);
+    if (!response?.ok) {
+      console.log('Official site fetch failed:', response?.status ?? 'refused');
       return { socialLinks, linktreeUrl, discoveredPlatforms, bandcampUrls };
     }
 
