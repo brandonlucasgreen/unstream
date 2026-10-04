@@ -53,7 +53,6 @@ Sign in (free) to:
 ## For developers
 
 - **Public API** — search and artist lookup over REST. Docs at [unstream.stream/developers](https://unstream.stream/developers) (OpenAPI spec in [`docs/openapi.yaml`](docs/openapi.yaml)). Anonymous use is rate-limited; API keys are available, with the tiers on that page.
-- **Discord bot** — search Unstream from a Discord server.
 
 ## Platforms
 

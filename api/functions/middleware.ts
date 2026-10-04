@@ -378,9 +378,8 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'listenbrainz.org',
   'libre.fm',
   'archive.org',
-  // Discord
-  'discord.com',
-  'discordapp.com',
+  // No discord.com: the Discord bot was its only caller and was removed (2026-10-04) — it had
+  // no users and its background function was an open path to the bot token.
   // Image CDNs, fetched only to draw Instagram cards (social-card.ts): artist photos and release
   // covers as the platforms store them. Faircamp covers already pass the faircamp rule below,
   // and Mirlo's are on cdn.mirlo.space, covered above.

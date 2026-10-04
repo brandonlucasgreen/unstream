@@ -1298,7 +1298,7 @@ async function searchAllPlatforms(
   // A client that runs Phase 2 asks us not to wait for it: we use the cached answer if
   // there is one and otherwise return without it (hasPendingEnrichment), and Phase 2
   // fetches it and fills the shared cache for the next search. Everyone else (v1 API,
-  // Discord, edge pages, older app builds) still gets the full answer inline.
+  // edge pages, older app builds) still gets the full answer inline.
   const mbStartedAt = Date.now();
   const mbPromise: Promise<EnrichedMusicBrainzResult | null> = deferEnrichment
     ? peekMusicBrainzEnrichment(query, prefetched).then(data => {
@@ -1596,8 +1596,8 @@ export async function handler(event: { queryStringParameters?: Record<string, st
 
   // 'deferred' is sent only by clients that call /api/search/musicbrainz themselves when
   // hasPendingEnrichment is true — they would rather see results now and enrichment a
-  // moment later. Absent, we wait for MusicBrainz as before: the v1 API, the Discord bot,
-  // the edge-rendered pages and shipped app builds never make that second call.
+  // moment later. Absent, we wait for MusicBrainz as before: the v1 API, the edge-rendered
+  // pages and shipped app builds never make that second call.
   const deferEnrichment = event.queryStringParameters?.enrichment === 'deferred';
 
   try {

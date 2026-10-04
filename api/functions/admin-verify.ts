@@ -63,12 +63,12 @@ export async function handler(event: {
     // Fetch artist_profiles separately — no FK between verification_requests
     // and artist_profiles, so PostgREST can't embed them.
     const artistIds = (data || []).map((r: { artist_id: string }) => r.artist_id);
-    const profileMap = new Map<string, string | null>();
+    const profileMap = new Map<string, { verified_at: string | null; user_id: string; website_url: string | null }>();
 
     if (artistIds.length > 0) {
       const { data: profiles, error: profileError } = await client
         .from('artist_profiles')
-        .select('artist_id, verified_at')
+        .select('artist_id, verified_at, user_id, website_url')
         .in('artist_id', artistIds);
 
       if (profileError) {
@@ -80,8 +80,8 @@ export async function handler(event: {
         };
       }
 
-      for (const p of (profiles || []) as { artist_id: string; verified_at: string | null }[]) {
-        profileMap.set(p.artist_id, p.verified_at);
+      for (const p of (profiles || []) as { artist_id: string; verified_at: string | null; user_id: string; website_url: string | null }[]) {
+        profileMap.set(p.artist_id, p);
       }
     }
 
@@ -98,18 +98,21 @@ export async function handler(event: {
       artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
     }) => {
       const artist = Array.isArray(r.artists) ? r.artists[0] : r.artists;
+      const profile = profileMap.get(r.artist_id);
       return {
         id: r.id,
         artist_name: artist?.name ?? '(unknown)',
         artist_slug: artist?.slug ?? '',
         email: r.email,
-        website_url: null,
+        // The site the requester verified with, so the reviewer can check it's the artist's.
+        // Only when the profile row is theirs: it may hold someone else's claim in progress.
+        website_url: profile?.user_id === r.user_id ? profile.website_url : null,
         message: r.message,
         status: r.status,
         reviewer_notes: r.reviewer_notes,
         created_at: r.created_at,
         reviewed_at: r.reviewed_at,
-        link_back_completed: !!profileMap.get(r.artist_id),
+        link_back_completed: !!profile?.verified_at,
       };
     });
 
@@ -250,9 +253,12 @@ export async function handler(event: {
     }
 
     if (existingProfile) {
+      // The unverified row may be someone else's claim in progress (one row per artist).
+      // Approving this request verifies *this* requester, so hand the row to them; setting
+      // verified_at alone would have verified whoever started the other claim.
       const { error: verifyError } = await client
         .from('artist_profiles')
-        .update({ verified_at: now })
+        .update({ verified_at: now, user_id: request.user_id, email: request.email })
         .eq('id', existingProfile.id);
 
       if (verifyError) {

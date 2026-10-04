@@ -163,6 +163,13 @@ describe('me-username handler', () => {
     expect(upsertFn).toHaveBeenCalled();
   });
 
+  // Only turning sharing on used to check this, so a reserved handle could be taken here.
+  it('rejects a reserved handle before touching the database', async () => {
+    const res = await handler({ ...validEvent, body: JSON.stringify({ username: 'support' }) });
+    expect(res!.statusCode).toBe(400);
+    expect(mocks.mockFrom).not.toHaveBeenCalled();
+  });
+
   it('handles OPTIONS preflight', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'OPTIONS' });
     expect(res!.statusCode).toBe(204);

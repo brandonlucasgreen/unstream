@@ -27,7 +27,7 @@ export function PrivacyPolicyPage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
             <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
-            <p className="text-text-muted text-sm mb-8">Last updated: September 28, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -226,7 +226,6 @@ export function PrivacyPolicyPage() {
                 <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
                 <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
                 <li><strong>Stripe</strong> — tips to artists. You pay the artist through their own Stripe account; Stripe handles your card details and we never see them. We keep a record that a tip happened, its amount and, if you were signed in, your account.</li>
-                <li><strong>Discord</strong> — if you use the Unstream bot in a Discord server.</li>
               </ul>
               <P>
                 Separately, we read from public music and metadata sources — MusicBrainz, Wikidata,
