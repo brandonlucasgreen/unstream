@@ -33,11 +33,9 @@ jobs:
           # Positional, comma-separated: threads,bluesky,instagram,linkedin (an empty slot skips that platform).
           # Instagram gets the indie spotlights as card carousels, as drafts until INSTAGRAM_DRAFTS_BEFORE.
           BUFFER_CHANNEL_IDS: ${{ secrets.BUFFER_CHANNEL_IDS }}
-          # Needed for the artist_slug_aliases lookup that re-points retired manifest slugs (and
-          # for the verified-artist pool to read Supabase directly). If unset the script warns
-          # and degrades to the manifest slugs, which still resolve via the redirect.
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          # No Supabase secrets, deliberately: verified artists and retired-slug aliases come from
+          # the public /api/artist-directory. The service key bypasses all RLS, and a scheduled
+          # Action that runs `npm ci` is no place to hold it.
         run: npx tsx scripts/generate-social-posts.ts --week ${{ steps.week.outputs.week }} --schedule --publish
 
       # Runs even when the step above failed: it exits non-zero when any post was rejected, after

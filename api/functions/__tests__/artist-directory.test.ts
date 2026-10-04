@@ -279,4 +279,35 @@ describe('artist-directory handler', () => {
     expect(JSON.parse(res.body).artists).toEqual([]);
     expect(mocks.mockFrom).toHaveBeenCalledWith('artist_profiles');
   });
+
+  // The weekly social-posts Action reads this instead of holding the service key.
+  it('scope=aliases maps each retired slug to the current one, and only that', async () => {
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn((columns: string) => {
+        expect(columns).toBe('alias, artists!inner(slug)');
+        return cappedQuery([
+          { alias: 'trentem-ller', artists: { slug: 'trentemoller' } },
+          { alias: 'orphan', artists: null },
+        ]);
+      }),
+    });
+
+    const res = await handler({ queryStringParameters: { scope: 'aliases' } });
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body)).toEqual({ aliases: [{ alias: 'trentem-ller', slug: 'trentemoller' }] });
+    expect(mocks.mockFrom).toHaveBeenCalledWith('artist_slug_aliases');
+    expect(mocks.mockFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('scope=aliases answers a failed read with an uncached 500, not an empty list', async () => {
+    mocks.mockFrom.mockReturnValue({
+      select: vi.fn(() => ({
+        range: vi.fn(() => Promise.resolve({ data: null, error: { message: 'boom' } })),
+      })),
+    });
+
+    const res = await handler({ queryStringParameters: { scope: 'aliases' } });
+    expect(res.statusCode).toBe(500);
+    expect(res.headers).toBeUndefined();
+  });
 });

@@ -34,8 +34,9 @@
  *   BUFFER_ORG_ID         - Required for --schedule (content items belong to an organization) and --channels
  *   BUFFER_CHANNEL_IDS    - Required for --schedule (comma-separated: threads,bluesky,instagram,linkedin).
  *                           Positional; leave a slot empty to skip that platform (e.g. "t,b,,l").
- *   SUPABASE_URL          - Optional (falls back to production API)
- *   SUPABASE_SERVICE_KEY  - Optional (falls back to production API)
+ *
+ * No database credentials: verified artists and retired-slug aliases both come from the public
+ * /api/artist-directory endpoint, so the Action doesn't hold the service key.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
@@ -470,70 +471,35 @@ function loadArtistData(slug: string): ArtistData | null {
 }
 
 async function fetchVerifiedArtists(): Promise<VerifiedArtist[]> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('⚠ SUPABASE_URL/SUPABASE_SERVICE_KEY not set — fetching from production API');
+  // Claimed, verified artists with their chosen photo — the same list /artists shows.
+  try {
     const res = await fetch(`${UNSTREAM_BASE}/api/artist-directory`);
-    const data = await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json() as { artists?: VerifiedArtist[] };
     return data.artists || [];
+  } catch (error) {
+    // Not "there are no verified artists": say so, and the indie days are skipped below.
+    console.error(`✗ Verified-artist lookup failed (${error instanceof Error ? error.message : error})`);
+    return [];
   }
-
-  // Use the Supabase REST API directly to avoid importing the client
-  const profilesRes = await fetch(
-    `${supabaseUrl}/rest/v1/artist_profiles?verified_at=not.is.null&select=artist_id,custom_image_url`,
-    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-  );
-  const profiles = await profilesRes.json();
-  if (!profiles?.length) return [];
-
-  const artistIds = profiles.map((p: { artist_id: string }) => p.artist_id);
-  const artistsRes = await fetch(
-    `${supabaseUrl}/rest/v1/artists?id=in.(${artistIds.join(',')})&select=id,name,slug,image_url`,
-    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-  );
-  const artists = await artistsRes.json();
-
-  const customImages = new Map(
-    profiles.filter((p: { custom_image_url: string }) => p.custom_image_url)
-      .map((p: { artist_id: string; custom_image_url: string }) => [p.artist_id, p.custom_image_url])
-  );
-
-  return (artists || []).map((a: { id: string; slug: string; name: string; image_url: string }) => ({
-    slug: a.slug,
-    name: a.name,
-    imageUrl: customImages.get(a.id) || a.image_url || null,
-  }));
 }
 
 async function fetchCanonicalSlugs(): Promise<Map<string, string>> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
+  // Manifest slugs can be retired (accent re-slugs, merges), and a post advertising
+  // /artist/trentem-ller only works as long as the redirect installed for crawlers exists — the
+  // sitemap re-points the same slugs, so posts must too. An empty map on failure is the graceful
+  // answer: posts go out on the redirecting slug rather than the run failing.
   const canonical = new Map<string, string>();
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('⚠ SUPABASE_URL/SUPABASE_SERVICE_KEY not set — retired slugs are not re-pointed (they still resolve via the redirect)');
-    return canonical;
-  }
-
-  // Same REST-direct pattern as fetchVerifiedArtists above. Manifest slugs can be retired
-  // (accent re-slugs, merges), and a post advertising /artist/trentem-ller only works as long
-  // as the redirect installed for crawlers exists — the sitemap re-points the same slugs, so
-  // posts must too. An empty map on failure is the graceful answer: posts go out on the
-  // redirecting slug rather than the run failing.
   try {
-    const res = await fetch(
-      `${supabaseUrl}/rest/v1/artist_slug_aliases?select=alias,artists!inner(slug)`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-    );
-    const rows = await res.json() as Array<{ alias: string; artists: { slug: string } | null }> | null;
-    if (!Array.isArray(rows)) {
+    const res = await fetch(`${UNSTREAM_BASE}/api/artist-directory?scope=aliases`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json() as { aliases?: Array<{ alias: string; slug: string }> };
+    if (!Array.isArray(data.aliases)) {
       console.warn('⚠ Alias lookup returned no rows — posts keep the manifest slug.');
       return canonical;
     }
-    for (const row of rows) {
-      if (row.alias && row.artists?.slug) canonical.set(row.alias, row.artists.slug);
+    for (const { alias, slug } of data.aliases) {
+      if (alias && slug) canonical.set(alias, slug);
     }
   } catch (error) {
     console.warn(`⚠ Alias lookup failed (${error instanceof Error ? error.message : error}) — posts keep the manifest slug.`);
