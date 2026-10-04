@@ -89,6 +89,8 @@ export function YourTips() {
                   </p>
                   {STATUS_LABEL[tip.status] ? (
                     <p className="text-text-muted">{STATUS_LABEL[tip.status]}</p>
+                  ) : tip.refundedCents > 0 ? (
+                    <p className="text-text-muted">{formatUsd(tip.refundedCents)} refunded</p>
                   ) : tip.paidCents > tip.amountCents ? (
                     <p className="text-text-muted">you paid {formatUsd(tip.paidCents)}</p>
                   ) : null}

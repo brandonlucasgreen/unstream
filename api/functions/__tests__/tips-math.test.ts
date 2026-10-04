@@ -5,11 +5,13 @@ import { describe, it, expect } from 'vitest';
 import {
   ONE_OFF_MAX_CENTS,
   ONE_OFF_MIN_CENTS,
+  canChargeApplicationFee,
   estimatedStripeFeeCents,
   formatUsd,
   isStripeConnectCountry,
   isValidFeeBasisPoints,
   isValidOneOffAmount,
+  keptAfterRefund,
   tipBreakdown,
 } from '../../shared/tips';
 
@@ -91,5 +93,22 @@ describe('bounds', () => {
     expect(formatUsd(546)).toBe('$5.46');
     expect(formatUsd(240000)).toBe('$2,400.00');
     expect(formatUsd(10000000)).toBe('$100,000.00');
+  });
+});
+
+describe('keptAfterRefund (what a partly refunded tip still counts for)', () => {
+  it('takes off the refunded share in proportion, matching the fee return in tips-webhook', () => {
+    expect(keptAfterRefund(500, 546, 0)).toBe(500);
+    expect(keptAfterRefund(500, 546, 273)).toBe(250);
+    expect(keptAfterRefund(29, 576, 288)).toBe(14); // the fee: 29 − round(14.5)
+    expect(keptAfterRefund(500, 546, 546)).toBe(0);
+    expect(keptAfterRefund(500, 546, 600)).toBe(0);
+  });
+});
+
+describe('canChargeApplicationFee', () => {
+  it('is false only where Stripe forbids a platform fee on direct charges', () => {
+    for (const c of ['BR', 'MY', 'TH', 'br']) expect(canChargeApplicationFee(c)).toBe(false);
+    for (const c of ['US', 'GB', 'JP', null, undefined]) expect(canChargeApplicationFee(c)).toBe(true);
   });
 });

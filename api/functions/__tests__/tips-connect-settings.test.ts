@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   captureException: vi.fn(),
   captureMessage: vi.fn(),
+  purgeCacheTags: vi.fn(),
 }));
 vi.mock('../db', () => ({ getClient: () => db.client, resolveOwnedArtist: mocks.resolveOwnedArtist }));
 vi.mock('../ratelimit', () => ({ checkRateLimit: mocks.checkRateLimit, getClientIp: () => '203.0.113.9' }));
@@ -20,6 +21,7 @@ vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
   authenticateBearer: mocks.authenticateBearer,
 }));
+vi.mock('../purge-cache', () => ({ purgeCacheTags: mocks.purgeCacheTags }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
 import { handler as rawConnect } from '../tips-connect';
@@ -73,13 +75,78 @@ describe('tips-connect', () => {
     expect(form.get('controller[fees][payer]')).toBe('account');
     expect(form.get('controller[losses][payments]')).toBe('stripe');
     expect(form.get('controller[requirement_collection]')).toBe('stripe');
-    expect(init.headers['Idempotency-Key']).toBe('connect:artist-1:test');
+    expect(init.headers['Idempotency-Key']).toMatch(/^connect:artist-1:test:new:[0-9a-f]{16}$/);
     expect(init.headers['Stripe-Account']).toBeUndefined();
 
     expect(db.tables.artist_tip_accounts).toEqual([expect.objectContaining({
       artist_id: 'artist-1', livemode: false, stripe_account_id: 'acct_new', user_id: 'owner-1',
       tips_approved_at: null, addendum_version: expect.any(String),
     })]);
+  });
+
+  it('keys account creation on its params, so a retry with another country isn’t an idempotency error', async () => {
+    await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+    db.tables.artist_tip_accounts = [];
+    await connect({ slug: 'kid-lightbulbs', country: 'GB', acceptAddendum: true });
+    const keys = fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/v1/accounts')).map(([, init]) => init.headers['Idempotency-Key']);
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).not.toBe(keys[1]);
+  });
+
+  it('carries on to the onboarding link when a double click already created the row', async () => {
+    db.unique.artist_tip_accounts = [['artist_id', 'livemode']];
+    fetchMock.mockImplementation((url: string) => {
+      if (url.endsWith('/v1/accounts')) {
+        // The other click's request finished first: same account (same idempotency key), row written.
+        db.tables.artist_tip_accounts = [account({ charges_enabled: false })];
+        return Promise.resolve(new Response(JSON.stringify({ id: 'acct_new', country: 'US', charges_enabled: false })));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ url: 'https://connect.stripe.com/setup/s/abc' })));
+    });
+    const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).url).toBe('https://connect.stripe.com/setup/s/abc');
+    expect(db.tables.artist_tip_accounts).toHaveLength(1);
+  });
+
+  it('after a disconnect, asks for the terms again and replaces the account in place, unapproved', async () => {
+    const disconnected = account({
+      stripe_account_id: 'acct_old', tips_approved_at: '2026-09-01', tips_enabled: true, charges_enabled: false,
+      deauthorized_at: '2026-10-01T00:00:00Z', addendum_version: 'old',
+    });
+    db.tables.artist_tip_accounts = [disconnected];
+    expect((await connect({ slug: 'kid-lightbulbs' })).statusCode).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+    expect(res.statusCode).toBe(200);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.stripe.com/v1/accounts');
+    expect(init.headers['Idempotency-Key']).toMatch(/^connect:artist-1:test:re:acct_old:/);
+    expect(db.tables.artist_tip_accounts).toEqual([expect.objectContaining({
+      stripe_account_id: 'acct_new', deauthorized_at: null, tips_approved_at: null, tips_enabled: false,
+      charges_enabled: false, user_id: 'owner-1',
+    })]);
+    expect(db.tables.artist_tip_accounts[0].addendum_version).not.toBe('old');
+    // The link is for the new account.
+    expect(new URLSearchParams(fetchMock.mock.calls[1][1].body).get('account')).toBe('acct_new');
+  });
+
+  it('lets a new owner connect their own account once a previous owner’s was disconnected', async () => {
+    db.tables.artist_tip_accounts = [account({ user_id: 'previous-owner', stripe_account_id: 'acct_old', deauthorized_at: '2026-10-01' })];
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(200);
+    expect(db.tables.artist_tip_accounts[0]).toMatchObject({ user_id: 'owner-1', stripe_account_id: 'acct_new' });
+  });
+
+  it('tells the admin what Stripe refused, and keeps "try again" for outages', async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'Your platform needs a review' } }), { status: 400 }));
+    const refused = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+    expect(refused.statusCode).toBe(502);
+    expect(JSON.parse(refused.body)).toEqual({ error: "Stripe couldn't set up the account: Your platform needs a review", code: 'stripe_rejected' });
+
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'boom' } }), { status: 503 }));
+    const outage = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+    expect(JSON.parse(outage.body)).toEqual({ error: "Couldn't reach Stripe. Try again in a moment." });
   });
 
   it('requires the artist addendum and a supported country for a new account', async () => {
@@ -171,6 +238,30 @@ describe('tips-settings', () => {
     expect(mocks.captureException).toHaveBeenCalled();
   });
 
+  it('reports a disconnected account as not connected, so the connect form shows', async () => {
+    db.tables.artist_tip_accounts = [account({ tips_approved_at: null, charges_enabled: false, deauthorized_at: '2026-10-01' })];
+    const body = JSON.parse((await get()).body);
+    expect(body.state).toBe('not_connected');
+    expect(body.foreignAccount).toBe(false);
+    expect(body.totals).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(409);
+  });
+
+  it('reports a failed write of Stripe’s state, and still shows it', async () => {
+    db.tables.artist_tip_accounts = [account({ charges_enabled: false, details_submitted: false })];
+    const client = db.client as { from: (t: string) => Record<string, unknown> };
+    const realFrom = client.from;
+    client.from = (table: string) => {
+      const builder = realFrom(table);
+      if (table !== 'artist_tip_accounts') return builder;
+      return { ...builder, update: () => ({ eq: () => ({ eq: () => Promise.resolve({ error: { message: 'disk full' } }) }) }) };
+    };
+    const body = JSON.parse((await get()).body);
+    expect(mocks.captureException).toHaveBeenCalled();
+    expect(body.state).toBe('onboarding');
+  });
+
   it('hides a previous owner’s account and its totals', async () => {
     db.tables.artist_tip_accounts = [account({ user_id: 'previous-owner', tips_approved_at: '2026-09-01' })];
     const body = JSON.parse((await get()).body);
@@ -186,6 +277,37 @@ describe('tips-settings', () => {
     expect(db.tables.artist_tip_accounts[0].fee_basis_points).toBe(300);
   });
 
+  it('holds the fee at 0% where Stripe doesn’t allow one, and says so', async () => {
+    db.tables.artist_tip_accounts = [account({ country: 'MY', fee_basis_points: 300 })];
+    const body = JSON.parse((await get()).body);
+    expect(body.feeAllowed).toBe(false);
+    expect(body.feeBasisPoints).toBe(0);
+    const res = await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 100 });
+    expect(res.statusCode).toBe(400);
+    expect(JSON.parse(res.body).code).toBe('fee_not_allowed');
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 0 })).statusCode).toBe(200);
+
+    db.tables.artist_tip_accounts = [account({ country: 'US' })];
+    expect(JSON.parse((await get()).body).feeAllowed).toBe(true);
+  });
+
+  it('purges the cached artist page after a change, not after a refused one', async () => {
+    db.tables.artist_tip_accounts = [account()];
+    await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 900 });
+    expect(mocks.purgeCacheTags).not.toHaveBeenCalled();
+    await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 100 });
+    await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000 });
+    expect(mocks.purgeCacheTags).toHaveBeenCalledTimes(2);
+    expect(mocks.purgeCacheTags).toHaveBeenCalledWith(['artist-kid-lightbulbs'], 'TipsSettings');
+  });
+
+  it('keeps goals to the Stripe mode they were made in', async () => {
+    await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000 });
+    expect(db.tables.artist_goals[0].livemode).toBe(false);
+    db.tables.artist_goals.push({ id: '44444444-4444-4444-8444-444444444444', artist_id: 'artist-1', title: 'Live goal', target_cents: 1000, status: 'open', livemode: true });
+    expect(JSON.parse((await get()).body).goals.map((g: { title: string }) => g.title)).toEqual(['Vinyl']);
+  });
+
   it('won’t switch tips on before Stripe enables charges', async () => {
     db.tables.artist_tip_accounts = [account({ charges_enabled: false })];
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(409);
@@ -198,7 +320,7 @@ describe('tips-settings', () => {
     }
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'One more', targetCents: 1000 })).statusCode).toBe(409);
 
-    db.tables.artist_goals.push({ id: '22222222-2222-4222-8222-222222222222', artist_id: 'other-artist', status: 'open' });
+    db.tables.artist_goals.push({ id: '22222222-2222-4222-8222-222222222222', artist_id: 'other-artist', status: 'open', livemode: false });
     await put({ slug: 'kid-lightbulbs', action: 'closeGoal', goalId: '22222222-2222-4222-8222-222222222222' });
     expect(db.tables.artist_goals.find(g => g.artist_id === 'other-artist')?.status).toBe('open');
   });

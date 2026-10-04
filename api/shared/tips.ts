@@ -26,7 +26,7 @@ export const MAX_GOAL_TITLE_LENGTH = 80;
  * Bumped when the artist addendum's wording changes, so the change can be re-accepted. Stored on
  * artist_tip_accounts.addendum_version.
  */
-export const ARTIST_ADDENDUM_VERSION = '2026-10-03';
+export const ARTIST_ADDENDUM_VERSION = '2026-10-04';
 
 export interface TipBreakdown {
   /** What the fan chose to give the artist. */
@@ -65,6 +65,31 @@ export function tipBreakdown(amountCents: number, coverFees: boolean, feeBasisPo
     applicationFeeCents,
     artistNetCents: grossCents - stripeFeeCents - applicationFeeCents,
   };
+}
+
+/**
+ * What's left of `cents` after a refund of `refundedCents` out of a charge of `grossCents`, in
+ * proportion. Used for the tip amount (goal progress, totals, a fan's list) and for Unstream's fee
+ * alike, so every figure that counts a partly refunded tip agrees, and the SQL aggregates in
+ * supabase/migrations/20261004120000_tips-hardening.sql do the same arithmetic.
+ */
+export function keptAfterRefund(cents: number, grossCents: number, refundedCents: number): number {
+  if (refundedCents <= 0 || grossCents <= 0) return cents;
+  if (refundedCents >= grossCents) return 0;
+  return cents - Math.round((cents * refundedCents) / grossCents);
+}
+
+/**
+ * Stripe doesn't let a platform outside Brazil, Malaysia or Thailand take an application fee on a
+ * direct charge for a connected account in those countries (docs.stripe.com/connect/direct-charges,
+ * and Stripe's Malaysia and Thailand Connect support pages). Artists there can still take tips, with
+ * no Unstream fee: checkout sends none, and the artist settings refuse a non-zero fee.
+ */
+export const NO_APPLICATION_FEE_COUNTRIES: ReadonlySet<string> = new Set(['BR', 'MY', 'TH']);
+
+/** Whether Unstream may take its fee on this connected account's charges. Unknown country: yes. */
+export function canChargeApplicationFee(country: string | null | undefined): boolean {
+  return !country || !NO_APPLICATION_FEE_COUNTRIES.has(country.toUpperCase());
 }
 
 export function isValidOneOffAmount(amountCents: unknown): amountCents is number {

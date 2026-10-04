@@ -47,7 +47,7 @@ function stripeSession(overrides: Record<string, unknown> = {}) {
 function payment(overrides: Record<string, unknown> = {}) {
   return {
     id: 'pay-1', artist_id: 'artist-1', stripe_payment_intent_id: 'pi_1', amount_cents: 500, gross_cents: 546,
-    currency: 'usd', status: 'succeeded', livemode: false, fan_user_id: null, created_at: '2026-10-03T12:00:00Z',
+    refunded_cents: 0, currency: 'usd', status: 'succeeded', livemode: false, fan_user_id: null, created_at: '2026-10-03T12:00:00Z',
     artists: { name: 'Kid Lightbulbs', slug: 'kid-lightbulbs' }, support_entries: [{ artist_goals: null }],
     ...overrides,
   };
@@ -101,8 +101,18 @@ describe('GET: the fan’s tips', () => {
     expect(tips.map((t: { id: string }) => t.id)).toEqual(['mine', 'refunded']);
     expect(tips[0]).toEqual({
       id: 'mine', artistName: 'Kid Lightbulbs', artistSlug: 'kid-lightbulbs', amountCents: 500, paidCents: 546,
+      refundedCents: 0, netAmountCents: 500,
       currency: 'usd', status: 'succeeded', goalTitle: 'Vinyl', createdAt: '2026-10-03T12:00:00Z',
     });
+    // A fully refunded tip keeps the amount the fan chose, and counts for nothing.
+    expect(tips[1]).toMatchObject({ amountCents: 500, refundedCents: 0, netAmountCents: 0 });
+  });
+
+  it('counts a partly refunded tip the way goals and totals do: less the refunded share', async () => {
+    db.tables.tip_payments = [payment({ fan_user_id: 'fan-1', refunded_cents: 273 })];
+    const [tip] = JSON.parse((await get()).body).tips;
+    // Half of the $5.46 paid came back, so half of the $5 tip counts.
+    expect(tip).toMatchObject({ status: 'succeeded', amountCents: 500, paidCents: 546, refundedCents: 273, netAmountCents: 250 });
   });
 
   it('returns nothing when tips are switched off (no Stripe key)', async () => {

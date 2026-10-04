@@ -6,7 +6,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createFakeDb, type FakeDb } from './fake-supabase';
 
 let db: FakeDb;
-const mocks = vi.hoisted(() => ({ authenticateAdmin: vi.fn(), captureException: vi.fn(), captureMessage: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  authenticateAdmin: vi.fn(), captureException: vi.fn(), captureMessage: vi.fn(),
+  sendTipsApprovedEmail: vi.fn(), purgeCacheTags: vi.fn(),
+}));
+vi.mock('../notifications', () => ({ sendTipsApprovedEmail: mocks.sendTipsApprovedEmail }));
+vi.mock('../purge-cache', () => ({ purgeCacheTags: mocks.purgeCacheTags }));
 vi.mock('../db', () => ({ getClient: () => db.client }));
 vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
@@ -55,12 +60,46 @@ describe('admin-tips', () => {
     });
   });
 
+  const seedOwner = (profile: Record<string, unknown> = {}) => {
+    db.tables.artists = [{ id: ARTIST, name: 'Kid Lightbulbs', slug: 'kid-lightbulbs' }];
+    db.tables.artist_profiles = [{ artist_id: ARTIST, user_id: 'owner-1', verified_at: '2026-01-01', ...profile }];
+  };
+
   it('approves only the account the admin was shown', async () => {
+    seedOwner();
     db.tables.artist_tip_accounts = [liveRow({ tips_approved_at: null })];
     expect((await post({ action: 'approve', artistId: ARTIST, stripeAccountId: 'acct_different' })).statusCode).toBe(409);
     expect(db.tables.artist_tip_accounts[0].tips_approved_at).toBeNull();
     expect((await post({ action: 'approve', artistId: ARTIST, stripeAccountId: 'acct_artist' })).statusCode).toBe(200);
     expect(db.tables.artist_tip_accounts[0].tips_approved_at).toEqual(expect.any(String));
+  });
+
+  it('emails the artist once approved, and purges their cached page', async () => {
+    seedOwner();
+    db.tables.artist_tip_accounts = [liveRow({ tips_approved_at: null })];
+    await post({ action: 'approve', artistId: ARTIST, stripeAccountId: 'acct_artist' });
+    expect(mocks.sendTipsApprovedEmail).toHaveBeenCalledWith(expect.objectContaining({
+      userId: 'owner-1', artistName: 'Kid Lightbulbs', slug: 'kid-lightbulbs', referenceId: expect.stringMatching(/^acct_artist:/),
+    }));
+    expect(mocks.purgeCacheTags).toHaveBeenCalledWith(['artist-kid-lightbulbs'], 'AdminTips');
+    // A second click is a no-op: no second email.
+    expect((await post({ action: 'approve', artistId: ARTIST, stripeAccountId: 'acct_artist' })).statusCode).toBe(200);
+    expect(mocks.sendTipsApprovedEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['Stripe hasn’t enabled charges', { charges_enabled: false }, {}],
+    ['the account was disconnected', { deauthorized_at: '2026-10-01' }, {}],
+    ['the profile changed hands', {}, { user_id: 'new-owner' }],
+    ['the claim isn’t verified', {}, { verified_at: null }],
+  ])('refuses to approve when %s', async (_label, accountOverrides, profileOverrides) => {
+    seedOwner(profileOverrides);
+    db.tables.artist_tip_accounts = [liveRow({ tips_approved_at: null, ...accountOverrides })];
+    const res = await post({ action: 'approve', artistId: ARTIST, stripeAccountId: 'acct_artist' });
+    expect(res.statusCode).toBe(409);
+    expect(JSON.parse(res.body).error).toEqual(expect.any(String));
+    expect(db.tables.artist_tip_accounts[0].tips_approved_at).toBeNull();
+    expect(mocks.sendTipsApprovedEmail).not.toHaveBeenCalled();
   });
 
   it('revokes: approval cleared and tips switched off', async () => {
@@ -81,6 +120,7 @@ describe('getTipsLiveSlugs', () => {
     ['switched off', { tips_enabled: false }],
     ['not charge-enabled', { charges_enabled: false }],
     ['the other mode', { livemode: true }],
+    ['disconnected in Stripe', { deauthorized_at: '2026-10-01' }],
   ])('excludes an account that is %s', async (_label, overrides) => {
     db.tables.artist_tip_accounts = [liveRow(overrides)];
     expect((await getTipsLiveSlugs(['kid-lightbulbs']))?.size).toBe(0);

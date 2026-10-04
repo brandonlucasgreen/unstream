@@ -46,7 +46,16 @@ export class StripeError extends Error {
   }
 }
 
-type FormValue = string | number | boolean | null | undefined | FormValue[] | { [key: string]: FormValue };
+/**
+ * Stripe refused the request itself (a 4xx other than 429): bad parameters, an account that can't
+ * do this, a permission it doesn't have. Retrying won't help, so callers say so rather than
+ * "try again". Network failures, 5xx and rate limits are temporary and are not rejections.
+ */
+export function isStripeRejection(err: unknown): err is StripeError {
+  return err instanceof StripeError && err.status >= 400 && err.status < 500 && err.status !== 429;
+}
+
+export type FormValue = string | number | boolean | null | undefined | FormValue[] | { [key: string]: FormValue };
 
 /**
  * Stripe's form encoding: nested objects as `a[b][c]=v`, arrays as `a[0]=v`. Null and undefined
@@ -177,6 +186,16 @@ export interface StripeCheckoutSession {
   /** Unix seconds. */
   created?: number;
   metadata?: Record<string, string> | null;
+}
+
+export interface StripeCharge {
+  id: string;
+  amount: number;
+  amount_refunded: number;
+  refunded?: boolean;
+  payment_intent?: string | null;
+  /** The platform's application fee object on this charge, if it carried one. */
+  application_fee?: string | null;
 }
 
 export interface StripeEvent {

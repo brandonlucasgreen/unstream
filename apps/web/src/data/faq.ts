@@ -48,6 +48,15 @@ We also link to a number of alternative services that can help you reduce your d
 On those days, Unstream shows the Bandcamp Friday payout on every Bandcamp link. If you've been meaning to buy something, that's the day to do it.`
   },
   {
+    title: "Can I tip an artist through Unstream?",
+    content: `If they've set it up, yes. Right now only artists who have claimed their Unstream profile and been approved by us can take tips, and they get a Tip button on their artist page.
+
+- **Your tip goes straight to the artist's own Stripe account.** The artist is the seller, so your receipt comes from them via Stripe, and refunds are theirs to give. If you can't reach them, [email support](mailto:support@unstream.stream) and we'll pass your request on.
+- **You can choose to cover the fees.** Stripe charges about 2.9% + 30¢ per card payment. Tick "cover the fees" and the tip is topped up so the artist gets the amount you chose. The tip page shows what you'll pay and what the artist gets before you pay.
+- **Unstream's fee is up to the artist:** 0% by default, or up to 5% if they choose to share some with us.
+- **You don't need an account.** Tips start at $3, because below that card fees take too much of it.`
+  },
+  {
     title: "What are some of the other benefits of moving off a streaming service?",
     content: `Lots of them!
 - Save money

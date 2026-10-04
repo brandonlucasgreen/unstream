@@ -119,6 +119,58 @@ async function resolveEmails(client: SupabaseClient, userIds: string[]): Promise
   return emails;
 }
 
+interface TipsApprovedParams {
+  client: SupabaseClient;
+  /** artist_tip_accounts.user_id: the profile owner who connected Stripe. */
+  userId: string;
+  artistName: string;
+  slug: string;
+  /** The approved account and approval time, so a revoke and a later re-approval email again. */
+  referenceId: string;
+}
+
+/**
+ * "Tips are on for <artist>": sent when an admin approves an artist's tips setup (admin-tips.ts),
+ * which is otherwise invisible to the artist until they next open Manage Tips. An answer to
+ * something the artist did, like the claim emails, so no opt-out footer. Best effort: the approval
+ * stands whether or not this sends, and nothing personal is logged.
+ */
+export async function sendTipsApprovedEmail(params: TipsApprovedParams): Promise<void> {
+  const { client, userId, artistName, slug, referenceId } = params;
+  try {
+    const { data, error } = await client.auth.admin.getUserById(userId);
+    const email = data?.user?.email;
+    if (error || !email) {
+      Sentry.captureMessage('sendTipsApprovedEmail: no email for the account owner', {
+        level: 'warning',
+        extra: { referenceId, error: error?.message },
+      });
+      return;
+    }
+    const tipsUrl = `https://unstream.stream/artist-edit/${encodeURIComponent(slug)}/tips`;
+    await sendNotificationOnce({
+      client,
+      notificationType: 'tips_approved',
+      referenceId,
+      recipientEmail: email,
+      subject: `Tips are on for ${artistName}`,
+      html:
+        `<p>We've checked your Stripe account, and <strong>${escapeHtml(artistName)}</strong> can now take tips on Unstream.</p>` +
+        `<p>Once tips are switched on in <a href="${tipsUrl}">Manage Tips</a>, fans see a Tip button on your page. You can set your Unstream fee (0% unless you choose otherwise) and add goals there too. ` +
+        'Tips go straight to your own Stripe account; refunds and payouts are in your Stripe dashboard.</p>',
+      text:
+        `We've checked your Stripe account, and ${artistName} can now take tips on Unstream.\n\n` +
+        `Once tips are switched on in Manage Tips, fans see a Tip button on your page. You can set your Unstream fee (0% unless you choose otherwise) and add goals there too: ${tipsUrl}\n\n` +
+        'Tips go straight to your own Stripe account; refunds and payouts are in your Stripe dashboard.',
+    });
+  } catch (err) {
+    Sentry.captureMessage('sendTipsApprovedEmail failed', {
+      level: 'warning',
+      extra: { referenceId, error: err instanceof Error ? err.message : String(err) },
+    });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Opt-out footer
 // ---------------------------------------------------------------------------

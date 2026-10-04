@@ -2,13 +2,23 @@
 // (docs/specs/artist-patronage-spec.md §9).
 //
 // Configure in Stripe as a *Connect* webhook ("events on connected accounts"), with its signing
-// secret in STRIPE_CONNECT_WEBHOOK_SECRET. Events handled:
+// secret in STRIPE_CONNECT_WEBHOOK_SECRET. Events to subscribe, and what each does:
 //   checkout.session.completed            a one-off tip was paid → tip_payments + support_entries,
 //                                         and the fan's receipt (sendReceipt)
-//   payment_intent.succeeded / .payment_failed   status sync
-//   charge.refunded, charge.dispute.created      status sync; progress and totals drop them
+//   charge.refunded                       refunded_cents, 'refunded' once fully refunded; Unstream's
+//                                         fee handed back in proportion
+//   charge.refund.updated                 a refund that failed or was canceled: recount from the charge
+//   charge.dispute.created / .closed      'disputed'; back to 'succeeded' if the artist wins, and
+//                                         Unstream's fee handed back if they lose
 //   account.updated                       mirror charges_enabled / details_submitted / country
 //   account.application.deauthorized      the artist disconnected Unstream in Stripe → tips off
+//
+// Stripe doesn't deliver events in order, so a payment's status only ever moves forward:
+// succeeded → refunded or disputed, disputed → succeeded only through a won dispute, and nothing
+// leaves 'refunded' except a refund that failed (the money went back to the artist). Every status
+// write is conditional on the status it moves from, so a late or replayed event changes nothing.
+// payment_intent.* events aren't needed: a row is only ever created, as 'succeeded', by
+// checkout.session.completed, so they're ignored if the endpoint still sends them.
 //
 // Replays are no-ops: tip_payments.stripe_payment_intent_id is unique, and the ledger entry is
 // written only by the request whose insert created the payment row. No rate limiter — Stripe is
@@ -16,7 +26,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { stripeRequest, verifyStripeSignature, type StripeEvent } from './stripe';
+import { isLiveMode, stripeRequest, verifyStripeSignature, type StripeCharge, type StripeEvent } from './stripe';
 import { markArtistSupported } from './tips-db';
 import { Sentry } from '../lib/sentry';
 
@@ -72,18 +82,22 @@ type Obj = Record<string, unknown>;
 const str = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null);
 
 export async function handleEvent(client: SupabaseClient, evt: StripeEvent): Promise<string> {
+  // A live Connect endpoint also receives test-mode events from connected accounts (and a test
+  // endpoint can see live ones). Only the mode of the key this server holds is ever recorded.
+  if (evt.livemode !== isLiveMode()) return 'other mode';
+
   const obj = evt.data.object as Obj;
   switch (evt.type) {
     case 'checkout.session.completed':
       return recordCheckout(client, evt, obj);
-    case 'payment_intent.succeeded':
-      return setStatus(client, str(obj.id), 'succeeded');
-    case 'payment_intent.payment_failed':
-      return setStatus(client, str(obj.id), 'failed');
     case 'charge.refunded':
       return recordRefund(client, obj);
+    case 'charge.refund.updated':
+      return refundUpdated(client, evt, obj);
     case 'charge.dispute.created':
-      return setStatus(client, str(obj.payment_intent), 'disputed');
+      return moveStatus(client, str(obj.payment_intent), ['succeeded'], 'disputed');
+    case 'charge.dispute.closed':
+      return disputeClosed(client, evt, obj);
     case 'account.updated':
       return syncAccount(client, evt, obj);
     case 'account.application.deauthorized':
@@ -156,8 +170,8 @@ async function recordCheckout(client: SupabaseClient, evt: StripeEvent, session:
     .single();
 
   if (insertError) {
-    // 23505: this payment is already recorded — a replay, or payment_intent.succeeded got there
-    // first. Either way the entry was (or will be) written by the insert that won.
+    // 23505: this payment is already recorded — Stripe replayed the event, or delivered it twice
+    // at once. The ledger entry was (or is being) written by the request whose insert won.
     if (insertError.code === '23505') return 'already recorded';
     throw new Error(`tip_payments insert failed: ${insertError.message}`);
   }
@@ -223,46 +237,146 @@ async function chargedApplicationFee(paymentIntentId: string, stripeAccount: str
 }
 
 /**
- * A refund — usually the artist's, from their own Stripe dashboard. A full refund drops the payment
- * out of goals and totals. Either way Unstream hands back its fee in proportion (spec §5, and the
- * artist addendum promises it): Stripe doesn't return a platform's fee when a connected account
- * refunds a direct charge, so without this it would stay in Unstream's balance (found 2026-10-03 in
- * the sandbox: a refunded $5.76 tip left the 29¢ fee unrefunded).
+ * A refund — usually the artist's, from their own Stripe dashboard. `refunded_cents` follows the
+ * charge's amount_refunded, and every money figure (goal progress, the artist's totals, a fan's list)
+ * counts what's left in proportion (keptAfterRefund). A full refund also marks the payment
+ * 'refunded', which drops it out of all of them.
+ *
+ * The ledger entry is left as written on a partial refund, deliberately: support_entries is
+ * append-only and voiding is all-or-nothing, so the refunded share is derived at read time from its
+ * payment instead (get_goal_progress), and a refund that later fails needs nothing undone.
+ *
+ * Either way Unstream hands back its fee in proportion (spec §5, and the artist addendum promises
+ * it): Stripe doesn't return a platform's fee when a connected account refunds a direct charge, so
+ * without this it would stay in Unstream's balance (found 2026-10-03 in the sandbox: a refunded
+ * $5.76 tip left the 29¢ fee unrefunded).
  *
  * Only a charge carrying an application fee is Unstream's tip — the artist's own sales on the same
- * account carry none and are left alone. Replays are safe: the amount still owed is worked out from
- * what Stripe has already refunded, and the request is idempotent on (fee, total owed).
+ * account carry none and are left alone. Replays are safe: refunded_cents only grows here, and the
+ * fee owed is worked out from what Stripe has already returned.
  */
 async function recordRefund(client: SupabaseClient, charge: Obj): Promise<string> {
-  const note = charge.refunded === true
-    ? await setStatus(client, str(charge.payment_intent), 'refunded')
-    : 'partial refund, status left as is';
-
-  const feeId = str(charge.application_fee);
+  const paymentIntentId = str(charge.payment_intent);
   const amount = Number(charge.amount);
   const amountRefunded = Number(charge.amount_refunded);
-  if (!feeId || !Number.isInteger(amount) || amount <= 0 || !Number.isInteger(amountRefunded)) return note;
+  if (!paymentIntentId || !Number.isInteger(amount) || amount <= 0 || !Number.isInteger(amountRefunded)) {
+    return 'not a usable charge';
+  }
 
-  // The fee is a platform object, so these calls are on Unstream's own account (no Stripe-Account).
+  // Out of order, an earlier (smaller) refund total can arrive after a later one: only ever raise it.
+  const { error } = await client.from('tip_payments')
+    .update({ refunded_cents: amountRefunded })
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .lt('refunded_cents', amountRefunded);
+  if (error) throw new Error(`tip_payments refund update failed: ${error.message}`);
+
+  const fullyRefunded = charge.refunded === true || amountRefunded >= amount;
+  const note = fullyRefunded
+    ? await moveStatus(client, paymentIntentId, ['succeeded'], 'refunded')
+    : 'partial refund recorded';
+
+  const feeId = str(charge.application_fee);
+  if (!feeId) return note;
+  const returned = await returnApplicationFee(
+    feeId, fee => Math.min(fee.amount, Math.round(fee.amount * amountRefunded / amount)), 'fee-refund',
+  );
+  return returned > 0 ? `${note}; returned ${returned}¢ of Unstream's fee` : `${note}; fee already returned`;
+}
+
+/**
+ * A refund that failed (the fan's card couldn't take it) or was canceled puts the money back in the
+ * artist's balance, so the tip counts again. The charge is re-read for its current amount_refunded,
+ * which may be lower than what's stored — the one case refunded_cents goes down, and the one case
+ * a payment leaves 'refunded'. Unstream's fee, if it was already handed back, stays with the artist.
+ */
+async function refundUpdated(client: SupabaseClient, evt: StripeEvent, refund: Obj): Promise<string> {
+  if (refund.status !== 'failed' && refund.status !== 'canceled') return 'refund still going';
+  const paymentIntentId = str(refund.payment_intent);
+  const chargeId = str(refund.charge);
+  if (!paymentIntentId || !chargeId || !evt.account) return 'no charge';
+
+  // Looked up first, so a failed refund on the artist's own sales costs no Stripe call.
+  const { data: payment, error: readError } = await client.from('tip_payments')
+    .select('id, status')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .eq('livemode', evt.livemode)
+    .maybeSingle();
+  if (readError) throw new Error(`tip_payments read failed: ${readError.message}`);
+  if (!payment) return 'not an Unstream tip';
+
+  const charge = await stripeRequest<StripeCharge>(
+    'GET', `/v1/charges/${encodeURIComponent(chargeId)}`, {}, { stripeAccount: evt.account },
+  );
+  const { error } = await client.from('tip_payments')
+    .update({ refunded_cents: charge.amount_refunded })
+    .eq('id', (payment as { id: string }).id);
+  if (error) throw new Error(`tip_payments refund update failed: ${error.message}`);
+
+  if (charge.amount_refunded < charge.amount) {
+    await moveStatus(client, paymentIntentId, ['refunded'], 'succeeded');
+  }
+  return 'refund recounted';
+}
+
+/**
+ * A dispute is over. Won (or an inquiry closed with a warning): the money stayed with the artist,
+ * so the tip counts again. Lost: the fan's bank took it back, the payment stays 'disputed', and
+ * Unstream returns the rest of its fee to the artist — artists first; Unstream doesn't keep a cut of
+ * a tip the artist never got to keep.
+ */
+async function disputeClosed(client: SupabaseClient, evt: StripeEvent, dispute: Obj): Promise<string> {
+  const paymentIntentId = str(dispute.payment_intent);
+  if (dispute.status === 'won' || dispute.status === 'warning_closed') {
+    return moveStatus(client, paymentIntentId, ['disputed'], 'succeeded');
+  }
+  if (dispute.status !== 'lost') return `dispute ${String(dispute.status)}`;
+
+  const chargeId = str(dispute.charge);
+  if (!chargeId || !evt.account) return 'dispute lost';
+  const charge = await stripeRequest<StripeCharge>(
+    'GET', `/v1/charges/${encodeURIComponent(chargeId)}`, {}, { stripeAccount: evt.account },
+  );
+  const feeId = str(charge.application_fee);
+  if (!feeId) return 'dispute lost';
+  const returned = await returnApplicationFee(feeId, fee => fee.amount, 'fee-dispute');
+  return returned > 0 ? `dispute lost; returned ${returned}¢ of Unstream's fee` : 'dispute lost; fee already returned';
+}
+
+/**
+ * Hand back Unstream's application fee up to `owedTotal` of it, counting what Stripe has already
+ * returned. The fee is a platform object, so these calls are on Unstream's own account (no
+ * Stripe-Account). The idempotency key is the fee and the total owed, so a concurrent duplicate
+ * event makes the same request and Stripe applies it once. Returns the cents handed back now.
+ */
+async function returnApplicationFee(
+  feeId: string,
+  owedTotal: (fee: { amount: number; amount_refunded: number }) => number,
+  keyPrefix: string,
+): Promise<number> {
   const fee = await stripeRequest<{ amount: number; amount_refunded: number }>(
     'GET', `/v1/application_fees/${encodeURIComponent(feeId)}`,
   );
-  const owed = Math.min(fee.amount, Math.round(fee.amount * amountRefunded / amount));
+  const owed = owedTotal(fee);
   const toReturn = owed - fee.amount_refunded;
-  if (toReturn <= 0) return `${note}; fee already returned`;
+  if (toReturn <= 0) return 0;
   await stripeRequest(
     'POST', `/v1/application_fees/${encodeURIComponent(feeId)}/refunds`,
     { amount: toReturn },
-    { idempotencyKey: `fee-refund:${feeId}:${owed}` },
+    { idempotencyKey: `${keyPrefix}:${feeId}:${owed}` },
   );
-  return `${note}; returned ${toReturn}¢ of Unstream's fee`;
+  return toReturn;
 }
 
-async function setStatus(client: SupabaseClient, paymentIntentId: string | null, status: string): Promise<string> {
+/** Move a payment's status, but only from one of `from`: a late or replayed event is a no-op. */
+async function moveStatus(client: SupabaseClient, paymentIntentId: string | null, from: string[], to: string): Promise<string> {
   if (!paymentIntentId) return 'no payment intent';
-  const { error } = await client.from('tip_payments').update({ status }).eq('stripe_payment_intent_id', paymentIntentId);
+  const { data, error } = await client.from('tip_payments')
+    .update({ status: to })
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .in('status', from)
+    .select('id');
   if (error) throw new Error(`tip_payments status update failed: ${error.message}`);
-  return `status ${status}`;
+  return data && (data as unknown[]).length > 0 ? `status ${to}` : `status unchanged (not ${from.join('/')})`;
 }
 
 async function syncAccount(client: SupabaseClient, evt: StripeEvent, account: Obj): Promise<string> {
@@ -282,12 +396,14 @@ async function syncAccount(client: SupabaseClient, evt: StripeEvent, account: Ob
 
 /**
  * A Standard account can disconnect the platform from its own Stripe dashboard. Tips stop at once;
- * the row stays (it records who connected what), and reconnecting needs a fresh approval.
+ * the row stays (it records who connected what) with deauthorized_at set, which tips-connect reads
+ * as "no account": reconnecting creates a new Stripe account, re-accepts the addendum and needs a
+ * fresh approval.
  */
 async function disconnect(client: SupabaseClient, evt: StripeEvent): Promise<string> {
   if (!evt.account) return 'no account';
   const { error } = await client.from('artist_tip_accounts')
-    .update({ charges_enabled: false, tips_enabled: false, tips_approved_at: null })
+    .update({ charges_enabled: false, tips_enabled: false, tips_approved_at: null, deauthorized_at: new Date().toISOString() })
     .eq('stripe_account_id', evt.account)
     .eq('livemode', evt.livemode);
   if (error) throw new Error(`artist_tip_accounts disconnect failed: ${error.message}`);

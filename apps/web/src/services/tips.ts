@@ -28,6 +28,11 @@ export interface TipSettings {
   feeBasisPoints: number;
   country: string | null;
   countries: Record<string, string>;
+  /**
+   * False when Stripe won't take an application fee for the account's country (Brazil, Malaysia,
+   * Thailand), so Unstream's share is fixed at 0%. Missing means allowed.
+   */
+  feeAllowed?: boolean;
   goals: TipGoal[];
   totals: { month: TipTotals; allTime: TipTotals } | null;
 }
@@ -38,15 +43,21 @@ async function call<T>(token: string, url: string, init: RequestInit = {}): Prom
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
   });
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new TipsApiError((body as { error?: string }).error ?? `HTTP ${r.status}`, r.status);
+  if (!r.ok) {
+    const { error, code } = body as { error?: string; code?: string };
+    throw new TipsApiError(error ?? `HTTP ${r.status}`, r.status, code);
+  }
   return body as T;
 }
 
 export class TipsApiError extends Error {
   readonly status: number;
-  constructor(message: string, status: number) {
+  /** A machine-readable reason, when the server gives one — e.g. 'stripe_rejected' from /api/tips/connect. */
+  readonly code?: string;
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -112,6 +123,8 @@ export interface FanTip {
   amountCents: number;
   /** What the fan paid, including any fees they covered. */
   paidCents: number;
+  /** How much of paidCents the artist has refunded; non-zero on a partial refund too. */
+  refundedCents: number;
   currency: string;
   status: 'succeeded' | 'refunded' | 'disputed';
   goalTitle: string | null;

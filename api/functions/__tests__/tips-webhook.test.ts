@@ -165,17 +165,70 @@ describe('checkout.session.completed', () => {
 
 describe('status changes', () => {
   beforeEach(async () => { await deliver(paidSession()); });
+  const evt = (type: string, object: Record<string, unknown>) =>
+    ({ id: `evt_${type}`, type, livemode: false, account: 'acct_artist', data: { object } });
+  const refunded = (amountRefunded: number) =>
+    evt('charge.refunded', { payment_intent: 'pi_1', amount: 546, amount_refunded: amountRefunded, refunded: amountRefunded >= 546 });
+  const row = () => db.tables.tip_payments[0];
 
-  it('marks a fully refunded charge refunded, and leaves a partial refund alone', async () => {
-    await deliver({ id: 'evt_2', type: 'charge.refunded', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1', refunded: false } } });
-    expect(db.tables.tip_payments[0].status).toBe('succeeded');
-    await deliver({ id: 'evt_3', type: 'charge.refunded', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1', refunded: true } } });
-    expect(db.tables.tip_payments[0].status).toBe('refunded');
+  it('records a partial refund without changing the status, and a full one as refunded', async () => {
+    await deliver(refunded(200));
+    expect(row()).toMatchObject({ status: 'succeeded', refunded_cents: 200 });
+    await deliver(refunded(546));
+    expect(row()).toMatchObject({ status: 'refunded', refunded_cents: 546 });
+  });
+
+  it('never lowers refunded_cents when an earlier refund event arrives late', async () => {
+    await deliver(refunded(546));
+    await deliver(refunded(200));
+    expect(row()).toMatchObject({ status: 'refunded', refunded_cents: 546 });
   });
 
   it('marks a disputed charge disputed', async () => {
-    await deliver({ id: 'evt_4', type: 'charge.dispute.created', livemode: false, account: 'acct_artist', data: { object: { payment_intent: 'pi_1' } } });
-    expect(db.tables.tip_payments[0].status).toBe('disputed');
+    await deliver(evt('charge.dispute.created', { payment_intent: 'pi_1' }));
+    expect(row().status).toBe('disputed');
+  });
+
+  it('never moves a refunded payment to disputed or back to succeeded', async () => {
+    await deliver(refunded(546));
+    await deliver(evt('charge.dispute.created', { payment_intent: 'pi_1' }));
+    await deliver(evt('charge.dispute.closed', { payment_intent: 'pi_1', status: 'won', charge: 'ch_1' }));
+    expect(row().status).toBe('refunded');
+  });
+
+  it('ignores payment_intent events: a payment is only created by checkout', async () => {
+    const res = await deliver(evt('payment_intent.payment_failed', { id: 'pi_1' }));
+    expect(JSON.parse(res.body).note).toBe('ignored');
+    expect(row().status).toBe('succeeded');
+    await deliver(evt('payment_intent.succeeded', { id: 'pi_unknown' }));
+    expect(db.tables.tip_payments).toHaveLength(1);
+  });
+
+  it('puts a disputed tip back when the artist wins, or an inquiry closes with a warning', async () => {
+    for (const status of ['won', 'warning_closed']) {
+      await deliver(evt('charge.dispute.created', { payment_intent: 'pi_1' }));
+      await deliver(evt('charge.dispute.closed', { payment_intent: 'pi_1', status, charge: 'ch_1' }));
+      expect(row().status).toBe('succeeded');
+    }
+  });
+
+  it('ignores a won dispute for a payment that was never marked disputed', async () => {
+    await deliver(evt('charge.dispute.closed', { payment_intent: 'pi_1', status: 'won', charge: 'ch_1' }));
+    expect(row().status).toBe('succeeded');
+  });
+});
+
+describe('Stripe mode', () => {
+  it('ignores events from the other mode, before reading or writing anything', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_live_abc';
+    try {
+      const res = await deliver(paidSession());
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body).note).toBe('other mode');
+      expect(db.tables.tip_payments ?? []).toHaveLength(0);
+    } finally {
+      delete process.env.STRIPE_SECRET_KEY;
+    }
   });
 });
 
@@ -185,10 +238,12 @@ describe('accounts', () => {
     expect(db.tables.artist_tip_accounts[0]).toMatchObject({ charges_enabled: true, details_submitted: true, country: 'GB' });
   });
 
-  it('switches tips off and clears approval when the artist disconnects Unstream', async () => {
+  it('switches tips off, clears approval and records the disconnect when the artist deauthorizes Unstream', async () => {
     Object.assign(db.tables.artist_tip_accounts[0], { charges_enabled: true, tips_enabled: true, tips_approved_at: '2026-09-01' });
     await deliver({ id: 'evt_6', type: 'account.application.deauthorized', livemode: false, account: 'acct_artist', data: { object: {} } });
-    expect(db.tables.artist_tip_accounts[0]).toMatchObject({ charges_enabled: false, tips_enabled: false, tips_approved_at: null });
+    expect(db.tables.artist_tip_accounts[0]).toMatchObject({
+      charges_enabled: false, tips_enabled: false, tips_approved_at: null, deauthorized_at: expect.any(String),
+    });
   });
 });
 
@@ -247,6 +302,11 @@ describe('a refund hands back Unstream’s fee', () => {
     await deliver(refundEvent({ payment_intent: 'pi_artists_own_sale', application_fee: null, refunded: true, amount_refunded: 576 }));
     expect(fetchMock).not.toHaveBeenCalled();
     expect(db.tables.tip_payments[0].status).toBe('succeeded');
+  });
+
+  it('records the partial refund amount on the payment', async () => {
+    await deliver(refundEvent({ refunded: false, amount_refunded: 288 }));
+    expect(db.tables.tip_payments[0]).toMatchObject({ status: 'succeeded', refunded_cents: 288 });
   });
 
   it('fails the event so Stripe retries when the fee refund itself fails', async () => {
@@ -315,5 +375,93 @@ describe('the fan’s receipt', () => {
     expect(db.tables.tip_payments).toHaveLength(1);
     expect(mocks.captureException).toHaveBeenCalled();
     expect(JSON.stringify(mocks.captureException.mock.calls)).not.toContain('fan@example.com');
+  });
+});
+
+describe('a refund that fails or is canceled', () => {
+  const fetchMock = vi.fn();
+  let charge = { id: 'ch_1', amount: 576, amount_refunded: 0 };
+  const refundUpdated = (status: string, extra: Record<string, unknown> = {}) => ({
+    id: 'evt_ru', type: 'charge.refund.updated', livemode: false, account: 'acct_artist',
+    data: { object: { id: 're_1', status, charge: 'ch_1', payment_intent: 'pi_1', ...extra } },
+  });
+
+  beforeEach(async () => {
+    await deliver(paidSession({}, { amount_total: 576 }));
+    Object.assign(db.tables.tip_payments[0], { status: 'refunded', refunded_cents: 576 });
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    charge = { id: 'ch_1', amount: 576, amount_refunded: 0 };
+    fetchMock.mockReset();
+    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify(charge))));
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+
+  it('recounts from the charge on the artist’s account, and the tip counts again', async () => {
+    expect((await deliver(refundUpdated('failed'))).statusCode).toBe(200);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe('https://api.stripe.com/v1/charges/ch_1');
+    expect(init.headers['Stripe-Account']).toBe('acct_artist');
+    expect(db.tables.tip_payments[0]).toMatchObject({ status: 'succeeded', refunded_cents: 0 });
+  });
+
+  it('keeps a payment refunded when another refund still covers all of it', async () => {
+    charge.amount_refunded = 576;
+    await deliver(refundUpdated('canceled'));
+    expect(db.tables.tip_payments[0]).toMatchObject({ status: 'refunded', refunded_cents: 576 });
+  });
+
+  it('ignores refund updates that aren’t failures, and refunds on the artist’s own sales', async () => {
+    await deliver(refundUpdated('succeeded'));
+    await deliver(refundUpdated('failed', { payment_intent: 'pi_artists_own_sale' }));
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(db.tables.tip_payments[0].status).toBe('refunded');
+  });
+});
+
+describe('a lost dispute hands back Unstream’s fee', () => {
+  const fetchMock = vi.fn();
+  let fee = { amount: 29, amount_refunded: 0 };
+  const lost = () => ({
+    id: 'evt_dc', type: 'charge.dispute.closed', livemode: false, account: 'acct_artist',
+    data: { object: { id: 'dp_1', status: 'lost', charge: 'ch_1', payment_intent: 'pi_1' } },
+  });
+  const feeRefunds = () => fetchMock.mock.calls.filter(([url, init]) => String(url).endsWith('/v1/application_fees/fee_1/refunds') && init.method === 'POST');
+
+  beforeEach(async () => {
+    await deliver(paidSession({ unstream_application_fee_cents: '29' }, { amount_total: 576 }));
+    db.tables.tip_payments[0].status = 'disputed';
+    process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
+    fee = { amount: 29, amount_refunded: 0 };
+    fetchMock.mockReset();
+    fetchMock.mockImplementation((url: string, init: { method: string; body?: string }) => {
+      if (String(url).includes('/v1/charges/')) {
+        return Promise.resolve(new Response(JSON.stringify({ id: 'ch_1', amount: 576, amount_refunded: 0, application_fee: 'fee_1' })));
+      }
+      if (init.method === 'POST') {
+        fee.amount_refunded += Number(new URLSearchParams(init.body).get('amount'));
+        return Promise.resolve(new Response(JSON.stringify({ id: 'fr_1' })));
+      }
+      return Promise.resolve(new Response(JSON.stringify({ id: 'fee_1', ...fee })));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; });
+
+  it('returns what’s left of the fee, keyed on the fee and amount, and leaves the payment disputed', async () => {
+    fee.amount_refunded = 10;
+    expect((await deliver(lost())).statusCode).toBe(200);
+    const [[, init]] = feeRefunds();
+    expect(new URLSearchParams(init.body).get('amount')).toBe('19');
+    expect(init.headers['Idempotency-Key']).toBe('fee-dispute:fee_1:29');
+    expect(init.headers['Stripe-Account']).toBeUndefined();
+    expect(db.tables.tip_payments[0].status).toBe('disputed');
+  });
+
+  it('never returns it twice on a replay', async () => {
+    await deliver(lost());
+    await deliver(lost());
+    expect(feeRefunds()).toHaveLength(1);
+    expect(fee.amount_refunded).toBe(29);
   });
 });

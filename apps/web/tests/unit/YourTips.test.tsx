@@ -14,7 +14,7 @@ import { YourTips } from 'src/components/YourTips';
 
 const fetchMock = vi.fn();
 const tip = (overrides: Record<string, unknown> = {}) => ({
-  id: 't1', artistName: 'Kid Lightbulbs', artistSlug: 'kid-lightbulbs', amountCents: 500, paidCents: 546,
+  id: 't1', artistName: 'Kid Lightbulbs', artistSlug: 'kid-lightbulbs', amountCents: 500, paidCents: 546, refundedCents: 0,
   currency: 'usd', status: 'succeeded', goalTitle: null, createdAt: '2026-10-03T12:00:00Z', ...overrides,
 });
 
@@ -41,6 +41,13 @@ describe('YourTips', () => {
     expect(screen.getByText('you paid $5.46')).toBeTruthy();
     expect(screen.getByText(/towards “Vinyl”/)).toBeTruthy();
     expect(screen.getByText('Refunded')).toBeTruthy();
+  });
+
+  it('shows a partial refund instead of the fees line', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ tips: [tip({ refundedCents: 273 })] })));
+    render(<YourTips />);
+    expect(await screen.findByText('$2.73 refunded')).toBeTruthy();
+    expect(screen.queryByText(/you paid/)).toBeNull();
   });
 
   it('shows an error rather than nothing when the list can’t load', async () => {

@@ -19,6 +19,7 @@ import { getClient } from './db';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { markArtistSupported } from './tips-db';
+import { keptAfterRefund } from '../shared/tips';
 import { Sentry } from '../lib/sentry';
 
 const CORS_HEADERS = {
@@ -87,6 +88,7 @@ interface TipRow {
   id: string;
   amount_cents: number;
   gross_cents: number;
+  refunded_cents: number;
   currency: string;
   status: string;
   created_at: string;
@@ -102,6 +104,13 @@ export interface FanTip {
   amountCents: number;
   /** What the fan paid, including any fees they covered. */
   paidCents: number;
+  /** How much of paidCents the artist refunded; 0 for most tips. */
+  refundedCents: number;
+  /**
+   * What counts as given of amountCents, the way goals and the artist's totals count it: less any
+   * refunded share, and 0 for a tip that was fully refunded or is disputed.
+   */
+  netAmountCents: number;
   currency: string;
   status: string;
   goalTitle: string | null;
@@ -114,7 +123,7 @@ async function listTips(client: SupabaseClient, userId: string): Promise<FanTip[
 
   const { data, error } = await client
     .from('tip_payments')
-    .select('id, amount_cents, gross_cents, currency, status, created_at, artists(name, slug), support_entries(artist_goals(title))')
+    .select('id, amount_cents, gross_cents, refunded_cents, currency, status, created_at, artists(name, slug), support_entries(artist_goals(title))')
     .eq('fan_user_id', userId)
     .eq('livemode', isLiveMode())
     // A payment that never went through isn't a tip the fan left.
@@ -129,6 +138,8 @@ async function listTips(client: SupabaseClient, userId: string): Promise<FanTip[
     artistSlug: row.artists?.slug ?? '',
     amountCents: row.amount_cents,
     paidCents: row.gross_cents,
+    refundedCents: row.refunded_cents ?? 0,
+    netAmountCents: row.status !== 'succeeded' ? 0 : keptAfterRefund(row.amount_cents, row.gross_cents, row.refunded_cents ?? 0),
     currency: row.currency,
     status: row.status,
     goalTitle: row.support_entries?.find(e => e.artist_goals)?.artist_goals?.title ?? null,

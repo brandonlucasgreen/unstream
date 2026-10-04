@@ -210,6 +210,16 @@ export function PrivacyPolicyPage() {
                 location and featured release are shown publicly on your artist page. That's the
                 point of claiming it. The email address you claimed with is not shown.
               </P>
+              <P>
+                <strong>Taking tips as an artist.</strong> If you connect Stripe to take tips, we
+                keep your Stripe account ID, the country you chose, whether Stripe has enabled
+                charges on the account, when you accepted the artist terms for tips and which
+                version of them you accepted, the share you've chosen for Unstream, and any goals
+                you set. To check that the account belongs to you before tips go live, an admin
+                looks at the Stripe account's business name, country and email address next to
+                the email you claimed your profile with; those Stripe details are read from Stripe
+                at the time and not stored. We email you when your tips are approved.
+              </P>
             </Section>
 
             <Section title="Where your data goes">

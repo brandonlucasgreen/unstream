@@ -1,5 +1,5 @@
 // A small in-memory stand-in for the Supabase client, for the tips tests. Covers the query shapes
-// those endpoints use: select/eq/is/in/not/order/limit/maybeSingle/single, insert (with unique
+// those endpoints use: select/eq/lt/is/in/not/order/limit/maybeSingle/single, insert (with unique
 // columns raising 23505), update and delete with filters, count heads, and rpc via handlers.
 // Embedded selects (`artists(...)`) are not modelled; tests that need them stub rpc or the row.
 
@@ -81,6 +81,7 @@ export function createFakeDb(): FakeDb {
       delete() { op = { kind: 'delete' }; return builder; },
       upsert(payload: Row) { op = { kind: 'insert', payload }; return builder; },
       eq(c: string, v: unknown) { filters.push(r => get(r, c) === v); return builder; },
+      lt(c: string, v: number) { filters.push(r => Number(get(r, c) ?? 0) < v); return builder; },
       is(c: string, v: null) { filters.push(r => (get(r, c) ?? null) === v); return builder; },
       in(c: string, vs: unknown[]) { filters.push(r => vs.includes(get(r, c))); return builder; },
       not(c: string, _op: string, v: unknown) { filters.push(r => (v === null ? get(r, c) != null : get(r, c) !== v)); return builder; },
