@@ -1,6 +1,7 @@
 // API endpoint: POST /api/admin/merge-override
 // Admin-only endpoint for creating artist merge overrides from the UI.
 
+import { withSentry } from '../lib/sentry';
 import { getClient, invalidateAdminListCache } from './db';
 import { authenticateAdmin } from './middleware';
 import { isSearchOnlyLink, sourceIdFromUrl } from './search-utils';
@@ -12,7 +13,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
@@ -132,3 +133,5 @@ export async function handler(event: {
     body: JSON.stringify({ success: true, override: data }),
   };
 }
+
+export const handler = withSentry(handleRequest);

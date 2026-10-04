@@ -38,6 +38,7 @@ vi.mock('../middleware', () => ({
   }),
 }));
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureMessage: vi.fn(), captureException: vi.fn() },
 }));
 

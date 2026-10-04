@@ -7,6 +7,7 @@
 // once they actually change something. Every sender (notifications.ts,
 // weekly-analytics-recap.ts) treats a missing row the same way.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
@@ -38,7 +39,7 @@ function toResponseShape(row: PreferencesRow | null) {
   };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -128,3 +129,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

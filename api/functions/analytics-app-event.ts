@@ -4,6 +4,7 @@
 // The HMAC key (SESSION_HASH_SECRET) makes the hash non-reversible even with
 // knowledge of the input space, unlike plain SHA-256.
 
+import { withSentry } from '../lib/sentry';
 import { createHash, createHmac } from 'crypto';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -39,7 +40,7 @@ function hashSessionId(ip: string, userAgent: string): string {
   return createHmac('sha256', secret).update(raw).digest('hex');
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
@@ -106,3 +107,5 @@ export async function handler(event: {
 
   return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 }
+
+export const handler = withSentry(handleRequest);

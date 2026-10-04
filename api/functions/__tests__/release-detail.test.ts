@@ -38,7 +38,7 @@ vi.mock('../db', () => ({
   resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
 }));
 vi.mock('../../shared/bandcamp-friday', () => ({ isBandcampFriday: mocks.isBandcampFriday }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: mocks.captureMessage } }));
 
 import { handler, parseSlugs } from '../release-detail';
 import { PLATFORMS } from '../../shared/platform-registry';

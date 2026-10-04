@@ -7,11 +7,11 @@
 import { getClient, getReleaseReviewQueue, dismissReleaseReview, mergeReleases } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { purgeArtistReleaseCaches } from './purge-cache';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
@@ -159,3 +159,5 @@ export async function handler(event: {
     body: JSON.stringify({ success: true, action, keepId }),
   };
 }
+
+export const handler = withSentry(handleRequest);

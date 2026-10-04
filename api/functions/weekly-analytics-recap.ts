@@ -11,7 +11,7 @@ import { getClient } from './db';
 import { isInternalRequest } from './middleware';
 import { sendNotificationOnce, filterByPreference, subscriptionFooter, SUBSCRIPTION_EMAIL_HEADERS } from './notifications';
 import { escapeHtml } from '../lib/html';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const RECAP_WINDOW_DAYS = 7;
 
@@ -45,7 +45,7 @@ function summarize(rows: AnalyticsRow[]): { searches: number; views: number; cli
   return { searches, views, clicks };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
 }) {
@@ -142,3 +142,5 @@ export async function handler(event: {
 
   return { statusCode: 200, body: JSON.stringify({ sent, skipped, optedOut }) };
 }
+
+export const handler = withSentry(handleRequest);

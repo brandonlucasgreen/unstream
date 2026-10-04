@@ -23,6 +23,7 @@ vi.mock('../notifications', async importOriginal => {
   };
 });
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureMessage: mocks.captureMessage, captureException: mocks.captureException },
 }));
 

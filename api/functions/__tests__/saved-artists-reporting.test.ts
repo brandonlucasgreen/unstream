@@ -35,6 +35,7 @@ vi.mock('../ratelimit', () => ({
 }));
 vi.mock('../request-catalog', () => ({ requestArtistCatalog: mocks.mockRequestArtistCatalog }));
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureMessage: mocks.mockCaptureMessage, captureException: mocks.mockCaptureException },
 }));
 

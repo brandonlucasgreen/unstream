@@ -20,7 +20,7 @@ vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.checkRateLimit,
   getClientIp: () => '203.0.113.9',
 }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
 import { handler, CLAIM_WINDOW_SECONDS } from '../me-tips';
 

@@ -23,6 +23,7 @@ vi.mock('../ratelimit', () => ({
   getClientIp: () => '127.0.0.1',
 }));
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureException: mocks.captureException, captureMessage: vi.fn() },
 }));
 

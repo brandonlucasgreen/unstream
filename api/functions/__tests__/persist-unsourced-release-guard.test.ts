@@ -74,7 +74,7 @@ function makeClient() {
 }
 
 const captureMessage = vi.fn();
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage, captureException: vi.fn() } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage, captureException: vi.fn() } }));
 vi.mock('@supabase/supabase-js', () => ({ createClient: () => makeClient() }));
 process.env.SUPABASE_URL = 'https://example.supabase.co';
 process.env.SUPABASE_SERVICE_KEY = 'k';

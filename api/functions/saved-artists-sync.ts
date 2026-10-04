@@ -4,6 +4,7 @@
 // Designed for cross-client sync: the client stores the server_time from the last
 // successful pull and passes it as `since` on the next request.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
@@ -16,7 +17,7 @@ const CORS_HEADERS = {
 
 const SYNC_LIMIT = 500;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string | undefined>;
@@ -123,3 +124,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

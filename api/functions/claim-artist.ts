@@ -4,7 +4,7 @@
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
@@ -358,7 +358,7 @@ async function queueClaimForReview(
   return pendingResponse;
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string>;
   body: string | null;
@@ -941,3 +941,5 @@ export async function handler(event: {
     body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", "fetch-avatar", or "request-manual-review".' }),
   };
 }
+
+export const handler = withSentry(handleRequest);

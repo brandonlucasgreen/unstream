@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ captureMessage: vi.fn() }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: mocks.captureMessage } }));
 
 import { handler, UPSTREAM_URL } from '../digest-feed';
 import { isUrlHostnameAllowed } from '../middleware';

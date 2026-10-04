@@ -1,9 +1,10 @@
 // V1 API: /api/v1/status
 // Health check endpoint — no authentication required.
 
+import { withSentry } from '../lib/sentry';
 import { buildPublicCorsHeaders, generateRequestId, v1Response } from './middleware';
 
-export async function handler(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
+async function handleRequest(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
   const requestId = generateRequestId();
   const corsHeaders = buildPublicCorsHeaders();
 
@@ -25,3 +26,5 @@ export async function handler(event: { httpMethod: string; headers?: Record<stri
     }, requestId)),
   };
 }
+
+export const handler = withSentry(handleRequest);

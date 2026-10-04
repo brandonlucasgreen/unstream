@@ -99,6 +99,7 @@
     "functions/__tests__/collection-art-ratelimit.test.ts",
     "functions/__tests__/collection-matching.test.ts",
     "functions/__tests__/sentry-environment.test.ts",
+    "functions/__tests__/with-sentry.test.ts",
     "functions/analytics-event.ts",
     "functions/analytics-dashboard.ts",
     "functions/__tests__/analytics-dashboard.test.ts",

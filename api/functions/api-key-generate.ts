@@ -4,6 +4,7 @@
 // - GET: List user's API keys (requires Supabase auth)
 // - DELETE: Revoke an API key (requires Supabase auth)
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { authenticateBearer, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 
@@ -29,7 +30,7 @@ interface NetlifyEvent {
   body?: string;
 }
 
-export async function handler(event: NetlifyEvent) {
+async function handleRequest(event: NetlifyEvent) {
   const requestId = generateRequestId();
   const origin = event.headers.origin || event.headers.Origin;
   const corsHeaders = buildCorsHeaders(origin, false, {
@@ -273,3 +274,5 @@ async function handleDeleteKey(
     body: JSON.stringify(v1Response({ message: 'API key revoked' }, requestId)),
   };
 }
+
+export const handler = withSentry(handleRequest);

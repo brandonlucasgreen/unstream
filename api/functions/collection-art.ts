@@ -15,6 +15,7 @@
 // otherwise every page view would re-fetch every tile. Pagination (15 tiles a page) bounds
 // the burst on a cold cache.
 
+import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -118,7 +119,7 @@ async function authenticatedUserId(authHeader: string | undefined): Promise<stri
   return data.user.id;
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   path?: string;
@@ -250,3 +251,5 @@ export async function handler(event: {
     return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'No art available' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

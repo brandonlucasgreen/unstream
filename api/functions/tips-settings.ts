@@ -25,7 +25,7 @@ import {
   estimatedStripeFeeCents,
   isValidFeeBasisPoints,
 } from '../shared/tips';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -36,7 +36,7 @@ interface HandlerEvent {
   queryStringParameters?: Record<string, string | undefined> | null;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 
   const user = await authenticateBearer(event.headers.authorization);
@@ -270,3 +270,5 @@ async function closeGoal(client: SupabaseClient, artistId: string, body: Record<
   if (error) throw new Error(`artist_goals update failed: ${error.message}`);
   return respond(200, { goals: await getGoals(client, artistId, { openOnly: false }) });
 }
+
+export const handler = withSentry(handleRequest);

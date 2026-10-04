@@ -16,11 +16,11 @@ import {
   restoreArtistDuplicatePair,
 } from './artist-merge';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
@@ -179,3 +179,5 @@ export async function handler(event: {
 
   return json(400, { error: "action must be 'merge', 'reslug', 'dismiss' or 'restore'" });
 }
+
+export const handler = withSentry(handleRequest);

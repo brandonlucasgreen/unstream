@@ -28,7 +28,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { isLiveMode, stripeRequest, verifyStripeSignature, type StripeCharge, type StripeEvent } from './stripe';
 import { markArtistSupported } from './tips-db';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const HEADERS = { 'Content-Type': 'application/json' };
 const ok = (note: string) => ({ statusCode: 200, headers: HEADERS, body: JSON.stringify({ received: true, note }) });
@@ -40,7 +40,7 @@ interface HandlerEvent {
   isBase64Encoded?: boolean;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: HEADERS, body: '{"error":"Method not allowed"}' };
 
   const secret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
@@ -409,3 +409,5 @@ async function disconnect(client: SupabaseClient, evt: StripeEvent): Promise<str
   if (error) throw new Error(`artist_tip_accounts disconnect failed: ${error.message}`);
   return 'disconnected';
 }
+
+export const handler = withSentry(handleRequest);

@@ -3,6 +3,7 @@
 // Body: { current_password: string, new_password: string }
 // Never logs passwords at any level.
 
+import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -32,7 +33,7 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   return { userId: data.user.id, email: data.user.email || '', accessToken };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -107,3 +108,5 @@ export async function handler(event: {
 
   return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
 }
+
+export const handler = withSentry(handleRequest);

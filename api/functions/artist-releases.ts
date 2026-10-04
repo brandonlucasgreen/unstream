@@ -10,6 +10,7 @@
 // action below resolves the artist from `slug` and checks `resolveOwnedArtist` before touching
 // anything, exactly like `api/functions/artist-profile.ts` does for bio/link edits.
 
+import { withSentry } from '../lib/sentry';
 import {
   getClient,
   resolveOwnedArtist,
@@ -115,7 +116,7 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
   await purgeArtistReleaseCaches(slug, 'ArtistReleases');
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string>;
@@ -438,3 +439,5 @@ export async function handler(event: {
 
   return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true, action, ...responseExtra }) };
 }
+
+export const handler = withSentry(handleRequest);
