@@ -30,6 +30,7 @@ vi.mock('../cache', () => ({
   cacheDeleteByArtist: mocks.mockCacheDeleteByArtist,
 }));
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureException: mocks.mockCaptureException },
 }));
 

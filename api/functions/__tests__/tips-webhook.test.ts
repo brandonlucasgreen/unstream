@@ -10,7 +10,7 @@ import { createFakeDb, type FakeDb } from './fake-supabase';
 let db: FakeDb;
 const mocks = vi.hoisted(() => ({ captureException: vi.fn(), captureMessage: vi.fn() }));
 vi.mock('../db', () => ({ getClient: () => db.client }));
-vi.mock('../../lib/sentry', () => ({ Sentry: mocks }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: mocks }));
 
 import { handler } from '../tips-webhook';
 

@@ -44,6 +44,7 @@ vi.mock('../ratelimit', () => ({
 // DSN is configured. Whether the events then leave the process is the deployment's problem —
 // which is exactly how 77 call sites managed to report nothing for weeks without a test noticing.
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureMessage: mocks.captureMessage },
 }));
 

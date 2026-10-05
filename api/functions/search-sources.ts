@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
 import { persistSearchResults, artistSlug, getMergeOverrides, getLinkSuppressions } from './db';
@@ -1565,7 +1565,7 @@ export function attachArtistPageSlugs(results: AggregatedResult[]): void {
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const timer = new SearchTimer();
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
@@ -1727,3 +1727,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     };
   }
 }
+
+export const handler = withSentry(handleRequest);

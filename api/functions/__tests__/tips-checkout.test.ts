@@ -20,7 +20,7 @@ vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
   authenticateBearerFast: mocks.authenticateBearerFast,
 }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
 import { handler as rawHandler } from '../tips-checkout';
 const handler = async (e: Parameters<typeof rawHandler>[0]) => (await rawHandler(e))!;

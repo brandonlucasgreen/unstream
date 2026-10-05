@@ -3,6 +3,7 @@
 // Accepts { slug, metric } and atomically increments the daily count.
 // Returns 204 on success (or silent no-op on errors).
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
@@ -42,7 +43,7 @@ const slugCache = new Map<string, string>();
 // More slugs than any real search renders is abuse, not analytics.
 const MAX_BATCH_SLUGS = 24;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
@@ -133,3 +134,5 @@ export async function handler(event: {
 
   return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 }
+
+export const handler = withSentry(handleRequest);

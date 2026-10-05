@@ -70,7 +70,7 @@ vi.mock('../notifications', () => ({
   sendNotificationOnce: mocks.sendNotificationOnce,
   notifySavedArtistsOfNewLinks: mocks.notifySavedArtistsOfNewLinks,
 }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: vi.fn(), captureException: vi.fn() } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: vi.fn(), captureException: vi.fn() } }));
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
     auth: { getUser: () => Promise.resolve({ data: { user: mocks.user }, error: null }) },

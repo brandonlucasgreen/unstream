@@ -3,6 +3,7 @@
 // POST — toggles sharing on/off. Body: { public: boolean }
 // Sharing requires a username (set via /settings). 404 if no username.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { isReservedHandle } from '../lib/reserved-handles';
@@ -38,7 +39,7 @@ function purgeCacheTag(handle: string): void {
     .catch((e) => console.error(`[user-sharing] CDN cache purge failed for user-share-${handle}:`, e));
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -195,3 +196,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

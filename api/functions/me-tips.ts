@@ -20,7 +20,7 @@ import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit'
 import { isLiveMode, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { markArtistSupported } from './tips-db';
 import { keptAfterRefund } from '../shared/tips';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ interface JsonResponse {
 const respond = (statusCode: number, body: unknown): JsonResponse =>
   ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
 
-export async function handler(event: HandlerEvent): Promise<JsonResponse> {
+async function handleRequest(event: HandlerEvent): Promise<JsonResponse> {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
@@ -252,3 +252,5 @@ async function claimTip(client: SupabaseClient, userId: string, rawBody: string 
   await markArtistSupported(client, userId, artistId);
   return respond(200, { status: 'saved' });
 }
+
+export const handler = withSentry(handleRequest);

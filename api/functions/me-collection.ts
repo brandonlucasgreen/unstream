@@ -7,6 +7,7 @@
 // from this. Writes to collection_items happen only in sync code (bandcamp-sync-background)
 // — this endpoint can flip `hidden` and nothing else, so provenance stays server-asserted.
 
+import { withSentry } from '../lib/sentry';
 import { getClient, readAllPages } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -31,7 +32,7 @@ const ITEM_COLUMNS =
 /** The same columns plus the joins the grid needs to build release and artist links. */
 const ITEM_COLUMNS_WITH_LINKS = `${ITEM_COLUMNS}, releases!left (slug, artwork_url, artists (slug))`;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -139,3 +140,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

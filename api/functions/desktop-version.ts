@@ -1,3 +1,4 @@
+import { withSentry } from '../lib/sentry';
 import { MAC_RELEASE } from '../shared/desktop-release';
 
 // The pre-Sparkle update check: versions up to 3.5.0 poll this at launch and, if it reports
@@ -10,7 +11,7 @@ const VERSION_INFO = {
   releaseNotes: MAC_RELEASE.releaseNotes,
 };
 
-export async function handler(event: { httpMethod?: string }) {
+async function handleRequest(event: { httpMethod?: string }) {
   // Handle CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -36,3 +37,5 @@ export async function handler(event: { httpMethod?: string }) {
     body: JSON.stringify(VERSION_INFO),
   };
 }
+
+export const handler = withSentry(handleRequest);

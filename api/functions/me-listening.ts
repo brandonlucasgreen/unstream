@@ -15,6 +15,7 @@
 // deliberate act that subscribes you to release alerts, and a library scan choosing it for you
 // would bury the alerts that matter (the 2026-08-16 reversal of spec OQ6).
 
+import { withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { resolveArtistPages } from './collection-utils';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -73,7 +74,7 @@ function parseSignals(raw: unknown): Signal[] | string {
   return clean;
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -303,3 +304,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

@@ -15,7 +15,7 @@
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, checkSentryDedup, getClientIp } from './ratelimit';
 import { requestArtistCatalog } from './request-catalog';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 function getServiceClient() {
   return getClient();
@@ -121,7 +121,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -619,3 +619,5 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

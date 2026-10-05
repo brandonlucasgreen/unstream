@@ -4,6 +4,7 @@
 // Body: { location: string | null }
 // Returns the new location on success, or a friendly error on failure.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
@@ -16,7 +17,7 @@ const CORS_HEADERS = {
 
 const MAX_LENGTH = 100;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -162,3 +163,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

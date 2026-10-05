@@ -9,6 +9,9 @@
  * The DSN can be the same one used by the web client:
  *   https://a1c8d202cd8df4fc88a2fd54f2e4490b@o4510896048242688.ingest.us.sentry.io/4511275115151360
  *
+ * Functions must export their handler through `withSentry` (below), or events captured just
+ * before a function returns are lost when Lambda freezes the process.
+ *
  * Server-side events will appear in the same Sentry project but are
  * distinguishable via `platform: 'node'` in the Sentry UI.
  *
@@ -17,7 +20,7 @@
  *   SENTRY_ENV  = production  (or staging, etc.)
  */
 
-import * as Sentry from '@sentry/node';
+import * as SentryNode from '@sentry/node';
 
 const PRODUCTION_SITE_URL = 'https://unstream.stream';
 
@@ -55,7 +58,7 @@ export function initSentry(): void {
     return;
   }
 
-  Sentry.init({
+  SentryNode.init({
     dsn,
     environment: resolveSentryEnvironment(),
     // COMMIT_REF and COMMIT_SHA are build-time variables and never reach a deployed function, so
@@ -81,4 +84,55 @@ export function isSentryInitialized(): boolean {
 // gets a ready-to-use instance without boilerplate.
 initSentry();
 
-export { Sentry };
+/**
+ * Events captured since the last flush. Lets `withSentry` skip the flush (and its wait) on the
+ * common path where an invocation reported nothing.
+ */
+let unflushedEvents = 0;
+
+/**
+ * The Sentry API the functions use: @sentry/node as-is, except that the two capture calls also
+ * count what they queue, so `withSentry` knows when a flush is owed.
+ */
+export const Sentry = {
+  ...SentryNode,
+  captureException(...args: Parameters<typeof SentryNode.captureException>) {
+    unflushedEvents++;
+    return SentryNode.captureException(...args);
+  },
+  captureMessage(...args: Parameters<typeof SentryNode.captureMessage>) {
+    unflushedEvents++;
+    return SentryNode.captureMessage(...args);
+  },
+};
+
+/**
+ * Wrap every Netlify function's exported handler in this: `export const handler = withSentry(handleRequest)`.
+ *
+ * Why: Sentry sends events in the background, but a Netlify function is an AWS Lambda, and Lambda
+ * freezes the process the moment the handler's promise resolves. An event captured just before
+ * `return` is still queued at that point and is usually never sent, which is how server-side
+ * errors went missing from Sentry entirely. So before returning, wait (at most 2s) for anything
+ * this invocation captured to go out. Invocations that captured nothing skip the wait.
+ *
+ * It also reports an error the handler throws, then rethrows it so Netlify still answers 500.
+ * (When a wrapped handler calls another wrapped handler, as the v1 endpoints do, Sentry
+ * recognises the same error object and sends it once.)
+ */
+export function withSentry<Args extends unknown[], Result>(
+  handler: (...args: Args) => Promise<Result>,
+): (...args: Args) => Promise<Result> {
+  return async (...args: Args) => {
+    try {
+      return await handler(...args);
+    } catch (error) {
+      Sentry.captureException(error);
+      throw error;
+    } finally {
+      if (initialized && unflushedEvents > 0) {
+        unflushedEvents = 0;
+        await SentryNode.flush(2000);
+      }
+    }
+  };
+}

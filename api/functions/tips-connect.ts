@@ -37,7 +37,7 @@ import {
 import { canSetUpTips, getTipAccount, type TipAccountRow } from './tips-db';
 import { siteUrl, TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
 import { ARTIST_ADDENDUM_VERSION, isStripeConnectCountry } from '../shared/tips';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -45,7 +45,7 @@ interface HandlerEvent {
   body: string | null;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
 
@@ -199,3 +199,5 @@ async function createAccount(
   if (!current || current.deauthorized_at) throw new Error('artist_tip_accounts row missing after a concurrent connect');
   return current;
 }
+
+export const handler = withSentry(handleRequest);

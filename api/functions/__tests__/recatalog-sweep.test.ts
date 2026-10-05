@@ -41,6 +41,7 @@ vi.mock('../request-catalog', async importOriginal => {
 });
 
 vi.mock('../../lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: { captureMessage: mocks.captureMessage, captureException: vi.fn() },
   initSentry: vi.fn(),
   isSentryInitialized: () => false,

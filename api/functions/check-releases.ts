@@ -22,6 +22,7 @@
 // (plural) is additive and carries what a newer client can use. Both shipped clients decode
 // `platform` as a plain string and ignore unknown keys, so neither breaks on the new fields.
 
+import { withSentry } from '../lib/sentry';
 import { parse } from 'node-html-parser';
 import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -454,7 +455,7 @@ function jsonResponse(statusCode: number, body: unknown, extraHeaders: Record<st
 }
 
 // Netlify function handler
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
   body?: string;
@@ -590,3 +591,5 @@ export async function handler(event: {
     });
   }
 }
+
+export const handler = withSentry(handleRequest);

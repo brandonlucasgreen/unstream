@@ -1,7 +1,7 @@
 // MusicBrainz enrichment server function (Phase 2). The enrichment itself lives in
 // musicbrainz-enrichment.ts, shared with Phase 1 under one cache entry.
 
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { persistEnrichment, getLinkSuppressions } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
@@ -64,7 +64,7 @@ function stripSuppressedLinks(
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   const ip = getClientIp(event.headers || {});
   const rl = await checkRateLimit(ip, 'strict', corsHeaders);
@@ -164,3 +164,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     };
   }
 }
+
+export const handler = withSentry(handleRequest);

@@ -21,7 +21,7 @@ vi.mock('../ratelimit', () => ({
   getClientIp: vi.fn(() => '127.0.0.1'),
 }));
 vi.mock('../cache', () => ({ cacheDeleteByArtist: mocks.mockCacheDeleteByArtist }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: vi.fn() } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: vi.fn() } }));
 
 import { handler } from '../artist-profile';
 

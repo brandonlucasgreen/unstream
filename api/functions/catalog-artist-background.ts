@@ -10,6 +10,7 @@
 // demand is exactly the amplifier the check-releases hardening existed to close. (The removed
 // Discord bot's background function had no auth, and was itself exploitable for it.)
 
+import { withSentry } from '../lib/sentry';
 import {
   claimArtistForCatalog,
   getArtistForCatalog,
@@ -304,7 +305,7 @@ const MIRLO_API_KEY = process.env.MIRLO_API_KEY;
 
 const MIRLO_USER_AGENT = 'Unstream/1.0 (https://unstream.stream - ethical music finder)';
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
   body?: string;
@@ -1240,3 +1241,5 @@ function needsDetail(release: PersistedRelease): boolean {
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const handler = withSentry(handleRequest);

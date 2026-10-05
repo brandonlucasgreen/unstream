@@ -26,7 +26,7 @@
 
 import { getReleaseDetail, resolveArtistSlugAlias, type ReleaseDetailSource } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
 import { AVAILABILITY_ORDER, payoutRank } from '../shared/release-display';
@@ -113,7 +113,7 @@ function sortedOffers(source: ReleaseDetailSource) {
   });
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   path?: string;
   rawUrl?: string;
@@ -260,3 +260,5 @@ export async function handler(event: {
     return json(500, { error: 'Internal server error' });
   }
 }
+
+export const handler = withSentry(handleRequest);

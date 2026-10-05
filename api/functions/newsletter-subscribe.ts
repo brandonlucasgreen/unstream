@@ -25,7 +25,7 @@
 // stops that becoming somebody else's problem. Don't add `type: 'regular'` to "reduce
 // friction": it converts the form into a way to sign strangers up for mail.
 
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
 // Matches the permissive pattern used by the other browser-facing POST endpoints
@@ -60,7 +60,7 @@ function json(statusCode: number, body: Record<string, unknown>) {
   return { statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -157,3 +157,5 @@ export async function handler(event: {
   );
   return json(502, { error: "Something went wrong signing you up. Please try again." });
 }
+
+export const handler = withSentry(handleRequest);

@@ -3,7 +3,7 @@
 
 import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 // Row shapes returned by the analytics_* functions added in
 // supabase/migrations/20260823120000_analytics-dashboard-aggregates.sql.
@@ -13,7 +13,7 @@ interface PlatformRow { platform: string; clicks: number }
 interface StreamingRow { service: string; activations: number }
 interface SuccessRow { completed: number; with_results: number }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }) {
@@ -199,3 +199,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

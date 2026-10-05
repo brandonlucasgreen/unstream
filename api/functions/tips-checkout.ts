@@ -33,7 +33,7 @@ import {
   isValidOneOffAmount,
   tipBreakdown,
 } from '../shared/tips';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -45,7 +45,7 @@ interface HandlerEvent {
   queryStringParameters?: Record<string, string | undefined> | null;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
   const withCors = (res: { statusCode: number; body: string }) => ({ ...res, headers: CORS_HEADERS });
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
@@ -180,3 +180,5 @@ async function createCheckout(event: HandlerEvent) {
 function effectiveFeeBasisPoints(account: { fee_basis_points: number; country: string | null }): number {
   return canChargeApplicationFee(account.country) ? account.fee_basis_points : 0;
 }
+
+export const handler = withSentry(handleRequest);

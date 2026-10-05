@@ -2,6 +2,7 @@
 // Thin wrapper around artist-lookup that adds API key auth,
 // rate limit headers, request IDs, and standardized response envelope.
 
+import { withSentry } from '../lib/sentry';
 import { authenticateApiKey, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 import { checkApiRateLimit, getClientIp } from './ratelimit';
 import { getArtistBySlug, resolveArtistSlugAlias } from './db';
@@ -14,7 +15,7 @@ interface NetlifyEvent {
   body?: string;
 }
 
-export async function handler(event: NetlifyEvent) {
+async function handleRequest(event: NetlifyEvent) {
   const requestId = generateRequestId();
   const origin = event.headers.origin || event.headers.Origin;
   const apiKeyHeader = event.headers['x-api-key'] || event.headers['X-API-Key'];
@@ -105,3 +106,5 @@ export async function handler(event: NetlifyEvent) {
     };
   }
 }
+
+export const handler = withSentry(handleRequest);

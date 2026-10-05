@@ -13,7 +13,7 @@
 // which records sync_status='error' on the connection row. It must never record a partial
 // import as a completed sync — that would show a user a quietly wrong collection.
 
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { cacheGetOrFetch } from './cache';
 import { purgeUserShareCacheForUser } from './purge-cache';
@@ -205,7 +205,7 @@ async function resolveArtistsSafely(userId: string): Promise<CollectionResolveSu
   }
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -428,3 +428,5 @@ export async function handler(event: {
     body: JSON.stringify({ ...outcome.body, resolved }),
   };
 }
+
+export const handler = withSentry(handleRequest);

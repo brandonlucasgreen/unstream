@@ -22,7 +22,7 @@ vi.mock('../middleware', async importOriginal => ({
   authenticateBearer: mocks.authenticateBearer,
 }));
 vi.mock('../purge-cache', () => ({ purgeCacheTags: mocks.purgeCacheTags }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
 import { handler as rawConnect } from '../tips-connect';
 import { handler as rawSettings } from '../tips-settings';

@@ -16,7 +16,7 @@ import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './str
 import { tipsState, type TipAccountRow } from './tips-db';
 import { sendTipsApprovedEmail } from './notifications';
 import { purgeCacheTags } from './purge-cache';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -26,7 +26,7 @@ interface HandlerEvent {
   body?: string | null;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
   const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
@@ -190,3 +190,5 @@ async function approve(client: Client, artistId: string, stripeAccountId: string
   });
   return [200, { ok: true }];
 }
+
+export const handler = withSentry(handleRequest);
