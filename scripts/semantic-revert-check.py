@@ -2,13 +2,24 @@
 """
 semantic-revert-check.py
 
-Detects potential semantic reverts in a PR by checking whether lines
-that exist on main would be removed if the PR were merged.
+Detects potential semantic reverts in a PR: lines a recently merged PR
+added to main that merging this PR would remove.
 
-The key insight: GitHub's PR diff (three-dot) only shows what the PR
-branch *adds* relative to the merge base. But a stale-based PR can
-silently revert code. We detect this by checking git diff main..PR_HEAD
-for lines removed from main that were recently added.
+"Would remove" is measured by simulating the merge (`git merge-tree`)
+and diffing main against the result, which is what a squash merge
+lands. An earlier version diffed main's tip against the PR head
+directly. That reads everything main gained after the branch was cut
+as a deletion, so an out-of-date branch was flagged for "reverting"
+PRs it never touched, which a real merge keeps. That was the largest
+source of false alarms. A stale branch can still revert work by
+deleting lines in its own commits or in a bad conflict resolution,
+and the simulated merge sees both.
+
+Two more filters cut noise without hiding a real revert:
+- A deleted line that the PR adds back elsewhere (code moved between
+  files, re-indented, or gaining a trailing comma) is not flagged,
+  since the line still exists after the merge.
+- Lines with no letters or digits (`},`, `);`, blank lines) are ignored.
 
 Usage (GitHub Actions):
   Set env vars GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_EVENT_PATH,
@@ -38,6 +49,7 @@ from urllib.error import HTTPError
 MARKER = "<!-- semantic-revert-check -->"
 DEFAULT_LOOKBACK_DAYS = 7
 DEFAULT_BASE_BRANCH = "main"
+MAX_LINES_SHOWN = 8
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -146,18 +158,49 @@ def parse_diff_additions(diff_text: str) -> list[str]:
     return added
 
 
+def normalize_line(line: str) -> str:
+    """
+    Compare lines ignoring indentation and a trailing comma or semicolon,
+    so appending to a list (the previous last entry gains a comma) or
+    re-indenting a block doesn't read as deleting it.
+    """
+    return line.strip().rstrip(",;").rstrip()
+
+
+def is_trivial(line: str) -> bool:
+    """A line with no letters or digits (`},`, `);`, blank) carries no behaviour."""
+    return not re.search(r"[A-Za-z0-9]", line)
+
+
 def lines_overlap(deleted_contents: list[str], added_contents: list[str]) -> list[str]:
     """
     Check if any of the deleted lines (content strings) appear in the
     added lines. Returns matching content strings.
     """
-    deleted_set = set(c.strip() for c in deleted_contents)
-    added_set = set(c.strip() for c in added_contents)
-    overlap = deleted_set & added_set
-    # Filter out trivial overlaps
-    trivial = {"", "{", "}", "(", ")", ";", "//", "/*", "*/"}
-    overlap -= trivial
-    return sorted(overlap)
+    deleted_set = set(normalize_line(c) for c in deleted_contents)
+    added_set = set(normalize_line(c) for c in added_contents)
+    return sorted(line for line in deleted_set & added_set if not is_trivial(line))
+
+
+def simulated_merge_diff(base_ref: str, head_sha: str) -> str:
+    """
+    Diff base_ref against the tree that merging head_sha into it would
+    produce: exactly what the merge would change on the base branch.
+
+    If the merge conflicts, fall back to the PR's own changes since the
+    merge base (the three-dot diff GitHub shows). Neither ever reports
+    work that landed on the base after the branch was cut.
+    """
+    result = subprocess.run(
+        ["git", "merge-tree", "--write-tree", "--no-messages", base_ref, head_sha],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        merged_tree = result.stdout.split("\n", 1)[0].strip()
+        return git("diff", base_ref, merged_tree)
+    print("Merge would conflict; checking the PR's own diff instead.")
+    merge_base = git("merge-base", base_ref, head_sha).strip()
+    return git("diff", merge_base, head_sha)
 
 
 def get_pr_info_from_event(event_path: str) -> tuple[int, str, str]:
@@ -218,13 +261,16 @@ def find_semantic_reverts(
         # If the remote ref isn't available, we already have the SHA
         pass
 
-    # 3. Compute the diff: what would change on main if this PR were merged?
-    # Using git diff base_branch..PR_HEAD shows lines that would be REMOVED from main
-    try:
-        merge_diff = git("diff", f"origin/{base_branch}", head_sha)
-    except RuntimeError:
-        # Fallback: try local ref
-        merge_diff = git("diff", base_branch, head_sha)
+    return find_reverts(f"origin/{base_branch}", head_sha, lookback_days)
+
+
+def find_reverts(base_ref: str, head_sha: str, lookback_days: int) -> list[dict]:
+    """
+    The git-only half of find_semantic_reverts, callable on any base and
+    head (e.g. to replay a historical PR locally).
+    """
+    # 3. What would change on the base branch if this PR were merged?
+    merge_diff = simulated_merge_diff(base_ref, head_sha)
 
     if not merge_diff.strip():
         return []
@@ -246,12 +292,24 @@ def find_semantic_reverts(
         if not any(pat in f for pat in SKIP_PATTERNS)
     }
 
+    # 4. A line the PR deletes in one place and adds in another (moved to a
+    # new file, re-indented, gained a comma) still exists after the merge.
+    added_anywhere = set(normalize_line(line) for line in parse_diff_additions(merge_diff))
+    deleted_lines_by_file = {
+        f: kept
+        for f, entries in deleted_lines_by_file.items()
+        if (kept := [
+            (num, content) for num, content in entries
+            if normalize_line(content) not in added_anywhere
+        ])
+    }
+
     if not deleted_lines_by_file:
         return []
 
-    # 5. Get recent commits on base_branch
+    # 5. Get recent commits on the base branch
     log_output = git(
-        "log", f"origin/{base_branch}",
+        "log", base_ref,
         f"--since={lookback_days} days ago",
         "--format=%H %s",
     )
@@ -336,11 +394,20 @@ def format_comment(findings: list[dict], pr_number: int) -> str:
             pr_ref = f"#{sc['pr_number']}" if sc["pr_number"] else sc["sha"]
             lines.append(f"- {pr_ref} (merged {sc['merged_at']}) — \"{sc['title']}\"")
         lines.append("")
+        lines.append("<details><summary>Lines</summary>")
+        lines.append("")
+        lines.append("```")
+        lines.extend(finding["overlap_lines"][:MAX_LINES_SHOWN])
+        if total_lines > MAX_LINES_SHOWN:
+            lines.append(f"… and {total_lines - MAX_LINES_SHOWN} more")
+        lines.append("```")
+        lines.append("</details>")
+        lines.append("")
 
     lines.append(
-        "If this is an intentional cleanup, ignore this warning. "
-        "If not, this PR's branch may be based on a pre-merge commit and could revert recently-shipped work. "
-        "Consider rebasing onto main."
+        "These lines are gone after a merge of this PR (simulated against current main, so work "
+        "that landed after the branch was cut is not counted). If the PR meant to change or remove "
+        "them, ignore this warning. If not, it would undo recently shipped work."
     )
     return "\n".join(lines)
 
