@@ -99,6 +99,24 @@ the end. Nothing before step 6 changes.
    This is also what re-signs Sparkle's XPC services and helpers and strips their
    `get-task-allow` — a hand-rolled `codesign --deep` does not, and is the usual cause of
    sandbox errors. Do not add `--deep`.
+
+   **Check the export was signed with the G2 Developer ID certificate.** Apple moved Developer ID
+   to a new intermediate, "Developer ID Certification Authority (G2)", and certificates from the
+   old one expire on 1 February 2027. 3.7.0 was signed with an old one, because both certificates
+   carry the same name and automatic signing picked it. That one was removed from the keychain
+   on 2026-10-04, leaving only the G2 certificate (SHA-1 `85E77D28…`, expires January 2031):
+
+   ```bash
+   codesign -d --extract-certificates=/tmp/unstream_cert_ /path/to/export/Unstream.app
+   openssl x509 -inform der -in /tmp/unstream_cert_1 -noout -subject   # want OU=G2
+   ```
+
+   If it says `OU=Apple Certification Authority` instead, an old certificate is back in the
+   keychain (`security find-identity -v -p codesigning` lists two "Developer ID Application"
+   identities). Delete the old one and re-export; don't revoke it, since that can affect copies
+   already installed. Apps signed with the old certificate keep working after it expires, because
+   they're notarized and timestamped. A G2-signed build passes the designated requirement 3.7.0
+   checks updates against, so Sparkle accepts it (tested 2026-10-04).
 3. `create-dmg` as before.
 4. `xcrun notarytool submit` the DMG.
 5. `xcrun stapler staple` the DMG.
