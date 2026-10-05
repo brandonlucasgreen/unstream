@@ -123,6 +123,6 @@
     "title": "Artist bios in search results",
     "description": "Search for an artist and you'll now see a short bio when we can find one: their own words from a claimed Unstream page, or from Bandcamp, Discogs or Wikipedia. Artists who've claimed their page can turn it off.",
     "date": "2026-09-30",
-    "announced": false
+    "announced": true
   }
 ]
