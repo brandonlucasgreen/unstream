@@ -13,7 +13,7 @@ vi.mock('../../lib/sentry', () => ({
   Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage },
 }));
 
-import { sendNotificationOnce, notifySavedArtistsOfNewRelease, notifySavedArtistsOfNewLinks, filterByPreference } from '../notifications';
+import { sendNotificationOnce, notifySavedArtistsOfNewRelease, notifySavedArtistsOfNewLinks, filterByPreference, sendTipsApprovedEmail } from '../notifications';
 
 /**
  * A minimal stand-in for the two chains sendNotificationOnce actually uses:
@@ -563,5 +563,40 @@ describe('filterByPreference', () => {
 
     expect(result).toEqual(['u1', 'u2']);
     expect(mocks.captureException).toHaveBeenCalled();
+  });
+});
+
+describe('sendTipsApprovedEmail', () => {
+  beforeEach(() => { vi.resetAllMocks(); });
+
+  const clientWithUser = (getUserById: () => Promise<unknown>) => {
+    const base = fakeClient({ insertResult: { data: { id: 'log-1' }, error: null } });
+    return Object.assign(base, { auth: { admin: { getUserById: vi.fn(getUserById) } } });
+  };
+  const params = { userId: 'owner-1', artistName: 'Kid <Lightbulbs>', slug: 'kid-lightbulbs', referenceId: 'acct_1:2026-10-04T00:00:00Z' };
+
+  it('emails the account owner a link to Manage Tips, once per approval', async () => {
+    const client = clientWithUser(() => Promise.resolve({ data: { user: { email: 'artist@example.com' } }, error: null }));
+    mocks.sendTransactionalEmail.mockResolvedValue({ ok: true, messageId: 'msg_1' });
+    await sendTipsApprovedEmail({ client: client as never, ...params });
+
+    expect(client.auth.admin.getUserById).toHaveBeenCalledWith('owner-1');
+    expect(client.insertMock).toHaveBeenCalledWith({ notification_type: 'tips_approved', reference_id: params.referenceId, recipient_email: 'artist@example.com' });
+    const [[sent]] = mocks.sendTransactionalEmail.mock.calls;
+    expect(sent.to).toBe('artist@example.com');
+    expect(sent.subject).toBe('Tips are on for Kid <Lightbulbs>');
+    expect(sent.html).toContain('https://unstream.stream/artist-edit/kid-lightbulbs/tips');
+    expect(sent.html).toContain('Kid &lt;Lightbulbs&gt;');
+    expect(sent.text).toContain('https://unstream.stream/artist-edit/kid-lightbulbs/tips');
+  });
+
+  it('never throws, and reports a missing address without logging it', async () => {
+    const client = clientWithUser(() => Promise.resolve({ data: { user: null }, error: { message: 'not found' } }));
+    await expect(sendTipsApprovedEmail({ client: client as never, ...params })).resolves.toBeUndefined();
+    expect(mocks.sendTransactionalEmail).not.toHaveBeenCalled();
+    expect(mocks.captureMessage).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ level: 'warning' }));
+
+    const throwing = clientWithUser(() => Promise.reject(new Error('auth down')));
+    await expect(sendTipsApprovedEmail({ client: throwing as never, ...params })).resolves.toBeUndefined();
   });
 });

@@ -8,6 +8,7 @@ vi.mock('src/contexts/AuthContext', () => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
+  useSearchParams: () => [new URLSearchParams('')],
 }));
 
 vi.mock('src/components/Header', () => ({ Header: () => null }));

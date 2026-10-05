@@ -13,17 +13,22 @@
 //
 // Signed-in fans may send their Bearer token so the tip is attributed to them (their goal
 // contributions, "supported" on their saved artist). Signed-out fans can tip too.
+//
+// Anonymous and public, so CORS is restricted to unstream.stream (buildCorsHeaders), like the
+// site's other anonymous endpoints: no other site's page should be able to start a payment form.
+// Stripe's own error messages never reach a fan; Sentry gets them.
 
 import { getClient } from './db';
-import { authenticateBearerFast } from './middleware';
+import { authenticateBearerFast, buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
+import { isStripeRejection, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { getGoals, tipEligibility } from './tips-db';
-import { TIPS_CORS_HEADERS as CORS_HEADERS, respond, siteUrl } from './tips-http';
+import { respond, siteUrl } from './tips-http';
 import {
   ONE_OFF_MAX_CENTS,
   ONE_OFF_MIN_CENTS,
   ONE_OFF_PRESETS_CENTS,
+  canChargeApplicationFee,
   formatUsd,
   isValidOneOffAmount,
   tipBreakdown,
@@ -41,6 +46,8 @@ interface HandlerEvent {
 }
 
 export async function handler(event: HandlerEvent) {
+  const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
+  const withCors = (res: { statusCode: number; body: string }) => ({ ...res, headers: CORS_HEADERS });
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 
   const ip = getClientIp(event.headers);
@@ -50,14 +57,21 @@ export async function handler(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
 
   try {
-    if (event.httpMethod === 'GET') return await readTipPage(event.queryStringParameters?.slug ?? '');
-    if (event.httpMethod === 'POST') return await createCheckout(event);
-    return respond(405, { error: 'Method not allowed' });
+    if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? ''));
+    if (event.httpMethod === 'POST') return withCors(await createCheckout(event));
+    return withCors(respond(405, { error: 'Method not allowed' }));
   } catch (err) {
     Sentry.captureException(err, {
-      extra: { context: `tips-checkout.${event.httpMethod}`, stripeCode: err instanceof StripeError ? err.code : undefined },
+      extra: {
+        context: `tips-checkout.${event.httpMethod}`,
+        stripeStatus: err instanceof StripeError ? err.status : undefined,
+        stripeCode: err instanceof StripeError ? err.code : undefined,
+      },
     });
-    return respond(502, { error: "Couldn't start the payment. Try again in a moment." });
+    // Stripe refusing the session (a 4xx) means something about the artist's account: retrying
+    // won't help the fan, so don't ask them to.
+    if (isStripeRejection(err)) return withCors(respond(409, { error: "This artist can't take tips right now." }));
+    return withCors(respond(502, { error: "Couldn't start the payment. Try again in a moment." }));
   }
 }
 
@@ -74,7 +88,7 @@ async function readTipPage(slug: string) {
   return respond(200, {
     artist,
     takingTips: true,
-    feeBasisPoints: eligibility.account.fee_basis_points,
+    feeBasisPoints: effectiveFeeBasisPoints(eligibility.account),
     goals: await getGoals(client, artist.id, { openOnly: true }),
     presetsCents: ONE_OFF_PRESETS_CENTS,
     minCents: ONE_OFF_MIN_CENTS,
@@ -113,7 +127,7 @@ async function createCheckout(event: HandlerEvent) {
   // Optional attribution. A bad token is ignored rather than refused: the tip still works.
   const fan = event.headers.authorization ? await authenticateBearerFast(event.headers.authorization).catch(() => null) : null;
 
-  const breakdown = tipBreakdown(amountCents, coverFees, account.fee_basis_points);
+  const breakdown = tipBreakdown(amountCents, coverFees, effectiveFeeBasisPoints(account));
 
   // Everything the webhook needs to record the payment, on the PaymentIntent (which the charge
   // events carry) and the Session (which checkout.session.completed carries).
@@ -156,4 +170,13 @@ async function createCheckout(event: HandlerEvent) {
 
   if (!session.url) throw new Error('Checkout Session has no url');
   return respond(200, { url: session.url, breakdown });
+}
+
+/**
+ * The fee this artist's tips carry: their chosen fee, except where Stripe doesn't allow a platform
+ * fee on the account's country (NO_APPLICATION_FEE_COUNTRIES), where it's 0 whatever is stored.
+ * The tip page shows the same figure, so the breakdown the fan sees is what Stripe is sent.
+ */
+function effectiveFeeBasisPoints(account: { fee_basis_points: number; country: string | null }): number {
+  return canChargeApplicationFee(account.country) ? account.fee_basis_points : 0;
 }

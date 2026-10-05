@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArtistTipsAddendum } from './ArtistTipsAddendum';
 import { TipGoalsEditor } from './TipGoalsEditor';
-import { connectStripe, updateTipSettings, type TipSettings } from '../services/tips';
+import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
+import { connectStripe, TipsApiError, updateTipSettings, type TipSettings } from '../services/tips';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 
 // The Manage Tips tab's content (docs/specs/artist-patronage-spec.md §8, states 2–5). ArtistTipsPage
@@ -21,6 +22,8 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
 }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Back from Stripe can restore this page from the back/forward cache with the buttons still disabled.
+  useResetOnPageShow(() => setBusy(false));
 
   const goToStripe = async (opts: { country?: string; acceptAddendum?: boolean }) => {
     setBusy(true);
@@ -28,10 +31,13 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
     try {
       window.location.href = await connectStripe(token, slug, opts);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't reach Stripe");
+      setError(connectErrorMessage(err));
       setBusy(false);
     }
   };
+  // Stripe won't take an application fee for accounts in a few countries; a missing field means allowed.
+  const feeAllowed = settings.feeAllowed !== false;
+  const countryName = settings.country ? settings.countries[settings.country] ?? settings.country : 'your country';
   const update = async (patch: { tipsEnabled?: boolean; feeBasisPoints?: number }) => {
     setBusy(true);
     setError(null);
@@ -90,14 +96,18 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
           <label className="flex flex-wrap items-center gap-2 text-sm">
             Unstream's share
             <select
-              value={settings.feeBasisPoints}
-              disabled={busy}
+              value={feeAllowed ? settings.feeBasisPoints : 0}
+              disabled={busy || !feeAllowed}
               onChange={e => update({ feeBasisPoints: Number(e.target.value) })}
               className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
             >
               {FEE_OPTIONS.map(bps => <option key={bps} value={bps}>{bps / 100}%{bps === 0 ? ' (default)' : ''}</option>)}
             </select>
-            <span className="text-text-muted text-xs">Optional, and shown to fans before they pay.</span>
+            <span className="text-text-muted text-xs">
+              {feeAllowed
+                ? 'Optional, and shown to fans before they pay.'
+                : `Stripe doesn't allow a platform fee on tips to accounts in ${countryName}, so Unstream takes nothing.`}
+            </span>
           </label>
 
           {settings.totals && (
@@ -120,6 +130,17 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
+}
+
+/**
+ * What to show when /api/tips/connect fails. The server's own words, verbatim: a permanent rejection
+ * from Stripe ('stripe_rejected') explains itself and retrying won't help, so it gets a way to reach
+ * us instead; anything else is transient and its message already says to try again.
+ */
+function connectErrorMessage(err: unknown): string {
+  if (!(err instanceof TipsApiError)) return "Couldn't reach Stripe. Try again in a moment.";
+  if (err.code === 'stripe_rejected') return `${err.message} If you're not sure why, email support@unstream.stream.`;
+  return err.message;
 }
 
 function Totals({ label, totals }: { label: string; totals: { count: number; grossCents: number; netCents: number } }) {

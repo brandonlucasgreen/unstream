@@ -252,7 +252,14 @@ add ~1.5%, currency conversion ~1%**):
   `(amount + 0.30) / (1 − 0.029 − fee%)`. The server computes it; clients only display it.
 - **The breakdown is always shown before paying:** "You pay $5.46 · Stripe keeps $0.46 · Unstream keeps
   $0 · {Artist} gets $5.00."
-- **Refunds return Unstream's fee** (`refund_application_fee: true`).
+- **Refunds return Unstream's fee**, in proportion to what was refunded. Stripe doesn't do this itself
+  when a connected account refunds a direct charge, so the webhook refunds the application fee
+  (`tips-webhook.ts`). A partial refund counts the tip at what's left: goals, totals and the fan's list
+  all use `amount − round(amount × refunded / gross)`.
+- **A lost dispute returns the rest of Unstream's fee** to the artist: Unstream doesn't keep a cut of a
+  tip the artist didn't get to keep.
+- **No Unstream fee in Brazil, Malaysia or Thailand.** Stripe doesn't let a platform outside those
+  countries take an application fee on direct charges for accounts there; tips work, at 0%.
 
 ---
 
@@ -337,6 +344,7 @@ artist_tip_accounts       -- one per claimed artist who has connected Stripe
   stripe_account_id    text unique not null
   charges_enabled      boolean not null default false   -- mirrored from account.updated
   tips_approved_at     timestamptz null                 -- §6; reset when stripe_account_id changes
+  deauthorized_at      timestamptz null                 -- the artist disconnected Unstream; reconnecting reuses the row
   tips_enabled         boolean not null default false   -- the artist's switch
   fee_basis_points     integer not null default 0 check (between 0 and 500)
   country              text null
@@ -379,6 +387,7 @@ tip_payments              -- one per Stripe charge
   amount_cents         integer not null                 -- what the artist was tipped
   gross_cents          integer not null                 -- what the fan paid, after any gross-up
   application_fee_cents integer not null
+  refunded_cents       integer not null default 0       -- the charge's amount_refunded; money figures count the rest
   currency             text not null
   fan_user_id          uuid null                        -- private; null for signed-out one-offs
   channel              text check (in ('checkout','scheduled'))
@@ -390,7 +399,7 @@ tip_payments              -- one per Stripe charge
 
 artist_goals
   id, artist_id, title (≤ 80), target_cents, city_key null, city_label null,
-  release_id null, status ('open','closed'), created_at, closed_at
+  release_id null, status ('open','closed'), livemode, created_at, closed_at
 
 tip_interest              -- "I'd tip them"
   user_id, artist_id   pk; created_at
@@ -406,6 +415,9 @@ city_interest             -- Play my city
 - **`city_key`** is the lowercased, trimmed city with its country. Free-text cities are messy, so the
   input suggests existing keys as the fan types (§11 open question 5).
 - **No fan PII:** no emails, names or card data. `fan_user_id` and `user_id` are the only links.
+  One pass-through, decided by Brandon 2026-10-03: the webhook hands the email the fan typed into
+  Checkout back to Stripe as the charge's `receipt_email`, so the artist's receipt reaches a
+  signed-out fan whatever the artist's own receipt settings. It is never stored or logged.
 - **Why `livemode`:** `npm run dev` writes to production Supabase. Test-mode payments made locally land in
   the same tables and have to be excluded from everything real.
 - **Paging:** the charge run and any artist-wide aggregate use `readAllPages`. PostgREST truncates silently
@@ -424,7 +436,7 @@ don't get to fail at runtime in production.
 | `tips-connect.ts` | `POST /api/tips/connect` | Bearer + owns the claimed, verified profile | Creates the connected account if missing, returns an Account Link. `account` limiter. |
 | `tips-settings.ts` | `GET/PUT /api/tips/settings` | Bearer + ownership | On/off, fee, goals, totals, demand counts. |
 | `tips-checkout.ts` | `POST /api/tips/checkout` | Public | `{ artistSlug, amountCents, coverFees, goalId? }` → re-reads eligibility, computes gross-up and fee server-side, creates a Checkout Session on the artist's account → `{ url }`. Also serves the SCA fallback for a scheduled payment. `strict` limiter per IP (card-testing defence). |
-| `tips-webhook.ts` | `POST /api/tips/webhook` | Stripe **Connect** signature | `checkout.session.completed`, `payment_intent.succeeded` / `payment_failed`, `charge.refunded`, `charge.dispute.created`, `account.updated`. Base64-decode the body on Netlify before verifying. No rate limiter. |
+| `tips-webhook.ts` | `POST /api/tips/webhook` | Stripe **Connect** signature | `checkout.session.completed`, `charge.refunded`, `charge.refund.updated`, `charge.dispute.created`, `charge.dispute.closed`, `account.updated`, `account.application.deauthorized`. Events are unordered, so status only moves forward (conditional updates); events from the other Stripe mode are ignored. `payment_intent.*` isn't needed: checkout creates every row. Base64-decode the body on Netlify before verifying. No rate limiter. |
 | `me-support.ts` | `GET/POST/PUT/DELETE /api/me/support` | Bearer | The tab: entries, recurring and split, charge day, cap, cover fees, card summary (read from Stripe), quick tips (`POST`, checks cap and eligibility), removing an entry (void). `account` limiter. |
 | `me-support-card.ts` | `POST/DELETE /api/me/support/card` | Bearer | `POST` creates a setup-mode Checkout Session on the platform account. On return, the SPA calls `PUT` with the session id, and the server retrieves the session and stores the PaymentMethod. That avoids a second webhook endpoint. `DELETE` detaches the card and pauses the tab. |
 | `support-charge-run.ts` | `POST /api/support/charge-run` | Shared secret header | Daily. Sends notices for fans whose charge day is in three days; charges fans whose charge day is today (§3.2). One PaymentIntent per (fan, artist, period), idempotency key `run:{user}:{artist}:{period}`. Runs from a GitHub Actions cron, like `recatalog-sweep.yml` — there are no scheduled Netlify functions in this repo. |

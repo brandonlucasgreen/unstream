@@ -210,6 +210,16 @@ export function PrivacyPolicyPage() {
                 location and featured release are shown publicly on your artist page. That's the
                 point of claiming it. The email address you claimed with is not shown.
               </P>
+              <P>
+                <strong>Taking tips as an artist.</strong> If you connect Stripe to take tips, we
+                keep your Stripe account ID, the country you chose, whether Stripe has enabled
+                charges on the account, when you accepted the artist terms for tips and which
+                version of them you accepted, the share you've chosen for Unstream, and any goals
+                you set. To check that the account belongs to you before tips go live, an admin
+                looks at the Stripe account's business name, country and email address next to
+                the email you claimed your profile with; those Stripe details are read from Stripe
+                at the time and not stored. We email you when your tips are approved.
+              </P>
             </Section>
 
             <Section title="Where your data goes">
@@ -225,7 +235,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
                 <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
                 <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
-                <li><strong>Stripe</strong> — tips to artists. You pay the artist through their own Stripe account; Stripe handles your card details and we never see them. We keep a record that a tip happened, its amount and, if you were signed in, your account.</li>
+                <li><strong>Stripe</strong> — tips to artists. You pay the artist through their own Stripe account; Stripe handles your card details and we never see them. We keep a record that a tip happened, its amount and, if you were signed in or saved the tip to your account afterwards, your account. Stripe asks for your email address at checkout; we pass it back to Stripe so the artist's receipt reaches you, and we don't keep it.</li>
               </ul>
               <P>
                 Separately, we read from public music and metadata sources — MusicBrainz, Wikidata,

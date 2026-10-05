@@ -45,13 +45,20 @@ export function AdminTipsApprovals() {
     if (!session) return;
     setBusy(account.artistId);
     setError(null);
-    const r = await fetch('/api/admin/tips', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ action, artistId: account.artistId, stripeAccountId: account.stripeAccountId }),
-    });
-    if (!r.ok) setError(((await r.json().catch(() => ({}))) as { error?: string }).error ?? 'Failed');
-    setBusy(null);
+    try {
+      const r = await fetch('/api/admin/tips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ action, artistId: account.artistId, stripeAccountId: account.stripeAccountId }),
+      });
+      // The server explains a refusal (a 409 when charges aren't enabled or the profile changed hands).
+      if (!r.ok) setError(((await r.json().catch(() => ({}))) as { error?: string }).error ?? `Failed (HTTP ${r.status})`);
+    } catch (err) {
+      Sentry.captureException(err, { extra: { context: `AdminTipsApprovals.${action}` } });
+      setError(`Couldn't ${action === 'approve' ? 'approve' : 'switch tips off'}: the request didn't reach the server. Try again.`);
+    } finally {
+      setBusy(null);
+    }
     load();
   };
 
@@ -87,16 +94,21 @@ export function AdminTipsApprovals() {
           {!a.connectedByCurrentOwner && (
             <p className="text-xs text-red-400">Connected by someone who no longer owns this profile. Don't approve.</p>
           )}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {!a.approvedAt ? (
-              <button
-                type="button"
-                disabled={busy === a.artistId || !a.chargesEnabled || !a.connectedByCurrentOwner || !a.claimVerified}
-                onClick={() => act(a, 'approve')}
-                className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-xs disabled:opacity-50"
-              >
-                Approve tips
-              </button>
+              <>
+                <button
+                  type="button"
+                  disabled={busy === a.artistId || approveBlockers(a).length > 0}
+                  onClick={() => act(a, 'approve')}
+                  className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-xs disabled:opacity-50"
+                >
+                  Approve tips
+                </button>
+                {approveBlockers(a).length > 0 && (
+                  <span className="text-xs text-text-muted">Can't approve yet: {approveBlockers(a).join('; ')}.</span>
+                )}
+              </>
             ) : (
               <button type="button" disabled={busy === a.artistId} onClick={() => act(a, 'revoke')} className="px-3 py-1.5 rounded-lg border border-border text-xs">
                 Switch tips off
@@ -107,4 +119,13 @@ export function AdminTipsApprovals() {
       ))}
     </section>
   );
+}
+
+/** Why Approve is disabled for an account, in words — empty when it can be approved. */
+function approveBlockers(a: Pick<PendingAccount, 'claimVerified' | 'chargesEnabled' | 'connectedByCurrentOwner'>): string[] {
+  const reasons: string[] = [];
+  if (!a.connectedByCurrentOwner) reasons.push('connected by a previous owner of this profile');
+  if (!a.claimVerified) reasons.push("the profile claim isn't verified");
+  if (!a.chargesEnabled) reasons.push("Stripe hasn't enabled charges yet");
+  return reasons;
 }

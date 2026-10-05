@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { signInWithMagicLink, signInWithPassword, resetPasswordForEmail } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { LegalConsent } from '../components/LegalConsent';
+import { safeNextPath } from '../utils/safeNextPath';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
@@ -24,6 +25,12 @@ const INVALID_EMAIL_MESSAGE = "That email address doesn't look right. Check it a
 export function LoginPage() {
   const navigate = useNavigate();
   const { session, isLoading: authLoading } = useAuth();
+  // Where to go once signed in. A page that asks someone to sign in (the tip thanks page, to save a
+  // tip to their account) passes itself here so they come back to it, by password or magic link.
+  const [searchParams] = useSearchParams();
+  const next = safeNextPath(searchParams.get('next'), window.location.origin);
+  const afterSignIn = next ?? '/dashboard';
+  const savingTip = !!next?.startsWith('/tip/thanks');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -32,9 +39,9 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!authLoading && session) {
-      navigate('/dashboard', { replace: true });
+      navigate(afterSignIn, { replace: true });
     }
-  }, [session, authLoading, navigate]);
+  }, [session, authLoading, navigate, afterSignIn]);
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,7 +71,9 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      const redirectTo = `${window.location.origin}/login`;
+      const redirectTo = next
+        ? `${window.location.origin}/login?next=${encodeURIComponent(next)}`
+        : `${window.location.origin}/login`;
       const { error: authError } = await signInWithMagicLink(trimmed, redirectTo);
 
       if (authError) {
@@ -127,7 +136,9 @@ export function LoginPage() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold">Login</h1>
             <p className="text-text-muted text-sm">
-              Sign in to manage your claimed artist profiles and saved artists on Unstream.
+              {savingTip
+                ? 'Sign in, or create an account with a sign-in link, to keep track of your tips.'
+                : 'Sign in to manage your claimed artist profiles and saved artists on Unstream.'}
             </p>
           </div>
 
@@ -219,7 +230,11 @@ export function LoginPage() {
                   </button>
 
                   <p className="text-center text-xs text-text-muted">
-                    Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary hover:underline">Search for an artist</a> you like and click Save.
+                    {savingTip ? (
+                      <>New to Unstream? Send yourself a sign-in link and we'll create your account.</>
+                    ) : (
+                      <>Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary hover:underline">Search for an artist</a> you like and click Save.</>
+                    )}
                   </p>
 
                   <LegalConsent />
@@ -232,8 +247,8 @@ export function LoginPage() {
             <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
               <p className="font-medium">Check your email</p>
               <p className="text-sm text-text-muted">
-                We sent a sign-in link to <strong className="text-text-primary">{email}</strong>.
-                Click the link to access your dashboard.
+                We sent a sign-in link to <strong className="text-text-primary">{email}</strong>.{' '}
+                {savingTip ? 'Click the link and we\'ll bring you back to save your tip.' : 'Click the link to access your dashboard.'}
               </p>
               <button
                 type="button"

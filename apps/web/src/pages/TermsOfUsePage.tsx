@@ -410,7 +410,8 @@ export function TermsOfUsePage() {
                 handled through the artist's own Stripe account. Unstream doesn't issue refunds, can't reverse a
                 payment, and isn't responsible for an artist's decision on a refund or dispute. To ask for a
                 refund, contact the artist; if you can't reach them, email support@unstream.stream and we'll pass
-                your request on. If an artist refunds a tip, Unstream returns its share of the fee on it.
+                your request on. While the artist's Stripe account is connected to Unstream, refunding a tip returns
+                Unstream's share of the fee on it, as does a dispute the artist loses.
               </P>
               <P>
                 If you take tips as an artist, you are the seller of each tip and the merchant of record for it.

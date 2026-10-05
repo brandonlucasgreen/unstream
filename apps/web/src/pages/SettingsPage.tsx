@@ -11,6 +11,7 @@ import { SharingControls } from '../components/SharingControls';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 import { NotificationPreferences } from '../components/NotificationPreferences';
 import { BandcampConnect } from '../components/BandcampConnect';
+import { YourTips } from '../components/YourTips';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
@@ -109,6 +110,9 @@ export function SettingsPage() {
             <h2 className="text-lg font-semibold">Bandcamp collection</h2>
             <BandcampConnect />
           </section>
+
+          {/* Tips this fan has left. Renders nothing until there's one to show. */}
+          <YourTips />
 
           {/* Release feed section */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
