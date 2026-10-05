@@ -11,7 +11,7 @@
 // (t, s) pair, encrypted (credential-crypto.ts), and discarded. It must never be logged,
 // stored, echoed back, or attached to a Sentry event.
 
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -159,7 +159,7 @@ async function requestSync(userId: string, host: string | undefined): Promise<bo
 
 const SYNC_START_FAILED = 'Sync could not be started. Use Re-sync to try again.';
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -420,3 +420,5 @@ export async function handler(event: {
 
   return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 }
+
+export const handler = withSentry(handleRequest);

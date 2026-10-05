@@ -7,13 +7,14 @@
 // full search folds the same cards (same ids) into its results, so they replace
 // these in place.
 
+import { withSentry } from '../lib/sentry';
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery, buildPublicCorsHeaders } from './middleware';
 import { normalizeSearchQuery } from './search-utils';
 import { SearchTimer } from './search-timing';
 
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const timer = new SearchTimer();
   const corsHeaders = buildPublicCorsHeaders();
 
@@ -48,3 +49,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     body: JSON.stringify({ query, results }),
   };
 }
+
+export const handler = withSentry(handleRequest);

@@ -22,6 +22,7 @@
 //   - **404, never 401, for a bad token.** A 401 invites retrying, and distinguishing
 //     "well-formed but unknown" from "malformed" tells an anonymous caller more than they need.
 
+import { withSentry } from '../lib/sentry';
 import { getClientIp, checkRateLimit } from './ratelimit';
 import {
   getFeedReleasesForArtist,
@@ -155,7 +156,7 @@ export function parsePath(path: string):
   return null;
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   path?: string;
   rawUrl?: string;
@@ -254,3 +255,5 @@ export async function handler(event: {
     false
   );
 }
+
+export const handler = withSentry(handleRequest);

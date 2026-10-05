@@ -1,6 +1,7 @@
 // GET /api/analytics/stats?slug={slug}&period=7d|30d|90d|all
 // Authenticated endpoint returning aggregated analytics for a verified artist.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
@@ -14,7 +15,7 @@ const CORS_HEADERS = {
 
 const VALID_PERIODS = new Set(['7d', '30d', '90d', 'all']);
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string>;
@@ -151,3 +152,5 @@ export async function handler(event: {
     }),
   };
 }
+
+export const handler = withSentry(handleRequest);

@@ -18,13 +18,14 @@
 // The GET is what the button uses to decide whether to show itself: visibility follows the
 // server's real admin rule rather than a copy of it in page markup.
 
+import { withSentry } from '../lib/sentry';
 import { clearCatalogCooldown, clearReleaseDetailCooldown, getCatalogState } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { triggerCatalogNow } from './request-catalog';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string> | null;
@@ -102,3 +103,5 @@ function safeParseArtistId(body: string | undefined): string | undefined {
     return undefined;
   }
 }
+
+export const handler = withSentry(handleRequest);

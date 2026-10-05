@@ -7,7 +7,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 import { safeEmbedStyle } from '../shared/embed-style';
 
@@ -224,7 +224,7 @@ async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: s
   return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string> | null;
@@ -542,3 +542,5 @@ export async function handler(event: {
     body: JSON.stringify({ success: true, slug: finalSlug }),
   };
 }
+
+export const handler = withSentry(handleRequest);

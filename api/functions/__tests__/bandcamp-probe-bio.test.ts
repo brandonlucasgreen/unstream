@@ -14,7 +14,7 @@ vi.mock('../db', () => ({
   putBandcampProbe: mocks.putBandcampProbe,
 }));
 vi.mock('../ratelimit', () => ({ checkSentryDedup: vi.fn().mockResolvedValue(false) }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: vi.fn() } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: vi.fn() } }));
 
 import { findBandcampArtist } from '../../search/bandcamp-probe';
 

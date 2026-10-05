@@ -6,6 +6,14 @@ import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
+import { MAX_OPEN_GOALS } from "../shared/tips.ts";
+import {
+  stripeModeFromKey,
+  isTipAccountTakingTips,
+  renderTipSection,
+  type OpenGoal,
+  type TipAccountSnapshot,
+} from "../shared/artist-page-tips.ts";
 
 /**
  * How many releases to list before summarising the rest.
@@ -170,6 +178,75 @@ function buildSafeEmbed(featuredEmbed: string | null): string {
   if (/\ballowfullscreen\b/i.test(featuredEmbed)) iframeAttrs += ' allowfullscreen';
 
   return `<div style="border-radius:12px;overflow:hidden"><iframe ${iframeAttrs}></iframe></div>`;
+}
+
+/**
+ * Open goals for a claimed artist who is taking tips right now, or null when they aren't (or the
+ * read failed) — null renders no tips block at all. The same rules as `getTipsLiveSlugs` and
+ * `getGoals` in api/functions/tips-db.ts, duplicated because edge functions can't import from
+ * api/functions; the pure parts live in api/shared/artist-page-tips.ts.
+ *
+ * Fails closed: a failed account read hides the Tip link rather than failing the page. A failed
+ * goals read keeps the link and drops the goals — they're decoration, as on the SPA's page.
+ * Edge functions have no Sentry here, so failures go to the function log.
+ */
+async function readTipGoals(
+  supabase: ReturnType<typeof createClient>,
+  artistId: string,
+  ownerUserId: string | null | undefined,
+): Promise<OpenGoal[] | null> {
+  // Tips ship dark: no Stripe key (or an unrecognised one) means no tips block and no queries.
+  // Only the key's prefix is read, to keep test and live rows apart exactly as the functions do.
+  const mode = stripeModeFromKey(Deno.env.get("STRIPE_SECRET_KEY"));
+  if (!mode || !ownerUserId) return null;
+  const livemode = mode === 'live';
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
+  try {
+    const { data: account, error: accountError } = await supabase
+      .from('artist_tip_accounts')
+      .select('user_id, charges_enabled, tips_enabled, tips_approved_at, deauthorized_at')
+      .eq('artist_id', artistId)
+      .eq('livemode', livemode)
+      .maybeSingle()
+      .abortSignal(controller.signal);
+    if (accountError) throw new Error(`artist_tip_accounts: ${accountError.message}`);
+    if (!isTipAccountTakingTips(account as TipAccountSnapshot | null, ownerUserId)) return null;
+
+    try {
+      const { data: goalRows, error: goalsError } = await supabase
+        .from('artist_goals')
+        .select('id, title, target_cents')
+        .eq('artist_id', artistId)
+        .eq('status', 'open')
+        .eq('livemode', livemode)
+        .order('created_at', { ascending: false })
+        .limit(MAX_OPEN_GOALS)
+        .abortSignal(controller.signal);
+      if (goalsError) throw new Error(`artist_goals: ${goalsError.message}`);
+      const rows = (goalRows ?? []) as { id: string; title: string; target_cents: number }[];
+      if (rows.length === 0) return [];
+
+      const { data: progress, error: progressError } = await supabase
+        .rpc('get_goal_progress', { p_goal_ids: rows.map(r => r.id), p_livemode: livemode })
+        .abortSignal(controller.signal);
+      if (progressError) throw new Error(`get_goal_progress: ${progressError.message}`);
+      const raised = new Map<string, number>();
+      for (const p of (progress ?? []) as { goal_id: string; raised_cents: number | string }[]) {
+        raised.set(p.goal_id, Number(p.raised_cents));
+      }
+      return rows.map(r => ({ id: r.id, title: r.title, targetCents: r.target_cents, raisedCents: raised.get(r.id) ?? 0 }));
+    } catch (err) {
+      console.error('[artist-page-static] goals read failed:', String(err));
+      return [];
+    }
+  } catch (err) {
+    console.error('[artist-page-static] tip account read failed:', String(err));
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 const CSS = `
@@ -448,6 +525,12 @@ export default async function handler(request: Request, context: Context) {
 
       const featuredEmbedHtml = buildSafeEmbed(profile.featured_embed || '');
 
+      // Only a claimed, verified profile can take tips, so the unclaimed template never asks.
+      // Tip state is cached with the rest of the page (a day, purged by the artist-${slug} tag);
+      // checkout re-checks eligibility on every request, so a stale link can't take a payment.
+      const tipGoals = await readTipGoals(supabase, artist.id, profile.user_id);
+      const tipSectionHtml = tipGoals ? renderTipSection(slug, artist.name, tipGoals) : '';
+
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -501,6 +584,7 @@ export default async function handler(request: Request, context: Context) {
     </div>
 
     <div class="container" style="padding-bottom:32px">
+      ${tipSectionHtml}
       ${bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : ''}
       ${featuredEmbedHtml ? `
         <div style="margin-top:24px">

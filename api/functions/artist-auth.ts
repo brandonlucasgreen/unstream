@@ -2,6 +2,7 @@
 // GET  — returns claimed profiles for the authenticated user
 // POST — now a no-op (Supabase handles magic link login directly)
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
@@ -10,7 +11,7 @@ function getServiceClient() {
   return getClient();
 }
 
-export async function handler(event: { httpMethod: string; headers: Record<string, string | undefined>; body: string | null }) {
+async function handleRequest(event: { httpMethod: string; headers: Record<string, string | undefined>; body: string | null }) {
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -127,3 +128,5 @@ export async function handler(event: { httpMethod: string; headers: Record<strin
 
   return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 }
+
+export const handler = withSentry(handleRequest);

@@ -1,3 +1,4 @@
+import { withSentry } from '../lib/sentry';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { isDirectLink, readAllPages } from './db';
 import { cacheGetOrFetch } from './cache';
@@ -64,7 +65,7 @@ const JSON_HEADERS = {
   'Cache-Control': 'public, max-age=300, s-maxage=300',
 };
 
-export async function handler(event: { queryStringParameters?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string> }) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -198,3 +199,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
 
   return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ artists }) };
 }
+
+export const handler = withSentry(handleRequest);

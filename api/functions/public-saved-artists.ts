@@ -8,6 +8,7 @@
 // provenance='purchased', non-hidden items are ever public: a page that counted anything
 // else as support would be lying, and the whole value of the artifact is that it isn't.
 
+import { withSentry } from '../lib/sentry';
 import { getClient, readAllPages } from './db';
 import { artistUrlFor, collectionArtUrl, releaseUrlFor, resolveArtistPages } from './collection-utils';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -19,7 +20,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -178,3 +179,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

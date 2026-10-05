@@ -43,7 +43,7 @@ vi.mock('../middleware', () => ({
   buildCorsHeaders: () => ({ 'Content-Type': 'application/json' }),
 }));
 
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureMessage: vi.fn() } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: vi.fn() } }));
 
 const { handler } = await import('../admin-release-review');
 

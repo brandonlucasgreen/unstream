@@ -2,6 +2,7 @@
 // Returns the list of supported platforms with their IDs, names, and categories.
 // No authentication required — this is public metadata.
 
+import { withSentry } from '../lib/sentry';
 import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
 import { buildPublicCorsHeaders, generateRequestId, v1Response } from './middleware';
 
@@ -12,7 +13,7 @@ interface PlatformInfo {
   url?: string;
 }
 
-export async function handler(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
+async function handleRequest(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
   const requestId = generateRequestId();
   const corsHeaders = buildPublicCorsHeaders();
 
@@ -108,3 +109,5 @@ function getPlatformName(id: string): string {
   };
   return names[id] || id.charAt(0).toUpperCase() + id.slice(1);
 }
+
+export const handler = withSentry(handleRequest);

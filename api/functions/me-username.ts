@@ -3,6 +3,7 @@
 // Body: { username: string }
 // Returns the new username on success, or a friendly error on failure.
 
+import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { isReservedHandle } from '../lib/reserved-handles';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -20,7 +21,7 @@ const CORS_HEADERS = {
 
 const USERNAME_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,18}[a-z0-9])$/;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -120,3 +121,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

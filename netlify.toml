@@ -238,6 +238,12 @@
   to = "/.netlify/functions/tips-webhook"
   status = 200
 
+# A fan's own tips: the Settings list, and saving a signed-out tip to their account from /tip/thanks.
+[[redirects]]
+  from = "/api/me/tips"
+  to = "/.netlify/functions/me-tips"
+  status = 200
+
 [[redirects]]
   from = "/api/admin/tips"
   to = "/.netlify/functions/admin-tips"

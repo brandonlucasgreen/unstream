@@ -1,3 +1,4 @@
+import { withSentry } from '../lib/sentry';
 import { MAC_RELEASE, isSparkleReady, type MacRelease } from '../shared/desktop-release';
 
 // The Sparkle appcast the Mac app reads (SUFeedURL in apps/mac/Unstream/Info-macOS.plist).
@@ -46,7 +47,7 @@ export function buildAppcast(release: MacRelease): string {
 `;
 }
 
-export async function handler(event: { httpMethod?: string }) {
+async function handleRequest(event: { httpMethod?: string }) {
   const headers = {
     'Content-Type': 'application/xml; charset=utf-8',
     // Sparkle checks once a day per install, so this only smooths bursts — but it also means
@@ -60,3 +61,5 @@ export async function handler(event: { httpMethod?: string }) {
 
   return { statusCode: 200, headers, body: buildAppcast(MAC_RELEASE) };
 }
+
+export const handler = withSentry(handleRequest);

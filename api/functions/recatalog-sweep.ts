@@ -36,7 +36,7 @@
 import { getStaleCatalogCandidates } from './db';
 import { isInternalRequest } from './middleware';
 import { isCatalogEnabled, requestArtistCatalog } from './request-catalog';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 /**
  * How many artists one sweep asks for.
@@ -58,7 +58,7 @@ import { Sentry } from '../lib/sentry';
  */
 const SWEEP_BATCH_SIZE = 25;
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod?: string;
   headers?: Record<string, string | undefined>;
 }) {
@@ -165,3 +165,5 @@ export async function handler(event: {
   console.log('[recatalog-sweep]', JSON.stringify(summary));
   return { statusCode: 200, body: JSON.stringify(summary) };
 }
+
+export const handler = withSentry(handleRequest);

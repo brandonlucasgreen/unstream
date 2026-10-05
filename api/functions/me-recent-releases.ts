@@ -6,6 +6,7 @@
 // Follows the same conventions as the other me-* endpoints (bearer auth against the anon client,
 // hand-rolled permissive CORS) and is in api/tsconfig.json's typecheck include — keep it there.
 
+import { withSentry } from '../lib/sentry';
 import { getFeedReleasesForUser, type FeedReleaseRow } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 
@@ -88,7 +89,7 @@ export function splitRecentReleases(
   };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }): Promise<JsonResponse> {
@@ -124,3 +125,5 @@ export async function handler(event: {
     body: JSON.stringify(splitRecentReleases(rows)),
   };
 }
+
+export const handler = withSentry(handleRequest);

@@ -20,7 +20,7 @@ vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
   authenticateBearerFast: mocks.authenticateBearerFast,
 }));
-vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
 import { handler as rawHandler } from '../tips-checkout';
 const handler = async (e: Parameters<typeof rawHandler>[0]) => (await rawHandler(e))!;
@@ -37,7 +37,7 @@ function seedTippableArtist(overrides: Record<string, unknown> = {}) {
     charges_enabled: true, tips_approved_at: '2026-09-01', tips_enabled: true, fee_basis_points: 0,
     ...overrides,
   }];
-  db.tables.artist_goals = [{ id: '11111111-1111-4111-8111-111111111111', artist_id: 'artist-1', title: 'Vinyl', target_cents: 240000, status: 'open', created_at: '2026-09-01' }];
+  db.tables.artist_goals = [{ id: '11111111-1111-4111-8111-111111111111', artist_id: 'artist-1', title: 'Vinyl', target_cents: 240000, status: 'open', livemode: false, created_at: '2026-09-01' }];
 }
 
 beforeEach(() => {
@@ -102,6 +102,7 @@ describe('POST — creating the payment', () => {
     ['not enabled for charges by Stripe', { charges_enabled: false }],
     ['connected by a previous owner of the profile', { user_id: 'someone-else' }],
     ['connected in the other Stripe mode', { livemode: true }],
+    ['disconnected by the artist in Stripe', { deauthorized_at: '2026-10-01' }],
   ])('refuses an artist whose account is %s', async (_label, overrides) => {
     seedTippableArtist(overrides);
     const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
@@ -129,6 +130,9 @@ describe('POST — creating the payment', () => {
 
     db.tables.artist_goals[0].status = 'closed';
     expect((await post({ artistSlug: 'kid-lightbulbs', amountCents: 500, goalId })).statusCode).toBe(400);
+    // A goal made in the other Stripe mode (testing locally against production data) isn't open here.
+    Object.assign(db.tables.artist_goals[0], { status: 'open', livemode: true });
+    expect((await post({ artistSlug: 'kid-lightbulbs', amountCents: 500, goalId })).statusCode).toBe(400);
     expect((await post({ artistSlug: 'kid-lightbulbs', amountCents: 500, goalId: 'not-a-uuid' })).statusCode).toBe(400);
   });
 
@@ -153,6 +157,41 @@ describe('POST — creating the payment', () => {
     expect(res.statusCode).toBe(502);
     expect(res.body).not.toContain('secret internal detail');
     expect(mocks.captureException).toHaveBeenCalled();
+  });
+});
+
+describe('Stripe refusals, CORS and fee-less countries', () => {
+  it('tells the fan the artist can’t take tips when Stripe refuses the session, without Stripe’s words', async () => {
+    seedTippableArtist();
+    fetchMock.mockResolvedValue(new Response('{"error":{"message":"account cannot create charges"}}', { status: 400 }));
+    const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
+    expect(res.statusCode).toBe(409);
+    expect(JSON.parse(res.body).error).toBe("This artist can't take tips right now.");
+    expect(res.body).not.toContain('cannot create charges');
+    expect(mocks.captureException).toHaveBeenCalled();
+  });
+
+  it('keeps "try again" for Stripe rate limits', async () => {
+    seedTippableArtist();
+    fetchMock.mockResolvedValue(new Response('{"error":{"message":"slow down"}}', { status: 429 }));
+    expect((await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 })).statusCode).toBe(502);
+  });
+
+  it('is restricted to unstream.stream, not open to every origin', async () => {
+    seedTippableArtist();
+    const res = await handler({ httpMethod: 'POST', headers: { origin: 'https://evil.example' }, body: JSON.stringify({ artistSlug: 'kid-lightbulbs', amountCents: 500 }) });
+    expect(res.headers['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+    const preflight = await handler({ httpMethod: 'OPTIONS', headers: { origin: 'https://unstream.stream' }, body: null });
+    expect(preflight.headers['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+  });
+
+  it('sends no Unstream fee for an account in a country where Stripe doesn’t allow one', async () => {
+    seedTippableArtist({ fee_basis_points: 500, country: 'BR' });
+    await post({ artistSlug: 'kid-lightbulbs', amountCents: 1000, coverFees: false });
+    expect(sentForm().get('payment_intent_data[application_fee_amount]')).toBeNull();
+    expect(sentForm().get('metadata[unstream_application_fee_cents]')).toBe('0');
+    const page = await handler({ httpMethod: 'GET', headers: {}, body: null, queryStringParameters: { slug: 'kid-lightbulbs' } });
+    expect(JSON.parse(page.body).feeBasisPoints).toBe(0);
   });
 });
 

@@ -1,3 +1,4 @@
+import { withSentry } from '../lib/sentry';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
 // Helper to fetch with timeout
@@ -177,7 +178,7 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
   // Skip rate limiting when called internally from v1 wrappers (which do their own check).
@@ -234,3 +235,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     };
   }
 }
+
+export const handler = withSentry(handleRequest);

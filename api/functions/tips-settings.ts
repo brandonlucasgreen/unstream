@@ -16,14 +16,16 @@ import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
 import { canSetUpTips, getGoals, getTipAccount, stripeHold, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
 import { TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
+import { purgeCacheTags } from './purge-cache';
 import {
   MAX_GOAL_TITLE_LENGTH,
   MAX_OPEN_GOALS,
   STRIPE_CONNECT_COUNTRIES,
+  canChargeApplicationFee,
   estimatedStripeFeeCents,
   isValidFeeBasisPoints,
 } from '../shared/tips';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -34,7 +36,7 @@ interface HandlerEvent {
   queryStringParameters?: Record<string, string | undefined> | null;
 }
 
-export async function handler(event: HandlerEvent) {
+async function handleRequest(event: HandlerEvent) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
 
   const user = await authenticateBearer(event.headers.authorization);
@@ -77,16 +79,24 @@ export async function handler(event: HandlerEvent) {
   try {
     if (event.httpMethod === 'GET') return respond(200, await readSettings(client, artistId, owned.artistName!, user.userId));
 
+    let result: ReturnType<typeof respond>;
     switch (body.action) {
       case 'update':
-        return await updateSettings(client, artistId, owned.artistName!, user.userId, body);
+        result = await updateSettings(client, artistId, owned.artistName!, user.userId, body);
+        break;
       case 'createGoal':
-        return await createGoal(client, artistId, body);
+        result = await createGoal(client, artistId, body);
+        break;
       case 'closeGoal':
-        return await closeGoal(client, artistId, body);
+        result = await closeGoal(client, artistId, body);
+        break;
       default:
         return respond(400, { error: 'Unknown action' });
     }
+    // The server-rendered artist page shows the Tip link and open goals and is CDN-cached for a
+    // day under this tag; without the purge a change looks like it didn't save. Best effort.
+    if (result.statusCode === 200) await purgeCacheTags([`artist-${String(slug)}`], 'TipsSettings');
+    return result;
   } catch (err) {
     Sentry.captureException(err, { extra: { context: `tips-settings.${event.httpMethod}` } });
     return respond(500, { error: 'Something went wrong. Try again.' });
@@ -111,8 +121,11 @@ async function refreshFromStripe(
       country: remote.country ?? account.country,
     };
     if (patch.charges_enabled !== account.charges_enabled || patch.details_submitted !== account.details_submitted) {
-      await client.from('artist_tip_accounts').update(patch)
+      const { error } = await client.from('artist_tip_accounts').update(patch)
         .eq('artist_id', account.artist_id).eq('livemode', account.livemode);
+      // Caught below like a failed Stripe read: the dashboard still shows Stripe's answer for this
+      // view, and the next view (or account.updated) writes it again.
+      if (error) throw new Error(`artist_tip_accounts refresh failed: ${error.message}`);
     }
     return { account: { ...account, ...patch }, hold: patch.charges_enabled ? null : stripeHold(remote) };
   } catch (err) {
@@ -127,7 +140,13 @@ function startOfMonthUtc(): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
-interface TotalsRow { payment_count: number | string; gross_cents: number | string; amount_cents: number | string; application_fee_cents: number | string }
+interface TotalsRow {
+  payment_count: number | string;
+  gross_cents: number | string;
+  amount_cents: number | string;
+  application_fee_cents: number | string;
+  refunded_cents?: number | string;
+}
 
 async function readTotals(client: SupabaseClient, artistId: string, since: string | null) {
   const { data, error } = await client.rpc('get_artist_tip_totals', {
@@ -138,18 +157,25 @@ async function readTotals(client: SupabaseClient, artistId: string, since: strin
   if (error) throw new Error(`get_artist_tip_totals failed: ${error.message}`);
   const row = ((data ?? []) as TotalsRow[])[0];
   const count = Number(row?.payment_count ?? 0);
-  const grossCents = Number(row?.gross_cents ?? 0);
+  const chargedCents = Number(row?.gross_cents ?? 0);
+  const refundedCents = Number(row?.refunded_cents ?? 0);
+  // Already net of the refunded share (get_artist_tip_totals), like every other money figure.
   const feeCents = Number(row?.application_fee_cents ?? 0);
+  const grossCents = chargedCents - refundedCents;
   // Net is estimated at Stripe's standard rate per payment; the artist's Stripe dashboard has the
-  // exact figure. Summing per-payment fees from totals needs the count for the fixed 30¢.
-  const netCents = count === 0 ? 0 : grossCents - Math.round(grossCents * 0.029) - 30 * count - feeCents;
+  // exact figure. Summing per-payment fees from totals needs the count for the fixed 30¢. Stripe
+  // keeps its fee on what was charged, refunds or not, so it's estimated on the charged total.
+  const netCents = count === 0 ? 0 : grossCents - Math.round(chargedCents * 0.029) - 30 * count - feeCents;
   return { count, grossCents, netCents, applicationFeeCents: feeCents };
 }
 
 async function readSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string) {
   const stored = stripeMode() ? await getTipAccount(client, artistId) : null;
-  // A previous owner's account is never shown or used as this owner's — not its state, not its totals.
-  const refreshed = stored && stored.user_id === userId ? await refreshFromStripe(client, stored) : null;
+  // A disconnected account (deauthorized in Stripe) reads as none, so the artist gets the connect
+  // form again. A previous owner's account is never shown or used as this owner's — not its state,
+  // not its totals.
+  const usable = stored && !stored.deauthorized_at ? stored : null;
+  const refreshed = usable && usable.user_id === userId ? await refreshFromStripe(client, usable) : null;
   const account = refreshed?.account ?? null;
   const [goals, month, allTime] = await Promise.all([
     getGoals(client, artistId, { openOnly: false }),
@@ -163,9 +189,12 @@ async function readSettings(client: SupabaseClient, artistId: string, artistName
     livemode: isLiveMode(),
     state: tipsState(account, refreshed?.hold ?? null),
     // So the dashboard can say "contact us" instead of offering a Connect button that will 409.
-    foreignAccount: !!stored && !account,
+    foreignAccount: !!usable && !account,
     tipsEnabled: account?.tips_enabled ?? false,
-    feeBasisPoints: account?.fee_basis_points ?? 0,
+    // Stripe won't let Unstream take a fee on some countries' accounts (NO_APPLICATION_FEE_COUNTRIES);
+    // there the fee is 0 whatever was stored, and the dashboard disables the control.
+    feeAllowed: canChargeApplicationFee(account?.country),
+    feeBasisPoints: account && canChargeApplicationFee(account.country) ? account.fee_basis_points : 0,
     country: account?.country ?? null,
     countries: STRIPE_CONNECT_COUNTRIES,
     goals,
@@ -176,7 +205,7 @@ async function readSettings(client: SupabaseClient, artistId: string, artistName
 
 async function updateSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string, body: Record<string, unknown>) {
   const account = await getTipAccount(client, artistId);
-  if (!account || account.user_id !== userId) return respond(409, { error: 'Connect Stripe first' });
+  if (!account || account.deauthorized_at || account.user_id !== userId) return respond(409, { error: 'Connect Stripe first' });
 
   const patch: Record<string, unknown> = {};
   if (body.tipsEnabled !== undefined) {
@@ -188,6 +217,12 @@ async function updateSettings(client: SupabaseClient, artistId: string, artistNa
   }
   if (body.feeBasisPoints !== undefined) {
     if (!isValidFeeBasisPoints(body.feeBasisPoints)) return respond(400, { error: 'The Unstream fee must be between 0% and 5%' });
+    if (body.feeBasisPoints > 0 && !canChargeApplicationFee(account.country)) {
+      return respond(400, {
+        error: "Stripe doesn't let Unstream take a fee on tips to accounts in your country, so the Unstream fee stays at 0%.",
+        code: 'fee_not_allowed',
+      });
+    }
     patch.fee_basis_points = body.feeBasisPoints;
   }
   if (Object.keys(patch).length === 0) return respond(400, { error: 'Nothing to update' });
@@ -210,7 +245,7 @@ async function createGoal(client: SupabaseClient, artistId: string, body: Record
 
   const { count, error: countError } = await client.from('artist_goals')
     .select('id', { count: 'exact', head: true })
-    .eq('artist_id', artistId).eq('status', 'open');
+    .eq('artist_id', artistId).eq('livemode', isLiveMode()).eq('status', 'open');
   if (countError) throw new Error(`artist_goals count failed: ${countError.message}`);
   if ((count ?? 0) >= MAX_OPEN_GOALS) return respond(409, { error: `Close a goal first — up to ${MAX_OPEN_GOALS} can be open` });
 
@@ -218,6 +253,7 @@ async function createGoal(client: SupabaseClient, artistId: string, body: Record
     artist_id: artistId,
     title,
     target_cents: target,
+    livemode: isLiveMode(),
   });
   if (error) throw new Error(`artist_goals insert failed: ${error.message}`);
   return respond(200, { goals: await getGoals(client, artistId, { openOnly: false }) });
@@ -230,7 +266,9 @@ async function closeGoal(client: SupabaseClient, artistId: string, body: Record<
   // tips were unconditional (spec §3.4).
   const { error } = await client.from('artist_goals')
     .update({ status: 'closed', closed_at: new Date().toISOString() })
-    .eq('id', goalId).eq('artist_id', artistId).eq('status', 'open');
+    .eq('id', goalId).eq('artist_id', artistId).eq('livemode', isLiveMode()).eq('status', 'open');
   if (error) throw new Error(`artist_goals update failed: ${error.message}`);
   return respond(200, { goals: await getGoals(client, artistId, { openOnly: false }) });
 }
+
+export const handler = withSentry(handleRequest);

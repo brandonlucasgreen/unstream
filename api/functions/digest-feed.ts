@@ -1,5 +1,5 @@
 import { isUrlHostnameAllowed } from './middleware';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 
 // The weekly industry digest's feed, at /digest/feed.xml. Unlisted: nothing on the site links to
 // it, it isn't in the sitemap, and it answers with X-Robots-Tag: noindex.
@@ -37,7 +37,7 @@ function failure(statusCode: number, body: string): FeedResponse {
   };
 }
 
-export async function handler(event: { httpMethod?: string }): Promise<FeedResponse> {
+async function handleRequest(event: { httpMethod?: string }): Promise<FeedResponse> {
   if (event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD') {
     return { statusCode: 405, headers: { 'Content-Type': 'text/plain' }, body: 'Method not allowed' };
   }
@@ -82,3 +82,5 @@ export async function handler(event: { httpMethod?: string }): Promise<FeedRespo
     body,
   };
 }
+
+export const handler = withSentry(handleRequest);

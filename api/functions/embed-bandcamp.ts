@@ -1,3 +1,4 @@
+import { withSentry } from '../lib/sentry';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { safeFetch } from './safe-fetch';
 
@@ -90,7 +91,7 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
 }
 
 // Netlify function handler
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   const ip = getClientIp(event.headers || {});
   const rl = await checkRateLimit(ip, 'strict', corsHeaders);
@@ -141,3 +142,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     };
   }
 }
+
+export const handler = withSentry(handleRequest);

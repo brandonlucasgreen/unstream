@@ -22,6 +22,8 @@ export interface TipAccountRow {
   fee_basis_points: number;
   addendum_accepted_at: string;
   addendum_version: string;
+  /** Set when the artist disconnected Unstream in Stripe; the row is then treated as no account. */
+  deauthorized_at: string | null;
   created_at: string;
 }
 
@@ -31,6 +33,7 @@ export interface GoalRow {
   title: string;
   target_cents: number;
   status: 'open' | 'closed';
+  livemode: boolean;
   created_at: string;
   closed_at: string | null;
 }
@@ -84,7 +87,8 @@ export function stripeHold(account: StripeAccount): StripeHold {
  * Stripe read failed, or nobody asked) an account that can't take charges reads as 'onboarding'.
  */
 export function tipsState(account: TipAccountRow | null, hold: StripeHold | null = null): TipsState {
-  if (!account) return 'not_connected';
+  // A disconnected account is as good as none: the artist connects again from scratch.
+  if (!account || account.deauthorized_at) return 'not_connected';
   if (!account.charges_enabled) {
     if (hold === 'in_review') return 'stripe_review';
     if (hold === 'declined') return 'stripe_declined';
@@ -96,7 +100,7 @@ export function tipsState(account: TipAccountRow | null, hold: StripeHold | null
 
 /** Taking tips right now: connected, approved, switched on. Ownership is checked separately. */
 export function isAccountLive(account: TipAccountRow | null): boolean {
-  return !!account && account.charges_enabled && !!account.tips_approved_at && account.tips_enabled;
+  return !!account && !account.deauthorized_at && account.charges_enabled && !!account.tips_approved_at && account.tips_enabled;
 }
 
 export async function getTipAccount(client: SupabaseClient, artistId: string): Promise<TipAccountRow | null> {
@@ -173,6 +177,7 @@ export async function getTipsLiveSlugs(slugs: string[]): Promise<Set<string> | n
       .eq('livemode', isLiveMode())
       .eq('tips_enabled', true)
       .eq('charges_enabled', true)
+      .is('deauthorized_at', null)
       .not('tips_approved_at', 'is', null)
       .in('artists.slug', unique);
     if (error) throw new Error(error.message);
@@ -197,12 +202,17 @@ export async function getTipsLiveSlugs(slugs: string[]): Promise<Set<string> | n
   }
 }
 
-/** An artist's goals with what each has received (succeeded payments in this Stripe mode only). */
+/**
+ * An artist's goals in this Stripe mode, with what each has received (succeeded payments, less any
+ * refunded share). Goals carry the mode they were made in, so one set up while testing locally
+ * (`npm run dev` writes to production Supabase) never shows on the live page or takes live tips.
+ */
 export async function getGoals(client: SupabaseClient, artistId: string, opts: { openOnly: boolean }): Promise<Goal[]> {
   let query = client
     .from('artist_goals')
-    .select('id, artist_id, title, target_cents, status, created_at, closed_at')
+    .select('id, artist_id, title, target_cents, status, livemode, created_at, closed_at')
     .eq('artist_id', artistId)
+    .eq('livemode', isLiveMode())
     .order('created_at', { ascending: false })
     .limit(opts.openOnly ? 3 : 20);
   if (opts.openOnly) query = query.eq('status', 'open');
@@ -228,4 +238,19 @@ export async function getGoals(client: SupabaseClient, artistId: string, opts: {
     raisedCents: raised.get(r.id) ?? 0,
     status: r.status,
   }));
+}
+
+/**
+ * Spec §3.3: a fan's first successful payment marks the artist supported in their saved artists, if
+ * they have them saved. Called when a signed-in tip is recorded and when a fan saves a signed-out tip
+ * to their account afterwards. Best effort: the payment is recorded either way.
+ */
+export async function markArtistSupported(client: SupabaseClient, userId: string, artistId: string): Promise<void> {
+  const { error } = await client
+    .from('saved_artists')
+    .update({ supported: true, supported_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('artist_id', artistId)
+    .eq('supported', false);
+  if (error) Sentry.captureMessage('[tips-db] mark supported failed', { level: 'warning', extra: { error: error.message } });
 }

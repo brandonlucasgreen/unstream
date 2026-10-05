@@ -2,6 +2,7 @@
 // GET — returns the current user's username (or null), email, and has_password flag.
 // Used by the /settings page to populate the form on load.
 
+import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
@@ -48,7 +49,7 @@ async function authenticateRequest(authHeader: string | undefined): Promise<{ us
   };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
@@ -110,3 +111,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

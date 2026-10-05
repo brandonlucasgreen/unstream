@@ -19,7 +19,7 @@
 import { getArtistProfileBySlug, getArtistReleases } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isUrlHostnameAllowed } from './middleware';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { PLATFORMS } from '../shared/platform-registry';
 import {
   cardImageUrl,
@@ -103,7 +103,7 @@ async function fetchCardImage(storedUrl: string): Promise<ImageResult> {
 
 const PATH_PATTERN = new RegExp(`/api/social-card/([a-z0-9-]{1,100})/(${CARD_SLIDES.join('|')})\\.png$`);
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   path?: string;
@@ -197,3 +197,5 @@ export async function handler(event: {
     return { statusCode: 500, headers: FAILURE_HEADERS, body: JSON.stringify({ error: 'Render failed' }) };
   }
 }
+
+export const handler = withSentry(handleRequest);

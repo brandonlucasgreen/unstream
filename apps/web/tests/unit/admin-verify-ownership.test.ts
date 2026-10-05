@@ -15,6 +15,7 @@ vi.mock('../../../../api/functions/middleware', () => ({
 }));
 
 vi.mock('../../../../api/lib/sentry', () => ({
+  withSentry: (handler: unknown) => handler,
   Sentry: {
     captureMessage: (msg: string, opts: unknown) => mockSentryCapture(msg, opts),
   },

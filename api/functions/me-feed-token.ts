@@ -8,6 +8,7 @@
 // client, hand-rolled permissive CORS, service-role client for the write). These are the only
 // files in api/tsconfig.json's typecheck include — keep this one in it.
 
+import { withSentry } from '../lib/sentry';
 import { randomBytes } from 'crypto';
 import { deleteFeedToken, getFeedToken, setFeedToken } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -53,7 +54,7 @@ function json(statusCode: number, body: unknown) {
   };
 }
 
-export async function handler(event: {
+async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }) {
@@ -101,3 +102,5 @@ export async function handler(event: {
 
   return json(405, { error: 'Method not allowed' });
 }
+
+export const handler = withSentry(handleRequest);

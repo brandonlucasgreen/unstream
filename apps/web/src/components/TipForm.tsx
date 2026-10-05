@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { GoalProgress } from './GoalProgress';
+import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 import type { TipPageData } from '../services/tips';
 
@@ -13,12 +14,19 @@ import type { TipPageData } from '../services/tips';
 
 export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initialGoalId?: string }) {
   const { session } = useAuth();
+  // Only open goals are offered, so a `?goal=` that isn't one of them (closed, mistyped, another
+  // artist's) starts with no goal rather than a selection the fan can't see.
+  const openGoals = (data.goals ?? []).filter(goal => goal.status === 'open');
   const [amountCents, setAmountCents] = useState(1000);
   const [custom, setCustom] = useState('');
   const [coverFees, setCoverFees] = useState(true);
-  const [goalId, setGoalId] = useState<string>(initialGoalId);
+  const [goalId, setGoalId] = useState<string>(
+    openGoals.some(goal => goal.id === initialGoalId) ? initialGoalId : '',
+  );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Back from Stripe's page can restore this one from the back/forward cache, still "Opening Stripe…".
+  useResetOnPageShow(() => setSubmitting(false));
 
   const minCents = data.minCents ?? 300;
   const maxCents = data.maxCents ?? 50000;
@@ -98,10 +106,10 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
         )}
       </fieldset>
 
-      {(data.goals ?? []).length > 0 && (
+      {openGoals.length > 0 && (
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium mb-1">Put it towards a goal? (optional)</legend>
-          {(data.goals ?? []).map(goal => (
+          {openGoals.map(goal => (
             <label key={goal.id} className={`block p-3 rounded-lg border cursor-pointer ${goalId === goal.id ? 'border-accent-primary' : 'border-border'}`}>
               <input
                 type="radio"

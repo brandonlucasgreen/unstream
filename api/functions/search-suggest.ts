@@ -5,6 +5,7 @@
 // no platform fan-out, no external requests. The full search still happens on
 // submit; this only helps people find the right name faster.
 
+import { withSentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { suggestArtists, cleanSuggestTerm, type ArtistSuggestion } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
@@ -12,7 +13,7 @@ import { validateQuery, buildPublicCorsHeaders } from './middleware';
 
 const SUGGEST_CACHE_TTL = 5 * 60; // seconds; the artists table changes slowly
 
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
   const corsHeaders = buildPublicCorsHeaders();
 
   // 'lenient' tier: the debounced typeahead fires on every typing pause, so it
@@ -62,3 +63,5 @@ export async function handler(event: { queryStringParameters?: Record<string, st
     body: JSON.stringify({ query, suggestions }),
   };
 }
+
+export const handler = withSentry(handleRequest);

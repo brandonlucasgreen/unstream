@@ -5,7 +5,7 @@
 
 import { getArtistProfileBySlug, getArtistReleases, getClient, resolveArtistSlugAlias } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
-import { Sentry } from '../lib/sentry';
+import { Sentry, withSentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
@@ -21,7 +21,7 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
-export async function handler(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string>; httpMethod?: string }) {
+async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string>; httpMethod?: string }) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
@@ -255,3 +255,5 @@ async function readOpenGoals(artistId: string) {
     return [];
   }
 }
+
+export const handler = withSentry(handleRequest);
