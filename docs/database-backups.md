@@ -46,12 +46,20 @@ recreated:
 
 ## Get a backup and decrypt it
 
-You need Docker, the Supabase CLI and `age` (`brew install supabase/tap/supabase age`). You also
-need the private key file, saved from the password manager as `unstream-backup.key`.
+You need Docker, the Supabase CLI and `age` (`brew install supabase/tap/supabase age`).
 
-1. **Download.** In the Cloudflare dashboard go to R2 → `unstream-db-backup` → `daily/`, then
+1. **Recreate the key file.** Copy the `AGE-SECRET-KEY-1…` line from the password manager, then:
+
+   ```bash
+   pbpaste > unstream-backup.key && chmod 600 unstream-backup.key
+   age-keygen -y unstream-backup.key   # must print the age1… key in .github/db-backup-recipients.txt
+   ```
+
+   That one line is the whole key; the comment lines `age-keygen` writes around it don't matter.
+   `pbpaste` keeps it out of shell history. Delete the file when you're done.
+2. **Download.** In the Cloudflare dashboard go to R2 → `unstream-db-backup` → `daily/`, then
    download the newest file, or the newest from before the problem started.
-2. **Decrypt and unpack:**
+3. **Decrypt and unpack:**
 
    ```bash
    mkdir restore
