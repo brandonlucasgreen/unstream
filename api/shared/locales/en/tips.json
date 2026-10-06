@@ -1,0 +1,24 @@
+{
+  "thanks": {
+    "heading": "Thank you",
+    "body": "Your tip went straight to the artist's own Stripe account. It will appear on your statement under their name.",
+    "saveHeading": "Keep track of your tips",
+    "saveBody": "Sign in or create an account and we'll save this tip to it, so you can see every tip you've left in one place. Entirely optional.",
+    "saveCta": "Save this tip to my account →",
+    "saved": "Saved to your account.",
+    "seeTips": "See your tips",
+    "receipt": "Your receipt comes by email from the artist's Stripe account, under their business name, to the address you gave at checkout.",
+    "refund": "Need a refund?",
+    "refundBody": "The artist is the seller, so refunds come from them; their contact details are on your receipt. If you can't reach them, email support@unstream.stream and we'll pass it on.",
+    "howItWorks": "How tipping works",
+    "backToArtist": "Back to the artist",
+    "findMoreArtists": "Find more artists"
+  },
+  "panel": {
+    "takeTips": "Take tips on Unstream",
+    "goesLive": "(goes live once Unstream has checked your setup)",
+    "seeWhatFansSee": "See what fans see",
+    "payoutsInStripe": "Payouts, refunds and receipts in Stripe ↗",
+    "stripeConnected": "Stripe is connected. We check each artist's first setup by hand, so it's clear the account belongs to you — usually within a day. You can get everything ready meanwhile."
+  }
+}
