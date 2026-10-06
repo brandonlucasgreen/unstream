@@ -1,0 +1,4 @@
+# age public keys the nightly database backup is encrypted to (.github/workflows/db-backup.yml).
+# Public by design: anyone can encrypt to these, only the matching private key can decrypt.
+# The private key for this one is in Brandon's password manager. See docs/database-backups.md.
+age14fqjhf2nlr7lu2vfxv35k0qk0p7mrgr8fths56d39uaum9s6hajszzwaww
