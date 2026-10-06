@@ -321,6 +321,8 @@ On the server:
 
 The schema is the migrations: timestamp-prefixed files in `supabase/migrations/`, starting from `20260331000000_baseline.sql`. (`supabase/schema.sql` is a stale early snapshot — 4 tables, last touched August 2026 — kept for reference only; don't read it as current.) Changes ship as new files there (e.g. `20260726120000_bandcamp-slug-probes.sql`), and **filename order is what Supabase applies**. The sequential `-- Migration NNN` header comments and the older `migration-NNN-*.sql` copies are historical reference only — the sequence has gaps. Don't edit historical migrations.
 
+**Plan: Supabase Pro (chosen 2026-10-06, over moving the database).** If Pro's disk throttling ever shows up, add Small compute (2 GB) first. A move to DigitalOcean Managed PostgreSQL (data only, auth staying on Supabase) is fully planned as the fallback in `docs/specs/digitalocean-database-plan.md`, which also records why it wasn't chosen. Read it before proposing a database move.
+
 When adding a table or column: new migration, RLS policies included, `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, comments explaining the change. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
 **Auto-deploy:** `supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` touching `supabase/migrations/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
