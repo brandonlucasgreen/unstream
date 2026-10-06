@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
 import { HeaderSearch } from './HeaderSearch';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '../contexts/AuthContext';
 
 function UnstreamLogo() {
@@ -40,6 +42,7 @@ function UnstreamLogo() {
 
 export function Header() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
   const [pendingReleaseReviewCount, setPendingReleaseReviewCount] = useState(0);
@@ -93,21 +96,21 @@ export function Header() {
   // The group carries the pending-verification emphasis so a queue waiting for
   // review is still visible without opening the menu.
   const adminGroup: NavGroup = {
-    label: 'Admin',
+    label: t('nav.admin.label'),
     emphasis: pendingVerifyCount > 0 || pendingReleaseReviewCount > 0,
     items: [
       {
         to: '/admin/verify',
-        label: pendingVerifyCount > 0 ? `Verify (${pendingVerifyCount})` : 'Verify',
+        label: pendingVerifyCount > 0 ? t('nav.admin.verifyCount', { count: pendingVerifyCount }) : t('nav.admin.verify'),
         emphasis: pendingVerifyCount > 0,
       },
       {
         to: '/admin/release-review',
-        label: pendingReleaseReviewCount > 0 ? `Release review (${pendingReleaseReviewCount})` : 'Release review',
+        label: pendingReleaseReviewCount > 0 ? t('nav.admin.releaseReviewCount', { count: pendingReleaseReviewCount }) : t('nav.admin.releaseReview'),
         emphasis: pendingReleaseReviewCount > 0,
       },
-      { to: '/admin/links', label: 'Removed links' },
-      { to: '/admin/analytics', label: 'Analytics' },
+      { to: '/admin/links', label: t('nav.admin.removedLinks') },
+      { to: '/admin/analytics', label: t('nav.admin.analytics') },
     ],
   };
 
@@ -116,15 +119,15 @@ export function Header() {
   const navItems: NavEntry[] = session
     ? [
         ...(isAdmin ? [adminGroup] : []),
-        { to: '/dashboard', label: 'Dashboard', emphasis: true },
-        { to: '/settings', label: 'Settings' },
+        { to: '/dashboard', label: t('nav.dashboard'), emphasis: true },
+        { to: '/settings', label: t('nav.settings') },
       ]
     : [
-        { to: '/platforms', label: 'Platforms' },
-        { to: '/faq', label: 'FAQ' },
-        { to: '/press', label: 'Press kit' },
-        { to: '/contact', label: 'Contact' },
-        { to: '/login', label: 'Login', button: true },
+        { to: '/platforms', label: t('nav.platforms') },
+        { to: '/faq', label: t('nav.faq') },
+        { to: '/press', label: t('nav.pressKit') },
+        { to: '/contact', label: t('nav.contact') },
+        { to: '/login', label: t('nav.login'), button: true },
       ];
 
   // The sticky header keeps a solid background rather than a blurred one: a
@@ -159,7 +162,7 @@ export function Header() {
             type="button"
             onClick={() => setMobileSearchOpen(open => !open)}
             className="lg:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
-            aria-label="Search artists"
+            aria-label={t('search.ariaLabel')}
             aria-expanded={mobileSearchOpen}
             aria-controls="header-search-row"
           >
@@ -205,10 +208,12 @@ export function Header() {
                 onClick={handleSignOut}
                 className="text-text-muted hover:text-text-primary transition-colors"
               >
-                Sign out
+                {t('nav.signOut')}
               </button>
             )}
           </nav>
+
+          <LanguageSwitcher className="ml-1" />
 
           <MobileNav
             items={navItems}

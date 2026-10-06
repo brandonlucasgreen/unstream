@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as Sentry from '@sentry/react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -13,6 +14,7 @@ import { getTipPage, TipsApiError, type TipPageData } from '../services/tips';
 // comes back here.
 
 export function TipPage() {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const [data, setData] = useState<TipPageData | null>(null);
@@ -27,10 +29,10 @@ export function TipPage() {
         if (cancelled) return;
         const notFound = err instanceof TipsApiError && err.status === 404;
         if (!notFound) Sentry.captureException(err, { extra: { context: 'TipPage.load', slug } });
-        setLoadError(notFound ? "We couldn't find that artist." : "Couldn't load this page. Try again in a moment.");
+        setLoadError(notFound ? t('artist:tipPage.loadNotFound') : t('artist:tipPage.loadFailed'));
       });
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, t]);
 
   useEffect(() => {
     if (data?.artist.name) document.title = `Tip ${data.artist.name} | Unstream`;
@@ -45,7 +47,7 @@ export function TipPage() {
           {loadError ? (
             <p className="text-center text-text-muted">{loadError}</p>
           ) : !data ? (
-            <p className="text-center text-text-muted">Loading…</p>
+            <p className="text-center text-text-muted">{t('artist:tipPage.loading')}</p>
           ) : (
             <>
               <div className="text-center space-y-2">
@@ -54,15 +56,15 @@ export function TipPage() {
                 )}
                 <h1 className="text-2xl font-bold">Tip {data.artist.name}</h1>
                 <p className="text-sm text-text-muted">
-                  Support for their music, paid straight to {data.artist.name}'s own Stripe account.
+                  {t('artist:tipPage.straightTo', { name: data.artist.name })}
                 </p>
               </div>
 
               {!data.takingTips ? (
                 <div className="p-4 rounded-xl border border-border space-y-3">
-                  <p className="text-sm">{data.artist.name} isn't taking tips on Unstream yet.</p>
+                  <p className="text-sm">{t('artist:tipPage.notTaking', { name: data.artist.name })}</p>
                   <Link to={`/a/${data.artist.slug}`} className="text-sm text-accent-primary hover:underline">
-                    See where else to support them →
+                    {t('artist:tipPage.seeWhereElse')}
                   </Link>
                 </div>
               ) : (

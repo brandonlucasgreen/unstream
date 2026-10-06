@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useArtistSuggestions } from '../hooks/useArtistSuggestions';
 import { SuggestionList } from './SuggestionList';
 
@@ -24,6 +25,7 @@ export function HeaderSearch({
   onClose?: () => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(urlQuery);
@@ -80,8 +82,8 @@ export function HeaderSearch({
         onKeyDown={handleKeyDown}
         onFocus={() => suggest.reopen(query)}
         onBlur={suggest.close}
-        placeholder="Search artists..."
-        aria-label="Search artists"
+        placeholder={t('search.placeholder')}
+        aria-label={t('search.ariaLabel')}
         enterKeyHint="search"
         autoFocus={autoFocus}
         // text-base (16px) below lg: iOS Safari zooms in on focus for any input
