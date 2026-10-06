@@ -33,7 +33,8 @@
     "package:extension": "bash scripts/package-extension.sh",
     "migrate:link": "supabase link --project-ref bwogclqzpsbvqbyhhqbz",
     "migrate:dry-run": "supabase db push --dry-run --linked",
-    "migrate:list": "supabase migration list --linked"
+    "migrate:list": "supabase migration list --linked",
+    "audit:strings": "tsx scripts/audit-ui-strings.ts"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
@@ -69,6 +70,7 @@
     "jsdom": "^29.1.1",
     "marked": "^18.0.0",
     "tailwindcss": "^4.1.18",
+    "ts-morph": "^28.0.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
