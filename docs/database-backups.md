@@ -106,8 +106,8 @@ hardcode the project URL.
 3. **Restore the migration history**, so `supabase db push` keeps working:
 
    ```bash
-   supabase link --project-ref <new-ref>
-   supabase migration repair --status applied $(ls supabase/migrations | cut -d_ -f1)
+   supabase migration repair --db-url '<session-pooler-connection-string>' \
+     --status applied $(ls supabase/migrations | cut -d_ -f1)
    ```
 
 4. **Recreate the pg_cron jobs** in the SQL editor:
@@ -122,8 +122,8 @@ hardcode the project URL.
 5. **Point everything at the new project:**
    - **Netlify env vars:** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`,
      `SUPABASE_JWT_SECRET`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Then redeploy.
-   - **GitHub secrets:** `SUPABASE_DB_PASSWORD`.
-   - **The project ref** (`bwogclqzpsbvqbyhhqbz`) in `supabase-migrate.yml` and `db-backup.yml`.
+   - **GitHub secret `SUPABASE_DB_URL`:** the new project's session pooler connection string.
+     Both `supabase-migrate.yml` and `db-backup.yml` read it.
    - **The Mac app:** the URL in `apps/mac/Unstream/Services/AuthService.swift` and the anon key
      in `Info-macOS.plist` and `Info-iOS.plist`. Ship a release.
    - **The extension:** the URL and anon key in `apps/extension/lib/supabase.js`. Ship a release.

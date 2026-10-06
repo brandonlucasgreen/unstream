@@ -22,6 +22,16 @@ name: Supabase migrations
 #
 # The failure is loud in Actions and invisible everywhere else. Check this workflow went green
 # after any merge that adds a migration.
+#
+# ## Credentials: a connection string, not an access token
+#
+# SUPABASE_DB_URL is the production database's Session pooler connection string, password
+# included (Supabase dashboard → Connect → Session pooler). Until 2026-10-06 this workflow used
+# `supabase link` with SUPABASE_ACCESS_TOKEN, but Supabase stopped issuing classic (account-wide)
+# access tokens, and the scoped ones that replaced them can't run `supabase link`
+# (supabase/supabase#50244: it 403s revealing the project's API keys). A connection string is the
+# narrower credential anyway: it reaches this one database and nothing else in the account.
+# db-backup.yml uses the same secret, so don't remove it while either workflow exists.
 
 on:
   push:
@@ -60,17 +70,13 @@ jobs:
         with:
           version: latest
 
-      - name: Link project
-        if: steps.changes.outputs.changed == 'true'
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          supabase link --project-ref bwogclqzpsbvqbyhhqbz --password "$SUPABASE_DB_PASSWORD"
-
       - name: Push migrations
         if: steps.changes.outputs.changed == 'true'
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase db push --linked --include-all --password "$SUPABASE_DB_PASSWORD"
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::SUPABASE_DB_URL secret is not set"
+            exit 1
+          fi
+          supabase db push --db-url "$SUPABASE_DB_URL" --include-all

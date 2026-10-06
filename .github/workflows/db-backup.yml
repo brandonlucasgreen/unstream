@@ -26,9 +26,9 @@ name: Database backup
 # the next successful run closes it. Scheduled-workflow failure emails go only to whoever last
 # edited the cron line, which can be nobody who is watching.
 #
-# Secrets: SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD (shared with supabase-migrate.yml), plus
-# R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY from an R2 API token scoped to the
-# bucket with Object Read & Write.
+# Secrets: SUPABASE_DB_URL (shared with supabase-migrate.yml; see its header for why a connection
+# string rather than an access token), plus R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and
+# R2_SECRET_ACCESS_KEY from an R2 API token scoped to the bucket with Object Read & Write.
 
 on:
   schedule:
@@ -55,14 +55,13 @@ jobs:
 
       - name: Check configuration
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         run: |
           missing=0
-          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+          for name in SUPABASE_DB_URL R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1
@@ -82,21 +81,14 @@ jobs:
       - name: Install age
         run: sudo apt-get update -qq && sudo apt-get install -y -qq age
 
-      - name: Link project
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase link --project-ref bwogclqzpsbvqbyhhqbz --password "$SUPABASE_DB_PASSWORD"
-
       - name: Dump roles, schema and data
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           mkdir -p "$RUNNER_TEMP/dump"
-          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/roles.sql" --role-only
-          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/schema.sql"
-          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/data.sql" \
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$RUNNER_TEMP/dump/roles.sql" --role-only
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$RUNNER_TEMP/dump/schema.sql"
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f "$RUNNER_TEMP/dump/data.sql" \
             --use-copy --data-only --schema auth,public
 
       - name: Refuse an empty dump
