@@ -2,7 +2,8 @@
 
 **Date:** 2026-09-26
 **Status:** Not pursued, kept as the fallback (2026-10-06). Once there was money for the move, the
-owner chose to **upgrade Supabase to Pro** instead. Pro costs ~$5 a month more than this plan, and
+owner chose **Supabase Pro** as the next step instead, deferred for now in favour of nightly
+backups (`docs/database-backups.md`). Pro costs ~$5 a month more than this plan, and
 in return:
 - **Nothing to migrate,** and auth and data stay in one system.
 - **It addresses what the round 6 measurement pointed at:** shared-instance flakiness on Nano

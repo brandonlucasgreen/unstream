@@ -1,0 +1,171 @@
+name: Database backup
+
+# Nightly encrypted backup of the production Supabase database to Cloudflare R2, proven
+# restorable on every run. Restore steps: docs/database-backups.md.
+#
+# Why this exists: the project is on Supabase's free plan, which keeps no backups we can restore.
+# Before this workflow, a bad migration or a mistaken DELETE would have lost fans' saved artists,
+# claims, collections, usernames, API keys and tip records for good.
+#
+# What a run does:
+#   1. Dumps roles, schema and data with `supabase db dump` — Supabase's documented backup method.
+#      Data is limited to the `auth` (accounts) and `public` (everything Unstream stores) schemas;
+#      the other Supabase-internal schemas hold nothing of ours and some refuse to be restored.
+#   2. Refuses a suspiciously empty dump (no artists, or no accounts) rather than uploading it.
+#   3. Encrypts the dump with age to the public key(s) in .github/db-backup-recipients.txt and
+#      uploads it to the `unstream-db-backup` R2 bucket. Plaintext never leaves this runner: the
+#      dump holds emails and password hashes, and this repository is public. The matching private
+#      key lives only in the owner's password manager.
+#   4. Restores the same dump into a throwaway local Supabase stack and checks every table's row
+#      count against the dump (.github/scripts/db-restore-check.sh). A backup nobody has restored
+#      is a hope, not a backup.
+#
+# Retention is an R2 lifecycle rule on the bucket (delete after 30 days), not this workflow.
+#
+# Failure is loud: any failed step opens (or comments on) a "Database backup failing" issue, and
+# the next successful run closes it. Scheduled-workflow failure emails go only to whoever last
+# edited the cron line, which can be nobody who is watching.
+#
+# Secrets: SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD (shared with supabase-migrate.yml), plus
+# R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY from an R2 API token scoped to the
+# bucket with Object Read & Write.
+
+on:
+  schedule:
+    - cron: '17 9 * * *' # Daily 09:17 UTC: the middle of the US night, clear of the 03:00/03:20
+                         # pg_cron jobs and the 01:00/13:00 release sweep
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BACKUP_BUCKET: unstream-db-backup
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check configuration
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          missing=0
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set"
+              missing=1
+            fi
+          done
+          if ! grep -q '^age1' .github/db-backup-recipients.txt 2>/dev/null; then
+            echo "::error::.github/db-backup-recipients.txt has no age public key (a line starting age1)"
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install age
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq age
+
+      - name: Link project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase link --project-ref bwogclqzpsbvqbyhhqbz --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Dump roles, schema and data
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/dump"
+          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/roles.sql" --role-only
+          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/schema.sql"
+          supabase db dump --linked --password "$SUPABASE_DB_PASSWORD" -f "$RUNNER_TEMP/dump/data.sql" \
+            --use-copy --data-only --schema auth,public
+
+      - name: Refuse an empty dump
+        run: |
+          # Row counts per table, read straight from the COPY blocks in data.sql.
+          counts=$(awk '/^COPY /{t=$2; n=0; next} /^\\\.$/{if (t != "") print t, n; t=""; next} t != ""{n++}' "$RUNNER_TEMP/dump/data.sql")
+          for table in '"public"."artists"' '"auth"."users"'; do
+            rows=$(echo "$counts" | awk -v t="$table" '$1 == t {print $2}')
+            if [ -z "$rows" ] || [ "$rows" -eq 0 ]; then
+              echo "::error::Dump has no rows in $table; refusing to treat it as a backup"
+              exit 1
+            fi
+          done
+          echo "Dump: $(echo "$counts" | wc -l) tables, $(echo "$counts" | awk '{s+=$2} END {print s}') rows"
+
+      - name: Encrypt and upload to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          # R2 rejects the integrity checksums newer AWS CLI versions send by default.
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: |
+          name="unstream-db-$(date -u +%Y-%m-%dT%H%MZ).tar.gz.age"
+          tar -C "$RUNNER_TEMP/dump" -czf - roles.sql schema.sql data.sql \
+            | age --encrypt --recipients-file .github/db-backup-recipients.txt --output "$RUNNER_TEMP/$name"
+          aws s3 cp "$RUNNER_TEMP/$name" "s3://$BACKUP_BUCKET/daily/$name" \
+            --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" --no-progress
+          echo "Uploaded daily/$name ($(du -h "$RUNNER_TEMP/$name" | cut -f1))"
+
+      - name: Prove the backup restores
+        run: |
+          mkdir -p "$RUNNER_TEMP/restore-check"
+          cd "$RUNNER_TEMP/restore-check"
+          supabase init --force > /dev/null
+          # Only Postgres and Auth: Auth creates the auth tables the users are restored into.
+          supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          "$GITHUB_WORKSPACE/.github/scripts/db-restore-check.sh" "$RUNNER_TEMP/dump" \
+            postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+      - name: Close the failure issue
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          for number in $(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search '"Database backup failing" in:title' --json number --jq '.[].number'); do
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Backups are working again: $run_url"
+          done
+
+      - name: Open an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search '"Database backup failing" in:title' --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "Failed again: $run_url"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Database backup failing" --body "$(cat <<EOF
+          The nightly database backup failed: $run_url
+
+          Until it passes, the newest restorable copy of production is the last successful run's.
+          See docs/database-backups.md. This issue closes itself on the next successful backup.
+          EOF
+          )"
+          fi
