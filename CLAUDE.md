@@ -327,7 +327,7 @@ The schema is the migrations: timestamp-prefixed files in `supabase/migrations/`
 
 When adding a table or column: new migration, RLS policies included, `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, comments explaining the change. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
-**Auto-deploy:** `supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` touching `supabase/migrations/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`.
+**Auto-deploy:** `supabase-migrate.yml` runs `supabase db push --linked` on every push to `main` touching `supabase/migrations/`. Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, **shared with `db-backup.yml` — don't remove them while either workflow exists** (they were removed once as "unused", on 2026-10-06, which silently disabled both).
 
 **Applying a migration to production from an unmerged branch poisons every later migration.** `supabase db push` aborts *before applying anything* when production has a version missing locally, so one migration left on an unmerged branch silently blocks everybody's migrations on `main` — it happened, and took release alerts down for 30 hours. If you run the workflow by hand from a branch, merge it promptly and **check the workflow went green**; the failure is loud in Actions and invisible everywhere else.
 
