@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "platforms": "Plateformes",
+    "faq": "FAQ",
+    "pressKit": "Kit presse",
+    "contact": "Contact",
+    "login": "Connexion",
+    "signOut": "Se déconnecter",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "mainMenu": "Menu principal",
+    "admin": {
+      "label": "Admin",
+      "verify": "Vérifier",
+      "verifyCount": "Vérifier ({{count}})",
+      "releaseReview": "Vérification des sorties",
+      "releaseReviewCount": "Vérification des sorties ({{count}})",
+      "removedLinks": "Liens supprimés",
+      "analytics": "Statistiques"
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher des artistes…",
+    "ariaLabel": "Rechercher des artistes"
+  },
+  "footer": {
+    "madeWithLove": "Fait avec amour dans le Massachusetts, aux États-Unis",
+    "indieArtistIndex": "Index des artistes indépendants",
+    "artistsYouKnow": "Des artistes que vous connaissez",
+    "platforms": "Plateformes",
+    "changelog": "Nouveautés",
+    "pressKit": "Kit presse",
+    "support": "Soutenir Unstream",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité"
+  },
+  "cta": {
+    "signInToSave": "Connectez-vous pour enregistrer des artistes →"
+  },
+  "status": {
+    "searchingPlatforms": "Recherche sur les plateformes…",
+    "searchingMorePlatforms": "Recherche sur d'autres plateformes…",
+    "loadingMoreSources": "Chargement de nouvelles sources…",
+    "resolvingArtist": "Identification de l'artiste à partir du lien…"
+  },
+  "skeleton": {
+    "searchingPlatforms": "Recherche sur les plateformes"
+  },
+  "results": {
+    "clear": "Effacer"
+  },
+  "error": {
+    "searchFailed": "La recherche a échoué. Veuillez réessayer.",
+    "resolveLinkFailed": "Impossible de résoudre le lien. Essayez de rechercher manuellement.",
+    "resolveLinkNotFound": "Aucun artiste trouvé à partir de ce lien. Essayez de rechercher manuellement."
+  },
+  "lang": {
+    "label": "Langue",
+    "en": "Anglais"
+  }
+}
