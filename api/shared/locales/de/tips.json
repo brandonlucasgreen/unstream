@@ -1,0 +1,24 @@
+{
+  "thanks": {
+    "heading": "Danke",
+    "body": "Dein Trinkgeld ging direkt auf das eigene Stripe-Konto des Artists. Es erscheint auf deinem Kontoauszug unter seinem Namen.",
+    "saveHeading": "Behalte deine Trinkgelder im Blick",
+    "saveBody": "Melde dich an oder erstelle ein Konto, dann speichern wir dieses Trinkgeld darin, damit du alle Trinkgelder, die du gegeben hast, an einem Ort siehst. Ganz optional.",
+    "saveCta": "Dieses Trinkgeld in meinem Konto speichern →",
+    "saved": "In deinem Konto gespeichert.",
+    "seeTips": "Deine Trinkgelder ansehen",
+    "receipt": "Deine Quittung kommt per E-Mail vom Stripe-Konto des Artists, unter seinem Geschäftsnamen, an die Adresse, die du beim Bezahlen angegeben hast.",
+    "refund": "Brauchst du eine Rückerstattung?",
+    "refundBody": "Der Artist ist der Verkäufer, die Rückerstattung kommt also von ihm; seine Kontaktdaten stehen auf deiner Quittung. Wenn du ihn nicht erreichst, schreib an support@unstream.stream und wir leiten es weiter.",
+    "howItWorks": "So funktionieren Trinkgelder",
+    "backToArtist": "Zurück zum Artist",
+    "findMoreArtists": "Weitere Artists finden"
+  },
+  "panel": {
+    "takeTips": "Trinkgelder auf Unstream annehmen",
+    "goesLive": "(wird freigeschaltet, sobald Unstream dein Setup geprüft hat)",
+    "seeWhatFansSee": "Sieh, was Fans sehen",
+    "payoutsInStripe": "Auszahlungen, Rückerstattungen und Quittungen in Stripe ↗",
+    "stripeConnected": "Stripe ist verbunden. Wir prüfen das erste Setup jedes Artists von Hand, damit klar ist, dass das Konto dir gehört — meist innerhalb eines Tages. In der Zwischenzeit kannst du alles vorbereiten."
+  }
+}
