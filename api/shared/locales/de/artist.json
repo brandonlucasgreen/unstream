@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "Unterstütze direkt den Artist, den du gerade hörst",
+    "titleHighlight": "genau jetzt",
+    "byline": "Unstream findet die Orte, an denen deine Lieblings-Artists — und nicht die großen Tech-Konzerne — bis zu 97 % jedes Verkaufs behalten."
+  },
+  "home": {
+    "orSearch": "Oder suche Artists jederzeit oben auf der Seite 🔎"
+  },
+  "results": {
+    "emptyTitle": "Keine Ergebnisse gefunden",
+    "emptyHint": "Versuche einen anderen Suchbegriff",
+    "foundOne": "{{count}} Ergebnis gefunden",
+    "foundMany": "{{count}} Ergebnisse gefunden"
+  },
+  "features": {
+    "heading": "Behalte die Artists im Blick, die du unterstützen willst",
+    "detectionTitle": "Automatische Erkennung",
+    "detectionBody": "Die macOS-Menüleisten-App erkennt, was in Spotify, Apple Music oder einem beliebigen Player auf deinem Mac läuft — kein Kopieren und Einfügen nötig.",
+    "saveTitle": "Artists speichern",
+    "saveBody": "Stelle eine Liste der Artists zusammen, die du unterstützen willst. Die App merkt sie sich, damit du immer weißt, wo du ihre Musik kaufen kannst.",
+    "releaseTitle": "Release-Benachrichtigungen",
+    "releaseBody": "Erhalte eine Benachrichtigung, wenn Artists, denen du folgst, neue Musik veröffentlichen. Verpasse keinen Release der Artists, die dir wichtig sind.",
+    "scrobbleTitle": "Scrobbling",
+    "scrobbleBody": "Die Browser-Erweiterung erkennt, was du auf Spotify Web und anderen Streaming-Seiten hörst, und scrobbelt es zu ListenBrainz.",
+    "anonymousTitle": "Völlig anonym",
+    "anonymousBody": "Kein Konto nötig. Es werden keine persönlichen Daten erhoben. Nur anonymisierte Suchen und Klicks — sonst nichts.",
+    "freeBody": "Unstream ist kostenlos, weil es darum geht, Geld zu den Artists zu bringen, und nicht darum, dir etwas zu berechnen. Wenn es dir nützlich ist, kannst du gerne",
+    "freeSupportLink": "seine Entwicklung unterstützen"
+  },
+  "sources": {
+    "heading": "Verfügbare Quellen",
+    "plusLine": "…plus offizielle Websites und Links zu sozialen Netzwerken"
+  },
+  "faqLink": "Häufige Fragen →",
+  "contact": {
+    "heading": "Melde dich",
+    "body": "Du findest den Artist nicht, den du unterstützen willst? Du hast eine Idee für eine Funktion? Schreib uns unten."
+  },
+  "admin": {
+    "merge": "{{count}} Artists zusammenführen"
+  },
+  "tipPage": {
+    "loading": "Wird geladen…",
+    "straightTo": "Die Unterstützung für die Musik geht direkt auf {{name}}s eigenes Stripe-Konto.",
+    "notTaking": "{{name}} nimmt noch keine Trinkgelder auf Unstream an.",
+    "seeWhereElse": "Sieh, wo du sonst unterstützen kannst →",
+    "loadNotFound": "Diesen Artist konnten wir nicht finden.",
+    "loadFailed": "Diese Seite konnte nicht geladen werden. Versuche es gleich noch einmal."
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "settings": "Ajustes",
+    "platforms": "Plataformas",
+    "faq": "FAQ",
+    "pressKit": "Kit de prensa",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "mainMenu": "Menú principal",
+    "admin": {
+      "label": "Administración",
+      "verify": "Verificar",
+      "verifyCount": "Verificar ({{count}})",
+      "releaseReview": "Revisión de lanzamientos",
+      "releaseReviewCount": "Revisión de lanzamientos ({{count}})",
+      "removedLinks": "Enlaces eliminados",
+      "analytics": "Analíticas"
+    }
+  },
+  "search": {
+    "placeholder": "Buscar artistas...",
+    "ariaLabel": "Buscar artistas"
+  },
+  "footer": {
+    "madeWithLove": "Hecho con cariño en Massachusetts, EE. UU.",
+    "indieArtistIndex": "Índice de artistas independientes",
+    "artistsYouKnow": "Artistas que conoces",
+    "platforms": "Plataformas",
+    "changelog": "Novedades",
+    "pressKit": "Kit de prensa",
+    "support": "Apoya Unstream",
+    "faq": "FAQ",
+    "contact": "Contacto",
+    "terms": "Condiciones de uso",
+    "privacy": "Política de privacidad"
+  },
+  "cta": {
+    "signInToSave": "Inicia sesión para guardar artistas →"
+  },
+  "status": {
+    "searchingPlatforms": "Buscando en las plataformas...",
+    "searchingMorePlatforms": "Buscando en más plataformas...",
+    "loadingMoreSources": "Cargando más fuentes...",
+    "resolvingArtist": "Identificando al artista a partir del enlace..."
+  },
+  "skeleton": {
+    "searchingPlatforms": "Buscando en las plataformas"
+  },
+  "results": {
+    "clear": "Borrar"
+  },
+  "error": {
+    "searchFailed": "No se pudo buscar. Inténtalo de nuevo.",
+    "resolveLinkFailed": "No se pudo resolver el enlace. Prueba a buscar manualmente.",
+    "resolveLinkNotFound": "No se encontró ningún artista en ese enlace. Prueba a buscar manualmente."
+  },
+  "lang": {
+    "label": "Idioma",
+    "en": "Inglés"
+  }
+}

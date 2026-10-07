@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "今聴いているアーティストを直接支援しよう",
+    "titleHighlight": "いますぐ",
+    "byline": "Unstreamは、あなたの好きな音楽アーティストが（大手テック企業ではなく）売上の最大97%を手元に残せる場所を見つけます。"
+  },
+  "home": {
+    "orSearch": "または、ページ上部でいつでもアーティストを検索できます 🔎"
+  },
+  "results": {
+    "emptyTitle": "結果が見つかりませんでした",
+    "emptyHint": "別の検索キーワードをお試しください",
+    "foundOne": "{{count}}件の結果が見つかりました",
+    "foundMany": "{{count}}件の結果が見つかりました"
+  },
+  "features": {
+    "heading": "支援したいアーティストを記録しておこう",
+    "detectionTitle": "自動検出",
+    "detectionBody": "macOSのメニューバーアプリが、Spotify、Apple Music、その他Mac上のあらゆるメディアプレーヤーで再生中の曲を検出します。コピー＆ペーストは不要です。",
+    "saveTitle": "アーティストを保存",
+    "saveBody": "支援したいアーティストのリストを作りましょう。アプリが覚えているので、どこでその音楽を買えるかいつでもわかります。",
+    "releaseTitle": "リリース通知",
+    "releaseBody": "フォローしているアーティストが新曲をリリースしたら通知が届きます。気になるアーティストのリリースを逃しません。",
+    "scrobbleTitle": "Scrobbling",
+    "scrobbleBody": "ブラウザ拡張機能がSpotify Webやその他のストリーミングサイトで聴いている曲を検出し、ListenBrainzにScrobbleします。",
+    "anonymousTitle": "完全匿名",
+    "anonymousBody": "アカウントは不要です。個人データは収集しません。匿名化された検索とクリックのみで、それ以外は何もありません。",
+    "freeBody": "Unstreamが無料なのは、目的がアーティストにお金を届けることであり、あなたから料金を取ることではないからです。役に立ったと感じたら、ぜひ",
+    "freeSupportLink": "開発を支援することをご検討ください"
+  },
+  "sources": {
+    "heading": "利用できるソース",
+    "plusLine": "…さらに公式サイトやSNSへのリンクもあります"
+  },
+  "faqLink": "よくある質問 →",
+  "contact": {
+    "heading": "お問い合わせ",
+    "body": "支援したいアーティストが見つかりませんか？機能のアイデアがありますか？下記からご連絡ください。"
+  },
+  "admin": {
+    "merge": "{{count}}人のアーティストを統合"
+  },
+  "tipPage": {
+    "loading": "読み込み中…",
+    "straightTo": "音楽への支援は、{{name}}さんのご自身のStripeアカウントへ直接支払われます。",
+    "notTaking": "{{name}}さんはまだUnstreamでチップを受け取っていません。",
+    "seeWhereElse": "他に支援できる場所を見る →",
+    "loadNotFound": "そのアーティストは見つかりませんでした。",
+    "loadFailed": "このページを読み込めませんでした。しばらくしてからもう一度お試しください。"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "settings": "設定",
+    "platforms": "プラットフォーム",
+    "faq": "FAQ",
+    "pressKit": "プレスキット",
+    "contact": "お問い合わせ",
+    "login": "ログイン",
+    "signOut": "ログアウト",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "mainMenu": "メインメニュー",
+    "admin": {
+      "label": "管理",
+      "verify": "確認",
+      "verifyCount": "確認（{{count}}）",
+      "releaseReview": "リリース審査",
+      "releaseReviewCount": "リリース審査（{{count}}）",
+      "removedLinks": "削除されたリンク",
+      "analytics": "アナリティクス"
+    }
+  },
+  "search": {
+    "placeholder": "アーティストを検索…",
+    "ariaLabel": "アーティストを検索"
+  },
+  "footer": {
+    "madeWithLove": "米国マサチューセッツ州で心を込めて制作",
+    "indieArtistIndex": "インディー・アーティスト・インデックス",
+    "artistsYouKnow": "知っているアーティスト",
+    "platforms": "プラットフォーム",
+    "changelog": "更新履歴",
+    "pressKit": "プレスキット",
+    "support": "Unstreamを支援する",
+    "faq": "FAQ",
+    "contact": "お問い合わせ",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー"
+  },
+  "cta": {
+    "signInToSave": "ログインしてアーティストを保存 →"
+  },
+  "status": {
+    "searchingPlatforms": "プラットフォームを検索中…",
+    "searchingMorePlatforms": "さらにプラットフォームを検索中…",
+    "loadingMoreSources": "さらにソースを読み込み中…",
+    "resolvingArtist": "リンクからアーティストを特定中…"
+  },
+  "skeleton": {
+    "searchingPlatforms": "プラットフォームを検索中"
+  },
+  "results": {
+    "clear": "クリア"
+  },
+  "error": {
+    "searchFailed": "検索に失敗しました。もう一度お試しください。",
+    "resolveLinkFailed": "リンクを解決できませんでした。手動で検索してみてください。",
+    "resolveLinkNotFound": "そのリンクからアーティストを見つけられませんでした。手動で検索してみてください。"
+  },
+  "lang": {
+    "label": "言語",
+    "en": "英語"
+  }
+}
