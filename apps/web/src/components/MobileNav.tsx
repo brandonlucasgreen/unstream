@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export type NavItem = {
   to: string;
@@ -52,6 +53,7 @@ export function MobileNav({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!open) return;
@@ -90,7 +92,7 @@ export function MobileNav({
         type="button"
         onClick={() => setOpen(true)}
         className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors sm:hidden"
-        aria-label="Open menu"
+        aria-label={t('nav.openMenu')}
         aria-expanded={open}
         aria-controls="mobile-nav"
       >
@@ -112,7 +114,7 @@ export function MobileNav({
 
         <nav
           id="mobile-nav"
-          aria-label="Main menu"
+          aria-label={t('nav.mainMenu')}
           className={`absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-border bg-bg-primary shadow-2xl transition-transform duration-250 ease-out motion-reduce:transition-none ${
             open ? 'translate-x-0' : 'translate-x-full'
           }`}
@@ -125,7 +127,7 @@ export function MobileNav({
               type="button"
               onClick={close}
               className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
-              aria-label="Close menu"
+              aria-label={t('nav.closeMenu')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -197,7 +199,7 @@ export function MobileNav({
               }}
               className="mt-auto border-t border-border px-6 py-4 text-left text-base text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
             >
-              Sign out
+              {t('nav.signOut')}
             </button>
           )}
         </nav>

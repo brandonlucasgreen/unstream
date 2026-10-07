@@ -14,6 +14,7 @@ export default defineConfig({
     hookTimeout: 60000,
     retry: 0,
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    setupFiles: ['./tests/setup.ts'],
     // Use 'node' environment for API tests (no React DOM needed)
     // Use 'jsdom' for React component tests (add `// @vitest-environment jsdom` at the top of the .tsx file)
     environment: 'node',

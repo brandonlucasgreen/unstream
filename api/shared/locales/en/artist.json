@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "Directly support the artist you’re listening to",
+    "titleHighlight": "right now",
+    "byline": "Unstream finds the places where your favorite music artists — not big tech companies — keep up to 97% of every sale."
+  },
+  "home": {
+    "orSearch": "Or search artists anytime at the top of the page 🔎"
+  },
+  "results": {
+    "emptyTitle": "No results found",
+    "emptyHint": "Try a different search term",
+    "foundOne": "Found {{count}} result",
+    "foundMany": "Found {{count}} results"
+  },
+  "features": {
+    "heading": "Keep track of artists you want to support",
+    "detectionTitle": "Automatic detection",
+    "detectionBody": "The macOS menu bar app detects what’s playing in Spotify, Apple Music, or any media player on your Mac — no copy-paste needed.",
+    "saveTitle": "Save artists",
+    "saveBody": "Build a list of artists you want to support. The app remembers them so you always know where to buy their music.",
+    "releaseTitle": "Release alerts",
+    "releaseBody": "Get notified when artists you follow release new music. Never miss a drop from the artists you care about.",
+    "scrobbleTitle": "Scrobbling",
+    "scrobbleBody": "The browser extension detects what you’re listening to on Spotify Web and other streaming sites and scrobbles it to ListenBrainz.",
+    "anonymousTitle": "Fully anonymous",
+    "anonymousBody": "No account required. No personal data collected. Only anonymized searches and clicks — nothing else.",
+    "freeBody": "Unstream is free because the point is getting money to artists, not charging you. If you find it useful, consider",
+    "freeSupportLink": "supporting its development"
+  },
+  "sources": {
+    "heading": "Available sources",
+    "plusLine": "...plus official websites and social links"
+  },
+  "faqLink": "Frequently asked questions →",
+  "contact": {
+    "heading": "Get in touch",
+    "body": "Can't find the artist you want to support? Have a feature idea? Reach out below."
+  },
+  "admin": {
+    "merge": "Merge {{count}} Artists"
+  },
+  "tipPage": {
+    "loading": "Loading…",
+    "straightTo": "Support for their music, paid straight to {{name}}'s own Stripe account.",
+    "notTaking": "{{name}} isn't taking tips on Unstream yet.",
+    "seeWhereElse": "See where else to support them →",
+    "loadNotFound": "We couldn't find that artist.",
+    "loadFailed": "Couldn't load this page. Try again in a moment."
+  }
+}

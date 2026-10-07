@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as Sentry from '@sentry/react';
 import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
@@ -20,6 +21,7 @@ import { DEFAULT_PAGE_TITLE } from './data/seo';
 import './index.css';
 
 function App() {
+  const { t } = useTranslation();
   const { isAdmin, session, loadSavedArtists } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -99,12 +101,12 @@ function App() {
           // Trigger search with resolved artist name
           handleSearch(result.artistName);
         } else {
-          setError('Could not find artist from that link. Try searching manually.');
+          setError(t('error.resolveLinkNotFound'));
           setSearchParams({}, { replace: true });
         }
         setIsResolving(false);
       }).catch(() => {
-        setError('Failed to resolve link. Try searching manually.');
+        setError(t('error.resolveLinkFailed'));
         setSearchParams({}, { replace: true });
         setIsResolving(false);
       });
@@ -212,12 +214,12 @@ function App() {
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'search.platformSearch' } });
       if (currentSearchRef.current === searchId) {
-        setError('Failed to search. Please try again.');
+        setError(t('error.searchFailed'));
         setIsLoading(false);
       }
       console.error(err);
     }
-  }, [setSearchParams]);
+  }, [setSearchParams, t]);
 
   // Clear everything a search produced, without touching the URL. Split out of
   // handleGoHome so the effect above can reset in response to the URL losing its
@@ -285,11 +287,11 @@ function App() {
                 bigger step runs the hero to four lines and shoves the download
                 buttons toward the fold. */}
             <h1 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-text-primary">
-              Directly support the artist you&rsquo;re listening to <span className="marker-word">right now</span>
+              {t('artist:hero.title')} <span className="marker-word">{t('artist:hero.titleHighlight')}</span>
             </h1>
             {!isStandalone && (
               <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-                Unstream finds the places where your favorite music artists &mdash; not big tech companies &mdash; keep up to 97% of every sale.
+                {t('artist:hero.byline')}
               </p>
             )}
           </div>
@@ -316,7 +318,7 @@ function App() {
               {!session && (
                 <p className="text-center">
                   <Link to="/login" className="text-accent-primary hover:underline font-medium">
-                    Sign in to save artists &rarr;
+                    {t('cta.signInToSave')}
                   </Link>
                 </p>
               )}
@@ -331,7 +333,7 @@ function App() {
               </div>
 
               <p className="text-center text-text-secondary">
-                Or search artists anytime at the top of the page 🔎
+                {t('artist:home.orSearch')}
               </p>
             </>
           )}
@@ -339,7 +341,7 @@ function App() {
           {/* Resolving URL state */}
           {isResolving && (
             <div className="mt-8 flex items-center justify-center py-8">
-              <LoadingLabel>Resolving artist from link...</LoadingLabel>
+              <LoadingLabel>{t('status.resolvingArtist')}</LoadingLabel>
             </div>
           )}
 
@@ -354,9 +356,9 @@ function App() {
           {hasSearched && !error && (
             <div className="mt-8">
               {isLoading && results.length === 0 ? (
-                <SkeletonScreen label="Searching platforms">
+                <SkeletonScreen label={t('skeleton.searchingPlatforms')}>
                   <div className="space-y-4">
-                    <LoadingLabel>Searching platforms...</LoadingLabel>
+                    <LoadingLabel>{t('status.searchingPlatforms')}</LoadingLabel>
                     <SearchResultsSkeleton />
                   </div>
                 </SkeletonScreen>
@@ -364,21 +366,23 @@ function App() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     {isLoading ? (
-                      <LoadingLabel>Searching more platforms...</LoadingLabel>
+                      <LoadingLabel>{t('status.searchingMorePlatforms')}</LoadingLabel>
                     ) : (
                       <p className="text-text-muted text-sm">
-                        Found {results.length} result{results.length !== 1 ? 's' : ''}
+                        {results.length === 1
+                          ? t('artist:results.foundOne', { count: results.length })
+                          : t('artist:results.foundMany', { count: results.length })}
                       </p>
                     )}
                     <div className="flex items-center gap-4">
-                      {isEnriching && <LoadingLabel>Loading more sources...</LoadingLabel>}
+                      {isEnriching && <LoadingLabel>{t('status.loadingMoreSources')}</LoadingLabel>}
                       {/* In PWA mode the SearchBar's own Reset already does this. */}
                       {!isStandalone && (
                         <button
                           onClick={handleGoHome}
                           className="text-sm text-text-muted hover:text-text-primary transition-colors shrink-0"
                         >
-                          Clear
+                          {t('results.clear')}
                         </button>
                       )}
                     </div>
@@ -396,16 +400,16 @@ function App() {
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <p className="text-text-muted text-lg">No results found</p>
+                  <p className="text-text-muted text-lg">{t('artist:results.emptyTitle')}</p>
                   <p className="text-text-muted/70 text-sm mt-2">
-                    Try a different search term
+                    {t('artist:results.emptyHint')}
                   </p>
                   {!isStandalone && (
                     <button
                       onClick={handleGoHome}
                       className="mt-4 text-sm text-text-muted hover:text-text-primary transition-colors"
                     >
-                      Clear
+                      {t('results.clear')}
                     </button>
                   )}
                 </div>
@@ -423,7 +427,7 @@ function App() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
-                Merge {selectedForMerge.size} Artists
+                {t('artist:admin.merge', { count: selectedForMerge.size })}
               </button>
             </div>
           )}
@@ -435,7 +439,7 @@ function App() {
               {/* App Features */}
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
                 <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
-                  Keep track of artists you want to support
+                  {t('artist:features.heading')}
                 </h2>
                 <div className="flex flex-col md:flex-row items-start gap-8">
                   <div className="flex-1">
@@ -443,36 +447,36 @@ function App() {
                       <div className="flex gap-3">
                         <div className="text-2xl">🎧</div>
                         <div>
-                          <h3 className="font-semibold text-text-primary mb-1">Automatic detection</h3>
-                          <p className="text-text-muted text-sm">The macOS menu bar app detects what&rsquo;s playing in Spotify, Apple Music, or any media player on your Mac &mdash; no copy-paste needed.</p>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.detectionTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.detectionBody')}</p>
                         </div>
                       </div>
                       <div className="flex gap-3">
                         <div className="text-2xl">📋</div>
                         <div>
-                          <h3 className="font-semibold text-text-primary mb-1">Save artists</h3>
-                          <p className="text-text-muted text-sm">Build a list of artists you want to support. The app remembers them so you always know where to buy their music.</p>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.saveTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.saveBody')}</p>
                         </div>
                       </div>
                       <div className="flex gap-3">
                         <div className="text-2xl">🔔</div>
                         <div>
-                          <h3 className="font-semibold text-text-primary mb-1">Release alerts</h3>
-                          <p className="text-text-muted text-sm">Get notified when artists you follow release new music. Never miss a drop from the artists you care about.</p>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.releaseTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.releaseBody')}</p>
                         </div>
                       </div>
                       <div className="flex gap-3">
                         <div className="text-2xl">🎵</div>
                         <div>
-                          <h3 className="font-semibold text-text-primary mb-1">Scrobbling</h3>
-                          <p className="text-text-muted text-sm">The browser extension detects what you&rsquo;re listening to on Spotify Web and other streaming sites and scrobbles it to ListenBrainz.</p>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.scrobbleTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.scrobbleBody')}</p>
                         </div>
                       </div>
                       <div className="flex gap-3">
                         <div className="text-2xl">🔒</div>
                         <div>
-                          <h3 className="font-semibold text-text-primary mb-1">Fully anonymous</h3>
-                          <p className="text-text-muted text-sm">No account required. No personal data collected. Only anonymized searches and clicks &mdash; nothing else.</p>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.anonymousTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.anonymousBody')}</p>
                         </div>
                       </div>
                     </div>
@@ -483,16 +487,16 @@ function App() {
                 </div>
 
                 <p className="text-text-secondary text-center mt-6">
-                  Unstream is free because the point is getting money to artists, not charging you. If you find it useful, consider{' '}
+                  {t('artist:features.freeBody')}{' '}
                   <a href="/support" className="text-accent-primary hover:underline">
-                    <strong>supporting its development</strong>
+                    <strong>{t('artist:features.freeSupportLink')}</strong>
                   </a> 🤘
                 </p>
               </div>
 
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
                 <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
-                  Available sources
+                  {t('artist:sources.heading')}
                 </h2>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -529,7 +533,7 @@ function App() {
                 </div>
 
                 <p className="text-center text-text-muted text-sm mt-6">
-                  ...plus official websites and social links
+                  {t('artist:sources.plusLine')}
                 </p>
               </div>
 
@@ -540,7 +544,7 @@ function App() {
           {!isStandalone && (
           <div className="text-center mt-8">
             <a href="/faq" className="text-accent-secondary hover:underline font-medium">
-              Frequently asked questions →
+              {t('artist:faqLink')}
             </a>
           </div>
           )}
@@ -555,10 +559,10 @@ function App() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
             <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-3 text-center md:text-left heading-accent">
-              Get in touch
+              {t('artist:contact.heading')}
             </h2>
             <p className="text-text-secondary mb-6 text-center md:text-left">
-              Can't find the artist you want to support? Have a feature idea? Reach out below.
+              {t('artist:contact.body')}
             </p>
             {/* .letterbird-contact is the hook index.css uses to let the embed auto-size. Without
                 it the iframe stays at its default ~150px and the form is cramped — the rule was

@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "platforms": "Platforms",
+    "faq": "FAQ",
+    "pressKit": "Press kit",
+    "contact": "Contact",
+    "login": "Login",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainMenu": "Main menu",
+    "admin": {
+      "label": "Admin",
+      "verify": "Verify",
+      "verifyCount": "Verify ({{count}})",
+      "releaseReview": "Release review",
+      "releaseReviewCount": "Release review ({{count}})",
+      "removedLinks": "Removed links",
+      "analytics": "Analytics"
+    }
+  },
+  "search": {
+    "placeholder": "Search artists...",
+    "ariaLabel": "Search artists"
+  },
+  "footer": {
+    "madeWithLove": "Made with love in Massachusetts, USA",
+    "indieArtistIndex": "Indie Artist Index",
+    "artistsYouKnow": "Artists You Know",
+    "platforms": "Platforms",
+    "changelog": "Changelog",
+    "pressKit": "Press kit",
+    "support": "Support Unstream",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "terms": "Terms of use",
+    "privacy": "Privacy policy"
+  },
+  "cta": {
+    "signInToSave": "Sign in to save artists →"
+  },
+  "status": {
+    "searchingPlatforms": "Searching platforms...",
+    "searchingMorePlatforms": "Searching more platforms...",
+    "loadingMoreSources": "Loading more sources...",
+    "resolvingArtist": "Resolving artist from link..."
+  },
+  "skeleton": {
+    "searchingPlatforms": "Searching platforms"
+  },
+  "results": {
+    "clear": "Clear"
+  },
+  "error": {
+    "searchFailed": "Failed to search. Please try again.",
+    "resolveLinkFailed": "Failed to resolve link. Try searching manually.",
+    "resolveLinkNotFound": "Could not find artist from that link. Try searching manually."
+  },
+  "lang": {
+    "label": "Language",
+    "en": "English"
+  }
+}

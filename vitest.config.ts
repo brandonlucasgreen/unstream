@@ -16,6 +16,7 @@ export default defineConfig({
     hookTimeout: 60000,
     retry: 0,
     include: ['apps/web/tests/**/*.test.ts', 'apps/web/tests/**/*.test.tsx', 'api/functions/**/*.test.ts'],
+    setupFiles: ['apps/web/tests/setup.ts'],
     environment: 'node',
   },
   esbuild: {
