@@ -6,7 +6,45 @@
     <atom:link href="https://unstream.stream/digest/feed.xml" rel="self" type="application/rss+xml" />
     <description>A weekly, LLM-compiled digest of music-industry news relevant to Unstream. Unlisted.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 02 Oct 2026 16:38:19 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 17:26:45 GMT</lastBuildDate>
+    <item>
+      <title>Platform moves, royalty fights, and AI policy tighten the indie music landscape</title>
+      <link>https://github.com/brandonlucasgreen/unstream/blob/industry-digest/2026-W41.md</link>
+      <guid isPermaLink="false">unstream-industry-digest-2026-W41</guid>
+      <pubDate>Fri, 09 Oct 2026 14:00:00 GMT</pubDate>
+      <description>Bandcamp waives fees, Beatport raises funds, Spotify tweaks rules, and new AI laws reshape how Unstream connects fans to artists.</description>
+      <content:encoded><![CDATA[<p>This week’s headlines show a tightening of the ecosystem that powers direct‑to‑fan sales. Platforms are tweaking revenue models and adding features, while streaming services and regulators push new royalty rules and AI restrictions that could shift where fans find and support artists.</p>
+<h2>Platform updates</h2>
+<h3>Bandcamp Friday waives its revenue share for 24 hours</h3>
+<p>On October 2 Bandcamp announced a one‑day “Bandcamp Friday” where it drops its standard 15 % cut, sending the full purchase amount to artists and labels. For Unstream this highlights a surge in direct purchases that can be surfaced to users looking for the highest‑payout options.</p>
+<p><a href="https://www.linkedin.com/posts/bandcamp_today-is-bandcamp-friday-for-24-hours-we-activity-7511787611007561728-Zkeq">linkedin.com</a></p>
+<h3>NewPipe adds DRM‑free Bandcamp streaming</h3>
+<p>The open‑source video app NewPipe 0.21.0 now streams DRM‑free tracks from Bandcamp, expanding privacy‑focused listening options. Unstream can consider linking to such clients to give fans more ways to access Bandcamp‑hosted music without leaving the app.</p>
+<p><a href="https://howtogadget.blog/newpipe-0-21-0-bandcamp-drm-free-music">howtogadget.blog</a></p>
+<h3>Beatport secures growth investment from Square Nine Capital</h3>
+<p>Beatport announced an undisclosed capital injection aimed at expanding services for the global electronic‑music community. This influx may lead to new marketplace features and payout structures that Unstream should monitor for inclusion in its electronic‑genre listings.</p>
+<p><a href="https://www.billboard.com/pro/beatport-growth-investment-square-nine-capital/">Billboard Business</a></p>
+<h2>Streaming economics &amp; royalty battles</h2>
+<h3>Spotify’s 1,000‑stream rule threatens small‑label earnings</h3>
+<p>Spotify continues to enforce a policy where tracks earn no recorded‑music royalties until they reach 1,000 streams in a 12‑month window. Unstream’s users will need clear guidance on which catalogues are affected, especially for emerging indie artists who rely on low‑stream thresholds.</p>
+<p><a href="https://futurecityrecords.com/spotify-1000-stream-rule/">futurecityrecords.com</a></p>
+<h3>Indie artist sues Spotify over alleged royalty cuts</h3>
+<p>A lawsuit filed in Los Angeles accuses Spotify of “undisclosed, unfair, and deceptive” practices that reduce payouts for smaller artists. This legal pressure could prompt Spotify to adjust its payout formulas, directly impacting the earnings data Unstream displays for streaming‑based links.</p>
+<p><a href="https://www.latimes.com/entertainment-arts/business/story/2026-06-09/spotify-accused-of-reducing-indie-artists-compensation-in-new-lawsuit">latimes.com</a></p>
+<h3>U.S. royalty fight set for 2028‑2032 as songwriters challenge rates</h3>
+<p>Spotify, Apple, Amazon and major songwriters are preparing for a US Copyright Royalty Board case that will determine mechanical royalty rates for the next five years. The outcome will reshape the baseline earnings across all platforms, a key variable for Unstream’s payout‑percentage comparisons.</p>
+<p><a href="https://www.rockumweb.com/reportes/2576/spotify-apple-amazon-and-songwriters-enter-us-streaming-royalty-fight-for-2028-2032">rockumweb.com</a></p>
+<h2>AI policy and its impact on direct‑to‑fan music</h2>
+<h3>Denmark passes digital‑replica law targeting AI‑generated voices and likenesses</h3>
+<p>Effective early 2027, the new Danish copyright amendment protects artists’ vocal and visual likenesses from AI‑generated replicas without consent. For Unstream, this signals a growing trend of jurisdiction‑specific AI safeguards that could affect how AI‑generated tracks are listed or flagged.</p>
+<p><a href="https://completemusicupdate.com/denmarks-new-digital-replica-law-should-go-into-effect-in-early-2027-says-danish-culture-minister/">CMU</a></p>
+<h3>Bandcamp bans substantially AI‑generated music and impersonation</h3>
+<p>Bandcamp updated its policy to prohibit uploads that are largely created by artificial intelligence or that use AI to impersonate artists. This restriction will reduce the presence of AI‑only releases on a major indie marketplace, sharpening Unstream’s focus on authentic, artist‑owned content.</p>
+<p><a href="https://www.peepstune.com/bandcamp-banned-substantially-ai-generated-music-did-fans-really-celebrate/">peepstune.com</a></p>
+<hr>
+<p><em>Compiled by gpt-oss:120b from 90 stories. Every link above comes from a fetched feed or search result, not from the model.</em></p>
+]]></content:encoded>
+    </item>
     <item>
       <title>Week of Oct 2: AI lawsuits, streaming fraud, and new direct‑fan tools</title>
       <link>https://github.com/brandonlucasgreen/unstream/blob/industry-digest/2026-W40.md</link>
