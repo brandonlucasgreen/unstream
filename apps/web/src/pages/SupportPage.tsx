@@ -1,7 +1,7 @@
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PlatformIcon } from '../components/PlatformIcon';
-import { KOFI_URL, UPCOMING_COSTS } from '../data/support';
+import { KOFI_URL } from '../data/support';
 
 export function SupportPage() {
   return (
@@ -20,39 +20,15 @@ export function SupportPage() {
         <div className="max-w-2xl mx-auto">
           <div className="space-y-4 text-text-secondary text-lg leading-relaxed mb-10">
             <p>
+              I'm{' '}
+              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+                Brandon
+              </a>{' '}
+              — an indie musician and tech worker. I build and run Unstream in my spare time.
               Unstream is free to use because its mission is to expand &amp; deepen support for artists.
               Search, support links, saved artists and the apps stay free whether or not anyone pays.
             </p>
-            <p>
-              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
-                I'm Brandon
-              </a>{' '}
-              — an indie musician and tech worker. I build and run Unstream in my spare time, and
-              because Unstream has been small, I've been able to run it basically for free.
-            </p>
           </div>
-
-          <section aria-labelledby="costs-heading" className="mb-10">
-            <h2 id="costs-heading" className="font-display text-xl font-semibold text-text-primary mb-3">
-              That's about to change
-            </h2>
-            <p className="text-text-secondary mb-4">
-              Unstream is growing, which is exciting! But it's starting to outgrow free services. The
-              database has already gone down a few times as I've added features and more people have
-              started to use it. Moving to paid services to run Unstream looks roughly like this:
-            </p>
-            <ul className="divide-y divide-border border-y border-border">
-              {UPCOMING_COSTS.map((cost) => (
-                <li key={cost.service} className="py-3 flex justify-between gap-4">
-                  <span className="text-text-primary">
-                    {cost.service}
-                    {cost.what && <span className="text-text-muted"> — {cost.what}</span>}
-                  </span>
-                  <span className="text-text-primary tabular-nums shrink-0">{cost.monthly}/mo</span>
-                </li>
-              ))}
-            </ul>
-          </section>
 
           <section aria-labelledby="help-heading" className="mb-10">
             <h2 id="help-heading" className="font-display text-xl font-semibold text-text-primary mb-3">
