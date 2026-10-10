@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
 import { NavDropdown } from './NavDropdown';
 import { HeaderSearch } from './HeaderSearch';
-import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '../contexts/AuthContext';
 
 function UnstreamLogo() {
@@ -212,8 +211,6 @@ export function Header() {
               </button>
             )}
           </nav>
-
-          <LanguageSwitcher className="ml-1" />
 
           <MobileNav
             items={navItems}

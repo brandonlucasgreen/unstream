@@ -43,5 +43,6 @@ trusted-HTML flag per key. Every value renders as text.
 1. Add `locales/<lng>/{common,artist,tips}.json`.
 2. Register the resource bundle and add the code to the supported list in
    `apps/web/src/i18n.ts`.
-3. Add a label to `languages` in that file (drives `LanguageSwitcher`).
+3. Add a label to `languageLabels` in that file, and bring back a header
+   language switcher (removed while English is the only language).
 4. Run `npm run verify`.
