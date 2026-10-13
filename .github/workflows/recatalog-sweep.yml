@@ -54,6 +54,17 @@ name: Release catalogue sweep
 #
 # Safe to over-run. A duplicate invocation finds the same artists claimed and does nothing, so
 # re-running by hand is free.
+#
+# ## Why this calls unstream.netlify.app, not unstream.stream (2026-10-13)
+#
+# On 2026-10-12 Bot Fight Mode was enabled on the unstream.stream zone. Free-plan BFM has no
+# exceptions: it managed-challenges the runner's curl POST *before* the custom-rules pipeline
+# runs, so even an explicit skip rule (id 57b608…) for the sweep path can't exempt it — the
+# workflow has been failing 403 "Just a moment…" since 2026-10-12T21:29Z (runs 38310947596,
+# 38361485988). Routing to the DNS-only netlify.app host keeps CF out of the path entirely.
+# The function is still secret-gated (401 without the right Bearer), so the unproxied target
+# adds no new surface — see the firewall-event evidence in docs/ if this reads as arbitrary.
+# Revisit if the zone ever moves to Pro/SBFM, which honors skip rules.
 
 on:
   schedule:
@@ -75,7 +86,7 @@ jobs:
 
           response=$(curl -sS -X POST -w '\n%{http_code}' \
             -H "Authorization: Bearer $INTERNAL_FUNCTION_SECRET" \
-            https://unstream.stream/.netlify/functions/recatalog-sweep)
+            https://unstream.netlify.app/.netlify/functions/recatalog-sweep)
 
           status=$(echo "$response" | tail -n1)
           body=$(echo "$response" | sed '$d')
