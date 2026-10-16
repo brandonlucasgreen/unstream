@@ -98,6 +98,12 @@ async function handleRequest(event: {
     .maybeSingle();
 
   if (pendingError) {
+    // 42P01 (table not there) pre-merge: the confirmation link can't be real yet — say so
+    // plainly instead of a bare 500 (same preview-goes-live-later situation as me-email.ts).
+    if (pendingError.code === '42P01' || /relation .* does not exist|schema cache/i.test(pendingError.message)) {
+      console.warn('[me-email-confirm] email_change_requests table not present yet — nothing to confirm');
+      return json(503, { error: 'Email changes are not available yet. Try again after the next release.' });
+    }
     console.error('[me-email-confirm] Error loading pending change:', pendingError.message);
     return json(500, { error: 'Could not look up the pending change' });
   }
@@ -114,7 +120,14 @@ async function handleRequest(event: {
   // before any crypto work. Safe to sweep pre-compare because the row is scoped to the
   // signed-in account (no cross-account oracle) and an expired row has no retry left.
   if (new Date(pending.expires_at).getTime() <= Date.now()) {
-    await client.from('email_change_requests').delete().eq('user_id', user.userId);
+    const { error: expiredSweepError } = await client
+      .from('email_change_requests')
+      .delete()
+      .eq('user_id', user.userId);
+    if (expiredSweepError) {
+      // Best-effort sweep (42P01 pre-merge = table not live yet); never gates the 410.
+      console.warn('[me-email-confirm] expired-row sweep skipped:', expiredSweepError.message);
+    }
     return json(410, { error: 'This confirmation link has expired. Start a new email change from Settings.' });
   }
 
@@ -148,8 +161,15 @@ async function handleRequest(event: {
   if (updateError) {
     if (DUPLICATE_EMAIL_ERROR.test(updateError.message)) {
       // Someone else holds the address now (e.g. they confirmed their own change to it
-      // first). The pending row can never succeed; delete it and say so plainly.
-      await client.from('email_change_requests').delete().eq('user_id', user.userId);
+      // first). The pending row can never succeed; delete it and say so plainly. The
+      // delete is best-effort (42P01 pre-merge = table not live yet) — the 409 stands.
+      const { error: dupSweepError } = await client
+        .from('email_change_requests')
+        .delete()
+        .eq('user_id', user.userId);
+      if (dupSweepError) {
+        console.warn('[me-email-confirm] duplicate-conflict row sweep skipped:', dupSweepError.message);
+      }
       return json(409, {
         error: 'That email address is already on another Unstream account. The pending change was cancelled — start a new one from Settings with a different address.',
       });

@@ -112,9 +112,21 @@ async function handleRequest(event: {
       console.error('[me-settings] Error fetching username:', usernameResult.error.message);
       return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
-    if (pendingResult.error) {
+    // pendingResult.error is non-fatal when it's just the table not existing yet: the
+    // email_change_requests migration lands with the merge (supabase-migrate.yml on main),
+    // and pre-merge previews run branch code against the production database — which lacks
+    // the table until then. A missing table must NOT take the whole Settings payload down
+    // (launch blocker, 2026-10-16: 500 + hidden email on the #609 preview). Postgres 42P01 =
+    // undefined_table.
+    const PENDING_TABLE_MISSING =
+      pendingResult.error?.code === '42P01' ||
+      /relation .* does not exist|schema cache/i.test(pendingResult.error?.message || '');
+    if (pendingResult.error && !PENDING_TABLE_MISSING) {
       console.error('[me-settings] Error fetching pending email change:', pendingResult.error.message);
       return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
+    }
+    if (PENDING_TABLE_MISSING) {
+      console.warn('[me-settings] email_change_requests table not present yet — pendingEmailChange reported as null');
     }
 
     // pendingEmailChange is only ever an unexpired request, so the Settings page can show

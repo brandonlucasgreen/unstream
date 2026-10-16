@@ -147,6 +147,45 @@ describe('me-settings handler', () => {
     expect(gt).toHaveBeenCalledWith('expires_at', expect.any(String));
   });
 
+  it('tolerates a missing email_change_requests table (pre-merge preview)', async () => {
+    // Until the migration lands with the merge, prod runs without the table. The pending
+    // check failing there must NOT take down the whole settings payload (launch blocker
+    // 2026-10-16: 500 + hidden email on the #609 preview) — 42P01 degrades to null.
+    mocks.mockFrom.mockImplementation((table: string) => {
+      if (table === 'email_change_requests') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              gt: vi.fn(() => ({
+                maybeSingle: vi.fn().mockResolvedValue({
+                  data: null,
+                  error: { code: '42P01', message: 'relation "email_change_requests" does not exist' },
+                }),
+              })),
+            })),
+          })),
+        };
+      }
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { username: 'kidlightbulbs', location: null },
+              error: null,
+            }),
+          })),
+        })),
+      };
+    });
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(200);
+    const body = JSON.parse(res!.body);
+    expect(body.pendingEmailChange).toBe(null);
+    expect(body.email).toBe('test@example.com');
+    expect(body.username).toBe('kidlightbulbs');
+  });
+
   it('returns null username and location when user has no username row', async () => {
     stubTables();
 

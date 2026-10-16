@@ -74,6 +74,12 @@ async function handleRequest(event: {
       .delete()
       .eq('user_id', user.userId);
     if (error) {
+      // Missing table (42P01) pre-merge: cancelling a pending change is a no-op when the
+      // feature isn't live yet, so treat it as cancelled rather than erroring.
+      if (error.code === '42P01' || /relation .* does not exist|schema cache/i.test(error.message)) {
+        console.warn('[me-email] email_change_requests table not present yet — cancel treated as no-op');
+        return json(200, { cancelled: true });
+      }
       console.error('[me-email] Error deleting pending change:', error.message);
       return json(500, { error: 'Could not cancel the pending change' });
     }
@@ -122,6 +128,14 @@ async function handleRequest(event: {
     );
 
   if (insertError) {
+    // 42P01 = undefined_table: the email_change_requests migration lands with the merge
+    // (supabase-migrate.yml on main). Pre-merge previews run branch code against prod,
+    // where the table doesn't exist yet — say so plainly instead of a bare 500 (launch
+    // blocker fix, 2026-10-16).
+    if (insertError.code === '42P01' || /relation .* does not exist|schema cache/i.test(insertError.message)) {
+      console.warn('[me-email] email_change_requests table not present yet — email changes are not live');
+      return json(503, { error: 'Email changes are not available yet. Try again after the next release.' });
+    }
     console.error('[me-email] Error storing pending change:', insertError.message);
     return json(500, { error: 'Could not start the email change' });
   }

@@ -161,6 +161,32 @@ describe('me-email handler', () => {
     expect(mocks.mockSendEmail).not.toHaveBeenCalled();
   });
 
+  it('returns 503 with a plain message when the table is not live yet (42P01)', async () => {
+    // Pre-merge previews run branch code against prod, where email_change_requests
+    // doesn't exist until the migration lands with the merge — say so, don't 500.
+    const upsert = {
+      upsert: vi.fn().mockResolvedValue({ data: null, error: { code: '42P01', message: 'relation "email_change_requests" does not exist' } }),
+    };
+    stubTableSequence([upsert]);
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(503);
+    expect(JSON.parse(res!.body).error).toContain('not available yet');
+    expect(mocks.mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it('DELETE tolerates a missing table as a no-op cancel (42P01)', async () => {
+    mocks.mockFrom.mockImplementation(() => ({
+      delete: vi.fn(() => ({
+        eq: vi.fn().mockResolvedValue({ data: null, error: { code: '42P01', message: 'relation "email_change_requests" does not exist' } }),
+      })),
+    }));
+
+    const res = await handler({ ...validEvent, httpMethod: 'DELETE' });
+    expect(res!.statusCode).toBe(200);
+    expect(JSON.parse(res!.body).cancelled).toBe(true);
+  });
+
   it('DELETE cancels the pending change', async () => {
     const del = rollbackBuilder();
     stubTableSequence([del]);
