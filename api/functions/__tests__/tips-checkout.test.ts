@@ -12,9 +12,19 @@ const mocks = vi.hoisted(() => ({
   authenticateBearerFast: vi.fn(),
   captureException: vi.fn(),
   captureMessage: vi.fn(),
+  // The flag store, read the way the real one reads it: a Map standing in for the
+  // `feature-flags` hash (UNS-215).
+  flagStore: new Map<string, unknown>(),
+  hgetall: vi.fn(),
 }));
 
 vi.mock('../db', () => ({ getClient: () => db.client }));
+// Redis is stubbed rather than reached, and the stub drives the real feature-flags module so the
+// gate these tests exercise is the shipping one.
+vi.mock('../redis', () => ({
+  getRedis: () => ({ hgetall: (key: string) => mocks.hgetall(key) }),
+  reportRedisFailure: vi.fn(),
+}));
 vi.mock('../ratelimit', () => ({ checkRateLimit: mocks.checkRateLimit, getClientIp: () => '203.0.113.9' }));
 vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
@@ -46,6 +56,12 @@ beforeEach(() => {
   vi.resetAllMocks();
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.authenticateBearerFast.mockResolvedValue(null);
+  // Tips are live for everything below except the gate tests: the flag is on unless a test says
+  // otherwise, so these stay tests about tips rather than about the rollout.
+  mocks.flagStore.clear();
+  mocks.flagStore.set('tips', 'on');
+  mocks.hgetall.mockImplementation(async (key: string) =>
+    key === 'feature-flags' ? Object.fromEntries(mocks.flagStore) : null);
   process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
   process.env.URL = 'https://unstream.stream';
   fetchMock.mockReset();
@@ -213,5 +229,63 @@ describe('GET — the tip page', () => {
     expect(body.takingTips).toBe(false);
     expect(body.feeBasisPoints).toBeUndefined();
     expect(body.artist.name).toBe('Kid Lightbulbs');
+  });
+});
+
+// UNS-215: the whole feature is admin-only while the flag is off, and these two surfaces are the
+// ones a fan reaches directly (the tip page and the button behind it). Off is the pre-rollout
+// state: this artist is fully set up to take tips, and neither surface offers one.
+describe('the UNS-215 gate', () => {
+  const getPage = (slug: string) =>
+    handler({ httpMethod: 'GET', headers: {}, body: null, queryStringParameters: { slug } });
+
+  it('answers the tip page with no tip, keeping the shape old clients know', async () => {
+    seedTippableArtist({ fee_basis_points: 250 });
+    mocks.flagStore.set('tips', 'off');
+
+    const res = await getPage('kid-lightbulbs');
+    const body = JSON.parse(res.body);
+
+    expect(res.statusCode).toBe(200);
+    expect(body.takingTips).toBe(false);
+    // Nothing an old client could render as a tip form.
+    expect(body.feeBasisPoints).toBeUndefined();
+    expect(body.goals).toBeUndefined();
+    expect(body.presetsCents).toBeUndefined();
+    expect(body.minCents).toBeUndefined();
+    // The artist itself still loads, so the page isn't a dead end.
+    expect(body.artist.name).toBe('Kid Lightbulbs');
+  });
+
+  it('refuses to create a payment, without a URL and without reaching Stripe', async () => {
+    seedTippableArtist();
+    mocks.flagStore.set('tips', 'off');
+
+    const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
+
+    // 409, the answer every other refusal here gives — the client already shows its message.
+    expect(res.statusCode).toBe(409);
+    expect(JSON.parse(res.body).error).toBe("This artist can't take tips right now.");
+    expect(res.body).not.toContain('checkout.stripe.com');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('hides both surfaces when the flag store itself cannot be read', async () => {
+    // Fail closed: a Redis outage is not a reason to start charging cards.
+    seedTippableArtist();
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+
+    expect(JSON.parse((await getPage('kid-lightbulbs')).body).takingTips).toBe(false);
+    expect((await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 })).statusCode).toBe(409);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('serves the tip and the payment form while the flag is on', async () => {
+    seedTippableArtist();
+
+    expect(JSON.parse((await getPage('kid-lightbulbs')).body).takingTips).toBe(true);
+    const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).url).toBe('https://checkout.stripe.com/c/pay/cs_1');
   });
 });

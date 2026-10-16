@@ -23,6 +23,7 @@ import { authenticateBearerFast, buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isStripeRejection, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { getGoals, tipEligibility } from './tips-db';
+import { getFeatureFlag } from './feature-flags';
 import { respond, siteUrl } from './tips-http';
 import {
   ONE_OFF_MAX_CENTS,
@@ -57,8 +58,12 @@ async function handleRequest(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
 
   try {
-    if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? ''));
-    if (event.httpMethod === 'POST') return withCors(await createCheckout(event));
+    // UNS-215: the flag gates this surface as well. A flag that is off — or a flag store that
+    // cannot be read, since that store fails closed — means no tip page and no payment form,
+    // with no eligibility read and no Stripe call.
+    const tipsFlagOn = await getFeatureFlag('tips');
+    if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? '', tipsFlagOn));
+    if (event.httpMethod === 'POST') return withCors(await createCheckout(event, tipsFlagOn));
     return withCors(respond(405, { error: 'Method not allowed' }));
   } catch (err) {
     Sentry.captureException(err, {
@@ -75,13 +80,15 @@ async function handleRequest(event: HandlerEvent) {
   }
 }
 
-async function readTipPage(slug: string) {
+async function readTipPage(slug: string, tipsFlagOn: boolean) {
   if (!SLUG_REGEX.test(slug)) return respond(400, { error: 'Invalid artist' });
   const eligibility = await tipEligibility(slug);
   if (!eligibility.ok && !eligibility.artist) return respond(eligibility.status, { error: eligibility.reason });
 
   const artist = eligibility.artist!;
-  if (!eligibility.ok) {
+  // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
+  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets.
+  if (!tipsFlagOn || !eligibility.ok) {
     return respond(200, { artist, takingTips: false });
   }
   const client = getClient()!;
@@ -96,7 +103,12 @@ async function readTipPage(slug: string) {
   });
 }
 
-async function createCheckout(event: HandlerEvent) {
+async function createCheckout(event: HandlerEvent, tipsFlagOn: boolean) {
+  // First, before the body is even parsed: while the flag is off there is no way to start a
+  // payment. A 409 with the same words every other refusal uses — the answer an old client
+  // already knows how to show, and nothing that looks like a session it could redirect to.
+  if (!tipsFlagOn) return respond(409, { error: "This artist can't take tips right now." });
+
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(event.body || '{}');
