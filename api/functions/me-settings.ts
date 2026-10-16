@@ -85,25 +85,42 @@ async function handleRequest(event: {
   try {
     // Read username + location from public.usernames (PostgREST-accessible table).
     // Email and has_password already came back with the token validation above.
-    const { data: usernameRow, error: usernameError } = await client
-      .from('usernames')
-      .select('username, location')
-      .eq('user_id', user.userId)
-      .maybeSingle();
+    // A pending email change (UNS-212) means the Settings page should show the
+    // "confirmation sent to <new address>" notice instead of a quiet success.
+    const [usernameResult, pendingResult] = await Promise.all([
+      client
+        .from('usernames')
+        .select('username, location')
+        .eq('user_id', user.userId)
+        .maybeSingle(),
+      client
+        .from('email_change_requests')
+        .select('new_email')
+        .eq('user_id', user.userId)
+        .maybeSingle(),
+    ]);
 
-    if (usernameError) {
-      console.error('[me-settings] Error fetching username:', usernameError.message);
+    if (usernameResult.error) {
+      console.error('[me-settings] Error fetching username:', usernameResult.error.message);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
+    }
+    if (pendingResult.error) {
+      console.error('[me-settings] Error fetching pending email change:', pendingResult.error.message);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
 
+    // Expired rows still read as pending here; the confirm endpoint enforces expiry, and
+    // me-email sweeps stale rows on its next use. Showing "check <address> until <date>"
+    // for a few stale hours is harmless.
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
       body: JSON.stringify({
-        username: usernameRow?.username || null,
-        location: usernameRow?.location ?? null,
+        username: usernameResult.data?.username || null,
+        location: usernameResult.data?.location ?? null,
         email: user.email,
         hasPassword: user.hasPassword,
+        pendingEmailChange: pendingResult.data?.new_email ?? null,
       }),
     };
   } catch (error) {

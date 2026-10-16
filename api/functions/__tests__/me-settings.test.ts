@@ -81,12 +81,13 @@ describe('me-settings handler', () => {
       data: { user: { id: 'user-1', email: 'test@example.com', user_metadata: { has_password: true } } },
       error: null,
     });
-    mocks.mockFrom.mockReturnValue({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: vi.fn(() => Promise.resolve({ data: { username: 'kidlightbulbs', location: 'Brooklyn, NY' }, error: null })),
-        })),
-      })),
+    mocks.mockFrom.mockImplementation((table: string) => {
+      const maybeSingle = vi.fn().mockResolvedValue(
+        table === 'usernames'
+          ? { data: { username: 'kidlightbulbs', location: 'Brooklyn, NY' }, error: null }
+          : { data: null, error: null },
+      );
+      return { select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) })) };
     });
 
     const res = await handler(validEvent);
@@ -96,6 +97,29 @@ describe('me-settings handler', () => {
     expect(body.location).toBe('Brooklyn, NY');
     expect(body.email).toBe('test@example.com');
     expect(body.hasPassword).toBe(true);
+    expect(body.pendingEmailChange).toBe(null);
+  });
+
+  it('includes the pending email-change address when one exists', async () => {
+    mocks.mockAuthGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', email: 'test@example.com' } },
+      error: null,
+    });
+    mocks.mockFrom.mockImplementation((table: string) => {
+      const maybeSingle = vi.fn().mockResolvedValue(
+        table === 'usernames'
+          ? { data: null, error: null }
+          : { data: { new_email: 'new@example.com' }, error: null },
+      );
+      return { select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) })) };
+    });
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(200);
+    const body = JSON.parse(res!.body);
+    expect(body.pendingEmailChange).toBe('new@example.com');
+    // The current email stays the primary until confirmation flips it.
+    expect(body.email).toBe('test@example.com');
   });
 
   it('returns null username and location when user has no username row', async () => {

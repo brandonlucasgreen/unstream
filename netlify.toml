@@ -269,6 +269,20 @@
   to = "/.netlify/functions/me-password"
   status = 200
 
+# Email change (UNS-212): propose an address + confirmation email (POST), cancel a pending
+# change (DELETE). The confirmation itself goes through /api/me/email/confirm below.
+[[redirects]]
+  from = "/api/me/email"
+  to = "/.netlify/functions/me-email"
+  status = 200
+
+# Confirming a pending email change — called by /settings when the confirmation link from
+# the emailed token lands there with ?confirm_email=<token>.
+[[redirects]]
+  from = "/api/me/email/confirm"
+  to = "/.netlify/functions/me-email-confirm"
+  status = 200
+
 # Bandcamp collection connection (Subsonic beta). The connect POST carries a credential,
 # which is why it's proxied server-side and stored encrypted — requires
 # BANDCAMP_CREDENTIAL_KEY (see api/functions/credential-crypto.ts).

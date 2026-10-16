@@ -128,6 +128,20 @@ export async function updatePassword(newPassword: string): Promise<{ error: stri
 }
 
 /**
+ * Ask Supabase for a fresh session after the server-side admin API changed the account's
+ * email (UNS-212). The held access token still carries the old email in its claims until
+ * it expires (~1h); a refresh re-issues one with the new address, and the USER_UPDATED
+ * event refreshes `user` in AuthContext. No re-login needed.
+ */
+export async function refreshSessionAfterEmailChange(): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { data, error } = await supabase.auth.refreshSession();
+  return { error: error?.message ?? (data.session ? null : 'No session returned') };
+}
+
+/**
  * Record on the account that the dashboard welcome was dismissed. `data` is merged into
  * `user_metadata` by Supabase, so this leaves `has_password` alone. The resulting
  * USER_UPDATED event is what refreshes `user` in AuthContext.
