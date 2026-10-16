@@ -71,6 +71,8 @@ export function EmailChangeForm({ accessToken, currentEmail, pendingEmail, onPen
   }
 
   async function cancelChange() {
+    // clear success up front: a failed cancel must not leave the previous "confirmation
+    // sent" line sitting above the error (fix list item 6 on UNS-212).
     setError(null);
     setSuccess(null);
     setLoading(true);
@@ -79,7 +81,11 @@ export function EmailChangeForm({ accessToken, currentEmail, pendingEmail, onPen
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${accessToken}` },
       });
-      if (response.ok) {
+      if (response.status === 429) {
+        // Same rate-limit tier as requestChange — say it's backpressure rather than failing
+        // with a generic "could not cancel".
+        setError('Too many requests. Please wait a minute and try again.');
+      } else if (response.ok) {
         onPendingChange(null);
       } else {
         const data = await response.json().catch(() => ({}));

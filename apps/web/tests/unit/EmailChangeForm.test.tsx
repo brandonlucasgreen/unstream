@@ -162,6 +162,52 @@ describe('EmailChangeForm', () => {
     // The parent keeps showing the banner since nothing changed.
     expect(mockOnPendingChange).not.toHaveBeenCalled();
   });
+
+  it('surfaces the rate-limit message when cancelling is throttled', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      json: async () => ({ error: 'Too many requests' }),
+    });
+
+    renderForm({ pendingEmail: 'pending@example.com' });
+
+    fireEvent.click(screen.getByText('Cancel change'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Too many requests. Please wait a minute and try again.')).not.toBeNull();
+    });
+    expect(mockOnPendingChange).not.toHaveBeenCalled();
+  });
+
+  it('clears a prior success message when a cancel fails', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 202,
+        json: async () => ({ pending: true, new_email: 'newer@example.com' }),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: 'Could not cancel the pending change' }),
+      });
+
+    renderForm({ pendingEmail: 'pending@example.com' });
+
+    fireEvent.change(screen.getByLabelText('New email address'), { target: { value: 'newer@example.com' } });
+    fireEvent.click(screen.getByText('Change email'));
+    await waitFor(() => {
+      expect(screen.getByText(/Confirmation sent to newer@example\.com/)).not.toBeNull();
+    });
+
+    fireEvent.click(screen.getByText('Cancel change'));
+    await waitFor(() => {
+      expect(screen.getByText('Could not cancel the pending change')).not.toBeNull();
+    });
+    // No stale "confirmation sent" line left above the failure.
+    expect(screen.queryByText(/Confirmation sent to/)).toBeNull();
+  });
 });
 
 export {};

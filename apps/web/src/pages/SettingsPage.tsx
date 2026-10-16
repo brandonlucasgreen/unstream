@@ -35,8 +35,10 @@ export function SettingsPage() {
   // server without a refetch; the first load seeds it from the settings payload.
   const [pendingEmailChange, setPendingEmailChange] = useState<string | null>(null);
   // ?confirm_email=<token> arrives from the link in the confirmation email. The confirm
-  // POST runs during load; the outcome renders as the banner below.
-  const [searchParams] = useSearchParams();
+  // POST runs during load; the outcome renders as the banner below. The initial banner state
+  // derives from this param, so any visit that arrives without the param starts with no
+  // banner — and the param is cleared from the router once this load has handled it.
+  const [searchParams, setSearchParams] = useSearchParams();
   const confirmToken = searchParams.get('confirm_email');
   const [confirmStatus, setConfirmStatus] = useState<'working' | 'success' | 'error' | null>(
     confirmToken ? 'working' : null,
@@ -71,8 +73,8 @@ export function SettingsPage() {
     loadSettings();
   }, [session, authLoading]);
 
-  // Applying a confirmation link: POST the token, then scrub it from the URL so a reload
-  // or a shared link can't replay a used token — /settings#email-change shows the outcome.
+  // Applying a confirmation link: POST the token, then drop it from the URL so a reload
+  // or a shared link can't replay a used token — the banner below shows the outcome.
   useEffect(() => {
     if (authLoading || !session || !confirmToken) return;
 
@@ -92,6 +94,13 @@ export function SettingsPage() {
           setConfirmStatus('success');
           setConfirmMessage(`Your email is now ${data.email || 'updated'}. Sign-in and notification emails go to the new address.`);
           setPendingEmailChange(null);
+          // Seed the new address straight away: the settings GET fired on mount may have
+          // returned the pre-change address, and both "Signed in as" and the form's
+          // duplicate check read settings.email. The session refresh below re-runs the
+          // settings load, which keeps this honest (fix list item 4 on UNS-212).
+          if (typeof data.email === 'string' && data.email) {
+            setSettings((prev) => (prev ? { ...prev, email: data.email } : prev));
+          }
           // Pick up a re-issued session so the JWT's email claim matches immediately. Best
           // effort: the held token stays valid until it expires, and AuthContext refreshes
           // it on the next authenticated call regardless.
@@ -115,15 +124,15 @@ export function SettingsPage() {
         setConfirmStatus('error');
         setConfirmMessage('Network error while confirming. Try the link again.');
       }
-      // Drop the token from the address bar. history.replaceState keeps this one render —
-      // setSearchParams would re-run effects; the banner already holds the outcome.
-      window.history.replaceState(null, '', '/settings#email-change');
+      // Drop the token from the URL — through the router, not history.replaceState, so the
+      // router's location forgets it too. Otherwise a remount that still carries the used
+      // token re-runs this POST and re-shows a stale (and now failing) banner (fix list
+      // item 5 on UNS-212). With no token left the effect above returns early, so the burned
+      // token is never posted twice; the outcome banner already holds this render's result.
+      setSearchParams({}, { replace: true });
     }
     confirmChange();
-    // confirmToken/session intentionally the only triggers: rerunning on state changes
-    // would re-post a (now burned) token.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, authLoading, confirmToken]);
+  }, [session, authLoading, confirmToken, setSearchParams]);
 
   if (!authLoading && !session) {
     return <Navigate to="/login" replace />;
@@ -151,9 +160,8 @@ export function SettingsPage() {
             </div>
           )}
 
-          {/* Email-change confirmation outcome. Shown until the next navigation; the Email
-              section below carries the #email-change anchor the confirmation link's URL
-              fragment points at (the token part is scrubbed after use). */}
+          {/* Email-change confirmation outcome. Shown for the visit the link opened; the
+              Email section below is where the pending/new state lives afterwards. */}
           {confirmStatus !== null && (
             <div
               role="status"
