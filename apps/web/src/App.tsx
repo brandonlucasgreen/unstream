@@ -445,6 +445,13 @@ function App() {
                   <div className="flex-1">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="flex gap-3">
+                        <div className="text-2xl">💛</div>
+                        <div>
+                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.tipTitle')}</h3>
+                          <p className="text-text-muted text-sm">{t('artist:features.tipBody')}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
                         <div className="text-2xl">🎧</div>
                         <div>
                           <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.detectionTitle')}</h3>
