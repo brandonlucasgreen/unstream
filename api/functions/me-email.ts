@@ -13,13 +13,7 @@ import { randomBytes, createHash } from 'crypto';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { sendTransactionalEmail } from '../lib/resend';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 // Same shape as LoginPage's EMAIL_PATTERN — string-only early validation so the user gets
 // a specific message instead of a raw database or Supabase error.
@@ -39,27 +33,32 @@ export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-function json(statusCode: number, body: unknown) {
-  return {
-    statusCode,
-    headers: { ...CORS_HEADERS, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(body),
-  };
-}
-
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, not a module constant: the allowlisted origin depends on the caller (fix
+  // list item 1 on UNS-212 — never '*', these endpoints carry a user's Bearer token).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, DELETE, OPTIONS',
+  );
+
+  const json = (statusCode: number, body: unknown) => ({
+    statusCode,
+    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
+    body: JSON.stringify(body),
+  });
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // One verification, not two: resolveAccountRequest checks the token while deriving the
   // rate-limit bucket (see me-feed-token.ts for the established pattern).
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (!user) return json(401, { error: 'Not signed in' });
@@ -81,8 +80,14 @@ async function handleRequest(event: {
     return json(200, { cancelled: true });
   }
 
+  // POST and DELETE are the whole surface; anything else is a method error, not a missing
+  // resource (repo convention — see artist-releases.ts).
   if (event.httpMethod !== 'POST') {
-    return json(404, { error: 'Not found' });
+    return {
+      statusCode: 405,
+      headers: { ...corsHeaders, Allow: 'POST, DELETE, OPTIONS' },
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
   let body: Record<string, unknown>;
@@ -121,10 +126,11 @@ async function handleRequest(event: {
     return json(500, { error: 'Could not start the email change' });
   }
 
-  // Opportunistic cleanup: drop other users' expired rows so the table self-treats. A miss
-  // here (Redis-style) is fine — expiry is also enforced when confirming.
-  await client.from('email_change_requests').delete().lt('expires_at', new Date().toISOString());
-
+  // No inline sweep of expired rows: `expires_at` is indexed, but a write on every request
+  // just to garbage-collect is per-request write amplification for nothing. Expiry is
+  // enforced where it matters instead — the confirm endpoint rejects a stale link, and
+  // me-settings filters expired rows out of its read (fix list items 3 and 8 on UNS-212).
+  // A scheduled cleanup, if the table ever needs one, can be its own job.
   const confirmUrl = pendingConfirmLink(token);
   const emailResult = await sendTransactionalEmail({
     to: newEmail,

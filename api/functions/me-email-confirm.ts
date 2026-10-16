@@ -14,21 +14,7 @@ import { createClient } from '@supabase/supabase-js';
 import { createHash, timingSafeEqual } from 'crypto';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
-function json(statusCode: number, body: unknown) {
-  return {
-    statusCode,
-    headers: { ...CORS_HEADERS, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(body),
-  };
-}
+import { buildAccountCorsHeaders } from './account-cors';
 
 // Tokens are minted in me-email as randomBytes(32).toString('hex') — always 64 hex chars.
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
@@ -38,19 +24,39 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin — never '*' on an endpoint that takes a Bearer token
+  // (fix list item 1 on UNS-212).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, OPTIONS',
+  );
+
+  const json = (statusCode: number, body: unknown) => ({
+    statusCode,
+    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
+    body: JSON.stringify(body),
+  });
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // Any signed-in visitor can carry a token in from a link; the token itself is the
   // authorization, and the session says which account the change applies to. Strict-tier
   // rate limiting caps guessed-token floods.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'strict', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'strict', corsHeaders);
   if (rl.limited) return rl.response;
 
+  // POST is the whole surface; a wrong method is a 405, not a missing resource (repo
+  // convention — see artist-releases.ts). The 404 further down stays: that one means "no
+  // pending change for this account", which is a real not-found.
   if (event.httpMethod !== 'POST') {
-    return json(404, { error: 'Not found' });
+    return {
+      statusCode: 405,
+      headers: { ...corsHeaders, Allow: 'POST, OPTIONS' },
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
   if (!user) return json(401, { error: 'Sign in to confirm this email change.' });

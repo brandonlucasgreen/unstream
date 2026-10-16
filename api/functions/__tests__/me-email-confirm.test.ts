@@ -36,6 +36,11 @@ vi.mock('../ratelimit', () => ({
 
 import { handler } from '../me-email-confirm';
 
+// The handler's return type is a union over its branches, so header access needs a cast.
+function headersOf(response: { headers: unknown } | null | undefined): Record<string, string> {
+  return response!.headers as Record<string, string>;
+}
+
 // The token me-email would have emailed. The row stores sha256(token) as hex.
 const TOKEN = 'a'.repeat(64);
 const tokenHash = (t: string) => createHash('sha256').update(t).digest('hex');
@@ -190,9 +195,22 @@ describe('me-email-confirm handler', () => {
     expect(mocks.mockFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('returns 404 for non-POST methods', async () => {
+  it('returns 405 with an Allow header for non-POST methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'GET', body: null });
-    expect(res!.statusCode).toBe(404);
+    expect(res!.statusCode).toBe(405);
+    expect(headersOf(res).Allow).toBe('POST, OPTIONS');
+  });
+
+  it('scopes Access-Control-Allow-Origin to the site allowlist, never a wildcard', async () => {
+    stubTableSequence([selectBuilder({ data: null, error: null })]);
+
+    const res = await handler({
+      ...validEvent,
+      headers: { ...validEvent.headers, origin: 'https://evil.example' },
+    });
+    expect(headersOf(res)['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+    expect(headersOf(res)['Access-Control-Allow-Origin']).not.toBe('*');
+    expect(headersOf(res)['Access-Control-Allow-Credentials']).toBeUndefined();
   });
 
   it('handles OPTIONS preflight', async () => {

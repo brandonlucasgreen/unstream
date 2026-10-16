@@ -29,6 +29,11 @@ vi.mock('../../lib/resend', () => ({
 
 import { handler, hashToken, pendingConfirmLink } from '../me-email';
 
+// The handler's return type is a union over its branches, so header access needs a cast.
+function headersOf(response: { headers: unknown } | null | undefined): Record<string, string> {
+  return response!.headers as Record<string, string>;
+}
+
 describe('me-email handler', () => {
   const validEvent = {
     httpMethod: 'POST',
@@ -54,7 +59,8 @@ describe('me-email handler', () => {
   });
 
   // The handler talks to email_change_requests through a sequence of one-shot builders:
-  // POST happy path = [upsert, sweep delete], email-failure path adds a rollback delete.
+  // POST happy path = [upsert], the email-failure path adds a rollback delete. Expired rows
+  // are no longer swept in the request path (UNS-212 fix list item 8).
   function stubTableSequence(builders: unknown[]) {
     let call = 0;
     mocks.mockFrom.mockImplementation(() => {
@@ -66,9 +72,6 @@ describe('me-email handler', () => {
 
   const upsertBuilder = () => ({
     upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
-  });
-  const sweepBuilder = () => ({
-    delete: vi.fn(() => ({ lt: vi.fn().mockResolvedValue({ data: null, error: null }) })),
   });
   const rollbackBuilder = () => ({
     delete: vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ data: null, error: null }) })),
@@ -94,8 +97,7 @@ describe('me-email handler', () => {
 
   it('stores a pending change and emails the confirmation link to the new address', async () => {
     const upsert = upsertBuilder();
-    const sweep = sweepBuilder();
-    stubTableSequence([upsert, sweep]);
+    stubTableSequence([upsert]);
 
     const res = await handler(validEvent);
     expect(res!.statusCode).toBe(202);
@@ -112,9 +114,9 @@ describe('me-email handler', () => {
     expect(row.expires_at).toBeTruthy();
     expect(opts).toEqual({ onConflict: 'user_id' });
 
-    // The sweep targets expired rows only.
-    const sweepLt = (sweep.delete as ReturnType<typeof vi.fn>).mock.results[0].value.lt;
-    expect(sweepLt).toHaveBeenCalledWith('expires_at', expect.any(String));
+    // No sweep: the only table call is the upsert. Expiry is enforced at confirm and at the
+    // me-settings read instead (UNS-212 fix list items 3 and 8).
+    expect(mocks.mockFrom).toHaveBeenCalledTimes(1);
 
     // The email goes to the NEW address with a /settings?confirm_email=<token> link.
     const sent = mocks.mockSendEmail.mock.calls[0][0] as { to: string; subject: string; html: string; text: string };
@@ -129,8 +131,7 @@ describe('me-email handler', () => {
 
   it('lowercases the requested address before storing it', async () => {
     const upsert = upsertBuilder();
-    const sweep = sweepBuilder();
-    stubTableSequence([upsert, sweep]);
+    stubTableSequence([upsert]);
 
     await handler({ ...validEvent, body: JSON.stringify({ new_email: 'New@Example.COM' }) });
     const [row] = upsert.upsert.mock.calls[0] as [Record<string, unknown>, Record<string, unknown>];
@@ -140,9 +141,8 @@ describe('me-email handler', () => {
   it('rolls back the pending row and returns 502 when the email send fails', async () => {
     mocks.mockSendEmail.mockResolvedValue({ ok: false, error: 'Resend rejected' });
     const upsert = upsertBuilder();
-    const sweep = sweepBuilder();
     const rollback = rollbackBuilder();
-    stubTableSequence([upsert, sweep, rollback]);
+    stubTableSequence([upsert, rollback]);
 
     const res = await handler(validEvent);
     expect(res!.statusCode).toBe(502);
@@ -172,9 +172,10 @@ describe('me-email handler', () => {
     expect(delEq).toHaveBeenCalledWith('user_id', 'user-1');
   });
 
-  it('returns 404 for unknown methods', async () => {
+  it('returns 405 with an Allow header for unknown methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'PUT' });
-    expect(res!.statusCode).toBe(404);
+    expect(res!.statusCode).toBe(405);
+    expect(headersOf(res).Allow).toBe('POST, DELETE, OPTIONS');
   });
 
   it('handles OPTIONS preflight', async () => {
@@ -182,10 +183,29 @@ describe('me-email handler', () => {
     expect(res!.statusCode).toBe(204);
   });
 
+  it('scopes Access-Control-Allow-Origin to the site allowlist, never a wildcard', async () => {
+    stubTableSequence([upsertBuilder(), upsertBuilder()]);
+
+    const unknownOrigin = await handler({
+      ...validEvent,
+      headers: { ...validEvent.headers, origin: 'https://evil.example' },
+    });
+    expect(headersOf(unknownOrigin)['Access-Control-Allow-Origin']).toBe('https://unstream.stream');
+    expect(headersOf(unknownOrigin)['Access-Control-Allow-Origin']).not.toBe('*');
+    // Bearer-token endpoints must not invite credentials.
+    expect(headersOf(unknownOrigin)['Access-Control-Allow-Credentials']).toBeUndefined();
+
+    // A local dev origin is echoed back so `netlify dev` / Vite keep working.
+    const localOrigin = await handler({
+      ...validEvent,
+      headers: { ...validEvent.headers, origin: 'http://localhost:5173' },
+    });
+    expect(headersOf(localOrigin)['Access-Control-Allow-Origin']).toBe('http://localhost:5173');
+  });
+
   it('uses the account rate-limit tier', async () => {
     const upsert = upsertBuilder();
-    const sweep = sweepBuilder();
-    stubTableSequence([upsert, sweep]);
+    stubTableSequence([upsert]);
 
     await handler(validEvent);
     expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith('user:user-1', 'account', expect.any(Object));

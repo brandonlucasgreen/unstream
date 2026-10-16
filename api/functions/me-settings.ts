@@ -6,17 +6,7 @@ import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
-
-// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
-// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
-// non-API-key requests, which would break local dev and other origins using
-// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 // getUser(token) validates the token against the auth server and returns the
 // user's *current* record (not the stale token claims), so email and
@@ -54,8 +44,15 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin — never '*' on an endpoint that takes a Bearer token
+  // (fix list item 1 on UNS-212; the old wildcard here was borrowed debt from saved-artists).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
@@ -63,23 +60,29 @@ async function handleRequest(event: {
   // the rate-limit key first costs nothing to that: it verifies the JWT locally.
   const ip = getClientIp(event.headers);
   const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rlPromise = checkRateLimit(rlKey, 'account', CORS_HEADERS);
+  const rlPromise = checkRateLimit(rlKey, 'account', corsHeaders);
   const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
+  // GET is the whole surface; a wrong method is a 405, not a missing resource (repo
+  // convention — see artist-releases.ts).
   if (event.httpMethod !== 'GET') {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+    return {
+      statusCode: 405,
+      headers: { ...corsHeaders, Allow: 'GET, OPTIONS' },
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   const user = await userPromise;
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   try {
@@ -97,24 +100,28 @@ async function handleRequest(event: {
         .from('email_change_requests')
         .select('new_email')
         .eq('user_id', user.userId)
+        // Expired rows are filtered at read: a pending link that can no longer be confirmed
+        // must not keep showing as "waiting for confirmation". Nothing sweeps the table in
+        // the request path any more (fix list items 3 and 8 on UNS-212), so this read is
+        // where expiry is enforced on the settings side.
+        .gt('expires_at', new Date().toISOString())
         .maybeSingle(),
     ]);
 
     if (usernameResult.error) {
       console.error('[me-settings] Error fetching username:', usernameResult.error.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
     if (pendingResult.error) {
       console.error('[me-settings] Error fetching pending email change:', pendingResult.error.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load settings' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
     }
 
-    // Expired rows still read as pending here; the confirm endpoint enforces expiry, and
-    // me-email sweeps stale rows on its next use. Showing "check <address> until <date>"
-    // for a few stale hours is harmless.
+    // pendingEmailChange is only ever an unexpired request, so the Settings page can show
+    // "waiting for confirmation" without hedging about how stale the row might be.
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         username: usernameResult.data?.username || null,
         location: usernameResult.data?.location ?? null,
@@ -125,7 +132,7 @@ async function handleRequest(event: {
     };
   } catch (error) {
     console.error('[me-settings] Error:', error);
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 
