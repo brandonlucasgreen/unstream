@@ -48,6 +48,12 @@ We also link to a number of alternative services that can help you reduce your d
 On those days, Unstream shows the Bandcamp Friday payout on every Bandcamp link. If you've been meaning to buy something, that's the day to do it.`
   },
   {
+    title: "When I tip an artist, where does the money go?",
+    content: `Straight to that artist's own Stripe account — Unstream never holds it. The artist chooses whether Unstream keeps a small fee (up to 5%, usually 0%), and the fee is shown on the tip page before you pay. Your receipt comes from the artist's Stripe under their business name.
+
+Refunds and disputes are handled by the artist — their contact details are on your receipt. If you can't reach them, [email support](mailto:support@unstream.stream) and we'll pass it on.`
+  },
+  {
     title: "What are some of the other benefits of moving off a streaming service?",
     content: `Lots of them!
 - Save money
