@@ -19,6 +19,13 @@ import { buildAccountCorsHeaders } from './account-cors';
 // Tokens are minted in me-email as randomBytes(32).toString('hex') — always 64 hex chars.
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 
+// Shapes Supabase uses when the target address is already on another account. Matched
+// narrowly on purpose: `updateError.message` is free-form, and a match deletes the pending
+// row for good. A bare /\bexists\b/ catch-all also matched unrelated transient errors
+// ("relation ... does not exist") and cancelled a change a retry could still complete.
+const DUPLICATE_EMAIL_ERROR =
+  /already[\s\S]*?(?:registered|in use|exists)|email address[\s\S]*?already/i;
+
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -137,8 +144,7 @@ async function handleRequest(event: {
   });
 
   if (updateError) {
-    const alreadyRegistered = /already[\s\S]*(registered|in use)|already exists|\bexists\b/i.test(updateError.message);
-    if (alreadyRegistered) {
+    if (DUPLICATE_EMAIL_ERROR.test(updateError.message)) {
       // Someone else holds the address now (e.g. they confirmed their own change to it
       // first). The pending row can never succeed; delete it and say so plainly.
       await client.from('email_change_requests').delete().eq('user_id', user.userId);

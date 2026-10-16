@@ -185,6 +185,37 @@ describe('me-email-confirm handler', () => {
     expect(del.delete).toHaveBeenCalled();
   });
 
+  // Item 9: the duplicate shapes Supabase actually emits still map to 409 + cleanup.
+  it.each([
+    'user already exists',
+    'A user with this email address is already in use',
+    'email address "new@example.com" already exists',
+  ])('maps the duplicate shape %s to 409', async (message) => {
+    const sel = selectBuilder({ data: pendingRow(), error: null });
+    const del = deleteBuilder();
+    stubTableSequence([sel, del]);
+    mocks.mockAuthAdminUpdate.mockResolvedValue({ data: null, error: { message } });
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(409);
+    expect(del.delete).toHaveBeenCalled();
+  });
+
+  // Item 9: a transient failure that merely mentions "exists" must NOT be read as a
+  // duplicate — the old bare /\bexists\b/ catch-all cancelled the pending change for good.
+  it.each(['relation "email_change_requests" does not exist', 'column exists but is not writable'])(
+    'treats the non-duplicate error %s as a retryable 500',
+    async (message) => {
+      stubTableSequence([selectBuilder({ data: pendingRow(), error: null })]);
+      mocks.mockAuthAdminUpdate.mockResolvedValue({ data: null, error: { message } });
+
+      const res = await handler(validEvent);
+      expect(res!.statusCode).toBe(500);
+      // Row survives — the token is still good, the user can use the same link again.
+      expect(mocks.mockFrom).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('maps other update errors to 500 and leaves the row for a retry', async () => {
     stubTableSequence([selectBuilder({ data: pendingRow(), error: null })]);
     mocks.mockAuthAdminUpdate.mockResolvedValue({ data: null, error: { message: 'connection reset' } });
