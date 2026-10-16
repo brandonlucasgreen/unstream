@@ -13,6 +13,7 @@ import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-d
 import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
 import { getGoals, getTipsLiveSlugs } from './tips-db';
+import { getFeatureFlag } from './feature-flags';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -170,10 +171,16 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
     // Whether the artist takes tips, read alongside the releases. A failed read shows no Tip
     // button (reported inside getTipsLiveSlugs) rather than failing the page.
-    const [{ releases, total: releaseCount }, tipsLive] = await Promise.all([
+    //
+    // UNS-215: the tips flag gates this payload too. Off — or unreadable, since the flag store
+    // fails closed — renders `tips: { enabled: false, goals: [] }` and skips the tips query
+    // entirely. The flag read rides along with the releases read rather than costing its own
+    // round trip, and hiding tips never fails the rest of the page.
+    const [{ releases, total: releaseCount }, tipsFlagOn] = await Promise.all([
       getArtistReleases(artistRow.id, 60),
-      getTipsLiveSlugs([artistRow.slug]),
+      getFeatureFlag('tips'),
     ]);
+    const tipsLive = tipsFlagOn ? await getTipsLiveSlugs([artistRow.slug]) : null;
     const tipsEnabled = tipsLive?.has(artistRow.slug) ?? false;
     const goals = tipsEnabled ? await readOpenGoals(artistRow.id) : [];
 
