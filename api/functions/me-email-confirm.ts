@@ -157,8 +157,16 @@ async function handleRequest(event: {
   }
 
   // One-shot: burn the token. Anything failing past this point has already changed the
-  // email; a retried link will just report "no pending change".
-  await client.from('email_change_requests').delete().eq('user_id', user.userId);
+  // email, so a failed delete is logged, not surfaced — the update is idempotent on a
+  // repeat, and a stale row self-heals (either this row is replaced by the next request
+  // for the same account, or the next confirm attempt deletes it).
+  const { error: cleanupError } = await client
+    .from('email_change_requests')
+    .delete()
+    .eq('user_id', user.userId);
+  if (cleanupError) {
+    console.error('[me-email-confirm] pending-row cleanup failed', cleanupError.message);
+  }
 
   // The access token the client holds still carries the old email in its claims until it
   // expires (~1h). The client refreshes its session against the auth server after this

@@ -97,8 +97,8 @@ describe('me-email-confirm handler', () => {
       })),
     })),
   });
-  const deleteBuilder = () => ({
-    delete: vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ data: null, error: null }) })),
+  const deleteBuilder = (result: { data: unknown; error: unknown } = { data: null, error: null }) => ({
+    delete: vi.fn(() => ({ eq: vi.fn().mockResolvedValue(result) })),
   });
 
   it('returns 401 when not authenticated', async () => {
@@ -168,6 +168,25 @@ describe('me-email-confirm handler', () => {
       email_confirm: true,
     });
     expect(del.delete).toHaveBeenCalled();
+  });
+
+  // Item 10: a failed post-update cleanup is logged, never surfaced — the email is already
+  // changed, so the request still reports success and the stale row self-heals later.
+  it('logs a failed post-update cleanup and still returns 200', async () => {
+    const sel = selectBuilder({ data: pendingRow(), error: null });
+    const del = deleteBuilder({ data: null, error: { message: 'db down' } });
+    stubTableSequence([sel, del]);
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const res = await handler(validEvent);
+
+    expect(res!.statusCode).toBe(200);
+    expect(JSON.parse(res!.body).confirmed).toBe(true);
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[me-email-confirm] pending-row cleanup failed',
+      'db down',
+    );
+    errorSpy.mockRestore();
   });
 
   it('maps a "registered" update error to 409 and cancels the pending change', async () => {
