@@ -60,7 +60,7 @@ async function handleRequest(event: HandlerEvent) {
   try {
     // UNS-215: the flag gates this surface as well. A flag that is off — or a flag store that
     // cannot be read, since that store fails closed — means no tip page and no payment form,
-    // with no eligibility read and no Stripe call.
+    // and skips every tips-only read (fee/goals) plus the Stripe call.
     const tipsFlagOn = await getFeatureFlag('tips');
     if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? '', tipsFlagOn));
     if (event.httpMethod === 'POST') return withCors(await createCheckout(event, tipsFlagOn));
@@ -87,7 +87,9 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
 
   const artist = eligibility.artist!;
   // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
-  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets.
+  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. The one
+  // artist read stays — the response body needs it; what's skipped is every tips-only read
+  // (fee/goals) and the Stripe call.
   if (!tipsFlagOn || !eligibility.ok) {
     return respond(200, { artist, takingTips: false });
   }

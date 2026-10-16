@@ -1245,7 +1245,12 @@ export function attachTipsEnabled(
   live: Set<string> | null,
   flagOn: boolean,
 ): void {
-  if (!flagOn || !live || live.size === 0) return;
+  if (!flagOn || !live || live.size === 0) {
+    // Flag off must mean "no result is ever marked" — clear any mark a future caller's
+    // reused objects might carry, rather than only skipping the marking.
+    for (const result of results) delete result.tipsEnabled;
+    return;
+  }
   for (const result of results) {
     const slug = resultPageSlug(result);
     if (slug && live.has(slug)) result.tipsEnabled = true;
