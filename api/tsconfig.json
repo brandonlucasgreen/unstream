@@ -69,6 +69,8 @@
     "functions/__tests__/artist-directory.test.ts",
     "functions/artist-merge.ts",
     "functions/admin-artist-duplicates.ts",
+    "functions/admin-flags.ts",
+    "functions/__tests__/admin-flags.test.ts",
     "functions/__tests__/artist-merge.test.ts",
     "functions/__tests__/persist-identity-match.test.ts",
     "functions/claim-artist.ts",
