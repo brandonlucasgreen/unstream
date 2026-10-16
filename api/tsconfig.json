@@ -37,6 +37,8 @@
     "functions/me-settings.ts",
     "functions/me-username.ts",
     "functions/me-password.ts",
+    "functions/me-email.ts",
+    "functions/me-email-confirm.ts",
     "functions/me-feed-token.ts",
     "functions/newsletter-subscribe.ts",
     "functions/__tests__/newsletter-subscribe.test.ts",
