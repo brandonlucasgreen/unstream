@@ -166,6 +166,11 @@ const FEATURES = [
     body:
       'A verified badge, a short URL, control over which links show, and analytics on searches, views, and click-throughs.',
   },
+  {
+    title: 'Fans can tip the artist, straight to them',
+    body:
+      'Artists taking tips show a Tip button on their page and results. Money goes from the fan’s card directly to the artist’s own Stripe account — Unstream never holds it — with the artist-chosen fee (usually 0%) shown before paying.',
+  },
 ];
 
 const NOT_LIST = [
@@ -174,7 +179,7 @@ const NOT_LIST = [
     'Not anti-Spotify evangelism.',
     'The framing is “reduce your dependency,” not “quit.” Most people who use Unstream still stream. That’s the point.',
   ],
-  ['Not a marketplace.', 'Unstream takes no cut of anything. It links out and gets out of the way.'],
+  ['Not a marketplace.', 'Unstream takes no cut, except for an optional percentage of tips. Artists can choose whether to share a cut with Unstream or not in their accounts.'],
   ['Not a discovery engine.', 'It’s for artists you already like, not artists you haven’t met.'],
   ['Not artists-first.', 'Artists have a feature set, but the audience is fans.'],
 ];
