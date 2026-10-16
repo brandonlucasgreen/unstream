@@ -124,5 +124,12 @@
     "description": "Search for an artist and you'll now see a short bio when we can find one: their own words from a claimed Unstream page, or from Bandcamp, Discogs or Wikipedia. Artists who've claimed their page can turn it off.",
     "date": "2026-09-30",
     "announced": true
+  },
+  {
+    "id": "artist-tips",
+    "title": "Tip artists, straight to them",
+    "description": "Artists connect their own Stripe account and a Tip button appears on their page and in results. You pay them directly — money lands in their own Stripe account, the artist-chosen fee (usually 0%) is shown before you pay, and your receipt comes from the artist's own Stripe. Tip from the site while you listen or from the Mac menu bar app.",
+    "date": "2026-10-16",
+    "announced": false
   }
 ]

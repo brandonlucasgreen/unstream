@@ -146,6 +146,12 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
         </p>
       )}
 
+      {breakdown && breakdown.applicationFeeCents === 0 && (
+        <p className="text-xs text-text-muted">
+          Unstream takes nothing here — {data.artist.name} hasn't chosen to share a fee. It's always shown before you pay.
+        </p>
+      )}
+
       {submitError && <p className="text-sm text-red-400">{submitError}</p>}
 
       <button
