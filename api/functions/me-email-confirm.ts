@@ -110,6 +110,14 @@ async function handleRequest(event: {
     });
   }
 
+  // Expiry first: a stale link cannot succeed whatever the token is, so short-circuit (410)
+  // before any crypto work. Safe to sweep pre-compare because the row is scoped to the
+  // signed-in account (no cross-account oracle) and an expired row has no retry left.
+  if (new Date(pending.expires_at).getTime() <= Date.now()) {
+    await client.from('email_change_requests').delete().eq('user_id', user.userId);
+    return json(410, { error: 'This confirmation link has expired. Start a new email change from Settings.' });
+  }
+
   // Compare SHA-256 digests, timing-safe. me-email stored sha256(token); hash this token
   // the same way and compare bytes. A mismatch must not delete the row — the real email
   // may still be in transit, or a newer request replaced this link's row.
@@ -121,12 +129,6 @@ async function handleRequest(event: {
     return json(403, {
       error: 'This confirmation link is not valid. Open the link from the newest confirmation email, or start a new email change from Settings.',
     });
-  }
-
-  if (new Date(pending.expires_at).getTime() <= Date.now()) {
-    // Right token, stale link: no retry can succeed, so sweep the row.
-    await client.from('email_change_requests').delete().eq('user_id', user.userId);
-    return json(410, { error: 'This confirmation link has expired. Start a new email change from Settings.' });
   }
 
   // --- Confirmed. Apply the change. ---

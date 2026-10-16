@@ -152,6 +152,25 @@ describe('me-email-confirm handler', () => {
     expect(del.delete).toHaveBeenCalled();
   });
 
+  // Item 11: expiry is checked before the timing-safe compare, so an expired row short-circuits
+  // to 410 even when the token does not match — no crypto work, and no update is attempted.
+  it('checks expiry before comparing the token', async () => {
+    const sel = selectBuilder({
+      data: pendingRow({
+        token_hash: tokenHash('b'.repeat(64)),
+        expires_at: new Date(Date.now() - 1000).toISOString(),
+      }),
+      error: null,
+    });
+    const del = deleteBuilder();
+    stubTableSequence([sel, del]);
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(410);
+    expect(del.delete).toHaveBeenCalled();
+    expect(mocks.mockAuthAdminUpdate).not.toHaveBeenCalled();
+  });
+
   it('applies the change via the admin API and burns the token on success', async () => {
     const sel = selectBuilder({ data: pendingRow(), error: null });
     const del = deleteBuilder();
