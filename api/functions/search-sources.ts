@@ -8,6 +8,7 @@ import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { safeFetch } from './safe-fetch';
 import { getTipsLiveSlugs } from './tips-db';
+import { getFeatureFlag } from './feature-flags';
 import { parseMirloArtistSearch } from './search-parsers';
 import {
   type SourceId,
@@ -1675,11 +1676,20 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
 
     // Which of these artists take tips, so a result card can show Tip without a request per
     // card. One read for the whole page; an empty set, with no read, while tips are off.
+    //
+    // UNS-215: the flag gates this surface too. Read it first, so a flag that is off — or a flag
+    // store that cannot be read, since that store fails closed — costs no Supabase query and
+    // leaves no result carrying tipsEnabled.
+    const tipsFlagOn = await getFeatureFlag('tips');
     const artistSlugs = finalResults
       .filter(r => r.type === 'artist')
       .map(resultPageSlug)
       .filter((s): s is string => !!s);
-    attachTipsEnabled(finalResults, await getTipsLiveSlugs(artistSlugs));
+    attachTipsEnabled(
+      finalResults,
+      tipsFlagOn ? await getTipsLiveSlugs(artistSlugs) : null,
+      tipsFlagOn,
+    );
 
     const response: SearchResponse = {
       query, // Return original query for display

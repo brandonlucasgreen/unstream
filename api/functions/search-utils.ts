@@ -1233,9 +1233,19 @@ export function resultPageSlug(result: AggregatedResult): string | undefined {
   return result.claimedSlug || result.knownSlug;
 }
 
-/** Mark the results whose artist is taking tips, in place. `live` is null when the read failed. */
-export function attachTipsEnabled(results: AggregatedResult[], live: Set<string> | null): void {
-  if (!live || live.size === 0) return;
+/**
+ * Mark the results whose artist is taking tips, in place. `live` is null when the read failed.
+ *
+ * `flagOn` is the UNS-215 gate and is required rather than defaulted on purpose: while the flag
+ * is off, tips are admin-only everywhere, and a default would let a new call site mark results by
+ * accident. Flag off means no result is ever marked, whatever `live` says.
+ */
+export function attachTipsEnabled(
+  results: AggregatedResult[],
+  live: Set<string> | null,
+  flagOn: boolean,
+): void {
+  if (!flagOn || !live || live.size === 0) return;
   for (const result of results) {
     const slug = resultPageSlug(result);
     if (slug && live.has(slug)) result.tipsEnabled = true;
