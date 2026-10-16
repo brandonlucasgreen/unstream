@@ -46,6 +46,8 @@
     "functions/__tests__/digest-feed.test.ts",
     "functions/release-detail.ts",
     "functions/redis.ts",
+    "functions/feature-flags.ts",
+    "functions/__tests__/feature-flags.test.ts",
     "functions/cache.ts",
     "functions/recatalog-sweep.ts",
     "functions/catalog-artist-background.ts",
