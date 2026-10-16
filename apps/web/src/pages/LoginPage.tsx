@@ -233,7 +233,7 @@ export function LoginPage() {
                     {savingTip ? (
                       <>New to Unstream? Send yourself a sign-in link and we'll create your account.</>
                     ) : (
-                      <>Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary hover:underline">Search for an artist</a> you like and click Save.</>
+                      <>Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary underline hover:no-underline">Search for an artist</a> you like and click Save.</>
                     )}
                   </p>
 

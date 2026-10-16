@@ -15,9 +15,9 @@ export function LegalConsent({ children }: { children?: React.ReactNode }) {
   return (
     <p className="text-xs text-text-muted text-center">
       By continuing you agree to Unstream's{' '}
-      <Link to="/terms" className="text-accent-primary hover:underline">Terms of Use</Link>
+      <Link to="/terms" className="text-accent-primary underline hover:no-underline">Terms of Use</Link>
       {' '}and{' '}
-      <Link to="/privacy-policy" className="text-accent-primary hover:underline">Privacy Policy</Link>.
+      <Link to="/privacy-policy" className="text-accent-primary underline hover:no-underline">Privacy Policy</Link>.
       {children ? <> {children}</> : null}
     </p>
   );
