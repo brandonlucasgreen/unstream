@@ -2,7 +2,7 @@
   "hero": {
     "title": "Directly support the artist you’re listening to",
     "titleHighlight": "right now",
-    "byline": "Unstream finds the places where your favorite music artists — not big tech companies — keep up to 97% of every sale."
+    "byline": "Unstream helps you tip & buy from the artists you love & discover — ensuring they, not big tech platforms, keep up to 97% of every sale."
   },
   "home": {
     "orSearch": "Or search artists anytime at the top of the page 🔎"
@@ -26,7 +26,9 @@
     "anonymousTitle": "Fully anonymous",
     "anonymousBody": "No account required. No personal data collected. Only anonymized searches and clicks — nothing else.",
     "freeBody": "Unstream is free because the point is getting money to artists, not charging you. If you find it useful, consider",
-    "freeSupportLink": "supporting its development"
+    "freeSupportLink": "supporting its development",
+    "tipTitle": "Leave a tip in seconds",
+    "tipBody": "Artists can accept tips on Unstream directly. Money lands in their own Stripe account with a small (0-5%) platform fee you can optionally cover."
   },
   "sources": {
     "heading": "Available sources",

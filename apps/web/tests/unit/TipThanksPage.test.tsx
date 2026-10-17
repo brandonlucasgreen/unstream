@@ -21,6 +21,8 @@ vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
 import { TipThanksPage } from 'src/pages/TipThanksPage';
 
+
+// UNS-219: the link points at the tipping question's FAQ anchor (/faq#tipping), not the terms.
 const fetchMock = vi.fn();
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
 
@@ -45,6 +47,7 @@ describe('TipThanksPage', () => {
     render(<TipThanksPage />);
     expect(screen.getByText(/comes by email from the artist's Stripe/)).toBeTruthy();
     expect(screen.getByText('support@unstream.stream').getAttribute('href')).toBe('mailto:support@unstream.stream');
+    expect(screen.getByText('How tipping works').closest('a')!.getAttribute('href')).toBe('/faq#tipping');
   });
 
   it('saves a signed-in fan’s tip by its session id', async () => {

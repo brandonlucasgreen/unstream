@@ -1,9 +1,21 @@
+import { useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { faqSections } from '../data/faq';
 import { markdownToHtml } from '../utils/markdownLight';
 
 export function FaqPage() {
+  // A deep link like /faq#tipping lands after the browser resolved the URL's hash, so scroll to the
+  // question it names once the sections exist. Same pattern as the changelog page.
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el instanceof HTMLDetailsElement) el.open = true;
+    el.scrollIntoView();
+  }, []);
+
   return (
     <div className="min-h-screen">
 
@@ -23,7 +35,7 @@ export function FaqPage() {
           {faqSections.length > 0 && (
             <div className="space-y-4">
               {faqSections.map((section, index) => (
-                <details key={index} className="group bg-surface-secondary rounded-xl border border-border">
+                <details key={index} id={section.anchor ?? `faq-${index}`} className="group bg-surface-secondary rounded-xl border border-border">
                   <summary className="flex items-center justify-between cursor-pointer p-4 text-text-primary font-medium hover:bg-bg-hover transition-colors rounded-xl">
                     {section.title}
                     <span className="ml-2 text-text-muted group-open:rotate-180 transition-transform">▼</span>

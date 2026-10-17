@@ -70,7 +70,10 @@ describe('ArtistTipsPage', () => {
     tips.connectStripe.mockReturnValue(new Promise(() => {}));
     renderAt('/artist-edit/kid-lightbulbs/tips?stripe=refresh');
     expect(await screen.findByText('Taking you back to Stripe…')).toBeTruthy();
-    expect(tips.connectStripe).toHaveBeenCalledTimes(1);
+    // "Taking you back…" renders in the same commit that queues the connectStripe passive
+    // effect, so the call can lag the text under CI load — wait for it instead of asserting
+    // synchronously (this raced once in CI: 2026-10-16 run 38947327677).
+    await waitFor(() => expect(tips.connectStripe).toHaveBeenCalledTimes(1));
     expect(tips.connectStripe).toHaveBeenCalledWith('tok', 'kid-lightbulbs', {});
     await waitFor(() => expect(location!.search).toBe(''));
     expect(tips.connectStripe).toHaveBeenCalledTimes(1);

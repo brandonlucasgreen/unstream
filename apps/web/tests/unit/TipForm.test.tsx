@@ -12,7 +12,11 @@ vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: null }) 
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
 import { TipForm } from 'src/components/TipForm';
+import { TIP_FAQ_ANCHOR } from 'src/data/faq';
 import type { TipPageData } from 'src/services/tips';
+
+// UNS-219: "How tipping works" links to the tipping question in the FAQ (stable anchor exported
+// from faq.ts, so removing the question fails this file's import rather than stranding the link).
 
 const OPEN_GOAL = '11111111-1111-4111-8111-111111111111';
 const data: TipPageData = {
@@ -53,6 +57,14 @@ describe('TipForm goal from the link', () => {
   it('ignores a goal id when the artist has no goals at all', async () => {
     render(<TipForm data={{ ...data, goals: [] }} initialGoalId={OPEN_GOAL} />);
     expect((await payAndReadBody()).goalId).toBeUndefined();
+  });
+});
+
+describe('TipForm "How tipping works" link', () => {
+  it('points at the tipping question in the FAQ, not the terms of use', () => {
+    render(<TipForm data={data} />);
+    const link = screen.getByText('How tipping works').closest('a')!;
+    expect(link.getAttribute('href')).toBe(`/faq#${TIP_FAQ_ANCHOR}`); // /faq#tipping
   });
 });
 
