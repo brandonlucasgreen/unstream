@@ -36,8 +36,8 @@ describe('normalizeSectionOrder', () => {
   it('an edit-page bug can never hide a section (omissions re-appended)', () => {
     expect(normalizeSectionOrder(['featured'])).toEqual([
       'featured',
-      'patronage',
       'bio',
+      'patronage',
       'marketplaces',
       'social',
     ]);
@@ -45,17 +45,18 @@ describe('normalizeSectionOrder', () => {
 });
 
 describe('resolveSectionOrder', () => {
-  it('defaults to patronage first when nothing stored', () => {
+  it('defaults to bio first when nothing stored (UNS-221 default order)', () => {
     expect(resolveSectionOrder(null)).toEqual([...DEFAULT_SECTION_ORDER]);
-    expect(DEFAULT_SECTION_ORDER[0]).toBe('patronage');
+    expect(DEFAULT_SECTION_ORDER[0]).toBe('bio');
+    expect(DEFAULT_SECTION_ORDER[2]).toBe('patronage');
   });
 
   it('applies the stored order when present', () => {
     expect(resolveSectionOrder(['social', 'bio'])).toEqual([
       'social',
       'bio',
-      'patronage',
       'featured',
+      'patronage',
       'marketplaces',
     ]);
   });

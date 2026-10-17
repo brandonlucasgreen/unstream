@@ -179,7 +179,7 @@ describe('GET /api/artist-page', () => {
       });
 
       const body = JSON.parse((await call('funkadelic')).body);
-      expect(body.sectionOrder).toEqual(['patronage', 'bio', 'featured', 'marketplaces', 'social']);
+      expect(body.sectionOrder).toEqual(['bio', 'featured', 'patronage', 'marketplaces', 'social']);
       // Legacy flat fields still render the same links for pre-UNS-221 clients (the Mac app):
       // every sectioned link appears in `links`.
       expect(body.links).toHaveLength(5);
