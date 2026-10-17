@@ -244,7 +244,7 @@ add ~1.5%, currency conversion ~1%**):
 | $10 | 59¢ | 5.9% |
 | $20 | 88¢ | 4.4% |
 
-- **One-off minimum $3; presets $5 / $10 / $20.** A one-off is always one charge.
+- **One-off minimum $3; presets $3 / $5 / $10** (changed from $5 / $10 / $20, 2026-10-17, UNS-218). A one-off is always one charge.
 - **Quick-tip presets $1 / $3 / $5.** Possible only because the tab combines them (§3.2).
 - **Tab charges are at least $3 per artist**, except the six-month carry-over.
 - **Unstream's fee: artist-chosen, 0–5%, default 0%.** Shown to the fan either way.

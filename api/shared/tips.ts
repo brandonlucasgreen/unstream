@@ -13,7 +13,8 @@ export const STRIPE_FIXED_CENTS = 30;
 export const ONE_OFF_MIN_CENTS = 300;
 /** A ceiling against typos and card-testing: $500. */
 export const ONE_OFF_MAX_CENTS = 50000;
-export const ONE_OFF_PRESETS_CENTS = [500, 1000, 2000];
+/** The preset buttons on the tip form: $3, $5, $10 (Brandon, 2026-10-17, UNS-218). */
+export const ONE_OFF_PRESETS_CENTS = [300, 500, 1000];
 
 /** Unstream's fee is the artist's choice: 0–5%, default 0. */
 export const MAX_FEE_BASIS_POINTS = 500;

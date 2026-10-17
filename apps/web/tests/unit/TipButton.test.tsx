@@ -25,7 +25,7 @@ beforeAll(() => {
 const fetchMock = vi.fn();
 const tipPage = {
   artist: { id: 'a1', slug: 'kid-lightbulbs', name: 'Kid Lightbulbs', imageUrl: null },
-  takingTips: true, feeBasisPoints: 0, presetsCents: [500, 1000, 2000], minCents: 300, maxCents: 50000,
+  takingTips: true, feeBasisPoints: 0, presetsCents: [300, 500, 1000], minCents: 300, maxCents: 50000,
   goals: [{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, status: 'open' }],
 };
 
@@ -51,11 +51,11 @@ describe('TipButton', () => {
     fireEvent(link, click);
     expect(click.defaultPrevented).toBe(true);
 
-    expect(await screen.findByRole('button', { name: /Pay \$10\.\d\d with Stripe/ })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /Pay \$5\.46 with Stripe/ })).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledWith('/api/tips/checkout?slug=kid-lightbulbs');
     expect(screen.getByRole('dialog').hasAttribute('open')).toBe(true);
 
-    fireEvent.click(screen.getByRole('button', { name: '$5' }));
+    fireEvent.click(screen.getByRole('button', { name: '$3' }));
     expect(parentClick).not.toHaveBeenCalled();
   });
 
