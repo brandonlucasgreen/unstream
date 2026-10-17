@@ -80,9 +80,15 @@ async function handleRequest(event: HandlerEvent) {
   // costs nothing and leaves nothing behind. The wording is the one this endpoint already uses for
   // "not yet", so a client shows the same message either way.
   //
+  // But the flag never gates the admin: every caller here already passed canSetUpTips above, which
+  // admits only the admin — so a plain flag check would let the flag lock the admin out of his own
+  // pilot onboarding, which is backwards. Off means "closed to whoever might come later", not
+  // "closed to the person launching it": the admin proceeds with the flag off, everyone else is
+  // already refused.
+  //
   // Opening this does not by itself let an artist take money: takingTips() still requires
   // tips_approved_at, which only an admin sets through /api/admin/tips.
-  if (!(await getFeatureFlag('tipsArtists'))) {
+  if (!canSetUpTips(user.email) && !(await getFeatureFlag('tipsArtists'))) {
     return respond(403, { error: "Tips aren't open to artists yet" });
   }
 
