@@ -11,6 +11,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
+import { getFeatureFlag } from './feature-flags';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
@@ -204,6 +205,15 @@ async function readSettings(client: SupabaseClient, artistId: string, artistName
 }
 
 async function updateSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string, body: Record<string, unknown>) {
+  // UNS-215: switching tips ON is the artist-side flag's business, and it is checked before
+  // anything else — the answer must not depend on whether Stripe happens to be connected yet.
+  // Switching them OFF is never gated: it is the kill switch, and the only way out for an artist
+  // who already went live after a rollout is pulled. Every other action here (the fee, both goal
+  // actions) stays open too. Fails closed, like the store it reads.
+  if (body.tipsEnabled === true && !(await getFeatureFlag('tipsArtists'))) {
+    return respond(403, { error: "Tips aren't open to artists yet" });
+  }
+
   const account = await getTipAccount(client, artistId);
   if (!account || account.deauthorized_at || account.user_id !== userId) return respond(409, { error: 'Connect Stripe first' });
 

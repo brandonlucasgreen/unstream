@@ -2,6 +2,10 @@
 // verified claim gets anywhere; the account is created as Standard with Stripe as controller,
 // only once, and only after the addendum is accepted in a supported country; the fee stays in
 // 0–5%; tips can't be switched on before Stripe enables charges; three open goals at most.
+//
+// UNS-215 adds one gate in front of onboarding: the artist-side flag (tipsArtists) has to be on
+// for a connect or for switching tips on, and it fails closed. It gates nothing else — disabling
+// tips, the fee and both goal actions stay open whatever it says.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createFakeDb, type FakeDb } from './fake-supabase';
@@ -14,8 +18,18 @@ const mocks = vi.hoisted(() => ({
   captureException: vi.fn(),
   captureMessage: vi.fn(),
   purgeCacheTags: vi.fn(),
+  // The flag store, read the way the real one reads it: a Map standing in for the
+  // `feature-flags` hash (UNS-215).
+  flagStore: new Map<string, unknown>(),
+  hgetall: vi.fn(),
 }));
 vi.mock('../db', () => ({ getClient: () => db.client, resolveOwnedArtist: mocks.resolveOwnedArtist }));
+// Redis is stubbed rather than reached, and the stub drives the real feature-flags module so the
+// gate these tests exercise is the shipping one.
+vi.mock('../redis', () => ({
+  getRedis: () => ({ hgetall: (key: string) => mocks.hgetall(key) }),
+  reportRedisFailure: vi.fn(),
+}));
 vi.mock('../ratelimit', () => ({ checkRateLimit: mocks.checkRateLimit, getClientIp: () => '203.0.113.9' }));
 vi.mock('../middleware', async importOriginal => ({
   ...(await importOriginal<typeof import('../middleware')>()),
@@ -53,6 +67,12 @@ beforeEach(() => {
         : { id: 'acct_new', charges_enabled: true, details_submitted: true, country: 'US' },
   ))));
   vi.stubGlobal('fetch', fetchMock);
+  // Tips onboarding is open for everything below except the gate tests: tipsArtists is on unless a
+  // test says otherwise, so these stay tests about onboarding rather than about the rollout.
+  mocks.flagStore.clear();
+  mocks.flagStore.set('tipsArtists', 'on');
+  mocks.hgetall.mockImplementation(async (key: string) =>
+    key === 'feature-flags' ? Object.fromEntries(mocks.flagStore) : null);
 });
 afterEach(() => { vi.unstubAllGlobals(); delete process.env.STRIPE_SECRET_KEY; delete process.env.ADMIN_EMAIL; });
 
@@ -382,5 +402,105 @@ describe('tips are private to the admin for now', () => {
   it('stays closed when ADMIN_EMAIL isn’t set at all', async () => {
     delete process.env.ADMIN_EMAIL;
     expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
+  });
+});
+
+// UNS-215: the artist-side flag, the half of the split that opens onboarding and the tips switch.
+describe('the tipsArtists gate', () => {
+  it('refuses to start onboarding while the flag is off, before any Stripe call', async () => {
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+
+    expect(res.statusCode).toBe(403);
+    expect(JSON.parse(res.body).error).toBe("Tips aren't open to artists yet");
+    expect(fetchMock).not.toHaveBeenCalled();
+    // Nothing was written: no account row, so nothing to clean up when the flag comes back on.
+    expect(db.tables.artist_tip_accounts ?? []).toEqual([]);
+  });
+
+  it('keeps onboarding closed when the flag store itself cannot be read', async () => {
+    // Fail closed: a Redis outage must not be the reason an onboarding endpoint goes live.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps onboarding closed while the field is missing from the hash', async () => {
+    // The state every flag starts in, and the one a new deployment is in.
+    mocks.flagStore.clear();
+
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('checks ownership before the flag, so a non-owner gets the ownership answer', async () => {
+    mocks.flagStore.set('tipsArtists', 'off');
+    mocks.resolveOwnedArtist.mockResolvedValue({ ok: false, status: 403, error: 'You do not own this profile' });
+
+    const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
+
+    expect(JSON.parse(res.body).error).toBe('You do not own this profile');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('refuses to switch tips on while the flag is off', async () => {
+    db.tables.artist_tip_accounts = [account()];
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    const res = await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true });
+
+    expect(res.statusCode).toBe(403);
+    expect(JSON.parse(res.body).error).toBe("Tips aren't open to artists yet");
+    expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(false);
+  });
+
+  it('answers the flag rather than "connect Stripe first" when the flag is off', async () => {
+    // Checked before the account read on purpose: whether tips may be switched on at all is not a
+    // question about this artist's Stripe state, and the flag is the more useful answer.
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
+  });
+
+  it('still answers 400 for a malformed tipsEnabled while the flag is off', async () => {
+    // The flag check matches the boolean `true` exactly, so a client bug is still the 400 it was
+    // rather than a 403 that hides it.
+    db.tables.artist_tip_accounts = [account()];
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: 'true' })).statusCode).toBe(400);
+  });
+
+  it('still lets an artist switch tips off while the flag is off', async () => {
+    // The kill switch must never depend on the flag: an artist who is already live has to be able
+    // to stop taking money even after the rollout is pulled.
+    db.tables.artist_tip_accounts = [account({ tips_enabled: true })];
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: false })).statusCode).toBe(200);
+    expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(false);
+  });
+
+  it('leaves the fee and both goal actions open while the flag is off', async () => {
+    db.tables.artist_tip_accounts = [account()];
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 100 })).statusCode).toBe(200);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000 })).statusCode).toBe(200);
+    expect((await put({ slug: 'kid-lightbulbs', action: 'closeGoal', goalId: '11111111-1111-4111-8111-111111111111' })).statusCode).toBe(200);
+  });
+
+  it('gates nothing on the read side: the dashboard still renders while the flag is off', async () => {
+    // The page has to keep working so an artist can see their state and switch tips off; only the
+    // two actions the flag owns refuse.
+    db.tables.artist_tip_accounts = [account({ tips_enabled: true })];
+    mocks.flagStore.set('tipsArtists', 'off');
+
+    const body = JSON.parse((await get()).body);
+    expect(body.state).toBe('awaiting_approval');
+    expect(body.tipsEnabled).toBe(true);
   });
 });
