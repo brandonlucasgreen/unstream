@@ -76,8 +76,11 @@ async function handleRequest(event: HandlerEvent) {
       },
     });
     // Stripe refusing the session (a 4xx) means something about the artist's account: retrying
-    // won't help the fan, so don't ask them to.
-    if (isStripeRejection(err)) return withCors(respond(409, { error: "This artist can't take tips right now." }));
+    // won't help the fan, so don't ask them to. The Stripe error code rides along (code only —
+    // codes are programmatic, documented identifiers meant for display; the raw message may carry
+    // account details we don't broadcast). The tip page surfaces it to the artist-side ops flow,
+    // and it turns "can't take tips" from a guess into a diagnosis when it happens in production.
+    if (isStripeRejection(err)) return withCors(respond(409, { error: "This artist can't take tips right now.", code: err.code ?? null }));
     return withCors(respond(502, { error: "Couldn't start the payment. Try again in a moment." }));
   }
 }

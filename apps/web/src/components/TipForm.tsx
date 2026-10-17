@@ -52,6 +52,10 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok || !body.url) {
+        // The 409 body can carry the Stripe error code when the artist's account itself refuses
+        // the payment (code only — a programmatic identifier, not account data). To Sentry AND to
+        // him in the UI text, so ops + artist both know WHY without a log dive.
+        if (body.code) console.warn('tips-checkout refused by Stripe:', body.code);
         setSubmitError(body.error ?? "Couldn't start the payment. Try again.");
         setSubmitting(false);
         return;
