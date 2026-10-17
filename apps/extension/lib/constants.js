@@ -32,6 +32,8 @@ export const SOURCE_CONFIG = {
   kofi: { icon: '☕', name: 'Ko-fi' },
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },
   liberapay: { icon: '🤝', name: 'Liberapay' },
+  venmo: { icon: '💵', name: 'Venmo' },
+  paypal: { icon: '🅿️', name: 'PayPal' },
   ampwall: { icon: '🔊', name: 'Ampwall' },
   subvert: { icon: '🌐', name: 'Subvert' },
   beatport: { icon: '🎛️', name: 'Beatport' },

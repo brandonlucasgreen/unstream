@@ -195,6 +195,23 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     payoutPercent: '~97%',
     homepageUrl: 'https://liberapay.com',
   },
+  // Profile-link-only patronage options: artists paste their own payment links on the edit page
+  // (UNS-217). No payout figure — personal payments carry no platform fee, and neither company
+  // publishes an artist share, so `payoutPercent` stays absent rather than guessed.
+  venmo: {
+    name: 'Venmo',
+    color: '#3D95CE',
+    icon: '💵',
+    category: 'patronage',
+    homepageUrl: 'https://venmo.com',
+  },
+  paypal: {
+    name: 'PayPal',
+    color: '#0070BA',
+    icon: '🅿️',
+    category: 'patronage',
+    homepageUrl: 'https://www.paypal.com',
+  },
 
   // Library
   hoopla: {

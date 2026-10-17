@@ -40,6 +40,9 @@ let platformCatalog: [String: PlatformConfig] = [
     "hoopla": PlatformConfig(name: "Hoopla", icon: "books.vertical", color: "#E31837", searchOnly: false),
     "patreon": PlatformConfig(name: "Patreon", icon: "heart", color: "#FF424D", searchOnly: false, artistPayoutPercent: "86-90%"),
     "liberapay": PlatformConfig(name: "Liberapay", icon: "hands.clap", color: "#F6C915", searchOnly: false, artistPayoutPercent: "~97%"),
+    // Profile-link-only patronage options (UNS-217): no payout figure — see platform-registry.ts.
+    "venmo": PlatformConfig(name: "Venmo", icon: "dollarsign", color: "#3D95CE", searchOnly: false),
+    "paypal": PlatformConfig(name: "PayPal", icon: "p.circle", color: "#0070BA", searchOnly: false),
     // Search-only platforms
     "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#1E1E24", searchOnly: true, artistPayoutPercent: "92-95%"),
     "subvert": PlatformConfig(name: "Subvert", icon: "globe", color: "#D9DBDD", searchOnly: true, artistPayoutPercent: "97%"),
