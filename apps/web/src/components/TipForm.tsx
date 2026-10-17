@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { GoalProgress } from './GoalProgress';
 import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
-import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
+import { formatUsd, ONE_OFF_PRESETS_CENTS, tipBreakdown } from '../../../../api/shared/tips';
 import type { TipPageData } from '../services/tips';
 
 // The tip itself (docs/specs/artist-patronage-spec.md §3.1, §5): an amount, an optional goal and the
@@ -17,7 +17,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
   // Only open goals are offered, so a `?goal=` that isn't one of them (closed, mistyped, another
   // artist's) starts with no goal rather than a selection the fan can't see.
   const openGoals = (data.goals ?? []).filter(goal => goal.status === 'open');
-  const [amountCents, setAmountCents] = useState(1000);
+  const [amountCents, setAmountCents] = useState(500);
   const [custom, setCustom] = useState('');
   const [coverFees, setCoverFees] = useState(true);
   const [goalId, setGoalId] = useState<string>(
@@ -69,7 +69,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
       <fieldset>
         <legend className="text-sm font-medium mb-2">Amount</legend>
         <div className="grid grid-cols-3 gap-2">
-          {(data.presetsCents ?? [500, 1000, 2000]).map(cents => (
+          {(data.presetsCents ?? ONE_OFF_PRESETS_CENTS).map(cents => (
             <button
               key={cents}
               type="button"

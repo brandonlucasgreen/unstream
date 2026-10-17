@@ -17,7 +17,7 @@ import { TipPage } from 'src/pages/TipPage';
 const fetchMock = vi.fn();
 const page = (overrides: Record<string, unknown> = {}) => ({
   artist: { id: 'a1', slug: 'kid-lightbulbs', name: 'Kid Lightbulbs', imageUrl: null },
-  takingTips: true, feeBasisPoints: 0, goals: [], presetsCents: [500, 1000, 2000], minCents: 300, maxCents: 50000,
+  takingTips: true, feeBasisPoints: 0, goals: [], presetsCents: [300, 500, 1000], minCents: 300, maxCents: 50000,
   ...overrides,
 });
 

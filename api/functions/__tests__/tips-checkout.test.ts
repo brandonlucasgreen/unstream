@@ -221,6 +221,7 @@ describe('GET — the tip page', () => {
     expect(body.feeBasisPoints).toBe(250);
     expect(body.goals).toHaveLength(1);
     expect(body.minCents).toBe(300);
+    expect(body.presetsCents).toEqual([300, 500, 1000]);
   });
 
   it('says an artist isn’t taking tips, without their settings', async () => {

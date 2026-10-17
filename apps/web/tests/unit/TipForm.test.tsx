@@ -20,7 +20,7 @@ const data: TipPageData = {
   takingTips: true,
   feeBasisPoints: 0,
   goals: [{ id: OPEN_GOAL, title: 'Vinyl', targetCents: 100000, raisedCents: 0, status: 'open' }],
-  presetsCents: [500, 1000, 2000],
+  presetsCents: [300, 500, 1000],
   minCents: 300,
   maxCents: 50000,
 };
@@ -67,5 +67,25 @@ describe('TipForm after Back from Stripe', () => {
     Object.defineProperty(event, 'persisted', { value: true });
     act(() => { window.dispatchEvent(event); });
     expect(screen.getByRole('button', { name: /^Pay / }).hasAttribute('disabled')).toBe(false);
+  });
+});
+
+// UNS-218: the preset amounts moved to $3 / $5 / $10, and $5 is the default selection.
+describe('TipForm presets', () => {
+  it('offers $3, $5 and $10 and opens with $5 selected', async () => {
+    render(<TipForm data={data} />);
+    for (const label of ['$3', '$5', '$10']) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+    }
+    expect(screen.getByRole('button', { name: '$5' }).getAttribute('aria-pressed')).toBe('true');
+    expect((await payAndReadBody()).amountCents).toBe(500);
+  });
+
+  it('falls back to the shared presets when the server sent none', () => {
+    render(<TipForm data={{ ...data, presetsCents: undefined }} />);
+    for (const label of ['$3', '$5', '$10']) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+    }
+    expect(screen.queryByRole('button', { name: '$20' })).toBeNull();
   });
 });

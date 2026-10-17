@@ -61,7 +61,7 @@ build is saved. With 69 artists saved by any fan (Sept sweep), the likeliest out
 | **Payment structure** | Stripe Connect **Standard** accounts + **direct charges** + `application_fee_amount` (§3). |
 | **Money handling** | Unstream never holds, pools, or transfers funds. The charge is created on the artist's account. |
 | **Unstream's fee** | **Artist-chosen, 0–5%, default 0%** (Brandon, 2026-09-25). Shown to the fan either way. |
-| **Amounts** | Presets **$5 / $10 / $20**, custom allowed, **minimum $3**, maximum $500. §4. |
+| **Amounts** | Presets **$3 / $5 / $10**, custom allowed, **minimum $3**, maximum $500. §4. (Presets were $5/$10/$20; changed 2026-10-17, UNS-218.) |
 | **Fan covers fees** | Optional checkbox, **on by default** ("add $0.46 so {artist} gets the full $5"). Ampwall reports ~75% of buyers opt in. |
 | **Fan sign-in** | Not required. If signed in, the tip is linked to the fan's account (privately) to mark the artist supported. §6. |
 | **Fan message** | Not in v1 — it's a moderation surface. Stripe Checkout's email receipt is the thank-you. |
@@ -135,13 +135,13 @@ conversion ~1%**), paid by the artist's account:
 | Tip | Stripe fee | % lost | + Unstream 5% | Artist receives (5% fee) |
 |---|---|---|---|---|
 | $1 | 33¢ | 32.9% | 5¢ | $0.62 |
-| $3 | 39¢ | 12.9% | 15¢ | $2.46 |
+| **$3** | 39¢ | 12.9% | 15¢ | $2.46 |
 | **$5** | 45¢ | 8.9% | 25¢ | $4.30 |
 | **$10** | 59¢ | 5.9% | 50¢ | $8.91 |
-| **$20** | 88¢ | 4.4% | $1.00 | $18.12 |
+| $20 | 88¢ | 4.4% | $1.00 | $18.12 |
 
 - **Minimum $3.** Below it the fixed fee takes more than an eighth. $1 tips are a donation to Stripe.
-- **Presets $5 / $10 / $20.** $5 is where the fee drops under a tenth.
+- **Presets $3 / $5 / $10** (were $5 / $10 / $20 — Brandon, 2026-10-17, UNS-218). $5 is where the fee drops under a tenth.
 - **"Cover the fees" grosses up** so the artist nets the chosen amount: at 0% Unstream fee, a $5 tip
   becomes `(5 + 0.30) / (1 − 0.029)` = **$5.46**. The server computes it; the client only displays it.
 - **The breakdown is always shown before paying:** "You pay $5.46 · Stripe keeps $0.46 · Unstream
