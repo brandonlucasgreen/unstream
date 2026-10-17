@@ -177,6 +177,9 @@ interface ArtistProfile {
   // Divider positions in the artist's link order — see api/shared/link-dividers.ts.
   // Carried here so the artist edit page can rebuild the arrangement it saved.
   linkDividers?: number[];
+  // UNS-221: the saved page-section arrangement, for the edit page's reorder control.
+  // Renderers normalize (unknown keys dropped, omissions re-appended) — this is the raw value.
+  sectionOrder?: string[];
 }
 
 interface ArtistResult {
@@ -232,6 +235,9 @@ export interface ArtistProfileRow {
   featured_embed: string | null;
   verified_at: string | null;
   link_dividers: number[] | null;
+  // Artist-arranged page-section order (UNS-221, api/shared/page-sections.ts).
+  // NULL = unsaved/default; unknown keys filtered at read time by normalizeSectionOrder.
+  section_order: string[] | null;
 }
 
 export interface ArtistProfileBundle {
@@ -282,7 +288,7 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
     const [profileResult, linksResult] = await Promise.all([
       client
         .from('artist_profiles')
-        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers')
+        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers, section_order')
         .eq('artist_id', artistId)
         .single(),
       client
@@ -3947,7 +3953,7 @@ export async function getArtistBySlug(
       row.match_confidence === 'claimed'
         ? client
             .from('artist_profiles')
-            .select('bio, show_bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers')
+            .select('bio, show_bio, custom_image_url, website_url, featured_embed, verified_at, link_dividers, section_order')
             .eq('artist_id', row.id)
             .single()
         : Promise.resolve({ data: null }),
@@ -3970,6 +3976,7 @@ interface ProfileRow {
   featured_embed: string | null;
   verified_at: string | null;
   link_dividers: number[] | null;
+  section_order: string[] | null;
 }
 
 /**
@@ -3995,6 +4002,7 @@ function artistRowToResult(row: ArtistRow, links: LinkRow[], profileData: Profil
       featuredEmbed: profileData.featured_embed || undefined,
       verified: !!profileData.verified_at,
       ...(profileData.link_dividers?.length ? { linkDividers: profileData.link_dividers } : {}),
+      ...(profileData.section_order?.length ? { sectionOrder: profileData.section_order } : {}),
     };
   }
 

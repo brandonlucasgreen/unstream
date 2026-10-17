@@ -189,13 +189,40 @@ describe('RichArtistProfile', () => {
     expect(document.querySelectorAll('hr').length).toBe(0);
   });
 
-  it('renders a divider above the link index it points at', () => {
-    render(<RichArtistProfile payload={{ ...basePayload, linkDividers: [1] }} slug="kid-lightbulbs" />);
+  it('renders a legacy divider inside a section as a rule above its link (pre-UNS-221 payload)', () => {
+    // Two patronage links with the artist's rule between them — the rule survives as a
+    // within-Patronage separator above Ko-fi.
+    const legacyPayload = {
+      ...basePayload,
+      links: [
+        { platform: 'patreon', url: 'https://patreon.com/kidlightbulbs', displayName: 'Patreon', payoutPercent: '86-90%', bandcampFriday: false },
+        { platform: 'kofi', url: 'https://ko-fi.com/kidlightbulbs', displayName: 'Ko-fi', payoutPercent: '92-97%', bandcampFriday: false },
+      ],
+      linkDividers: [1],
+    };
+    render(<RichArtistProfile payload={legacyPayload} slug="kid-lightbulbs" />);
     const divider = document.querySelector('hr');
     expect(divider).toBeTruthy();
     // The divider starts a new row of pills; the link it points at leads that row.
     const nextRowLink = divider!.nextElementSibling?.querySelector('a.source-badge');
-    expect(nextRowLink?.getAttribute('href')).toBe('https://patreon.com/kidlightbulbs');
+    expect(nextRowLink?.getAttribute('href')).toBe('https://ko-fi.com/kidlightbulbs');
+  });
+
+  it('subsumes a legacy divider at a section boundary into the section gap itself', () => {
+    // Bandcamp (marketplaces) then Patreon (patronage) with the artist's rule between them:
+    // the sections already separate them with headings, so no extra rule draws.
+    const legacyPayload = {
+      ...basePayload,
+      links: [
+        { platform: 'bandcamp', url: 'https://kidlightbulbs.bandcamp.com', displayName: 'Bandcamp', payoutPercent: '80-85%', bandcampFriday: false },
+        { platform: 'patreon', url: 'https://patreon.com/kidlightbulbs', displayName: 'Patreon', payoutPercent: '86-90%', bandcampFriday: false },
+      ],
+      linkDividers: [1],
+    };
+    render(<RichArtistProfile payload={legacyPayload} slug="kid-lightbulbs" />);
+    expect(screen.getByText('Patronage')).toBeTruthy();
+    expect(screen.getByText('Marketplaces')).toBeTruthy();
+    expect(document.querySelectorAll('hr').length).toBe(0);
   });
 
   it('does not render a divider before the first link', () => {
@@ -320,6 +347,112 @@ describe('RichArtistProfile', () => {
       expect(screen.getByText('Tip Kid Lightbulbs').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs');
       expect(screen.getByText('Vinyl').closest('a')?.getAttribute('href')).toBe('/tip/kid-lightbulbs?goal=g1');
       expect(screen.getByText('$1,200.00 of $2,400.00')).toBeTruthy();
+    });
+  });
+
+  describe('page sections (UNS-221)', () => {
+    const claimedPayload = {
+      ...basePayload,
+      // bandcamp = marketplaces, patreon = patronage (both with sectionCategory in the web copy)
+      tips: { enabled: true, goals: [] },
+    };
+
+    it('renders the default order: Patronage (tip first) → Bio → Featured → Marketplaces → Follow', () => {
+      render(<MemoryRouter><RichArtistProfile payload={claimedPayload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const headings = [...document.querySelectorAll('h2')].map(h => h.textContent);
+      const idx = (label: string) => headings.indexOf(label);
+      expect(idx('Patronage')).toBeGreaterThanOrEqual(0);
+      expect(idx('Bio')).toBeGreaterThan(idx('Patronage'));
+      expect(idx('Featured Release')).toBeGreaterThan(idx('Bio'));
+      expect(idx('Marketplaces')).toBeGreaterThan(idx('Featured Release'));
+      expect(idx('Follow')).toBeGreaterThan(idx('Marketplaces'));
+    });
+
+    it('renders the Tip button inside the Patronage section, above any patronage platform', () => {
+      render(<MemoryRouter><RichArtistProfile payload={claimedPayload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const patronageSection = screen.getByText('Patronage').closest('div')!;
+      const sectionText = patronageSection.textContent ?? '';
+      const tipIndex = sectionText.indexOf('Tip Kid Lightbulbs');
+      const patreonIndex = sectionText.indexOf('Patreon');
+      expect(tipIndex).toBeGreaterThanOrEqual(0);
+      expect(patreonIndex).toBeGreaterThan(tipIndex);
+    });
+
+    it('renders sections in the payload sectionOrder when the artist rearranged them', () => {
+      const payload = {
+        ...basePayload,
+        tips: { enabled: true, goals: [] } as const,
+        sectionOrder: ['featured', 'social', 'marketplaces', 'patronage', 'bio'] as const,
+      };
+      render(<MemoryRouter><RichArtistProfile payload={payload as unknown as ArtistPagePayload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const headings = [...document.querySelectorAll('h2')].map(h => h.textContent);
+      const idx = (label: string) => headings.indexOf(label);
+      expect(idx('Featured Release')).toBeLessThan(idx('Follow'));
+      expect(idx('Follow')).toBeLessThan(idx('Marketplaces'));
+      expect(idx('Marketplaces')).toBeLessThan(idx('Patronage'));
+      expect(idx('Patronage')).toBeLessThan(idx('Bio'));
+    });
+
+    it('renders the Tip above patronage links even when Patronage lands last', () => {
+      const payload = {
+        ...basePayload,
+        tips: { enabled: true, goals: [] } as const,
+        sectionOrder: ['bio', 'featured', 'marketplaces', 'social', 'patronage'] as const,
+      };
+      render(<MemoryRouter><RichArtistProfile payload={payload as unknown as ArtistPagePayload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const patronageSection = screen.getByText('Patronage').closest('div')!;
+      const sectionText = patronageSection.textContent ?? '';
+      expect(sectionText.indexOf('Tip Kid Lightbulbs')).toBeGreaterThanOrEqual(0);
+      expect(sectionText.indexOf('Tip Kid Lightbulbs')).toBeLessThan(sectionText.indexOf('Patreon'));
+    });
+
+    it('skips empty sections (no Marketplaces heading when no marketplace links)', () => {
+      const payload = {
+        ...basePayload,
+        // Patreon stays (patronage), bandcamp goes (no marketplaces left), no tips:
+        // Marketplaces has nothing to show, Patronage has only Patreon — no tip.
+        links: [{ platform: 'patreon', url: 'https://patreon.com/kidlightbulbs', displayName: 'Patreon', payoutPercent: '86-90%', bandcampFriday: false }],
+        tips: { enabled: false, goals: [] },
+      };
+      render(<RichArtistProfile payload={payload} slug="kid-lightbulbs" />);
+      expect(screen.queryByText('Marketplaces')).toBeNull();
+      expect(screen.getByText('Patronage')).toBeTruthy();
+    });
+
+    it('shows the Patronage heading when only the Tip block is present (no patronage links)', () => {
+      const payload = {
+        ...basePayload,
+        links: [{ platform: 'bandcamp', url: 'https://kidlightbulbs.bandcamp.com', displayName: 'Bandcamp', payoutPercent: '80-85%', bandcampFriday: false }],
+        tips: { enabled: true, goals: [] },
+      };
+      render(<MemoryRouter><RichArtistProfile payload={payload} slug="kid-lightbulbs" /></MemoryRouter>);
+      expect(screen.getByText('Patronage')).toBeTruthy();
+      expect(screen.getByText('Tip Kid Lightbulbs')).toBeTruthy();
+      expect(document.querySelector('a.source-badge[href="https://patreon.com/kidlightbulbs"]')).toBeNull();
+    });
+
+    it('derives official links into an Official section (not Marketplaces) on a sectioned payload', () => {
+      // Sectioned payload as the new server sends it: faircamp in the official group.
+      const payload = {
+        ...basePayload,
+        tips: { enabled: false, goals: [] },
+        linkGroups: [
+          {
+            section: 'official' as const,
+            links: [{ platform: 'faircamp', url: 'https://kid.example.faircamp.site', displayName: 'Faircamp', payoutPercent: '90-97%', bandcampFriday: false }],
+            dividerIndexes: [],
+          },
+          {
+            section: 'marketplaces' as const,
+            links: [{ platform: 'bandcamp', url: 'https://kidlightbulbs.bandcamp.com', displayName: 'Bandcamp', payoutPercent: '80-85%', bandcampFriday: false }],
+            dividerIndexes: [],
+          },
+        ],
+      };
+      render(<RichArtistProfile payload={payload as unknown as ArtistPagePayload} slug="kid-lightbulbs" />);
+      expect(screen.getByText('Official')).toBeTruthy();
+      expect(screen.getByText('Marketplaces')).toBeTruthy();
+      expect(document.querySelector('a.source-badge[href="https://kid.example.faircamp.site"]')).toBeTruthy();
     });
   });
 });

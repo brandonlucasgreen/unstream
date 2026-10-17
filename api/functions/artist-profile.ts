@@ -10,6 +10,7 @@ import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 import { safeEmbedStyle } from '../shared/embed-style';
+import { normalizeSectionOrder } from '../shared/page-sections';
 
 function getServiceClient() {
   return getClient();
@@ -276,6 +277,9 @@ async function handleRequest(event: {
     // (artist_profiles.link_dividers) rather than as an artist_links row.
     links?: LinkEntry[];
     location?: { city?: string; country?: string };
+    // UNS-221: the artist's page-section arrangement. Validated against the shared section
+    // list before any write; stored raw (the renderer normalizes).
+    sectionOrder?: string[];
   };
   try {
     body = JSON.parse(event.body || '{}');
@@ -489,6 +493,28 @@ async function handleRequest(event: {
     if (embedError) {
       console.error('[Profile] Embed update failed:', embedError);
       return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update embed' }) };
+    }
+  }
+
+  // --- Update page-section order (UNS-221) ---
+  // Validated before any write, like showBio: a bad value can't leave half an update applied.
+  if (body.sectionOrder !== undefined) {
+    const sectionOrder = normalizeSectionOrder(body.sectionOrder);
+    if (!sectionOrder) {
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: 'sectionOrder must be a list of section keys' }),
+      };
+    }
+    const { error: sectionError } = await client
+      .from('artist_profiles')
+      .update({ section_order: sectionOrder, updated_at: new Date().toISOString() })
+      .eq('id', profile.id);
+
+    if (sectionError) {
+      console.error('[Profile] Section order update failed:', sectionError);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update section order' }) };
     }
   }
 

@@ -2,6 +2,8 @@ import { Fragment, useState, useCallback } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
+import { resolveSectionOrder, groupLinksIntoSections, type PageSectionKey } from '../../../../api/shared/page-sections';
+import { mainLinkDividerIndexes } from '../../../../api/shared/link-dividers';
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
@@ -21,26 +23,17 @@ interface RichArtistProfileProps {
 }
 
 type ArtistLink = ArtistPagePayload['links'][number];
+type ArtistPageLinkGroup = NonNullable<ArtistPagePayload['linkGroups']>[number];
 
-/**
- * Split the artist's links at the divider positions they chose, so each group can
- * render as its own wrapped row of pills with a rule between rows.
- */
-function groupLinksByDivider(links: ArtistLink[], dividerIndexes: Set<number>): ArtistLink[][] {
-  const groups: ArtistLink[][] = [];
-  let current: ArtistLink[] = [];
-
-  links.forEach((link, index) => {
-    if (dividerIndexes.has(index) && current.length > 0) {
-      groups.push(current);
-      current = [];
-    }
-    current.push(link);
-  });
-
-  if (current.length > 0) groups.push(current);
-  return groups;
-}
+/** Section headings as the artist page shows them (edit-page labels match these). */
+const SECTION_HEADINGS: Record<PageSectionKey, string> = {
+  patronage: 'Patronage',
+  bio: 'Bio',
+  featured: 'Featured Release',
+  marketplaces: 'Marketplaces',
+  official: 'Official',
+  social: 'Follow',
+};
 
 function getLocationText(artist: ArtistPagePayload['artist']): string {
   const region = artist.country || artist.countryCode;
@@ -52,9 +45,72 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
   const { artist, profile, links, socialLinks } = payload;
-  const linkGroups = groupLinksByDivider(links, new Set(payload.linkDividers ?? []));
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
+
+  // UNS-221: sections render in the payload's resolved order (the server applies the
+  // artist's saved arrangement); a cached response without one falls back to the default.
+  const sectionOrder: PageSectionKey[] =
+    (payload.sectionOrder as PageSectionKey[] | undefined) ??
+    resolveSectionOrder(null);
+
+  // Server-grouped links when the payload carries them. A cached response predating the
+  // section payload has only the legacy flat fields — derive the same groups client-side
+  // from the web copy of the registry (the same sectionCategory values, parity-tested),
+  // so the page renders identically during a CDN cache roll.
+  //
+  // The legacy divider positions ("a rule above flat-index N of the main list") are translated
+  // into per-section rule indexes the same way the server does: mainLinkDividerIndexes against
+  // the full stored order, then the links whose *pre-divider* count matches a rule carry that
+  // rule into their section.
+
+  const flatLinks = [
+    ...links,
+    ...socialLinks.map(l => ({ ...l, payoutPercent: null, bandcampFriday: false })),
+  ];
+  // Dividers only ever landed on main-list gaps; socials render as their own section, so
+  // social-only rule positions are intentionally unreachable (see api/shared/link-dividers.ts).
+  const legacyRuleFlatIndexes = new Set<number>();
+  if (!payload.linkGroups && payload.linkDividers?.length) {
+    // mainLinkDividerIndexes counts stored positions against the FULL link list it is given
+    // (socials included) — that is the list the editor's stored positions were written
+    // against. Feed it the same full flat order, then drop every rule it lands on a social
+    // (those move to the Follow section, not a rule inside the main sections).
+    const isMainLink = (l: (typeof flatLinks)[number]) =>
+      sources[l.platform as SourceId]?.sectionCategory !== 'social';
+    const mainRulePreCounts = new Set(
+      mainLinkDividerIndexes(flatLinks, isMainLink, payload.linkDividers),
+    );
+    let mainCount = 0;
+    flatLinks.forEach((link, flatIndex) => {
+      if (mainRulePreCounts.has(mainCount) && isMainLink(link)) {
+        legacyRuleFlatIndexes.add(flatIndex);
+      }
+      mainCount++;
+    });
+  }
+
+  const rawGroups = payload.linkGroups ?? groupLinksIntoSections(
+    flatLinks.map((link, flatIndex) => ({ ...link, __flatIndex: flatIndex })),
+    link => sources[link.platform as SourceId]?.sectionCategory,
+    [],
+  ).map(group => ({
+    section: group.key as ArtistPageLinkGroup['section'],
+    links: group.items.map((item) => {
+      const { __flatIndex, ...rest } = item as { __flatIndex: number } & Record<string, unknown>;
+      void __flatIndex;
+      return rest as unknown as ArtistPageLinkGroup['links'][number];
+    }),
+    dividerIndexes: group.items
+      .map((item, positionInGroup) =>
+        legacyRuleFlatIndexes.has((item as { __flatIndex: number }).__flatIndex)
+          ? positionInGroup
+          : -1)
+      .filter(n => n >= 0),
+  }));
+  const groupBySection = new Map(
+    rawGroups.map(g => [g.section as PageSectionKey, g as ArtistPageLinkGroup]),
+  );
 
   // Embed widget state
   const [embedOpen, setEmbedOpen] = useState(false);
@@ -297,119 +353,121 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
 
       {/* Content container */}
       <div className="pb-8">
-        {/* Tips on Unstream, with the artist's open goals (spec §3.1, §3.4). First, before the bio and every
-            platform link: the most direct support a fan can give (Brandon, 2026-10-03). Only while they take tips. */}
-        {payload.tips?.enabled && (
-          <div className="mb-6 space-y-3">
-            <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
-              Tip directly
-            </h2>
-            <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
-            {payload.tips.goals.map(goal => (
-              <TipLink
-                key={goal.id}
-                slug={payload.artist.slug}
-                artistName={payload.artist.name}
-                goalId={goal.id}
-                className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
-              >
-                <GoalProgress goal={goal} />
-              </TipLink>
-            ))}
-          </div>
-        )}
-
-        {/* Bio */}
-        {profile?.bio && (
-          <p className="text-text-muted text-sm mb-6 whitespace-pre-line">
-            {profile.bio}
-          </p>
-        )}
-
-        {/* Featured Embed */}
-        {profile?.featuredEmbed && (
-          <div className={profile.bio ? 'mt-6' : ''}>
-            <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
-              Featured Release
-            </h2>
-            {/* contain:paint clips even a position:fixed child, so an embed saved before its
-                style was filtered still can't cover the page. */}
-            <div className="rounded-xl overflow-hidden [contain:paint]">
-              <div dangerouslySetInnerHTML={{ __html: profile.featuredEmbed }} />
-            </div>
-          </div>
-        )}
-
-        {/* Main Platform Links — the same platform pills the search results use, in the
-            artist's own order. Dividers the artist placed split the pills into rows. */}
-        {linkGroups.length > 0 && (
-          <div className={profile?.featuredEmbed ? 'mt-6' : ''}>
-            <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
-              Support directly
-            </h2>
-            <div className="space-y-3">
-              {linkGroups.map((group, groupIndex) => (
-                <Fragment key={groupIndex}>
-                  {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
+        {/* UNS-221: the claimed artist's page renders in the section order they arranged.
+            Every section is content-gated (nothing renders when empty), `official` pins to
+            the marketplaces slot, and the Patronage section opens with the first-party Tip
+            block when the artist takes tips — always first within its section, before any
+            platform patronage link. */}
+        {sectionOrder.map(sectionKey => {
+          if (sectionKey === 'patronage') {
+            const group = groupBySection.get('patronage');
+            if (!payload.tips?.enabled && (!group || group.links.length === 0)) return null;
+            return (
+              <div key="patronage" className="mb-6 space-y-3">
+                <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
+                  Patronage
+                </h2>
+                {payload.tips?.enabled && (
                   <div className="platform-pill-row">
-                    {group.map(link => {
-                      const badge = (
-                        <SourceBadge
-                          source={getSource(link.platform as SourceId)}
-                          url={link.url}
-                          isDirectLink
-                          displayName={link.displayName ?? undefined}
-                          onClick={() => handleLinkClick(link.platform)}
-                        />
-                      );
-                      const key = link.platform + link.url;
-
-                      // The Bandcamp Friday label rides along in the same cell, so the
-                      // pill row stays one grid cell per platform on a phone.
-                      if (!link.bandcampFriday) return <Fragment key={key}>{badge}</Fragment>;
-                      return (
-                        <span key={key} className="flex items-center gap-2">
-                          {badge}
-                          <span className="bandcamp-friday-label">Bandcamp Friday!</span>
-                        </span>
-                      );
-                    })}
+                    <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
+                    {payload.tips.goals.map(goal => (
+                      <TipLink
+                        key={goal.id}
+                        slug={payload.artist.slug}
+                        artistName={payload.artist.name}
+                        goalId={goal.id}
+                        className="block rounded-lg p-2 -mx-2 hover:bg-bg-hover transition-colors"
+                      >
+                        <GoalProgress goal={goal} />
+                      </TipLink>
+                    ))}
                   </div>
-                </Fragment>
-              ))}
-            </div>
-          </div>
-        )}
+                )}
+                {group && group.links.length > 0 && (
+                  <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />
+                )}
+              </div>
+            );
+          }
 
-        {/* Social Links */}
-        {socialLinks.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
-              Follow
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {socialLinks.map((link) => {
-                const source = sources[link.platform as SourceId];
-                const linkName = link.displayName || source?.name || link.platform;
+          if (sectionKey === 'bio') {
+            if (!profile?.bio) return null;
+            return (
+              <div key="bio" className="mb-6">
+                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                  Bio
+                </h2>
+                <p className="text-text-muted text-sm whitespace-pre-line">
+                  {profile.bio}
+                </p>
+              </div>
+            );
+          }
 
-                return (
-                  <a
-                    key={link.platform + link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-track-platform={link.platform}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm text-text-primary hover:bg-bg-hover transition-colors"
-                    onClick={() => handleLinkClick(link.platform)}
-                  >
-                    <SocialIcon platform={link.platform} className="w-4 h-4" />
-                    {linkName}
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          if (sectionKey === 'featured') {
+            if (!profile?.featuredEmbed) return null;
+            return (
+              <div key="featured" className="mb-6">
+                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                  Featured Release
+                </h2>
+                {/* contain:paint clips even a position:fixed child, so an embed saved before its
+                    style was filtered still can't cover the page. */}
+                <div className="rounded-xl overflow-hidden [contain:paint]">
+                  <div dangerouslySetInnerHTML={{ __html: profile.featuredEmbed }} />
+                </div>
+              </div>
+            );
+          }
+
+          if (sectionKey === 'social') {
+            const group = groupBySection.get('social');
+            if (!group || group.links.length === 0) return null;
+            return (
+              <div key="social" className="mb-6">
+                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                  Follow
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {group.links.map(link => {
+                    const source = sources[link.platform as SourceId];
+                    const linkName = link.displayName || source?.name || link.platform;
+
+                    return (
+                      <a
+                        key={link.platform + link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-track-platform={link.platform}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm text-text-primary hover:bg-bg-hover transition-colors"
+                        onClick={() => handleLinkClick(link.platform)}
+                      >
+                        <SocialIcon platform={link.platform} className="w-4 h-4" />
+                        {linkName}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
+
+          // marketplaces — and `official`, which is not artist-orderable but renders
+          // in the marketplaces slot directly after it.
+          return (['marketplaces', 'official'] as const).map(sectionKeyInner => {
+            const group = groupBySection.get(sectionKeyInner);
+            if (!group || group.links.length === 0) return null;
+            return (
+              <div key={sectionKeyInner} className="mb-6">
+                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                  {SECTION_HEADINGS[sectionKeyInner]}
+                </h2>
+                <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />
+              </div>
+            );
+          });
+        })}
 
         <ReleasesSection
           releases={payload.releases ?? []}
@@ -417,6 +475,62 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           artistSlug={slug}
         />
       </div>
+    </div>
+  );
+}
+
+/**
+ * One section's pills, split at the artist's own divider positions into wrapped rows
+ * with a rule between rows — the arrangement they set for those links.
+ */
+function SectionPillGroups({ group, handleLinkClick }: {
+  group: ArtistPageLinkGroup;
+  handleLinkClick: (platform: string) => void;
+}) {
+  const dividerIndexes = new Set(group.dividerIndexes ?? []);
+  const groups: ArtistLink[][] = [];
+  let current: ArtistLink[] = [];
+
+  group.links.forEach((link, index) => {
+    if (dividerIndexes.has(index) && current.length > 0) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(link);
+  });
+  if (current.length > 0) groups.push(current);
+
+  return (
+    <div className="space-y-3">
+      {groups.map((rows, groupIndex) => (
+        <Fragment key={groupIndex}>
+          {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
+          <div className="platform-pill-row">
+            {rows.map(link => {
+              const badge = (
+                <SourceBadge
+                  source={getSource(link.platform as SourceId)}
+                  url={link.url}
+                  isDirectLink
+                  displayName={link.displayName ?? undefined}
+                  onClick={() => handleLinkClick(link.platform)}
+                />
+              );
+              const key = link.platform + link.url;
+
+              // The Bandcamp Friday label rides along in the same cell, so the
+              // pill row stays one grid cell per platform on a phone.
+              if (!link.bandcampFriday) return <Fragment key={key}>{badge}</Fragment>;
+              return (
+                <span key={key} className="flex items-center gap-2">
+                  {badge}
+                  <span className="bandcamp-friday-label">Bandcamp Friday!</span>
+                </span>
+              );
+            })}
+          </div>
+        </Fragment>
+      ))}
     </div>
   );
 }

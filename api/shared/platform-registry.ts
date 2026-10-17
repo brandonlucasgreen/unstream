@@ -14,6 +14,13 @@ export interface PlatformMeta {
   color: string;
   icon: string;
   category: string;
+  /**
+   * Which artist-page section (UNS-221, api/shared/page-sections.ts) a claimed artist's link
+   * in this platform renders in. Absent = `marketplaces` — the catch-all that keeps library,
+   * decentralized and custom "other" links on the page through any recategorisation gap.
+   * Only patronage / official / social differ from the default.
+   */
+  sectionCategory?: 'patronage' | 'official' | 'social';
   payoutPercent?: string;
   searchOnly?: boolean;
   homepageUrl?: string;
@@ -149,7 +156,10 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     name: 'Faircamp',
     color: '#22c55e',
     icon: '🏕️',
-    category: 'decentralized',
+    // The artist's self-hosted page IS their official page (UNS-221) — the same role
+    // officialsite plays for a hosted site.
+    category: 'official',
+    sectionCategory: 'official',
     payoutPercent: '90-97%',
     // A static-site generator for selling downloads. No cart, no stock, no shipping.
     digitalOnly: true,
@@ -162,6 +172,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#ff424d',
     icon: '🎨',
     category: 'patronage',
+    sectionCategory: 'patronage',
     payoutPercent: '86-90%',
     homepageUrl: 'https://www.patreon.com',
   },
@@ -170,6 +181,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#ffdd00',
     icon: '☕',
     category: 'patronage',
+    sectionCategory: 'patronage',
     payoutPercent: '~92%',
     searchOnly: true,
     homepageUrl: 'https://buymeacoffee.com',
@@ -179,6 +191,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#29abe0',
     icon: '🍵',
     category: 'patronage',
+    sectionCategory: 'patronage',
     payoutPercent: '92-97%',
     searchOnly: true,
     homepageUrl: 'https://ko-fi.com',
@@ -190,6 +203,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#F6C915',
     icon: '🤝',
     category: 'patronage',
+    sectionCategory: 'patronage',
     // Liberapay takes no cut; only the card processor's fee comes off, which Liberapay puts at
     // ~3% on average for Stripe (https://liberapay.com/about/faq).
     payoutPercent: '~97%',
@@ -203,6 +217,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#3D95CE',
     icon: '💵',
     category: 'patronage',
+    sectionCategory: 'patronage',
     homepageUrl: 'https://venmo.com',
   },
   paypal: {
@@ -210,6 +225,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#0070BA',
     icon: '🅿️',
     category: 'patronage',
+    sectionCategory: 'patronage',
     homepageUrl: 'https://www.paypal.com',
   },
 
@@ -235,6 +251,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#71717a',
     icon: '⭐',
     category: 'official',
+    sectionCategory: 'official',
     homepageUrl: '',
   },
   wikipedia: {
@@ -242,6 +259,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#636466',
     icon: '📖',
     category: 'official',
+    sectionCategory: 'official',
     homepageUrl: 'https://en.wikipedia.org',
   },
 
@@ -251,6 +269,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#E4405F',
     icon: 'instagram',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://www.instagram.com',
   },
   facebook: {
@@ -258,6 +277,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#1877F2',
     icon: 'facebook',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://www.facebook.com',
   },
   tiktok: {
@@ -265,6 +285,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#E0E0E0',
     icon: 'tiktok',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://www.tiktok.com',
   },
   youtube: {
@@ -272,6 +293,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#FF0000',
     icon: 'youtube',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://www.youtube.com',
   },
   threads: {
@@ -279,6 +301,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#E0E0E0',
     icon: 'threads',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://www.threads.net',
   },
   bluesky: {
@@ -286,6 +309,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#0085FF',
     icon: 'bluesky',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://bsky.app',
   },
   mastodon: {
@@ -293,6 +317,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#6364FF',
     icon: 'mastodon',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://mastodon.social',
   },
   peertube: {
@@ -300,13 +325,16 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     color: '#F1680D',
     icon: 'peertube',
     category: 'social',
+    sectionCategory: 'social',
     homepageUrl: 'https://joinpeertube.org',
   },
   newsletter: {
     name: 'Newsletter',
     color: '#666',
     icon: '📧',
-    category: 'social',
+    // The artist's own mailings are an official channel, not social (UNS-221).
+    category: 'official',
+    sectionCategory: 'official',
     homepageUrl: '',
   },
 

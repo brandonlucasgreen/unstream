@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { DEFAULT_SECTION_ORDER, normalizeSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
 import type { SourceId } from '../types';
 
 // A divider entry is a horizontal rule on the public artist page, not a link.
@@ -116,6 +117,7 @@ interface FormState {
   customImageUrl: string | null;
   fetchingAvatar: string | null;
   links: LinkEntry[];
+  sectionOrder: PageSectionKey[];
   city: string;
   country: string;
   removeOpen: boolean;
@@ -153,6 +155,7 @@ const initialFormState: FormState = {
   customImageUrl: null,
   fetchingAvatar: null,
   links: [],
+  sectionOrder: [...DEFAULT_SECTION_ORDER],
   city: '',
   country: '',
   removeOpen: false,
@@ -222,6 +225,9 @@ export function ArtistEditPage() {
             showBio: data.profile?.showBio !== false,
             featuredEmbed: data.profile?.featuredEmbed ?? '',
             links: existingLinks,
+            // The saved arrangement (or the default when none). Normalized so unknown keys
+            // from an older payload can't linger in state.
+            sectionOrder: normalizeSectionOrder(data.profile?.sectionOrder) ?? [...DEFAULT_SECTION_ORDER],
             city: data.location?.city ?? '',
             country: data.location?.country ?? data.location?.countryCode ?? '',
             loading: false,
@@ -300,6 +306,14 @@ export function ArtistEditPage() {
     set('links', updated);
   }
 
+  function moveSection(index: number, direction: -1 | 1) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= form.sectionOrder.length) return;
+    const updated = [...form.sectionOrder];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    set('sectionOrder', updated);
+  }
+
   async function handleSave() {
     set('error', null);
     set('success', null);
@@ -368,6 +382,12 @@ export function ArtistEditPage() {
           featuredEmbed: form.featuredEmbed || null,
           customImageUrl: form.customImageUrl,
           location: { city: form.city, country: form.country },
+          // UNS-221: send the arrangement only when it differs from the default, so an
+          // un-touched save doesn't pin every artist into the current default permanently.
+          sectionOrder:
+            JSON.stringify(form.sectionOrder) === JSON.stringify([...DEFAULT_SECTION_ORDER])
+              ? undefined
+              : form.sectionOrder,
           links: validLinks.map(l => l.platform === DIVIDER_PLATFORM
             ? { platform: DIVIDER_PLATFORM }
             : {
@@ -563,6 +583,54 @@ export function ArtistEditPage() {
             Changing your slug will update your profile URL. Old links will stop working.
           </p>
         )}
+      </section>
+
+      {/* Page section order (UNS-221) */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium">Page Sections</h2>
+        <p className="text-xs text-text-muted">
+          Choose the order of the sections on your artist page. Official pages (your website, Wikipedia, Faircamp, Newsletter) always follow Marketplaces.
+        </p>
+
+        <div className="space-y-2">
+          {form.sectionOrder.map((section, index) => {
+            const label = section === 'patronage'
+              ? 'Patronage — tips first, then supporter platforms'
+              : section === 'bio'
+                ? 'Bio'
+                : section === 'featured'
+                  ? 'Featured Release'
+                  : section === 'marketplaces'
+                    ? 'Marketplaces — Bandcamp, Mirlo, and stores'
+                    : 'Social — Follow links';
+            return (
+              <div
+                key={section}
+                className="flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border border-border"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => moveSection(index, -1)}
+                    disabled={index === 0}
+                    className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                    title="Move up"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    onClick={() => moveSection(index, 1)}
+                    disabled={index === form.sectionOrder.length - 1}
+                    className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
+                    title="Move down"
+                  >
+                    ▼
+                  </button>
+                </div>
+                <span className="flex-1 text-sm text-text-primary">{label}</span>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* Bio */}

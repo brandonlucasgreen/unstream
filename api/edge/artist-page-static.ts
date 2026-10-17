@@ -3,6 +3,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
+import {
+  DEFAULT_SECTION_ORDER,
+  groupLinksIntoSections,
+  resolveSectionOrder,
+  type PageSectionKey,
+} from "../shared/page-sections.ts";
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
@@ -151,6 +157,137 @@ function isEmbedDomainAllowed(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Section headings as the crawler page shows them — the same labels the SPA renders
+ * (RichArtistProfile SECTION_HEADINGS) and the edit page uses.
+ */
+const SECTION_HEADINGS: Record<PageSectionKey, string> = {
+  patronage: 'Patronage',
+  bio: 'Bio',
+  featured: 'Featured Release',
+  marketplaces: 'Marketplaces',
+  official: 'Official',
+  social: 'Follow',
+};
+
+/**
+ * Claimed-page sections, in the artist's saved order (UNS-221). The crawler's view of the same
+ * arrangement RichArtistProfile renders: patronage (with the Tip block first inside it, using
+ * the shared renderTipSection), bio, featured release, marketplaces (+ the pinned Official
+ * section), Follow — skipping sections with nothing to show.
+ */
+function renderClaimedSections({
+  profile,
+  platformsFiltered,
+  isMainPlatform,
+  tipSectionHtml,
+  featuredEmbedHtml,
+  bioHtml,
+}: {
+  profile: { section_order?: unknown } | null;
+  platformsFiltered: { platform: string; url: string; display_name?: string }[];
+  isMainPlatform: (p: { platform: string }) => boolean;
+  tipSectionHtml: string;
+  featuredEmbedHtml: string;
+  bioHtml: string;
+}): string {
+  const sectionOrder = resolveSectionOrder(profile?.section_order) as PageSectionKey[];
+
+  // Group the artist's stored link order by section (the sectionCategory field on the
+  // registry decides where each link lands; unknown platforms ride in marketplaces).
+  // Dividers the artist placed between main links become per-section rules — a rule at a
+  // section boundary renders as the section gap, not a stray rule.
+  const groups = groupLinksIntoSections(platformsFiltered, (p: { platform: string }) =>
+    PLATFORMS[p.platform]?.sectionCategory, []);
+
+  const sectionRuleIndexes = new Map(
+    groups.map(g => [g.key, g.ruleIndexes]),
+  );
+
+  // One pill list per link section, rebuilt from the shared groups (the old flat
+  // platformLinksHtml interleaved patronage and marketplaces under one heading).
+  const linkRow = (p: { platform: string; url: string; display_name?: string }): string => {
+    const info = PLATFORMS[p.platform];
+    const isOther = p.platform === 'other' || p.platform.startsWith('other_');
+    const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
+    const linkColor = info?.color || '#71717a';
+    const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
+    const isBCFriday = p.platform === 'bandcamp' && isBandcampFriday();
+    const payout = isBCFriday ? '~97%' : info?.payoutPercent;
+    const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
+    const bcFridayLabel = isBCFriday ? '<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
+    return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
+      <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
+      <span style="flex:1;font-weight:500">${linkName}</span>
+      ${payoutLabel}${bcFridayLabel}
+    </a>`;
+  };
+
+  // Rows with rules between them, per section — the mirror of SectionPillGroups in the SPA.
+  const pillGroupsHtml = (section: PageSectionKey): string => {
+    const group = groups.find(g => g.key === section);
+    if (!group || group.items.length === 0) return '';
+    const rules = new Set(sectionRuleIndexes.get(section) ?? []);
+    const rows: string[][] = [];
+    let current: string[] = [];
+    group.items.forEach((item, index) => {
+      if (rules.has(index) && current.length > 0) {
+        rows.push(current);
+        current = [];
+      }
+      current.push(linkRow(item as { platform: string; url: string; display_name?: string }));
+    });
+    if (current.length > 0) rows.push(current);
+    return rows
+      .map((row, i) => `
+        ${i > 0 ? '<hr style="border:0;border-top:1px solid var(--border);margin:4px 0">' : ''}
+        <div style="display:grid;gap:8px">${row.join('')}</div>`)
+      .join('');
+  };
+
+  const sectionHtmlFor = (key: PageSectionKey): string => {
+    switch (key) {
+      case 'patronage': {
+        const linkHtml = pillGroupsHtml('patronage');
+        if (!tipSectionHtml && !linkHtml) return '';
+        return `
+        <div style="margin-bottom:24px">
+          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Patronage</h2>
+          ${tipSectionHtml ? tipSectionHtml : ''}
+          ${linkHtml}
+        </div>`;
+      }
+      case 'bio':
+        return bioHtml ? `
+        <div style="margin-bottom:24px">
+          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Bio</h2>
+          ${bioHtml}
+        </div>` : '';
+      case 'featured':
+        return featuredEmbedHtml ? `
+        <div style="margin-bottom:24px">
+          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Featured Release</h2>
+          ${featuredEmbedHtml}
+        </div>` : '';
+      default: {
+        // marketplaces, and official pinned directly after it (not artist-orderable).
+        const linkHtml = pillGroupsHtml(key);
+        if (!linkHtml) return '';
+        return `
+        <div style="margin-bottom:24px">
+          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">${SECTION_HEADINGS[key]}</h2>
+          ${linkHtml}
+        </div>`;
+      }
+    }
+  };
+
+  return sectionOrder
+    .flatMap((key) => (key === 'marketplaces' ? ['marketplaces', 'official' as PageSectionKey] : [key]))
+    .map(sectionHtmlFor)
+    .join('');
 }
 
 function buildSafeEmbed(featuredEmbed: string | null): string {
@@ -594,6 +731,20 @@ export default async function handler(request: Request, context: Context) {
       const tipGoals = await readTipGoals(supabase, artist.id, profile.user_id);
       const tipSectionHtml = tipGoals ? renderTipSection(slug, artist.name, tipGoals) : '';
 
+      // UNS-221: the claimed page renders its sections in the artist's saved order
+      // (artist_profiles.section_order), the same model the SPA payload carries — this is the
+      // crawler's view of the same page, so it must agree with RichArtistProfile. Official
+      // pages are not artist-orderable and follow marketplaces wherever that lands; links
+      // keep their own stored order and divider rules inside each section.
+      const sectionHtml = renderClaimedSections({
+        profile,
+        platformsFiltered: platforms,
+        isMainPlatform,
+        tipSectionHtml,
+        featuredEmbedHtml,
+        bioHtml: bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : '',
+      });
+
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -647,20 +798,8 @@ export default async function handler(request: Request, context: Context) {
     </div>
 
     <div class="container" style="padding-bottom:32px">
-      ${tipSectionHtml}
-      ${bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : ''}
-      ${featuredEmbedHtml ? `
-        <div style="margin-top:24px">
-          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Featured Release</h2>
-          ${featuredEmbedHtml}
-        </div>
-      ` : ''}
-      ${mainPlatforms.length > 0 ? `
-        <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px${featuredEmbedHtml ? ';margin-top:24px' : ''}">Support directly</h2>
-        <div style="display:grid;gap:8px">${platformLinksHtml}</div>
-      ` : ''}
-      ${socialLinksHtml}
       ${releasesHtml}
+      ${sectionHtml}
     </div>
   </div>
 
