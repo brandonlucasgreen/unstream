@@ -96,7 +96,7 @@ describe('ArtistTipsPage', () => {
   it('confirms the return from Stripe and cleans up the address', async () => {
     tips.getTipSettings.mockResolvedValue(settings('stripe_review'));
     renderAt('/artist-edit/kid-lightbulbs/tips?stripe=return');
-    expect(await screen.findByText("Back from Stripe. Here's where things stand.")).toBeTruthy();
+    expect(await screen.findByText('Stripe Connect awaiting verification')).toBeTruthy();
     expect(screen.getByTestId('panel')).toBeTruthy();
     expect(location!.search).toBe('');
     expect(tips.connectStripe).not.toHaveBeenCalled();
