@@ -111,6 +111,36 @@ export async function getTipPage(slug: string): Promise<TipPageData> {
   return body as TipPageData;
 }
 
+// A hover/skim prefetch: the Tip window fetches this endpoint when it opens, at ~0.5s of function
+// latency, so starting the identical request while the fan is still moving toward the button turns
+// that wait into an instant form. Small single-slot memo keyed by slug; one request in flight per
+// slug, consumed (once) by whoever opens the sheet — never cached after settlement, so a failure
+// (or a stale state between the hover and the click) simply falls through to a fresh fetch.
+const tipPagePrefetch = new Map<string, Promise<TipPageData>>();
+
+/** Warm the tip-page fetch for `slug` if (and only if) nothing is already in flight for it. */
+export function prefetchTipPage(slug: string): void {
+  if (tipPagePrefetch.has(slug)) return;
+  const p = getTipPage(slug)
+    .catch(() => { tipPagePrefetch.delete(slug); throw null; }) // consumers refetch; nobody awaits this
+    .finally(() => setTimeout(() => tipPagePrefetch.delete(slug), 3000));
+  tipPagePrefetch.set(slug, p as Promise<TipPageData>);
+}
+
+/**
+ * The prefetch-aware read TipSheet uses: joins an in-flight prefetch when there is one, else
+ * fetches fresh. Identical contract to plain `getTipPage` (same rejection shape).
+ */
+export async function getTipPageCached(slug: string): Promise<TipPageData> {
+  const p = tipPagePrefetch.get(slug);
+  if (!p) return getTipPage(slug);
+  try {
+    return await p;
+  } catch {
+    return getTipPage(slug); // the prefetch failed — surface a real error, not its swallowed one
+  }
+}
+
 // ---------------------------------------------------------------------------------------------
 // A fan's own record: /api/me/tips.
 // ---------------------------------------------------------------------------------------------

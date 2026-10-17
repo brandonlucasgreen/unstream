@@ -1,6 +1,7 @@
 import { useState, type MouseEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { TipSheet } from './TipSheet';
+import { prefetchTipPage } from '../services/tips';
 
 // The Tip button (docs/specs/artist-patronage-spec.md §3.1), shown only for an artist taking tips.
 // It opens the tip window over the current page. It's still a real link to /tip/{slug}, so opening it
@@ -25,9 +26,14 @@ export function TipLink({ slug, artistName, goalId, className, children }: {
     setOpen(true);
   };
 
+  // The sheet waits on a ~0.5s function call before the form shows. Starting that call while the
+  // fan is still aiming at the button (or tabbing to it) hides the wait; the sheet joins the
+  // in-flight request. No hover on touch screens — there it just loads as before.
+  const warm = () => prefetchTipPage(slug);
+
   return (
     <>
-      <Link to={href} onClick={onClick} className={className}>
+      <Link to={href} onClick={onClick} onMouseEnter={warm} onFocus={warm} className={className}>
         {children}
       </Link>
       {open && <TipSheet slug={slug} artistName={artistName} goalId={goalId} onClose={() => setOpen(false)} />}
