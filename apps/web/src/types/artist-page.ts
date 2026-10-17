@@ -32,7 +32,7 @@ export interface ArtistPagePayload {
     // Positions in this section's own `links` array which a horizontal divider is drawn above.
     dividerIndexes: number[];
   }>;
-  /** The resolved section order (patronage/bio/featured/marketplaces/social). Older cached
+  /** The resolved section order (bio/featured/patronage/marketplaces/social). Older cached
    *  responses omit it — treat a missing value as the default order. */
   sectionOrder?: Array<'patronage' | 'bio' | 'featured' | 'marketplaces' | 'social'>;
   links: Array<{

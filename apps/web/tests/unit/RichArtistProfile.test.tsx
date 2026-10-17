@@ -357,14 +357,14 @@ describe('RichArtistProfile', () => {
       tips: { enabled: true, goals: [] },
     };
 
-    it('renders the default order: Patronage (tip first) → Bio → Featured → Marketplaces → Follow', () => {
+    it('renders the default order: Bio → Featured → Patronage (tip first) → Marketplaces → Follow', () => {
       render(<MemoryRouter><RichArtistProfile payload={claimedPayload} slug="kid-lightbulbs" /></MemoryRouter>);
       const headings = [...document.querySelectorAll('h2')].map(h => h.textContent);
       const idx = (label: string) => headings.indexOf(label);
-      expect(idx('Patronage')).toBeGreaterThanOrEqual(0);
-      expect(idx('Bio')).toBeGreaterThan(idx('Patronage'));
+      expect(idx('Bio')).toBeGreaterThanOrEqual(0);
       expect(idx('Featured Release')).toBeGreaterThan(idx('Bio'));
-      expect(idx('Marketplaces')).toBeGreaterThan(idx('Featured Release'));
+      expect(idx('Patronage')).toBeGreaterThan(idx('Featured Release'));
+      expect(idx('Marketplaces')).toBeGreaterThan(idx('Patronage'));
       expect(idx('Follow')).toBeGreaterThan(idx('Marketplaces'));
     });
 

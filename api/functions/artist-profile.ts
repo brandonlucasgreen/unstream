@@ -158,9 +158,9 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ site_id: siteId, cache_tags: [`artist-${slug}`] }),
+        body: JSON.stringify({ site_id: siteId, cache_tags: [`artist-${slug}`, `artist-page-${slug}`] }),
       });
-      console.log(`[Profile] Purged CDN cache for artist-${slug}`);
+      console.log(`[Profile] Purged CDN cache for artist-${slug} and artist-page-${slug}`);
     } else {
       console.warn('[Profile] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge');
     }

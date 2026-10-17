@@ -118,6 +118,10 @@ interface FormState {
   fetchingAvatar: string | null;
   links: LinkEntry[];
   sectionOrder: PageSectionKey[];
+  // True once the artist moved a section this session — the only signal distinguishable from
+  // "loaded". Without it a revert-to-default can't be saved: the payload would equal the
+  // default and look like "nothing changed" (UNS-221 save bug Brandon hit).
+  sectionOrderTouched: boolean;
   city: string;
   country: string;
   removeOpen: boolean;
@@ -156,6 +160,9 @@ const initialFormState: FormState = {
   fetchingAvatar: null,
   links: [],
   sectionOrder: [...DEFAULT_SECTION_ORDER],
+  // Loaded state resets it; only moveSection sets it true. Note LOAD_DATA spreads later, so
+  // LOAD_DATA must also reset it (see the load dispatch) or a prior session's flag could leak.
+  sectionOrderTouched: false,
   city: '',
   country: '',
   removeOpen: false,
@@ -228,6 +235,7 @@ export function ArtistEditPage() {
             // The saved arrangement (or the default when none). Normalized so unknown keys
             // from an older payload can't linger in state.
             sectionOrder: normalizeSectionOrder(data.profile?.sectionOrder) ?? [...DEFAULT_SECTION_ORDER],
+            sectionOrderTouched: false,
             city: data.location?.city ?? '',
             country: data.location?.country ?? data.location?.countryCode ?? '',
             loading: false,
@@ -311,7 +319,11 @@ export function ArtistEditPage() {
     if (newIndex < 0 || newIndex >= form.sectionOrder.length) return;
     const updated = [...form.sectionOrder];
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    set('sectionOrder', updated);
+    dispatch({ type: 'SET', field: 'sectionOrder', value: updated });
+    // Only moveSection sets this — so Save always sends the arrangement the artist actually
+    // arranged, including a revert back to the default order (which would otherwise look
+    // unchanged and never save — the bug Brandon hit, UNS-221).
+    dispatch({ type: 'SET', field: 'sectionOrderTouched', value: true });
   }
 
   async function handleSave() {
@@ -382,12 +394,12 @@ export function ArtistEditPage() {
           featuredEmbed: form.featuredEmbed || null,
           customImageUrl: form.customImageUrl,
           location: { city: form.city, country: form.country },
-          // UNS-221: send the arrangement only when it differs from the default, so an
-          // un-touched save doesn't pin every artist into the current default permanently.
-          sectionOrder:
-            JSON.stringify(form.sectionOrder) === JSON.stringify([...DEFAULT_SECTION_ORDER])
-              ? undefined
-              : form.sectionOrder,
+          // UNS-221: only sent when the artist actually arranged sections this session —
+          // an untouched save writes nothing (no artist gets pinned to today's default by a
+          // coincidental save), while a touched revert-to-default DOES save (explicitly
+          // storing the default list is equivalent to clearing, since normalization makes
+          // a complete default list render identically).
+          sectionOrder: form.sectionOrderTouched ? form.sectionOrder : undefined,
           links: validLinks.map(l => l.platform === DIVIDER_PLATFORM
             ? { platform: DIVIDER_PLATFORM }
             : {

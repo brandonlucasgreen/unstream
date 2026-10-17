@@ -22,15 +22,15 @@
 //                  is pinned immediately after whatever the marketplaces slot renders.
 //   social       — the "Follow" links (Instagram, YouTube, Mastodon…).
 //
-// The artist can reorder `patronage, bio, featured, marketplaces, social` (in that default
-// order — which keeps tips first on the page, the standing call from 2026-10-03). Sections
-// with no content are skipped by the renderer; the order only decides *sequence*.
+// The artist can reorder `bio, featured, patronage, marketplaces, social` — the default
+// order Brandon set after seeing it arranged (bio/featured first, patronage mid-page).
+// Sections with no content are skipped by the renderer; the order only decides *sequence*.
 
 /** Page section keys in the default display order. */
 export const DEFAULT_SECTION_ORDER = [
-  'patronage',
   'bio',
   'featured',
+  'patronage',
   'marketplaces',
   'social',
 ] as const;
@@ -86,7 +86,7 @@ export function normalizeSectionOrder(input: unknown): PageSectionKey[] | null {
   return seen.length > 0 ? seen : null;
 }
 
-/** The order to render: the artist's stored one, with patronage/tip default first when none. */
+/** The order to render: the artist's stored one, or the default (bio first) when none. */
 export function resolveSectionOrder(stored: unknown): PageSectionKey[] {
   return normalizeSectionOrder(stored) ?? [...DEFAULT_SECTION_ORDER];
 }
