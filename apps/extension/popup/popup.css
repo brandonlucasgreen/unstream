@@ -342,6 +342,49 @@ body {
   text-overflow: ellipsis;
 }
 
+/* The Tip button (docs/specs/artist-tips-spec.md §6): filled and full width, the way the Mac
+   popover's ArtistTipButton and the web's TipButton are — it is a patronage option, and the one
+   that pays the artist the most, so it leads the links rather than blending in with them. It only
+   exists for an artist taking tips; there is no disabled or placeholder state. */
+.tip-button-slot {
+  margin-bottom: 8px;
+}
+
+.tip-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  background: #FF6B35;
+  border: none;
+  border-radius: 8px;
+  color: #F9FAFB;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tip-button:hover {
+  background: #E55A2B;
+}
+
+.tip-button-heart {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* One line, like the Mac button's lineLimit(1): a long artist name truncates instead of wrapping
+   the button and pushing the platform links down. */
+.tip-button-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Social Links */
 .social-links {
   display: flex;

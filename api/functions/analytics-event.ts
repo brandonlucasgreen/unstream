@@ -18,6 +18,11 @@ const VALID_SOURCE_IDS = new Set<string>([
   'spotify', 'apple-music', 'youtube', 'instagram', 'facebook', 'tiktok',
   'threads', 'bluesky', 'mastodon', 'funkwhale',
   'listenbrainz', 'librefm', 'internetarchive',
+  // The extension popup's Tip button, a click-out to the artist's own tip page (tips spec §6,
+  // UNS-213). Not a third-party platform, but the same shape of event as click:bandcamp — a fan
+  // leaving for an artist's page — so it rides this endpoint and the same breakdown on the artist
+  // dashboard. Without it here the popup's event is dropped silently at the whitelist.
+  'tip',
 ]);
 
 const CORS_HEADERS = {
