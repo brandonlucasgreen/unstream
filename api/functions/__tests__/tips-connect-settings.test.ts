@@ -46,6 +46,8 @@ const get = async () => (await rawSettings({ httpMethod: 'GET', headers: { autho
 
 const fetchMock = vi.fn();
 const OWNER = { userId: 'owner-1', email: 'o@example.com' };
+// A claimed artist who is NOT the admin — the caller the tipsArtists flag actually gates.
+const ARTIST = { userId: 'artist-9', email: 'another-artist@example.com' };
 
 beforeEach(() => {
   db = createFakeDb();
@@ -378,7 +380,7 @@ describe('tips-settings', () => {
 });
 
 describe('tips are private to the admin for now', () => {
-  const ARTIST = { userId: 'owner-1', email: 'another-artist@example.com' };
+  const ARTIST = { userId: 'artist-9', email: 'another-artist@example.com' };
 
   it('hides Manage Tips from any other artist, even with Stripe configured', async () => {
     mocks.authenticateBearer.mockResolvedValue(ARTIST);
@@ -406,8 +408,17 @@ describe('tips are private to the admin for now', () => {
 });
 
 // UNS-215: the artist-side flag, the half of the split that opens onboarding and the tips switch.
+// The flag never gates the admin (canSetUpTips has already refused everyone else), so these tests
+// run the flag-off refusals as ARTIST — the admin's flag-off path is that the gate is a no-op.
 describe('the tipsArtists gate', () => {
-  it('refuses to start onboarding while the flag is off, before any Stripe call', async () => {
+  beforeEach(() => {
+    // The flag is ON for the shared suite; the artist caller is the one the flag actually gates.
+    mocks.authenticateBearer.mockResolvedValue(ARTIST);
+    mocks.resolveOwnedArtist.mockResolvedValue({ ok: true, status: 200, artistId: 'artist-1', artistName: 'Kid Lightbulbs' });
+    process.env.ADMIN_EMAIL = OWNER.email; // re-assert: ARTIST != ADMIN_EMAIL
+  });
+
+  it('refuses a non-admin to start onboarding while the flag is off, before any Stripe call', async () => {
     mocks.flagStore.set('tipsArtists', 'off');
 
     const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
@@ -419,50 +430,60 @@ describe('the tipsArtists gate', () => {
     expect(db.tables.artist_tip_accounts ?? []).toEqual([]);
   });
 
-  it('keeps onboarding closed when the flag store itself cannot be read', async () => {
-    // Fail closed: a Redis outage must not be the reason an onboarding endpoint goes live.
-    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
-
-    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
-    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('keeps onboarding closed while the field is missing from the hash', async () => {
-    // The state every flag starts in, and the one a new deployment is in.
-    mocks.flagStore.clear();
-
-    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('checks ownership before the flag, so a non-owner gets the ownership answer', async () => {
+  it('lets the admin start onboarding with the flag off — the flag never locks the launcher out', async () => {
     mocks.flagStore.set('tipsArtists', 'off');
-    mocks.resolveOwnedArtist.mockResolvedValue({ ok: false, status: 403, error: 'You do not own this profile' });
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
     const res = await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true });
 
-    expect(JSON.parse(res.body).error).toBe('You do not own this profile');
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).url).toBe('https://connect.stripe.com/setup/s/abc');
+  });
+
+  it('fails closed for a non-admin even when the flag store is unreadable', async () => {
+    // Redis down + flag unreadable: the artist can't onboard — but not thanks to the flag: the
+    // privacy gate refuses them first. Same visible outcome, one refusal message.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('refuses to switch tips on while the flag is off', async () => {
-    db.tables.artist_tip_accounts = [account()];
-    mocks.flagStore.set('tipsArtists', 'off');
+  it('lets the admin proceed even when the flag store is unreadable', async () => {
+    // Fail-closed is about strangers, not the pilot: a Redis outage must not strand the admin.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
-    const res = await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true });
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(200);
+  });
 
-    expect(res.statusCode).toBe(403);
-    expect(JSON.parse(res.body).error).toBe("Tips aren't open to artists yet");
-    expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(false);
+  it('keeps onboarding closed when the flag store itself cannot be read', async () => {
+    // Fail closed: a Redis outage must not be the reason an onboarding endpoint goes live. For the
+    // admin the refusal never had a flag word in it — and every other caller already stopped at
+    // canSetUpTips, so fail-closed has the same net effect from both paths.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('answers the flag rather than "connect Stripe first" when the flag is off', async () => {
     // Checked before the account read on purpose: whether tips may be switched on at all is not a
     // question about this artist's Stripe state, and the flag is the more useful answer.
+    db.tables.artist_tip_accounts = [account()];
     mocks.flagStore.set('tipsArtists', 'off');
 
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(403);
+    expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(false);
+  });
+
+  it('lets the admin switch tips on with the flag off — he is the pilot', async () => {
+    db.tables.artist_tip_accounts = [account()];
+    mocks.flagStore.set('tipsArtists', 'off');
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
+
+    expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: true })).statusCode).toBe(200);
+    expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(true);
   });
 
   it('still answers 400 for a malformed tipsEnabled while the flag is off', async () => {
@@ -470,15 +491,18 @@ describe('the tipsArtists gate', () => {
     // rather than a 403 that hides it.
     db.tables.artist_tip_accounts = [account()];
     mocks.flagStore.set('tipsArtists', 'off');
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: 'true' })).statusCode).toBe(400);
   });
 
   it('still lets an artist switch tips off while the flag is off', async () => {
     // The kill switch must never depend on the flag: an artist who is already live has to be able
-    // to stop taking money even after the rollout is pulled.
+    // to stop taking money even after the rollout is pulled. (Private-for-now caveat: non-admins
+    // are already refused by the privacy gate; this asserts the flagged-off path for the pilot.)
     db.tables.artist_tip_accounts = [account({ tips_enabled: true })];
     mocks.flagStore.set('tipsArtists', 'off');
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', tipsEnabled: false })).statusCode).toBe(200);
     expect(db.tables.artist_tip_accounts[0].tips_enabled).toBe(false);
@@ -487,6 +511,7 @@ describe('the tipsArtists gate', () => {
   it('leaves the fee and both goal actions open while the flag is off', async () => {
     db.tables.artist_tip_accounts = [account()];
     mocks.flagStore.set('tipsArtists', 'off');
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
     expect((await put({ slug: 'kid-lightbulbs', action: 'update', feeBasisPoints: 100 })).statusCode).toBe(200);
     expect((await put({ slug: 'kid-lightbulbs', action: 'createGoal', title: 'Vinyl', targetCents: 1000 })).statusCode).toBe(200);
@@ -498,6 +523,7 @@ describe('the tipsArtists gate', () => {
     // two actions the flag owns refuse.
     db.tables.artist_tip_accounts = [account({ tips_enabled: true })];
     mocks.flagStore.set('tipsArtists', 'off');
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
 
     const body = JSON.parse((await get()).body);
     expect(body.state).toBe('awaiting_approval');

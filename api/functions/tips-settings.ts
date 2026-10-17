@@ -83,7 +83,7 @@ async function handleRequest(event: HandlerEvent) {
     let result: ReturnType<typeof respond>;
     switch (body.action) {
       case 'update':
-        result = await updateSettings(client, artistId, owned.artistName!, user.userId, body);
+        result = await updateSettings(client, artistId, owned.artistName!, user.userId, body, tipsOpenToCaller);
         break;
       case 'createGoal':
         result = await createGoal(client, artistId, body);
@@ -204,13 +204,18 @@ async function readSettings(client: SupabaseClient, artistId: string, artistName
   };
 }
 
-async function updateSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string, body: Record<string, unknown>) {
+async function updateSettings(client: SupabaseClient, artistId: string, artistName: string, userId: string, body: Record<string, unknown>, tipsOpenToCaller: boolean) {
   // UNS-215: switching tips ON is the artist-side flag's business, and it is checked before
   // anything else — the answer must not depend on whether Stripe happens to be connected yet.
   // Switching them OFF is never gated: it is the kill switch, and the only way out for an artist
   // who already went live after a rollout is pulled. Every other action here (the fee, both goal
   // actions) stays open too. Fails closed, like the store it reads.
-  if (body.tipsEnabled === true && !(await getFeatureFlag('tipsArtists'))) {
+  //
+  // The flag never gates the admin: tipsOpenToCaller is canSetUpTips-shaped (admin only, while
+  // tips are private), and a plain flag check would let the flag lock the admin out of switching
+  // on his own pilot artist with the flag off — backwards. Off means "closed to whoever might
+  // come later", not "closed to the person launching it".
+  if (body.tipsEnabled === true && !tipsOpenToCaller && !(await getFeatureFlag('tipsArtists'))) {
     return respond(403, { error: "Tips aren't open to artists yet" });
   }
 
