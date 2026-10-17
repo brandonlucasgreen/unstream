@@ -58,7 +58,7 @@ describe('admin-flags', () => {
   it('is admin-only', async () => {
     mocks.authenticateAdmin.mockResolvedValue(null);
     expect((await get()).statusCode).toBe(401);
-    expect((await post({ flag: 'tips', enabled: true })).statusCode).toBe(401);
+    expect((await post({ flag: 'tipsArtists', enabled: true })).statusCode).toBe(401);
     // An unauthenticated caller never reaches the store.
     expect(mocks.hgetall).not.toHaveBeenCalled();
     expect(mocks.hset).not.toHaveBeenCalled();
@@ -74,25 +74,29 @@ describe('admin-flags', () => {
   it('GET on an empty hash reports both flags off', async () => {
     const response = await get();
     expect(response.statusCode).toBe(200);
-    expect(flagsOf(response)).toEqual({ tips: false, emailChange: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false });
   });
 
   it('GET reports only the flag whose field is "on"', async () => {
-    mocks.hash.set('tips', 'on');
-    expect(flagsOf(await get())).toEqual({ tips: true, emailChange: false });
+    mocks.hash.set('tipsArtists', 'on');
+    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false });
   });
 
-  it('GET ignores a hash field that is not a known flag', async () => {
-    mocks.hash.set('tips', 'on');
+  it('GET ignores a hash field that is not a known flag, including the retired "tips" one', async () => {
+    mocks.hash.set('tipsArtists', 'on');
     mocks.hash.set('tipsV2', 'on');
-    expect(flagsOf(await get())).toEqual({ tips: true, emailChange: false });
+    // UNS-215 dropped the single `tips` flag and the dead `emailChange` one. Their old fields
+    // stay in Redis and no reader knows them: nothing in the response comes from either.
+    mocks.hash.set('tips', 'on');
+    mocks.hash.set('emailChange', 'on');
+    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false });
   });
 
   it('GET still succeeds, all off, when Redis throws', async () => {
     mocks.hgetall.mockRejectedValue(new Error('WRONGTYPE, command was: ["HGETALL","feature-flags"]'));
     const response = await get();
     expect(response.statusCode).toBe(200);
-    expect(flagsOf(response)).toEqual({ tips: false, emailChange: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false });
     expect(mocks.reportRedisFailure).toHaveBeenCalled();
   });
 
@@ -103,7 +107,15 @@ describe('admin-flags', () => {
     expect(mocks.hset).not.toHaveBeenCalled();
   });
 
-  it.each([[{}], [{ flag: 'tips' }], [{ flag: 'tips', enabled: 'true' }], [{ flag: 7, enabled: true }]])(
+  it('POST rejects a name that was once a flag', async () => {
+    // The retired names are gone from the registry, so they are client bugs like any other.
+    expect((await post({ flag: 'tips', enabled: true })).statusCode).toBe(400);
+    expect((await post({ flag: 'emailChange', enabled: true })).statusCode).toBe(400);
+    expect(errorOf(await post({ flag: 'emailChange', enabled: true }))).toContain('tipsArtists');
+    expect(mocks.hset).not.toHaveBeenCalled();
+  });
+
+  it.each([[{}], [{ flag: 'tipsArtists' }], [{ flag: 'tipsFans', enabled: 'true' }], [{ flag: 7, enabled: true }]])(
     'POST rejects %j',
     async (body) => {
       expect((await post(body)).statusCode).toBe(400);
@@ -112,23 +124,23 @@ describe('admin-flags', () => {
   );
 
   it('POST writes exactly one field and value, and returns the updated map', async () => {
-    const response = await post({ flag: 'tips', enabled: true });
+    const response = await post({ flag: 'tipsArtists', enabled: true });
     expect(response.statusCode).toBe(200);
-    expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { tips: 'on' });
-    expect([...mocks.hash.entries()]).toEqual([['tips', 'on']]);
-    expect(flagsOf(response)).toEqual({ tips: true, emailChange: false });
+    expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { tipsArtists: 'on' });
+    expect([...mocks.hash.entries()]).toEqual([['tipsArtists', 'on']]);
+    expect(flagsOf(response)).toEqual({ tipsArtists: true, tipsFans: false });
   });
 
   it('POST switching a flag off writes "off" and returns it off', async () => {
-    mocks.hash.set('emailChange', 'on');
-    const response = await post({ flag: 'emailChange', enabled: false });
-    expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { emailChange: 'off' });
-    expect(flagsOf(response)).toEqual({ tips: false, emailChange: false });
+    mocks.hash.set('tipsFans', 'on');
+    const response = await post({ flag: 'tipsFans', enabled: false });
+    expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { tipsFans: 'off' });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false });
   });
 
   it('POST returns 503, changing nothing, when Redis is unavailable', async () => {
     mocks.getRedis.mockReturnValue(null);
-    const response = await post({ flag: 'tips', enabled: true });
+    const response = await post({ flag: 'tipsArtists', enabled: true });
     expect(response.statusCode).toBe(503);
     expect(errorOf(response)).toEqual(expect.any(String));
     expect(mocks.hset).not.toHaveBeenCalled();
@@ -136,7 +148,7 @@ describe('admin-flags', () => {
 
   it('POST returns 503 when the write itself fails', async () => {
     mocks.hset.mockRejectedValue(new Error('ECONNRESET'));
-    const response = await post({ flag: 'tips', enabled: true });
+    const response = await post({ flag: 'tipsArtists', enabled: true });
     expect(response.statusCode).toBe(503);
     expect(mocks.hash.size).toBe(0);
     expect(mocks.reportRedisFailure).toHaveBeenCalled();

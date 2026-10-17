@@ -385,9 +385,10 @@ describe('GET /api/artist-page', () => {
   describe('tips', () => {
     // Inner hooks run after the outer beforeEach that clears the store, so this survives.
     beforeEach(() => {
-      // Tips are admin-only until the flag says otherwise (UNS-215), so a test about tips
-      // reaching a fan has to switch the flag on first.
-      mocks.flagStore.set('tips', 'on');
+      // Tips reach a fan only while the fan-facing flag says so (UNS-215), so a test about tips
+      // reaching a fan has to switch tipsFans on first. tipsArtists is irrelevant here: this is
+      // the page a fan reads, not the artist's own dashboard.
+      mocks.flagStore.set('tipsFans', 'on');
     });
 
     it('says the artist is taking tips, with their open goals', async () => {
@@ -410,7 +411,7 @@ describe('GET /api/artist-page', () => {
     it('hides the Tip and every goal while the flag is off, without reading them', async () => {
       // Flag off is the pre-rollout state: this artist's data says they ARE taking tips, and
       // the payload still says otherwise. The read is skipped, so nothing can leak through it.
-      mocks.flagStore.set('tips', 'off');
+      mocks.flagStore.set('tipsFans', 'off');
       mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
       mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
       mocks.getGoals.mockResolvedValue([{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, status: 'open' }]);
@@ -424,7 +425,7 @@ describe('GET /api/artist-page', () => {
 
     it('hides tips when the flag store itself cannot be read', async () => {
       // Fail closed: a Redis outage must not be the reason a flag-off feature goes live.
-      mocks.flagStore.set('tips', 'on');
+      mocks.flagStore.set('tipsFans', 'on');
       mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
       mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
       mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
@@ -444,6 +445,18 @@ describe('GET /api/artist-page', () => {
       const body = JSON.parse((await call('funkadelic')).body);
 
       expect(body.tips).toEqual({ enabled: false, goals: [] });
+      expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
+    });
+
+    it('still hides tips when only the artist-side flag is on', async () => {
+      // The split's whole point: letting artists register with Stripe does not put a Tip button
+      // in front of a fan. tipsArtists is on here, tipsFans is not.
+      mocks.flagStore.set('tipsFans', 'off');
+      mocks.flagStore.set('tipsArtists', 'on');
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
+
+      expect(JSON.parse((await call('funkadelic')).body).tips).toEqual({ enabled: false, goals: [] });
       expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
     });
   });

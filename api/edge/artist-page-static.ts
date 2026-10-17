@@ -7,7 +7,7 @@ import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, release
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
 import { MAX_OPEN_GOALS } from "../shared/tips.ts";
-import { FLAGS_HASH_KEY, TIPS_FLAG_FIELD, flagIsOn } from "../shared/tips-flag.ts";
+import { FLAGS_HASH_KEY, TIPS_FANS_FLAG_FIELD, flagIsOn } from "../shared/tips-flag.ts";
 import {
   stripeModeFromKey,
   isTipAccountTakingTips,
@@ -192,7 +192,10 @@ const TIPS_FLAG_CACHE_MS = 60_000;
 let tipsFlagCache: { value: boolean; expiresAt: number } | null = null;
 
 /**
- * The `tips` feature flag (UNS-215), read straight off Upstash over its REST API.
+ * The `tipsFans` feature flag (UNS-215), read straight off Upstash over its REST API.
+ *
+ * The fan-facing half of the split: an artist may already have onboarded with Stripe while this
+ * stays off, and this page must not advertise a tip until fans are allowed to give one.
  *
  * A second reader of the same hash, not a second decision: edge functions run on Deno and cannot
  * import api/functions/feature-flags.ts (which pulls in the Upstash SDK and Sentry), so the value
@@ -219,7 +222,7 @@ async function readTipsFlag(): Promise<boolean> {
       const res = await fetch(url, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(["HGET", FLAGS_HASH_KEY, TIPS_FLAG_FIELD]),
+        body: JSON.stringify(["HGET", FLAGS_HASH_KEY, TIPS_FANS_FLAG_FIELD]),
         signal: AbortSignal.timeout(2000),
       });
       if (res.ok) raw = ((await res.json()) as { result?: unknown }).result;

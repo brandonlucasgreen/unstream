@@ -172,13 +172,14 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // Whether the artist takes tips, read alongside the releases. A failed read shows no Tip
     // button (reported inside getTipsLiveSlugs) rather than failing the page.
     //
-    // UNS-215: the tips flag gates this payload too. Off — or unreadable, since the flag store
-    // fails closed — renders `tips: { enabled: false, goals: [] }` and skips the tips query
-    // entirely. The flag read rides along with the releases read rather than costing its own
+    // UNS-215: the fan-facing tips flag (tipsFans) gates this payload too — an artist may be
+    // onboarded with Stripe while fans are not yet allowed to tip. Off — or unreadable, since the
+    // flag store fails closed — renders `tips: { enabled: false, goals: [] }` and skips the tips
+    // query entirely. The flag read rides along with the releases read rather than costing its own
     // round trip, and hiding tips never fails the rest of the page.
     const [{ releases, total: releaseCount }, tipsFlagOn] = await Promise.all([
       getArtistReleases(artistRow.id, 60),
-      getFeatureFlag('tips'),
+      getFeatureFlag('tipsFans'),
     ]);
     const tipsLive = tipsFlagOn ? await getTipsLiveSlugs([artistRow.slug]) : null;
     const tipsEnabled = tipsLive?.has(artistRow.slug) ?? false;

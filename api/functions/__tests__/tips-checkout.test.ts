@@ -56,10 +56,11 @@ beforeEach(() => {
   vi.resetAllMocks();
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.authenticateBearerFast.mockResolvedValue(null);
-  // Tips are live for everything below except the gate tests: the flag is on unless a test says
-  // otherwise, so these stay tests about tips rather than about the rollout.
+  // Tips are live for everything below except the gate tests: the fan-facing flag (tipsFans, the
+  // one this surface reads) is on unless a test says otherwise, so these stay tests about tips
+  // rather than about the rollout.
   mocks.flagStore.clear();
-  mocks.flagStore.set('tips', 'on');
+  mocks.flagStore.set('tipsFans', 'on');
   mocks.hgetall.mockImplementation(async (key: string) =>
     key === 'feature-flags' ? Object.fromEntries(mocks.flagStore) : null);
   process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
@@ -241,7 +242,7 @@ describe('the UNS-215 gate', () => {
 
   it('answers the tip page with no tip, keeping the shape old clients know', async () => {
     seedTippableArtist({ fee_basis_points: 250 });
-    mocks.flagStore.set('tips', 'off');
+    mocks.flagStore.set('tipsFans', 'off');
 
     const res = await getPage('kid-lightbulbs');
     const body = JSON.parse(res.body);
@@ -259,7 +260,7 @@ describe('the UNS-215 gate', () => {
 
   it('refuses to create a payment, without a URL and without reaching Stripe', async () => {
     seedTippableArtist();
-    mocks.flagStore.set('tips', 'off');
+    mocks.flagStore.set('tipsFans', 'off');
 
     const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
 
