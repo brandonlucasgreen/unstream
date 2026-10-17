@@ -128,7 +128,7 @@ export function TipThanksPage() {
               <strong className="text-text-primary">Need a refund?</strong> The artist is the seller, so refunds
               come from them; their contact details are on your receipt. If you can't reach them, email{' '}
               <a href="mailto:support@unstream.stream" className="text-accent-primary hover:underline">support@unstream.stream</a>{' '}
-              and we'll pass it on. <Link to="/terms#section-14" className="underline">How tipping works</Link>
+              and we'll pass it on. <Link to="/faq#faq-4" className="underline">How tipping works</Link>
             </p>
           </div>
 

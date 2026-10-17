@@ -164,7 +164,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
       </button>
       <p className="text-xs text-text-muted text-center">
         {data.artist.name} is the seller and receives the payment directly. Refunds are handled by the artist.{' '}
-        <Link to="/terms#section-14" className="underline">How tipping works</Link>
+        <Link to="/faq#faq-4" className="underline">How tipping works</Link>
       </p>
     </div>
   );
