@@ -116,15 +116,21 @@ export async function getTipPage(slug: string): Promise<TipPageData> {
 // that wait into an instant form. Small single-slot memo keyed by slug; one request in flight per
 // slug, consumed (once) by whoever opens the sheet — never cached after settlement, so a failure
 // (or a stale state between the hover and the click) simply falls through to a fresh fetch.
+// The memo doubles as the budget guard: a hover-sweep across a result grid can't queue unbounded
+// requests — past the cap, the oldest prefetches simply aren't made, and the click path refetches.
 const tipPagePrefetch = new Map<string, Promise<TipPageData>>();
+const TIP_PREFETCH_BUDGET = 8;
 
 /** Warm the tip-page fetch for `slug` if (and only if) nothing is already in flight for it. */
 export function prefetchTipPage(slug: string): void {
   if (tipPagePrefetch.has(slug)) return;
-  const p = getTipPage(slug)
-    .catch(() => { tipPagePrefetch.delete(slug); throw null; }) // consumers refetch; nobody awaits this
-    .finally(() => setTimeout(() => tipPagePrefetch.delete(slug), 3000));
-  tipPagePrefetch.set(slug, p as Promise<TipPageData>);
+  if (tipPagePrefetch.size >= TIP_PREFETCH_BUDGET) return;
+  const p = getTipPage(slug).finally(() => setTimeout(() => tipPagePrefetch.delete(slug), 3000));
+  // The stored promise rejects when nobody ever joins (hover without a click, then a failure) —
+  // attach a quiet handler on a twin so the runtime never logs an unhandled rejection, while the
+  // stored promise itself still rejects so consumers get the real error via getTipPageCached.
+  p.catch(() => {}); // no-op twin: handles the unobserved-rejection case
+  tipPagePrefetch.set(slug, p);
 }
 
 /**
