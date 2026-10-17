@@ -15,6 +15,26 @@ export interface ArtistPagePayload {
     featuredEmbed: string | null;
     verifiedAt: string | null;
   } | null;
+  /**
+   * UNS-221: the artist's links grouped into page sections, in the artist's own section
+   * order resolved server-side. Legacy `links` + `socialLinks` below stay for older clients
+   * (the Mac app); new renderers should read the groups.
+   */
+  linkGroups?: Array<{
+    section: 'patronage' | 'bio' | 'featured' | 'marketplaces' | 'official' | 'social';
+    links: Array<{
+      platform: string;
+      url: string;
+      displayName: string | null;
+      payoutPercent: string | null;
+      bandcampFriday: boolean;
+    }>;
+    // Positions in this section's own `links` array which a horizontal divider is drawn above.
+    dividerIndexes: number[];
+  }>;
+  /** The resolved section order (patronage/bio/featured/marketplaces/social). Older cached
+   *  responses omit it — treat a missing value as the default order. */
+  sectionOrder?: Array<'patronage' | 'bio' | 'featured' | 'marketplaces' | 'social'>;
   links: Array<{
     platform: string;
     url: string;

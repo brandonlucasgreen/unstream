@@ -122,6 +122,87 @@ describe('GET /api/artist-page', () => {
     expect(body.profile).toBeNull();
   });
 
+  describe('page sections (UNS-221)', () => {
+    const sectionLinks = [
+      { platform: 'bandcamp', url: 'https://funkadelic.bandcamp.com', display_name: null },
+      { platform: 'patreon', url: 'https://www.patreon.com/funkadelic', display_name: null },
+      { platform: 'instagram', url: 'https://www.instagram.com/funkadelic', display_name: null },
+      { platform: 'faircamp', url: 'https://funkadelic.faircamp.site', display_name: null },
+      { platform: 'newsletter', url: 'https://buttondown.email/funkadelic', display_name: null },
+    ];
+    const claimedRow = artistRow({ match_confidence: 'claimed' });
+    const claimedProfile = {
+      bio: 'Free your mind.',
+      custom_image_url: null,
+      featured_embed: null,
+      verified_at: '2026-06-01T00:00:00.000Z',
+      link_dividers: null,
+    };
+
+    it('groups links into sections with official last (faircamp + newsletter recategorized)', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        failed: false,
+        bundle: { artist: claimedRow, profile: claimedProfile, links: sectionLinks },
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.linkGroups.map((g: { section: string }) => g.section)).toEqual([
+        'patronage',
+        'marketplaces',
+        'social',
+        'official',
+      ]);
+      const official = body.linkGroups.find((g: { section: string }) => g.section === 'official');
+      expect(official.links.map((l: { platform: string }) => l.platform)).toEqual(['faircamp', 'newsletter']);
+      const social = body.linkGroups.find((g: { section: string }) => g.section === 'social');
+      expect(social.links.map((l: { platform: string }) => l.platform)).toEqual(['instagram']);
+    });
+
+    it('resolves the artist section-order into the payload', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        failed: false,
+        bundle: {
+          artist: claimedRow,
+          profile: { ...claimedProfile, section_order: ['bio', 'featured', 'social', 'marketplaces', 'patronage'] },
+          links: sectionLinks,
+        },
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.sectionOrder).toEqual(['bio', 'featured', 'social', 'marketplaces', 'patronage']);
+    });
+
+    it('sectionOrder defaults when nothing is stored, and legacy fields stay consistent', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        failed: false,
+        bundle: { artist: claimedRow, profile: { ...claimedProfile, section_order: null }, links: sectionLinks },
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.sectionOrder).toEqual(['patronage', 'bio', 'featured', 'marketplaces', 'social']);
+      // Legacy flat fields still render the same links for pre-UNS-221 clients (the Mac app):
+      // every sectioned link appears in `links`.
+      expect(body.links).toHaveLength(5);
+      expect(body.socialLinks.map((l: { platform: string }) => l.platform)).toEqual(['instagram']);
+    });
+
+    it('an unknown platform id rides in marketplaces, never dropped', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        failed: false,
+        bundle: {
+          artist: claimedRow,
+          profile: claimedProfile,
+          links: [...sectionLinks, { platform: 'something_new', url: 'https://example.com', display_name: 'New Thing' }],
+        },
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      const marketplaces = body.linkGroups.find((g: { section: string }) => g.section === 'marketplaces');
+      expect(marketplaces.links.map((l: { platform: string }) => l.platform)).toContain('something_new');
+      expect(body.links).toHaveLength(6);
+    });
+  });
+
   it('reports a verified claimed artist as claimed', async () => {
     mocks.getArtistProfileBySlug.mockResolvedValue({ failed: false, bundle: {
       artist: artistRow({ match_confidence: 'claimed' }),

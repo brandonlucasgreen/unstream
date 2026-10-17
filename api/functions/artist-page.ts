@@ -14,6 +14,7 @@ import { mainLinkDividerIndexes } from '../shared/link-dividers';
 import { sanitizeEmbed } from './artist-profile';
 import { getGoals, getTipsLiveSlugs } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
+import { groupLinksIntoSections, resolveSectionOrder, type PageSectionKey } from '../shared/page-sections';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -115,44 +116,42 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
 
     const bcFriday = isBandcampFriday();
 
-    // Split links into main (non-social) and social
-    const isMainLink = (l: { platform: string }) => {
-      const info = PLATFORMS[l.platform];
-      return !info || info.category !== 'social';
-    };
-    const mainLinks = allLinks.filter(isMainLink);
-    const socialLinks = allLinks.filter(l => {
-      const info = PLATFORMS[l.platform];
-      return info?.category === 'social';
-    });
+    // Build the sectioned link payload (UNS-221). One pass over the artist's ordered links:
+    // every link lands in its section (patronage / marketplaces / official / social) by way of
+    // the platform registry's sectionCategory — a platform the registry doesn't know rides in
+    // `marketplaces`, never dropped — and the artist's stored dividers become per-section
+    // rules. This replaces the old two-bucket split (main links + social): the same links,
+    // grouped the way the page now renders them, so the SPA can draw section headings in the
+    // artist's own section order without re-deriving any of it client-side.
+    const categoryOf = (l: { platform: string }) => PLATFORMS[l.platform]?.sectionCategory;
+    const linkGroups = groupLinksIntoSections(allLinks, categoryOf, profile?.link_dividers).map(group => ({
+      section: group.key,
+      links: group.items.map(l => {
+        const info = PLATFORMS[l.platform];
+        const isBCFriday = l.platform === 'bandcamp' && bcFriday;
+        const payoutPercent = isBCFriday ? '~97%' : (info?.payoutPercent ?? null);
+        const displayName = (l.platform === 'other' || l.platform.startsWith('other_'))
+          ? (l.display_name || null)
+          : (l.display_name || info?.name || null);
 
-    // Build the main links array with payout info
-    const links = mainLinks.map(l => {
-      const info = PLATFORMS[l.platform];
-      const isBCFriday = l.platform === 'bandcamp' && bcFriday;
-      const payoutPercent = isBCFriday ? '~97%' : (info?.payoutPercent ?? null);
-      const displayName = (l.platform === 'other' || l.platform.startsWith('other_'))
-        ? (l.display_name || null)
-        : (l.display_name || info?.name || null);
+        return {
+          platform: l.platform,
+          url: l.url,
+          displayName,
+          payoutPercent,
+          bandcampFriday: isBCFriday,
+        };
+      }),
+      // Divider positions, reindexed into this section's own link list (dividers the artist
+      // placed between sections that are now separately grouped ride along here rather than
+      // disappearing — a rule with one link on each side of a section boundary still draws).
+      dividerIndexes: group.ruleIndexes,
+    }));
 
-      return {
-        platform: l.platform,
-        url: l.url,
-        displayName,
-        payoutPercent,
-        bandcampFriday: isBCFriday,
-      };
-    });
-
-    // Build the social links array
-    const social = socialLinks.map(l => {
-      const info = PLATFORMS[l.platform];
-      return {
-        platform: l.platform,
-        url: l.url,
-        displayName: l.display_name || info?.name || null,
-      };
-    });
+    // The artist's saved section order, defaulting to patronage → bio → featured →
+    // marketplaces → social. `official` is not artist-orderable and follows marketplaces
+    // wherever that lands (see api/shared/page-sections.ts).
+    const sectionOrder: PageSectionKey[] = resolveSectionOrder(profile?.section_order);
 
     // Same claimed test the artist-page-static edge function applies, so the two renderers of
     // this URL agree on which card a fan sees: a profile row alone isn't enough, the artist row
@@ -220,10 +219,22 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
         // The SPA picks RichArtistProfile vs UnclaimedQuietCard off this field.
         verifiedAt: isClaimed ? profile.verified_at : null,
       } : null,
-      links,
-      // Indexes into `links` above which a horizontal divider is drawn.
-      linkDividers: mainLinkDividerIndexes(allLinks, isMainLink, profile?.link_dividers),
-      socialLinks: social,
+      // UNS-221 sectioned links, in the artist's own order. Legacy `links` + `socialLinks`
+      // stay on the payload in parallel for clients that haven't learned the sections yet
+      // (the Mac app reads this same payload); they are derived from the same groups, so
+      // the three shapes cannot disagree.
+      linkGroups,
+      sectionOrder,
+      links: linkGroups.flatMap(g => g.links),
+      // Kept for pre-UNS-221 clients: flat main-link list (no per-section grouping).
+      socialLinks: (linkGroups.find(g => g.section === 'social')?.links ?? []).map(l => ({
+        platform: l.platform,
+        url: l.url,
+        displayName: l.displayName,
+      })),
+      // Kept for pre-UNS-221 clients: indexes into `links` above which a horizontal divider
+      // is drawn (the old whole-list positions, social links included).
+      linkDividers: legacyMainDividerIndexes(allLinks, profile?.link_dividers),
       releases: releasesWithSummary,
       releaseCount,
       bandcampFriday: bcFriday,
@@ -262,6 +273,30 @@ async function readOpenGoals(artistId: string) {
     Sentry.captureException(err, { extra: { context: 'artist-page.goals' } });
     return [];
   }
+}
+
+/**
+ * The legacy `linkDividers` shape, for pre-UNS-221 clients: indexes into the flattened `links`
+ * array (every link in stored order — patronage, marketplaces, official, social interleaved as
+ * stored) which a divider is drawn above, so the legacy card keeps its grouping. The sectioned
+ * payload is the forward shape; this keeps the old one consistent with the same stored values.
+ */
+function legacyMainDividerIndexes<T extends { platform: string }>(
+  allLinks: T[],
+  positions: number[] | null | undefined,
+): number[] {
+  if (!positions || positions.length === 0) return [];
+  const isMainLink = (l: T) => PLATFORMS[l.platform]?.sectionCategory !== 'social';
+  const mainIndexes = new Set(
+    mainLinkDividerIndexes(allLinks, isMainLink, positions).map(n => n - 1),
+  );
+  const out: number[] = [];
+  let mainCount = 0;
+  allLinks.forEach((l, index) => {
+    if (mainIndexes.has(mainCount)) out.push(index);
+    if (isMainLink(l)) mainCount++;
+  });
+  return out;
 }
 
 export const handler = withSentry(handleRequest);

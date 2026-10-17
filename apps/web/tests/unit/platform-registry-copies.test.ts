@@ -39,13 +39,22 @@ describe('services/sources.ts matches the platform registry', () => {
     expect(web.artistPayoutPercent).toBe(PLATFORMS[id].payoutPercent);
   });
 
-  it.each(sharedIds)('%s has the same name, icon and category', (id) => {
+  it.each(sharedIds)('%s has the same name, icon, category and sectionCategory', (id) => {
     const web = sources[id as keyof typeof sources];
     const registry = PLATFORMS[id];
-    expect({ name: web.name, icon: web.icon, category: web.category }).toEqual({
+    expect({
+      name: web.name,
+      icon: web.icon,
+      category: web.category,
+      // UNS-221: the artist-page section a claimed link renders in must agree too — a link
+      // landing in "Patronage" on the web but "Support directly" on the crawler page is the
+      // two-renderers drift this file exists to catch.
+      sectionCategory: (web as { sectionCategory?: string }).sectionCategory,
+    }).toEqual({
       name: registry.name,
       icon: registry.icon,
       category: registry.category,
+      sectionCategory: registry.sectionCategory,
     });
   });
 });

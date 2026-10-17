@@ -39,6 +39,11 @@ export interface Source {
   color: string;
   icon: string;
   category: 'marketplace' | 'patronage' | 'library' | 'decentralized' | 'official' | 'social' | 'curated';
+  /**
+   * Which artist-page section (UNS-221) a claimed artist's link in this platform renders in.
+   * Mirrors api/shared/platform-registry.ts (parity-tested); absent = `marketplaces`.
+   */
+  sectionCategory?: 'patronage' | 'official' | 'social';
   hasEmbed: boolean;
   searchUrlTemplate: string;
   searchOnly?: boolean; // True if we can't verify the artist exists (shows "Search X" instead)
