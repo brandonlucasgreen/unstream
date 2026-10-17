@@ -6,6 +6,7 @@ import { GoalProgress } from './GoalProgress';
 import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 import type { TipPageData } from '../services/tips';
+import { TIP_FAQ_ANCHOR } from '../data/faq';
 
 // The tip itself (docs/specs/artist-patronage-spec.md §3.1, §5): an amount, an optional goal and the
 // cover-the-fees checkbox, with the breakdown shown before paying. Shared by the /tip/{slug} page and
@@ -164,7 +165,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
       </button>
       <p className="text-xs text-text-muted text-center">
         {data.artist.name} is the seller and receives the payment directly. Refunds are handled by the artist.{' '}
-        <Link to="/faq#faq-4" className="underline">How tipping works</Link>
+        <Link to={`/faq#${TIP_FAQ_ANCHOR}`} className="underline">How tipping works</Link>
       </p>
     </div>
   );

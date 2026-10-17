@@ -1,6 +1,12 @@
 export interface FAQSection {
   title: string;
   content: string;
+  /**
+   * Stable anchor for deep links like /faq#tipping. Positional faq-<index> ids broke under
+   * reorder (UNS-219 review): links are hand-maintained copy, so anchors must not be.
+   * Only questions that are deep-link targets need one.
+   */
+  anchor?: string;
 }
 
 export const faqSections: FAQSection[] = [
@@ -49,6 +55,7 @@ On those days, Unstream shows the Bandcamp Friday payout on every Bandcamp link.
   },
   {
     title: "When I tip an artist, where does the money go?",
+    anchor: "tipping",
     content: `Straight to that artist's own Stripe account — Unstream never holds it. The artist chooses whether Unstream keeps a small fee (up to 5%, usually 0%), and the fee is shown on the tip page before you pay. Your receipt comes from the artist's Stripe under their business name.
 
 Refunds and disputes are handled by the artist — their contact details are on your receipt. If you can't reach them, [email support](mailto:support@unstream.stream) and we'll pass it on.`
@@ -111,3 +118,12 @@ We don't sell any of it, we don't run ads, and there are no third-party trackers
     content: `Unstream is totally free to use, but please consider [supporting it on Ko-fi](https://ko-fi.com/bgreenlol)!`
   }
 ];
+
+/**
+ * The anchor the tip surfaces deep-link to (UNS-219): /faq#tipping, the
+ * "When I tip an artist, where does the money go?" question. Throws at import time if the
+ * question or its anchor disappears, so a copy edit can't silently strand the links.
+ */
+export const TIP_FAQ_ANCHOR: string =
+  faqSections.find((s) => s.title.startsWith('When I tip an artist'))?.anchor ??
+  (() => { throw new Error('FAQ lost the "When I tip an artist" question - update the tip pages link and its tests'); })();

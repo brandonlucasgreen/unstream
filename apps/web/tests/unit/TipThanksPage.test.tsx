@@ -20,13 +20,9 @@ vi.mock('src/components/Footer', () => ({ Footer: () => null }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
 import { TipThanksPage } from 'src/pages/TipThanksPage';
-import { faqSections } from 'src/data/faq';
 
-// UNS-219: the link points at the tipping question in the FAQ, not the terms of use. The anchor is
-// faq-<index>, so derive it from the data source of truth rather than hardcoding it.
-const tipFaqIdx = faqSections.findIndex((s: { title: string }) => s.title.startsWith('When I tip an artist'));
-if (tipFaqIdx < 0) throw new Error('FAQ lost the "When I tip an artist" question - update the tip pages link and its tests');
 
+// UNS-219: the link points at the tipping question's FAQ anchor (/faq#tipping), not the terms.
 const fetchMock = vi.fn();
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
 
@@ -51,7 +47,7 @@ describe('TipThanksPage', () => {
     render(<TipThanksPage />);
     expect(screen.getByText(/comes by email from the artist's Stripe/)).toBeTruthy();
     expect(screen.getByText('support@unstream.stream').getAttribute('href')).toBe('mailto:support@unstream.stream');
-    expect(screen.getByText('How tipping works').closest('a')!.getAttribute('href')).toBe(`/faq#faq-${tipFaqIdx}`);
+    expect(screen.getByText('How tipping works').closest('a')!.getAttribute('href')).toBe('/faq#tipping');
   });
 
   it('saves a signed-in fan’s tip by its session id', async () => {
