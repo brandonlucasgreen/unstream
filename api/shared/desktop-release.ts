@@ -34,14 +34,14 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.7.0',
-  build: '19',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.7.0/Unstream-3.7.0.dmg',
-  lengthBytes: 4251022,
-  edSignature: 'SSr/pOF/9T+XywQ3nkZzK2IUchiulvGRgb5uH29H3ocylwhkKYJIfZO0pc59oF7t3xnC/MXBd65bslU6U6QIDg==',
-  publishedAt: '2026-09-30T00:00:00Z',
+  shortVersion: '3.8.0',
+  build: '20',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.8.0/Unstream-3.8.0.dmg',
+  lengthBytes: 4258099,
+  edSignature: 'Pu+48xHu5o9+l8v7rnThPAyOG/2pcI5xLmYDWTVvzoaQIAEJ4smrYUDhyBNJT43Fum6aJoQUKjRqbqpNAfvlDA==',
+  publishedAt: '2026-10-17T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes: 'Search results can now show a short artist bio, and the popover has larger text, more spacing and bigger click targets.',
+  releaseNotes: 'You can now tip artists who take tips on Unstream, straight from their search result. Venmo and PayPal links show up alongside the other ways to support an artist.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
