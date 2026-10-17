@@ -21,6 +21,7 @@
 import { createHash } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
+import { getFeatureFlag } from './feature-flags';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import {
@@ -72,6 +73,18 @@ async function handleRequest(event: HandlerEvent) {
   const owned = await resolveOwnedArtist(slug, user.userId);
   if (!owned.ok) return respond(owned.status, { error: owned.error });
   const artistId = owned.artistId!;
+
+  // UNS-215: starting onboarding is what the artist-side flag opens. Checked after ownership so a
+  // non-owner still gets resolveOwnedArtist's refusal, and before any Stripe call or account row,
+  // so a flag that is off — or a flag store that cannot be read, since that store fails closed —
+  // costs nothing and leaves nothing behind. The wording is the one this endpoint already uses for
+  // "not yet", so a client shows the same message either way.
+  //
+  // Opening this does not by itself let an artist take money: takingTips() still requires
+  // tips_approved_at, which only an admin sets through /api/admin/tips.
+  if (!(await getFeatureFlag('tipsArtists'))) {
+    return respond(403, { error: "Tips aren't open to artists yet" });
+  }
 
   try {
     let account = await getTipAccount(client, artistId);
