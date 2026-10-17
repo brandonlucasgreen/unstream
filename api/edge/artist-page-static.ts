@@ -7,6 +7,7 @@ import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, release
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
 import { MAX_OPEN_GOALS } from "../shared/tips.ts";
+import { FLAGS_HASH_KEY, TIPS_FLAG_FIELD, flagIsOn } from "../shared/tips-flag.ts";
 import {
   stripeModeFromKey,
   isTipAccountTakingTips,
@@ -181,6 +182,61 @@ function buildSafeEmbed(featuredEmbed: string | null): string {
 }
 
 /**
+ * How long a read of the tips flag is reused. This render only reaches crawlers, there are ~800
+ * of these pages for them to sweep, and a flag flip only has to reach Google within a minute — so
+ * one read a minute per warm instance is worth far more than an instant switch.
+ */
+const TIPS_FLAG_CACHE_MS = 60_000;
+
+/** The module-level flag cache: one value, for the life of one warm edge instance. */
+let tipsFlagCache: { value: boolean; expiresAt: number } | null = null;
+
+/**
+ * The `tips` feature flag (UNS-215), read straight off Upstash over its REST API.
+ *
+ * A second reader of the same hash, not a second decision: edge functions run on Deno and cannot
+ * import api/functions/feature-flags.ts (which pulls in the Upstash SDK and Sentry), so the value
+ * is fetched here and applied by the shared api/shared/tips-flag.ts. The env names are the ones
+ * the node side's client uses (api/functions/redis.ts), deliberately: if one side is renamed, the
+ * flag fails closed here rather than the two sides disagreeing silently.
+ *
+ * Fails closed, exactly like the node store — no env, a non-200, a body with no result, a failed
+ * fetch — because a flag that reads "on" by accident would publish a half-built feature to every
+ * crawler. The answer, including an off one, is cached for a minute: that bounds a hot SEO page
+ * to one read a minute, and delays recovery from a blip by the same minute.
+ */
+async function readTipsFlag(): Promise<boolean> {
+  const now = Date.now();
+  if (tipsFlagCache && now < tipsFlagCache.expiresAt) return tipsFlagCache.value;
+
+  const url = Deno.env.get("UPSTASH_REDIS_REST_URL");
+  const token = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
+
+  let raw: unknown;
+  if (url && token) {
+    try {
+      // HGET sent as a command body — the hash read Upstash's REST API expects ({ result: "on" }).
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(["HGET", FLAGS_HASH_KEY, TIPS_FLAG_FIELD]),
+        signal: AbortSignal.timeout(2000),
+      });
+      if (res.ok) raw = ((await res.json()) as { result?: unknown }).result;
+      else console.error(`[artist-page-static] tips flag read failed: HTTP ${res.status}`);
+    } catch (err) {
+      console.error("[artist-page-static] tips flag read failed:", String(err));
+    }
+  } else {
+    console.error("[artist-page-static] tips flag read skipped: Upstash env not configured");
+  }
+
+  const value = flagIsOn(raw);
+  tipsFlagCache = { value, expiresAt: now + TIPS_FLAG_CACHE_MS };
+  return value;
+}
+
+/**
  * Open goals for a claimed artist who is taking tips right now, or null when they aren't (or the
  * read failed) — null renders no tips block at all. The same rules as `getTipsLiveSlugs` and
  * `getGoals` in api/functions/tips-db.ts, duplicated because edge functions can't import from
@@ -195,6 +251,10 @@ async function readTipGoals(
   artistId: string,
   ownerUserId: string | null | undefined,
 ): Promise<OpenGoal[] | null> {
+  // UNS-215: the flag gates this render too, and it is checked before anything else so a flag-off
+  // rollout costs no Supabase query and can't leak a Tip link through any later branch.
+  if (!(await readTipsFlag())) return null;
+
   // Tips ship dark: no Stripe key (or an unrecognised one) means no tips block and no queries.
   // Only the key's prefix is read, to keep test and live rows apart exactly as the functions do.
   const mode = stripeModeFromKey(Deno.env.get("STRIPE_SECRET_KEY"));

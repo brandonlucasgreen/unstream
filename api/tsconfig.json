@@ -50,6 +50,8 @@
     "functions/redis.ts",
     "functions/feature-flags.ts",
     "functions/__tests__/feature-flags.test.ts",
+    "shared/tips-flag.ts",
+    "functions/__tests__/tips-flag.test.ts",
     "functions/cache.ts",
     "functions/recatalog-sweep.ts",
     "functions/catalog-artist-background.ts",

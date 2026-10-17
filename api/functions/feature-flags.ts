@@ -14,6 +14,10 @@
 // every caught error goes through reportRedisFailure() and reaches Sentry.
 
 import { getRedis, reportRedisFailure } from './redis';
+// The hash key and the "is this value on" test live in api/shared so the Deno edge functions,
+// which cannot import this module, read the same key and apply the same test (UNS-215). The
+// key is re-exported below: it is still this module's public constant.
+import { FLAGS_HASH_KEY as SHARED_FLAGS_HASH_KEY, flagIsOn } from '../shared/tips-flag';
 
 /**
  * Every flag that exists — the single source of truth.
@@ -31,7 +35,7 @@ export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 export type FeatureFlagMap = Record<FeatureFlag, boolean>;
 
 /** The one hash. Field = flag name, value = "on" | "off". */
-export const FLAGS_HASH_KEY = 'feature-flags';
+export const FLAGS_HASH_KEY = SHARED_FLAGS_HASH_KEY;
 
 /**
  * Thrown by setFeatureFlag when the value could not be written because Redis is unavailable.
@@ -76,7 +80,7 @@ export async function getFeatureFlags(): Promise<FeatureFlagMap> {
   for (const [name, value] of Object.entries(stored)) {
     // Unknown names are ignored rather than reported: they are how a flag looks between being
     // removed from FEATURE_FLAGS and being cleaned out of Redis.
-    if (isFeatureFlag(name) && value === 'on') flags[name] = true;
+    if (isFeatureFlag(name) && flagIsOn(value)) flags[name] = true;
   }
   return flags;
 }

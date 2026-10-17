@@ -19,11 +19,24 @@ const mocks = vi.hoisted(() => ({
   resolveArtistSlugAlias: vi.fn(),
   getTipsLiveSlugs: vi.fn(),
   getGoals: vi.fn(),
+  // The flag store, read the way the real one reads it: a Map standing in for the
+  // `feature-flags` hash. Empty means every flag is off, which is what production starts at
+  // (UNS-215), so a test that wants tips has to switch the flag on.
+  flagStore: new Map<string, unknown>(),
+  hgetall: vi.fn(),
 }));
 
 vi.mock('../tips-db', () => ({
   getTipsLiveSlugs: mocks.getTipsLiveSlugs,
   getGoals: mocks.getGoals,
+}));
+
+// Redis is always stubbed rather than reached (see cache-should-cache.test.ts: the Netlify build
+// carries production Upstash credentials). This stub also drives the real feature-flags module,
+// so the gate under test is the shipping one, not a mock of it.
+vi.mock('../redis', () => ({
+  getRedis: () => ({ hgetall: (key: string) => mocks.hgetall(key) }),
+  reportRedisFailure: vi.fn(),
 }));
 
 
@@ -88,6 +101,9 @@ describe('GET /api/artist-page', () => {
     mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
     mocks.getTipsLiveSlugs.mockResolvedValue(new Set());
     mocks.getGoals.mockResolvedValue([]);
+    mocks.flagStore.clear();
+    mocks.hgetall.mockImplementation(async (key: string) =>
+      key === 'feature-flags' ? Object.fromEntries(mocks.flagStore) : null);
   });
 
   it('returns 200 with links for an unclaimed artist', async () => {
@@ -367,6 +383,13 @@ describe('GET /api/artist-page', () => {
   });
 
   describe('tips', () => {
+    // Inner hooks run after the outer beforeEach that clears the store, so this survives.
+    beforeEach(() => {
+      // Tips are admin-only until the flag says otherwise (UNS-215), so a test about tips
+      // reaching a fan has to switch the flag on first.
+      mocks.flagStore.set('tips', 'on');
+    });
+
     it('says the artist is taking tips, with their open goals', async () => {
       mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
       mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
@@ -380,6 +403,48 @@ describe('GET /api/artist-page', () => {
       const body = JSON.parse((await call('funkadelic')).body);
       expect(body.tips).toEqual({ enabled: false, goals: [] });
       expect(mocks.getGoals).not.toHaveBeenCalled();
+    });
+
+    // --- the UNS-215 gate ---
+
+    it('hides the Tip and every goal while the flag is off, without reading them', async () => {
+      // Flag off is the pre-rollout state: this artist's data says they ARE taking tips, and
+      // the payload still says otherwise. The read is skipped, so nothing can leak through it.
+      mocks.flagStore.set('tips', 'off');
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
+      mocks.getGoals.mockResolvedValue([{ id: 'g1', title: 'Vinyl', targetCents: 240000, raisedCents: 500, status: 'open' }]);
+
+      const body = JSON.parse((await call('funkadelic')).body);
+
+      expect(body.tips).toEqual({ enabled: false, goals: [] });
+      expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
+      expect(mocks.getGoals).not.toHaveBeenCalled();
+    });
+
+    it('hides tips when the flag store itself cannot be read', async () => {
+      // Fail closed: a Redis outage must not be the reason a flag-off feature goes live.
+      mocks.flagStore.set('tips', 'on');
+      mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
+
+      const body = JSON.parse((await call('funkadelic')).body);
+
+      expect(body.tips).toEqual({ enabled: false, goals: [] });
+      expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
+    });
+
+    it('hides tips while the flag is missing from the hash', async () => {
+      // Same as off, and the state every flag starts in.
+      mocks.flagStore.clear();
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      mocks.getTipsLiveSlugs.mockResolvedValue(new Set(['funkadelic']));
+
+      const body = JSON.parse((await call('funkadelic')).body);
+
+      expect(body.tips).toEqual({ enabled: false, goals: [] });
+      expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
     });
   });
 });
