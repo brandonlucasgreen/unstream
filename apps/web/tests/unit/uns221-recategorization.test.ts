@@ -31,6 +31,17 @@ describe('UNS-221 search-result sections', () => {
     expect(result.decentralized.map(p => p.sourceId)).not.toContain('faircamp');
   });
 
+  // UNS-222: bandwagon is a buy-music storefront, so it renders beside Bandcamp/Mirlo —
+  // on search cards, the Platforms page, and the Mac app's marketplace group.
+  it('groups Bandwagon into marketplace, not decentralized (UNS-222)', () => {
+    const result = categorizePlatforms(
+      [link('bandwagon', 'https://bandwagon.fm/@kid')],
+      allKnownSourceIds,
+    );
+    expect(result.marketplace.map(p => p.sourceId)).toContain('bandwagon');
+    expect(result.decentralized.map(p => p.sourceId)).not.toContain('bandwagon');
+  });
+
   it('keeps Official Site itself official (already was — pinned)', () => {
     const result = categorizePlatforms(
       [link('officialsite', 'https://kidlightbulbs.com')],
@@ -51,6 +62,13 @@ describe('UNS-221 search-result sections', () => {
         ).toBe(false);
       }
     }
+  });
+
+  // UNS-222: bandwagon moved decentralized → marketplace in BOTH copies.
+  it('the registry agrees with the web copy that bandwagon is marketplace (UNS-222)', () => {
+    expect(PLATFORMS.bandwagon.category).toBe('marketplace');
+    expect((sourceCategories.marketplace.sources as string[]).includes('bandwagon')).toBe(true);
+    expect((sourceCategories.decentralized.sources as string[]).includes('bandwagon')).toBe(false);
   });
 
   it('every section key the artist page defines has a category bucket that feeds it', () => {

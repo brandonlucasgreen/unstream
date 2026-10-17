@@ -71,7 +71,10 @@ export const sources: Record<SourceId, Source> = {
     description: 'ActivityPub-based music community',
     color: '#8b5cf6',
     icon: '🚐',
-    category: 'decentralized',
+    // Bandwagon is a buy-music storefront (UNS-222): fans buy directly from artists, so it
+    // renders in the same group as Bandcamp/Mirlo on cards and the Platforms page. Absent
+    // `sectionCategory` keeps it in the artist page's `marketplaces` section.
+    category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://bandwagon.fm/artists?q={query}',
     homepageUrl: 'https://bandwagon.fm',
@@ -415,7 +418,7 @@ export const sourceCategories = {
   marketplace: {
     name: 'Music Marketplaces',
     description: 'Buy music directly from artists',
-    sources: ['bandcamp', 'mirlo', 'ampwall', 'subvert', 'qobuz', 'beatport', 'even', 'jamcoop', 'discogs'] as SourceId[],
+    sources: ['bandcamp', 'mirlo', 'ampwall', 'subvert', 'qobuz', 'beatport', 'even', 'jamcoop', 'discogs', 'bandwagon'] as SourceId[],
   },
   patronage: {
     name: 'Patronage Platforms',
@@ -425,8 +428,10 @@ export const sourceCategories = {
   decentralized: {
     name: 'Self-hosted & Decentralized',
     description: 'ActivityPub and self-hosted platforms',
-    // Faircamp moved to `official` in UNS-221 — a Faircamp site is the artist's own page.
-    sources: ['bandwagon'] as SourceId[],
+    // Faircamp moved to `official` (UNS-221, a Faircamp site is the artist's own page) and
+    // Bandwagon to `marketplace` (UNS-222). No searchable platform remains here: funkwhale
+    // and friends are MusicBrainz-enrichment-only, so the bucket is kept for their future.
+    sources: [] as SourceId[],
   },
   library: {
     name: 'Library Services',

@@ -364,8 +364,9 @@ export function PressPage() {
             <p className="text-sm text-text-muted mt-4">
               Sources fall into four groups: music marketplaces (Bandcamp, Mirlo, Ampwall, Subvert,
               Qobuz, Beatport, EVEN, Jam.coop, Discogs), patronage platforms (Patreon, Ko-fi, Buy Me
-              a Coffee, Liberapay), decentralized and self-hosted platforms (Faircamp, Bandwagon,
-              Funkwhale), and library services (Hoopla, Freegal, Internet Archive).
+              a Coffee, Liberapay), decentralized and self-hosted platforms, and library
+              services (Hoopla, Freegal, Internet Archive). Bandwagon, which runs on ActivityPub,
+              is grouped with the music marketplaces (UNS-222).
             </p>
           </section>
 

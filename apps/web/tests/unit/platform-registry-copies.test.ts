@@ -11,7 +11,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
-import { sources } from '../../src/services/sources';
+import { sources, sourceCategories } from '../../src/services/sources';
 import { PAYOUT_PERCENTAGES } from '../../../../apps/extension/lib/constants.js';
 
 const sharedIds = Object.keys(PLATFORMS).filter((id) => id in sources);
@@ -80,5 +80,23 @@ describe("the Mac app's platform catalog matches the platform registry", () => {
 
   it.each([...macCatalog.keys()].filter((id) => id in PLATFORMS))('%s has the same name and payout', (id) => {
     expect(macCatalog.get(id)).toEqual({ name: PLATFORMS[id].name, payout: PLATFORMS[id].payoutPercent });
+  });
+
+  // UNS-222: the Mac's category set must agree with the web copy's marketplace bucket. The Swift
+  // sets are hand-kept lists with no parity test (UNS-221 left the newsletter line behind) — these
+  // pins read the Swift source directly so a recategorization can't strand a platform in the
+  // wrong Mac group again.
+  it.each([
+    ['marketplacePlatformIds', 'marketplace'],
+    ['socialPlatformIds', 'social'],
+  ] as const)('the Mac %s set agrees with the %s copy', (setName, category) => {
+    const setIds = new Set(
+      macSource.match(new RegExp(`let ${setName}: Set<String> = \\[([^\\]]*)\\]`))?.[1]
+        ?.match(/"([a-z_-]+)"/g)?.map((s) => s.replaceAll('"', '')) ?? [],
+    );
+    const webIds = (sourceCategories[category].sources as string[]).filter((id) => macCatalog.has(id));
+    expect(
+      [...setIds].filter((id) => id in PLATFORMS).sort(),
+    ).toEqual([...webIds].sort());
   });
 });
