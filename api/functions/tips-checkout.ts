@@ -58,10 +58,12 @@ async function handleRequest(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
 
   try {
-    // UNS-215: the flag gates this surface as well. A flag that is off — or a flag store that
-    // cannot be read, since that store fails closed — means no tip page and no payment form,
-    // and skips every tips-only read (fee/goals) plus the Stripe call.
-    const tipsFlagOn = await getFeatureFlag('tips');
+    // UNS-215: the fan-facing tips flag (tipsFans) gates this surface as well. A flag that is off
+    // — or a flag store that cannot be read, since that store fails closed — means no tip page and
+    // no payment form, and skips every tips-only read (fee/goals) plus the Stripe call. This is
+    // the fan half of the split: what lets an artist register is tipsArtists, a separate flag, and
+    // a fan can still be refused here after the artist has onboarded.
+    const tipsFlagOn = await getFeatureFlag('tipsFans');
     if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? '', tipsFlagOn));
     if (event.httpMethod === 'POST') return withCors(await createCheckout(event, tipsFlagOn));
     return withCors(respond(405, { error: 'Method not allowed' }));

@@ -1,10 +1,14 @@
-// The tips gate's decision, shared by the node functions and the Deno edge renderer (UNS-215).
+// The tips gates' decision, shared by the node functions and the Deno edge renderer (UNS-215).
 //
-// The two runtimes read the flag through completely different code — the node side through the
+// The two runtimes read the flags through completely different code — the node side through the
 // Upstash SDK in feature-flags.ts, the edge side through a REST fetch — so the only thing keeping
 // them in agreement is this function and the hash key beside it. Locked here: only the exact
-// string "on" turns tips on, and every way a read can go wrong (missing hash, missing field, a
+// string "on" turns a flag on, and every way a read can go wrong (missing hash, missing field, a
 // thrown read passed through as an Error) reads as off.
+//
+// UNS-215 split one `tips` flag into `tipsArtists` (artist onboarding) and `tipsFans` (every
+// fan-facing surface). Both field names are asserted against the registry below: a typo in either
+// would otherwise be a flag that silently never turns on.
 
 import { describe, it, expect, vi } from 'vitest';
 
@@ -13,7 +17,12 @@ import { describe, it, expect, vi } from 'vitest';
 // here calls Redis; the stub makes that a fact rather than an assumption.
 vi.mock('../redis', () => ({ getRedis: () => null, reportRedisFailure: vi.fn() }));
 
-import { FLAGS_HASH_KEY, TIPS_FLAG_FIELD, flagIsOn } from '../../shared/tips-flag';
+import {
+  FLAGS_HASH_KEY,
+  TIPS_ARTISTS_FLAG_FIELD,
+  TIPS_FANS_FLAG_FIELD,
+  flagIsOn,
+} from '../../shared/tips-flag';
 
 describe('flagIsOn', () => {
   it('is on only for the exact stored value "on"', () => {
@@ -47,8 +56,10 @@ describe('the shared key names', () => {
     expect(nodeKey).toBe(FLAGS_HASH_KEY);
   });
 
-  it('is the field the registry registers as "tips"', async () => {
+  it('names the two fields the registry registers', async () => {
     const { FEATURE_FLAGS } = await import('../feature-flags');
-    expect([...FEATURE_FLAGS]).toContain(TIPS_FLAG_FIELD);
+    expect([...FEATURE_FLAGS]).toEqual([TIPS_ARTISTS_FLAG_FIELD, TIPS_FANS_FLAG_FIELD]);
+    expect(TIPS_ARTISTS_FLAG_FIELD).toBe('tipsArtists');
+    expect(TIPS_FANS_FLAG_FIELD).toBe('tipsFans');
   });
 });

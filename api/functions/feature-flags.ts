@@ -26,8 +26,12 @@ import { FLAGS_HASH_KEY as SHARED_FLAGS_HASH_KEY, flagIsOn } from '../shared/tip
  * what exists: getFeatureFlags() ignores fields with names not in this list, so a flag deleted
  * from the code cannot be resurrected by a stale field left in Redis, and setFeatureFlag() is
  * only ever called with a name from here.
+ *
+ * UNS-215: `tipsArtists` gates the artist side (starting Stripe onboarding, switching tips on)
+ * and `tipsFans` gates every fan-facing surface. They are independent on purpose; the thing that
+ * limits who can actually be paid is the admin approval gate, not either flag.
  */
-export const FEATURE_FLAGS = ['tips', 'emailChange'] as const;
+export const FEATURE_FLAGS = ['tipsArtists', 'tipsFans'] as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 

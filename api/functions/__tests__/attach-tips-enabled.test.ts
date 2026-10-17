@@ -1,6 +1,6 @@
-// Search results pick up the Tip button by page slug — and only while the tips flag is on
-// (UNS-215): the flag is the admin-only rollout switch, so a result must not carry `tipsEnabled`
-// for any other reason.
+// Search results pick up the Tip button by page slug — and only while the fan-facing tips flag
+// (tipsFans) is on (UNS-215): the flag is the rollout switch, so a result must not carry
+// `tipsEnabled` for any other reason.
 
 import { describe, it, expect } from 'vitest';
 import { attachTipsEnabled, type AggregatedResult } from '../search-utils';

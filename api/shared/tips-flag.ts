@@ -1,4 +1,4 @@
-// The `tips` feature flag, decided in one place for both runtimes (UNS-215).
+// The tips feature flags, decided in one place for both runtimes (UNS-215).
 //
 // Why this exists as well as api/functions/feature-flags.ts: the SEO edge function
 // (api/edge/artist-page-static.ts) reads the same flag, and edge functions run on Deno — they
@@ -7,7 +7,16 @@
 // keeps the *decision*, and the hash key it reads, from drifting the same way. The node side
 // reads it through feature-flags.ts, which imports both of the exports below.
 //
-// The contract is exactly feature-flags.ts's: the flag is on only when the `tips` field of the
+// UNS-215 split the one `tips` flag into two orthogonal ones:
+//   tipsArtists — the artist side. On, a claimed artist may start Stripe Connect onboarding and
+//                 switch tips on. Off, both refuse; the rest of the dashboard stays open.
+//   tipsFans    — the fan side. On, fans see and can act on tips: search result buttons, the
+//                 artist page payload, the SEO page block, tip checkout.
+// Neither implies the other, and nothing in code ties them together. What actually limits who can
+// be paid is the admin approval gate — takingTips() requires tips_approved_at, which only an
+// admin sets (/api/admin/tips) — so `tipsArtists` being on does not by itself open the till.
+//
+// The contract is exactly feature-flags.ts's: a flag is on only when its own field of the
 // `feature-flags` hash holds the string "on". Missing hash, missing field, any other value
 // ("ON", "true", a boolean, null) — and a read that failed, which the edge caller passes through
 // as an Error — all mean OFF.
@@ -25,8 +34,11 @@
  */
 export const FLAGS_HASH_KEY = 'feature-flags';
 
-/** The field in that hash the tips gate reads. */
-export const TIPS_FLAG_FIELD = 'tips';
+/** The field in that hash the artist-onboarding gate reads. */
+export const TIPS_ARTISTS_FLAG_FIELD = 'tipsArtists';
+
+/** The field in that hash every fan-facing tips surface reads. */
+export const TIPS_FANS_FLAG_FIELD = 'tipsFans';
 
 /**
  * Whether a raw flag value means "live to everyone" — true only for the exact string "on".
