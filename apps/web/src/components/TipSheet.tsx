@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { TipForm } from './TipForm';
-import { getTipPage, type TipPageData } from '../services/tips';
+import { getTipPageCached, type TipPageData } from '../services/tips';
 
 // The tip window: the /tip/{slug} form opened over search results or the artist page, so a fan tips
 // without leaving where they are until Stripe's own payment page. A native <dialog> shown modally,
@@ -25,7 +25,7 @@ export function TipSheet({ slug, artistName, goalId, onClose }: {
 
   useEffect(() => {
     let cancelled = false;
-    getTipPage(slug)
+    getTipPageCached(slug)
       .then(d => { if (!cancelled) setData(d); })
       .catch(err => {
         if (cancelled) return;
