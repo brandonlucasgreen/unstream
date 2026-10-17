@@ -24,6 +24,7 @@ import {
   supportReminderDecision,
   snoozeSupportReminder,
 } from '../lib/support-reminder.js';
+import { tipTarget, renderTipButton } from '../lib/tip-button.js';
 
 const API_BASE = 'https://unstream.stream/api';
 
@@ -67,6 +68,7 @@ const elements = {
   detectEnableBtn: document.getElementById('detect-enable-btn'),
   resultsSection: document.getElementById('results-section'),
   resultsGrid: document.getElementById('results-grid'),
+  tipButtonSlot: document.getElementById('tip-button-slot'),
   socialSection: document.getElementById('social-section'),
   socialLinks: document.getElementById('social-links'),
   artistReleasesSection: document.getElementById('artist-releases-section'),
@@ -823,6 +825,12 @@ function renderResults(results) {
     seen.add(p.sourceId);
     return true;
   });
+
+  // The tip button, for an artist taking tips. It gets the same slug resolution the popup already
+  // uses for the artist's page and releases, and the server marks `tipsEnabled` by that same slug.
+  // Rendered before the "no alternative sources" case: taking tips does not depend on there being
+  // another platform to link to.
+  renderTipButton(elements.tipButtonSlot, tipTarget(results, currentArtist));
 
   if (nonSocialPlatforms.length === 0) {
     const emptyDiv = document.createElement('div');
