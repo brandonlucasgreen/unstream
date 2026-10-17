@@ -47,7 +47,7 @@ const get = async () => (await rawSettings({ httpMethod: 'GET', headers: { autho
 const fetchMock = vi.fn();
 const OWNER = { userId: 'owner-1', email: 'o@example.com' };
 // A claimed artist who is NOT the admin — the caller the tipsArtists flag actually gates.
-const ARTIST = { userId: 'owner-1', email: 'another-artist@example.com' };
+const ARTIST = { userId: 'artist-9', email: 'another-artist@example.com' };
 
 beforeEach(() => {
   db = createFakeDb();
@@ -380,7 +380,7 @@ describe('tips-settings', () => {
 });
 
 describe('tips are private to the admin for now', () => {
-  const ARTIST = { userId: 'owner-1', email: 'another-artist@example.com' };
+  const ARTIST = { userId: 'artist-9', email: 'another-artist@example.com' };
 
   it('hides Manage Tips from any other artist, even with Stripe configured', async () => {
     mocks.authenticateBearer.mockResolvedValue(ARTIST);
@@ -438,6 +438,23 @@ describe('the tipsArtists gate', () => {
 
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).url).toBe('https://connect.stripe.com/setup/s/abc');
+  });
+
+  it('fails closed for a non-admin even when the flag store is unreadable', async () => {
+    // Redis down + flag unreadable: the artist can't onboard — but not thanks to the flag: the
+    // privacy gate refuses them first. Same visible outcome, one refusal message.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('lets the admin proceed even when the flag store is unreadable', async () => {
+    // Fail-closed is about strangers, not the pilot: a Redis outage must not strand the admin.
+    mocks.hgetall.mockRejectedValue(new Error('ECONNRESET'));
+    mocks.authenticateBearer.mockResolvedValue(OWNER);
+
+    expect((await connect({ slug: 'kid-lightbulbs', country: 'US', acceptAddendum: true })).statusCode).toBe(200);
   });
 
   it('keeps onboarding closed when the flag store itself cannot be read', async () => {
