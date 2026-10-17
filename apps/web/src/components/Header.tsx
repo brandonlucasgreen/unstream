@@ -110,6 +110,7 @@ export function Header() {
       },
       { to: '/admin/links', label: t('nav.admin.removedLinks') },
       { to: '/admin/analytics', label: t('nav.admin.analytics') },
+      { to: '/admin/flags', label: t('nav.admin.featureFlags') },
     ],
   };
 

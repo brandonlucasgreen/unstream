@@ -18,7 +18,8 @@
       "releaseReview": "Release review",
       "releaseReviewCount": "Release review ({{count}})",
       "removedLinks": "Removed links",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "featureFlags": "Feature flags"
     }
   },
   "search": {
