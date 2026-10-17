@@ -1,0 +1,24 @@
+{
+  "thanks": {
+    "heading": "Gracias",
+    "body": "Tu propina fue directa a la cuenta de Stripe del propio artista. Aparecerá en tu extracto con su nombre.",
+    "saveHeading": "Lleva un registro de tus propinas",
+    "saveBody": "Inicia sesión o crea una cuenta y guardaremos esta propina en ella, para que veas todas las propinas que has dejado en un solo lugar. Totalmente opcional.",
+    "saveCta": "Guardar esta propina en mi cuenta →",
+    "saved": "Guardado en tu cuenta.",
+    "seeTips": "Ver tus propinas",
+    "receipt": "El recibo te llega por correo desde la cuenta de Stripe del artista, con su nombre comercial, a la dirección que indicaste al pagar.",
+    "refund": "¿Necesitas un reembolso?",
+    "refundBody": "El artista es el vendedor, así que los reembolsos corren por su cuenta; sus datos de contacto están en tu recibo. Si no consigues localizarle, escribe a support@unstream.stream y se lo haremos llegar.",
+    "howItWorks": "Cómo funcionan las propinas",
+    "backToArtist": "Volver al artista",
+    "findMoreArtists": "Encontrar más artistas"
+  },
+  "panel": {
+    "takeTips": "Aceptar propinas en Unstream",
+    "goesLive": "(se activa cuando Unstream haya revisado tu configuración)",
+    "seeWhatFansSee": "Mira lo que ven los fans",
+    "payoutsInStripe": "Pagos, reembolsos y recibos en Stripe ↗",
+    "stripeConnected": "Stripe está conectado. Revisamos a mano la primera configuración de cada artista para que quede claro que la cuenta es tuya; normalmente en un día. Mientras tanto, puedes dejarlo todo listo."
+  }
+}

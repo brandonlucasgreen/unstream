@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Übersicht",
+    "settings": "Einstellungen",
+    "platforms": "Plattformen",
+    "faq": "FAQ",
+    "pressKit": "Pressemappe",
+    "contact": "Kontakt",
+    "login": "Anmelden",
+    "signOut": "Abmelden",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "mainMenu": "Hauptmenü",
+    "admin": {
+      "label": "Admin",
+      "verify": "Prüfen",
+      "verifyCount": "Prüfen ({{count}})",
+      "releaseReview": "Release-Prüfung",
+      "releaseReviewCount": "Release-Prüfung ({{count}})",
+      "removedLinks": "Entfernte Links",
+      "analytics": "Statistiken"
+    }
+  },
+  "search": {
+    "placeholder": "Artists suchen…",
+    "ariaLabel": "Artists suchen"
+  },
+  "footer": {
+    "madeWithLove": "Mit Liebe gemacht in Massachusetts, USA",
+    "indieArtistIndex": "Indie-Artist-Index",
+    "artistsYouKnow": "Artists, die du kennst",
+    "platforms": "Plattformen",
+    "changelog": "Änderungen",
+    "pressKit": "Pressemappe",
+    "support": "Unstream unterstützen",
+    "faq": "FAQ",
+    "contact": "Kontakt",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzerklärung"
+  },
+  "cta": {
+    "signInToSave": "Anmelden, um Artists zu speichern →"
+  },
+  "status": {
+    "searchingPlatforms": "Plattformen werden durchsucht…",
+    "searchingMorePlatforms": "Weitere Plattformen werden durchsucht…",
+    "loadingMoreSources": "Weitere Quellen werden geladen…",
+    "resolvingArtist": "Artist wird aus dem Link ermittelt…"
+  },
+  "skeleton": {
+    "searchingPlatforms": "Plattformen werden durchsucht"
+  },
+  "results": {
+    "clear": "Löschen"
+  },
+  "error": {
+    "searchFailed": "Suche fehlgeschlagen. Bitte versuche es erneut.",
+    "resolveLinkFailed": "Link konnte nicht aufgelöst werden. Versuche es mit einer manuellen Suche.",
+    "resolveLinkNotFound": "Zu diesem Link wurde kein Artist gefunden. Versuche es mit einer manuellen Suche."
+  },
+  "lang": {
+    "label": "Sprache",
+    "en": "Englisch"
+  }
+}

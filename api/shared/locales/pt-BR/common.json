@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "settings": "Configurações",
+    "platforms": "Plataformas",
+    "faq": "FAQ",
+    "pressKit": "Kit de imprensa",
+    "contact": "Contato",
+    "login": "Entrar",
+    "signOut": "Sair",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "mainMenu": "Menu principal",
+    "admin": {
+      "label": "Administração",
+      "verify": "Verificar",
+      "verifyCount": "Verificar ({{count}})",
+      "releaseReview": "Revisão de lançamentos",
+      "releaseReviewCount": "Revisão de lançamentos ({{count}})",
+      "removedLinks": "Links removidos",
+      "analytics": "Análises"
+    }
+  },
+  "search": {
+    "placeholder": "Buscar artistas...",
+    "ariaLabel": "Buscar artistas"
+  },
+  "footer": {
+    "madeWithLove": "Feito com carinho em Massachusetts, EUA",
+    "indieArtistIndex": "Índice de artistas independentes",
+    "artistsYouKnow": "Artistas que você conhece",
+    "platforms": "Plataformas",
+    "changelog": "Novidades",
+    "pressKit": "Kit de imprensa",
+    "support": "Apoie o Unstream",
+    "faq": "FAQ",
+    "contact": "Contato",
+    "terms": "Termos de uso",
+    "privacy": "Política de privacidade"
+  },
+  "cta": {
+    "signInToSave": "Entre para salvar artistas →"
+  },
+  "status": {
+    "searchingPlatforms": "Buscando nas plataformas...",
+    "searchingMorePlatforms": "Buscando em mais plataformas...",
+    "loadingMoreSources": "Carregando mais fontes...",
+    "resolvingArtist": "Identificando o artista pelo link..."
+  },
+  "skeleton": {
+    "searchingPlatforms": "Buscando nas plataformas"
+  },
+  "results": {
+    "clear": "Limpar"
+  },
+  "error": {
+    "searchFailed": "Não foi possível buscar. Tente novamente.",
+    "resolveLinkFailed": "Não foi possível resolver o link. Tente buscar manualmente.",
+    "resolveLinkNotFound": "Não encontramos nenhum artista nesse link. Tente buscar manualmente."
+  },
+  "lang": {
+    "label": "Idioma",
+    "en": "Inglês"
+  }
+}

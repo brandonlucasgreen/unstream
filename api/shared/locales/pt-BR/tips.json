@@ -1,0 +1,24 @@
+{
+  "thanks": {
+    "heading": "Obrigado",
+    "body": "Sua gorjeta foi direto para a conta Stripe do próprio artista. Ela vai aparecer na sua fatura com o nome dele.",
+    "saveHeading": "Acompanhe suas gorjetas",
+    "saveBody": "Entre ou crie uma conta e vamos salvar esta gorjeta nela, para você ver todas as gorjetas que deixou em um só lugar. Totalmente opcional.",
+    "saveCta": "Salvar esta gorjeta na minha conta →",
+    "saved": "Salvo na sua conta.",
+    "seeTips": "Ver suas gorjetas",
+    "receipt": "O recibo chega por e-mail, enviado pela conta Stripe do artista, com o nome comercial dele, para o endereço que você informou na compra.",
+    "refund": "Precisa de reembolso?",
+    "refundBody": "O artista é o vendedor, então os reembolsos vêm dele; os dados de contato estão no seu recibo. Se não conseguir falar com ele, escreva para support@unstream.stream e nós repassamos.",
+    "howItWorks": "Como funcionam as gorjetas",
+    "backToArtist": "Voltar para o artista",
+    "findMoreArtists": "Encontrar mais artistas"
+  },
+  "panel": {
+    "takeTips": "Receber gorjetas no Unstream",
+    "goesLive": "(entra no ar depois que o Unstream verificar sua configuração)",
+    "seeWhatFansSee": "Veja o que os fãs veem",
+    "payoutsInStripe": "Pagamentos, reembolsos e recibos no Stripe ↗",
+    "stripeConnected": "O Stripe está conectado. Conferimos à mão a primeira configuração de cada artista, para deixar claro que a conta é sua — normalmente em um dia. Enquanto isso, você pode deixar tudo pronto."
+  }
+}

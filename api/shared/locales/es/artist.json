@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "Apoya directamente al artista que estás escuchando",
+    "titleHighlight": "ahora mismo",
+    "byline": "Unstream encuentra los lugares donde tus artistas favoritos —no las grandes tecnológicas— se quedan con hasta el 97 % de cada venta."
+  },
+  "home": {
+    "orSearch": "O busca artistas cuando quieras en la parte superior de la página 🔎"
+  },
+  "results": {
+    "emptyTitle": "No se encontraron resultados",
+    "emptyHint": "Prueba con otro término de búsqueda",
+    "foundOne": "Se encontró {{count}} resultado",
+    "foundMany": "Se encontraron {{count}} resultados"
+  },
+  "features": {
+    "heading": "Sigue de cerca a los artistas que quieres apoyar",
+    "detectionTitle": "Detección automática",
+    "detectionBody": "La app de la barra de menús de macOS detecta lo que suena en Spotify, Apple Music o cualquier reproductor de tu Mac: sin copiar y pegar.",
+    "saveTitle": "Guarda artistas",
+    "saveBody": "Crea una lista de los artistas que quieres apoyar. La app los recuerda para que siempre sepas dónde comprar su música.",
+    "releaseTitle": "Avisos de lanzamientos",
+    "releaseBody": "Recibe un aviso cuando los artistas que sigues publiquen música nueva. No te pierdas ningún lanzamiento de los artistas que te importan.",
+    "scrobbleTitle": "Scrobbling",
+    "scrobbleBody": "La extensión del navegador detecta lo que escuchas en Spotify Web y otros sitios de streaming y lo registra en ListenBrainz.",
+    "anonymousTitle": "Totalmente anónimo",
+    "anonymousBody": "No hace falta cuenta. No se recopilan datos personales. Solo búsquedas y clics anonimizados, nada más.",
+    "freeBody": "Unstream es gratis porque lo importante es que el dinero llegue a los artistas, no cobrarte a ti. Si te resulta útil, considera",
+    "freeSupportLink": "apoyar su desarrollo"
+  },
+  "sources": {
+    "heading": "Fuentes disponibles",
+    "plusLine": "...además de webs oficiales y enlaces a redes sociales"
+  },
+  "faqLink": "Preguntas frecuentes →",
+  "contact": {
+    "heading": "Ponte en contacto",
+    "body": "¿No encuentras al artista que quieres apoyar? ¿Tienes una idea para una función? Escríbenos abajo."
+  },
+  "admin": {
+    "merge": "Fusionar {{count}} artistas"
+  },
+  "tipPage": {
+    "loading": "Cargando…",
+    "straightTo": "El apoyo a su música va directo a la cuenta de Stripe de {{name}}.",
+    "notTaking": "{{name}} todavía no acepta propinas en Unstream.",
+    "seeWhereElse": "Mira dónde más puedes apoyarle →",
+    "loadNotFound": "No encontramos a ese artista.",
+    "loadFailed": "No se pudo cargar esta página. Inténtalo de nuevo en un momento."
+  }
+}

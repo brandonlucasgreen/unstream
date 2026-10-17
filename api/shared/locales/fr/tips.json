@@ -1,0 +1,24 @@
+{
+  "thanks": {
+    "heading": "Merci",
+    "body": "Votre pourboire est allé directement sur le compte Stripe de l'artiste. Il apparaîtra sur votre relevé sous son nom.",
+    "saveHeading": "Suivez vos pourboires",
+    "saveBody": "Connectez-vous ou créez un compte et nous y enregistrerons ce pourboire, pour que vous voyiez tous les pourboires que vous avez laissés au même endroit. Entièrement facultatif.",
+    "saveCta": "Enregistrer ce pourboire sur mon compte →",
+    "saved": "Enregistré sur votre compte.",
+    "seeTips": "Voir vos pourboires",
+    "receipt": "Votre reçu arrive par e-mail depuis le compte Stripe de l'artiste, sous son nom commercial, à l'adresse que vous avez indiquée au paiement.",
+    "refund": "Besoin d'un remboursement ?",
+    "refundBody": "L'artiste est le vendeur, les remboursements viennent donc de lui ; ses coordonnées figurent sur votre reçu. Si vous n'arrivez pas à le joindre, écrivez à support@unstream.stream et nous transmettrons.",
+    "howItWorks": "Comment fonctionnent les pourboires",
+    "backToArtist": "Retour à l'artiste",
+    "findMoreArtists": "Trouver d'autres artistes"
+  },
+  "panel": {
+    "takeTips": "Accepter les pourboires sur Unstream",
+    "goesLive": "(activé dès qu'Unstream a vérifié votre configuration)",
+    "seeWhatFansSee": "Voir ce que voient les fans",
+    "payoutsInStripe": "Paiements, remboursements et reçus dans Stripe ↗",
+    "stripeConnected": "Stripe est connecté. Nous vérifions à la main la première configuration de chaque artiste, pour qu'il soit clair que le compte vous appartient — généralement en un jour. En attendant, vous pouvez tout préparer."
+  }
+}
