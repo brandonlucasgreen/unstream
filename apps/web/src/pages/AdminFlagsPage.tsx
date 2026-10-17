@@ -10,15 +10,19 @@ import { getFeatureFlags, updateFeatureFlag, type FeatureFlagMap } from '../serv
  * Labels only. Which flags exist — and whether each is on — comes from the server, so adding a
  * flag to the registry (api/functions/feature-flags.ts) puts a row here with no change to this
  * file. An unknown name falls back to the raw flag name.
+ *
+ * UNS-215 split `tips` into these two, and they are deliberately independent — neither implies
+ * the other. The caption for the artist one says the half that matters: opening onboarding is not
+ * the same as letting an artist take money (that still needs admin approval).
  */
 const FLAG_COPY: Record<string, { title: string; caption: string }> = {
-  tips: {
-    title: 'Tips',
-    caption: 'every tip surface on search results, artist pages, SEO pages and checkout',
+  tipsArtists: {
+    title: 'Tips — artist onboarding',
+    caption: 'artists can start Stripe Connect registration; only admin-approved accounts can take money',
   },
-  emailChange: {
-    title: 'Change Email',
-    caption: 'the email-change section in Settings',
+  tipsFans: {
+    title: 'Tips — fans',
+    caption: 'tip buttons on search results, artist pages, SEO pages, and checkout',
   },
 };
 
