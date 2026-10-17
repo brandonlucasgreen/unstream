@@ -67,7 +67,8 @@ let platformCatalog: [String: PlatformConfig] = [
 ]
 
 /// Social platform IDs for filtering
-let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "newsletter"]
+// Newsletter is official (UNS-221), not social; bandwagon is marketplace (UNS-222).
+let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
 
 /// Marketplace platform IDs — storefronts where fans can directly buy/support
-let marketplacePlatformIds: Set<String> = ["bandcamp", "mirlo", "ampwall", "subvert", "qobuz", "beatport", "even", "jamcoop", "discogs"]
+let marketplacePlatformIds: Set<String> = ["bandcamp", "mirlo", "ampwall", "subvert", "qobuz", "beatport", "even", "jamcoop", "discogs", "bandwagon"]

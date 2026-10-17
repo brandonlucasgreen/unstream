@@ -11,6 +11,17 @@ describe('supportPlatformGroups', () => {
     expect(groups.map((g) => g.key)).toEqual(['marketplace', 'patronage', 'decentralized', 'library']);
   });
 
+  // UNS-222: bandwagon is a buy-music storefront, so it moved decentralized → marketplace.
+  // The decentralized group still renders when a future self-hosted search platform lands;
+  // today it is legitimately empty (funkwhale is enrichment-only, not searchable).
+  it('groups bandwagon with the marketplaces (UNS-222)', () => {
+    const marketplace = groups.find((g) => g.key === 'marketplace')!;
+    expect(marketplace.platforms.map((p) => p.id)).toContain('bandwagon');
+    const decentralized = groups.find((g) => g.key === 'decentralized')!;
+    expect(decentralized.platforms.map((p) => p.id)).not.toContain('bandwagon');
+    expect(decentralized.platforms).toHaveLength(0);
+  });
+
   it('leaves out official and social links', () => {
     expect(platforms.map((p) => p.category)).not.toContain('official');
     expect(platforms.map((p) => p.category)).not.toContain('social');

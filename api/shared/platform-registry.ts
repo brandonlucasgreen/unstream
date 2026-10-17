@@ -142,12 +142,12 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     homepageUrl: 'https://www.discogs.com',
   },
 
-  // Self-hosted & Decentralized
+  // Marketplace (UNS-222: bandwagon is a buy-music storefront, not self-hosted/decentralized)
   bandwagon: {
     name: 'Bandwagon',
     color: '#8b5cf6',
     icon: '🚐',
-    category: 'decentralized',
+    category: 'marketplace',
     homepageUrl: 'https://bandwagon.fm',
     aiPolicy: 'formal',
     aiPolicyUrl: 'https://bandwagon.fm/acceptable-use',
