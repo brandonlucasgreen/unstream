@@ -84,7 +84,7 @@ export function ArtistTipsPage() {
   return (
     <div className="space-y-4">
       {stripeParam === 'return' && (
-        <p className="text-sm text-text-secondary" role="status">Back from Stripe. Here's where things stand.</p>
+        <p className="text-sm text-text-secondary" role="status">Stripe Connect awaiting verification</p>
       )}
       {refreshError && <p className="text-sm text-red-400">{refreshError}</p>}
       <ArtistTipsPanel slug={slug} token={session.access_token} settings={settings} onChange={setSettings} />
