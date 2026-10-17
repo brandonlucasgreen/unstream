@@ -103,4 +103,17 @@ describe('the single-event shape (extension and Mac app)', () => {
     expect(res?.statusCode).toBe(204);
     expect(mocks.mockRpc).not.toHaveBeenCalled();
   });
+
+  it('takes the Tip button click-out the extension popup sends (UNS-213)', async () => {
+    // `click:tip` has to be a known source or the whitelist drops the popup's event in silence,
+    // which is the one failure mode that leaves no trace anywhere.
+    await post({ slug: 'artist-a', metric: 'click:tip' });
+
+    expect(mocks.mockRpc).toHaveBeenCalledTimes(1);
+    expect(mocks.mockRpc).toHaveBeenCalledWith('increment_analytics', {
+      p_artist_id: 'id-a',
+      p_date: expect.any(String),
+      p_metric: 'click:tip',
+    });
+  });
 });
