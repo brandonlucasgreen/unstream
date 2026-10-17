@@ -1,9 +1,9 @@
 // MusicBrainz enrichment server function (Phase 2). The enrichment itself lives in
 // musicbrainz-enrichment.ts, shared with Phase 1 under one cache entry.
 
-import { Sentry, withSentry } from '../lib/sentry';
+import { withSentry } from '../lib/sentry';
 import { persistEnrichment, getLinkSuppressions } from './db';
-import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
+import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
 import { normalizeSearchQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
 import {
@@ -98,13 +98,14 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     }
 
     if (result === null) {
-      const shouldCapture = await checkSentryDedup('uns152:musicbrainz-unavailable', 30 * 60);
-      if (shouldCapture) {
-        Sentry.captureMessage('MusicBrainz did not answer; enrichment skipped', {
-          level: 'warning',
-          extra: { query: normalizedQuery, note: 'Kept for the one-minute failure TTL only.' },
-        });
-      }
+      // This is the designed degradation, not a fault: enrichment.searchFailed is true only when
+      // MusicBrainz itself returned a non-200 or the fetch threw (timeout, network) — an
+      // upstream outage or MB throttling us, never "no such artist" (which answers populated-empty)
+      // and never a low-confidence match (which answers with suggestions). The fan's search is
+      // served from the other 16 sources either way. Sentry noise per outage added nothing the
+      // dashboard logs don't: the skip is visible in response bodies and the console line below,
+      // and the failure is only cached for the one-minute TTL, so a recovery is seen immediately.
+      console.log('[MusicBrainz] unavailable; enrichment skipped (upstream)');
       return {
         statusCode: 200,
         headers: {
