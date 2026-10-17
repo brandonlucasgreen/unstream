@@ -354,6 +354,30 @@ export const sources: Record<SourceId, Source> = {
     homepageUrl: 'https://liberapay.com',
     artistPayoutPercent: '~97%',
   },
+  // Patronage options with no search/discovery surface (UNS-217): the search backend never
+  // returns links for these, artists add them as profile links from the edit page.
+  venmo: {
+    id: 'venmo',
+    name: 'Venmo',
+    description: 'Peer payment and tip link',
+    color: '#3D95CE',
+    icon: '💵',
+    category: 'patronage',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://venmo.com',
+  },
+  paypal: {
+    id: 'paypal',
+    name: 'PayPal',
+    description: 'Payment and tip link (PayPal.me)',
+    color: '#0070BA',
+    icon: '🅿️',
+    category: 'patronage',
+    hasEmbed: false,
+    searchUrlTemplate: '',
+    homepageUrl: 'https://www.paypal.com',
+  },
   other: {
     id: 'other',
     name: 'Link',
@@ -376,7 +400,7 @@ export const sourceCategories = {
   patronage: {
     name: 'Patronage Platforms',
     description: 'Support artists directly',
-    sources: ['patreon', 'buymeacoffee', 'kofi', 'liberapay'] as SourceId[],
+    sources: ['patreon', 'buymeacoffee', 'kofi', 'liberapay', 'venmo', 'paypal'] as SourceId[],
   },
   decentralized: {
     name: 'Self-hosted & Decentralized',

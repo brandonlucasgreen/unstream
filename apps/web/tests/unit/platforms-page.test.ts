@@ -20,6 +20,17 @@ describe('supportPlatformGroups', () => {
     expect(platforms.length).toBeGreaterThanOrEqual(17);
   });
 
+  it('includes the profile-only patronage options an artist can paste a link for (UNS-217)', () => {
+    for (const id of ['venmo', 'paypal'] as const) {
+      const p = platforms.find((pl) => pl.id === id);
+      expect(p, id).toBeDefined();
+      expect(p!.category).toBe('patronage');
+      // No payout figure on purpose: neither company publishes an artist share, so the cards
+      // must show nothing rather than a guess.
+      expect(p!.artistPayoutPercent).toBeUndefined();
+    }
+  });
+
   it('gives every platform a name, description and homepage to link to', () => {
     for (const p of platforms) {
       expect(p, p.id).toBeDefined();

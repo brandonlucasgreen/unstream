@@ -28,6 +28,8 @@ export type SourceId =
   | 'newsletter'
   | 'wikipedia'
   | 'liberapay'
+  | 'venmo'
+  | 'paypal'
   | 'other';
 
 export interface Source {

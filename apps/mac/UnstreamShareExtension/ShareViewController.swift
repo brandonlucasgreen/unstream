@@ -74,6 +74,9 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     "bluesky":      .init(name: "Bluesky",         icon: "🦋", payoutPercent: nil,       isSocial: true),
     "mastodon":     .init(name: "Mastodon",        icon: "🐘", payoutPercent: nil,       isSocial: true),
     "peertube":     .init(name: "PeerTube",        icon: "📹", payoutPercent: nil,       isSocial: true),
+    // Profile-link-only patronage options (UNS-217): no payout figure — see platform-registry.ts.
+    "venmo":        .init(name: "Venmo",           icon: "💵", payoutPercent: nil,       isSocial: false),
+    "paypal":       .init(name: "PayPal",          icon: "🅿️", payoutPercent: nil,       isSocial: false),
 ]
 
 // MARK: - View Model
