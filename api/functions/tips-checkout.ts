@@ -121,11 +121,10 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
     return respond(200, body);
   }
   if (!tipsFlagOn) {
-    // Eligible artist, fan-side flag off (the only reason a kill switch outruns the cache here —
-    // the flag itself is checked live every request).
-    const body: TipPagePayload = { artist: eligibility.artist, takingTips: false };
-    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, TIP_PAGE_NOT_TAKING_TTL_SECONDS);
-    return respond(200, body);
+    // Eligible artist, fan-side flag off — the kill switch. The flag is checked live every
+    // request, so this verdict says nothing about the artist that will still be true in 10s:
+    // answer it but don't cache it (caching it would let a flag flip lag behind its own check).
+    return respond(200, { artist: eligibility.artist, takingTips: false });
   }
   const artist = eligibility.artist;
   const body: TipPagePayload = {
