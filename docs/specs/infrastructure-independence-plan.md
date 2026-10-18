@@ -37,8 +37,8 @@ There are two practical reasons as well:
 | Auth | GoTrue (Supabase's open-source auth server) container on App Platform, data in the managed database | open source | Supabase gone entirely |
 | CDN + DNS | Cloudflare (stays) | Public company (NYSE: NET), own network | Cache by tag, purge by tag on the free plan |
 | Cache, rate limits, flags | In-process memory + Postgres | — | Upstash gone |
-| Email | Resend for now; an independent provider when there's a reason | — | Not urgent; candidates in Phase 4 |
-| Code, issues | Forgejo: Codeberg, or a private instance | Codeberg is a non-profit (Codeberg e.V.) | Codeberg needs an open-source license; see Phase 6 |
+| Email | Resend for now; Cloudflare Email Service once it's out of beta | Cloudflare (public company) | Not urgent; Phase 4 |
+| Code, issues | Codeberg (Forgejo) | Non-profit (Codeberg e.V.) | Needs the MIT license file (Phase 0.2) |
 | CI | A Forgejo runner on Brandon's Mac Studio | — | Production never waits on it |
 | Error tracking | Sentry for now; GlitchTip optional | — | GlitchTip speaks the Sentry SDK |
 | Stays as is | Stripe, GoatCounter, Buttondown, Cloudflare R2 (backups) | — | No equivalent for Stripe Connect; GoatCounter and Buttondown are indie |
@@ -75,7 +75,7 @@ architecture below is portable to it; only the provider-specific steps (doctl, a
 | App container (1 GB) | $10 |
 | GoTrue container (512 MB), from Phase 5 | $5 |
 | CI runner | $0 (the Mac Studio) |
-| Code hosting, from Phase 6 | $0 on Codeberg; a few dollars for a managed private Forgejo |
+| Code hosting, from Phase 6 | $0 on Codeberg |
 | Email | $0 on Resend's free tier; ~$10 if it moves to a paid independent provider |
 | **Total** | **~$35–50** |
 
@@ -90,15 +90,21 @@ Each phase is shippable on its own, leaves the site working, and has a rollback.
 follows the dependencies: the database first (it fixes the outages), then the app (it unlocks
 removing Upstash and owning the auth URL), and the forge last (it depends on CI being small).
 
+**The big step is Phases 1–3**: off Supabase's database, Netlify and Upstash, onto DigitalOcean.
+Phases 4–6 can wait for a reason. One caveat: Phase 1 moves the data, not sign-in. Supabase's
+free project keeps running Auth until Phase 5, on the same Nano machine whose memory floor
+caused the outages, so a wedge there still breaks sign-in, though no longer search or pages.
+
 ### Phase 0: no-cost groundwork (any time)
 
 | # | Step | Who |
 |---|---|---|
 | 0.1 | Record the decision: CLAUDE.md's database plan line, the status of `digitalocean-database-plan.md`, this doc | Agent (done with this doc) |
-| 0.2 | Think about the license question in Phase 6; nothing waits on it until then. Once it's settled, a **pull mirror** of the GitHub repo on the chosen forge puts the code somewhere independent early | Brandon |
+| 0.2 | **Add the MIT `LICENSE` file.** Brandon intended MIT, and the Press page says "open source", but the repo has no license file, so legally it's all rights reserved. Independent of every phase; it also unblocks Codeberg (Phase 6) | Agent, once Brandon names the copyright holder |
 | 0.3 | Check Netlify billing: credit pricing or the legacy plan, and how many credits are left. Until Phase 2, batch merges so several PRs ship in one deploy | Brandon |
 | 0.4 | Measure email volume, to know whether a free tier covers it (Phase 4): `select date_trunc('day', created_at) d, count(*) from email_log group by 1 order by 1 desc limit 30;` | Brandon, SQL editor |
 | 0.5 | In Supabase → Authentication → SMTP, note whether auth emails use Supabase's built-in sender or a custom SMTP (Resend). Phase 5 needs it | Brandon |
+| 0.6 | **Alert when the Mac Studio goes quiet.** The code review agent already runs there, so if the Mac is down, PRs merge unreviewed and nothing says so. A launchd job pings Healthchecks.io every few minutes, and the review agent pings after each review; Healthchecks sends a missed ping to **hosted** ntfy.sh (an unguessable topic name, since ntfy.sh topics are readable by anyone who knows the name) and to email. The ntfy server on the Mac can't do this: it goes down with the thing it's watching | Brandon, ~15 min |
 
 ### Phase 1: the database (≈ $20/month starts)
 
@@ -211,7 +217,8 @@ behind the same function signatures:
 
 ### Phase 4 (optional, any time): email off Resend
 
-**Not urgent.** Resend is VC-backed, but Unstream is inside its free tier, the swap is one file
+**Not urgent, and the likely destination is Cloudflare Email Service once it's out of beta**
+(Brandon, 2026-10-18): Cloudflare is already in the stack, so it adds no vendor. Resend is VC-backed, but Unstream is inside its free tier, the swap is one file
 plus DNS, and nothing else waits on it: GoTrue (Phase 5) can send through Resend's SMTP as well
 as anyone's. Move when there's a reason (volume outgrows the free tier, Resend's terms change)
 or a provider worth moving to.
@@ -264,15 +271,9 @@ The work, whichever provider:
 
 **Prerequisite:** Phases 2–3, so the app's scheduled jobs live in the server and CI is small.
 
-**Decide first where the repository lives.** Codeberg hosts only projects under an OSI- or
-FSF-approved license, and Unstream has none: a public repository with no license is "all rights
-reserved". So:
-- **Codeberg means choosing a license.** AGPL-3.0 fits Unstream best: anyone who runs a modified
-  copy as a service has to publish their changes. It's a lasting product and legal decision, so
-  it's Brandon's.
-- **Without one, use a private Forgejo** and collaborate there by invitation: a managed instance
-  from a small host (PikaPods, for example, at a few dollars a month), or Forgejo on the Mac
-  Studio behind a Cloudflare Tunnel, which makes the forge itself depend on the Mac.
+**Codeberg needs a license.** It hosts only projects under an OSI- or FSF-approved license.
+Phase 0.2's MIT `LICENSE` file covers that; without it, the fallback is a private Forgejo (a
+managed instance from a small host such as PikaPods, a few dollars a month).
 
 - **Move app-level schedules in-process first** (`node-cron` in the server): the catalogue sweep
   and the tips-review notifier. Their workflows go away.
@@ -293,8 +294,8 @@ reserved". So:
   - **Scheduled jobs** (`db-backup` nightly, social posts on Mondays, the digest on Fridays) run
     only while the Mac is awake and online, and **a job that never starts never fails**, so
     `db-backup`'s "backup failing" issue would never open. Add a dead man's switch: each job
-    pings Healthchecks.io (open source, run by a one-person company) when it succeeds, and it
-    emails when a ping is late. From Phase 1, DigitalOcean's own daily backups mean a missed
+    pings Healthchecks.io (open source, run by a one-person company) when it succeeds, alongside
+    Phase 0.6's heartbeat, and a late ping alerts through hosted ntfy.sh and email. From Phase 1, DigitalOcean's own daily backups mean a missed
     night costs the second copy, not the only one.
 - **Port the remaining workflows** to `.forgejo/workflows/` (largely GitHub Actions syntax):
 
