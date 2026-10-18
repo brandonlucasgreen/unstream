@@ -433,6 +433,14 @@ describe('the tipsArtists gate', () => {
     expect(JSON.parse(summary!.body)).toEqual({ available: true });
   });
 
+  it('refuses the tab to a non-admin when the flag reads off — the boolean, not truthy-string', async () => {
+    mocks.flagStore.set('tipsArtists', 'off');
+    const summary = await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    });
+    expect(JSON.parse(summary!.body)).toEqual({ available: false });
+  });
+
   it('refuses the tab to a non-admin while the flag is on but Stripe is unconfigured', async () => {
     delete process.env.STRIPE_SECRET_KEY;
     const summary = await rawSettings({
