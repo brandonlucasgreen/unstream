@@ -165,3 +165,7 @@ When adding a new migration, create a file in `supabase/migrations/` named `YYYY
 - [Privacy policy](https://unstream.stream/privacy-policy)
 - [Terms of use](https://unstream.stream/terms)
 - [Support Unstream](https://unstream.stream/support)
+
+## License
+
+[MIT](LICENSE). The bundled fonts (Stack Sans Headline, Darker Grotesque) are under the SIL Open Font License; their licences sit alongside them.
