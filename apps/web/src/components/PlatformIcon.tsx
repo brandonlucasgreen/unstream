@@ -11,6 +11,10 @@ export interface SimpleIcon {
 }
 
 export const SIMPLE_ICON_PATHS: Partial<Record<SourceId, SimpleIcon>> = {
+  // UNS-234: restore Bandcamp's diamond mark. It existed here since #108 but was
+  // dropped during the UNS-232 refactor to { d, fillRule } objects, so every
+  // branded Bandcamp pill fell back to the 🎵 emoji.
+  bandcamp: { d: 'M0 18.75l7.437-13.5H24l-7.438 13.5H0z' },
   // UNS-232: Ampwall's volume-knob mark, from their published brand kit
   // (Mark SVG, Jan 2025). Vendor geometry scaled from 500x500 to 24x24;
   // the notch in the knob is carved between subpaths, so evenodd is required.
