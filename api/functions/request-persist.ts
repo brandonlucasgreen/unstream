@@ -17,6 +17,7 @@
 import { Sentry } from '../lib/sentry';
 import { persistSearchResults, type PersistableResult } from './db';
 import { checkSentryDedup } from './ratelimit';
+import { internalFunctionOrigin } from '../lib/internal-origin';
 
 /**
  * The most this sends to the background function, in bytes of JSON.
@@ -39,29 +40,6 @@ export type PersistMode =
   | 'inline-oversize'
   | 'inline-dispatch-failed'
   | 'error';
-
-/**
- * Where to call our own background functions.
- *
- * **Not `URL`, which is what request-catalog.ts uses.** `URL` is https://unstream.stream, and that
- * zone has had Cloudflare's Bot Fight Mode on since 2026-10-12. On the free plan it has no
- * exceptions and challenges datacenter traffic before any skip rule runs — the release sweep's
- * GitHub runner was answered "Just a moment…" until it moved to the netlify.app host (#606), and
- * a Lambda's request comes from AWS just as the runner's came from Microsoft. The site's own
- * `<SITE_NAME>.netlify.app` hostname is served by Netlify directly, outside Cloudflare.
- *
- * `SITE_NAME` is one of the three variables Netlify exposes to a function at runtime (with `URL`
- * and `SITE_ID`). A preview resolves to the *production* host here too, as request-catalog's
- * `URL` does, since a preview can't name itself at runtime. Under `netlify dev`, `URL` is
- * localhost and is used as is, so local runs exercise the local function.
- */
-export function internalFunctionOrigin(): string | null {
-  const siteUrl = process.env.URL;
-  const siteName = process.env.SITE_NAME;
-  if (siteUrl && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(siteUrl)) return siteUrl;
-  if (siteName && /^[a-z0-9-]+$/.test(siteName)) return `https://${siteName}.netlify.app`;
-  return siteUrl || null;
-}
 
 /**
  * Only what persistSearchResults reads: artist cards, and from each one its name, image,

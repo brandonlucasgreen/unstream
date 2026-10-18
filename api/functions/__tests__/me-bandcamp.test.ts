@@ -46,14 +46,16 @@ import { decryptCredential } from '../credential-crypto';
 // this allowlist is a security boundary, not a convenience.
 describe('selfDispatchOrigin', () => {
   it('accepts this site\'s own production and Netlify deploy hostnames', () => {
-    expect(selfDispatchOrigin('unstream.stream')).toBe('https://unstream.stream');
-    expect(selfDispatchOrigin('www.unstream.stream')).toBe('https://www.unstream.stream');
+    // The production domain dispatches to the production deploy's netlify.app host, never back
+    // through unstream.stream, whose Cloudflare bot protection once challenged these calls.
+    expect(selfDispatchOrigin('unstream.stream')).toBe('https://unstream.netlify.app');
+    expect(selfDispatchOrigin('www.unstream.stream')).toBe('https://unstream.netlify.app');
     expect(selfDispatchOrigin('unstream.netlify.app')).toBe('https://unstream.netlify.app');
     expect(selfDispatchOrigin('deploy-preview-438--unstream.netlify.app')).toBe(
       'https://deploy-preview-438--unstream.netlify.app'
     );
     // Case and port are normalised away before matching.
-    expect(selfDispatchOrigin('Unstream.Stream:443')).toBe('https://unstream.stream');
+    expect(selfDispatchOrigin('Unstream.Stream:443')).toBe('https://unstream.netlify.app');
   });
 
   it('refuses any hostname that is not ours, so the secret cannot be redirected', () => {

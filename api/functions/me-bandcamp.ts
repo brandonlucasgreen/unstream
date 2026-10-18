@@ -97,12 +97,17 @@ function toStatusShape(row: ConnectionRow | null) {
  * budget, and so stays pinned behind request-catalog.ts's production gate — a Bandcamp sync
  * writes only the rows of the user who asked for it, so letting a preview run its own is
  * both safe and the point.
+ *
+ * A request to the production domain dispatches to the production deploy's netlify.app host
+ * rather than back through unstream.stream: that domain sits behind Cloudflare, whose bot
+ * protection challenged our own function-to-function calls for six days in October 2026 (see
+ * internalFunctionOrigin in api/lib/internal-origin.ts).
  */
 export function selfDispatchOrigin(host: string | undefined): string | null {
   if (!host) return null;
   const hostname = host.split(':')[0].trim().toLowerCase();
   if (hostname === 'unstream.stream' || hostname === 'www.unstream.stream') {
-    return `https://${hostname}`;
+    return 'https://unstream.netlify.app';
   }
   // Deploy previews and branch deploys: <deploy-name>--unstream.netlify.app
   if (hostname === 'unstream.netlify.app' || /^[a-z0-9-]+--unstream\.netlify\.app$/.test(hostname)) {

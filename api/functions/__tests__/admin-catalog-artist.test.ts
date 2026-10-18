@@ -117,6 +117,15 @@ describe('POST — starting a crawl', () => {
   // Netlify answers 202 to a background invocation the instant it is queued and discards the
   // handler's response — so any refusal we can predict has to be caught here, or it reaches the
   // UI as a crawl that simply never finishes.
+  // Anything but a 202 means Netlify never queued the crawl — a bot challenge's 403 above all,
+  // which doesn't throw. Reported, or the button says "queued" for a crawl that never runs.
+  it('reports a refused dispatch instead of claiming the crawl was queued', async () => {
+    mocks.fetch.mockResolvedValueOnce({ status: 403, ok: false } as Response);
+    const response = await post();
+    expect(response.statusCode).toBe(502);
+    expect(JSON.parse(response.body).error).toContain('HTTP 403');
+  });
+
   it('refuses where cataloging is disabled rather than queuing a crawl that will be rejected', async () => {
     delete process.env.RELEASE_CATALOG_ENABLED;
     const response = await post();

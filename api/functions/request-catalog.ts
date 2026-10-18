@@ -10,6 +10,7 @@
 // 0.6–1.6s to every query after a long effort to get search down to ~1.8–3.0s.
 
 import type { CatalogTrigger } from './db';
+import { internalFunctionOrigin } from '../lib/internal-origin';
 
 /** Matches MAX_ARTISTS_PER_RUN in catalog-artist-background.ts. */
 const MAX_ARTISTS_PER_REQUEST = 25;
@@ -73,10 +74,10 @@ export async function requestArtistCatalog(
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
 
-  // `URL` and not `DEPLOY_PRIME_URL`: only URL, SITE_NAME and SITE_ID reach a function at
-  // runtime, so DEPLOY_PRIME_URL is always undefined here. That means a preview would invoke the
+  // The site's netlify.app host, never `URL`, which goes through Cloudflare (see
+  // internalFunctionOrigin). A preview can't name itself at runtime, so it resolves to the
   // *production* background function — which is exactly why the gate above has to hold.
-  const siteUrl = process.env.URL;
+  const siteUrl = internalFunctionOrigin();
 
   if (!secret || !siteUrl) {
     // Not an error worth surfacing: without configuration the feature is simply off.
@@ -87,8 +88,9 @@ export async function requestArtistCatalog(
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3_000);
+    let status: number;
     try {
-      await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
+      const response = await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,8 +99,16 @@ export async function requestArtistCatalog(
         body: JSON.stringify({ artistIds: ids, trigger }),
         signal: controller.signal,
       });
+      status = response.status;
     } finally {
       clearTimeout(timeoutId);
+    }
+    // Netlify answers 202 the moment it accepts a background invocation. Anything else — a bot
+    // challenge's 403 above all, which doesn't throw — means nothing was queued. Counting that as
+    // delivered is how six days of sweeps reported `requested: 25` while cataloguing nothing.
+    if (status !== 202) {
+      console.warn(`[catalog] request refused: HTTP ${status}`);
+      return false;
     }
     return true;
   } catch (error) {
@@ -143,7 +153,7 @@ export async function triggerCatalogNow(artistId: string): Promise<TriggerCatalo
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  const siteUrl = process.env.URL;
+  const siteUrl = internalFunctionOrigin();
 
   if (!secret || !siteUrl) {
     // Said plainly rather than as a generic 500: this exact configuration gap silently stopped
@@ -158,11 +168,16 @@ export async function triggerCatalogNow(artistId: string): Promise<TriggerCatalo
 
   try {
     // 'saved' is the larger hourly budget, which is right for a deliberate act by a person.
-    await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
+    const response = await fetch(`${siteUrl}/.netlify/functions/catalog-artist-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
       body: JSON.stringify({ artistIds: [artistId], trigger: 'saved' satisfies CatalogTrigger }),
     });
+    // Only a 202 means Netlify accepted the invocation; see requestArtistCatalog.
+    if (response.status !== 202) {
+      console.error(`[catalog] deliberate trigger refused: HTTP ${response.status}`);
+      return { ok: false, status: 502, error: `The cataloging function refused the request (HTTP ${response.status})` };
+    }
     return { ok: true };
   } catch (error) {
     console.error('[catalog] deliberate trigger failed:', error instanceof Error ? error.message : String(error));

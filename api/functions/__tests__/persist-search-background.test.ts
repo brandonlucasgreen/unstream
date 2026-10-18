@@ -28,11 +28,11 @@ vi.mock('../../lib/sentry', () => ({
 import { handler } from '../persist-search-results-background';
 import {
   MAX_PERSIST_PAYLOAD_BYTES,
-  internalFunctionOrigin,
   parsePersistPayload,
   requestSearchPersist,
   toPersistPayload,
 } from '../request-persist';
+import { internalFunctionOrigin } from '../../lib/internal-origin';
 
 const SECRET = 'test-secret-value';
 const originalEnv = { ...process.env };

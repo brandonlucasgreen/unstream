@@ -319,7 +319,7 @@ On the server:
 - **Account endpoints** (`me-*`, `saved-artists`, `saved-artists-sync`, `user-sharing`) authenticate and rate-limit through `resolveAccountRequest` (`ratelimit.ts`), which verifies the JWT locally (`authenticateBearerFast`) — a revoked session keeps working for up to an hour (#331).
 - **Where a fresh check matters, make the round trip to Supabase:** `authenticateBearer` (admin via `authenticateAdmin`, API-key issuance, `artist-releases`). `me-password` is the one account endpoint outside `resolveAccountRequest`; it calls `getUser` itself because it needs the access token.
 - **Admin** is the `ADMIN_EMAIL` env var on the server; `AuthContext` hardcodes the same address only to show admin UI.
-- **Function-to-function calls** (background jobs, the sweep) carry `INTERNAL_FUNCTION_SECRET`, checked by `isInternalRequest`.
+- **Function-to-function calls** (background jobs, the sweep) carry `INTERNAL_FUNCTION_SECRET`, checked by `isInternalRequest`. They go to `internalFunctionOrigin()` (`api/lib/internal-origin.ts`, the site's `netlify.app` host), never `URL`, which is behind Cloudflare, and only a 202 counts as delivered: a bot challenge's 403 once made six days of catalogue requests look sent ("The six days nothing was catalogued", engineering history).
 
 ## Database / migrations
 
