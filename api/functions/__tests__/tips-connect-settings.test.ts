@@ -379,8 +379,14 @@ describe('tips-settings', () => {
   });
 });
 
-describe('tips are private to the admin for now', () => {
+describe('tips are private to the admin while the flag is off', () => {
   const ARTIST = { userId: 'artist-9', email: 'another-artist@example.com' };
+
+  beforeEach(() => {
+    // The suite-wide default opens onboarding (tipsArtists on); this describe is about the
+    // flag-OFF posture, so close it again per test.
+    mocks.flagStore.set('tipsArtists', 'off');
+  });
 
   it('hides Manage Tips from any other artist, even with Stripe configured', async () => {
     mocks.authenticateBearer.mockResolvedValue(ARTIST);
@@ -407,15 +413,40 @@ describe('tips are private to the admin for now', () => {
   });
 });
 
-// UNS-215: the artist-side flag, the half of the split that opens onboarding and the tips switch.
-// The flag never gates the admin (canSetUpTips has already refused everyone else), so these tests
-// run the flag-off refusals as ARTIST — the admin's flag-off path is that the gate is a no-op.
+// UNS-215: the artist-side flag, the half of the split that opens onboarding, the tips switch and
+// the Manage Tips tab (the summary check reads it too). The flag never gates the admin, so a
+// flag-off refusal is ARTIST-shaped — the admin's flag-off path is that the gate is a no-op.
 describe('the tipsArtists gate', () => {
   beforeEach(() => {
     // The flag is ON for the shared suite; the artist caller is the one the flag actually gates.
     mocks.authenticateBearer.mockResolvedValue(ARTIST);
     mocks.resolveOwnedArtist.mockResolvedValue({ ok: true, status: 200, artistId: 'artist-1', artistName: 'Kid Lightbulbs' });
     process.env.ADMIN_EMAIL = OWNER.email; // re-assert: ARTIST != ADMIN_EMAIL
+  });
+
+  it('shows the Manage Tips tab to a non-admin artist while the flag is on (summary=1)', async () => {
+    // Reported 2026-10-18: verified artist, flag on, no tab. Root cause: the summary check read
+    // admin-allowlist only, so the tab the flag opens never rendered for anyone else.
+    const summary = await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    });
+    expect(JSON.parse(summary!.body)).toEqual({ available: true });
+  });
+
+  it('refuses the tab to a non-admin when the flag reads off — the boolean, not truthy-string', async () => {
+    mocks.flagStore.set('tipsArtists', 'off');
+    const summary = await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    });
+    expect(JSON.parse(summary!.body)).toEqual({ available: false });
+  });
+
+  it('refuses the tab to a non-admin while the flag is on but Stripe is unconfigured', async () => {
+    delete process.env.STRIPE_SECRET_KEY;
+    const summary = await rawSettings({
+      httpMethod: 'GET', headers: { authorization: 'Bearer t' }, body: null, queryStringParameters: { summary: '1' },
+    });
+    expect(JSON.parse(summary!.body)).toEqual({ available: false });
   });
 
   it('refuses a non-admin to start onboarding while the flag is off, before any Stripe call', async () => {

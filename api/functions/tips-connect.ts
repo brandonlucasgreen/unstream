@@ -55,9 +55,6 @@ async function handleRequest(event: HandlerEvent) {
   const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
-  // Private for now: only the admin can connect a Stripe account (see canSetUpTips).
-  if (!canSetUpTips(user.email)) return respond(403, { error: "Tips aren't open to artists yet" });
-
   if (!stripeMode()) return respond(503, { error: 'Tips are not available yet' });
   const client = getClient();
   if (!client) return respond(500, { error: 'Database not configured' });
@@ -80,11 +77,9 @@ async function handleRequest(event: HandlerEvent) {
   // costs nothing and leaves nothing behind. The wording is the one this endpoint already uses for
   // "not yet", so a client shows the same message either way.
   //
-  // But the flag never gates the admin: every caller here already passed canSetUpTips above, which
-  // admits only the admin — so a plain flag check would let the flag lock the admin out of his own
-  // pilot onboarding, which is backwards. Off means "closed to whoever might come later", not
-  // "closed to the person launching it": the admin proceeds with the flag off, everyone else is
-  // already refused.
+  // And the flag never gates the admin: with the flag off this answer is admin-only
+  // (canSetUpTips), so a flag flip can't lock the admin out of his own pilot onboarding. Off
+  // means "closed to whoever might come later", not "closed to the person launching it".
   //
   // Opening this does not by itself let an artist take money: takingTips() still requires
   // tips_approved_at, which only an admin sets through /api/admin/tips.

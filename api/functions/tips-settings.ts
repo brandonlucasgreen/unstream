@@ -45,9 +45,11 @@ async function handleRequest(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
 
-  // The artist settings header asks only whether to show the Manage Tips tab: Stripe configured, and
-  // (while tips are private) the caller is the admin. No profile, database or Stripe read.
-  const tipsOpenToCaller = !!stripeMode() && canSetUpTips(user.email);
+  // The artist settings header asks only whether to show the Manage Tips tab: Stripe configured,
+  // and tips open to the caller — the admin by allowlist (works with the flag off), or anyone the
+  // tipsArtists flag admits. No profile, database or Stripe read here; the flag store failing
+  // closed means the tab hides while Redis is down, matching the endpoints' own behaviour.
+  const tipsOpenToCaller = !!stripeMode() && (canSetUpTips(user.email) || (await getFeatureFlag('tipsArtists')));
   if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
     return respond(200, { available: tipsOpenToCaller });
   }
@@ -211,11 +213,11 @@ async function updateSettings(client: SupabaseClient, artistId: string, artistNa
   // who already went live after a rollout is pulled. Every other action here (the fee, both goal
   // actions) stays open too. Fails closed, like the store it reads.
   //
-  // The flag never gates the admin: tipsOpenToCaller is canSetUpTips-shaped (admin only, while
-  // tips are private), and a plain flag check would let the flag lock the admin out of switching
-  // on his own pilot artist with the flag off — backwards. Off means "closed to whoever might
-  // come later", not "closed to the person launching it".
-  if (body.tipsEnabled === true && !tipsOpenToCaller && !(await getFeatureFlag('tipsArtists'))) {
+  // The flag never gates the admin: tipsOpenToCaller is admin-OR-flag, so with the flag off the
+  // admin can still switch on his pilot artist, and with every other caller admitted by the flag
+  // this check answers exactly "closing the gates" — a flag flip that only locks out artists the
+  // flag had let in, never the person launching it.
+  if (body.tipsEnabled === true && !tipsOpenToCaller) {
     return respond(403, { error: "Tips aren't open to artists yet" });
   }
 
