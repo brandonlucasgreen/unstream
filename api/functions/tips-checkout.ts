@@ -21,9 +21,10 @@
 import { getClient } from './db';
 import { authenticateBearerFast, buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { isStripeRejection, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
+import { isStripeRejection, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { getGoals, tipEligibility } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
+import { cacheGet, cacheSet } from './cache';
 import { respond, siteUrl } from './tips-http';
 import {
   ONE_OFF_MAX_CENTS,
@@ -87,27 +88,68 @@ async function handleRequest(event: HandlerEvent) {
 
 async function readTipPage(slug: string, tipsFlagOn: boolean) {
   if (!SLUG_REGEX.test(slug)) return respond(400, { error: 'Invalid artist' });
-  const eligibility = await tipEligibility(slug);
-  if (!eligibility.ok && !eligibility.artist) return respond(eligibility.status, { error: eligibility.reason });
 
-  const artist = eligibility.artist!;
-  // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
-  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. The one
-  // artist read stays — the response body needs it; what's skipped is every tips-only read
-  // (fee/goals) and the Stripe call.
-  if (!tipsFlagOn || !eligibility.ok) {
-    return respond(200, { artist, takingTips: false });
+  // The whole GET answer — eligibility verdict included — rides one cache entry. The reads it
+  // replaces (2 serial eligibility reads, then goals) are exactly the latency the window-open
+  // moment feels, and a fan flow resolves the artist once before Stripe takes over, so none of
+  // them is needed again while the entry is fresh. Flag changes still apply immediately (checked
+  // live before this call); artist-side edits (fee, goals, switch) propagate within the TTL.
+  const cached = await cacheGet<TipPagePayload>(`tipspg:${stripeMode()}:${slug}`);
+  if (cached) {
+    // The flag still applies live: a kill switch can't sit behind a 60s cache.
+    return respond(200, tipsFlagOn ? cached : { artist: cached.artist, takingTips: false });
   }
-  const client = getClient()!;
-  return respond(200, {
+
+  const eligibility = await tipEligibility(slug);
+  // No such artist stays an immediate 404, uncached — a typo must never be answered with
+  // "isn't taking tips", and nothing here is worth remembering about it.
+  if (!eligibility.ok && !eligibility.artist) {
+    return respond(eligibility.status, { error: eligibility.reason });
+  }
+  if (!eligibility.ok) {
+    const negativeArtist = eligibility.artist;
+    if (!negativeArtist) {
+      // Unreachable while tipEligibility keeps its contract (every !ok answer about a *found*
+      // artist carries it), but respond like it: not an answer we cache.
+      return respond(eligibility.status, { error: eligibility.reason });
+    }
+    // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
+    // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. Short window:
+    // an artist flipping their switch back sees it within 10s.
+    const body: TipPagePayload = { artist: negativeArtist, takingTips: false };
+    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, TIP_PAGE_NOT_TAKING_TTL_SECONDS);
+    return respond(200, body);
+  }
+  if (!tipsFlagOn) {
+    // Eligible artist, fan-side flag off — the kill switch. The flag is checked live every
+    // request, so this verdict says nothing about the artist that will still be true in 10s:
+    // answer it but don't cache it (caching it would let a flag flip lag behind its own check).
+    return respond(200, { artist: eligibility.artist, takingTips: false });
+  }
+  const artist = eligibility.artist;
+  const body: TipPagePayload = {
     artist,
     takingTips: true,
     feeBasisPoints: effectiveFeeBasisPoints(eligibility.account),
-    goals: await getGoals(client, artist.id, { openOnly: true }),
+    goals: await getGoals(getClient()!, artist.id, { openOnly: true }),
     presetsCents: ONE_OFF_PRESETS_CENTS,
     minCents: ONE_OFF_MIN_CENTS,
     maxCents: ONE_OFF_MAX_CENTS,
-  });
+  };
+  await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, 60);
+  return respond(200, body);
+}
+
+const TIP_PAGE_NOT_TAKING_TTL_SECONDS = 10;
+
+interface TipPagePayload {
+  artist: { id: string; slug: string; name: string; imageUrl: string | null };
+  takingTips: boolean;
+  feeBasisPoints?: number;
+  goals?: Awaited<ReturnType<typeof getGoals>>;
+  presetsCents?: typeof ONE_OFF_PRESETS_CENTS;
+  minCents?: number;
+  maxCents?: number;
 }
 
 async function createCheckout(event: HandlerEvent, tipsFlagOn: boolean) {

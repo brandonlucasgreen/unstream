@@ -67,6 +67,27 @@ describe('TipPage', () => {
     expect(await screen.findByText(/Tips go to Kid Lightbulbs straight away, whether or not the goal is met\./)).toBeTruthy();
   });
 
+  it('renders the static form immediately, pay disabled until hydration', async () => {
+    let resolveGet!: (r: Response) => void;
+    fetchMock.mockReturnValue(new Promise<Response>(res => { resolveGet = res; })); // hold the GET
+    render(<TipPage />);
+    // Static copy: amount buttons + cover-fee are there at first paint with the slug-name fallback.
+    expect(screen.getByText('$5')).toBeTruthy();
+    expect(screen.getByText(/Kid Lightbulbs gets the full amount/)).toBeTruthy();
+    // Hydration-dependent UI: the real breakdown can't show and Pay can't fire.
+    expect(screen.queryByText(/You pay/)).toBeNull();
+    expect((screen.getByText('Pay with Stripe') as HTMLButtonElement).disabled).toBe(true);
+    // Hydrate: name, fee, and the enabled computed label appear — no remount.
+    fireEvent.click(screen.getByText('$5'));
+    resolveGet(new Response(JSON.stringify(page({ feeBasisPoints: 500 }))));
+    fireEvent.click(await screen.findByText('$5'));
+    // The computed gross from the hydrated fee — the label includes it (5% fee, fees covered).
+    await screen.findByText(/You pay/);
+    expect(screen.getByText(/Pay \$5\.\d\d with Stripe/)).toBeTruthy();
+    expect((screen.getByText(/Pay \$5\.\d\d with Stripe/) as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.getByText(/Unstream keeps \$0\./)).toBeTruthy(); // the fee line appeared
+  });
+
   it('says so for an artist not taking tips, and points to their page', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ artist: page().artist, takingTips: false })));
     render(<TipPage />);
