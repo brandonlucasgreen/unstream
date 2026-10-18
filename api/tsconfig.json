@@ -31,6 +31,7 @@
     "functions/search-sources.ts",
     "functions/search-musicbrainz.ts",
     "functions/search-stored.ts",
+    "functions/persist-search-results-background.ts",
     "functions/__tests__/search-stored.test.ts",
     "functions/__tests__/to-stored-result.test.ts",
     "functions/artist-profile.ts",

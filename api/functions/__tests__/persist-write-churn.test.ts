@@ -233,3 +233,22 @@ describe('an artist we have never seen', () => {
     expect(writesTo('artist_links')[0].rows).toHaveLength(1);
   });
 });
+
+// Search hands these cards to a background function and responds without waiting
+// (request-persist.ts). That is only safe because nothing in the response depends on the write:
+// if persistSearchResults ever started annotating the cards it is given — an id, a resolved slug —
+// the response would silently lose that once the write moved off the response path.
+describe('the cards it is given', () => {
+  it('are never changed, for a new artist or a known one', async () => {
+    const fresh = [result({ name: 'Brand New Band', url: 'https://brandnewband.bandcamp.com' })];
+    const freshBefore = structuredClone(fresh);
+    await persistSearchResults(fresh as never);
+    expect(fresh).toEqual(freshBefore);
+
+    seedArtist(2 * 60 * 60 * 1000);
+    const known = [result({ imageUrl: 'https://img/2.jpg' })];
+    const knownBefore = structuredClone(known);
+    await persistSearchResults(known as never);
+    expect(known).toEqual(knownBefore);
+  });
+});

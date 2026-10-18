@@ -2,7 +2,8 @@ import { parse } from 'node-html-parser';
 import { Sentry, withSentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
-import { persistSearchResults, artistSlug, getMergeOverrides, getLinkSuppressions } from './db';
+import { artistSlug, getMergeOverrides, getLinkSuppressions } from './db';
+import { requestSearchPersist } from './request-persist';
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
@@ -1559,8 +1560,9 @@ export function attachArtistPageSlugs(results: AggregatedResult[]): void {
     if (result.type !== 'artist') continue;
     if (result.claimedSlug || result.knownSlug) continue;
     if (result.matchConfidence === 'unverified') continue;
-    // The same expression `persistSearchResults` upserts under, so this names a row that exists
-    // rather than guessing at one.
+    // The same expression `persistSearchResults` upserts under, so this names the row it writes
+    // rather than guessing at one. That write now lands in a background function moments after
+    // the response, not before it; a click that beats it gets the artist page's uncached 404.
     result.knownSlug = artistSlug(result.name);
   }
 }
@@ -1651,13 +1653,15 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // Persist artist results to the database. Skip claimed results (already in
     // DB) and known- cards (served FROM the DB — persisting them back would
     // refresh updated_at without re-verifying anything).
-    try {
-      await timer.time('persist', persistSearchResults(finalResults.filter(r =>
-        r.matchConfidence !== 'claimed' && !r.id.startsWith('known-')
-      )));
-    } catch (err) {
-      console.error('[DB] Background persist failed:', err);
-    }
+    //
+    // Handed to a background function rather than awaited here, so the response doesn't wait on
+    // Supabase; `persist` in Server-Timing is the handoff, and its desc says if it fell back to
+    // persisting inline. See request-persist.ts. Never throws.
+    const persistStartedAt = Date.now();
+    const persistMode = await requestSearchPersist(finalResults.filter(r =>
+      r.matchConfidence !== 'claimed' && !r.id.startsWith('known-')
+    ));
+    timer.record('persist', Date.now() - persistStartedAt, persistMode);
 
     // Tell the client where each artist's page lives.
     //
