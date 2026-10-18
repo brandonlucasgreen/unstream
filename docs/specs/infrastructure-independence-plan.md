@@ -1,392 +1,303 @@
-# Infrastructure independence: moving Unstream to DigitalOcean and Forgejo
+# Infrastructure independence: Netlify → Cloudflare, GitHub → Codeberg
 
 **Date:** 2026-10-18
 **Status:** Decided (Brandon, 2026-10-18). Not started.
-**Supersedes:** the 2026-10-06 decision to make Supabase Pro the next step. The database move in
-`digitalocean-database-plan.md` is no longer the fallback; it is Phase 1 of this plan.
+**Scope:** everything around the database. Supabase stays for data and sign-in; the database is
+a later decision (see "Later").
 
 ## Why
 
 Unstream should run, as far as practical, on providers that are **not venture-funded and not a
-hyperscaler (AWS, Google, Microsoft)**, without Brandon becoming a systems administrator. Today
-almost every layer fails that test:
+hyperscaler (AWS, Google, Microsoft)**, and whose values Brandon can stand behind, without turning
+a small project into a migration project. Today:
 
-| Layer | Today | Owner / runs on |
-|---|---|---|
-| Database + Auth | Supabase (free Nano) | VC-backed, AWS |
-| Functions, edge, CDN, deploys | Netlify (legacy free plan) | VC-backed; Functions run on AWS Lambda |
-| Cache, rate limits, flags | Upstash Redis (free) | VC-backed, AWS/GCP |
-| Transactional email | Resend (free) | VC-backed |
-| Code, CI, scheduled jobs | GitHub + Actions | Microsoft |
-| Issues | Linear | VC-backed |
-| Error tracking | Sentry | VC-backed |
+| Layer | Today | Owner / runs on | In this plan |
+|---|---|---|---|
+| Functions, edge, CDN, deploys | Netlify (legacy free plan) | VC-backed; Functions run on AWS Lambda | → Cloudflare Workers |
+| Cache, rate limits, flags | Upstash Redis (free) | VC-backed, AWS/GCP | → Cloudflare KV, Durable Objects, rate limiting |
+| Transactional email | Resend (free) | VC-backed | → Cloudflare Email Service, once it's out of beta |
+| Code, CI, scheduled jobs | GitHub + Actions | Microsoft | → Codeberg, CI on Brandon's Mac Studio |
+| Issues | Linear | VC-backed | → Forgejo issues on Codeberg |
+| Error tracking | Sentry | VC-backed | Stays; GlitchTip optional |
+| Database + Auth | Supabase (free Nano) | VC-backed, AWS | **Stays for now** |
+| License | none (all rights reserved) | — | MIT (#648) |
 
-There are two practical reasons as well:
-- **The free Nano database is what causes the outages.** Supabase's own services hold ~1.27 GB
-  committed and ~400 MB of swap on a 0.5 GB machine (disk I/O investigation, Round 7).
-- **Netlify's free tier is finite.** The account is on the legacy free plan, metered in build
-  minutes (300 a month), function invocations and bandwidth; as of 2026-10-18 it has room. If
-  the account is ever moved to Netlify's credit pricing, a production deploy costs 15 of 300
-  monthly credits and every site pauses at zero, which would make Phase 2 urgent.
+**Why Cloudflare** (Brandon, 2026-10-18): already in the stack (DNS, CDN, R2 backups), a public
+company that isn't VC-backed and runs its own network, with values Brandon trusts. Moving the
+app there *reduces* the number of providers instead of adding one.
+
+**Why the database waits:** leaving Supabase is the expensive part of any move: 373 query call
+sites in 43 files, 20 Postgres functions, RLS policies, and sign-in across the web app, the Mac
+app and the extension. It's a large project for a small product, and the remaining options each
+have real costs (see "Later"). Supabase on AWS is the accepted compromise for now.
 
 ## Where it ends up
 
-| Layer | Target | Owner | Notes |
-|---|---|---|---|
-| Database | DigitalOcean Managed PostgreSQL, NYC3 | DigitalOcean (public, NYSE: DOCN), own infrastructure | Daily backups, 7-day point-in-time restore, 1 GB for Postgres alone |
-| App | **One container on App Platform** running the Node server, PostgREST and GoTrue | DigitalOcean | API, server-rendered pages, background jobs, static files |
-| Data API | PostgREST, inside the app container (its own small component during Phase 1) | open source | Keeps every `supabase-js` data call working unchanged |
-| Auth | GoTrue (Supabase's open-source auth server), inside the app container, data in the managed database | open source | Supabase gone entirely |
-| CDN + DNS | Cloudflare (stays) | Public company (NYSE: NET), own network | Cache by tag, purge by tag on the free plan |
-| Cache, rate limits, flags | In-process memory + Postgres | — | Upstash gone |
-| Email | Resend for now; Cloudflare Email Service once it's out of beta | Cloudflare | Not urgent; Phase 5 |
-| Code, issues | Codeberg (Forgejo) | Non-profit (Codeberg e.V.) | MIT-licensed since #648, which Codeberg requires |
-| CI | A Forgejo runner on Brandon's Mac Studio | — | Production never waits on it |
-| Error tracking | Sentry for now; GlitchTip optional | — | GlitchTip speaks the Sentry SDK |
-| Stays as is | Stripe, GoatCounter, Buttondown, Cloudflare R2 (backups, social cards) | — | No equivalent for Stripe Connect; GoatCounter and Buttondown are indie |
+| Layer | Target | Notes |
+|---|---|---|
+| App | **Cloudflare Workers** (Workers Paid, $5/month) with static assets | API, server-rendered pages, background jobs, the SPA |
+| Background jobs | Cloudflare Queues, Cron Triggers, `waitUntil` | Replaces Netlify background functions and two GitHub Actions schedules |
+| Cache, rate limits, flags | Cloudflare KV, Durable Objects, the rate-limiting binding | Upstash gone |
+| CDN + DNS | Cloudflare (as now) | Cache by tag, purge by tag |
+| Database + Auth | Supabase (free; Pro when outages justify it) | Unchanged |
+| Email | Resend until Cloudflare Email Service is generally available | Not urgent |
+| Code, issues | Codeberg (Forgejo) | MIT-licensed since #648, which Codeberg requires |
+| CI | A Forgejo runner on Brandon's Mac Studio | Alerting when it goes quiet (Phase 0) |
+| Error tracking | Sentry (its Cloudflare SDK); GlitchTip optional | Same project and alerts |
+| Stays as is | Stripe, GoatCounter, Buttondown, Cloudflare R2 (backups, social cards) | |
 
-**Region: NYC3** for everything on DigitalOcean. Traffic is a mix of US and EU; New York is
-~70–90 ms from both Western Europe and the US West Coast, and Cloudflare serves cached responses
-from near each visitor. The app container and the database share NYC3's private network.
+### Why Workers Paid ($5/month), not the free plan
 
-**The alternative, if EU hosting is ever preferred:** Scaleway (Iliad group, not VC-backed) has
-managed Postgres, serverless containers and transactional email in Paris/Amsterdam/Warsaw. The
-architecture below is portable to it; only the provider-specific steps (doctl, app spec) change.
+The free plan's per-request limits don't fit a search:
+- **10 ms of CPU per request.** Network waits don't count, but parsing a dozen platforms' HTML,
+  matching and merging does. A Worker over its limit fails the request with an error page.
+- **50 outbound requests per request.** A search's fan-out (~17 platforms, Bandcamp probe
+  candidates, Supabase reads) can reach it.
+- **KV allows 1,000 writes a day.** Upstash's caches would pass that at around 100 searches a day.
+
+Workers Paid includes 10M requests and 30M CPU-ms a month, 30 s of CPU per request (up to 5 min),
+far higher outbound limits, 1M KV writes and 1M Queue operations a month. Re-check the numbers
+before Phase 1.
 
 ### What was considered and ruled out (2026-10-18)
 
-- **Supabase Pro:** fixes the outages for $25, but stays VC-backed and on AWS.
-- **Cloudflare Workers for the app, DigitalOcean for the database.** Workable, about the same
-  cost (~$5 for Workers Paid; the free plan's 10 ms of CPU and 50 outbound calls per request
-  don't fit a search), and it would bring back free preview deploys. Rejected because it means
-  *more* platforms, not fewer:
-  - PostgREST and GoTrue still need DigitalOcean containers.
-  - Upstash stays, since Workers keep no memory between requests.
-  - Background jobs move onto Cloudflare-only Queues, and leaving later is another port. A
-    container on App Platform runs unchanged on Scaleway, Hetzner or Coolify.
-  - Workers run near the visitor, far from a New York database, so they'd need Smart Placement.
-  - Cloudflare would hold DNS, CDN, backups, email and the app: one account problem takes down
-    everything.
-- **Moving the app first.** Considered on 2026-10-18 while Netlify looked close to its limits;
-  dropped once the account turned out to be on the legacy plan with room to spare. The database
-  is what causes outages, so it goes first.
-- **Self-managed VPS (Hetzner, or Coolify on a VPS):** most independent, but the database's
-  durability (backups, restores, upgrades, disk) would be Brandon's. Coolify Cloud ($5 + a server)
-  is a credible way to run the *stateless* app later if wanted; the database stays managed either way.
-- **Bunnyshell:** VC-backed (Early Game Ventures, ~$10M), and a Kubernetes layer on top of a cloud
-  rather than a host.
-- **Bunny.net:** took VC (Runa Capital, 2022); no managed Postgres.
-- **Render, Railway, Fly, Koyeb, Neon, Aiven, Ubicloud:** VC-backed or acquired.
-- **EthicalHost.ca and similar shared hosts:** built for WordPress-style sites; no Node app
-  hosting or managed Postgres. Good homes for simple sites, not for Unstream.
+- **Everything on DigitalOcean** (App Platform for the app, Managed Postgres, PostgREST and GoTrue
+  in containers): drafted in full earlier in this PR's history (#647) and dropped:
+  - it moves the database and sign-in, a huge transition for a small project;
+  - DigitalOcean is an ecosystem Brandon doesn't know;
+  - it publishes no values Brandon could point to.
+
+  `digitalocean-database-plan.md` stays as the fully planned option if the database ever moves
+  to managed Postgres.
+- **Cloudflare Workers with a DigitalOcean database:** two compute platforms (PostgREST and GoTrue
+  would still need containers), for no gain over keeping Supabase.
+- **Supabase Pro:** not ruled out, only deferred. It's the fix for the outages (see "Later").
+- **Self-managed VPS (Hetzner, Coolify):** the database's durability would be Brandon's.
+- **Bunnyshell, Bunny.net, Render, Railway, Fly, Koyeb, Neon, Aiven, Ubicloud:** VC-backed or
+  acquired. **EthicalHost.ca and similar:** shared hosting, no Node or managed Postgres.
 
 ## Cost
 
-| | Monthly | From |
-|---|---|---|
-| Managed Postgres, 1 GB | ~$15 | Phase 1 |
-| PostgREST as its own component, while Netlify still calls it | $5 | Phase 1, until Phase 2 |
-| App container (Node server + PostgREST, + GoTrue from Phase 4): 512 MB, or 1 GB if memory runs tight | $5–10 | Phase 2 |
-| CI runner | $0 (the Mac Studio) | Phase 6 |
-| Code hosting | $0 on Codeberg | Phase 6 |
-| Email | $0 on Resend's free tier; ~$10 if it moves to a paid provider | Phase 5 |
-| **Total** | **~$20–35** | |
+| | Monthly |
+|---|---|
+| Cloudflare Workers Paid (Queues, KV, Durable Objects within its allowances) | $5 |
+| Cloudflare R2 (backups, social cards) | $0 within the free tier |
+| Supabase | $0 free; $25 on Pro |
+| Upstash | $0, then gone (Phase 2) |
+| Email, Codeberg, the Mac Studio runner | $0 |
+| **Total** | **$5, or ~$30 with Supabase Pro** |
 
-App Platform's free tier covers static sites only; a server starts at $5 (512 MB, 1 shared vCPU,
-50 GB outbound transfer, then $0.02/GB). Prices are from October 2026; **re-check before each
-phase**. For comparison, staying put means Supabase Pro ($25), plus a paid Netlify plan ($9–20)
-if the free tier runs out.
+## Keep it portable
+
+Brandon may one day offer a **self-hosted Unstream**, and Cloudflare's Queues, KV and Durable
+Objects are Cloudflare-only. So every Cloudflare-specific call stays behind the modules that
+already wrap infrastructure: `cache.ts`, `ratelimit.ts`, `feature-flags.ts`, `request-catalog.ts`
+and `purge-cache.ts`. Handlers never touch a binding directly. A self-hosted build then means
+writing those modules for Node plus Redis or Postgres, not touching every handler. The Worker
+runtime itself (`workerd`) is open source.
 
 ## The phases, in order
 
-Each phase is shippable on its own, leaves the site working, and has a rollback. The order
-follows the dependencies: the database first (it causes the outages), then the app (it unlocks
-removing Upstash and owning the auth URL), and the forge last (it depends on CI being small).
-
-**The big step is Phases 1–3**: off Supabase's database, Netlify and Upstash, onto DigitalOcean.
-Phases 4–6 can wait for a reason. One caveat: Phase 1 moves the data, not sign-in. Supabase's
-free project keeps running Auth until Phase 4, on the same Nano machine whose memory floor
-caused the outages, so a wedge there still breaks sign-in, though no longer search or pages.
+Each phase ships on its own, leaves the site working, and has a rollback.
 
 ### Phase 0: no-cost groundwork (any time)
 
 | # | Step | Who |
 |---|---|---|
-| 0.1 | Record the decision: CLAUDE.md's database plan line, the status of `digitalocean-database-plan.md`, this doc | Done (this doc) |
-| 0.2 | Add the MIT `LICENSE` file. The Press page said "open source", but with no license file the code was legally all rights reserved; Codeberg also requires one | Done (#648) |
-| 0.3 | **Social cards leave the app.** The weekly generator draws the Instagram cards at scheduling time and uploads them to R2, instead of Buffer fetching them from `/api/social-card` on publish day. The heaviest function leaves before Phase 2: ~130 ms of CPU, bundled fonts and wasm. The endpoint stays two weeks for already-scheduled posts, then a follow-up removes it | In progress |
-| 0.4 | Glance at Netlify's usage (build minutes, function invocations, bandwidth) monthly until Phase 2 | Brandon |
-| 0.5 | Measure email volume, to know whether a free tier covers it (Phase 5): `select date_trunc('day', created_at) d, count(*) from email_log group by 1 order by 1 desc limit 30;` | Brandon, SQL editor |
-| 0.6 | In Supabase → Authentication → SMTP, note whether auth emails use Supabase's built-in sender or a custom SMTP (Resend). Phase 4 needs it | Brandon |
-| 0.7 | **Alert when the Mac Studio goes quiet.** The code review agent already runs there, so if the Mac is down, PRs merge unreviewed and nothing says so. A launchd job pings Healthchecks.io every few minutes, and the review agent pings after each review; Healthchecks sends a missed ping to **hosted** ntfy.sh (an unguessable topic name, since ntfy.sh topics are readable by anyone who knows the name) and to email. The ntfy server on the Mac can't do this: it goes down with the thing it's watching | Brandon, ~15 min |
+| 0.1 | Record the decision: this doc, CLAUDE.md's pointer | Done (this doc) |
+| 0.2 | MIT `LICENSE`: the Press page said "open source", but with no license file the code was legally all rights reserved; Codeberg also requires one | Done (#648) |
+| 0.3 | **Social cards leave the app** (#649). The weekly generator draws the Instagram cards when it schedules and uploads them to R2. The heaviest function (~130 ms of CPU, fonts and wasm) is gone before Phase 1, which matters for Workers' CPU budget. The old endpoint stays two weeks for already-scheduled posts, then a follow-up removes it | In progress; Brandon sets up the R2 bucket |
+| 0.4 | **Alert when the Mac Studio goes quiet.** The code review agent already runs there (and CI will, Phase 4), so if the Mac is down, PRs merge unreviewed and nothing says so. A launchd job pings Healthchecks.io every few minutes, and the review agent pings after each review; Healthchecks sends a missed ping to **hosted** ntfy.sh (an unguessable topic name, since ntfy.sh topics are readable by anyone who knows the name) and to email. The ntfy server on the Mac can't do this: it goes down with the thing it's watching | Brandon, ~15 min |
+| 0.5 | Measure email volume, for Phase 3: `select date_trunc('day', created_at) d, count(*) from email_log group by 1 order by 1 desc limit 30;`. Note whether Supabase's auth emails use its built-in sender or Resend's SMTP (Supabase → Authentication → SMTP) | Brandon |
 
-### Phase 1: the database (≈ $20/month starts)
+### Phase 1: the app, Netlify → Cloudflare Workers ($5/month; Netlify goes to $0)
 
-Follow `digitalocean-database-plan.md` from "Picking this back up". It is complete; this plan
-adds four corrections found on 2026-10-18:
+**Lift and shift first, simplify second:** the first cutover changes where the code runs and
+nothing else. Supabase, Upstash and every environment variable stay as they are.
 
-- **New data call site:** `api/edge/tip-page-meta.ts` reads `SUPABASE_URL` /
-  `SUPABASE_SERVICE_KEY` (added after the plan was written). Switch it with the other edge
-  functions.
-- **Check `me-email-confirm.ts`** (email-change flow, added 2026-10-16): classify each Supabase
-  call as data or Auth-admin, like the plan's two "traps".
-- **`schedule-social-posts.yml` no longer holds Supabase secrets** (#577), so drop it from the
-  plan's list of call sites.
-- **New since the plan:** search persistence and catalogue requests run in background functions
-  (#641, #642). They use `db.ts`'s `getClient()`, so the plan's env split covers them.
+**1a. One Worker that runs the existing code**
+- **Function adapter:** turns each `Request` into the Lambda-style `event` the 67 handlers already
+  take, and their `{ statusCode, headers, body }` back into a `Response`. Handlers stay untouched.
+- **Routes:** generated from `netlify.toml`'s 72 redirects, so `/api/*` and the feed URLs keep
+  their paths. A test asserts every `[[redirects]]` entry has a route.
+- **Headers:** the 3 `[[headers]]` blocks (including CSP) are applied with the same values.
+- **The 7 edge functions** are already Web-standard code, the closest fit. `Deno.env.get` becomes
+  the Worker's env, `esm.sh` imports become npm packages, and `context.next()` becomes "serve the
+  SPA". The crawler/browser split in `artist-page-static` and `u-handle` keeps its
+  one-route-one-renderer shape: decide per request, before any query.
+- **Static assets:** `apps/web/dist` served by Workers static assets, with the SPA fallback.
+  Static asset requests are free and don't count against the Worker.
+- **Node compatibility:** `nodejs_compat` for `supabase-js`, `jose` and the parsers. Check each
+  dependency runs in Workers before porting anything else.
+- **`safeFetch`** resolves DNS itself to require public IPs. Check what Workers' `node:dns`
+  supports. Workers can't reach private networks or cloud metadata endpoints anyway, but keep the
+  hostname allowlist and the per-hop redirect re-validation either way.
+- **Smart Placement,** so the Worker runs near Supabase rather than near each visitor. Every
+  search makes several sequential database reads.
+- **Sentry:** `@sentry/cloudflare` instead of `@sentry/node`, same DSN; `withSentry`'s flush
+  becomes `waitUntil`. The web client's Sentry is unchanged.
+- **Secrets** move from Netlify's environment to Worker secrets.
 
-Sign-in stays on Supabase until Phase 4. Only data moves.
+**1b. Background jobs and schedules**
+- **Search persistence:** `ctx.waitUntil()` after the response. `request-persist.ts` and the
+  persist background function go away.
+- **Catalogue crawls and the Bandcamp collection sync** become Queue consumers:
+  - Queues gives retries, a dead-letter queue, concurrency as a setting (the crawl pacing budget)
+    and a visible backlog. "Is cataloguing running?" becomes a glance; it would have caught the
+    six days nothing was catalogued.
+  - The internal HTTP handshakes, `internal-origin.ts` and the function-to-function
+    `INTERNAL_FUNCTION_SECRET` checks for these jobs go away.
+  - Check a consumer's per-invocation limits against the longest discography crawl; split work
+    per page if needed.
+- **Schedules:** the catalogue sweep and the tips-review notifier become Cron Triggers, and
+  `recatalog-sweep.yml` and `tips-review-notify.yml` go away.
 
-**Rollback:** unset `DATA_API_URL` / `DATA_API_SERVICE_KEY` and redeploy (the plan's §7).
+**1c. Caching on Cloudflare's own CDN**
+- `Netlify-CDN-Cache-Control` becomes the Cache API or `CDN-Cache-Control`. Release pages (#638)
+  and the cached API responses keep their TTLs.
+- The crawler-split pages (`/a/<slug>`, `/artist/*`, `/u/*`, `/tip/*`) stay uncached: the cache
+  key is the URL, the same reason they aren't cached on Netlify.
+- `purge-cache.ts`: Netlify's purge API becomes Cloudflare's purge-by-tag (5 requests a minute on
+  the free zone plan). `Cache-Tag` keeps its name.
 
-### Phase 2: the app, off Netlify (≈ +$0–5/month; Netlify goes to $0)
+**1d. Local dev and previews**
+- `wrangler dev` replaces `netlify dev`, which removes the `netlify dev` traps from CLAUDE.md.
+  Like now, it runs against production Supabase.
+- Every uploaded version gets a preview URL, so **per-PR previews come back without spending a
+  build allowance**.
 
-The largest phase. Do it as **lift-and-shift first, simplify second**, so the first cutover
-changes hosting and nothing else. The database (Phase 1), Upstash and every environment
-variable stay as they are.
+**1e. Cutover**
+- Deploy to the Worker's `workers.dev` address and a staging hostname (e.g.
+  `next.unstream.stream`). Walk through:
+  - search, artist and release pages, and the edge-rendered pages as a crawler (curl with a
+    Googlebot user agent);
+  - sign-in, saves, and tips in test mode;
+  - feeds, `/appcast.xml` and the Queue-driven catalogue crawl.
+- **Cutover:** route `unstream.stream` to the Worker.
+- **Rollback:** route it back to Netlify. Keep the Netlify site, idle, for two weeks.
 
-**2a. One Node server that runs the existing code unchanged**
-- `server/` (new): a small Node HTTP server (Hono, or plain `node:http`).
-  - **Function adapter:** turns each request into the Lambda-style `event` the 67 handlers already
-    take and maps their `{ statusCode, headers, body }` back. Handlers stay untouched.
-  - **Routes:** generated from `netlify.toml`'s 72 redirects, so `/api/*` and the feed URLs keep
-    their paths. A test asserts every `[[redirects]]` entry has a route.
-  - **Headers:** the 3 `[[headers]]` blocks (including CSP) become middleware with the same values.
-  - **The 7 edge functions:** ported from Deno to Node modules. Replace `esm.sh` imports with npm
-    packages, `Deno.env.get` with `process.env`, and `context.next()` with "serve the SPA's
-    `index.html`". The crawler/browser split in `artist-page-static` and `u-handle` keeps its
-    one-route-one-renderer shape: decide per request, before any query.
-  - **Static files:** serve `apps/web/dist` with long-lived cache headers on hashed assets and
-    `index.html` as the fallback.
-  - **The 3 background functions:** for parity, keep their HTTP endpoints (answer 202, run the work
-    in-process after responding). `internalFunctionOrigin()` points at the server itself through a
-    new `INTERNAL_ORIGIN` env var.
-- `Dockerfile`: `npm ci`, `npm run build` (the generators still run before `vite build`), start
-  the server.
-- **One container, several processes.** App Platform bills per container, not per program, so
-  PostgREST moves *into* the app container and Phase 1's separate PostgREST component ($5) goes
-  away; GoTrue joins the same way in Phase 4.
-  - The `Dockerfile` copies each binary from its official image in a multi-stage build (pinned
-    versions), so upgrading one is a version bump that ships with an app deploy.
-  - A small entrypoint starts the processes and **exits as soon as any one of them exits**, so
-    App Platform restarts the whole container rather than leaving it half-alive. The health
-    check covers all of them.
-  - PostgREST and GoTrue listen on localhost only: PostgREST loses its public route entirely,
-    and GoTrue is reached through the server's `/auth/v1/*` proxy (2c).
-  - The coupling costs little: every page needs all three, so they're effectively down together
-    anyway. App Platform starts a deploy's new container before stopping the old one.
-  - **Fallback:** if memory or the coupling becomes a problem, either one moves back to its own
-    $5 component with no code change; only its URL env var changes.
-- `infra/digitalocean/app.yaml`: one app component replacing Phase 1's PostgREST component, env
-  vars as encrypted secrets, health check on `/api/health/db`.
-- **Private network:** the app reaches the database over NYC3's VPC; limit the database's trusted
-  sources to the app.
-- **Memory:** start on the $5, 512 MB size and watch App Platform's memory graph for a week.
-  PostgREST and GoTrue are small (tens of MB each), but with Node's own share 1 GB ($10) may be
-  needed, likely by Phase 4. Resizing is a setting, not a migration. Running out of memory
-  restarts the container, which drops in-memory state and any crawl in progress.
+**1f. Optional: own the auth URL.** Not needed while Supabase stays. If a Mac or extension
+release is going out anyway, point their auth at an `unstream.stream/auth/v1/*` proxy instead
+of the hard-coded `supabase.co` address (`AuthService.swift`, `lib/supabase.js`). A future auth
+move (or a self-hosted build) then needs no client release.
 
-**2b. Caching moves from Netlify's CDN to Cloudflare's**
-- `Netlify-CDN-Cache-Control` becomes `CDN-Cache-Control`, which Cloudflare honours. Release
-  pages (#638) and the other cached API responses keep their TTLs.
-- Cloudflare **Cache Rules** make the cached paths eligible; by default Cloudflare only caches
-  static file types. The crawler-split pages (`/a/<slug>`, `/artist/*`, `/u/*`, `/tip/*`) get **no**
-  cache rule: the cache key is the URL, the same reason they aren't cached on Netlify.
-- `purge-cache.ts`: Netlify's purge API becomes Cloudflare's purge-by-tag, which is on the free
-  plan at 5 purge requests a minute. `Cache-Tag` keeps its name.
-- Check whether Cloudflare honours `stale-while-revalidate` on the free plan; if not, plain TTLs
-  are fine.
+### Phase 2: Upstash → Cloudflare (no cost change)
 
-**2c. Own the auth URL (sets up Phase 4)**
-- Add a proxy route `unstream.stream/auth/v1/*` → `bwogclqzpsbvqbyhhqbz.supabase.co/auth/v1/*`.
-- Point every client's "Supabase URL" for auth at `https://unstream.stream`:
-  - the web app, through its build-time env;
-  - **the Mac app (`AuthService.swift`) and the extension (`lib/supabase.js`), which hard-code
-    the `supabase.co` URL today**;
-  - `middleware.ts`'s JWKS fetch.
-- Ship a Mac release (Sparkle) and an extension release with the change. **Phase 4 can't start
-  until most installs have updated**, so do this early.
-
-**2d. Cutover**
-- Run the DigitalOcean app on its `ondigitalocean.app` hostname and on a staging hostname such
-  as `do.unstream.stream`. Walk through search, artist and release pages, sign-in, saves, tips
-  in test mode, feeds, `/appcast.xml` and the edge-rendered pages as a crawler (curl with a
-  Googlebot user agent).
-- Point `recatalog-sweep.yml` and `tips-review-notify.yml` (which call `unstream.netlify.app`
-  today) at the new host.
-- **Cutover:** in Cloudflare DNS, point `unstream.stream` at App Platform.
-- **Rollback:** point it back at Netlify. Keep the Netlify site, idle, for two weeks.
-
-**2e. Simplify, once stable**
-- Background work runs in-process directly. Remove the HTTP handshakes: `request-persist.ts`,
-  `request-catalog.ts`'s POST, `internal-origin.ts`, and the Lambda-freeze rules in CLAUDE.md.
-  Catalogue crawls go through an in-process queue with concurrency 1, which keeps the existing
-  pacing budget.
-- Replace Netlify-only machinery: `scripts/netlify-ignore-*.sh`, `netlify.toml`, the
-  `withSentry` flush rationale (the flush stays harmless), and `npm run dev`. Local dev becomes
-  the same server plus Vite, which removes the `netlify dev` traps from CLAUDE.md.
-- **What's lost:** per-PR deploy previews. App Platform has no free equivalent. Use local dev
-  and the staging hostname; add a $10 staging app later only if missed.
-
-### Phase 3: Upstash, gone (no cost change)
-
-Upstash exists because Netlify functions keep no memory between runs. The App Platform server
-does, so everything behind `cache.ts`, `ratelimit.ts`, `feature-flags.ts` and `redis.ts` moves
-behind the same function signatures:
+Behind the same function signatures in `cache.ts`, `ratelimit.ts`, `feature-flags.ts` and
+`redis.ts` (see "Keep it portable"):
 
 | Today in Redis | Moves to | Why |
 |---|---|---|
-| Per-minute rate-limit windows | Memory | A reset on deploy is harmless |
-| Daily quotas (`strict`'s 500/day, API-key tiers) | Postgres counters | The 500/day is a documented promise to v1 callers |
-| Search, suggest, directory and tip-page caches | Memory | They refill |
-| MusicBrainz enrichment (`mb-enriched`, 1 day) and per-platform search caches | An `UNLOGGED` Postgres cache table with expiry, pruned nightly by pg_cron | Refetching after every deploy would hit MusicBrainz's 1 request/second limit |
-| Feature flags (`tipsArtists`, `tipsFans`) | A Postgres table | Settings, not cache |
-| Sentry dedup, tips-review-notify state | Memory / Postgres respectively | |
+| Search, suggest, directory, tip-page and per-platform caches | KV with `expirationTtl` | Eventually consistent (~60 s), fine for caches |
+| MusicBrainz enrichment (`mb-enriched`, 1 day) | KV, 1-day TTL | Same rule: never cache uncertainty |
+| Per-minute rate-limit windows | The Workers rate-limiting binding | Approximate and per location, fine for per-minute windows |
+| Daily quotas (`strict`'s 500/day, API-key tiers) | A Durable Object counter | Exact; the 500/day is a documented promise to v1 callers |
+| Feature flags, tips-review-notify state, Sentry dedup | KV | Small and rarely written |
 
-- One migration: server-only tables with RLS enabled and no policies, per CLAUDE.md. These land
-  on the DigitalOcean database from Phase 1, not on the Nano instance whose disk I/O budget was
-  rationed for six rounds.
-- **The assumption to write into CLAUDE.md:** this needs **one app instance**. Two or more would
-  not share memory, and would need a shared store again (DigitalOcean Managed Valkey, ~$15/month).
-- Delete `upstash-keepalive.yml`, the Upstash env vars, and the "Redis is metered" section of
-  CLAUDE.md.
+- **KV is metered too:** 1M writes a month on Workers Paid. A search can write ~10 platform cache
+  entries, so that's tens of thousands of searches a month. CLAUDE.md's "Redis is metered"
+  section becomes the same rule for KV writes.
+- Delete `upstash-keepalive.yml` and the Upstash env vars; close the account.
 - **Rollback:** revert the PR; Upstash keeps working until its account is closed.
 
-### Phase 4: sign-in, off Supabase (≈ $0–5/month)
+### Phase 3 (optional, when it's GA): email → Cloudflare Email Service
 
-**Prerequisite:** Phase 2c's Mac and extension releases are on most installs.
-
-- Add GoTrue to the app container (2a), pinned to the version Supabase currently runs, with its
-  data in an `auth` schema in the DigitalOcean database. The only likely cost is resizing the
-  container to 1 GB, if Phase 2 hasn't already.
-- **Migrate the `auth` schema** (users, identities, sessions, refresh tokens) from Supabase with
-  `pg_dump`, preserving GoTrue's own migration table so it doesn't re-run migrations.
-- **Keep everyone signed in:**
-  - **Old tokens:** existing access tokens are signed with Supabase's key and expire within an
-    hour. `middleware.ts` trusts both JWKS endpoints during the switch.
-  - **Refresh tokens** move with the schema, so clients refresh against GoTrue and get its tokens.
-- Configure GoTrue: site URL and redirect allowlist (`unstream.stream`, the Mac app's and the
-  extension's callback URLs), email templates, and SMTP (Resend's, or Phase 5's provider).
-- **Cutover:** flip the `/auth/v1/*` proxy from Supabase to GoTrue. Rehearse it on the staging
-  hostname first, with a test account through sign-up, magic link, password sign-in and
-  refresh, on web, the Mac app and the extension.
-- Restore the foreign keys to `auth.users` that Phase 1 dropped; the users table is local again.
-- **Rollback:** flip the proxy back. Sessions refreshed against GoTrue since the flip become
-  invalid at Supabase, so those users sign in again. Keep the window short.
-- After two quiet weeks: final backup of the Supabase project, then delete it.
-
-### Phase 5 (optional, any time): email off Resend
-
-**Not urgent, and the likely destination is Cloudflare Email Service once it's out of beta**
-(Brandon, 2026-10-18): Cloudflare is already in the stack, so it adds no vendor. Resend is
-VC-backed, but Unstream is inside its free tier, the swap is one file plus DNS, and nothing else
-waits on it: GoTrue (Phase 4) can send through Resend's SMTP as well as anyone's. Move when
-there's a reason (volume outgrows the free tier, Resend's terms change) or a provider worth
-moving to.
-
-**Mailgun isn't the values pick.** It was the first idea for its free tier, but it belongs to
-Sinch, a large public messaging company that bought it in 2021 out of Thoma Bravo's
-private-equity roll-up (Pathwire). Other fits, as of October 2026; verify ownership and pricing
-before choosing:
-
-| Provider | What it is | Watch out for |
-|---|---|---|
-| Cloudflare Email Service | Sending from a vendor already in the stack (REST API, SMTP); public company | Public beta since April 2026; wait for general availability |
-| MailPace | Small UK company (formerly OhMySMTP); transactional only, EU-hosted, no open or click tracking | Paid from low volume (~$10/month for 10k); the free tier is tiny |
-| Lettermint | Dutch; runs on its own EU infrastructure, with no US cloud underneath | Young; funding not public; free tier ~300/month |
-| Scaleway Transactional Email | Iliad group, EU | Only worth it if other things move to Scaleway |
-
-Phase 0.5's volume count decides between a free tier and ~$10/month.
-
-The work, whichever provider:
-- `api/lib/resend.ts` becomes a client for the new provider behind the same interface. Callers:
+Not urgent: Resend is inside its free tier, the swap is one file plus DNS, and nothing waits on
+it. Cloudflare Email Service has been in public beta since April 2026 (REST API, Workers binding,
+SMTP); move when it's generally available.
+- `api/lib/resend.ts` becomes a Cloudflare Email client behind the same interface. Callers:
   `notifications.ts`, `me-email.ts`.
-- DNS in Cloudflare: the provider's SPF and DKIM records, and a DMARC policy.
-- If auth mail goes through Resend today (Phase 0.6), point Supabase's SMTP settings (later
-  GoTrue's) at the new provider too.
+- SPF, DKIM and DMARC records in Cloudflare DNS.
+- If Supabase's auth emails go through Resend's SMTP (Phase 0.5), point them at Cloudflare's SMTP
+  too.
+- Mailgun was considered and isn't the values pick: Sinch bought it in 2021 out of Thoma Bravo's
+  private-equity roll-up. MailPace (small, UK) and Lettermint (Dutch, own EU infrastructure) are
+  the independent fallbacks.
 - **Rollback:** switch the env back; keep Resend configured for a month.
 
-### Phase 6: GitHub → Forgejo (≈ $0/month)
+### Phase 4: GitHub → Codeberg
 
-**Prerequisite:** Phases 2–3, so the app's scheduled jobs can live in the server and CI is small.
+**Prerequisite:** Phase 1, so the app's schedules live in Cron Triggers and CI is small.
 
-**Codeberg needs a license.** It hosts only projects under an OSI- or FSF-approved license; the
-MIT `LICENSE` (#648) covers that.
-
-- **Move app-level schedules in-process first** (`node-cron` in the server): the catalogue sweep
-  and the tips-review notifier. Their workflows go away. This can happen any time after Phase 2.
 - **CI runs on Brandon's Mac Studio.** One `forgejo-runner` takes every job; Codeberg's hosted
   Actions are deliberately limited.
-  - Linux jobs run in containers through Colima (open source), so Docker Desktop isn't needed;
-    `mac-build` runs in host mode for Xcode.
+  - Linux jobs run in containers through Colima (open source); `mac-build` runs in host mode for
+    Xcode.
   - Run it under its own macOS user account, so jobs can't read Brandon's files.
   - **Contributors' PRs run on the Mac.** Forgejo holds a fork PR's workflows until someone with
     write access approves them, and approving runs whatever the PR changed, workflow files
     included. Read its `.forgejo/` diff first, and keep secrets out of PR-triggered jobs.
-- **Nothing in production may wait on the Mac being on:**
-  - **Deploys:** App Platform builds the app itself from the repository's public clone URL. A
-    Forgejo push webhook calls a small signed endpoint in the app, which asks DigitalOcean to
-    deploy, so a sleeping Mac delays CI, not a release.
-  - **Scheduled jobs** (`db-backup` nightly, social posts on Mondays, the digest on Fridays) run
-    only while the Mac is awake and online, and **a job that never starts never fails**, so
-    `db-backup`'s "backup failing" issue would never open. Each job pings Healthchecks.io when it
-    succeeds, alongside Phase 0.7's heartbeat, and a late ping alerts through hosted ntfy.sh and
-    email. From Phase 1, DigitalOcean's own daily backups mean a missed night costs the second
-    copy, not the only one.
+- **Deploys:** Cloudflare's Git-connected builds support GitHub and GitLab, not Codeberg. Pick
+  one at the time:
+  - **`wrangler deploy` from the Mac runner.** Simplest; a sleeping Mac delays releases, and
+    Phase 0.4's alert says so.
+  - **Codeberg push-mirrors to a read-only GitHub repo** that Cloudflare builds from. Production
+    never waits on the Mac, at the price of GitHub staying in the loop as a mirror.
+- **Scheduled jobs left in CI** (`db-backup` nightly, social posts on Mondays, the digest on
+  Fridays) run only while the Mac is awake, and **a job that never starts never fails**, so
+  `db-backup`'s "backup failing" issue would never open. Each job pings Healthchecks.io when it
+  succeeds, alongside Phase 0.4's heartbeat.
 - **Port the remaining workflows** to `.forgejo/workflows/` (largely GitHub Actions syntax):
 
   | Workflow | Notes |
   |---|---|
   | `ci.yml` | Straight port |
-  | `supabase-migrate.yml` | Already rewritten for DigitalOcean in Phase 1 |
-  | `db-backup.yml` | Straight port; still valuable as the off-provider copy |
+  | `supabase-migrate.yml`, `db-backup.yml` | Straight ports |
   | `semantic-revert-check.yml` | Its PR comments use the GitHub API; port to Forgejo's |
   | `mac-build.yml` | Host mode on the Mac Studio |
-  | `industry-digest.yml` | Publishes to a branch; `digest-feed.ts` reads `raw.githubusercontent.com`, so switch it to the forge's raw URL and update the SSRF allowlist |
-  | `schedule-social-posts.yml` | Commits back; needs a push token for the forge |
+  | `industry-digest.yml` | Publishes to a branch; `digest-feed.ts` reads `raw.githubusercontent.com`, so switch it to Codeberg's raw URL and update the SSRF allowlist |
+  | `schedule-social-posts.yml` | Commits back; needs a Codeberg push token |
   | `weekly-analytics-recap.yml` | Paused; port or delete |
 
-- **Lost GitHub integrations:**
-  - GitGuardian → `gitleaks` in CI.
-  - The automated PR review bot → port it or drop it.
-  - Supabase's and Netlify's GitHub apps are already gone by then.
+- **Lost GitHub integrations:** GitGuardian → `gitleaks` in CI; the automated PR review bot →
+  port it or drop it.
 - **Links that point at GitHub:**
   - "Codebase" and "Roadmap" in the server-rendered pages' footers (`artist-page-static`,
     `u-handle`, `release-page`), and the Press page's "Open source on GitHub".
-  - Mac DMG downloads in `api/shared/desktop-release.ts`: move them to the forge's releases or R2.
+  - Mac DMG downloads in `api/shared/desktop-release.ts`: move them to Codeberg releases or R2.
     Sparkle's appcast is already served from `unstream.stream`.
-- **Linear → Forgejo issues:** a one-off script that reads Linear's export and creates issues,
-  labels and milestones on the new forge, plus a `UNS-n → #m` mapping file in `docs/` so old commit
-  references still resolve.
-- **Working with agents afterwards:** Claude Code's cloud sessions and its GitHub PR tooling
-  are GitHub-only. Work moves to Claude Code on the Mac, which works with any git remote; agents
-  push branches and open PRs through Forgejo's API or CLI. Optionally keep GitHub as a read-only
-  mirror for tools that need it.
-- **Rollback:** GitHub stays in place as a mirror until the new forge has run cleanly for a month.
+- **Linear → Forgejo issues:** a one-off script from Linear's export, plus a `UNS-n → #m` mapping
+  file in `docs/` so old commit references still resolve.
+- **Working with agents afterwards:** Claude Code's cloud sessions and its GitHub PR tooling are
+  GitHub-only. Work moves to Claude Code on the Mac, which works with any git remote.
+- **Rollback:** GitHub stays as a mirror until Codeberg has run cleanly for a month.
 
-### Phase 7 (optional): Sentry → GlitchTip
+### Phase 5 (optional): Sentry → GlitchTip
 
-GlitchTip is open source and accepts the Sentry SDK, so the change is the DSN. Hosted GlitchTip is
-run by a small company; self-hosting needs Postgres plus Valkey and isn't worth it at this size.
-Decide when the rest is done.
+GlitchTip is open source and accepts the Sentry SDK, so the change is the DSN. Decide when the
+rest is done.
+
+## Later: the database
+
+Supabase stays for data and sign-in. When it's worth revisiting:
+- **The outages** come from Supabase's own services exceeding the free Nano instance's memory
+  (disk I/O investigation, Round 7), not from Unstream's load. **Supabase Pro ($25/month) is the
+  fix**; upgrade when the outages cost more than that.
+- **If the database ever leaves Supabase,** the options as of 2026-10-18:
+  - **Managed Postgres elsewhere** (DigitalOcean, Scaleway, OVH). `digitalocean-database-plan.md`
+    is fully planned. From Workers it means either PostgREST in a container somewhere, or
+    rewriting the 373 query call sites as SQL through Hyperdrive. Sign-in needs a new home
+    either way.
+  - **Cloudflare D1** (SQLite). All-Cloudflare, but the biggest rewrite: every query, the 20
+    Postgres functions, the trigram index and pg_cron jobs, the migrations, plus replacing
+    Supabase Auth (e.g. Better Auth in Workers) across the web, Mac and extension clients.
+- **A self-hosted Unstream** would need the same database portability. Plain Postgres is the
+  easiest thing to self-host, which argues for the managed-Postgres route over D1 if it comes to
+  that.
 
 ## How CLAUDE.md changes, by phase
 
 | Phase | Rule | Change |
 |---|---|---|
-| 0 | "Plan: stay on the free plan…" | Replaced with a pointer to this plan |
-| 0 | Social posts: the `/api/social-card` renderer | Rewritten for cards drawn by the generator and hosted on R2 |
-| 1 | Database / migrations | Rewritten for DigitalOcean |
-| 2 | Lambda-freeze rules, `withSentry` rationale | Relaxed |
-| 2 | `netlify dev` traps | Rewritten for the new local dev |
-| 2 | Deploy-preview rules | Rewritten for the new local dev |
-| 2 | "Edge functions" section | Becomes "server-rendered pages" |
-| 2 | `netlify.toml` references | Point at the server's route table |
-| 3 | "Redis is metered" | Deleted |
-| 3 | One-instance assumption | Added |
-| 4 | Auth section | Rewritten |
-| 4 | "`REVOKE` … on Supabase" | Kept: Supabase-specific default privileges no longer apply on DigitalOcean, but the habit is harmless |
-| 6 | Deployment and GitHub Actions sections | Rewritten for Forgejo and the Mac Studio runner |
+| 0 | Database plan line | Points at this plan; the database stays on Supabase |
+| 0 | Social posts: the `/api/social-card` renderer | Cards drawn by the generator, hosted on R2 (#649) |
+| 1 | Architecture, Repository structure, Commands | Workers instead of Netlify Functions and Edge Functions |
+| 1 | Lambda-freeze rules, `withSentry` rationale, function-to-function calls | Rewritten for `waitUntil` and Queues |
+| 1 | Local dev section, deploy-preview rules | Rewritten for `wrangler dev` and version previews |
+| 1 | "Edge functions" section, `netlify.toml` references | Point at the Worker's routes |
+| 1 | Deployment, `netlify-ignore-*.sh` | Rewritten for Workers deploys |
+| 2 | "Redis is metered" | Becomes "KV writes are metered" |
+| 4 | Deployment and GitHub Actions sections | Rewritten for Codeberg and the Mac Studio runner |
 
 Each phase's PR updates CLAUDE.md in the same change, and `docs/engineering-history.md` gets an
 entry for anything learned the hard way.
@@ -397,9 +308,6 @@ Each phase is one or more agent sessions. To start one, paste:
 
 ```
 Read docs/specs/infrastructure-independence-plan.md and start Phase <N>.
-Re-check prices and anything the phase says to re-check, report what changed,
-then do the agent steps and tell me exactly what I need to do myself.
+Re-check prices and limits it names, report what changed, then do the agent
+steps and tell me exactly what I need to do myself.
 ```
-
-For Phase 1, the database plan's own "Picking this back up" applies, with the four corrections
-under Phase 1 above.
