@@ -347,6 +347,22 @@ previously found 20 is a parser break or a bot challenge, not an artist deleting
 catalog — `recordCatalogOutcome` reports exactly that transition to Sentry, since it is
 otherwise recorded as a perfectly ordinary success.
 
+### The six days nothing was catalogued (2026-10-12 → 2026-10-18)
+
+**Rule it produced:** function-to-function calls go to `internalFunctionOrigin()` (the site's
+`netlify.app` host), never `URL`, and only a 202 counts as delivered.
+
+Cloudflare's free-plan Bot Fight Mode was switched on for unstream.stream on 2026-10-12. It
+has no exceptions and runs before any skip rule, so it challenged the GitHub runner calling
+the sweep (#606) — and, unnoticed, every Lambda calling `catalog-artist-background` at `URL`,
+which is unstream.stream. `requestArtistCatalog` counted any response that didn't throw as
+delivered, so the challenge's 403 read as success. The sweep logged `requested: 25` every run
+while nothing ran: its `inCooldown` drained from 171 (10-08) to 65 (10-17) as cooldowns
+expired unrenewed, and `stalestAttemptedAt` stayed frozen at 10-05. Saves, the artist's own
+button and collection imports were no-ops for the same reason. Found while building #641;
+fixed by turning Bot Fight Mode off, then by addressing the netlify.app host and checking for
+the 202, so a Cloudflare setting can't do it again and a refusal fails the sweep loudly.
+
 ---
 
 ## Local dev: what the silent-failure traps cost

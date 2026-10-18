@@ -188,6 +188,26 @@ describe('requestArtistCatalog only runs where cataloging is enabled', () => {
     });
   });
 
+  // unstream.stream sits behind Cloudflare, whose bot protection answered these calls with a
+  // challenge for six days in October 2026. The netlify.app host is served by Netlify directly.
+  it('dispatches to the site\'s netlify.app host, not the Cloudflare-fronted URL', async () => {
+    process.env.SITE_NAME = 'unstream';
+    mocks.fetch.mockResolvedValue({ status: 202, ok: true } as Response);
+
+    await expect(requestArtistCatalog([ARTIST], 'saved')).resolves.toBe(true);
+
+    expect(String(mocks.fetch.mock.calls[0][0])).toBe(
+      'https://unstream.netlify.app/.netlify/functions/catalog-artist-background'
+    );
+  });
+
+  // A bot challenge is a 403 that doesn't throw. Counting it as delivered is how the sweep
+  // reported `requested: 25` every run while cataloguing nothing.
+  it.each([403, 404, 500])('reports a %i answer as not requested', async status => {
+    mocks.fetch.mockResolvedValue({ status, ok: false } as Response);
+    await expect(requestArtistCatalog([ARTIST], 'scheduled')).resolves.toBe(false);
+  });
+
   it('deduplicates ids and never throws when the handshake fails', async () => {
     mocks.fetch.mockRejectedValue(new Error('network down'));
 
