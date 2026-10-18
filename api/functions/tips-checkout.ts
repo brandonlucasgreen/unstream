@@ -97,7 +97,7 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
   const cached = await cacheGet<TipPagePayload>(`tipspg:${stripeMode()}:${slug}`);
   if (cached) {
     // The flag still applies live: a kill switch can't sit behind a 60s cache.
-    return respond(200, tipsFlagOn ? cached : { ...cached, takingTips: false });
+    return respond(200, tipsFlagOn ? cached : { artist: cached.artist, takingTips: false });
   }
 
   const eligibility = await tipEligibility(slug);
