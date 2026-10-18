@@ -333,7 +333,7 @@ export default async function handler(request: Request, context: Context) {
         <div class="source-head">
           <span style="font-size:18px">${info?.icon || '🔗'}</span>
           <span style="flex:1;font-weight:600">${escapeHtml(name)}</span>
-          ${payoutPercent ? `<span style="font-size:13px;color:var(--muted)">${escapeHtml(payoutPercent)} to artist</span>` : ''}
+          ${payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${escapeHtml(payoutPercent)} to artist</span>` : ''}
           ${isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : ''}
         </div>
         ${offersHtml}${pendingHtml}

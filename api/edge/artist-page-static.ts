@@ -216,7 +216,7 @@ function renderClaimedSections({
     const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
     const isBCFriday = p.platform === 'bandcamp' && isBandcampFriday();
     const payout = isBCFriday ? '~97%' : info?.payoutPercent;
-    const payoutLabel = payout ? `<span style="font-size:13px;color:var(--muted)">${payout} to artist</span>` : '';
+    const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
     const bcFridayLabel = isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
     return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
       <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
@@ -673,7 +673,7 @@ export default async function handler(request: Request, context: Context) {
       const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
       const isBCFriday = p.platform === 'bandcamp' && bcFriday;
       const payout = isBCFriday ? '~97%' : info?.payoutPercent;
-      const payoutLabel = payout ? `<span style="font-size:13px;color:var(--muted)">${payout} to artist</span>` : '';
+      const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
       const bcFridayLabel = isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
       return `${divider}<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
         <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>

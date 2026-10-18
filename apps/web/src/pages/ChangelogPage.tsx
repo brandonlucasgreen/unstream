@@ -108,7 +108,7 @@ export function ChangelogPage() {
                         id={entry.id}
                         className="bg-surface-secondary rounded-xl p-5 border border-border scroll-mt-24"
                       >
-                        <h2 className="font-display text-base font-semibold text-text-primary mb-1">
+                        <h2 className="font-display text-xl font-semibold text-text-primary mb-1">
                           {entry.title}
                         </h2>
                         <p className="text-text-secondary text-sm">{entry.description}</p>
