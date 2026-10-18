@@ -314,6 +314,9 @@ function buildSafeEmbed(featuredEmbed: string | null): string {
   const style = styleMatch ? safeEmbedStyle(styleMatch[1]) : null;
   if (style) iframeAttrs += ` style="${escapeHtml(style)}"`;
   if (/\ballowfullscreen\b/i.test(featuredEmbed)) iframeAttrs += ' allowfullscreen';
+  // title is required for axe frame-title (wcag2a); the safe rebuild drops
+  // everything but the attrs above, so supply our own.
+  iframeAttrs += ' title="Featured release player"';
 
   return `<div style="border-radius:12px;overflow:hidden"><iframe ${iframeAttrs}></iframe></div>`;
 }

@@ -139,6 +139,20 @@ function App() {
       script.setAttribute('data-letterbirduser', 'hi-d2078591');
       el.appendChild(script);
     }
+    // Letterbird's embed injects its own iframe with no title attribute (axe: frame-title).
+    // We can't set it at creation — it's their script — so title it on arrival.
+    // Same patch as ContactPage.tsx; the embed renders there too via its own mount.
+    if (el) {
+      const titleFrames = (): void => {
+        el.querySelectorAll('iframe:not([title])').forEach((f: Element) =>
+          f.setAttribute('title', 'Contact form')
+        );
+      };
+      titleFrames();
+      const obs = new MutationObserver(titleFrames);
+      obs.observe(el, { childList: true, subtree: true });
+      return () => obs.disconnect();
+    }
   }, []);
 
   const handleSearch = useCallback(async (query: string) => {
