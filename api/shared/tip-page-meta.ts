@@ -29,7 +29,10 @@ export interface TipPageMetaInput {
   slug: string;
   /** Raw artist name from the database (untrusted here — escaped before it reaches any attribute). */
   artistName: string;
-  /** Raw photo URL, or '' / null when the artist has none (card renders without an image). */
+  /**
+   * The artist's photo, or null when they have none — the card renders without image tags
+   * either way. '' is accepted intentionally: the read normalizes a missing DB image to ''.
+   */
   imageUrl: string | null;
 }
 
@@ -80,8 +83,9 @@ export function buildTipPageMetaHtml({ slug, artistName, imageUrl }: TipPageMeta
 }
 
 /**
- * The slug shape checkout accepts (tips-checkout.ts SLUG_REGEX, without its case range because
- * this lookup lowercases first).
+ * The slug shape checkout accepts (tips-checkout.ts SLUG_REGEX, case range dropped: this gate
+ * only ever sees lowercase paths — browsers normalize, and uppercase is rejected here rather
+ * than silently matched, since lookups use the raw path slug with no folding step).
  */
 export function isTipSlug(s: string): boolean {
   return /^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$/.test(s);
