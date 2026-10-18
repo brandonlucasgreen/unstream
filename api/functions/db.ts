@@ -5476,10 +5476,20 @@ async function savedArtistIdsForUser(
 
   // One `.in()` is safe without chunking here in a way it usually isn't: this is one person's
   // saved list, not a table scan. The PostgREST 1,000-row cap is nowhere near.
-  const { data: bySlug, error: slugError } = await client
-    .from('artists')
-    .select('id, slug, name')
-    .in('slug', [...candidates]);
+  //
+  // The alias read is only *used* for slugs the artists read leaves unmatched, but it is asked
+  // for every unresolved slug and sent at the same time, so the dashboard waits on one round trip
+  // here instead of two in a row. The extra rows it can return are a handful of tiny ones.
+  const [{ data: bySlug, error: slugError }, { data: aliased, error: aliasError }] = await Promise.all([
+    client
+      .from('artists')
+      .select('id, slug, name')
+      .in('slug', [...candidates]),
+    client
+      .from('artist_slug_aliases')
+      .select('artist_id, alias')
+      .in('alias', unresolved.map(row => row.slug)),
+  ]);
 
   if (slugError) {
     // Reported rather than swallowed: returning the partial set would look exactly like "those
@@ -5519,13 +5529,14 @@ async function savedArtistIdsForUser(
   }
 
   if (stillUnmatched.length > 0) {
-    const { data: aliased, error: aliasError } = await client
-      .from('artist_slug_aliases')
-      .select('artist_id, alias')
-      .in('alias', stillUnmatched);
-
-    if (aliasError) console.error('[DB] savedArtistIdsForUser alias resolution failed:', aliasError.message);
-    else for (const row of (aliased as { artist_id: string }[]) || []) ids.add(row.artist_id);
+    if (aliasError) {
+      console.error('[DB] savedArtistIdsForUser alias resolution failed:', aliasError.message);
+    } else {
+      const wanted = new Set(stillUnmatched);
+      for (const row of (aliased as { artist_id: string; alias: string }[]) || []) {
+        if (wanted.has(row.alias)) ids.add(row.artist_id);
+      }
+    }
   }
 
   return [...ids];
@@ -5533,6 +5544,9 @@ async function savedArtistIdsForUser(
 
 /** Slugs per artists lookup — keeps each response far below PostgREST's 1,000-row cap. */
 const ARTIST_SLUG_LOOKUP_CHUNK = 100;
+
+/** Slug lookups in flight at once: 500 collection artists in one round trip, and no more. */
+const CONCURRENT_SLUG_LOOKUPS = 5;
 
 /**
  * The artists a fan owns a record by, resolved to artist ids.
@@ -5575,18 +5589,31 @@ async function collectionArtistIdsForUser(
   if (slugs.size === 0) return [...ids];
 
   // Chunked, unlike the saved-artist lookup above: a collection is a whole record library, not
-  // a shortlist, so this one really can approach PostgREST's 1,000-row cap.
+  // a shortlist, so this one really can approach PostgREST's 1,000-row cap. Up to
+  // CONCURRENT_SLUG_LOOKUPS chunks are sent at once rather than one after another, so a typical
+  // collection costs the dashboard one round trip here instead of one per hundred artists, while
+  // a huge one can't open dozens of simultaneous requests against the small database. Results are
+  // still read in order and stop at the first failed chunk, as the sequential loop did.
   const pending = [...slugs];
+  const chunks: string[][] = [];
   for (let i = 0; i < pending.length; i += ARTIST_SLUG_LOOKUP_CHUNK) {
-    const { data, error } = await client
-      .from('artists')
-      .select('id')
-      .in('slug', pending.slice(i, i + ARTIST_SLUG_LOOKUP_CHUNK));
-    if (error) {
-      console.error('[DB] collectionArtistIdsForUser slug resolution failed:', error.message);
-      break;
+    chunks.push(pending.slice(i, i + ARTIST_SLUG_LOOKUP_CHUNK));
+  }
+  let failed = false;
+  for (let i = 0; i < chunks.length && !failed; i += CONCURRENT_SLUG_LOOKUPS) {
+    const lookups = await Promise.all(
+      chunks.slice(i, i + CONCURRENT_SLUG_LOOKUPS).map(chunk =>
+        client.from('artists').select('id').in('slug', chunk)
+      )
+    );
+    for (const { data, error } of lookups) {
+      if (error) {
+        console.error('[DB] collectionArtistIdsForUser slug resolution failed:', error.message);
+        failed = true;
+        break;
+      }
+      for (const row of (data as { id: string }[]) || []) ids.add(row.id);
     }
-    for (const row of (data as { id: string }[]) || []) ids.add(row.id);
   }
 
   return [...ids];
@@ -5611,9 +5638,14 @@ export async function getFeedReleasesForUser(userId: string, now: Date = new Dat
     // 2026-08-16). The Bandcamp import used to conscript matched artists into saved_artists,
     // which is what made their releases show up at all; this union is what keeps that promise
     // now that it doesn't.
-    const savedIds = await savedArtistIdsForUser(client, userId);
+    //
+    // The two lists don't depend on each other, so they resolve at the same time: the dashboard
+    // waits for the slower of the two chains, not both end to end.
+    const [savedIds, collectionIds] = await Promise.all([
+      savedArtistIdsForUser(client, userId),
+      collectionArtistIdsForUser(client, userId),
+    ]);
     if (savedIds === null) return [];
-    const collectionIds = await collectionArtistIdsForUser(client, userId);
     const artistIds = [...new Set([...savedIds, ...collectionIds])];
     if (artistIds.length === 0) return [];
 
