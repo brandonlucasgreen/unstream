@@ -21,9 +21,10 @@
 import { getClient } from './db';
 import { authenticateBearerFast, buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
-import { isStripeRejection, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
+import { isStripeRejection, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { getGoals, tipEligibility } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
+import { cacheGet, cacheSet } from './cache';
 import { respond, siteUrl } from './tips-http';
 import {
   ONE_OFF_MAX_CENTS,
@@ -87,27 +88,49 @@ async function handleRequest(event: HandlerEvent) {
 
 async function readTipPage(slug: string, tipsFlagOn: boolean) {
   if (!SLUG_REGEX.test(slug)) return respond(400, { error: 'Invalid artist' });
-  const eligibility = await tipEligibility(slug);
-  if (!eligibility.ok && !eligibility.artist) return respond(eligibility.status, { error: eligibility.reason });
 
-  const artist = eligibility.artist!;
-  // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
-  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. The one
-  // artist read stays — the response body needs it; what's skipped is every tips-only read
-  // (fee/goals) and the Stripe call.
-  if (!tipsFlagOn || !eligibility.ok) {
-    return respond(200, { artist, takingTips: false });
+  // The whole GET answer — eligibility verdict included — rides one cache entry. The reads it
+  // replaces (2 serial eligibility reads, then goals) are exactly the latency the window-open
+  // moment feels, and a fan flow resolves the artist once before Stripe takes over, so none of
+  // them is needed again while the entry is fresh. Flag changes still apply immediately (checked
+  // live before this call); artist-side edits (fee, goals, switch) propagate within the TTL.
+  const cached = await cacheGet<TipPagePayload>(`tipspg:${stripeMode()}:${slug}`);
+  if (cached) {
+    // The flag still applies live: a kill switch can't sit behind a 60s cache.
+    return respond(200, tipsFlagOn ? cached : { ...cached, takingTips: false });
   }
-  const client = getClient()!;
-  return respond(200, {
+
+  const eligibility = await tipEligibility(slug);
+  const artist = eligibility.artist;
+  // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
+  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets.
+  if (!artist || !eligibility.ok || !tipsFlagOn) {
+    const body: TipPagePayload = { artist: artist ?? { id: '', slug, name: slug, imageUrl: null }, takingTips: false };
+    // Short window: an artist flipping their switch ON sees it within 10s.
+    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, 10);
+    return respond(200, body);
+  }
+  const body: TipPagePayload = {
     artist,
     takingTips: true,
     feeBasisPoints: effectiveFeeBasisPoints(eligibility.account),
-    goals: await getGoals(client, artist.id, { openOnly: true }),
+    goals: await getGoals(getClient()!, artist.id, { openOnly: true }),
     presetsCents: ONE_OFF_PRESETS_CENTS,
     minCents: ONE_OFF_MIN_CENTS,
     maxCents: ONE_OFF_MAX_CENTS,
-  });
+  };
+  await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, 60);
+  return respond(200, body);
+}
+
+interface TipPagePayload {
+  artist: { id: string; slug: string; name: string; imageUrl: string | null };
+  takingTips: boolean;
+  feeBasisPoints?: number;
+  goals?: Awaited<ReturnType<typeof getGoals>>;
+  presetsCents?: typeof ONE_OFF_PRESETS_CENTS;
+  minCents?: number;
+  maxCents?: number;
 }
 
 async function createCheckout(event: HandlerEvent, tipsFlagOn: boolean) {

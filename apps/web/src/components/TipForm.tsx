@@ -13,7 +13,7 @@ import { TIP_FAQ_ANCHOR } from '../data/faq';
 // the tip window on search results and the artist page. The server re-checks everything and creates
 // the payment, and Stripe's own page takes the card — no Stripe.js, no card fields here.
 
-export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initialGoalId?: string }) {
+export function TipForm({ data, hydrated = true, initialGoalId = '' }: { data: TipPageData; /** false while the page data is still loading: the bundled constants render, but nothing that depends on the server (fee, goals, the real artist name) asserts anything. */ hydrated?: boolean; initialGoalId?: string }) {
   const { session } = useAuth();
   // Only open goals are offered, so a `?goal=` that isn't one of them (closed, mistyped, another
   // artist's) starts with no goal rather than a selection the fan can't see.
@@ -142,7 +142,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
         <span>Cover the fees, so {data.artist.name} gets the full amount</span>
       </label>
 
-      {breakdown && (
+      {hydrated && breakdown && (
         <p className="text-sm text-text-secondary">
           You pay <strong className="text-text-primary">{formatUsd(breakdown.grossCents)}</strong>
           {' · '}Stripe keeps ~{formatUsd(breakdown.stripeFeeCents)}
@@ -151,7 +151,7 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
         </p>
       )}
 
-      {breakdown && breakdown.applicationFeeCents === 0 && (
+      {hydrated && breakdown && breakdown.applicationFeeCents === 0 && (
         <p className="text-xs text-text-muted">
           Unstream takes nothing here — {data.artist.name} hasn't chosen to share a fee. It's always shown before you pay.
         </p>
@@ -162,10 +162,10 @@ export function TipForm({ data, initialGoalId = '' }: { data: TipPageData; initi
       <button
         type="button"
         onClick={pay}
-        disabled={!amountValid || submitting}
+        disabled={!hydrated || !amountValid || submitting}
         className="w-full min-h-11 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 disabled:opacity-50"
       >
-        {submitting ? 'Opening Stripe…' : breakdown ? `Pay ${formatUsd(breakdown.grossCents)} with Stripe` : 'Pay with Stripe'}
+        {submitting ? 'Opening Stripe…' : hydrated && breakdown ? `Pay ${formatUsd(breakdown.grossCents)} with Stripe` : 'Pay with Stripe'}
       </button>
       <p className="text-xs text-text-muted text-center">
         {data.artist.name} is the seller and receives the payment directly. Refunds are handled by the artist.{' '}
