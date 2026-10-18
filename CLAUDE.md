@@ -269,6 +269,8 @@ Routed in `netlify.toml`: `/` → `og-metadata`; `/a/{artist}/{release}` → `re
 
 **Who gets which renderer.** `release-page` is pure SSR for everyone. `artist-page-static` and `u-handle` render only for crawlers (`api/shared/crawler-detection.ts`) and hand real browsers to the SPA before any database query, so a direct load and an in-app click produce the same UI.
 
+**Edge responses are cached only on opt-in.** Netlify ignores an edge function's `Netlify-CDN-Cache-Control` unless the function declares `cache = "manual"`; only `release-page` does (2026-10-18). Before that, every release page view queried Supabase despite its hour-long TTL. Don't opt in a function that answers crawlers and browsers differently at one URL: the cache key is the URL, so people would be served the crawler render.
+
 `/artists` is SPA-only after UNS-98; `artist-directory-page` was removed. Edge functions run on Deno and import from URLs (`edge.netlify.com`, `esm.sh`) — they can't import from `api/functions/`, so shared constants get duplicated or pulled from `api/shared/`.
 
 ### Social posts

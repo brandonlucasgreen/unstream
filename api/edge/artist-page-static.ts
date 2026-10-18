@@ -42,6 +42,13 @@ const MAX_RELEASES_SHOWN = 24;
  *
  * Claimed-artist edits don't wait for the TTL: they purge the `artist-${slug}` tag below (see
  * purgeArtistCaches in api/functions/artist-releases.ts and artist-profile.ts).
+ *
+ * **Inert as things stand.** Netlify caches an edge function's response only when the function
+ * opts in (`cache = "manual"`), and this one doesn't, so every crawler hit runs the queries above.
+ * Opting in isn't a one-line fix here the way it was for release-page: this URL answers crawlers
+ * with this render and browsers with the SPA, and the CDN's cache key is the URL, so a cached
+ * crawler render would be served to people. Caching it needs the key to vary on the crawler
+ * decision first.
  */
 const CDN_CACHE_CONTROL = 'public, s-maxage=86400, stale-while-revalidate=86400';
 
