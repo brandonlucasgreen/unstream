@@ -142,6 +142,13 @@
   excludedPattern = "^/u/[^/]+/releases\\.(ics|xml)$"
   function = "u-handle"
 
+# The tip page's artist-specific share card (UNS-225). No exclusion needed: /tip/ has no feed
+# paths. A card serves only social crawlers (see tip-page-meta.ts) — indexing crawlers and real
+# browsers fall through to the SPA there, the same split every other meta edge function uses.
+[[edge_functions]]
+  path = "/tip/*"
+  function = "tip-page-meta"
+
 # Link previews for the hand-written static pages. Their titles are set client-side, so without
 # this an unfurl of /press — the URL that goes in every press pitch — shows the homepage's card.
 [[edge_functions]]

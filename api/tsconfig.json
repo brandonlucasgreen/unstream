@@ -123,6 +123,8 @@
     "functions/__tests__/social-card-slides.test.ts",
     "functions/artist-page.ts",
     "shared/tips.ts",
+    "shared/tip-page-meta.ts",
+    "functions/__tests__/tip-page-meta.test.ts",
     "functions/stripe.ts",
     "functions/tips-db.ts",
     "functions/tips-http.ts",
