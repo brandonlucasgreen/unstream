@@ -95,7 +95,9 @@ export function sanitizeEmbed(raw: string | null, ownedHostnames: string[] = [])
   const attrs = Object.entries(safeAttrs)
     .map(([k, v]) => `${k}="${v.replace(/"/g, '&quot;')}"`)
     .join(' ');
-  const iframe = `<iframe ${attrs}${allowfullscreen ? ' allowfullscreen' : ''} loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
+  // title is required for axe frame-title (wcag2a); the sanitized markup drops
+  // everything not whitelisted above, so supply our own.
+  const iframe = `<iframe ${attrs} title="Featured release player"${allowfullscreen ? ' allowfullscreen' : ''} loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
 
   // Cap at 2000 chars
   return iframe.slice(0, 2000);
