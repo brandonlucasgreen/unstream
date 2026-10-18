@@ -1,3 +1,25 @@
+# Everyone may crawl Unstream, including search engines and the AI assistants that read a page to
+# answer someone's question or cite it (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User,
+# PerplexityBot, Perplexity-User, DuckAssistBot, Meta-WebIndexer, Googlebot, Bingbot, Applebot):
+# being cited sends fans to artists. Those bots are deliberately NOT named below. A bot that
+# matches a named group ignores this one, so listing them would only cut them off from any rule
+# added here later.
 User-agent: *
 Allow: /
+
+# Crawlers and tokens whose purpose is training AI models are refused, in line with the Terms of
+# Use. Training on artists' pages gives nothing back to them. Some operators run separate bots for
+# training and for answers; only the training ones are here.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: cohere-training-data-crawler
+User-agent: AI2Bot
+User-agent: Ai2Bot-Dolma
+Disallow: /
+
 Sitemap: https://unstream.stream/sitemap.xml
