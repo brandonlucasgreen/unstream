@@ -333,8 +333,8 @@ export default async function handler(request: Request, context: Context) {
         <div class="source-head">
           <span style="font-size:18px">${info?.icon || '🔗'}</span>
           <span style="flex:1;font-weight:600">${escapeHtml(name)}</span>
-          ${payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${escapeHtml(payoutPercent)} to artist</span>` : ''}
-          ${isBCFriday ? '<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : ''}
+          ${payoutPercent ? `<span style="font-size:13px;color:var(--muted)">${escapeHtml(payoutPercent)} to artist</span>` : ''}
+          ${isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : ''}
         </div>
         ${offersHtml}${pendingHtml}
         <a class="buy" href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">Buy on ${escapeHtml(name)} &rarr;</a>
@@ -391,7 +391,7 @@ export default async function handler(request: Request, context: Context) {
 
   <div class="page-content">
     <div class="container" style="padding-top:32px;padding-bottom:32px">
-      <a href="/a/${escapeHtml(encodeURIComponent(artistSlug))}" style="font-size:14px;color:var(--muted);text-decoration:none">&larr; ${artistName}</a>
+      <a href="/a/${escapeHtml(encodeURIComponent(artistSlug))}" style="font-size:16px;color:var(--muted);text-decoration:none">&larr; ${artistName}</a>
 
       <div class="release-head" style="margin-top:20px">
         <!-- Artwork is hotlinked from the platform's CDN, so a dead or blocked image is a
@@ -402,46 +402,46 @@ export default async function handler(request: Request, context: Context) {
              <div class="release-art-fallback" style="display:none">💿</div>`
           : `<div class="release-art-fallback">💿</div>`}
         <div>
-          ${typeLabel ? `<div style="font-size:11px;letter-spacing:0.08em;color:var(--muted)">${escapeHtml(typeLabel)}</div>` : ''}
+          ${typeLabel ? `<div style="font-size:12px;letter-spacing:0.08em;color:var(--muted)">${escapeHtml(typeLabel)}</div>` : ''}
           <h1 style="font-size:32px;font-weight:700;line-height:1.1;margin-top:4px">${title}</h1>
-          <div style="margin-top:6px;font-size:15px;color:var(--muted)">${artistName}</div>
-          ${statusText ? `<div style="margin-top:10px;font-size:14px;color:var(--muted)">${escapeHtml(statusText)}</div>` : ''}
+          <div style="margin-top:6px;font-size:16px;color:var(--muted)">${artistName}</div>
+          ${statusText ? `<div style="margin-top:10px;font-size:16px;color:var(--muted)">${escapeHtml(statusText)}</div>` : ''}
         </div>
       </div>
     </div>
 
     <div class="container" style="padding-bottom:32px">
-      <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Where to buy</h2>
-      ${sourcesHtml ? `<div class="sources-grid">${sourcesHtml}</div>` : '<p style="font-size:14px;color:var(--muted)">We haven\'t found anywhere to buy this yet.</p>'}
+      <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Where to buy</h2>
+      ${sourcesHtml ? `<div class="sources-grid">${sourcesHtml}</div>` : '<p style="font-size:16px;color:var(--muted)">We haven\'t found anywhere to buy this yet.</p>'}
       ${oldestCapture ? `<p class="note">Prices last checked ${escapeHtml(relativeDays(oldestCapture))}. Stock and prices may change. Payout figures are estimates based on each platform's published rates.</p>` : ''}
     </div>
   </div>
 
   <div style="padding:24px 16px;text-align:center">
     <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
-    <p style="font-size:14px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
+    <p style="font-size:16px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
   </div>
 
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--muted)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/support" style="color:var(--muted);text-decoration:none">Donate</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/faq" style="color:var(--muted);text-decoration:none">FAQ</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>

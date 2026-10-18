@@ -209,7 +209,7 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
       {/* An upcoming release is the most interesting row here and the easiest to miss at the top
           of a list that otherwise reads as history. */}
       {release.status === 'announced' && (
-        <span className="text-[10px] font-bold uppercase tracking-wide text-accent-primary shrink-0">
+        <span className="text-xs font-bold uppercase tracking-wide text-accent-primary shrink-0">
           Coming
         </span>
       )}

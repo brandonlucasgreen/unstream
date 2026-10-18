@@ -121,7 +121,7 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
   const platformsHtml = orderedSourcePlatforms(sources)
     .map(p => {
       const info = PLATFORM_INFO[p];
-      return `<span title="${escapeHtml(info?.name || p)}" style="font-size:12px">${info?.icon || '🔗'}</span>`;
+      return `<span title="${escapeHtml(info?.name || p)}" style="font-size:13px">${info?.icon || '🔗'}</span>`;
     })
     .join('');
 
@@ -132,14 +132,14 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
   // An upcoming release is the most interesting row in the list and the easiest to miss when
   // it's sorted to the top of a chronology that otherwise reads as history.
   const upcoming = release.status === 'announced'
-    ? '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent);flex-shrink:0">Coming</span>'
+    ? '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--accent);flex-shrink:0">Coming</span>'
     : '';
 
   return `<a href="${href}" style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:var(--text)">
     ${art}
     <span style="flex:1;min-width:0">
       <span style="display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${title}</span>
-      ${meta ? `<span style="display:block;font-size:12px;color:var(--muted)">${escapeHtml(meta)}</span>` : ''}
+      ${meta ? `<span style="display:block;font-size:13px;color:var(--muted)">${escapeHtml(meta)}</span>` : ''}
       ${platformsHtml ? `<span style="display:flex;gap:4px;margin-top:2px">${platformsHtml}</span>` : ''}
     </span>
     ${upcoming}
@@ -216,8 +216,8 @@ function renderClaimedSections({
     const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
     const isBCFriday = p.platform === 'bandcamp' && isBandcampFriday();
     const payout = isBCFriday ? '~97%' : info?.payoutPercent;
-    const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
-    const bcFridayLabel = isBCFriday ? '<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
+    const payoutLabel = payout ? `<span style="font-size:13px;color:var(--muted)">${payout} to artist</span>` : '';
+    const bcFridayLabel = isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
     return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
       <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
       <span style="flex:1;font-weight:500">${linkName}</span>
@@ -254,7 +254,7 @@ function renderClaimedSections({
         if (!tipSectionHtml && !linkHtml) return '';
         return `
         <div style="margin-bottom:24px">
-          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Patronage</h2>
+          <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Patronage</h2>
           ${tipSectionHtml ? tipSectionHtml : ''}
           ${linkHtml}
         </div>`;
@@ -262,13 +262,13 @@ function renderClaimedSections({
       case 'bio':
         return bioHtml ? `
         <div style="margin-bottom:24px">
-          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Bio</h2>
+          <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Bio</h2>
           ${bioHtml}
         </div>` : '';
       case 'featured':
         return featuredEmbedHtml ? `
         <div style="margin-bottom:24px">
-          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Featured Release</h2>
+          <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Featured Release</h2>
           ${featuredEmbedHtml}
         </div>` : '';
       default: {
@@ -277,7 +277,7 @@ function renderClaimedSections({
         if (!linkHtml) return '';
         return `
         <div style="margin-bottom:24px">
-          <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">${SECTION_HEADINGS[key]}</h2>
+          <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">${SECTION_HEADINGS[key]}</h2>
           ${linkHtml}
         </div>`;
       }
@@ -300,7 +300,7 @@ function buildSafeEmbed(featuredEmbed: string | null): string {
   const src = iframeMatch[1];
   if (!isEmbedDomainAllowed(src)) {
     // Not in allowlist — render a safe placeholder instead
-    return '<div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);padding:32px 16px;text-align:center;color:var(--muted);font-size:14px;background:var(--bg2)">Featured Release</div>';
+    return '<div style="border-radius:12px;overflow:hidden;border:1px solid var(--border);padding:32px 16px;text-align:center;color:var(--muted);font-size:16px;background:var(--bg2)">Featured Release</div>';
   }
 
   // Extract dimensions if present
@@ -651,12 +651,12 @@ export default async function handler(request: Request, context: Context) {
     // has saved or searched, because cataloguing is demand-driven.
     const releasesHtml = releases.length === 0 ? '' : `
       <div style="margin-top:24px">
-        <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Releases</h2>
+        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Releases</h2>
         <div style="display:grid;gap:8px">
           ${releases.map((r: ReleaseRow) => renderReleaseRow(r, slug)).join('')}
         </div>
         ${releaseCount > releases.length
-          ? `<p style="font-size:13px;color:var(--muted);margin-top:10px">and ${releaseCount - releases.length} more</p>`
+          ? `<p style="font-size:14px;color:var(--muted);margin-top:10px">and ${releaseCount - releases.length} more</p>`
           : ''}
       </div>
     `;
@@ -673,8 +673,8 @@ export default async function handler(request: Request, context: Context) {
       const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
       const isBCFriday = p.platform === 'bandcamp' && bcFriday;
       const payout = isBCFriday ? '~97%' : info?.payoutPercent;
-      const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
-      const bcFridayLabel = isBCFriday ? '<span style="font-size:11px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
+      const payoutLabel = payout ? `<span style="font-size:13px;color:var(--muted)">${payout} to artist</span>` : '';
+      const bcFridayLabel = isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
       return `${divider}<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
         <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
         <span style="flex:1;font-weight:500">${linkName}</span>
@@ -684,13 +684,13 @@ export default async function handler(request: Request, context: Context) {
 
     const socialLinksHtml = socialPlatforms.length > 0 ? `
       <div style="margin-top:24px">
-        <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Follow</h2>
+        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Follow</h2>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           ${socialPlatforms.map((p: { platform: string; url: string }) => {
             const info = PLATFORM_INFO[p.platform];
             if (!info) return '';
             const icon = SOCIAL_ICONS[p.platform] || info.icon;
-            return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:14px">${icon} ${info.name}</a>`;
+            return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:16px">${icon} ${info.name}</a>`;
           }).join('')}
         </div>
       </div>
@@ -702,7 +702,7 @@ export default async function handler(request: Request, context: Context) {
       ? `${artist.city}, ${locationRegion}`
       : artist.city || locationRegion || '';
     const locationHtml = locationText
-      ? `<div style="margin-top:6px;color:var(--muted);font-size:14px">${escapeHtml(locationText)}</div>`
+      ? `<div style="margin-top:6px;color:var(--muted);font-size:16px">${escapeHtml(locationText)}</div>`
       : '';
 
     // JSON-LD structured data
@@ -742,7 +742,7 @@ export default async function handler(request: Request, context: Context) {
         isMainPlatform,
         tipSectionHtml,
         featuredEmbedHtml,
-        bioHtml: bio ? `<p style="color:var(--muted);font-size:14px;margin-bottom:24px;text-align:left">${bio}</p>` : '',
+        bioHtml: bio ? `<p style="color:var(--muted);font-size:16px;margin-bottom:24px;text-align:left">${bio}</p>` : '',
       });
 
       const html = `<!DOCTYPE html>
@@ -789,7 +789,7 @@ export default async function handler(request: Request, context: Context) {
       </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <h1 style="font-size:28px;font-weight:700">${artistName}</h1>
-        <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(255,107,53,0.15);color:var(--accent)">
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:13px;font-weight:500;background:rgba(255,107,53,0.15);color:var(--accent)">
           <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
           Verified
         </span>
@@ -805,29 +805,29 @@ export default async function handler(request: Request, context: Context) {
 
   <div style="padding:24px 16px;text-align:center">
     <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
-    <p style="font-size:14px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
+    <p style="font-size:16px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
   </div>
 
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--muted)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/users/brandonlucasgreen/projects/4" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>
@@ -896,13 +896,13 @@ export default async function handler(request: Request, context: Context) {
 
     <div class="container" style="padding-bottom:32px">
       ${mainPlatforms.length > 0 ? `
-        <h2 style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
+        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
         <div style="display:grid;gap:8px">${platformLinksHtml}</div>
       ` : ''}
       ${socialLinksHtml}
       ${releasesHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">
-        <p style="font-size:14px;color:var(--muted)">Are you ${artistName}?</p>
+        <p style="font-size:16px;color:var(--muted)">Are you ${artistName}?</p>
         <a href="/claim?slug=${escapeHtml(slug)}" class="claim-cta">Claim this profile</a>
       </div>
     </div>
@@ -910,29 +910,29 @@ export default async function handler(request: Request, context: Context) {
 
   <div style="padding:24px 16px;text-align:center">
     <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
-    <p style="font-size:14px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
+    <p style="font-size:16px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
   </div>
 
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--muted)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/users/brandonlucasgreen/projects/4" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Roadmap</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>

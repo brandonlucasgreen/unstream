@@ -73,7 +73,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
         {label}
         {hasPayoutPercent ? (
           <span
-            className={`payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
+            className={`payout-badge relative text-xs font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
             style={{
               backgroundColor: isBCFriday ? '#1da0c320' : `${source.color}30`,
             }}
@@ -99,7 +99,7 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
           <span
             role="link"
             tabIndex={0}
-            className="ai-policy-badge text-[10px] font-medium px-1 py-0.5 rounded inline-flex items-center gap-0.5 cursor-pointer"
+            className="ai-policy-badge text-xs font-medium px-1 py-0.5 rounded inline-flex items-center gap-0.5 cursor-pointer"
             style={{ backgroundColor: source.aiPolicy === 'formal' ? '#22c55e30' : '#f59e0b30' }}
             onClick={(e) => {
               e.preventDefault();

@@ -71,7 +71,7 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
           </span>
         </div>
         <div className="flex items-center justify-center gap-2">
-          <h1 className="font-display text-[28px] font-bold text-text-primary">
+          <h1 className="font-display text-2xl font-bold text-text-primary">
             {artist.name}
           </h1>
           {onSave && (
@@ -104,7 +104,7 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
       {/* Platform Links */}
       {links.length > 0 && (
         <div className="pb-8">
-          <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
             Support directly
           </h2>
           {/* Same platform pills as the search results and claimed artist pages. */}
@@ -138,7 +138,7 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
       {/* Social Links */}
       {socialLinks.length > 0 && (
         <div className="pb-8">
-          <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
             Follow
           </h2>
           <div className="flex flex-wrap gap-2">
