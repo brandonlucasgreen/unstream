@@ -266,43 +266,42 @@ export async function getArtistProfileBySlug(slug: string): Promise<ArtistProfil
   if (!client) return { bundle: null, failed: true };
 
   try {
-    // Find the artist row first. maybeSingle() rather than single(): single() reports "0 rows" as
-    // an error, which is what made a genuine absence indistinguishable from a real failure.
-    const { data: artist, error: artistError } = await client
+    // The artist row, its profile and its links in ONE round trip, embedded. This used to be two
+    // sequential trips (the row, then profile and links in parallel), on the critical path of
+    // every uncached artist page. `artist_profiles.artist_id` is UNIQUE, so PostgREST embeds the
+    // profile as an object (or null), never an array.
+    //
+    // maybeSingle() rather than single(): single() reports "0 rows" as an error, which is what made
+    // a genuine absence indistinguishable from a real failure.
+    const { data, error } = await client
       .from('artists')
-      .select('*')
+      .select(
+        '*, artist_profiles ( bio, custom_image_url, featured_embed, verified_at, link_dividers, section_order ),' +
+        ' artist_links ( * )'
+      )
       .eq('slug', slug)
+      .order('display_order', { referencedTable: 'artist_links', ascending: true, nullsFirst: false })
       .maybeSingle();
 
-    if (artistError) return { bundle: null, failed: true };
-    if (!artist) return { bundle: null, failed: false };
+    if (error) return { bundle: null, failed: true };
+    if (!data) return { bundle: null, failed: false };
 
     // Deliberately no `match_confidence === 'claimed'` filter. Unclaimed artists have a real row
     // and real links, and /artist/:slug renders them as the quiet card — the same page the
     // artist-page-static edge function serves crawlers, which has never had this filter either.
     // Gating here 404'd every unclaimed artist page for anyone running JS (see #369).
-    const artistRow = artist as ArtistRow;
-    const artistId = artistRow.id;
-
-    // Fetch profile and links in parallel
-    const [profileResult, linksResult] = await Promise.all([
-      client
-        .from('artist_profiles')
-        .select('bio, custom_image_url, featured_embed, verified_at, link_dividers, section_order')
-        .eq('artist_id', artistId)
-        .single(),
-      client
-        .from('artist_links')
-        .select('*')
-        .eq('artist_id', artistId)
-        .order('display_order', { ascending: true, nullsFirst: false }),
-    ]);
+    //
+    // The embeds are split back off so `artist` stays the plain row every caller expects.
+    const { artist_profiles: profile, artist_links: links, ...artistRow } = data as unknown as ArtistRow & {
+      artist_profiles: ArtistProfileRow | null;
+      artist_links: LinkRow[] | null;
+    };
 
     return {
       bundle: {
         artist: artistRow,
-        profile: (profileResult.data as ArtistProfileRow | null) ?? null,
-        links: (linksResult.data as LinkRow[]) || [],
+        profile: profile ?? null,
+        links: links || [],
       },
       failed: false,
     };
@@ -4851,18 +4850,41 @@ export async function getArtistReleases(
   artistId: string,
   limit: number
 ): Promise<{ releases: ArtistPageRelease[]; total: number }> {
+  return readArtistPageReleases({ artistId }, limit);
+}
+
+/**
+ * The same releases, found by the artist's slug instead of their id.
+ *
+ * This is what lets /api/artist-page read the releases *alongside* the artist row rather than
+ * after it: the slug is in the URL, the id only arrives with the row. The `artists!inner` embed
+ * turns the slug into a filter on the releases themselves (and on the count), so the result is
+ * identical to `getArtistReleases` for the artist holding that slug, and empty for a slug nobody
+ * holds.
+ */
+export async function getArtistReleasesBySlug(
+  slug: string,
+  limit: number
+): Promise<{ releases: ArtistPageRelease[]; total: number }> {
+  return readArtistPageReleases({ slug }, limit);
+}
+
+async function readArtistPageReleases(
+  artist: { artistId: string } | { slug: string },
+  limit: number
+): Promise<{ releases: ArtistPageRelease[]; total: number }> {
   const client = getClient();
   if (!client) return { releases: [], total: 0 };
 
   try {
-    const { data, count, error } = await client
-      .from('releases')
-      .select(
-        'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
-        ' release_sources ( platform, release_offers ( price, currency, availability ) )',
-        { count: 'exact' }
-      )
-      .eq('artist_id', artistId)
+    const select =
+      'slug, title, release_type, release_date, date_precision, status, artwork_url,' +
+      ' release_sources ( platform, release_offers ( price, currency, availability ) )';
+    const query = 'artistId' in artist
+      ? client.from('releases').select(select, { count: 'exact' }).eq('artist_id', artist.artistId)
+      : client.from('releases').select(`${select}, artists!inner ( slug )`, { count: 'exact' }).eq('artists.slug', artist.slug);
+
+    const { data, count, error } = await query
       .eq('is_hidden', false)
       .order('display_order', { ascending: true, nullsFirst: false })
       .order('release_date', { ascending: false, nullsFirst: false })
