@@ -9,6 +9,32 @@ import { render } from '@testing-library/react';
 import { PlatformIcon, SIMPLE_ICON_PATHS } from 'src/components/PlatformIcon';
 import { sources } from 'src/services/sources';
 
+describe('Bandcamp uses its Simple Icons mark (UNS-234)', () => {
+  it('has an entry in SIMPLE_ICON_PATHS (the diamond, restored after #646 dropped it)', () => {
+    expect(SIMPLE_ICON_PATHS.bandcamp?.d).toBeTruthy();
+    expect(SIMPLE_ICON_PATHS.bandcamp?.d).toMatch(/^M/);
+  });
+
+  it('renders an svg, not the 🎵 emoji fallback', () => {
+    const source = sources.bandcamp;
+    const { container } = render(
+      <PlatformIcon sourceId="bandcamp" color={source.color} emoji={source.icon} />,
+    );
+    const svg = container.querySelector('svg');
+    expect(svg).not.toBeNull();
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 24 24');
+    expect((svg?.querySelector('path')?.getAttribute('d') ?? '').length).toBeGreaterThan(10);
+    expect(container.textContent).not.toContain('🎵');
+  });
+
+  it('renders the registry brand color', () => {
+    const { container } = render(
+      <PlatformIcon sourceId="bandcamp" color={sources.bandcamp.color} emoji={sources.bandcamp.icon} />,
+    );
+    expect(container.querySelector('svg')?.getAttribute('fill')).toBe('#1da0c3');
+  });
+});
+
 describe('branded platforms have Simple Icons paths (UNS-220)', () => {
   it.each(['venmo', 'paypal'] as const)('%s has an entry in SIMPLE_ICON_PATHS', (id) => {
     expect(SIMPLE_ICON_PATHS[id]?.d).toBeTruthy();
