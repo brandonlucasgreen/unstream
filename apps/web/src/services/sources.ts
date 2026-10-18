@@ -431,6 +431,8 @@ export const sourceCategories = {
     // Faircamp moved to `official` (UNS-221, a Faircamp site is the artist's own page) and
     // Bandwagon to `marketplace` (UNS-222). No searchable platform remains here: funkwhale
     // and friends are MusicBrainz-enrichment-only, so the bucket is kept for their future.
+    // UNS-226: no listing page renders it until a searchable platform re-enters (an empty
+    // cell read as "there is nothing here", which had become the homepage's story).
     sources: [] as SourceId[],
   },
   library: {
@@ -439,8 +441,10 @@ export const sourceCategories = {
     sources: ['hoopla', 'freegal'] as SourceId[],
   },
   official: {
-    name: 'Official',
-    description: 'Artist websites and profiles',
+    // UNS-226: the homepage grid renders this as one combined section — official pages and
+    // self-hosted platforms together (a Faircamp site IS the artist's own page, UNS-221).
+    name: 'Official & Self-Hosted',
+    description: 'Artist websites and self-hosted pages',
     // Newsletter is an official channel, not social (UNS-221).
     sources: ['officialsite', 'wikipedia', 'faircamp', 'newsletter'] as SourceId[],
   },
@@ -455,6 +459,23 @@ export const sourceCategories = {
     sources: ['other'] as SourceId[],
   },
 };
+
+/**
+ * The homepage "Available sources" grid (App.tsx), in display order — UNS-226.
+ *
+ * Everything `sourceCategories` has is a *search-result* bucket; the homepage renders a curated
+ * subset as one chip grid: official becomes the combined "Official & Self-Hosted" section
+ * (search cards keep showing it as plain "Official" — those labels are separate), and the empty
+ * `decentralized` bucket drops out rather than rendering a heading with no chips under it.
+ * An entry here with zero linkable chips fails the uns226-homepage-sections pin, so a future
+ * recategorization can't strand an empty cell here again.
+ */
+export const HOMEPAGE_SOURCE_CATEGORIES = [
+  'marketplace',
+  'patronage',
+  'official',
+  'library',
+] as const satisfies readonly (keyof typeof sourceCategories)[];
 
 /**
  * Parse a query to extract multiple artist names from collaborative tracks.

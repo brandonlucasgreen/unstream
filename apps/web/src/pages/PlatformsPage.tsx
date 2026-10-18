@@ -16,9 +16,11 @@ import type { Source } from '../types';
  * `services/sources.ts`, which mirrors `api/shared/platform-registry.ts`, so adding a platform
  * there adds it here and a changed payout figure can't disagree with the result cards.
  *
- * Official and social links are left out: they're where an artist is, not ways to pay them.
+ * Official, social and the emptied `decentralized` bucket (UNS-226) are left out: officials
+ * and socials are where an artist is, not ways to pay them, and an empty bucket renders as
+ * a heading over nothing.
  */
-const SUPPORT_CATEGORIES = ['marketplace', 'patronage', 'decentralized', 'library'] as const;
+const SUPPORT_CATEGORIES = ['marketplace', 'patronage', 'library'] as const;
 
 export function supportPlatformGroups(): { key: string; name: string; description: string; platforms: Source[] }[] {
   return SUPPORT_CATEGORIES.map((key) => ({

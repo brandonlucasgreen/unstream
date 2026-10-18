@@ -359,6 +359,8 @@ export const CATEGORY_ORDER: { key: string; name: string; description: string }[
   { key: 'patronage', name: 'Patronage Platforms', description: 'Support artists directly' },
   { key: 'decentralized', name: 'Self-hosted & Decentralized', description: 'ActivityPub and self-hosted platforms' },
   { key: 'library', name: 'Library Services', description: 'Access through your local library' },
-  { key: 'official', name: 'Official', description: 'Artist websites and profiles' },
+  // UNS-226: the homepage renders this category as one combined section, so its display
+  // copy lives in BOTH registries (web sources.ts mirrors this — keep the two in sync).
+  { key: 'official', name: 'Official & Self-Hosted', description: 'Artist websites and self-hosted pages' },
   { key: 'social', name: 'Social', description: 'Artist social media profiles' },
 ];
