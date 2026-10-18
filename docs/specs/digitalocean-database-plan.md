@@ -16,6 +16,12 @@ The escalation order is now:
 2. Pro + Small compute (2 GB, +$5), if Pro's disk throttling shows up.
 3. This plan, if Supabase itself becomes the problem.
 
+**Reaffirmed 2026-10-18:** `infrastructure-independence-plan.md` moves the app from Netlify to
+Cloudflare Workers and leaves the database on Supabase. An all-DigitalOcean move was drafted and
+dropped the same day. This stays the fully planned option if the database ever moves to managed
+Postgres; from Workers it would also need PostgREST hosted somewhere, or the queries rewritten
+as SQL through Hyperdrive.
+
 The rest of this document is as it stood when the move was on hold. Re-check its numbers before
 using it.
 **Why:** the free Nano instance is the ceiling: 0.5 GB shared between Postgres, PostgREST,
