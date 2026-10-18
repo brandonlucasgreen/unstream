@@ -7,6 +7,7 @@ import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { isReservedHandle } from '../lib/reserved-handles';
+import { purgeCacheTags } from './purge-cache';
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -14,30 +15,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
-
-// Fire-and-forget CDN cache purge by tag. Uses the same Netlify env vars as
-// artist-profile.ts. No-op (with warning) if env vars aren't set (local dev/tests).
-function purgeCacheTag(handle: string): void {
-  const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token = process.env.NETLIFY_API_TOKEN;
-  if (!siteId || !token) {
-    console.warn(`[user-sharing] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge for user-share-${handle}`);
-    return;
-  }
-  fetch('https://api.netlify.com/api/v1/purge', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      site_id: siteId,
-      cache_tags: [`user-share-${handle}`],
-    }),
-  })
-    .then(() => console.log(`[user-sharing] Purged CDN cache for user-share-${handle}`))
-    .catch((e) => console.error(`[user-sharing] CDN cache purge failed for user-share-${handle}:`, e));
-}
 
 async function handleRequest(event: {
   httpMethod: string;
@@ -175,8 +152,12 @@ async function handleRequest(event: {
         }
 
         // Purge CDN cache for this user's shared page so it stops serving publicly.
-        // Fire-and-forget — a Netlify API blip must not fail the user's disable action.
-        purgeCacheTag(handle);
+        //
+        // Awaited, not fire-and-forget: Lambda freezes once the handler returns, so an un-awaited
+        // purge could simply never be sent, and the list someone just made private would keep
+        // serving publicly from the CDN for its TTL. purgeCacheTags never throws, so a Netlify API
+        // blip still can't fail the disable itself.
+        await purgeCacheTags([`user-share-${handle}`], 'user-sharing');
 
         return {
           statusCode: 200,
