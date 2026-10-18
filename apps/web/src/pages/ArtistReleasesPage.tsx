@@ -479,7 +479,7 @@ function CatalogNowPanel({
         </button>
         <span className="text-xs text-text-muted">{status}</span>
       </div>
-      <p className="text-[11px] text-text-muted pt-1">
+      <p className="text-xs text-text-muted pt-1">
         {readyAt
           ? `We checked your links in the last day — you can scan again ${describeWait(readyAt)}.`
           : 'You can run this once a day. Scanning re-reads every release page, so it takes a few minutes.'}
@@ -594,10 +594,10 @@ function ReleaseCard({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-text-primary truncate">{release.title}</p>
             {release.isHidden && (
-              <span className="text-[10px] font-bold uppercase tracking-wide text-text-muted shrink-0">Hidden</span>
+              <span className="text-xs font-bold uppercase tracking-wide text-text-muted shrink-0">Hidden</span>
             )}
             {release.needsReview && (
-              <span className="text-[10px] font-bold uppercase tracking-wide text-yellow-500 shrink-0">Needs review</span>
+              <span className="text-xs font-bold uppercase tracking-wide text-yellow-500 shrink-0">Needs review</span>
             )}
           </div>
           {meta && <p className="text-xs text-text-muted">{meta}</p>}

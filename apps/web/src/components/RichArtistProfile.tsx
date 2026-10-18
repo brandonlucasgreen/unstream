@@ -191,7 +191,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           </span>
         </div>
         <div className="flex items-center justify-center gap-2">
-          <h1 className="font-display text-[28px] font-bold text-text-primary">
+          <h1 className="font-display text-2xl font-bold text-text-primary">
             {artist.name}
           </h1>
           {artist.matchConfidence === 'claimed' && (
@@ -257,7 +257,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
 
       {embedOpen && (
         <div className="pb-6 text-left">
-          <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
             Embed this profile on your website
           </h2>
           {/* Theme + Link count controls */}
@@ -364,7 +364,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!payload.tips?.enabled && (!group || group.links.length === 0)) return null;
             return (
               <div key="patronage" className="mb-6 space-y-3">
-                <h2 className="text-[11px] uppercase tracking-wider text-text-muted">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted">
                   Patronage
                 </h2>
                 {payload.tips?.enabled && (
@@ -394,7 +394,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!profile?.bio) return null;
             return (
               <div key="bio" className="mb-6">
-                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
                   Bio
                 </h2>
                 <p className="text-text-muted text-sm whitespace-pre-line">
@@ -408,7 +408,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!profile?.featuredEmbed) return null;
             return (
               <div key="featured" className="mb-6">
-                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
                   Featured Release
                 </h2>
                 {/* contain:paint clips even a position:fixed child, so an embed saved before its
@@ -425,7 +425,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!group || group.links.length === 0) return null;
             return (
               <div key="social" className="mb-6">
-                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
                   Follow
                 </h2>
                 <div className="flex flex-wrap gap-2">
@@ -460,7 +460,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!group || group.links.length === 0) return null;
             return (
               <div key={sectionKeyInner} className="mb-6">
-                <h2 className="text-[11px] uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
                   {SECTION_HEADINGS[sectionKeyInner]}
                 </h2>
                 <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />

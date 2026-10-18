@@ -97,7 +97,7 @@ function BarChart({ data }: { data: DailyStat[] }) {
               x={padLeft - 4}
               y={y + 4}
               textAnchor="end"
-              fontSize={10}
+              fontSize={12}
               fill="currentColor"
               opacity={0.4}
             >
@@ -163,7 +163,7 @@ function BarChart({ data }: { data: DailyStat[] }) {
                 x={x + barW / 2}
                 y={height - 4}
                 textAnchor="middle"
-                fontSize={9}
+                fontSize={11}
                 fill="currentColor"
                 opacity={0.4}
               >

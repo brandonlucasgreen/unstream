@@ -41,7 +41,7 @@ export function FaqPage() {
                     <span className="ml-2 text-text-muted group-open:rotate-180 transition-transform">▼</span>
                   </summary>
                   <div
-                    className="px-4 pb-4 text-text-secondary prose prose-sm max-w-none"
+                    className="px-4 pb-4 text-text-secondary prose prose-base max-w-none"
                     dangerouslySetInnerHTML={{ __html: markdownToHtml(section.content) }}
                   />
                 </details>

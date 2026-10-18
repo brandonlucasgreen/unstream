@@ -156,7 +156,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
     .header { padding: 32px 0 24px; text-align: center; }
     .header h1 { font-size: 24px; font-weight: 700; }
     .header h1 a { text-decoration: none; color: var(--text); }
-    .header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .header p { font-size: 16px; color: var(--muted); margin-top: 4px; }
 
     /* Search form */
     .search-form { display: flex; gap: 8px; margin-bottom: 32px; }
@@ -183,12 +183,12 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
     .result-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
     .result-image { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
     .result-name { font-size: 20px; font-weight: 700; }
-    .result-type { font-size: 12px; color: var(--muted); text-transform: capitalize; }
-    .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; vertical-align: middle; }
+    .result-type { font-size: 13px; color: var(--muted); text-transform: capitalize; }
+    .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 600; vertical-align: middle; }
     .badge.verified { background: #22c55e20; color: #22c55e; }
 
     .category-label {
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
       color: var(--muted); margin-bottom: 8px; margin-top: 16px;
     }
     .category-label:first-child { margin-top: 0; }
@@ -197,13 +197,13 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
       display: flex; align-items: center; gap: 12px;
       padding: 10px 14px; border-radius: 10px;
       background: var(--bg); border: 1px solid var(--border);
-      text-decoration: none; color: var(--text); font-size: 14px;
+      text-decoration: none; color: var(--text); font-size: 16px;
     }
     .platform-link:hover { border-color: var(--accent); }
     .platform-icon { font-size: 18px; }
     .platform-name { flex: 1; font-weight: 500; }
-    .payout { font-size: 11px; color: var(--muted); }
-    .external-icon { color: var(--muted); font-size: 14px; }
+    .payout { font-size: 12px; color: var(--muted); }
+    .external-icon { color: var(--muted); font-size: 16px; }
 
     .social-list { display: flex; flex-wrap: wrap; gap: 8px; }
     .social-link {
@@ -216,18 +216,18 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
 
     .no-results, .error-msg { color: var(--muted); font-size: 16px; text-align: center; padding: 48px 0; }
     .error-msg { color: #ef4444; }
-    .noscript-note { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 24px; }
+    .noscript-note { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 24px; }
 
     /* Footer */
     footer { margin-top: auto; padding: 24px 16px; border-top: 1px solid var(--footer-border); }
     .footer-inner {
       max-width: 640px; margin: 0 auto; display: flex; flex-direction: column;
-      align-items: center; gap: 12px; font-size: 14px; color: var(--muted);
+      align-items: center; gap: 12px; font-size: 16px; color: var(--muted);
     }
     .footer-inner a { color: var(--muted); text-decoration: none; }
     .footer-inner a:hover { color: var(--text); }
     .footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
-    .footer-dot { opacity: 0.4; font-size: 10px; }
+    .footer-dot { opacity: 0.4; font-size: 12px; }
   </style>
 </head>
 <body>

@@ -238,8 +238,8 @@ export default async function handler(request: Request, context: Context) {
   <div class="page-content">
     <div class="container" style="padding-top:48px;padding-bottom:16px;text-align:center">
       <h1 style="font-size:24px;font-weight:700">${ownerName}'s collection</h1>
-      ${ownerLocation ? `<p style="color:var(--text);font-size:14px;margin-top:4px">${ownerLocation}</p>` : ''}
-      ${countParts.length > 0 ? `<p style="color:var(--muted);font-size:14px;margin-top:4px">${countParts.join(' &#x2022; ')}</p>` : ''}
+      ${ownerLocation ? `<p style="color:var(--text);font-size:16px;margin-top:4px">${ownerLocation}</p>` : ''}
+      ${countParts.length > 0 ? `<p style="color:var(--muted);font-size:16px;margin-top:4px">${countParts.join(' &#x2022; ')}</p>` : ''}
       <div data-share-mount style="margin-top:24px">
         <button class="copy-btn" id="copy-url-btn" data-url="${pageUrl}">
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
@@ -264,25 +264,25 @@ export default async function handler(request: Request, context: Context) {
 
   <div style="padding:24px 16px;text-align:center">
     <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
-    <p style="font-size:14px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
+    <p style="font-size:16px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
   </div>
 
   <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--muted)">
+    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)">
       <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
       <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
         <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/support" style="color:var(--muted);text-decoration:none">Support</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:10px">&#x2022;</span>
+        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
         <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
       </nav>
     </div>
