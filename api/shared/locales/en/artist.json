@@ -31,8 +31,7 @@
     "tipBody": "Artists can accept tips on Unstream directly. Money lands in their own Stripe account with a small (0-5%) platform fee you can optionally cover."
   },
   "sources": {
-    "heading": "Available sources",
-    "plusLine": "...plus official websites and social links"
+    "heading": "Available sources"
   },
   "faqLink": "Frequently asked questions →",
   "contact": {

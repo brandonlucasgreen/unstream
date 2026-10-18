@@ -553,10 +553,6 @@ function App() {
                     );
                   })}
                 </div>
-
-                <p className="text-center text-text-muted text-sm mt-6">
-                  {t('artist:sources.plusLine')}
-                </p>
               </div>
 
             </div>
