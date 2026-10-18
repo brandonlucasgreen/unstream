@@ -1,23 +1,20 @@
 # Moving the database to DigitalOcean (auth stays on Supabase)
 
 **Date:** 2026-09-26
-**Status:** Not pursued, kept as the fallback (2026-10-06). Once there was money for the move, the
-owner chose **Supabase Pro** as the next step instead, deferred for now in favour of nightly
-backups (`docs/database-backups.md`). Pro costs ~$5 a month more than this plan, and
-in return:
-- **Nothing to migrate,** and auth and data stay in one system.
-- **It addresses what the round 6 measurement pointed at:** shared-instance flakiness on Nano
-  rather than working-set pressure (`supabase-disk-io-investigation.md`).
-- **The values case for leaving was weak:** DigitalOcean isn't a meaningful values shift from
-  Supabase-on-AWS.
+**Status:** **Chosen, as Phase 1 of `infrastructure-independence-plan.md` (2026-10-18).** Not
+started. That plan moves Unstream off venture-funded and hyperscaler-hosted providers, and this
+database move is its first step; the auth move this document leaves out is its Phase 5.
 
-The escalation order is now:
-1. Supabase Pro (Micro, 1 GB).
-2. Pro + Small compute (2 GB, +$5), if Pro's disk throttling shows up.
-3. This plan, if Supabase itself becomes the problem.
+**History:** on 2026-10-06 this plan was set aside in favour of Supabase Pro, partly because
+"DigitalOcean isn't a meaningful values shift from Supabase-on-AWS." On 2026-10-18 the owner
+weighed it again, against the whole stack rather than the database alone, and decided the shift
+does matter: DigitalOcean is a public company, not VC-backed, and not built on a hyperscaler.
+`infrastructure-independence-plan.md` §"What was considered and ruled out" records the
+alternatives. Supabase Pro is no longer the next step.
 
-The rest of this document is as it stood when the move was on hold. Re-check its numbers before
-using it.
+The rest of this document is as it stood on 2026-10-02. Re-check its numbers before using it,
+and apply the four corrections listed under Phase 1 of the independence plan.
+
 **Why:** the free Nano instance is the ceiling: 0.5 GB shared between Postgres, PostgREST,
 Auth and the pooler, and a disk that throttles after bursts. It wedged on 2026-09-19, and six
 rounds of I/O work (`supabase-disk-io-investigation.md`) have been rationing around it. The
