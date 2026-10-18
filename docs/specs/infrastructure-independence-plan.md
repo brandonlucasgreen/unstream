@@ -1,4 +1,4 @@
-# Infrastructure independence: moving Unstream to DigitalOcean and Codeberg
+# Infrastructure independence: moving Unstream to DigitalOcean and Forgejo
 
 **Date:** 2026-10-18
 **Status:** Decided (Brandon, 2026-10-18). Not started.
@@ -37,8 +37,9 @@ There are two practical reasons as well:
 | Auth | GoTrue (Supabase's open-source auth server) container on App Platform, data in the managed database | open source | Supabase gone entirely |
 | CDN + DNS | Cloudflare (stays) | Public company (NYSE: NET), own network | Cache by tag, purge by tag on the free plan |
 | Cache, rate limits, flags | In-process memory + Postgres | — | Upstash gone |
-| Email | Mailgun | Sinch (public, Sweden) | Scaleway Transactional Email is the EU alternative |
-| Code, issues, CI | Codeberg (Forgejo) + own Forgejo runners | Non-profit (Codeberg e.V.) | Runner on a small DigitalOcean droplet; Mac runner for the Mac build |
+| Email | Resend for now; an independent provider when there's a reason | — | Not urgent; candidates in Phase 4 |
+| Code, issues | Forgejo: Codeberg, or a private instance | Codeberg is a non-profit (Codeberg e.V.) | Codeberg needs an open-source license; see Phase 6 |
+| CI | A Forgejo runner on Brandon's Mac Studio | — | Production never waits on it |
 | Error tracking | Sentry for now; GlitchTip optional | — | GlitchTip speaks the Sentry SDK |
 | Stays as is | Stripe, GoatCounter, Buttondown, Cloudflare R2 (backups) | — | No equivalent for Stripe Connect; GoatCounter and Buttondown are indie |
 
@@ -73,10 +74,10 @@ architecture below is portable to it; only the provider-specific steps (doctl, a
 | PostgREST container (512 MB) | $5 |
 | App container (1 GB) | $10 |
 | GoTrue container (512 MB), from Phase 5 | $5 |
-| Forgejo runner droplet (1 GB), from Phase 6 | ~$6 |
-| DigitalOcean Container Registry, from Phase 6 | $0–5 |
-| Mailgun | $0 if under 100 emails/day, else ~$15 |
-| **Total** | **~$41–61** |
+| CI runner | $0 (the Mac Studio) |
+| Code hosting, from Phase 6 | $0 on Codeberg; a few dollars for a managed private Forgejo |
+| Email | $0 on Resend's free tier; ~$10 if it moves to a paid independent provider |
+| **Total** | **~$35–50** |
 
 App Platform includes outbound transfer (50 GB on $5 containers, 100 GB on $10), then
 $0.02/GB. Prices are from DigitalOcean's pricing pages in October 2026; **re-check before each
@@ -87,16 +88,16 @@ once the free credits run out.
 
 Each phase is shippable on its own, leaves the site working, and has a rollback. The order
 follows the dependencies: the database first (it fixes the outages), then the app (it unlocks
-removing Upstash and owning the auth URL), and Codeberg last (it depends on CI being small).
+removing Upstash and owning the auth URL), and the forge last (it depends on CI being small).
 
 ### Phase 0: no-cost groundwork (any time)
 
 | # | Step | Who |
 |---|---|---|
 | 0.1 | Record the decision: CLAUDE.md's database plan line, the status of `digitalocean-database-plan.md`, this doc | Agent (done with this doc) |
-| 0.2 | Create a Codeberg account and a **pull mirror** of the GitHub repo, so the code already lives somewhere independent | Brandon, 10 min |
+| 0.2 | Think about the license question in Phase 6; nothing waits on it until then. Once it's settled, a **pull mirror** of the GitHub repo on the chosen forge puts the code somewhere independent early | Brandon |
 | 0.3 | Check Netlify billing: credit pricing or the legacy plan, and how many credits are left. Until Phase 2, batch merges so several PRs ship in one deploy | Brandon |
-| 0.4 | Measure email volume against Mailgun's free tier: `select date_trunc('day', created_at) d, count(*) from email_log group by 1 order by 1 desc limit 30;` | Brandon, SQL editor |
+| 0.4 | Measure email volume, to know whether a free tier covers it (Phase 4): `select date_trunc('day', created_at) d, count(*) from email_log group by 1 order by 1 desc limit 30;` | Brandon, SQL editor |
 | 0.5 | In Supabase → Authentication → SMTP, note whether auth emails use Supabase's built-in sender or a custom SMTP (Resend). Phase 5 needs it | Brandon |
 
 ### Phase 1: the database (≈ $20/month starts)
@@ -208,13 +209,34 @@ behind the same function signatures:
   CLAUDE.md.
 - **Rollback:** revert the PR; Upstash keeps working until its account is closed.
 
-### Phase 4: email, Resend → Mailgun ($0–15/month)
+### Phase 4 (optional, any time): email off Resend
 
-- `api/lib/resend.ts` becomes a Mailgun client behind the same interface. Callers:
+**Not urgent.** Resend is VC-backed, but Unstream is inside its free tier, the swap is one file
+plus DNS, and nothing else waits on it: GoTrue (Phase 5) can send through Resend's SMTP as well
+as anyone's. Move when there's a reason (volume outgrows the free tier, Resend's terms change)
+or a provider worth moving to.
+
+**Mailgun isn't the values pick.** It was the first idea for its free tier, but it belongs to
+Sinch, a large public messaging company that bought it in 2021 out of Thoma Bravo's
+private-equity roll-up (Pathwire). Better fits, as of October 2026; verify ownership and
+pricing before choosing:
+
+| Provider | What it is | Watch out for |
+|---|---|---|
+| MailPace | Small UK company (formerly OhMySMTP); transactional only, EU-hosted, no open or click tracking | Paid from low volume (~$10/month for 10k); the free tier is tiny |
+| Lettermint | Dutch; runs on its own EU infrastructure, with no US cloud underneath | Young; funding not public; free tier ~300/month |
+| Cloudflare Email Service | Sending from a vendor already in the stack (REST API, SMTP); public company | Public beta since April 2026; wait for general availability |
+| Scaleway Transactional Email | Iliad group, EU | Only worth it if other things move to Scaleway |
+
+Phase 0.4's volume count decides between a free tier and ~$10/month.
+
+The work, whichever provider:
+- `api/lib/resend.ts` becomes a client for the new provider behind the same interface. Callers:
   `notifications.ts`, `me-email.ts`.
-- DNS in Cloudflare: Mailgun's SPF, DKIM and tracking records, and a DMARC policy.
-- Do this **before Phase 5**: GoTrue needs an SMTP sender for magic links, and Mailgun provides it.
-- **Rollback:** switch the provider env back.
+- DNS in Cloudflare: the provider's SPF and DKIM records, and a DMARC policy.
+- If auth mail goes through Resend today (Phase 0.5), point Supabase's SMTP settings (later
+  GoTrue's) at the new provider too.
+- **Rollback:** switch the env back; keep Resend configured for a month.
 
 ### Phase 5: sign-in, off Supabase (≈ +$5/month)
 
@@ -229,7 +251,7 @@ behind the same function signatures:
     hour. `middleware.ts` trusts both JWKS endpoints during the switch.
   - **Refresh tokens** move with the schema, so clients refresh against GoTrue and get its tokens.
 - Configure GoTrue: site URL and redirect allowlist (`unstream.stream`, the Mac app's and the
-  extension's callback URLs), email templates, and Mailgun SMTP.
+  extension's callback URLs), email templates, and SMTP (Resend's, or Phase 4's provider).
 - **Cutover:** flip the `/auth/v1/*` proxy from Supabase to GoTrue. Rehearse it on the staging
   hostname first, with a test account through sign-up, magic link, password sign-in and
   refresh, on web, the Mac app and the extension.
@@ -238,16 +260,42 @@ behind the same function signatures:
   invalid at Supabase, so those users sign in again. Keep the window short.
 - After two quiet weeks: final backup of the Supabase project, then delete it.
 
-### Phase 6: Codeberg (≈ +$6–11/month)
+### Phase 6: GitHub → Forgejo (≈ $0–4/month)
 
-**Prerequisite:** Phases 2–3, so the scheduled jobs live in the app and CI is small.
+**Prerequisite:** Phases 2–3, so the app's scheduled jobs live in the server and CI is small.
+
+**Decide first where the repository lives.** Codeberg hosts only projects under an OSI- or
+FSF-approved license, and Unstream has none: a public repository with no license is "all rights
+reserved". So:
+- **Codeberg means choosing a license.** AGPL-3.0 fits Unstream best: anyone who runs a modified
+  copy as a service has to publish their changes. It's a lasting product and legal decision, so
+  it's Brandon's.
+- **Without one, use a private Forgejo** and collaborate there by invitation: a managed instance
+  from a small host (PikaPods, for example, at a few dollars a month), or Forgejo on the Mac
+  Studio behind a Cloudflare Tunnel, which makes the forge itself depend on the Mac.
 
 - **Move app-level schedules in-process first** (`node-cron` in the server): the catalogue sweep
   and the tips-review notifier. Their workflows go away.
-- **Runners:**
-  - A 1 GB DigitalOcean droplet running `forgejo-runner` in Docker, for Linux jobs. Codeberg's
-    hosted Actions are deliberately limited.
-  - `forgejo-runner` in host mode on Brandon's Mac, only for `mac-build`.
+- **CI runs on Brandon's Mac Studio.** One `forgejo-runner` takes every job; Codeberg's hosted
+  Actions are deliberately limited.
+  - Linux jobs run in containers through Colima (open source), so Docker Desktop isn't needed;
+    `mac-build` runs in host mode for Xcode.
+  - Run it under its own macOS user account, so jobs can't read Brandon's files.
+  - **Contributors' PRs run on the Mac.** Forgejo holds a fork PR's workflows until someone with
+    write access approves them, and approving runs whatever the PR changed, workflow files
+    included. Read its `.forgejo/` diff first, and keep secrets out of PR-triggered jobs.
+- **Nothing in production may wait on the Mac being on:**
+  - **Deploys:** App Platform builds the app itself from the repository's public clone URL. A
+    Forgejo push webhook calls a small signed endpoint in the app, which asks DigitalOcean to
+    deploy, so a sleeping Mac delays CI, not a release. A private repository can't be cloned
+    that way: there the runner builds an amd64 image and pushes it to DigitalOcean Container
+    Registry ($0–5/month), and deploys do wait on the Mac.
+  - **Scheduled jobs** (`db-backup` nightly, social posts on Mondays, the digest on Fridays) run
+    only while the Mac is awake and online, and **a job that never starts never fails**, so
+    `db-backup`'s "backup failing" issue would never open. Add a dead man's switch: each job
+    pings Healthchecks.io (open source, run by a one-person company) when it succeeds, and it
+    emails when a ping is late. From Phase 1, DigitalOcean's own daily backups mean a missed
+    night costs the second copy, not the only one.
 - **Port the remaining workflows** to `.forgejo/workflows/` (largely GitHub Actions syntax):
 
   | Workflow | Notes |
@@ -256,13 +304,11 @@ behind the same function signatures:
   | `supabase-migrate.yml` | Already rewritten for DigitalOcean in Phase 1 |
   | `db-backup.yml` | Straight port; still valuable as the off-provider copy |
   | `semantic-revert-check.yml` | Its PR comments use the GitHub API; port to Forgejo's |
-  | `mac-build.yml` | Mac runner |
-  | `industry-digest.yml` | Publishes to a branch; `digest-feed.ts` reads `raw.githubusercontent.com`, so switch it to Codeberg's raw URL and update the SSRF allowlist |
-  | `schedule-social-posts.yml` | Commits back; needs a Codeberg push token |
+  | `mac-build.yml` | Host mode on the Mac Studio |
+  | `industry-digest.yml` | Publishes to a branch; `digest-feed.ts` reads `raw.githubusercontent.com`, so switch it to the forge's raw URL and update the SSRF allowlist |
+  | `schedule-social-posts.yml` | Commits back; needs a push token for the forge |
   | `weekly-analytics-recap.yml` | Paused; port or delete |
 
-- **Deploys:** App Platform can't pull from Codeberg. CI builds the Docker image and pushes it to
-  DigitalOcean Container Registry, and App Platform deploys on each new image.
 - **Lost GitHub integrations:**
   - GitGuardian → `gitleaks` in CI.
   - The automated PR review bot → port it or drop it.
@@ -270,16 +316,16 @@ behind the same function signatures:
 - **Links that point at GitHub:**
   - "Codebase" and "Roadmap" in the edge pages' footers (`artist-page-static.ts`, `u-handle.ts`,
     `release-page.ts`).
-  - Mac DMG downloads in `api/shared/desktop-release.ts`: move them to Codeberg releases or R2.
+  - Mac DMG downloads in `api/shared/desktop-release.ts`: move them to the forge's releases or R2.
     Sparkle's appcast is already served from `unstream.stream`.
 - **Linear → Forgejo issues:** a one-off script that reads Linear's export and creates issues,
-  labels and milestones on Codeberg, plus a `UNS-n → #m` mapping file in `docs/` so old commit
+  labels and milestones on the new forge, plus a `UNS-n → #m` mapping file in `docs/` so old commit
   references still resolve.
 - **Working with agents afterwards:** Claude Code's cloud sessions and its GitHub PR tooling
   are GitHub-only. Work moves to Claude Code on the Mac, which works with any git remote; agents
   push branches and open PRs through Forgejo's API or CLI. Optionally keep GitHub as a read-only
   mirror for tools that need it.
-- **Rollback:** GitHub stays in place as a mirror until Codeberg has run cleanly for a month.
+- **Rollback:** GitHub stays in place as a mirror until the new forge has run cleanly for a month.
 
 ### Phase 7 (optional): Sentry → GlitchTip
 
@@ -301,7 +347,7 @@ Decide when the rest is done.
 | 3 | One-instance assumption | Added |
 | 5 | Auth section | Rewritten |
 | 5 | "`REVOKE` … on Supabase" | Kept: Supabase-specific default privileges no longer apply on DigitalOcean, but the habit is harmless |
-| 6 | Deployment and GitHub Actions sections | Rewritten for Codeberg and DigitalOcean Container Registry |
+| 6 | Deployment and GitHub Actions sections | Rewritten for Forgejo and the Mac Studio runner |
 
 Each phase's PR updates CLAUDE.md in the same change, and `docs/engineering-history.md` gets an
 entry for anything learned the hard way.
