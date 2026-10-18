@@ -1,10 +1,17 @@
 // API endpoint: GET /api/social-card/{artistSlug}/{slide}.png?platform={id}&release={releaseSlug}
 //
+// KEPT ONLY FOR POSTS ALREADY IN BUFFER. The weekly generator now draws the cards itself when it
+// schedules the week and uploads them to R2 (scripts/social-cards.ts), so nothing new points
+// here. Posts scheduled before that, up to two weeks out, and Instagram drafts from before
+// INSTAGRAM_DRAFTS_BEFORE still do, and Buffer fetches them on publish day. Remove this function,
+// its test, its netlify.toml route and [functions] block, loadCardAssetsWith, and the image hosts
+// only it fetches from ALLOWED_OUTBOUND_HOSTNAMES two weeks after the first Monday run that used
+// R2, once no draft in Buffer still points here.
+//
 // One slide of an indie spotlight's Instagram carousel, drawn on request from the artist's
 // Unstream data: the same artist row, profile, links and catalogue /api/artist-page reads, and
-// payouts from the platform registry. scripts/generate-social-posts.ts writes these URLs into
-// Buffer, and Buffer fetches them when the post publishes. Rendering on request means there is
-// nothing to store or clean up.
+// payouts from the platform registry. scripts/generate-social-posts.ts wrote these URLs into
+// Buffer, and Buffer fetches them when the post publishes.
 //
 // The platform and release come from the URL because the generator picked them when it wrote
 // the caption (see socialCardUrl). They are checked here against the artist's own data, so a URL
@@ -16,6 +23,8 @@
 // month and drawn at a time nobody controls, so it can't carry a date-dependent claim; the
 // caption says when it's Bandcamp Friday.
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { getArtistProfileBySlug, getArtistReleases } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isUrlHostnameAllowed } from './middleware';
@@ -31,7 +40,25 @@ import {
   type CardData,
   type CardSlide,
 } from '../shared/social-card';
-import { renderSocialCard, sniffImageType, type CardImage } from './social-card-render';
+import {
+  CARD_FONT_FILES,
+  loadCardAssetsWith,
+  renderSocialCard,
+  sniffImageType,
+  type CardImage,
+} from '../../scripts/social-card-render';
+
+// The renderer finds its fonts through import.meta.url, which is empty in this function's bundle:
+// Netlify builds it as CommonJS despite "type": "module". So they're found through __dirname and
+// require instead. netlify.toml's included_files puts scripts/social-card-fonts/ in the zip at the
+// same place relative to this file as in the repo, and external_node_modules ships resvg whole,
+// so both paths hold deployed and under vitest, which provides the same globals. (Checked by
+// bundling with zip-it-and-ship-it and rendering from the unzipped folder. The bundler's warning
+// that import.meta will be empty is about the renderer's own loader, which this replaces.)
+loadCardAssetsWith(() => ({
+  fonts: CARD_FONT_FILES.map(file => readFileSync(join(__dirname, '..', '..', 'scripts', 'social-card-fonts', file))),
+  wasm: readFileSync(require.resolve('@resvg/resvg-wasm/index_bg.wasm')),
+}));
 
 interface FunctionResponse {
   statusCode: number;
@@ -122,10 +149,10 @@ async function handleRequest(event: {
   const [, artistSlug, slideName] = match;
   const slide = slideName as CardSlide;
 
-  // 'lenient', not 'standard': the weekly generator renders every card once to check it, from
-  // one IP and in the same minute as its /api/artist-page reads, and 'standard' is one 30/min
-  // bucket shared by both. The other callers are Buffer and the CDN in front of this, so the
-  // limit only bites someone rendering cards in a loop.
+  // 'lenient', not 'standard': the weekly generator used to render every card once to check it,
+  // from one IP and in the same minute as its /api/artist-page reads, and 'standard' is one
+  // 30/min bucket shared by both. The other callers are Buffer and the CDN in front of this, so
+  // the limit only bites someone rendering cards in a loop.
   const rl = await checkRateLimit(getClientIp(event.headers), 'lenient', JSON_HEADERS);
   if (rl.limited) {
     return rl.response ?? { statusCode: 429, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Rate limited' }) };

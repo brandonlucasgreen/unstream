@@ -47,11 +47,13 @@
   framework = "#custom"
   autoLaunch = false
 
-# The Instagram card renderer reads two kinds of file at runtime, which the bundler can't see
-# through an import: its fonts, and resvg's WebAssembly binary. External, the resvg package ships
-# whole (wasm included) instead of being bundled into JS that can't find its .wasm.
+# The Instagram card endpoint, kept only for posts already in Buffer (see the top of
+# api/functions/social-card.ts for when it goes). Its renderer reads two kinds of file at runtime,
+# which the bundler can't see through an import: its fonts, now beside the renderer in scripts/,
+# and resvg's WebAssembly binary. External, the resvg package ships whole (wasm included) instead
+# of being bundled into JS that can't find its .wasm.
 [functions."social-card"]
-  included_files = ["api/functions/social-card-fonts/*.ttf"]
+  included_files = ["scripts/social-card-fonts/*.ttf"]
   external_node_modules = ["@resvg/resvg-wasm"]
 
 # The staleness probe in buildFreshness.ts compares this file's id against the one baked into
@@ -318,7 +320,8 @@
   status = 200
 
 # Instagram carousel slides for the weekly indie spotlights, drawn from the artist's data on
-# request — see api/functions/social-card.ts. Buffer fetches these when a post publishes.
+# request — see api/functions/social-card.ts. Kept only for posts scheduled before the generator
+# started uploading its own cards to R2; Buffer fetches these when a post publishes.
 [[redirects]]
   from = "/api/social-card/*"
   to = "/.netlify/functions/social-card"

@@ -1,5 +1,5 @@
 // Which slides an Instagram carousel gets and what their alt text says (api/shared/social-card.ts).
-// The generator and the renderer both read these, so a wrong answer here is a card that's
+// The post copy and the renderer both read these, so a wrong answer here is a card that's
 // missing, or one whose alt text describes something it doesn't show.
 
 import { describe, it, expect } from 'vitest';
@@ -9,7 +9,6 @@ import {
   cardImageUrl,
   cardSlides,
   photoSource,
-  socialCardUrl,
   type CardData,
 } from '../../shared/social-card';
 
@@ -34,6 +33,11 @@ describe('cardSlides', () => {
     expect(cardSlides(card({ release: { title: 'x', type: 'album', latest: false, artworkUrl: null } }))).toEqual(['buy', 'math', 'photo']);
     expect(cardSlides(card({ platform: { id: 'qobuz', name: 'Qobuz', payout: null } }))).toEqual(['buy', 'record', 'photo']);
     expect(cardSlides(card({ imageUrl: null }))).toEqual(['buy', 'record', 'math']);
+  });
+
+  it("has no photo slide when the photo's source can't be named in its credit", () => {
+    expect(cardSlides(card({ imageUrl: 'https://images.example.com/me.jpg' }))).toEqual(['buy', 'record', 'math']);
+    expect(cardSlides(card({ imageUrl: 'https://cdn.mirlo.space/file/artist-avatars/a-x600.webp' }))).toContain('photo');
   });
 
   it("makes no cards for a name the fonts can't draw, and no record slide for such a title", () => {
@@ -93,14 +97,5 @@ describe('cardAltText', () => {
   it("doesn't call a release the latest when nothing dates it", () => {
     const undated = card({ release: { title: 'Signals', type: 'ep', latest: false, artworkUrl: 'https://f4.bcbits.com/img/a1_2.jpg' } });
     expect(cardAltText('record', undated)).toBe('Cover art for Signals by Kid Lightbulbs, on Bandcamp.');
-  });
-});
-
-describe('socialCardUrl', () => {
-  it('carries the platform and release the caption named', () => {
-    expect(socialCardUrl('https://unstream.stream', 'kid-lightbulbs', 'record', 'bandcamp', 'any-day-now'))
-      .toBe('https://unstream.stream/api/social-card/kid-lightbulbs/record.png?platform=bandcamp&release=any-day-now');
-    expect(socialCardUrl('https://unstream.stream', 'kid-lightbulbs', 'buy', 'mirlo', null))
-      .toBe('https://unstream.stream/api/social-card/kid-lightbulbs/buy.png?platform=mirlo');
   });
 });

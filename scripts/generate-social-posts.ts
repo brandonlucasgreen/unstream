@@ -10,13 +10,16 @@
  *   Sun                      a maker post about Unstream, or a shipped feature
  * The Unstream LinkedIn page gets two posts: Tue (economics) and Thu (the week's artists).
  * Instagram gets the indie spotlights only, as carousels of cards Unstream draws itself
- * (/api/social-card, docs/specs/instagram-original-posts-spec.md), in the same Buffer content
- * item as that day's Threads and Bluesky posts.
+ * (docs/specs/instagram-original-posts-spec.md), in the same Buffer content item as that day's
+ * Threads and Bluesky posts. The cards are drawn here and uploaded to a public R2 bucket when the
+ * week is scheduled (scripts/social-cards.ts); a run that doesn't schedule Instagram posts writes
+ * them into the week's draft folder instead.
  * docs/engineering-history.md ("Social posts") has the measurements behind that shape.
  *
  * Output:
  *   data/social-posts/{week}/drafts.json   - All drafts for the week
  *   data/social-posts/{week}/day-{n}.md    - Human-readable draft per day
+ *   data/social-posts/{week}/cards/        - The Instagram cards, when they aren't uploaded
  *   data/social-posts/history.json         - Tracks which artists have been featured
  *
  * Usage:
@@ -25,6 +28,7 @@
  *   npx tsx scripts/generate-social-posts.ts --schedule              # Push to Buffer as DRAFTS (requires approval)
  *   npx tsx scripts/generate-social-posts.ts --schedule --publish    # Push to Buffer for auto-publication
  *   npx tsx scripts/generate-social-posts.ts --channels              # List Buffer channel IDs
+ *   npm run render:social-cards -- <slug>                           # One artist's cards, drawn locally
  *
  * Exits non-zero when any post was too long to send or Buffer rejected it, after the rest have
  * been scheduled and history saved — a rejected post used to leave the run green.
@@ -34,6 +38,10 @@
  *   BUFFER_ORG_ID         - Required for --schedule (content items belong to an organization) and --channels
  *   BUFFER_CHANNEL_IDS    - Required for --schedule (comma-separated: threads,bluesky,instagram,linkedin).
  *                           Positional; leave a slot empty to skip that platform (e.g. "t,b,,l").
+ *   SOCIAL_CARDS_BUCKET, SOCIAL_CARDS_PUBLIC_BASE_URL, R2_ACCOUNT_ID, SOCIAL_CARDS_R2_ACCESS_KEY_ID,
+ *   SOCIAL_CARDS_R2_SECRET_ACCESS_KEY
+ *                         - Required for --schedule with an Instagram channel: the R2 bucket the
+ *                           cards are uploaded to (cardBucketFromEnv in scripts/social-cards.ts).
  *
  * No database credentials: verified artists and retired-slug aliases both come from the public
  * /api/artist-directory endpoint, so the Action doesn't hold the service key.
@@ -65,6 +73,14 @@ import {
   type SocialPost,
 } from './social-post-templates';
 import { livePhotoUrl } from './social-post-photos';
+import {
+  cardBucketFromEnv,
+  localCardStore,
+  publishCard,
+  withDrawnCards,
+  type CardBucket,
+  type CardStore,
+} from './social-cards';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
@@ -511,6 +527,8 @@ interface IndieLookup {
   platforms: ArtistPlatform[];
   location: string | null;
   releases: CatalogueRelease[];
+  /** Claimed as /api/artist-page and the artist pages judge it: only these get Instagram cards. */
+  claimed: boolean;
 }
 
 /**
@@ -527,7 +545,8 @@ async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
     const res = await fetch(`${UNSTREAM_BASE}/api/artist-page?slug=${encodeURIComponent(slug)}`);
     if (!res.ok) return null;
     const data = await res.json() as {
-      artist?: { city?: string | null; country?: string | null };
+      artist?: { city?: string | null; country?: string | null; matchConfidence?: string };
+      profile?: { verifiedAt?: string | null } | null;
       links?: { platform: string; url: string }[];
       socialLinks?: { platform: string; url: string }[];
       releases?: CatalogueRelease[];
@@ -537,6 +556,8 @@ async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
       platforms: links.map(l => ({ sourceId: l.platform, url: l.url })),
       location: data.artist?.city || data.artist?.country || null,
       releases: data.releases || [],
+      // The directory lists every verified profile; the artist row has to be claimed too.
+      claimed: data.artist?.matchConfidence === 'claimed' && !!data.profile?.verifiedAt,
     };
   } catch {
     return null;
@@ -544,31 +565,30 @@ async function fetchIndieArtist(slug: string): Promise<IndieLookup | null> {
 }
 
 /**
- * The Instagram post with only the cards that render, checked by fetching each one from the live
- * endpoint: the same request Buffer makes when the post publishes, so it also warms the CDN for
- * it. A card can fail for reasons only the renderer knows (a photo host off the allowlist, a WebP
- * it can't decode, an image host that's down), and Buffer would otherwise only find out on
- * publish day and fail the post there. Null when no card renders.
+ * A verified indie artist's spotlight posts, built from their artist page and checked photo, or
+ * null when there's nothing to post: their page didn't load, or they have nowhere to buy music.
+ * The Instagram post still holds its carousel undrawn; see withDrawnCards.
  */
-async function withRenderableCards(post: SocialPost, artistName: string): Promise<SocialPost | null> {
-  const rendered = await Promise.all(post.images.map(async image => {
-    const card = new URL(image.url).pathname.split('/').pop();
-    try {
-      const res = await fetch(image.url, { signal: AbortSignal.timeout(30000) });
-      await res.arrayBuffer();
-      if (res.ok && res.headers.get('content-type') === 'image/png') return true;
-      console.log(`    · ${artistName}: Instagram card ${card} didn't render (${res.status}), so it's left out`);
-    } catch (error) {
-      console.log(`    · ${artistName}: Instagram card ${card} didn't render (${error instanceof Error ? error.message : error}), so it's left out`);
-    }
-    return false;
-  }));
-
-  const kept = post.images.filter((_, i) => rendered[i]).map(image => ({ url: image.url, altText: image.altText }));
-  if (kept.length === 0) return null;
-  // The tag goes on whichever card is now first; on a carousel the first image's tags apply to all.
-  const tags = post.images[0].userTags;
-  return { ...post, images: tags ? [{ ...kept[0], userTags: tags }, ...kept.slice(1)] : kept };
+async function buildIndieSpotlight(
+  artist: VerifiedArtist,
+  bandcampFriday: boolean
+): Promise<{ context: ArtistContext; posts: SocialPost[] } | null> {
+  const lookup = await fetchIndieArtist(artist.slug);
+  if (!lookup) {
+    console.warn(`  ⚠ ${artist.name}: artist lookup failed`);
+    return null;
+  }
+  // A stored photo the host has deleted would fail the post on publish day; see livePhotoUrl.
+  const imageUrl = await livePhotoUrl(artist);
+  const context = artistContext({ ...artist, imageUrl }, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
+  const spotlight = indieSpotlight(context, { bandcampFriday });
+  if (!spotlight) {
+    console.log(`  · ${artist.name}: nowhere to buy their music yet`);
+    return null;
+  }
+  if (lookup.claimed) return { context, posts: spotlight };
+  console.log(`  · ${artist.name}: not a claimed artist, so no Instagram cards`);
+  return { context, posts: spotlight.filter(post => post.platform !== 'instagram') };
 }
 
 // --- Week calculation ---
@@ -968,6 +988,48 @@ function draftToMarkdown(draft: DayDraft): string {
 
 // --- Main ---
 
+/** The R2 bucket's settings, or the run stops here, before anything is generated. */
+function cardBucketOrExit(): CardBucket {
+  try {
+    return cardBucketFromEnv();
+  } catch (error) {
+    console.error(`\n✗ ${error instanceof Error ? error.message : error}. Cannot schedule.`);
+    process.exit(1);
+  }
+}
+
+/**
+ * `npm run render:social-cards -- <slug>`: one verified artist's Instagram cards, drawn the way a
+ * scheduling run would draw them today, into data/social-posts/preview/ instead of R2. For looking
+ * at cards without Buffer or R2: it reads the same public endpoints a run does and nothing else.
+ */
+async function renderCardsLocally(slug: string | undefined) {
+  if (!slug || slug.startsWith('--')) {
+    console.error('\n✗ Name the artist: npm run render:social-cards -- <slug>');
+    process.exit(1);
+  }
+  const artist = (await fetchVerifiedArtists()).find(a => a.slug === slug);
+  if (!artist) {
+    console.error(`\n✗ ${slug} isn't in /api/artist-directory, and only verified artists get cards.`);
+    process.exit(1);
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const built = await buildIndieSpotlight(artist, BANDCAMP_FRIDAY_DATES.includes(today));
+  const post = built?.posts.find(p => p.platform === 'instagram');
+  if (!post) {
+    console.error(`\n✗ ${artist.name} gets no Instagram post, so there are no cards to draw.`);
+    process.exit(1);
+  }
+  const drawn = await withDrawnCards(post, artist, localCardStore(join(SOCIAL_DIR, 'preview')));
+  if (!drawn) {
+    console.error(`\n✗ None of ${artist.name}'s cards were drawn.`);
+    process.exit(1);
+  }
+  console.log(`\n${drawn.text}\n`);
+  for (const image of drawn.images) console.log(`  ${image.url}\n    ${image.altText}`);
+  console.log('');
+}
+
 // Mon-Sun. Saturday becomes a question one week in three (isQuestionWeek).
 const WEEK_PLAN: DayKind[] = ['indie', 'indie', 'indie', 'record-math', 'indie', 'indie', 'maker'];
 
@@ -977,9 +1039,15 @@ async function main() {
   const doSchedule = args.includes('--schedule');
   const doPublish = args.includes('--publish');
   const doChannels = args.includes('--channels');
+  const renderCards = args.includes('--render-cards');
 
   if (doChannels) {
     await listChannels();
+    return;
+  }
+  // Touches neither Buffer, R2 nor history, so it's checked before anything that could.
+  if (renderCards) {
+    await renderCardsLocally(args[args.indexOf('--render-cards') + 1]);
     return;
   }
 
@@ -1004,6 +1072,10 @@ async function main() {
       process.exit(1);
     }
   }
+  // Instagram cards go to R2 only when this run schedules Instagram posts, and then every setting
+  // has to be there: going ahead without them would schedule the week with no Instagram at all.
+  const scheduleInstagram = doSchedule && !!channelIdsStr?.split(',')[2]?.trim();
+  const cardBucket = scheduleInstagram ? cardBucketOrExit() : null;
   const tagIds = doSchedule && orgId ? await ensureTags(orgId) : null;
 
   const { week, dates } = getWeekDates(weekArg);
@@ -1076,14 +1148,15 @@ async function main() {
 
   const weekDir = join(SOCIAL_DIR, week);
   if (!existsSync(weekDir)) mkdirSync(weekDir, { recursive: true });
+  const storeCard: CardStore = cardBucket ? (key, png) => publishCard(cardBucket, key, png) : localCardStore(weekDir);
 
   const drafts: DayDraft[] = [];
   const weekNum = parseInt(week.split('-W')[1], 10);
   const run: RunPicks = { featured: new Set(), skipped: new Set() };
   // The indie artists posted so far this week, for Thursday's LinkedIn roundup.
   const weekIndie: ArtistContext[] = [];
-  // Instagram posts dropped because none of their cards rendered. Counted as failures when
-  // scheduling: the renderer is broken, and that shouldn't pass as a quiet week.
+  // Instagram posts dropped because none of their cards were drawn and stored. Counted as failures
+  // when scheduling: the renderer or the bucket is broken, and that shouldn't pass as a quiet week.
   let instagramDropped = 0;
 
   for (let day = 1; day <= 7; day++) {
@@ -1099,34 +1172,19 @@ async function main() {
 
     if (kind === 'indie') {
       const bandcampFriday = BANDCAMP_FRIDAY_DATES.includes(date);
-      const picked = await pickSpotlight(verifiedArtists, history, run, async artist => {
-        const lookup = await fetchIndieArtist(artist.slug);
-        if (!lookup) {
-          console.warn(`  ⚠ ${artist.name}: artist lookup failed — trying someone else`);
-          return null;
-        }
-        // A stored photo the host has deleted would fail the post on publish day; see livePhotoUrl.
-        const imageUrl = await livePhotoUrl(artist);
-        const context = artistContext({ ...artist, imageUrl }, `${UNSTREAM_BASE}/a/${artist.slug}`, lookup.platforms, lookup.location, lookup.releases);
-        const spotlight = indieSpotlight(context, { bandcampFriday });
-        if (!spotlight) {
-          console.log(`  · ${artist.name}: nowhere to buy their music yet — trying someone else`);
-          return null;
-        }
-        return { context, posts: spotlight };
-      });
+      const picked = await pickSpotlight(verifiedArtists, history, run, artist => buildIndieSpotlight(artist, bandcampFriday));
       if (picked) {
         for (const post of picked.posts) {
           if (post.platform !== 'instagram') {
             posts.push(post);
             continue;
           }
-          const instagram = await withRenderableCards(post, picked.artist.name);
+          const instagram = await withDrawnCards(post, picked.artist, storeCard);
           if (instagram) {
             posts.push(instagram);
           } else {
             instagramDropped++;
-            console.warn(`  ⚠ ${picked.artist.name}: none of the Instagram cards rendered — no Instagram post`);
+            console.warn(`  ⚠ ${picked.artist.name}: none of the Instagram cards were drawn — no Instagram post`);
           }
         }
         weekIndie.push(picked.context);
