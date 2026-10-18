@@ -34,9 +34,9 @@ There are two practical reasons as well:
 | Layer | Target | Owner | Notes |
 |---|---|---|---|
 | Database | DigitalOcean Managed PostgreSQL, NYC3 | DigitalOcean (public, NYSE: DOCN), own infrastructure | Daily backups, 7-day point-in-time restore, 1 GB for Postgres alone |
-| Data API | PostgREST container on App Platform | open source | Keeps every `supabase-js` data call working unchanged |
-| App | One Node server container on App Platform | DigitalOcean | API, server-rendered pages, background jobs, static files |
-| Auth | GoTrue (Supabase's open-source auth server) container on App Platform, data in the managed database | open source | Supabase gone entirely |
+| App | **One container on App Platform** running the Node server, PostgREST and GoTrue | DigitalOcean | API, server-rendered pages, background jobs, static files |
+| Data API | PostgREST, inside the app container (its own small component during Phase 1) | open source | Keeps every `supabase-js` data call working unchanged |
+| Auth | GoTrue (Supabase's open-source auth server), inside the app container, data in the managed database | open source | Supabase gone entirely |
 | CDN + DNS | Cloudflare (stays) | Public company (NYSE: NET), own network | Cache by tag, purge by tag on the free plan |
 | Cache, rate limits, flags | In-process memory + Postgres | — | Upstash gone |
 | Email | Resend for now; Cloudflare Email Service once it's out of beta | Cloudflare | Not urgent; Phase 5 |
@@ -47,7 +47,7 @@ There are two practical reasons as well:
 
 **Region: NYC3** for everything on DigitalOcean. Traffic is a mix of US and EU; New York is
 ~70–90 ms from both Western Europe and the US West Coast, and Cloudflare serves cached responses
-from near each visitor. App, PostgREST, GoTrue and the database share NYC3's private network.
+from near each visitor. The app container and the database share NYC3's private network.
 
 **The alternative, if EU hosting is ever preferred:** Scaleway (Iliad group, not VC-backed) has
 managed Postgres, serverless containers and transactional email in Paris/Amsterdam/Warsaw. The
@@ -85,13 +85,12 @@ architecture below is portable to it; only the provider-specific steps (doctl, a
 | | Monthly | From |
 |---|---|---|
 | Managed Postgres, 1 GB | ~$15 | Phase 1 |
-| PostgREST container (512 MB) | $5 | Phase 1 |
-| App container: 512 MB, or 1 GB if memory runs tight | $5–10 | Phase 2 |
-| GoTrue container (512 MB) | $5 | Phase 4 |
+| PostgREST as its own component, while Netlify still calls it | $5 | Phase 1, until Phase 2 |
+| App container (Node server + PostgREST, + GoTrue from Phase 4): 512 MB, or 1 GB if memory runs tight | $5–10 | Phase 2 |
 | CI runner | $0 (the Mac Studio) | Phase 6 |
 | Code hosting | $0 on Codeberg | Phase 6 |
 | Email | $0 on Resend's free tier; ~$10 if it moves to a paid provider | Phase 5 |
-| **Total** | **~$30–45** | |
+| **Total** | **~$20–35** | |
 
 App Platform's free tier covers static sites only; a server starts at $5 (512 MB, 1 shared vCPU,
 50 GB outbound transfer, then $0.02/GB). Prices are from October 2026; **re-check before each
@@ -140,7 +139,7 @@ Sign-in stays on Supabase until Phase 4. Only data moves.
 
 **Rollback:** unset `DATA_API_URL` / `DATA_API_SERVICE_KEY` and redeploy (the plan's §7).
 
-### Phase 2: the app, off Netlify (≈ +$5–10/month; Netlify goes to $0)
+### Phase 2: the app, off Netlify (≈ +$0–5/month; Netlify goes to $0)
 
 The largest phase. Do it as **lift-and-shift first, simplify second**, so the first cutover
 changes hosting and nothing else. The database (Phase 1), Upstash and every environment
@@ -164,14 +163,28 @@ variable stay as they are.
     new `INTERNAL_ORIGIN` env var.
 - `Dockerfile`: `npm ci`, `npm run build` (the generators still run before `vite build`), start
   the server.
-- `infra/digitalocean/app.yaml`: the app joins Phase 1's PostgREST component (GoTrue follows in
-  Phase 4), env vars as encrypted secrets, health check on `/api/health/db`.
-- **Private network:** with the app in NYC3, it reaches PostgREST and the database over the VPC.
-  Limit the database's trusted sources to the app, and drop PostgREST's public route if only the
-  server calls it.
+- **One container, several processes.** App Platform bills per container, not per program, so
+  PostgREST moves *into* the app container and Phase 1's separate PostgREST component ($5) goes
+  away; GoTrue joins the same way in Phase 4.
+  - The `Dockerfile` copies each binary from its official image in a multi-stage build (pinned
+    versions), so upgrading one is a version bump that ships with an app deploy.
+  - A small entrypoint starts the processes and **exits as soon as any one of them exits**, so
+    App Platform restarts the whole container rather than leaving it half-alive. The health
+    check covers all of them.
+  - PostgREST and GoTrue listen on localhost only: PostgREST loses its public route entirely,
+    and GoTrue is reached through the server's `/auth/v1/*` proxy (2c).
+  - The coupling costs little: every page needs all three, so they're effectively down together
+    anyway. App Platform starts a deploy's new container before stopping the old one.
+  - **Fallback:** if memory or the coupling becomes a problem, either one moves back to its own
+    $5 component with no code change; only its URL env var changes.
+- `infra/digitalocean/app.yaml`: one app component replacing Phase 1's PostgREST component, env
+  vars as encrypted secrets, health check on `/api/health/db`.
+- **Private network:** the app reaches the database over NYC3's VPC; limit the database's trusted
+  sources to the app.
 - **Memory:** start on the $5, 512 MB size and watch App Platform's memory graph for a week.
-  Resizing to 1 GB ($10) is a setting, not a migration. Running out of memory restarts the
-  container, which drops in-memory state and any crawl in progress.
+  PostgREST and GoTrue are small (tens of MB each), but with Node's own share 1 GB ($10) may be
+  needed, likely by Phase 4. Resizing is a setting, not a migration. Running out of memory
+  restarts the container, which drops in-memory state and any crawl in progress.
 
 **2b. Caching moves from Netlify's CDN to Cloudflare's**
 - `Netlify-CDN-Cache-Control` becomes `CDN-Cache-Control`, which Cloudflare honours. Release
@@ -239,12 +252,13 @@ behind the same function signatures:
   CLAUDE.md.
 - **Rollback:** revert the PR; Upstash keeps working until its account is closed.
 
-### Phase 4: sign-in, off Supabase (≈ +$5/month)
+### Phase 4: sign-in, off Supabase (≈ $0–5/month)
 
 **Prerequisite:** Phase 2c's Mac and extension releases are on most installs.
 
-- Add a GoTrue component to the app spec, pinned to the version Supabase currently runs, with
-  its data in an `auth` schema in the DigitalOcean database.
+- Add GoTrue to the app container (2a), pinned to the version Supabase currently runs, with its
+  data in an `auth` schema in the DigitalOcean database. The only likely cost is resizing the
+  container to 1 GB, if Phase 2 hasn't already.
 - **Migrate the `auth` schema** (users, identities, sessions, refresh tokens) from Supabase with
   `pg_dump`, preserving GoTrue's own migration table so it doesn't re-run migrations.
 - **Keep everyone signed in:**
