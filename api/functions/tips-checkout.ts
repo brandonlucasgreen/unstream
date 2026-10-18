@@ -106,10 +106,24 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
   if (!eligibility.ok && !eligibility.artist) {
     return respond(eligibility.status, { error: eligibility.reason });
   }
-  if (!eligibility.ok || !tipsFlagOn) {
+  if (!eligibility.ok) {
     const negativeArtist = eligibility.artist;
-    if (!negativeArtist) return respond(500, { error: 'Artist state inconsistent' });
+    if (!negativeArtist) {
+      // Unreachable while tipEligibility keeps its contract (every !ok answer about a *found*
+      // artist carries it), but respond like it: not an answer we cache.
+      return respond(eligibility.status, { error: eligibility.reason });
+    }
+    // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
+    // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. Short window:
+    // an artist flipping their switch back sees it within 10s.
     const body: TipPagePayload = { artist: negativeArtist, takingTips: false };
+    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, TIP_PAGE_NOT_TAKING_TTL_SECONDS);
+    return respond(200, body);
+  }
+  if (!tipsFlagOn) {
+    // Eligible artist, fan-side flag off (the only reason a kill switch outruns the cache here —
+    // the flag itself is checked live every request).
+    const body: TipPagePayload = { artist: eligibility.artist, takingTips: false };
     await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, TIP_PAGE_NOT_TAKING_TTL_SECONDS);
     return respond(200, body);
   }
