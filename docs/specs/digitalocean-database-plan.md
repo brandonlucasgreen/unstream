@@ -1,10 +1,9 @@
 # Moving the database to DigitalOcean (auth stays on Supabase)
 
 **Date:** 2026-09-26
-**Status:** **Chosen, as Phase 3 of `infrastructure-independence-plan.md` (2026-10-18).** Not
-started. That plan moves Unstream off venture-funded and hyperscaler-hosted providers: the app
-leaves Netlify for DigitalOcean App Platform first, then this database move, then the auth move
-this document leaves out (its Phase 4).
+**Status:** **Chosen, as Phase 1 of `infrastructure-independence-plan.md` (2026-10-18).** Not
+started. That plan moves Unstream off venture-funded and hyperscaler-hosted providers, and this
+database move is its first step; the auth move this document leaves out is its Phase 4.
 
 **History:** on 2026-10-06 this plan was set aside in favour of Supabase Pro, partly because
 "DigitalOcean isn't a meaningful values shift from Supabase-on-AWS." On 2026-10-18 the owner
@@ -14,8 +13,7 @@ does matter: DigitalOcean is a public company, not VC-backed, and not built on a
 alternatives. Supabase Pro is no longer the next step.
 
 The rest of this document is as it stood on 2026-10-02. Re-check its numbers before using it,
-and apply the changes listed under Phase 3 of the independence plan: by then the app runs on
-App Platform, not Netlify, which simplifies several steps below.
+and apply the four corrections listed under Phase 1 of the independence plan.
 
 **Why:** the free Nano instance is the ceiling: 0.5 GB shared between Postgres, PostgREST,
 Auth and the pooler, and a disk that throttles after bursts. It wedged on 2026-09-19, and six
