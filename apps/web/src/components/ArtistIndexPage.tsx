@@ -20,13 +20,15 @@ interface ArtistIndexPageProps {
   loadingLabel: string;
   /** Route prefix for an artist's page — '/a' for claimed profiles, '/artist' for pre-generated pages. */
   linkPrefix: string;
+  /** Optional line shown under the subtitle (UNS-223: the artist-claim CTA on /artists only). */
+  cta?: React.ReactNode;
 }
 
 // Shared by the "Indie Artist Index" (/artists, claimed profiles) and
 // "Artists You Know" (/known-artists, pre-generated unclaimed pages) —
 // identical fetch/group/render behavior, differing only in copy, data
 // source, and which artist-page route the cards link to.
-export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkPrefix }: ArtistIndexPageProps) {
+export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkPrefix, cta }: ArtistIndexPageProps) {
   const [artists, setArtists] = useState<DirectoryArtist[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,6 +80,11 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
           {!loading && (
             <p className="text-text-muted text-sm">
               {subtitle(artists.length)}
+            </p>
+          )}
+          {!loading && cta && (
+            <p className="text-sm max-w-xl mx-auto mt-3">
+              {cta}
             </p>
           )}
         </div>
