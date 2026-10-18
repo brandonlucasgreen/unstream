@@ -3,7 +3,7 @@
 // and releases for an unclaimed one.
 // This is the data source for the React SPA artist page (UNS-102).
 
-import { getArtistProfileBySlug, getArtistReleases, getClient, resolveArtistSlugAlias } from './db';
+import { getArtistProfileBySlug, getArtistReleasesBySlug, getClient, resolveArtistSlugAlias } from './db';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
 import { isPublishedArtistSlug } from '../shared/published-artist-slugs';
@@ -15,6 +15,7 @@ import { sanitizeEmbed } from './artist-profile';
 import { getGoals, getTipsLiveSlugs } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
 import { groupLinksIntoSections, resolveSectionOrder, type PageSectionKey } from '../shared/page-sections';
+import { SearchTimer } from './search-timing';
 
 const CORS_HEADERS: Record<string, string> = {
   'Content-Type': 'application/json',
@@ -28,8 +29,13 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  // Per-phase wall-clock time, sent as a Server-Timing header so a slow uncached load says where
+  // its time went (browser devtools → the request's Timing tab). The CDN replays the header of the
+  // request that filled the cache, so read it on a cache miss.
+  const timer = new SearchTimer();
+
   const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rl = await timer.time('ratelimit', checkRateLimit(ip, 'standard', CORS_HEADERS));
   if (rl.limited) return rl.response;
 
   const slug = event.queryStringParameters?.slug;
@@ -43,7 +49,24 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   }
 
   try {
-    let { bundle, failed } = await getArtistProfileBySlug(slug);
+    // Everything keyed by the slug in the URL starts at once, rather than one after another: the
+    // artist row with its profile and links (one query), the releases (found by slug, so they
+    // don't wait for the row's id), and the tips state. An uncached page used to wait on three
+    // database round trips in a row before it could answer, five with tips on; it now waits on
+    // one, two with tips on (the goals need the artist's id).
+    //
+    // UNS-215: the fan-facing tips flag (tipsFans) gates the tips payload — an artist may be
+    // onboarded with Stripe while fans are not yet allowed to tip. Off — or unreadable, since the
+    // flag store fails closed — renders `tips: { enabled: false, goals: [] }` and skips the tips
+    // query entirely. A failed tips read shows no Tip button (reported inside getTipsLiveSlugs)
+    // rather than failing the page.
+    const tipsFlag = getFeatureFlag('tipsFans');
+    const readTipsLive = (forSlug: string, phase: string) =>
+      timer.time(phase, tipsFlag.then(on => (on ? getTipsLiveSlugs([forSlug]) : null)));
+
+    let releasesRead = timer.time('releases', getArtistReleasesBySlug(slug, 60));
+    let tipsLiveRead = readTipsLive(slug, 'tips');
+    let { bundle, failed } = await timer.time('artist', getArtistProfileBySlug(slug));
 
     // A retired slug still resolves: the artist was merged into another row, or re-slugged when
     // accent folding was fixed (`trentem-ller` -> `trentemoller`). Only on a miss, so a live slug
@@ -55,14 +78,18 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // re-slugged five artists we publish and left every human following their old URL on the
     // not-found card while crawlers got a clean 301 from artist-page-static. Adding a URL-serving
     // reader of `artists.slug` means adding it here too.
+    //
+    // The reads started above were for the retired slug, so they start again for the live one.
     if (!bundle && !failed) {
-      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(slug);
+      const { canonical, failed: aliasFailed } = await timer.time('alias', resolveArtistSlugAlias(slug));
       // The alias lookup breaking is an outage too, not evidence the slug is gone — same 503
       // as the branch below, never a 404 that reads as "this artist doesn't exist".
       if (aliasFailed) {
         failed = true;
       } else if (canonical) {
-        ({ bundle, failed } = await getArtistProfileBySlug(canonical));
+        releasesRead = timer.time('alias-releases', getArtistReleasesBySlug(canonical, 60));
+        tipsLiveRead = readTipsLive(canonical, 'alias-tips');
+        ({ bundle, failed } = await timer.time('alias-artist', getArtistProfileBySlug(canonical)));
       }
     }
 
@@ -76,7 +103,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       });
       return {
         statusCode: 503,
-        headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store' },
+        headers: { ...CORS_HEADERS, 'Cache-Control': 'no-store', 'Server-Timing': timer.toServerTiming() },
         body: JSON.stringify({ error: 'Artist lookup temporarily unavailable' }),
       };
     }
@@ -99,7 +126,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       }
       return {
         statusCode: 404,
-        headers: CORS_HEADERS,
+        headers: { ...CORS_HEADERS, 'Server-Timing': timer.toServerTiming() },
         body: JSON.stringify({ error: 'Artist not found' }),
       };
     }
@@ -165,24 +192,13 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     const imageUrl = (isClaimed && profile?.custom_image_url) || artistRow.image_url || null;
 
     // Releases. The page paginates these ten at a time rather than listing them all, so the cap
-    // here bounds the payload, not what a fan can reach: six pages, which covers every catalogue
-    // measured so far (16 for Sufjan Stevens, 13 for Explosions in the Sky, 33 for the largest
-    // live Mirlo artist). Beyond it the list says how many more exist rather than fetching them.
-    // Whether the artist takes tips, read alongside the releases. A failed read shows no Tip
-    // button (reported inside getTipsLiveSlugs) rather than failing the page.
-    //
-    // UNS-215: the fan-facing tips flag (tipsFans) gates this payload too — an artist may be
-    // onboarded with Stripe while fans are not yet allowed to tip. Off — or unreadable, since the
-    // flag store fails closed — renders `tips: { enabled: false, goals: [] }` and skips the tips
-    // query entirely. The flag read rides along with the releases read rather than costing its own
-    // round trip, and hiding tips never fails the rest of the page.
-    const [{ releases, total: releaseCount }, tipsFlagOn] = await Promise.all([
-      getArtistReleases(artistRow.id, 60),
-      getFeatureFlag('tipsFans'),
-    ]);
-    const tipsLive = tipsFlagOn ? await getTipsLiveSlugs([artistRow.slug]) : null;
+    // (60, above) bounds the payload, not what a fan can reach: six pages, which covers every
+    // catalogue measured so far (16 for Sufjan Stevens, 13 for Explosions in the Sky, 33 for the
+    // largest live Mirlo artist). Beyond it the list says how many more exist rather than
+    // fetching them.
+    const [{ releases, total: releaseCount }, tipsLive] = await Promise.all([releasesRead, tipsLiveRead]);
     const tipsEnabled = tipsLive?.has(artistRow.slug) ?? false;
-    const goals = tipsEnabled ? await readOpenGoals(artistRow.id) : [];
+    const goals = tipsEnabled ? await timer.time('goals', readOpenGoals(artistRow.id)) : [];
 
     // "from $8 · ≈$6.80 to artist", and the platforms ordered artist-paying-first.
     //
@@ -251,6 +267,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
         // The canonical slug, not the requested one, so an alias URL's cached copy is purged
         // by the same call as the artist's own.
         'Cache-Tag': `artist-page-${artistRow.slug}`,
+        'Server-Timing': timer.toServerTiming(),
       },
       body: JSON.stringify(payload),
     };

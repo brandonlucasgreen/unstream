@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getArtistProfileBySlug: vi.fn(),
-  getArtistReleases: vi.fn(),
+  getArtistReleasesBySlug: vi.fn(),
   checkRateLimit: vi.fn(),
   checkSentryDedup: vi.fn(),
   captureMessage: vi.fn(),
@@ -42,7 +42,7 @@ vi.mock('../redis', () => ({
 
 vi.mock('../db', () => ({
   getArtistProfileBySlug: mocks.getArtistProfileBySlug,
-  getArtistReleases: mocks.getArtistReleases,
+  getArtistReleasesBySlug: mocks.getArtistReleasesBySlug,
   getClient: () => ({}),
   resolveArtistSlugAlias: mocks.resolveArtistSlugAlias,
 }));
@@ -95,7 +95,7 @@ describe('GET /api/artist-page', () => {
     // clearAllMocks leaves an unconsumed one queued to leak into the next test.
     vi.resetAllMocks();
     mocks.checkRateLimit.mockResolvedValue({ limited: false });
-    mocks.getArtistReleases.mockResolvedValue({ releases: [], total: 0 });
+    mocks.getArtistReleasesBySlug.mockResolvedValue({ releases: [], total: 0 });
     mocks.checkSentryDedup.mockResolvedValue(true);
     mocks.isPublishedArtistSlug.mockReturnValue(false);
     mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: null, failed: false });
@@ -344,7 +344,7 @@ describe('GET /api/artist-page', () => {
     };
 
     it('prices the leading artist-paying source, not the cheapest listing', async () => {
-      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 1 });
+      mocks.getArtistReleasesBySlug.mockResolvedValue({ releases: [release], total: 1 });
 
       const body = JSON.parse((await call('funkadelic')).body);
 
@@ -355,7 +355,7 @@ describe('GET /api/artist-page', () => {
     });
 
     it('says nothing rather than inventing a price when no source has a buyable offer', async () => {
-      mocks.getArtistReleases.mockResolvedValue({
+      mocks.getArtistReleasesBySlug.mockResolvedValue({
         releases: [{ ...release, sources: [{ platform: 'bandcamp', offers: [] }] }],
         total: 1,
       });
@@ -365,7 +365,7 @@ describe('GET /api/artist-page', () => {
     });
 
     it('keeps every field the release already had', async () => {
-      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 1 });
+      mocks.getArtistReleasesBySlug.mockResolvedValue({ releases: [release], total: 1 });
 
       const body = JSON.parse((await call('funkadelic')).body);
       // Additive only — the SPA artist page reads these and must not lose them.
@@ -381,7 +381,7 @@ describe('GET /api/artist-page', () => {
     it('reports the true total when the 60-release cap truncates the list', async () => {
       // The client shows "Showing 60 of 84" off this; collapsing them would imply the list is
       // the whole catalogue.
-      mocks.getArtistReleases.mockResolvedValue({ releases: [release], total: 84 });
+      mocks.getArtistReleasesBySlug.mockResolvedValue({ releases: [release], total: 84 });
 
       const body = JSON.parse((await call('funkadelic')).body);
       expect(body.releaseCount).toBe(84);
@@ -539,6 +539,73 @@ describe('GET /api/artist-page', () => {
 
       expect(JSON.parse((await call('funkadelic')).body).tips).toEqual({ enabled: false, goals: [] });
       expect(mocks.getTipsLiveSlugs).not.toHaveBeenCalled();
+    });
+
+    it('reads the tips of the canonical artist when the slug is an alias', async () => {
+      mocks.getArtistProfileBySlug
+        .mockResolvedValueOnce({ bundle: null, failed: false })
+        .mockResolvedValueOnce({
+          bundle: { artist: artistRow({ slug: 'trentemoller' }), profile: null, links: [] },
+          failed: false,
+        });
+      mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'trentemoller', failed: false });
+      mocks.getTipsLiveSlugs.mockImplementation(async (slugs: string[]) => new Set(slugs.filter(s => s === 'trentemoller')));
+
+      const body = JSON.parse((await call('trentem-ller')).body);
+
+      expect(body.tips.enabled).toBe(true);
+      expect(mocks.getTipsLiveSlugs).toHaveBeenLastCalledWith(['trentemoller']);
+    });
+  });
+
+  // An uncached page used to wait on three database round trips in a row (the artist, then its
+  // profile and links, then its releases) before it could answer. Everything keyed by the slug
+  // now starts at once; these pin that the reads don't drift back into a sequence.
+  describe('waits on as few round trips as possible', () => {
+    it('starts the releases and tips reads before the artist lookup has answered', async () => {
+      mocks.flagStore.set('tipsFans', 'on');
+      let answer!: (v: unknown) => void;
+      mocks.getArtistProfileBySlug.mockReturnValue(new Promise(resolve => { answer = resolve; }));
+
+      const pending = call('funkadelic');
+      // Let the flag read (a resolved promise) settle, without the artist lookup answering.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(mocks.getArtistReleasesBySlug).toHaveBeenCalledWith('funkadelic', 60);
+      expect(mocks.getTipsLiveSlugs).toHaveBeenCalledWith(['funkadelic']);
+
+      answer({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+      expect((await pending).statusCode).toBe(200);
+    });
+
+    it('serves the canonical artist\'s releases, not the retired slug\'s, for an alias', async () => {
+      mocks.getArtistProfileBySlug
+        .mockResolvedValueOnce({ bundle: null, failed: false })
+        .mockResolvedValueOnce({
+          bundle: { artist: artistRow({ slug: 'trentemoller' }), profile: null, links: [] },
+          failed: false,
+        });
+      mocks.resolveArtistSlugAlias.mockResolvedValue({ canonical: 'trentemoller', failed: false });
+      mocks.getArtistReleasesBySlug.mockImplementation(async (slug: string) =>
+        slug === 'trentemoller'
+          ? { releases: [{ slug: 'lost', title: 'Lost', releaseType: 'album', releaseDate: null, datePrecision: null, status: 'released', artworkUrl: null, sources: [] }], total: 1 }
+          : { releases: [], total: 0 });
+
+      const body = JSON.parse((await call('trentem-ller')).body);
+
+      expect(mocks.getArtistReleasesBySlug).toHaveBeenCalledWith('trentemoller', 60);
+      expect(body.releaseCount).toBe(1);
+      expect(body.releases[0].slug).toBe('lost');
+    });
+
+    it('says where the time went in a Server-Timing header', async () => {
+      mocks.getArtistProfileBySlug.mockResolvedValue({ bundle: { artist: artistRow(), profile: null, links }, failed: false });
+
+      const res = await call('funkadelic');
+
+      expect(res.headers['Server-Timing']).toMatch(/\bartist;dur=\d+/);
+      expect(res.headers['Server-Timing']).toMatch(/\breleases;dur=\d+/);
+      expect(res.headers['Server-Timing']).toMatch(/\btotal;dur=\d+/);
     });
   });
 });
