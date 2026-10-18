@@ -263,6 +263,36 @@ describe('user-sharing handler', () => {
     );
   });
 
+  // Lambda freezes once the handler returns, so a purge that isn't awaited can be lost and the
+  // list someone just made private keeps serving publicly from the CDN for its TTL.
+  it('POST waits for the CDN purge before answering a disable', async () => {
+    const maybeSingle = vi.fn(() => Promise.resolve({
+      data: { username: 'testuser', saved_artists_public: true },
+      error: null,
+    }));
+    const updateFn = vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) }));
+    mocks.mockFrom.mockReturnValueOnce({
+      select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle })) })),
+    }).mockReturnValueOnce({ update: updateFn });
+
+    let finishPurge!: () => void;
+    mocks.mockFetch.mockImplementationOnce(
+      () => new Promise(resolve => { finishPurge = () => resolve({ ok: true }); }),
+    );
+
+    let answered = false;
+    const pending = handler({ ...validEvent, httpMethod: 'POST', body: JSON.stringify({ public: false }) })
+      .then(res => { answered = true; return res; });
+
+    await vi.waitFor(() => expect(mocks.mockFetch).toHaveBeenCalled());
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(answered).toBe(false);
+
+    finishPurge();
+    const res = await pending;
+    expect(res!.statusCode).toBe(200);
+  });
+
   it('POST does NOT purge CDN cache when enabling sharing', async () => {
     const maybeSingle = vi.fn(() => Promise.resolve({
       data: { username: 'testuser', saved_artists_public: false },

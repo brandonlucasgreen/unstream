@@ -15,6 +15,7 @@
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, checkSentryDedup, getClientIp } from './ratelimit';
 import { requestArtistCatalog } from './request-catalog';
+import { purgeCacheTags } from './purge-cache';
 import { Sentry, withSentry } from '../lib/sentry';
 
 function getServiceClient() {
@@ -88,30 +89,6 @@ function invalidArtistSlugReason(artistSlug: string): { reason: string; error: s
 /** Truncated so an arbitrary client value can't blow up a Sentry tag. */
 function forTag(value: string): string {
   return value.length > 64 ? `${value.slice(0, 64)}…` : value;
-}
-
-// Fire-and-forget CDN cache purge by tag. Same pattern as artist-profile.ts.
-// No-op (with warning) if env vars aren't set (local dev/tests).
-function purgeCacheTag(handle: string): void {
-  const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-  const token = process.env.NETLIFY_API_TOKEN;
-  if (!siteId || !token) {
-    console.warn(`[saved-artists] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge for user-share-${handle}`);
-    return;
-  }
-  fetch('https://api.netlify.com/api/v1/purge', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      site_id: siteId,
-      cache_tags: [`user-share-${handle}`],
-    }),
-  })
-    .then(() => console.log(`[saved-artists] Purged CDN cache for user-share-${handle}`))
-    .catch((e) => console.error(`[saved-artists] CDN cache purge failed for user-share-${handle}:`, e));
 }
 
 const CORS_HEADERS = {
@@ -430,9 +407,11 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
 
     // If the user has public sharing enabled, purge the CDN cache for their page
     // so the removed artist disappears immediately instead of serving stale for ~5 min.
+    // Awaited: an un-awaited request can be lost when Lambda freezes after the response.
+    // purgeCacheTags never throws, so a failed purge can't fail the removal.
     const uname = unameResult.data;
     if (uname?.saved_artists_public && uname.username) {
-      purgeCacheTag(uname.username);
+      await purgeCacheTags([`user-share-${uname.username}`], 'saved-artists');
     }
 
     return {
