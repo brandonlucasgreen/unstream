@@ -130,6 +130,7 @@
     "functions/tips-http.ts",
     "functions/tips-connect.ts",
     "functions/tips-settings.ts",
+    "functions/tips-review-notify.ts",
     "functions/tips-checkout.ts",
     "functions/tips-webhook.ts",
     "functions/admin-tips.ts",
