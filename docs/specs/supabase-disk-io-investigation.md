@@ -891,7 +891,8 @@ above; until then, round 6 is closed.
 **Trigger:** the instance went unresponsive again (the 05:17 UTC sweep on 10-18 got a 504
 after 30 s; it normally answers in ~6 s). The owner's read of the dashboard: no obvious Disk IO
 spikes, and the database is still small. Rounds 3–6 fixed the writers; this round audited what
-reads Supabase per request, and what has been added since round 6.
+reads Supabase per request, and what has been added since round 6. The memory chart (below) then
+showed the outages are Nano's memory, not load.
 
 ## What landed
 
@@ -914,6 +915,29 @@ reads Supabase per request, and what has been added since round 6.
 - **GitHub's crons run 3–6 hours late.** The sweep scheduled for 01:00/13:00 UTC lands around
   05:00–07:00 and 16:00–19:00; the 09:17 backup around 13:00–17:00. Read the Disk IO graph
   against those times, not the cron lines.
+
+## The memory chart: what the outages actually are
+
+The owner's Reports → Database view for Oct 17 07:53 → Oct 18 07:53 settles round 6's open
+question (working set vs. platform):
+
+- **Memory usage:** ~160 MB used, ~230 MB cache + buffers, almost nothing free, and **~400 MB in
+  swap**, as much swapped out as resident.
+- **Memory commitment:** 1.27 GB committed against a commit limit of ~1.25 GB.
+- **Both flat across all 24 hours.** Traffic varies through a day; this doesn't. It is the fixed
+  footprint of the Supabase stack (Postgres, PostgREST, Auth, Realtime, Storage, the pooler,
+  logging) on a 0.5 GB Nano, not Unstream's load or its ~100 MB of data. It would look the same
+  with no visitors.
+
+Consequences: commitment over the limit means a spike leaves something unable to get memory, so a
+process stalls or is killed while Postgres still accepts connections (09-19, and the 10-18 05:17
+UTC sweep timeout). And with half the stack in swap, an uncached request that touches swapped-out
+memory waits on a throttled disk to read it back, which is the slow-uncached-load symptom. The Disk
+IO graph can look quiet throughout, because resident swap costs I/O only when pages move.
+
+No query or caching change shrinks that footprint; the fixes above reduce load on top of it. **This
+is the evidence for moving to Pro** (1 GB, `digitalocean-database-plan.md`'s step 1). Re-read the
+same two charts a day after: if swap is still in the hundreds of MB, Small compute (2 GB) is step 2.
 
 ## Measure after deploy
 
