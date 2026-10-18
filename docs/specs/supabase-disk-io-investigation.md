@@ -883,3 +883,66 @@ so the deletion ran), and `app_events_daily` holds 1,161 rows.
 
 The next full pack run (~2026-10-03) diffs table sizes against the pre-merge baseline
 above; until then, round 6 is closed.
+
+---
+
+# Round 7 (2026-10-18): reads, not writes
+
+**Trigger:** the instance went unresponsive again (the 05:17 UTC sweep on 10-18 got a 504
+after 30 s; it normally answers in ~6 s). The owner's read of the dashboard: no obvious Disk IO
+spikes, and the database is still small. Rounds 3–6 fixed the writers; this round audited what
+reads Supabase per request, and what has been added since round 6. The memory chart (below) then
+showed the outages are Nano's memory, not load.
+
+## What landed
+
+| # | Change | Where |
+|---|---|---|
+| 1 | `release-page` opts into CDN caching (`cache = "manual"`). Netlify ignores an edge function's cache headers without it, so its hour-long `Netlify-CDN-Cache-Control` had never applied: every human view and crawler hit of ~6,000 release URLs ran two queries, one a two-level nested embed over the release tables. Fall-throughs (timeouts, misses) are marked `no-store` so a blank SPA shell can't be cached at a release URL. | `netlify.toml`, `api/edge/release-page.ts` |
+| 2 | `getArtistBySlug` matches case variants by lowercasing the input and using `in`, not `slug.ilike`, which no index serves. Every writer of `artists.slug` lowercases it. Local Postgres 16: sequential scan of `artists` → unique-index lookup. Runs twice per web search. | `api/functions/db.ts`, `__tests__/get-artist-by-slug.test.ts` |
+| 3 | A partial trigram index for `findArtistSlugByIdentityUrl`'s `url ILIKE '%…%'`, covering only the identity platforms it queries. Local Postgres 16, PostgREST's parameterised shape after 6+ executions: full scan of `artist_links` (549 buffers) → bitmap index scan (112); index ~400 kB per 5k identity rows. Runs before each new artist row a search mints, awaited before the response. | `supabase/migrations/20261018120000_artist-links-identity-url-trgm.sql` |
+
+## Found, not changed
+
+- **`artist-page-static`, `u-handle` and `tip-page-meta` aren't CDN-cached either**, despite
+  their headers. The first two answer crawlers and browsers differently at one URL, so opting in
+  needs the cache key to vary on the crawler decision first; until then every crawler hit queries
+  Supabase.
+- **Each web search runs `findStoredArtists` twice**: `/api/search/stored` (#557) and Phase 1
+  both call it, behind 60 s of CDN.
+- **The extension writes analytics per detected track**, and since 2.7.3 that includes radio
+  sites.
+- **GitHub's crons run 3–6 hours late.** The sweep scheduled for 01:00/13:00 UTC lands around
+  05:00–07:00 and 16:00–19:00; the 09:17 backup around 13:00–17:00. Read the Disk IO graph
+  against those times, not the cron lines.
+
+## The memory chart: what the outages actually are
+
+The owner's Reports → Database view for Oct 17 07:53 → Oct 18 07:53 settles round 6's open
+question (working set vs. platform):
+
+- **Memory usage:** ~160 MB used, ~230 MB cache + buffers, almost nothing free, and **~400 MB in
+  swap**, as much swapped out as resident.
+- **Memory commitment:** 1.27 GB committed against a commit limit of ~1.25 GB.
+- **Both flat across all 24 hours.** Traffic varies through a day; this doesn't. It is the fixed
+  footprint of the Supabase stack (Postgres, PostgREST, Auth, Realtime, Storage, the pooler,
+  logging) on a 0.5 GB Nano, not Unstream's load or its ~100 MB of data. It would look the same
+  with no visitors.
+
+Consequences: commitment over the limit means a spike leaves something unable to get memory, so a
+process stalls or is killed while Postgres still accepts connections (09-19, and the 10-18 05:17
+UTC sweep timeout). And with half the stack in swap, an uncached request that touches swapped-out
+memory waits on a throttled disk to read it back, which is the slow-uncached-load symptom. The Disk
+IO graph can look quiet throughout, because resident swap costs I/O only when pages move.
+
+No query or caching change shrinks that footprint; the fixes above reduce load on top of it. **This
+is the evidence for moving to Pro** (1 GB, `digitalocean-database-plan.md`'s step 1). Re-read the
+same two charts a day after: if swap is still in the hundreds of MB, Small compute (2 GB) is step 2.
+
+## Measure after deploy
+
+- `curl -sI https://unstream.stream/a/<artist>/<release>` twice: the second `Cache-Status`
+  should include `hit`.
+- Query 4 of the round 6 pack: the `release_sources`/`release_offers` embed and the
+  `artists` slug lookup should fall down the `shared_blks_read` ranking.
+- Query 5: `idx_artist_links_identity_url_trgm` with a non-zero `idx_scan`.

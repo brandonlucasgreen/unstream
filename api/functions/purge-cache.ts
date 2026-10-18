@@ -1,9 +1,10 @@
 // Netlify CDN cache purge by tag.
 //
-// The edge functions that server-render artist and release pages cache aggressively (a day for
+// The edge functions that server-render artist and release pages set long CDN TTLs (a day for
 // the crawler-only artist page, an hour for release pages, which everyone sees). That is only safe
 // because the writes that change those pages purge them, so this is the counterpart to the
-// `Cache-Tag` headers in api/edge/artist-page-static.ts and api/edge/release-page.ts.
+// `Cache-Tag` headers in api/edge/artist-page-static.ts and api/edge/release-page.ts. Only the
+// release page is actually cached today; see the note on CDN_CACHE_CONTROL in artist-page-static.
 //
 // Netlify purges by *exact* tag — there are no wildcards — which is why release pages carry a
 // shared `artist-releases-${slug}` tag alongside their own: it's the only way to clear all of one

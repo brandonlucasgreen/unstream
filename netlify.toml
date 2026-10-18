@@ -120,6 +120,12 @@
   # so the exclusion has to be declared here or the redirect is never reached.
   excludedPattern = "^/a/[^/]+/releases\\.(ics|xml)$"
   function = "release-page"
+  # Netlify caches an edge function's response only when the function opts in, whatever its
+  # headers say. Without this, the hour-long Netlify-CDN-Cache-Control release-page.ts sets was
+  # ignored and every view and crawler hit queried Supabase. Safe here and only here among the
+  # edge functions: this page is the same for every visitor, whereas artist-page-static and
+  # u-handle answer crawlers and browsers differently at one URL, and the cache key is the URL.
+  cache = "manual"
 
 [[edge_functions]]
   path = "/artist/*"

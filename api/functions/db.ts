@@ -3890,9 +3890,7 @@ export async function getArtistBySlug(
   if (!client) return null;
 
   // Stored slugs only ever contain [a-z0-9-] (see artistSlug). Anything else
-  // can't match a real artist, and rejecting it here keeps the slug safe to
-  // interpolate into the PostgREST or() filter below (no ilike wildcards or
-  // filter-syntax characters).
+  // can't match a real artist, so it is rejected here without a query.
   if (!/^[A-Za-z0-9-]+$/.test(slug)) return null;
 
   try {
@@ -3903,27 +3901,33 @@ export async function getArtistBySlug(
     // They're fetched in ONE query — the old one-query-per-variant fallback
     // chain cost up to 4 sequential round-trips on every miss, and this
     // function runs at the front of every search.
-    const noHyphens = slug.includes('-') ? slug.replace(/-/g, '') : null;
+    //
+    // Case-insensitivity comes from lowercasing the input, not from `ilike`: every writer of
+    // `artists.slug` lowercases it (artistSlug, slugify in artist-profile.ts, the manifest), so
+    // the lowercase variant finds what `ilike` found. `ilike` can't use the slug's unique index,
+    // so it made this query a sequential scan of `artists` on every search; `in` is an index
+    // lookup. The exact input stays in the list for a stored slug that predates that rule.
+    const lowerSlug = slug.toLowerCase();
+    const noHyphens = slug.includes('-') ? lowerSlug.replace(/-/g, '') : null;
     const camelHyphenated = !slug.includes('-')
       ? slug.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
       : null;
 
-    const orFilters = [`slug.ilike.${slug}`]; // ilike without wildcards = case-insensitive match, covers exact too
-    if (noHyphens) orFilters.push(`slug.eq.${noHyphens}`);
-    if (camelHyphenated && camelHyphenated !== slug) orFilters.push(`slug.eq.${camelHyphenated}`);
+    const variants = new Set([slug, lowerSlug]);
+    if (noHyphens) variants.add(noHyphens);
+    if (camelHyphenated) variants.add(camelHyphenated);
 
     const { data: candidates, error: artistError } = await client
       .from('artists')
       .select('*')
-      .or(orFilters.join(','));
+      .in('slug', [...variants]);
 
     if (artistError || !candidates || candidates.length === 0) return null;
 
     const rows = candidates as ArtistRow[];
-    const lowerSlug = slug.toLowerCase();
     const artist =
       rows.find(r => r.slug === slug) ||
-      rows.find(r => r.slug.toLowerCase() === lowerSlug) ||
+      rows.find(r => r.slug === lowerSlug) ||
       (noHyphens ? rows.find(r => r.slug === noHyphens) : undefined) ||
       (camelHyphenated ? rows.find(r => r.slug === camelHyphenated) : undefined);
 
@@ -4247,6 +4251,12 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
  *     and the genuine same-artist pairs still resolve — `Big Thief`/`Bigthief`,
  *     `Creepy Nuts`/`Creepynuts`, `Cry Wolf`/`Crywolf`, `I.O.I`/`Ioi`, `Rue Oberkampf`/`Rueoberkampf`
  *     all via a shared Discogs artist id or Bandcamp subdomain.
+ *
+ * **Keep this list identical to the predicate of `idx_artist_links_identity_url_trgm`**
+ * (migration 20261018120000). That partial index is what keeps the `url ILIKE '%…%'` lookup below
+ * off a sequential scan of `artist_links`, and Postgres uses it only while every platform queried
+ * here is inside its predicate. Add a platform here without a migration and the lookup still
+ * works, just as a full scan again.
  */
 const IDENTITY_PLATFORMS = new Set([
   'bandcamp', 'mirlo', 'jamcoop', 'faircamp', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even', 'nina',

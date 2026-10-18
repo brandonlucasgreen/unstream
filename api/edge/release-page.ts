@@ -134,20 +134,37 @@ interface SourceRow {
   release_offers: OfferRow[] | null;
 }
 
+// Every way out of this function that isn't the rendered page goes through here.
+//
+// This function opts into CDN caching (`cache = "manual"` in netlify.toml), so the CDN caches
+// whatever it returns according to that response's headers — including whatever context.next()
+// hands back, which is the SPA shell or the next edge function's response. A fall-through is what
+// a database timeout looks like, and caching it would pin a blank page to a release URL: never
+// cache uncertainty.
+//
+// Copied into a new Response rather than set in place, because a redirect from further down the
+// chain can carry immutable headers.
+async function passThrough(context: Context): Promise<Response> {
+  const response = await context.next();
+  const headers = new Headers(response.headers);
+  headers.set('Netlify-CDN-Cache-Control', 'no-store');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default async function handler(request: Request, context: Context) {
   try {
     const url = new URL(request.url);
     const segments = url.pathname.replace(/\/$/, '').split('/').filter(Boolean);
     // ['a', artistSlug, releaseSlug] — the route regex guarantees the shape, but this function
     // is the thing that has to be right if that regex is ever loosened.
-    if (segments.length !== 3 || segments[0] !== 'a') return context.next();
+    if (segments.length !== 3 || segments[0] !== 'a') return passThrough(context);
 
     const artistSlug = decodeURIComponent(segments[1]);
     const releaseSlug = decodeURIComponent(segments[2]);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
-    if (!supabaseUrl || !supabaseKey) return context.next();
+    if (!supabaseUrl || !supabaseKey) return passThrough(context);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -200,7 +217,7 @@ export default async function handler(request: Request, context: Context) {
 
         const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
-        if (!canonical) return context.next();
+        if (!canonical) return passThrough(context);
 
         // max-age=3600, not the year a permanent redirect invites: browsers cache a 301
         // aggressively, and a slug that gets reassigned to a real artist has to be able to stop
@@ -246,7 +263,7 @@ export default async function handler(request: Request, context: Context) {
     } catch {
       // Timeout or error — fall through to the SPA rather than showing a broken page.
       clearTimeout(timeoutId);
-      return context.next();
+      return passThrough(context);
     }
 
     clearTimeout(timeoutId);
@@ -464,6 +481,10 @@ export default async function handler(request: Request, context: Context) {
         // request refreshes it: steady-state cost is one query per URL per hour regardless of
         // traffic. Artist edits don't wait for it — they purge (see purgeArtistCaches in
         // api/functions/artist-releases.ts).
+        //
+        // This header does nothing on its own: Netlify caches an edge function's response only
+        // when the function opts in, which is the `cache = "manual"` on this function's entry in
+        // netlify.toml. Until that line existed (2026-10-18), every hit queried Supabase.
         'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         // Two tags: the specific page, plus one shared by every release page of this artist.
         // Netlify purges by exact tag with no wildcards, and an artist editing their catalogue
@@ -473,6 +494,6 @@ export default async function handler(request: Request, context: Context) {
       },
     });
   } catch {
-    return context.next();
+    return passThrough(context);
   }
 }
