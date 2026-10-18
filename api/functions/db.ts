@@ -4434,7 +4434,7 @@ async function filterUnchangedLinks(
  * cards, not ArtistResult rows, and these are the only fields the write path
  * touches — it derives its own slug from `name` rather than trusting a card's.
  */
-interface PersistableResult {
+export interface PersistableResult {
   type: 'artist' | 'album' | 'track';
   name: string;
   imageUrl?: string;
@@ -4470,8 +4470,9 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
 
   // Search does NOT trigger release cataloging. See the note above persistSearchResults.
 
-  // This runs before the search response is sent, so wall-clock time matters:
-  // artists persist concurrently, and each artist's links go up in one bulk
+  // Normally runs in persist-search-results-background, after the search has responded, but
+  // request-persist.ts falls back to running it inline before the response, so wall-clock time
+  // still matters: artists persist concurrently, and each artist's links go up in one bulk
   // upsert instead of one round-trip per link.
   await Promise.all(results.map(async result => {
     if (result.type !== 'artist') return;
