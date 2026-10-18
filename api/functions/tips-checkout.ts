@@ -101,13 +101,17 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
   }
 
   const eligibility = await tipEligibility(slug);
+  // No such artist stays an immediate 404, uncached — a typo must never be answered with
+  // "isn't taking tips", and nothing here is worth remembering about it.
+  if (!eligibility.artist) return respond(eligibility.status, { error: eligibility.reason });
   const artist = eligibility.artist;
   // Flag off answers exactly what an artist who isn't taking tips answers, so an older client
-  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets.
-  if (!artist || !eligibility.ok || !tipsFlagOn) {
-    const body: TipPagePayload = { artist: artist ?? { id: '', slug, name: slug, imageUrl: null }, takingTips: false };
-    // Short window: an artist flipping their switch ON sees it within 10s.
-    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, 10);
+  // that only knows `takingTips` keeps working: 200, no fee, no goals, no presets. The negative
+  // body is only about a REAL artist being not-taking right now (= flag off, or their switch/
+  // eligibility off): short window, an artist flipping it back sees it within 10s.
+  if (!eligibility.ok || !tipsFlagOn) {
+    const body: TipPagePayload = { artist, takingTips: false };
+    await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, TIP_PAGE_NOT_TAKING_TTL_SECONDS);
     return respond(200, body);
   }
   const body: TipPagePayload = {
@@ -122,6 +126,8 @@ async function readTipPage(slug: string, tipsFlagOn: boolean) {
   await cacheSet(`tipspg:${stripeMode()}:${slug}`, body, 60);
   return respond(200, body);
 }
+
+const TIP_PAGE_NOT_TAKING_TTL_SECONDS = 10;
 
 interface TipPagePayload {
   artist: { id: string; slug: string; name: string; imageUrl: string | null };
