@@ -7,23 +7,24 @@ describe('supportPlatformGroups', () => {
   const groups = supportPlatformGroups();
   const platforms = groups.flatMap((g) => g.platforms);
 
-  it('covers marketplaces, patronage, decentralized and library platforms, in that order', () => {
-    expect(groups.map((g) => g.key)).toEqual(['marketplace', 'patronage', 'decentralized', 'library']);
+  it('covers marketplaces, patronage and library platforms, in that order (UNS-226)', () => {
+    expect(groups.map((g) => g.key)).toEqual(['marketplace', 'patronage', 'library']);
   });
 
   // UNS-222: bandwagon is a buy-music storefront, so it moved decentralized → marketplace.
-  // The decentralized group still renders when a future self-hosted search platform lands;
-  // today it is legitimately empty (funkwhale is enrichment-only, not searchable).
+  // UNS-226: no listing page renders the empty decentralized bucket anymore — it emptied
+  // when Faircamp went official (UNS-221) and funkwhale stayed enrichment-only. A future
+  // searchable self-hosted platform re-enters through its registry category (search cards
+  // render data-driven), and the listing pages once the group has content again.
   it('groups bandwagon with the marketplaces (UNS-222)', () => {
     const marketplace = groups.find((g) => g.key === 'marketplace')!;
     expect(marketplace.platforms.map((p) => p.id)).toContain('bandwagon');
-    const decentralized = groups.find((g) => g.key === 'decentralized')!;
-    expect(decentralized.platforms.map((p) => p.id)).not.toContain('bandwagon');
-    expect(decentralized.platforms).toHaveLength(0);
   });
 
-  it('leaves out official and social links', () => {
-    expect(platforms.map((p) => p.category)).not.toContain('official');
+  it('leaves out official, decentralized and social buckets', () => {
+    expect(groups.map((g) => g.key)).not.toContain('official');
+    // UNS-226: the empty decentralized block does not render on /platforms either.
+    expect(groups.map((g) => g.key)).not.toContain('decentralized');
     expect(platforms.map((p) => p.category)).not.toContain('social');
   });
 

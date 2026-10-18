@@ -9,7 +9,7 @@ import { Header } from './components/Header';
 import { LoadingLabel, SkeletonScreen } from './components/Skeleton';
 import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
-import { sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
+import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
 import { analytics } from './services/analytics';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
@@ -507,9 +507,9 @@ function App() {
                 </h2>
 
                 <div className="grid md:grid-cols-2 gap-6">
-                  {Object.entries(sourceCategories)
-                    .filter(([key]) => key !== 'social' && key !== 'official' && key !== 'curated')
-                    .map(([key, category]) => (
+                  {HOMEPAGE_SOURCE_CATEGORIES.map((key) => {
+                    const category = sourceCategories[key];
+                    return (
                     <div key={key}>
                       <h3 className="font-semibold text-text-primary mb-1">{category.name}</h3>
                       <p className="text-text-muted text-sm mb-4">{category.description}</p>
@@ -536,7 +536,8 @@ function App() {
                         })}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <p className="text-center text-text-muted text-sm mt-6">
