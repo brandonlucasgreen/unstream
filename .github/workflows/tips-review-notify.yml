@@ -1,0 +1,46 @@
+name: Tips review notifications
+
+# Pushes an ntfy alert whenever an artist newly lands in the admin tip review list — a row in
+# artist_tip_accounts whose tips_approved_at is null (the artist finished Stripe Connect
+# onboarding and an admin has to look at them before fans can pay). See
+# api/functions/tips-review-notify.ts for the classification (Upstash watermark of account ids
+# seen last run) and the ntfy publish.
+#
+# A GitHub Actions cron rather than a scheduled Netlify function: there are no scheduled Netlify
+# functions in this repo — same precedent as recatalog-sweep.yml, schedule-social-posts.yml, and
+# upstash-keepalive.yml.
+#
+# Cadence: every 30 minutes. The alert's whole point is to beat the artist's expectation that
+# "I connected Stripe, now fans can pay me" — minutes matter more than the handful of CI minutes
+# this costs (a dozen invocations a day, each one Supabase read + one Redis GET/SET).
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Manual trigger from the GitHub UI
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask for artists new to the tip review list and push ntfy for them
+        env:
+          INTERNAL_FUNCTION_SECRET: ${{ secrets.INTERNAL_FUNCTION_SECRET }}
+        run: |
+          if [ -z "$INTERNAL_FUNCTION_SECRET" ]; then
+            echo "::error::INTERNAL_FUNCTION_SECRET secret is not set"
+            exit 1
+          fi
+
+          response=$(curl -sS -X POST -w '\n%{http_code}' \
+            -H "Authorization: Bearer $INTERNAL_FUNCTION_SECRET" \
+            https://unstream.netlify.app/.netlify/functions/tips-review-notify)
+
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "$body"
+
+          case "$status" in
+            200) echo "::notice::run completed: $body" ;;
+            *)   echo "::error::tips-review-notify responded $status: $body"; exit 1 ;;
+          esac
