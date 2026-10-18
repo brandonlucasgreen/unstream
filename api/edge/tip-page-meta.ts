@@ -19,9 +19,15 @@ import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.
 import { buildTipPageMetaHtml, isTipSlug, TIP_RESERVED_SLUGS } from "../shared/tip-page-meta.ts";
 
 // The edge can't import api/functions, and /a/ does its own Supabase reads (artist-page-static
-// is the precedent this follows — 5-second timeout, fall through to the SPA on any failure so a
-// database hiccup costs a generic card rather than an error page where a payment flow starts).
+// is the precedent this follows — 5-second timeout with the signal on every query, fall through
+// to the SPA on any failure so a database hiccup costs a generic card rather than an error page
+// where a payment flow starts).
 const DATA_TIMEOUT_MS = 5000;
+
+// A day, like artist-page-static.ts: the render only ever reaches crawlers, each miss costs a
+// Supabase read, and every purge site that already clears that page (`artist-${slug}` tag below)
+// clears this one in the same call.
+const CDN_CACHE_CONTROL = 'public, s-maxage=86400, stale-while-revalidate=86400';
 
 /** The photo the /a/ page shows for this artist: profile custom image when claimed+verified, else the catalog image. */
 interface NameAndImage {
@@ -32,12 +38,22 @@ interface NameAndImage {
 // Same precedence artist-page-static.ts renders (`(claimed && custom_image_url) || image_url`) and
 // tipEligibility overrides into the payload (`if (p.custom_image_url) artist.imageUrl = ...`), so
 // the tip card and the artist card never disagree about whose face they show.
-export async function readTipPageNameAndImage(supabase: ReturnType<typeof createClient>, slug: string): Promise<NameAndImage | null> {
+//
+// Identity, not tips state: this read mirrors the catalog read (match_confidence + verified_at for
+// the photo rule) and deliberately stops there. The /tip page itself answers the not-taking states
+// with the same real name and photo (tips-checkout readTipPage), and eligibility re-checks live
+// inside checkout on every payment, so a card is never the thing to gate an account behind.
+export async function readTipPageNameAndImage(
+  supabase: ReturnType<typeof createClient>,
+  slug: string,
+  signal: AbortSignal,
+): Promise<NameAndImage | null> {
   const { data, error, status } = await supabase
     .from('artists')
     .select('name, image_url, match_confidence, artist_profiles ( custom_image_url, verified_at )')
     .eq('slug', slug)
-    .single();
+    .single()
+    .abortSignal(signal);
 
   if (error || !data) {
     // 42P01-style misses (PGRST on an unknown column or a schema hiccup) and code>400 read as "no
@@ -75,7 +91,7 @@ export default async function handler(request: Request, context: Context) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), DATA_TIMEOUT_MS);
       try {
-        return await readTipPageNameAndImage(supabase, slug);
+        return await readTipPageNameAndImage(supabase, slug, controller.signal);
       } catch (err) {
         console.error('[tip-page-meta] artist read failed:', String(err));
         return null;
@@ -93,7 +109,11 @@ export default async function handler(request: Request, context: Context) {
     return new Response(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
+        // Browsers never see this render (only social crawlers), so no browser cache; the CDN
+        // carries it for the day instead, same shape as artist-page-static.ts (whose TTL comment
+        // applies unchanged — a stale card can only lag a photo swap by a purge, never a payment).
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
         // Same tag artist-page-static.ts serves under: every purge site that already exists for
         // an artist's edge pages (profile save, tips settings, admin approve, photo refresh) now
         // refreshes the tip card too — sharing the tag, not adding a new one, is what keeps this
