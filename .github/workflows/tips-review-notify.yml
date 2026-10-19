@@ -44,3 +44,17 @@ jobs:
             200) echo "::notice::run completed: $body" ;;
             *)   echo "::error::tips-review-notify responded $status: $body"; exit 1 ;;
           esac
+      - name: Alert on failure (ntfy push)
+        if: failure()
+        env:
+          NTFY_CI_TOPIC: ${{ secrets.NTFY_CI_TOPIC }}
+        run: |
+          # Wake Brandon's phone natively: ntfy.sh topics push via APNs with no auth and no
+          # tailnet dependency (GitHub runners can't reach the self-hosted ntfy). Topic name
+          # doubles as the credential — unguessable hex, stored as a repo secret.
+          curl -sS -X POST -o /dev/null -w 'ntfy alert: %{http_code}\n' \
+            -H "Title: Tips review notify FAILED" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            -d "Tips review notifications workflow failed ($(date -u +%FT%TZ)). DB wedge candidates: Supabase down / function 5xx. Check: gh run list --workflow=tips-review-notify.yml" \
+            "https://ntfy.sh/$NTFY_CI_TOPIC"
