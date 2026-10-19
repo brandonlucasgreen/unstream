@@ -2,7 +2,8 @@
 
 **Date:** 2026-10-18
 **Status:** Decided (Brandon, 2026-10-18). Phases 1a, 1c and 1d built and verified locally, not
-cut over (see "Where Phase 1 stands"). Phase 1b not started.
+cut over (see "Where Phase 1 stands"). **Phase 1b is a prerequisite for the cutover, not a
+follow-up** — two blockers found on 2026-10-19 say why.
 **Scope:** everything around the database. Supabase stays for data and sign-in; the database is
 a later decision (see "Later").
 
@@ -155,19 +156,29 @@ nothing else. Supabase, Upstash and every environment variable stay as they are.
   becomes `waitUntil`. The web client's Sentry is unchanged.
 - **Secrets** move from Netlify's environment to Worker secrets.
 
-**1b. Background jobs and schedules**
-- **Search persistence:** `ctx.waitUntil()` after the response. `request-persist.ts` and the
-  persist background function go away.
+**1b. Background jobs and schedules — required before the cutover, not after.** See "Phase 1b is
+a prerequisite for the cutover" below for the two blockers that moved it.
+- **Search persistence:** `ctx.waitUntil()` after the response (done in 1a). `request-persist.ts`
+  and the persist background function go away. Safe on `waitUntil`: a handful of upserts, well
+  inside its 30-second ceiling.
 - **Catalogue crawls and the Bandcamp collection sync** become Queue consumers:
   - Queues gives retries, a dead-letter queue, concurrency as a setting (the crawl pacing budget)
     and a visible backlog. "Is cataloguing running?" becomes a glance; it would have caught the
     six days nothing was catalogued.
   - The internal HTTP handshakes, `internal-origin.ts` and the function-to-function
     `INTERNAL_FUNCTION_SECRET` checks for these jobs go away.
-  - Check a consumer's per-invocation limits against the longest discography crawl; split work
-    per page if needed.
+  - **Checked, 2026-10-19:** a queue consumer gets 15 minutes of wall clock, against a crawl
+    budgeted for 9 minutes of detail fetching and a 13-minute enrichment cutoff. It fits, but not
+    by much — so keep `DETAIL_BUDGET_MS` and `ENRICHMENT_CUTOFF_MS` under the 15, and split work
+    per page if either ever grows.
+  - `ctx.waitUntil` is **not** an option for these: it allows 30 seconds, and a crawl killed
+    there still counts as an attempt, so the artist is skipped until the cooldown lapses.
 - **Schedules:** the catalogue sweep and the tips-review notifier become Cron Triggers, and
-  `recatalog-sweep.yml` and `tips-review-notify.yml` go away.
+  `recatalog-sweep.yml` and `tips-review-notify.yml` go away. **This is the blocking part**: both
+  workflows name `unstream.netlify.app` on purpose (Bot Fight Mode challenges the runner on the
+  `unstream.stream` zone), so after the cutover they would drive the idle Netlify site and then
+  fail silently when it is retired. A Cron Trigger has no HTTP hop to be challenged, which also
+  retires `INTERNAL_FUNCTION_SECRET` and `api/lib/internal-origin.ts`.
 
 **1c. Caching on Cloudflare's own CDN**
 - `Netlify-CDN-Cache-Control` becomes the Cache API or `CDN-Cache-Control`. Release pages (#638)
@@ -184,12 +195,23 @@ nothing else. Supabase, Upstash and every environment variable stay as they are.
   build allowance**.
 
 **1e. Cutover**
-- Deploy to the Worker's `workers.dev` address and a staging hostname (e.g.
-  `next.unstream.stream`). Walk through:
+
+- **Stand up `next.unstream.stream`** — a custom hostname on the zone we already own, not the
+  free `*.workers.dev` address. Unstream has never had a staging environment; this is one, and it
+  costs nothing beyond the Worker already being paid for. The hostname matters: Cloudflare
+  documents the Cache API as functional on *custom domains*, and purge-by-tag is zone-scoped, so
+  `workers.dev` cannot verify either of the two things most worth verifying.
+- It reads and writes **production Supabase**, exactly as `npm run dev` does, so a test save,
+  claim or username is a real one. It needs its own copy of the secrets.
+- Walk through:
   - search, artist and release pages, and the edge-rendered pages as a crawler (curl with a
     Googlebot user agent);
   - sign-in, saves, and tips in test mode;
-  - feeds, `/appcast.xml` and the Queue-driven catalogue crawl.
+  - feeds, `/appcast.xml` and the Queue-driven catalogue crawl;
+  - **that purge-by-tag actually evicts a Cache API entry** — load a release page twice to get a
+    `cf-cache-status: HIT`, edit that artist, then confirm the page re-renders instead of serving
+    the old copy for the rest of the hour. This is the one thing no local run can prove, and the
+    docs support each half of the claim in a different place without ever joining them.
 - **Cutover:** route `unstream.stream` to the Worker.
 - **Rollback:** route it back to Netlify. Keep the Netlify site, idle, for two weeks.
 
@@ -211,24 +233,63 @@ rather than returning the SPA, and POST bodies reaching handlers intact.
 **Not cut over.** Production is still Netlify, and nothing here changes that; see "What Brandon
 has to do" below.
 
-**Not built: 1b.** Queues and Cron Triggers. Background work does now run in `ctx.waitUntil`
-rather than over HTTP (see below — it had to), but the catalogue sweep and the tips-review
-notifier are still GitHub Actions schedules hitting `/.netlify/functions/<name>`, which the
-Worker serves. Queues' retries, dead-letter queue, concurrency setting and visible backlog are
-the remaining prize.
+### Phase 1b is a prerequisite for the cutover (found 2026-10-19)
 
-**1c is done, and it was not what the plan assumed.** Two corrections worth keeping:
+1b was filed as the next nice thing: Queues for retries, a dead-letter queue, a visible backlog.
+Checking the numbers turned up two blockers instead. **Neither affects production today** —
+nothing is cut over — but both would bite on the day it is, and both are silent.
 
-- **A Worker's response is not cached by anything unless the Worker stores it.** Renaming the
-  header was never going to be enough: Cloudflare's CDN caches what comes back from an origin,
-  and a `Response` built inside a Worker never passes through that, so `CDN-Cache-Control` on it
-  is inert on its own. The Cache API is the mechanism (`workers/edge-cache.ts`), and a route opts
-  in with `cache: true`. That is the same trap Netlify had — where the header did nothing until
-  `cache = "manual"` appeared — and it fails the same silent way.
-- **Purge by tag is available on every plan**, not Enterprise, since April 2025. Most of what is
-  written about it still says otherwise. `purgeCacheTags` now purges Netlify *and* Cloudflare,
-  each when its own credentials are set, so the cutover and the rollback both keep working
-  without a code change. A throttled purge is reported rather than counted as done.
+**1. `ctx.waitUntil` gives 30 seconds. A catalogue crawl needs 9 to 13 minutes.**
+
+Cloudflare allows background work to continue for **30 seconds** after the response, shared
+across every `waitUntil` call in that request, and cancels whatever hasn't settled. A catalogue
+run is built around `DETAIL_BUDGET_MS = 9 minutes`, an `ENRICHMENT_CUTOFF_MS` of 13, and ~215
+seconds of measured fixed overhead (`catalog-artist-background.ts`). So a crawl moved onto
+`waitUntil` is killed roughly twenty times short of finishing.
+
+It is worse than a truncated crawl. `claimArtistForCatalog` writes `last_attempted_at` and
+returns *before* the crawl starts, so an artist killed at 30 seconds is recorded as attempted and
+is not retried until the cooldown expires. The symptom is a catalogue that looks healthy and
+quietly stops filling — the exact shape of "The six days nothing was catalogued".
+
+Queue consumers get **15 minutes**, which is why the crawls belong there. Until they are moved,
+the Worker must not be the thing serving cataloguing.
+
+*(The other two `waitUntil` users are fine: search persistence is a handful of upserts. The
+Bandcamp collection sync is the one to measure before trusting it — a large collection may not
+fit in 30 seconds either.)*
+
+**2. The scheduled jobs point at Netlify by name.**
+
+`recatalog-sweep.yml` and `tips-review-notify.yml` POST to the Netlify site by name
+(`unstream.netlify.app/.netlify/functions/<name>`) — deliberately, because Bot Fight Mode on the
+`unstream.stream` zone challenged
+the runner's curl and cost six days of cataloguing in October 2026. After the cutover those calls
+keep reaching the *idle Netlify site*, running the old code; once Netlify is retired two weeks
+later, they fail outright, and a job that never starts never reports a failure.
+
+Repointing them at Cloudflare walks straight back into Bot Fight Mode, so that is not the fix.
+**Cron Triggers are**, because they remove the HTTP hop altogether — which is also what makes
+`INTERNAL_FUNCTION_SECRET` and `internal-origin.ts` redundant.
+
+**What this changes:** do 1b before 1e. The ordering in "The phases, in order" above is otherwise
+unchanged.
+
+**1c is done.** One correction to the plan, and one thing the plan had right that most of the
+internet does not:
+
+- **Correction: a Worker's response is not cached by anything unless the Worker stores it.** This
+  plan said the header "becomes the Cache API *or* `CDN-Cache-Control`" — only the first of those
+  works. Cloudflare's CDN caches what comes back from an *origin*, and a `Response` built inside
+  a Worker never passes through that, so `CDN-Cache-Control` on it is inert on its own. The Cache
+  API is the mechanism (`workers/edge-cache.ts`), and a route opts in with `cache: true`. That is
+  the same trap Netlify had — where the header did nothing until `cache = "manual"` appeared —
+  and it fails the same silent way.
+- **Not a correction: purge by tag really is available on every plan**, as this plan assumed. It
+  stopped being Enterprise-only in April 2025, and most third-party write-ups are still stale on
+  that. `purgeCacheTags` now purges Netlify *and* Cloudflare, each when its own credentials are
+  set, so the cutover and the rollback both keep working without a code change. A throttled purge
+  is reported rather than counted as done.
 
 One header name serves both platforms: Netlify honours the standard `CDN-Cache-Control` as well
 as its own, so `Netlify-CDN-Cache-Control` is gone from all 15 files that set it.
@@ -299,10 +360,14 @@ Nothing in this phase touches production. To take it further:
    is what turns purging back on. Keep the Netlify ones until that site is retired — both are
    purged while both can serve. `URL` is already set as a var in `wrangler.jsonc`;
    `SENTRY_RELEASE` is worth setting at deploy time, which Netlify never did.
-3. **Deploy to `workers.dev` and a staging hostname** (`next.unstream.stream`) and walk 1e's
-   checklist against real data — above all sign-in, a save, a tip in test mode, and a catalogue
-   crawl, since those are the paths no local run can exercise.
-4. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
+3. **Get Phase 1b built** — Queues and Cron Triggers. Not optional: without it, cataloguing
+   stops quietly a day after the cutover, and the scheduled jobs keep driving a Netlify site that
+   is about to be switched off. See the blockers section below.
+4. **Stand up `next.unstream.stream`** (a custom hostname on the zone, not `workers.dev`) and
+   walk 1e's checklist against real data — above all sign-in, a save, a tip in test mode, a
+   catalogue crawl, and the purge-by-tag check, since those are the paths no local run can
+   exercise.
+5. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
    keep the Netlify site for two weeks.
 
 ### Phase 2: Upstash → Cloudflare (no cost change)

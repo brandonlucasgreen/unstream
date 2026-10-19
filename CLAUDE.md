@@ -300,8 +300,15 @@ anything under `api/edge/`.
   function; on Cloudflare that call would leave the edge and come straight back into our own
   zone, where free-plan Bot Fight Mode challenges it with no way to exempt it — the exact failure
   that catalogued nothing for six days. A caller that finds no dispatcher still falls back to the
-  old handshake, which is how `npm run dev` and the tests keep working. Queues, retries and a
-  visible backlog are Phase 1b and are not built.
+  old handshake, which is how `npm run dev` and the tests keep working.
+- **`waitUntil` allows 30 seconds, and a catalogue crawl needs 9–13 minutes.** That ceiling is
+  shared across every `waitUntil` call in a request, and whatever hasn't settled is cancelled.
+  Search persistence fits easily; **cataloguing does not**, and a crawl killed at 30 seconds still
+  counts as an attempt (`claimArtistForCatalog` writes `last_attempted_at` before it starts), so
+  the artist is skipped until the cooldown lapses — a catalogue that looks healthy and quietly
+  stops filling. Queue consumers get 15 minutes, which is where the crawls belong. **This makes
+  Phase 1b a prerequisite for the cutover, not a follow-up**; don't let the Worker serve
+  cataloguing until it is done.
 - **Sentry is `@sentry/cloudflare`,** same DSN and project. It has no `init()`: the client is
   created per request by the wrapper around the Worker's default export, which is also what ties
   flushing to `waitUntil`. Each handler's own `withSentry` still flushes before returning.
