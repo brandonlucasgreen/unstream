@@ -130,6 +130,6 @@
     "title": "Tip artists, straight to them",
     "description": "Artists connect their own Stripe account and a Tip button appears on their page and in results. You pay them directly — money lands in their own Stripe account, the artist-chosen fee (usually 0%) is shown before you pay, and your receipt comes from the artist's own Stripe. Tip from the site while you listen or from the Mac menu bar app.",
     "date": "2026-10-16",
-    "announced": false
+    "announced": true
   }
 ]
