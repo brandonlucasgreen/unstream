@@ -136,7 +136,7 @@ There is deliberately no `--write`; to test the write path, point `SUPABASE_URL`
 
 ### Keeping catalogues fresh
 
-Catalog triggers are all demand-driven — a save, an artist's own button, the admin command, a collection import — and `check-releases` only *reads* the catalogue, so without a scheduled refresh an artist saved once is catalogued once and their alerts quietly stop. `api/functions/recatalog-sweep.ts` fixes that, run every twelve hours by `recatalog-sweep.yml` at 25 artists per run (50 a day).
+Catalog triggers are all demand-driven — a save, an artist's own button, the admin command, a collection import — and `check-releases` only *reads* the catalogue, so without a scheduled refresh an artist saved once is catalogued once and their alerts quietly stop. `api/functions/recatalog-sweep.ts` fixes that, run once a day by `recatalog-sweep.yml` at 25 artists per run. It was every twelve hours until 2026-10-19, halved for the Nano's memory ceiling rather than for anything the sweep did (the sweep failed on its first read both outage nights); at 25 a day the queue only just drains inside the 7-day cooldown, so put the second run back once the database has headroom.
 
 **Search is deliberately not a trigger, directly or via the sweep** — queuing a crawl per Bandcamp-linked search result made an unauthenticated path the site's largest producer of database writes and exhausted the Supabase disk I/O budget; letting every searched artist into the sweep's pool did the same one step removed (the pool grew ~46 artists a day against the sweep's 50, so nearly every slot was a first-time crawl). Don't reintroduce either. The off-switch is the `RELEASE_CATALOG_ENABLED` env var — deleting it in Netlify stops cataloging with no deploy.
 

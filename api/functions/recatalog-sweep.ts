@@ -43,11 +43,12 @@ import { Sentry, withSentry } from '../lib/sentry';
  *
  * 25 matches MAX_ARTISTS_PER_RUN in catalog-artist-background, so a sweep is exactly one
  * background invocation — asking for more would silently drop the overflow. **The lever for
- * total throughput is the cron cadence, not this number.** At two runs a day that is 50
- * artists daily: saved artists (single figures) come round as soon as their 7-day cooldown
- * expires, and the ~2,500-artist tail rotates about every seven weeks. It was four runs until
- * disk I/O round 4 halved it; raise the cron frequency if the tail needs to be tighter and the
- * database has the headroom.
+ * total throughput is the cron cadence, not this number.** At one run a day that is 25 artists
+ * daily, against an `eligible` queue measured at 163 on 2026-10-18 — 6.5 days to come round
+ * against a 7-day cooldown, so a saved artist's alert has almost no slack left. It was four runs
+ * until disk I/O round 4 halved it and two until 2026-10-19 halved it again, for the instance's
+ * memory rather than for anything the sweep did; raise the cron frequency back as soon as the
+ * database has the headroom. The workflow's header has the arithmetic.
  *
  * That "cadence, not this number" rule is about **artists reached**, and it still holds. It did
  * not hold for *releases priced*, which is a different quantity and was starved somewhere else

@@ -10,25 +10,39 @@ name: Release catalogue sweep
 # functions in this repo, and this is the established precedent (schedule-social-posts.yml,
 # upstash-keepalive.yml).
 #
-# ## Cadence: every 12 hours
+# ## Cadence: once a day
 #
-# One run asks for at most 25 artists — one background invocation's worth — so two runs a day is
-# 50 artists daily. It was four runs (100 a day) until 2026-09-06; halved as part of disk I/O
-# round 4 (docs/specs/supabase-disk-io-investigation.md), because with the `searched` trigger
-# gone (#494) the sweep is the largest remaining writer, and most of what it does is first-time
-# catalogues from the backlog — the expensive case, nine indexes on `releases` per row. Restore
-# `0 1,7,13,19 * * *` once the Supabase disk I/O warning has stayed quiet for a month.
+# One run asks for at most 25 artists — one background invocation's worth — so one run a day is
+# 25 artists daily. It was four runs (100 a day) until 2026-09-06, halved to two as part of disk
+# I/O round 4 (docs/specs/supabase-disk-io-investigation.md) because with the `searched` trigger
+# gone (#494) the sweep is the largest remaining writer, and halved again on 2026-10-19 after the
+# instance went unresponsive overnight on 10-18 and 10-19.
+#
+# **That second halving does not claim the sweep caused those outages — it didn't.** Both nights
+# it failed on its *first* database read, which is a job noticing a wedged instance, not wedging
+# one; round 7 measured the cause as the Nano's memory ceiling (~1.27 GB committed against ~1.25
+# GB, ~400 MB swapped, flat around the clock) and the fix is Supabase Pro. This is the one lever
+# available without a plan change, taken deliberately with that in mind.
+#
+# **Restore `0 1,13 * * *` as soon as the instance has headroom** — that is the first thing to put
+# back, ahead of `0 1,7,13,19 * * *`, because at 25 a day the queue has almost no slack:
+# measured on 2026-10-18 the sweep reported `eligible: 163` against a 7-day cooldown, which is
+# 6.5 days to drain the queue at 25 a day against 3.3 days at 50. One failed or skipped run and
+# the artists at the back slip a cycle, so a saved artist's alert can be a week late rather than
+# arriving the day their cooldown expires.
 #
 # Since 2026-09-13 the sweep builds a first catalogue only for artists somebody has saved, claimed
 # or has in a connected collection (disk I/O round 5 — the pool was growing by ~46 searched
 # artists a day against a sweep of 50, so nearly every slot was a first-time crawl). Since
 # 2026-09-19 the same demand signals gate the refresh too (round 6, after the instance wedged):
 # an artist already catalogued whom nobody follows stops being refreshed — their page keeps
-# rendering the frozen catalogue — and is reported as `frozenCatalogues`. At 50 a day that means:
+# rendering the frozen catalogue — and is reported as `frozenCatalogues`. At 25 a day that means:
 #
-#   - Saved, claimed and collected artists come round as soon as their 7-day cooldown expires.
-#     They are the whole queue now, and there are a few hundred of them at most, so an alert
-#     never waits.
+#   - Saved, claimed and collected artists come round roughly as their 7-day cooldown expires.
+#     They are the whole queue now, and there are a few hundred of them at most — but see the
+#     slack arithmetic above: at this cadence the queue only just drains inside the cooldown,
+#     where at 50 a day it had days to spare. `eligible` climbing run after run is the signal
+#     that it no longer does.
 #   - `awaitingDemand` (never catalogued) and `frozenCatalogues` (catalogued, now frozen) growing
 #     in the log is search traffic and the gate working, not a backlog. `catalogueable`
 #     collapsing, or `eligible` at 0 while the saved/claimed/collected counts and `inCooldown`
@@ -38,10 +52,10 @@ name: Release catalogue sweep
 # artists and one second between release-page fetches, and stops starting them nine minutes into
 # a fifteen-minute invocation. At the response times measured on 2026-08-07 that deadline allows
 # roughly 160 release pages per run, on top of one grid page per Bandcamp artist (~17 of a
-# 25-artist batch). Two runs is therefore on the order of 350 sequential Bandcamp requests a day,
-# with a hard ceiling of 650 if Bandcamp ever answers fast enough to reach the 300-fetch
-# backstop — around one request a minute averaged, and never more than one a second, against
-# robots-permitted paths.
+# 25-artist batch). One run is therefore on the order of 175 sequential Bandcamp requests a day,
+# with a hard ceiling of 325 if Bandcamp ever answers fast enough to reach the 300-fetch
+# backstop — well under one request a minute averaged, and never more than one a second, against
+# robots-permitted paths. It was ~350/day at two runs.
 #
 # At four runs that was ~470/day until the detail cap was raised from 100, which had been rationing one
 # invocation's release-page reads across the whole batch and leaving the artists late in each
@@ -68,7 +82,7 @@ name: Release catalogue sweep
 
 on:
   schedule:
-    - cron: '0 1,13 * * *' # Every 12 hours, offset off the top-of-day cron rush
+    - cron: '0 1 * * *' # Once a day, offset off the top-of-day cron rush
   workflow_dispatch: # Manual trigger from the GitHub UI
 
 jobs:
