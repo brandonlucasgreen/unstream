@@ -20,7 +20,9 @@ The escalation order is now:
 Cloudflare Workers and leaves the database on Supabase. An all-DigitalOcean move was drafted and
 dropped the same day. This stays the fully planned option if the database ever moves to managed
 Postgres; from Workers it would also need PostgREST hosted somewhere, or the queries rewritten
-as SQL through Hyperdrive.
+as SQL through Hyperdrive. **Since 2026-10-19 it is not the recommended route:** that is running
+Supabase's own open-source stack on Hetzner (Elestio or Coolify), which keeps the code and
+sign-in unchanged. See "Later: the database" in that plan.
 
 The rest of this document is as it stood when the move was on hold. Re-check its numbers before
 using it.

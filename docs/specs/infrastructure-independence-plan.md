@@ -176,10 +176,11 @@ nothing else. Supabase, Upstash and every environment variable stay as they are.
 - **Cutover:** route `unstream.stream` to the Worker.
 - **Rollback:** route it back to Netlify. Keep the Netlify site, idle, for two weeks.
 
-**1f. Optional: own the auth URL.** Not needed while Supabase stays. If a Mac or extension
-release is going out anyway, point their auth at an `unstream.stream/auth/v1/*` proxy instead
-of the hard-coded `supabase.co` address (`AuthService.swift`, `lib/supabase.js`). A future auth
-move (or a self-hosted build) then needs no client release.
+**1f. Recommended: own the auth URL.** Not needed while Supabase stays, but it is the
+prerequisite for the later database route (see "Later"). Point the clients' auth at an
+`unstream.stream/auth/v1/*` proxy instead of the hard-coded `supabase.co` address
+(`AuthService.swift`, `lib/supabase.js`), in the next Mac and extension releases. A later
+database move (or a self-hosted build) then needs no client release.
 
 ### Phase 2: Upstash → Cloudflare (no cost change)
 
@@ -269,21 +270,77 @@ rest is done.
 
 ## Later: the database
 
-Supabase stays for data and sign-in. When it's worth revisiting:
-- **The outages** come from Supabase's own services exceeding the free Nano instance's memory
-  (disk I/O investigation, Round 7), not from Unstream's load. **Supabase Pro ($25/month) is the
-  fix**; upgrade when the outages cost more than that.
-- **If the database ever leaves Supabase,** the options as of 2026-10-18:
-  - **Managed Postgres elsewhere** (DigitalOcean, Scaleway, OVH). `digitalocean-database-plan.md`
-    is fully planned. From Workers it means either PostgREST in a container somewhere, or
-    rewriting the 373 query call sites as SQL through Hyperdrive. Sign-in needs a new home
-    either way.
-  - **Cloudflare D1** (SQLite). All-Cloudflare, but the biggest rewrite: every query, the 20
-    Postgres functions, the trigram index and pg_cron jobs, the migrations, plus replacing
-    Supabase Auth (e.g. Better Auth in Workers) across the web, Mac and extension clients.
-- **A self-hosted Unstream** would need the same database portability. Plain Postgres is the
-  easiest thing to self-host, which argues for the managed-Postgres route over D1 if it comes to
-  that.
+Supabase stays for data and sign-in. **The outages** come from Supabase's own services exceeding
+the free Nano instance's memory (disk I/O investigation, Round 7), not from Unstream's load.
+**Supabase Pro ($25/month) is the fix**; upgrade when the outages cost more than that.
+
+### The recommended route off Supabase: Supabase's own stack on Hetzner
+
+Decided 2026-10-19, for when leaving Supabase the company is worth it. What makes leaving
+expensive is the shape of the code (`supabase-js`, PostgREST, Supabase Auth), not the company.
+Supabase's stack is open source, so running it elsewhere keeps everything as it is:
+- the 373 query call sites and 20 Postgres functions;
+- RLS, migrations and the nightly backup;
+- sign-in in all three clients.
+
+**Hetzner:** a privately owned German host, not VC-backed, running its own data centres. Its US
+location is Ashburn, Virginia, near Supabase's current region; Falkenstein, Nuremberg and
+Helsinki are the EU options. Smart Placement keeps the Worker near whichever is chosen. A
+self-hosted Unstream could ship on the same stack.
+
+Two ways to run it:
+
+| | **Elestio** (preferred) | **Coolify on a Hetzner server** (fallback) |
+|---|---|---|
+| What it is | A managed service that deploys and operates Supabase's stack on a server at the provider you pick, Hetzner included | An open-source self-hosting panel (Coolify Cloud at $5/month, or self-hosted) that deploys Supabase's Docker stack on a Hetzner server Brandon rents |
+| Upkeep | Elestio: updates, backups, monitoring | Brandon, with Coolify's help: upgrades, disk, restores |
+| Billing | Elestio's plan for the server size, from prepaid credits. **Instances stop when credits run out** unless auto-recharge is on, so turn it on | Hetzner's server plus Coolify |
+| Unknowns | Elestio's ownership and funding (not found on 2026-10-19). Check before choosing | None beyond the upkeep |
+
+Size the server for the whole stack (Postgres, PostgREST, GoTrue, Kong, Storage, Realtime,
+Studio); Supabase's self-hosting guide gives a minimum of about 4 GB. Re-check prices when it
+comes up.
+
+**The move, in order:**
+1. **Prerequisite: Phase 1f.** The Mac app and extension reach sign-in through
+   `unstream.stream/auth/v1/*`, so the cutover is a server-side switch rather than a client
+   release.
+2. Stand up the stack. Pin Postgres's major version and GoTrue's close to hosted Supabase's.
+   Keep Postgres off the public internet and Studio behind a login.
+3. **Check sign-in tokens.** `middleware.ts` verifies them against a JWKS endpoint
+   (`createRemoteJWKSet`); confirm self-hosted GoTrue publishes one for its signing keys. If
+   hosted Supabase's signing key can't be carried over, everyone signs in once more after the
+   cutover.
+4. Restore the whole database, `auth` and `storage` schemas included, from a fresh dump taken
+   during a short write freeze. It's the same path the nightly backup's restore check already
+   proves (`docs/database-backups.md`).
+5. Point the Worker's Supabase URL and keys, and the `/auth/v1` proxy, at the new stack.
+   `supabase-migrate.yml` and `db-backup.yml` get the new database URL.
+6. **Rollback:** point them back. Keep the hosted project, read-only, for two weeks.
+
+Rules that carry over unchanged:
+- CLAUDE.md's "`REVOKE` … from `anon, authenticated`" applies: it's the same stack with the
+  same default privileges.
+- PostgREST's silent 1,000-row cap applies: same software.
+
+### Considered and not recommended (2026-10-18 and 10-19)
+
+- **Appwrite:**
+  - VC-backed: ~$37M, last a Tiger Global–led Series A in 2022.
+  - Its Cloud doesn't publish which provider runs its regions.
+  - Its own data and sign-in APIs mean rewriting every query and sign-in in all three clients.
+  - Appwrite 2.0's direct Postgres access (September 2026) would make it just another Postgres
+    host.
+- **Managed Postgres elsewhere** (DigitalOcean, Scaleway, OVH). `digitalocean-database-plan.md` is
+  fully planned. But from Workers it needs PostgREST hosted somewhere or the queries rewritten
+  as SQL through Hyperdrive, and sign-in needs a new home either way: more work than moving
+  Supabase's whole stack.
+- **Cloudflare D1, or PocketBase** (SQLite): the biggest rewrite:
+  - every query and the 20 Postgres functions;
+  - the trigram index and pg_cron jobs;
+  - the migrations;
+  - replacing Supabase Auth across the web, Mac and extension clients.
+- **Nhost:** VC-backed, on AWS.
 
 ## How CLAUDE.md changes, by phase
 
