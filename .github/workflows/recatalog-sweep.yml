@@ -104,3 +104,19 @@ jobs:
           # not fine if `catalogueable` has collapsed, which is what a broken or truncated
           # selection query looks like, and the two are indistinguishable without these counts.
           echo "Sweep OK: $body"
+
+      - name: Alert on failure (ntfy push)
+        if: failure()
+        env:
+          NTFY_CI_TOPIC: ${{ secrets.NTFY_CI_TOPIC }}
+        run: |
+          # Native phone push via ntfy.sh (APNs handles its own topics; GitHub runners can't
+          # reach the self-hosted ntfy behind the tailnet). Topic name doubles as the
+          # credential — unguessable hex stored as a repo secret. Fired for ANY failure:
+          # 403 challenge, 503 DB wedge ("schema cache" class), 504 inactivity timeout.
+          curl -sS -X POST -o /dev/null -w 'ntfy alert: %{http_code}\n' \
+            -H "Title: Recatalogue sweep FAILED" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            -d "Release catalogue sweep workflow failed ($(date -u +%FT%TZ)). If 503 schema-cache/504: Supabase wedged again — check: gh run view $(echo ${GITHUB_RUN_ID:-unknown})." \
+            "https://ntfy.sh/$NTFY_CI_TOPIC"

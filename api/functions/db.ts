@@ -892,6 +892,33 @@ export type StaleCatalogResult =
   | { ok: false; reason: string };
 
 /**
+ * The single row `stale_catalog_candidates()` returns, in its own snake_case.
+ *
+ * Kept separate from `StaleCatalogResult` on purpose: this is the database's shape and that is
+ * the sweep's, and writing the mapping out is what makes a column rename in the migration a
+ * compile-time problem here rather than an `undefined` in the sweep's log.
+ */
+interface StaleCatalogRow {
+  catalogueable: number;
+  saved_artists: number;
+  claimed_artists: number;
+  collected_artists: number;
+  awaiting_demand: number;
+  frozen_catalogues: number;
+  in_cooldown: number;
+  eligible: number;
+  candidates: {
+    artist_id: string;
+    saved: boolean;
+    claimed: boolean;
+    collected: boolean;
+    savers: number;
+    last_attempted_at: string | null;
+    releases_found: number | null;
+  }[] | null;
+}
+
+/**
  * The platforms `catalogArtist` can actually crawl.
  *
  * Deliberately **not** including `officialsite`: that link is only followed to *discover* other
@@ -902,9 +929,6 @@ export type StaleCatalogResult =
  * and turn the failure counters into noise.
  */
 const CATALOGUEABLE_PLATFORMS = ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo'] as const;
-
-/** Slugs per `.in()` when resolving collection artists — well inside PostgREST's URL and row caps. */
-const COLLECTED_SLUG_CHUNK = 100;
 
 /**
  * Whether a stored link is something the catalog pass can actually crawl.
@@ -917,8 +941,11 @@ const COLLECTED_SLUG_CHUNK = 100;
  * 2026-08-03: 189 such rows, and the 16 that had been swept were the *only* failures in
  * `release_catalog_state`, each climbing a backoff it could never escape.
  *
- * Used by both `getStaleCatalogCandidates` and `getArtistForCatalog` so the sweep's pool and
- * `catalogArtist`'s "is there anything to fetch" check cannot disagree about who is worth a run.
+ * `getArtistForCatalog` applies this so `catalogArtist` never fails on a link there was no point
+ * fetching. The sweep's pool needs the same rule, and since 2026-10-19 applies it in SQL instead
+ * (`NOT (platform = 'bandcamp' AND url LIKE '%bandcamp.com/search%')` in
+ * `stale_catalog_candidates`), so the two must now be changed together by hand — the migration's
+ * header says so from its side.
  */
 function isCatalogueableLink(platform: string, url: string): boolean {
   if (platform === 'bandcamp') return !isBandcampSearchLink(url);
@@ -1008,202 +1035,74 @@ export async function readAllPages<T>(
  * `claimArtistForCatalog` to refuse. That's not a second rate limiter — the same constant, read
  * up front — it's what stops a bounded batch being spent entirely on artists that will be
  * refused a moment later. The claim remains the authority; this only decides who to ask about.
+ *
+ * ## All of that now happens in SQL (2026-10-19)
+ *
+ * The rules above are implemented by `stale_catalog_candidates()`
+ * (`supabase/migrations/20261019120000_stale-catalog-candidates.sql`), which this function does
+ * nothing but call and map. **Change them there**, and read that migration's header before you
+ * do: it spells out which details are load-bearing.
+ *
+ * It used to do the work here, across six paged reads — every catalogue-able `artist_links` row,
+ * every undeleted save, every verified profile, every `collection_items` slug, those slugs
+ * resolved against `artists` in chunks, and the whole of `release_catalog_state` — combined with
+ * Sets and Maps. On the 2026-10-18 pool (`catalogueable: 5749`) that was over ten thousand rows
+ * serialised to JSON across ~20 PostgREST round trips to choose 25 ids.
+ *
+ * Disk I/O round 1 measured that and **dropped it as immaterial**, which was right: ~32 reads a
+ * day is nothing against an IOPS budget. Round 7 (2026-10-18) then measured the instance and
+ * found the real ceiling is memory — ~1.27 GB committed against ~1.25 GB, ~400 MB swapped, flat
+ * around the clock — which is a constraint those six full scans and that JSON do press on. The
+ * scans still happen inside Postgres; what stops is the rows leaving it. Measured on Postgres 16
+ * with the pool above: one call, 1,440 shared buffers, ~6 ms.
+ *
+ * `RECATALOG_COOLDOWN_HOURS` and `CATALOGUEABLE_PLATFORMS` are passed in rather than restated in
+ * SQL, so they keep one definition each.
  */
 export async function getStaleCatalogCandidates(limit: number): Promise<StaleCatalogResult> {
   const client = getClient();
   if (!client) return { ok: false, reason: 'Supabase is not configured on this deploy' };
 
-  const links = await readAllPages<{ artist_id: string | null; platform: string; url: string }>(
-    (from, to) =>
-      client
-        .from('artist_links')
-        .select('artist_id, platform, url')
-        .in('platform', CATALOGUEABLE_PLATFORMS as unknown as string[])
-        .range(from, to),
-    'catalogue-able artist links'
-  );
-  if (!links.ok) return links;
-
-  // One artist commonly has several of these platforms, so this is a set, not a count.
-  const pool = new Set<string>();
-  for (const row of links.rows) {
-    if (!row.artist_id) continue;
-    if (!isCatalogueableLink(row.platform, row.url)) continue;
-    pool.add(row.artist_id);
-  }
-
-  if (pool.size === 0) {
-    return {
-      ok: true,
-      candidates: [],
-      catalogueable: 0,
-      savedArtists: 0,
-      claimedArtists: 0,
-      collectedArtists: 0,
-      awaitingDemand: 0,
-      frozenCatalogues: 0,
-      inCooldown: 0,
-      eligible: 0,
-    };
-  }
-
-  // `deleted` is a tombstone, not a hard delete (migration 017) — an unsaved artist keeps a row
-  // so other devices can prune it, and re-crawling for someone who unsaved them is waste.
-  const saved = await readAllPages<{ artist_id: string | null }>(
-    (from, to) =>
-      client
-        .from('saved_artists')
-        .select('artist_id')
-        .eq('deleted', false)
-        .not('artist_id', 'is', null)
-        .range(from, to),
-    'saved artists'
-  );
-  if (!saved.ok) return saved;
-
-  const savers = new Map<string, number>();
-  for (const row of saved.rows) {
-    if (row.artist_id) savers.set(row.artist_id, (savers.get(row.artist_id) ?? 0) + 1);
-  }
-
-  // A verified claim only. A profile row exists from the moment someone starts the claim wizard,
-  // and until verification passes it is a stranger's assertion, not the artist's demand.
-  const profiles = await readAllPages<{ artist_id: string | null }>(
-    (from, to) =>
-      client
-        .from('artist_profiles')
-        .select('artist_id')
-        .not('verified_at', 'is', null)
-        .range(from, to),
-    'claimed artist profiles'
-  );
-  if (!profiles.ok) return profiles;
-
-  const claimed = new Set<string>();
-  for (const row of profiles.rows) {
-    if (row.artist_id) claimed.add(row.artist_id);
-  }
-
-  // Owning a record is the strongest statement of interest there is, and the collection import
-  // only asks for the first 25 artists of a sync directly (MAX_CATALOG_REQUESTS in
-  // collection-matching.ts) — the rest reach the crawler through here. Items carry a slug, not
-  // an artist id, so the slugs are resolved in chunks small enough for one PostgREST request.
-  const items = await readAllPages<{ artist_slug: string | null }>(
-    (from, to) =>
-      client
-        .from('collection_items')
-        .select('artist_slug')
-        .not('artist_slug', 'is', null)
-        .range(from, to),
-    'collection items'
-  );
-  if (!items.ok) return items;
-
-  const collectedSlugs = [...new Set(items.rows.map(r => r.artist_slug).filter((s): s is string => !!s))];
-  const collected = new Set<string>();
-  for (let i = 0; i < collectedSlugs.length; i += COLLECTED_SLUG_CHUNK) {
-    const { data, error } = await client
-      .from('artists')
-      .select('id')
-      .in('slug', collectedSlugs.slice(i, i + COLLECTED_SLUG_CHUNK));
-    if (error) return { ok: false, reason: `collection artists read failed: ${error.message}` };
-    for (const row of (data as { id: string }[]) ?? []) collected.add(row.id);
-  }
-
-  interface StateRow {
-    artist_id: string;
-    last_attempted_at: string | null;
-    last_catalogued_at: string | null;
-    releases_found: number | null;
-  }
-
-  // The whole table rather than an `in()` filter per chunk of ids: it holds one row per artist
-  // ever attempted, so it is bounded by the same population and paging it is fewer round trips.
-  const stateRows = await readAllPages<StateRow>(
-    (from, to) =>
-      client
-        .from('release_catalog_state')
-        .select('artist_id, last_attempted_at, last_catalogued_at, releases_found')
-        .range(from, to),
-    'catalog state'
-  );
-  if (!stateRows.ok) return stateRows;
-
-  const state = new Map<string, StateRow>();
-  for (const row of stateRows.rows) state.set(row.artist_id, row);
-
-  const cooldownCutoff = Date.now() - RECATALOG_COOLDOWN_HOURS * 3600_000;
-  const candidates: StaleCatalogCandidate[] = [];
-  let inCooldown = 0;
-  let awaitingDemand = 0;
-  let frozenCatalogues = 0;
-
-  for (const artistId of pool) {
-    const row = state.get(artistId);
-    const count = savers.get(artistId) ?? 0;
-    const isSaved = count > 0;
-    const isClaimed = claimed.has(artistId);
-    const isCollected = collected.has(artistId);
-
-    // The demand gate. Until 2026-09-19 (disk I/O round 6) an already-catalogued artist kept
-    // being refreshed whoever they were, which left the recurring refresh bill a function of
-    // search traffic: every artist a search ever resolved stayed in the 7-day rotation
-    // forever, the sustained I/O from that rotation wedged the instance on 2026-09-19, and
-    // unlike round 5's first-catalogue gate this tail could never drain. Now nobody's save,
-    // claim or collection means no sweep attention at all. Their state row stays and their
-    // page keeps rendering the frozen catalogue — prices go stale, the page does not empty —
-    // a stale price on a page nobody follows, weighed against an indefinite refresh bill for
-    // that same page. Saving the artist still catalogues immediately, whatever is frozen.
-    if (!isSaved && !isClaimed && !isCollected) {
-      // A row with only failed attempts counts as never catalogued — there is nothing stored
-      // to keep fresh, and retrying it for nobody is how the searched-but-unwanted tail keeps
-      // costing writes (round 5). Everything else is a frozen catalogue.
-      if (row?.last_catalogued_at) {
-        frozenCatalogues++;
-      } else {
-        awaitingDemand++;
-      }
-      continue;
-    }
-    if (row?.last_catalogued_at && new Date(row.last_catalogued_at).getTime() > cooldownCutoff) {
-      inCooldown++;
-      continue;
-    }
-    candidates.push({
-      artistId,
-      saved: isSaved,
-      claimed: isClaimed,
-      collected: isCollected,
-      savers: count,
-      lastAttemptedAt: row?.last_attempted_at ?? null,
-      releasesFound: row?.releases_found ?? null,
-    });
-  }
-
-  const wanted = (c: StaleCatalogCandidate) => c.saved || c.claimed || c.collected;
-  candidates.sort((a, b) => {
-    if (wanted(a) !== wanted(b)) return wanted(a) ? -1 : 1;
-    if (a.lastAttemptedAt === null || b.lastAttemptedAt === null) {
-      if (a.lastAttemptedAt !== b.lastAttemptedAt) return a.lastAttemptedAt === null ? -1 : 1;
-    } else {
-      // Compared as instants, not strings: PostgREST timestamps can differ in offset notation.
-      const diff = new Date(a.lastAttemptedAt).getTime() - new Date(b.lastAttemptedAt).getTime();
-      if (diff !== 0) return diff;
-    }
-    return b.savers - a.savers;
+  const { data, error } = await client.rpc('stale_catalog_candidates', {
+    p_limit: limit,
+    p_cooldown_hours: RECATALOG_COOLDOWN_HOURS,
+    p_platforms: CATALOGUEABLE_PLATFORMS as unknown as string[],
   });
+
+  if (error) {
+    console.error('[DB] stale catalog candidates read failed:', error.message);
+    return { ok: false, reason: `Could not select catalogue candidates: ${error.message}` };
+  }
+
+  // PostgREST returns a set-returning function as an array; this one returns exactly one row.
+  // No row is not an empty pool — an empty pool is a row of zeros — so it is a failure, for the
+  // same reason the result type is three-valued: "we couldn't ask" must not read as "nothing to
+  // do", which the sweep would report as a quiet, successful run.
+  const row = (data as StaleCatalogRow[] | null)?.[0];
+  if (!row) {
+    console.error('[DB] stale catalog candidates returned no row');
+    return { ok: false, reason: 'Candidate selection returned no row' };
+  }
 
   return {
     ok: true,
-    candidates: candidates.slice(0, limit),
-    catalogueable: pool.size,
-    savedArtists: [...savers.keys()].filter(id => pool.has(id)).length,
-    claimedArtists: [...claimed].filter(id => pool.has(id)).length,
-    collectedArtists: [...collected].filter(id => pool.has(id)).length,
-    awaitingDemand,
-    frozenCatalogues,
-    inCooldown,
-    eligible: candidates.length,
+    candidates: (row.candidates ?? []).map(c => ({
+      artistId: c.artist_id,
+      saved: c.saved,
+      claimed: c.claimed,
+      collected: c.collected,
+      savers: c.savers,
+      lastAttemptedAt: c.last_attempted_at,
+      releasesFound: c.releases_found,
+    })),
+    catalogueable: row.catalogueable,
+    savedArtists: row.saved_artists,
+    claimedArtists: row.claimed_artists,
+    collectedArtists: row.collected_artists,
+    awaitingDemand: row.awaiting_demand,
+    frozenCatalogues: row.frozen_catalogues,
+    inCooldown: row.in_cooldown,
+    eligible: row.eligible,
   };
 }
 

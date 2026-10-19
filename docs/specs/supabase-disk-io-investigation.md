@@ -946,3 +946,43 @@ same two charts a day after: if swap is still in the hundreds of MB, Small compu
 - Query 4 of the round 6 pack: the `release_sources`/`release_offers` embed and the
   `artists` slug lookup should fall down the `shared_blks_read` ranking.
 - Query 5: `idx_artist_links_identity_url_trgm` with a non-zero `idx_scan`.
+
+## Follow-up (2026-10-19): the sweep's selection moves into SQL
+
+**Trigger:** the instance went unresponsive again overnight. The 05:32 UTC sweep answered 503
+with PostgREST's `Could not query the database for the schema cache`, on `getStaleCatalogCandidates`
+— its *first* read, before anything was dispatched — and the 06:40 UTC `tips-review-notify` run
+then timed out at 504. The last healthy read was the 01:00 UTC tips run. So the sweep was the
+alarm again, not the cause: a job that dies on its opening query cannot have caused the state it
+died in, and the 10-18 16:16 UTC sweep had dispatched its 25 artists with nine healthy hours
+after it. Round 7's reading stands, and **Pro remains the fix**.
+
+What did change is the reading of the sweep's own selection. It was round 1's item #4, dropped
+after measurement as immaterial — correctly, against an IOPS budget. Round 7 established the
+binding constraint is memory, and six full scans plus ten thousand-plus rows of PostgREST JSON
+press on that one. So it moved into Postgres:
+
+| # | Change | Where |
+|---|---|---|
+| 4 | `getStaleCatalogCandidates` calls one `stale_catalog_candidates()` function instead of paging `artist_links`, `saved_artists`, `artist_profiles`, `collection_items`, `artists` and `release_catalog_state` and combining them in Node. ~20 PostgREST round trips and >10,000 rows of JSON become one round trip and one row. `RECATALOG_COOLDOWN_HOURS` and `CATALOGUEABLE_PLATFORMS` are passed in, so each keeps one definition. | `supabase/migrations/20261019120000_stale-catalog-candidates.sql`, `api/functions/db.ts` |
+
+Measured on Postgres 16 in Docker against the 2026-10-18 pool (8,000 artists, 14,439 link rows,
+`catalogueable: 5749`): **one call, 1,440 shared buffers, ~6 ms**, and all eight counters
+reproduce that day's sweep log exactly. The scans still happen — this does not make the sweep
+free — what stops is the rows leaving Postgres.
+
+**An index on `artist_links (platform)` was measured and rejected.** With it: 5.5 ms and 1,366
+buffers, against 6.3 ms and 1,443 without — ~12% of 6 ms, twice a day, for a 120 kB index
+maintained on every `artist_links` write, and `persistSearchResults` writes that table on every
+search. Round 1's "measure before adding an index" verdict on this same index holds; only the
+read side's reasoning changed, not the write side's.
+
+**Testing note.** The selection's 30-odd behavioural rules were covered by a suite driving a fake
+PostgREST client, which would have been reduced to checking that eight fields get renamed. The
+suite now loads the migration into PGlite (Postgres as WebAssembly, no Docker) and runs the real
+SQL in CI — stronger than before, since it used to test a TypeScript reimplementation of the
+rules. Five deliberate mutations of the SQL (placeholder exclusion, cooldown column, savers
+tiebreak, frozen-vs-awaiting split, tombstones) each fail it. PGlite cannot check function
+grants, because vanilla Postgres has no Supabase default privileges, so
+`migration-function-grants.test.ts` asserts by text that every migration since the 2026-09-19
+cleanup revokes EXECUTE from `PUBLIC, anon, authenticated`.
