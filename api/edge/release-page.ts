@@ -148,7 +148,7 @@ interface SourceRow {
 async function passThrough(context: Context): Promise<Response> {
   const response = await context.next();
   const headers = new Headers(response.headers);
-  headers.set('Netlify-CDN-Cache-Control', 'no-store');
+  headers.set('CDN-Cache-Control', 'no-store');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -483,14 +483,22 @@ export default async function handler(request: Request, context: Context) {
         // traffic. Artist edits don't wait for it — they purge (see purgeArtistCaches in
         // api/functions/artist-releases.ts).
         //
-        // This header does nothing on its own: Netlify caches an edge function's response only
-        // when the function opts in, which is the `cache = "manual"` on this function's entry in
-        // netlify.toml. Until that line existed (2026-10-18), every hit queried Supabase.
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        // This header does nothing on its own, on either platform, and that is worth saying
+        // plainly because it fails silently both times. Netlify caches an edge function's
+        // response only when the function opts in (`cache = "manual"` on its netlify.toml
+        // entry); a Worker's response is cached only when the Worker stores it (`cache: true`
+        // on this route, which turns on workers/edge-cache.ts). Until the Netlify line existed
+        // (2026-10-18) every hit queried Supabase while looking perfectly healthy.
+        //
+        // `CDN-Cache-Control` rather than `Netlify-CDN-Cache-Control`: both platforms honour the
+        // standard name, so one header serves whichever is live. The separate `Cache-Control`
+        // above is what the *browser* is told, and it stays short because prices are
+        // user-visible; the Worker keeps the two apart across a cache hit.
+        'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         // Two tags: the specific page, plus one shared by every release page of this artist.
-        // Netlify purges by exact tag with no wildcards, and an artist editing their catalogue
-        // needs all of their release pages gone at once — this is the only way to say that in
-        // one purge call.
+        // Purging is by exact tag with no wildcards on both platforms, and an artist editing
+        // their catalogue needs all of their release pages gone at once — this is the only way
+        // to say that in one purge call.
         'Cache-Tag': `release-${artistSlug}-${releaseSlug},artist-releases-${artistSlug}`,
       },
     });

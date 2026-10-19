@@ -314,10 +314,18 @@ anything under `api/edge/`.
 - **`/api/social-card/*` is proxied to the Netlify site**, because the function reads fonts off
   disk and loads resvg's wasm. It is already scheduled for deletion (#649 moved card drawing into
   the weekly generator); remove the proxy, the route and the function together.
-- **CDN caching is still Netlify's** (Phase 1c, not done). The renderers send
-  `Netlify-CDN-Cache-Control` and `purge-cache.ts` calls Netlify's purge API, both of which
-  Cloudflare ignores — so the release page's hour-long TTL would stop applying and every view
-  would query Supabase. That has to land before the cutover, not after.
+- **A response the Worker builds is cached only when the Worker stores it.** `CDN-Cache-Control`
+  is inert on its own — Cloudflare's CDN caches what comes back from an *origin*, which a Worker
+  response never is. `workers/edge-cache.ts` is the mechanism and a route opts in with
+  `cache: true`, the same shape as Netlify's `cache = "manual"` and the same silent failure if
+  you forget. **The cache key is the URL**, so only routes where one URL is one response for
+  everyone may opt in: the release page and six credential-free API reads. The crawler/browser
+  pages and anything varying by API key or sign-in must stay out — `workers/routes.ts` says
+  which and why, and a test holds the line.
+- **`CDN-Cache-Control`, not `Netlify-CDN-Cache-Control`.** Both platforms honour the standard
+  name. `purgeCacheTags` purges Netlify and Cloudflare, each when its own credentials are set
+  (`CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN`), so cutover and rollback need no code change.
+  Purge-by-tag is on every Cloudflare plan since April 2025, whatever older write-ups say.
 - **`npm run dev:worker`** runs it locally against the same production Supabase `npm run dev`
   uses. `npx wrangler deploy --dry-run` bundles without an account and is the fastest way to
   check a change still builds.

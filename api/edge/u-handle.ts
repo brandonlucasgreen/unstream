@@ -322,7 +322,7 @@ export default async function handler(request: Request, context: Context) {
         // sync), so the TTL only bounds staleness if a purge is missed — it is not the
         // freshness mechanism, and at 300s this was 3 queries per handle per five minutes
         // of crawler traffic.
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'Cache-Tag': `user-share-${handle}`,
       },
     });

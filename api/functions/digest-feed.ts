@@ -77,7 +77,7 @@ async function handleRequest(event: { httpMethod?: string }): Promise<FeedRespon
       'Cache-Control': 'public, max-age=900',
       // The digest changes once a week, so the CDN holds it for an hour: a new issue takes at
       // most that long to appear here, and the function runs roughly once an hour at most.
-      'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
     },
     body,
   };

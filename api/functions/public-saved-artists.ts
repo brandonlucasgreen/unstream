@@ -164,7 +164,7 @@ async function handleRequest(event: {
         // already purges it or does as of this change, so the TTL is a backstop, not the
         // freshness mechanism.
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+        'CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
         'Cache-Tag': `user-share-${handle}`,
       },
       body: JSON.stringify({

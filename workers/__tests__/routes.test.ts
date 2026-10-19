@@ -146,3 +146,44 @@ describe('route order', () => {
     expect(matchRoute('/assets/index-abc123.js')?.route).toMatchObject({ kind: 'missing-asset' });
   });
 });
+
+describe('which routes may be cached', () => {
+  /**
+   * The cache key is the URL, so a route may only opt in when one URL is one response for
+   * everybody. Getting this wrong doesn't error — it serves one person's answer to another.
+   */
+  const cached = ROUTES.filter((route) => 'cache' in route && route.cache).map((route) => route.pattern);
+
+  it('caches the release page, the one server-rendered page that is the same for everyone', () => {
+    expect(cached).toContain('/a/:artist/:release');
+  });
+
+  it('never caches a page that answers crawlers and browsers differently at one URL', () => {
+    // artist-page-static, u-handle and tip-page-meta all render for crawlers and hand real
+    // browsers to the SPA. Cached by URL, a crawler's render would be served to people.
+    for (const pattern of ['/a/*', '/artist/*', '/u/*', '/tip/*', '/']) {
+      expect(cached).not.toContain(pattern);
+    }
+  });
+
+  it('never caches an endpoint whose answer depends on a credential', () => {
+    // The v1 endpoints pick their TTL from the caller's API key tier, and collection art belongs
+    // to one signed-in fan. Keying those by credential is a job of its own.
+    for (const pattern of ['/api/v1/search', '/api/v1/artist/*', '/api/v1/resolve', '/api/collection/art/*']) {
+      expect(cached).not.toContain(pattern);
+    }
+  });
+
+  it('caches the public reads that are keyed by URL alone', () => {
+    expect(cached).toEqual(
+      expect.arrayContaining(['/api/artist-page', '/api/v1/platforms', '/api/release/:artist/:release']),
+    );
+  });
+
+  it('never caches anything that writes', () => {
+    const writeRoutes = ROUTES.filter(
+      (route) => 'cache' in route && route.cache && /\/(claim|tips|me|admin|analytics|newsletter)\//.test(route.pattern),
+    );
+    expect(writeRoutes).toEqual([]);
+  });
+});

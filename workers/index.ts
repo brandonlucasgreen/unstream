@@ -28,6 +28,7 @@ import { toFunctionEvent, toResponse, type FunctionEvent } from './function-adap
 import { FUNCTION_HANDLERS } from './function-handlers.ts';
 import { EDGE_RENDERERS } from './edge-renderers.ts';
 import { matchRoute } from './routes.ts';
+import { withEdgeCache } from './edge-cache.ts';
 import { withSiteHeaders } from './response-headers.ts';
 
 // `Env` is generated into worker-configuration.d.ts from wrangler.jsonc's bindings and vars, so
@@ -105,7 +106,7 @@ function backgroundDispatcher(ctx: ExecutionContext, request: Request): Backgrou
   };
 }
 
-async function route(request: Request, env: Env): Promise<Response> {
+async function route(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const url = new URL(request.url);
 
   if (PROXIED_TO_NETLIFY.some((prefix) => url.pathname.startsWith(prefix))) {
@@ -131,7 +132,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     case 'function': {
       const handler = FUNCTION_HANDLERS[matched.route.name];
       if (!handler) return new Response('Function not found', { status: 404 });
-      return toResponse(await handler(await toFunctionEvent(request)));
+      const run = async () => toResponse(await handler(await toFunctionEvent(request)));
+      return matched.route.cache ? withEdgeCache(request, ctx, run) : run();
     }
 
     case 'edge': {
@@ -139,7 +141,8 @@ async function route(request: Request, env: Env): Promise<Response> {
       if (!render) return serveSpa(request, env);
       // `context.next()` means "not mine — serve the SPA". Every renderer decides that per
       // request, before any database query: one route, one renderer.
-      return render(request, { next: () => serveSpa(request, env) });
+      const renderPage = () => render(request, { next: () => serveSpa(request, env) });
+      return matched.route.cache ? withEdgeCache(request, ctx, renderPage) : renderPage();
     }
 
     case 'redirect':
@@ -180,7 +183,7 @@ export default Sentry.withSentry(sentryOptions, {
     }
 
     const response = await withBackgroundDispatcher(backgroundDispatcher(ctx, request), () =>
-      route(request, env),
+      route(request, env, ctx),
     );
     return withSiteHeaders(response);
   },

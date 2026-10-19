@@ -131,7 +131,7 @@ describe('collection-art handler', () => {
     expect(res.headers['Content-Type']).toBe('image/jpeg');
     expect(res.isBase64Encoded).toBe(true);
     // Cached hard at the CDN so one page view doesn't re-hit Bandcamp per tile.
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=2592000');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=2592000');
   });
 
   it('refuses a public request when the owner has not shared their page', async () => {
@@ -174,7 +174,7 @@ describe('collection-art handler', () => {
     const res = await get();
     expect(res.statusCode).toBe(404);
     // A month-long cache would freeze a transient upstream failure into a permanent gap.
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=300');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=300');
   });
 
   it('404s rather than throwing when Bandcamp errors', async () => {
@@ -182,7 +182,7 @@ describe('collection-art handler', () => {
     mocks.mockFetchCoverArt.mockRejectedValue(new Error('upstream exploded'));
     const res = await get();
     expect(res.statusCode).toBe(404);
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=300');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=300');
   });
 
   it('404s when the owner has disconnected Bandcamp', async () => {

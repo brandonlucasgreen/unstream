@@ -254,7 +254,7 @@ describe('absence versus failure', () => {
     mocks.getReleaseDetail.mockResolvedValue({ detail: null, failed: false });
     const res = await get();
     expect(res.statusCode).toBe(404);
-    expect(res.headers['Netlify-CDN-Cache-Control']).toBeUndefined();
+    expect(res.headers['CDN-Cache-Control']).toBeUndefined();
   });
 
   // A Supabase outage must not render as "this release doesn't exist" — and must not be cached
@@ -265,7 +265,7 @@ describe('absence versus failure', () => {
 
     expect(res.statusCode).toBe(503);
     expect(res.headers['Cache-Control']).toBe('no-store');
-    expect(res.headers['Netlify-CDN-Cache-Control']).toBeUndefined();
+    expect(res.headers['CDN-Cache-Control']).toBeUndefined();
     expect(mocks.captureMessage).toHaveBeenCalled();
   });
 
@@ -385,7 +385,7 @@ describe('the payload', () => {
 
   it('caches at the CDN, since this is public data', async () => {
     const res = await get();
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=300');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=300');
     expect(res.headers['Cache-Tag']).toBe('release-detail-boy-harsher-get-mean');
   });
 

@@ -1,8 +1,8 @@
 # Infrastructure independence: Netlify → Cloudflare, GitHub → Codeberg
 
 **Date:** 2026-10-18
-**Status:** Decided (Brandon, 2026-10-18). Phase 1a and 1d built and verified locally, not cut
-over (see "Where Phase 1 stands"). Phases 1b and 1c not started.
+**Status:** Decided (Brandon, 2026-10-18). Phases 1a, 1c and 1d built and verified locally, not
+cut over (see "Where Phase 1 stands"). Phase 1b not started.
 **Scope:** everything around the database. Supabase stays for data and sign-in; the database is
 a later decision (see "Later").
 
@@ -201,7 +201,7 @@ database move (or a self-hosted build) then needs no client release.
 
 ### Where Phase 1 stands (2026-10-18)
 
-**Built and verified locally: 1a and 1d.** The Worker runs the whole site — 66 handlers, 7
+**Built and verified locally: 1a, 1c and 1d.** The Worker runs the whole site — 66 handlers, 7
 server-rendered pages, the SPA — and `npm run verify` is green (2,191 API and Worker tests, 1,340
 web tests, a clean typecheck of every handler the Worker imports). It bundles to 666 KB gzipped
 and was walked through end to end under `wrangler dev`: API routes, the retired-guides redirects,
@@ -217,14 +217,37 @@ notifier are still GitHub Actions schedules hitting `/.netlify/functions/<name>`
 Worker serves. Queues' retries, dead-letter queue, concurrency setting and visible backlog are
 the remaining prize.
 
-**Not built: 1c, and it must land before the cutover.** The edge renderers still send
-`Netlify-CDN-Cache-Control` and `purge-cache.ts` still calls Netlify's purge API — Cloudflare
-ignores the first and the second would be purging a CDN that no longer serves the site. Nothing
-breaks, but the release page's hour-long TTL silently stops applying, so **every release page
-view would query Supabase**, which is the exact cost #638 was added to avoid and the kind of
-regression that shows up as a disk-I/O bill rather than an error. The work is small: the header
-becomes `CDN-Cache-Control` (or the Cache API), and `purgeCacheTags` becomes Cloudflare's
-purge-by-tag, keeping the `Cache-Tag` names. Do it in its own PR before 1e.
+**1c is done, and it was not what the plan assumed.** Two corrections worth keeping:
+
+- **A Worker's response is not cached by anything unless the Worker stores it.** Renaming the
+  header was never going to be enough: Cloudflare's CDN caches what comes back from an origin,
+  and a `Response` built inside a Worker never passes through that, so `CDN-Cache-Control` on it
+  is inert on its own. The Cache API is the mechanism (`workers/edge-cache.ts`), and a route opts
+  in with `cache: true`. That is the same trap Netlify had — where the header did nothing until
+  `cache = "manual"` appeared — and it fails the same silent way.
+- **Purge by tag is available on every plan**, not Enterprise, since April 2025. Most of what is
+  written about it still says otherwise. `purgeCacheTags` now purges Netlify *and* Cloudflare,
+  each when its own credentials are set, so the cutover and the rollback both keep working
+  without a code change. A throttled purge is reported rather than counted as done.
+
+One header name serves both platforms: Netlify honours the standard `CDN-Cache-Control` as well
+as its own, so `Netlify-CDN-Cache-Control` is gone from all 15 files that set it.
+
+**What is cached, and what deliberately isn't.** The cache key is the URL, so a route may only
+opt in where one URL is one response for everyone: the release page (the measured win — ~6,000
+URLs, two Supabase queries each), plus six credential-free API reads (`artist-page`,
+`release-detail`, `platforms-list`, `public-saved-artists`, `artist-lookup`, `digest-feed`).
+Left uncached on purpose: `artist-page-static`, `u-handle` and `tip-page-meta`, which answer
+crawlers and browsers differently at one URL; and `search-sources-v1`, `artist-lookup-v1`,
+`resolve-url-v1` and `collection-art`, which vary by credential — the three v1 endpoints pick
+their TTL from the caller's API key tier, and collection art belongs to one signed-in fan.
+**Those four lose CDN caching at the cutover**; giving it back means keying the cache on the
+credential tier, which is a job of its own and is the one piece of 1c left on the table.
+
+**Still unverified without a Cloudflare account:** that purge-by-tag actually evicts entries
+written by the Cache API. The docs say the Cache API respects `Cache-Tag` and that purge-by-tag
+is plan-wide, but the two claims live in different places. Check it on the staging hostname
+before the cutover — edit an artist, then confirm their release page re-renders.
 
 **What the port turned up, which the plan didn't anticipate:**
 
@@ -271,14 +294,15 @@ Nothing in this phase touches production. To take it further:
 1. **Enable Workers Paid** ($5/month) on the Cloudflare account that already holds the DNS zone.
 2. **Set the Worker's secrets** with `wrangler secret put <NAME>`, or paste them in the
    dashboard: the same values Netlify holds, minus the build-time ones that never reached a
-   function anyway (`CONTEXT`, `COMMIT_REF`, `COMMIT_SHA`) and minus the Netlify API credentials
-   once 1c has replaced the purge. `URL` is already set as a var in `wrangler.jsonc`;
+   function anyway (`CONTEXT`, `COMMIT_REF`, `COMMIT_SHA`), plus **`CLOUDFLARE_ZONE_ID` and
+   `CLOUDFLARE_PURGE_TOKEN`** (an API token with the Cache Purge permission on that zone), which
+   is what turns purging back on. Keep the Netlify ones until that site is retired — both are
+   purged while both can serve. `URL` is already set as a var in `wrangler.jsonc`;
    `SENTRY_RELEASE` is worth setting at deploy time, which Netlify never did.
-3. **Get 1c done first** — see above; without it the release page stops being CDN-cached.
-4. **Deploy to `workers.dev` and a staging hostname** (`next.unstream.stream`) and walk 1e's
+3. **Deploy to `workers.dev` and a staging hostname** (`next.unstream.stream`) and walk 1e's
    checklist against real data — above all sign-in, a save, a tip in test mode, and a catalogue
    crawl, since those are the paths no local run can exercise.
-5. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
+4. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
    keep the Netlify site for two weeks.
 
 ### Phase 2: Upstash → Cloudflare (no cost change)

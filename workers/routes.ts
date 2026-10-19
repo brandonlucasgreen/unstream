@@ -17,10 +17,24 @@
 // is kept idle for rollback, and goes when netlify.toml does.
 
 export type Route =
-  /** Hand off to a function handler in api/functions/. */
-  | { pattern: string; kind: 'function'; name: string }
-  /** Hand off to a server-rendered page in api/edge/. */
-  | { pattern: string; kind: 'edge'; name: string }
+  /**
+   * Hand off to a function handler in api/functions/.
+   *
+   * `cache: true` has the same meaning and the same condition as on an edge route: the response
+   * is stored under its URL, so it is only safe where the URL is the whole of the question. A
+   * handler that reads a credential is excluded — see CACHED_FUNCTIONS below.
+   */
+  | { pattern: string; kind: 'function'; name: string; cache?: true }
+  /**
+   * Hand off to a server-rendered page in api/edge/.
+   *
+   * `cache: true` lets the page's `CDN-Cache-Control` actually mean something — without it the
+   * header is inert, because a Worker's own response is never cached by anything unless the
+   * Worker stores it (see workers/edge-cache.ts). It is safe only where one URL produces one
+   * response for everybody: the cache key is the URL, so a page that answers crawlers and
+   * browsers differently would start serving the crawler's render to people.
+   */
+  | { pattern: string; kind: 'edge'; name: string; cache?: true }
   /** A permanent redirect. */
   | { pattern: string; kind: 'redirect'; to: string; status: 301 }
   /**
@@ -46,7 +60,14 @@ const EDGE_ROUTES: Route[] = [
   // Exactly two segments under /a/, so single-segment artist URLs never reach it. The feed
   // routes below `FUNCTION_ROUTES` used to need an excludedPattern here; now they just sit
   // above it in the combined list.
-  { pattern: '/a/:artist/:release', kind: 'edge', name: 'release-page' },
+  //
+  // The one cached route, and the only one that can be: this page is pure SSR for everyone, so
+  // one URL is one response. There are ~6,000 of these URLs against ~800 artist pages and every
+  // miss costs two Supabase queries, one a two-level nested embed, which is what makes the TTL
+  // here worth more than anywhere else on the site. artist-page-static, u-handle and
+  // tip-page-meta answer crawlers and browsers differently at one URL and must stay uncached —
+  // the same reason only this one carried `cache = "manual"` on Netlify.
+  { pattern: '/a/:artist/:release', kind: 'edge', name: 'release-page', cache: true },
   { pattern: '/artist/*', kind: 'edge', name: 'artist-page-static' },
   { pattern: '/a/*', kind: 'edge', name: 'artist-page-static' },
   { pattern: '/search', kind: 'edge', name: 'noscript-search' },
@@ -58,6 +79,28 @@ const EDGE_ROUTES: Route[] = [
   { pattern: '/contact', kind: 'edge', name: 'static-page-meta' },
   { pattern: '/platforms', kind: 'edge', name: 'static-page-meta' },
 ];
+
+/**
+ * The API responses allowed into Cloudflare's cache, and why these and no others.
+ *
+ * A Worker's response is cached only when the Worker stores it, under the request's URL. These
+ * six read nothing but the URL — no `Authorization`, no API key — so one URL really is one
+ * response, and they keep the TTLs they had on Netlify.
+ *
+ * The four left out set a cache header too, and it stays inert here on purpose:
+ * `search-sources-v1`, `artist-lookup-v1` and `resolve-url-v1` choose their TTL from the
+ * caller's API key tier, and `collection-art` serves a signed-in fan's cover art. Storing any of
+ * them under the URL alone would hand one caller's answer to another. Keying them by credential
+ * tier is the way to get their caching back, and is a job of its own.
+ */
+const CACHED_FUNCTIONS: ReadonlySet<string> = new Set([
+  'digest-feed',
+  'artist-page',
+  'release-detail',
+  'platforms-list',
+  'public-saved-artists',
+  'artist-lookup',
+]);
 
 /** Ported one-for-one from netlify.toml's `[[redirects]]`, in the same order. */
 const FUNCTION_ROUTES: Route[] = [
@@ -158,7 +201,9 @@ export const ROUTES: Route[] = [
   ...FUNCTION_ROUTES.filter((route) => FEED_PATTERNS.has(route.pattern)),
   ...EDGE_ROUTES,
   ...FUNCTION_ROUTES.filter((route) => !FEED_PATTERNS.has(route.pattern)),
-];
+].map((route) =>
+  route.kind === 'function' && CACHED_FUNCTIONS.has(route.name) ? { ...route, cache: true } : route,
+);
 
 export interface RouteMatch {
   route: Route;

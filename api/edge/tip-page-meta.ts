@@ -114,7 +114,7 @@ export default async function handler(request: Request, context: Context) {
         // carries it for the day instead, same shape as artist-page-static.ts (whose TTL comment
         // applies unchanged — a stale card can only lag a photo swap by a purge, never a payment).
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
+        'CDN-Cache-Control': CDN_CACHE_CONTROL,
         // Same tag artist-page-static.ts serves under: every purge site that already exists for
         // an artist's edge pages (profile save, tips settings, admin approve, photo refresh) now
         // refreshes the tip card too — sharing the tag, not adding a new one, is what keeps this

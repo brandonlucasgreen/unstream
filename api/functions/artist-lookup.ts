@@ -53,7 +53,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 's-maxage=60, stale-while-revalidate=60',
+        'CDN-Cache-Control': 's-maxage=60, stale-while-revalidate=60',
         'Cache-Tag': `artist-${slug}`,
       },
       body: JSON.stringify(artist),

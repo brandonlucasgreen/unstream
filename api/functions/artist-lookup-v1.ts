@@ -92,7 +92,7 @@ async function handleRequest(event: NetlifyEvent) {
         ...rateLimitHeaders,
         'X-Request-Id': requestId,
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': apiKeyInfo ? 's-maxage=14400, stale-while-revalidate=3600' : 's-maxage=1800, stale-while-revalidate=300',
+        'CDN-Cache-Control': apiKeyInfo ? 's-maxage=14400, stale-while-revalidate=3600' : 's-maxage=1800, stale-while-revalidate=300',
         'Cache-Tag': `artist-${slug}`,
       },
       body: JSON.stringify(v1Response(artist, requestId, rl.rateLimitInfo)),

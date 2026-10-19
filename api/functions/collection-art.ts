@@ -38,7 +38,7 @@ const JSON_HEADERS = { ...BASE_HEADERS, 'Content-Type': 'application/json' };
 /** A month at the CDN, a day in the browser. Album art for a bought record doesn't change. */
 const IMAGE_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=86400',
-  'Netlify-CDN-Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=86400',
+  'CDN-Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=86400',
 };
 
 /**
@@ -48,7 +48,7 @@ const IMAGE_CACHE_HEADERS = {
  */
 const MISS_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=300',
-  'Netlify-CDN-Cache-Control': 'public, s-maxage=300',
+  'CDN-Cache-Control': 'public, s-maxage=300',
 };
 
 interface ItemRow {

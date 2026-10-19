@@ -850,7 +850,7 @@ export default async function handler(request: Request, context: Context) {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Cache-Control': 'public, max-age=0, must-revalidate',
-          'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
+          'CDN-Cache-Control': CDN_CACHE_CONTROL,
           'Cache-Tag': `artist-${slug}`,
         },
       });
@@ -955,7 +955,7 @@ export default async function handler(request: Request, context: Context) {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': CDN_CACHE_CONTROL,
+        'CDN-Cache-Control': CDN_CACHE_CONTROL,
         'Cache-Tag': `artist-${slug}`,
       },
     });

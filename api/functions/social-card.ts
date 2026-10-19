@@ -72,13 +72,13 @@ const JSON_HEADERS = { 'Content-Type': 'application/json' };
 /** A month at the CDN. The URL pins the platform and release, so the slide doesn't go stale. */
 const IMAGE_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=86400',
-  'Netlify-CDN-Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=86400',
+  'CDN-Cache-Control': 'public, s-maxage=2592000, stale-while-revalidate=86400',
 };
 
 /** "Nothing to draw" is an answer, so it's cached, but briefly: the artist may add the missing piece. */
 const MISS_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=300',
-  'Netlify-CDN-Cache-Control': 'public, s-maxage=300',
+  'CDN-Cache-Control': 'public, s-maxage=300',
 };
 
 /** The database or an image host didn't answer. Never cached: that isn't "nothing to draw". */
