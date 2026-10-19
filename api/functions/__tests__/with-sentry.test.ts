@@ -1,28 +1,33 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * Netlify functions run on Lambda, which freezes the process as soon as the handler resolves, so
- * a captured Sentry event is lost unless the handler waits for it to send. `withSentry` does that
- * wait, but only when the invocation actually captured something.
+ * An invocation can be torn down as soon as it has answered — on Lambda the process froze
+ * outright — so a captured Sentry event is lost unless the handler waits for it to send.
+ * `withSentry` does that wait, but only when the invocation actually captured something.
  */
 
 const mocks = vi.hoisted(() => ({
-  init: vi.fn(),
   captureException: vi.fn(),
   captureMessage: vi.fn(),
   flush: vi.fn(() => Promise.resolve(true)),
 }));
 
-vi.mock('@sentry/node', () => mocks);
+vi.mock('@sentry/cloudflare', () => mocks);
 
-// lib/sentry initializes on import, and only when a DSN is set.
+// Captures only go anywhere when a DSN is set, and withSentry only flushes then. The DSN stays
+// set for the whole file: isSentryInitialized() reads the environment when it is called, not
+// once at import, so clearing it here would quietly turn every flush assertion below into a
+// test of the no-DSN path instead.
 const savedDsn = process.env.SENTRY_DSN;
 process.env.SENTRY_DSN = 'https://public@example.ingest.sentry.io/1';
+afterAll(() => {
+  if (savedDsn === undefined) delete process.env.SENTRY_DSN;
+  else process.env.SENTRY_DSN = savedDsn;
+});
+
 const { Sentry, withSentry, isSentryInitialized } = await import('../../lib/sentry');
-if (savedDsn === undefined) delete process.env.SENTRY_DSN;
-else process.env.SENTRY_DSN = savedDsn;
 
 describe('withSentry', () => {
   beforeEach(() => {
@@ -31,7 +36,7 @@ describe('withSentry', () => {
     mocks.flush.mockClear();
   });
 
-  it('initializes Sentry when SENTRY_DSN is set', () => {
+  it('reports itself configured when SENTRY_DSN is set', () => {
     expect(isSentryInitialized()).toBe(true);
   });
 
@@ -86,7 +91,7 @@ describe('withSentry', () => {
   });
 });
 
-describe('every Netlify function exports its handler through withSentry', () => {
+describe('every function exports its handler through withSentry', () => {
   const functionsDir = join(__dirname, '..');
   const files = readdirSync(functionsDir).filter((name) => name.endsWith('.ts'));
   const exportsHandler = /export\s+(?:async\s+function|function|const|let|var)\s+handler\b|export\s*\{[^}]*\bhandler\b[^}]*\}/;

@@ -15,7 +15,8 @@
 // `/a/artist/release` and artist-page-static would otherwise answer first. The regex here
 // matches exactly two path segments so single-segment artist URLs never reach it.
 
-import { Context } from "https://edge.netlify.com";
+import { edgeEnv } from "./edge-context.ts";
+import type { Context } from "./edge-context.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
@@ -162,8 +163,8 @@ export default async function handler(request: Request, context: Context) {
     const artistSlug = decodeURIComponent(segments[1]);
     const releaseSlug = decodeURIComponent(segments[2]);
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
+    const supabaseUrl = edgeEnv("SUPABASE_URL");
+    const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
     if (!supabaseUrl || !supabaseKey) return passThrough(context);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -187,8 +188,8 @@ export default async function handler(request: Request, context: Context) {
         .from('artists')
         .select('id, name, image_url')
         .eq('slug', artistSlug)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .maybeSingle();
 
       // A retired slug still resolves. Most of the aliases in production (44 of them as of
       // 2026-08-07) came from the accent-folding reslug in #410 (`beyonc` -> `beyonce`), and a
@@ -212,8 +213,8 @@ export default async function handler(request: Request, context: Context) {
           .from('artist_slug_aliases')
           .select('artists!inner(slug)')
           .eq('alias', artistSlug.toLowerCase())
-          .maybeSingle()
-          .abortSignal(controller.signal);
+          .abortSignal(controller.signal)
+          .maybeSingle();
 
         const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
@@ -246,8 +247,8 @@ export default async function handler(request: Request, context: Context) {
         .eq('artist_id', artist.id)
         .eq('slug', releaseSlug)
         .eq('is_hidden', false)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .maybeSingle();
 
       if (!releaseData) {
         clearTimeout(timeoutId);

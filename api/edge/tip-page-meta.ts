@@ -13,8 +13,9 @@
 // the page everyone else sees. The SPA's client-side document.title ("Tip {artist}") keeps
 // matching what the card says.
 
-import type { Context } from "https://edge.netlify.com";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { edgeEnv } from "./edge-context.ts";
+import type { Context } from "./edge-context.ts";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { buildTipPageMetaHtml, isTipSlug, TIP_RESERVED_SLUGS } from "../shared/tip-page-meta.ts";
 
@@ -44,7 +45,7 @@ interface NameAndImage {
 // with the same real name and photo (tips-checkout readTipPage), and eligibility re-checks live
 // inside checkout on every payment, so a card is never the thing to gate an account behind.
 export async function readTipPageNameAndImage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   slug: string,
   signal: AbortSignal,
 ): Promise<NameAndImage | null> {
@@ -52,8 +53,8 @@ export async function readTipPageNameAndImage(
     .from('artists')
     .select('name, image_url, match_confidence, artist_profiles ( custom_image_url, verified_at )')
     .eq('slug', slug)
-    .single()
-    .abortSignal(signal);
+    .abortSignal(signal)
+    .single();
 
   if (error || !data) {
     // 42P01-style misses (PGRST on an unknown column or a schema hiccup) and code>400 read as "no
@@ -81,8 +82,8 @@ export default async function handler(request: Request, context: Context) {
     if (isIndexingCrawler(userAgent)) return context.next();
     if (!isSocialCrawler(userAgent)) return context.next();
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
+    const supabaseUrl = edgeEnv("SUPABASE_URL");
+    const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
     if (!supabaseUrl || !supabaseKey) return context.next();
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -126,7 +127,3 @@ export default async function handler(request: Request, context: Context) {
     return context.next();
   }
 }
-
-export const config = {
-  path: "/tip/*",
-};

@@ -34,8 +34,12 @@ set -uo pipefail
 # docs/ is safe because the OpenAPI spec the site links to is a separate copy at
 # apps/web/public/docs/openapi.yaml. If that ever becomes a build-time copy of
 # docs/openapi.yaml, docs/ has to come out of this list.
+# workers/ is safe for as long as Netlify is still what serves the site: the Worker is deployed
+# with `wrangler deploy`, never by a Netlify build, and nothing under apps/web/dist comes from it.
+# It comes OUT of this list the moment the cutover happens, when it becomes the site.
 IGNORED_PREFIXES=(
   "docs/"
+  "workers/"
   "apps/mac/"
   "apps/extension/"
   "supabase/"

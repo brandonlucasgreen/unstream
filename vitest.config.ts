@@ -15,7 +15,7 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 60000,
     retry: 0,
-    include: ['apps/web/tests/**/*.test.ts', 'apps/web/tests/**/*.test.tsx', 'api/functions/**/*.test.ts'],
+    include: ['apps/web/tests/**/*.test.ts', 'apps/web/tests/**/*.test.tsx', 'api/functions/**/*.test.ts', 'workers/**/*.test.ts'],
     setupFiles: ['apps/web/tests/setup.ts'],
     environment: 'node',
   },

@@ -1,10 +1,10 @@
-import { Context } from "https://edge.netlify.com";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { edgeEnv } from "./edge-context.ts";
+import type { Context } from "./edge-context.ts";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import {
-  DEFAULT_SECTION_ORDER,
   groupLinksIntoSections,
   resolveSectionOrder,
   type PageSectionKey,
@@ -188,7 +188,6 @@ const SECTION_HEADINGS: Record<PageSectionKey, string> = {
 function renderClaimedSections({
   profile,
   platformsFiltered,
-  isMainPlatform,
   tipSectionHtml,
   featuredEmbedHtml,
   bioHtml,
@@ -292,7 +291,7 @@ function renderClaimedSections({
   };
 
   return sectionOrder
-    .flatMap((key) => (key === 'marketplaces' ? ['marketplaces', 'official' as PageSectionKey] : [key]))
+    .flatMap((key): PageSectionKey[] => (key === 'marketplaces' ? ['marketplaces', 'official'] : [key]))
     .map(sectionHtmlFor)
     .join('');
 }
@@ -359,8 +358,8 @@ async function readTipsFlag(): Promise<boolean> {
   const now = Date.now();
   if (tipsFlagCache && now < tipsFlagCache.expiresAt) return tipsFlagCache.value;
 
-  const url = Deno.env.get("UPSTASH_REDIS_REST_URL");
-  const token = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
+  const url = edgeEnv("UPSTASH_REDIS_REST_URL");
+  const token = edgeEnv("UPSTASH_REDIS_REST_TOKEN");
 
   let raw: unknown;
   if (url && token) {
@@ -397,7 +396,7 @@ async function readTipsFlag(): Promise<boolean> {
  * Edge functions have no Sentry here, so failures go to the function log.
  */
 async function readTipGoals(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   artistId: string,
   ownerUserId: string | null | undefined,
 ): Promise<OpenGoal[] | null> {
@@ -407,7 +406,7 @@ async function readTipGoals(
 
   // Tips ship dark: no Stripe key (or an unrecognised one) means no tips block and no queries.
   // Only the key's prefix is read, to keep test and live rows apart exactly as the functions do.
-  const mode = stripeModeFromKey(Deno.env.get("STRIPE_SECRET_KEY"));
+  const mode = stripeModeFromKey(edgeEnv("STRIPE_SECRET_KEY"));
   if (!mode || !ownerUserId) return null;
   const livemode = mode === 'live';
 
@@ -419,8 +418,8 @@ async function readTipGoals(
       .select('user_id, charges_enabled, tips_enabled, tips_approved_at, deauthorized_at')
       .eq('artist_id', artistId)
       .eq('livemode', livemode)
-      .maybeSingle()
-      .abortSignal(controller.signal);
+      .abortSignal(controller.signal)
+      .maybeSingle();
     if (accountError) throw new Error(`artist_tip_accounts: ${accountError.message}`);
     if (!isTipAccountTakingTips(account as TipAccountSnapshot | null, ownerUserId)) return null;
 
@@ -439,7 +438,9 @@ async function readTipGoals(
       if (rows.length === 0) return [];
 
       const { data: progress, error: progressError } = await supabase
-        .rpc('get_goal_progress', { p_goal_ids: rows.map(r => r.id), p_livemode: livemode })
+        // No generated Database type here, so supabase-js can't type this function's
+        // arguments. The shape is checked by get_goal_progress itself.
+        .rpc('get_goal_progress' as never, { p_goal_ids: rows.map(r => r.id), p_livemode: livemode } as never)
         .abortSignal(controller.signal);
       if (progressError) throw new Error(`get_goal_progress: ${progressError.message}`);
       const raised = new Map<string, number>();
@@ -509,8 +510,8 @@ export default async function handler(request: Request, context: Context) {
       return context.next();
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
+    const supabaseUrl = edgeEnv("SUPABASE_URL");
+    const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
     if (!supabaseUrl || !supabaseKey) return context.next();
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -530,8 +531,8 @@ export default async function handler(request: Request, context: Context) {
         .from('artists')
         .select('*')
         .eq('slug', slug)
-        .single()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .single();
 
       artist = artistData;
 
@@ -551,8 +552,8 @@ export default async function handler(request: Request, context: Context) {
           .from('artist_slug_aliases')
           .select('artists!inner(slug)')
           .eq('alias', slug.toLowerCase())
-          .maybeSingle()
-          .abortSignal(controller.signal);
+          .abortSignal(controller.signal)
+          .maybeSingle();
 
         const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
@@ -569,8 +570,8 @@ export default async function handler(request: Request, context: Context) {
         .from('artist_profiles')
         .select('*')
         .eq('artist_id', artist.id)
-        .single()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .single();
 
       profile = profileData;
 
@@ -608,7 +609,7 @@ export default async function handler(request: Request, context: Context) {
         .limit(MAX_RELEASES_SHOWN)
         .abortSignal(controller.signal);
 
-      releases = (releasesData as ReleaseRow[]) || [];
+      releases = (releasesData as unknown as ReleaseRow[]) || [];
       releaseCount = count ?? releases.length;
     } catch (e: any) {
       // Timeout or error — fall through to SPA

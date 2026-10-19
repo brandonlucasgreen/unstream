@@ -1,0 +1,187 @@
+// The Worker: everything unstream.stream serves.
+//
+// One Worker in front of the static SPA, running the same function handlers and the same
+// server-rendered pages that ran on Netlify Functions and Netlify Edge Functions. What changed in
+// this move is where the code runs; what it does is unchanged (see "Lift and shift first,
+// simplify second" in docs/specs/infrastructure-independence-plan.md).
+//
+// A request is answered by exactly one of these, in this order:
+//
+//   1. a static asset, when one exists at that path — free, and never reaches the code below;
+//   2. the route table (workers/routes.ts), first match wins:
+//        function      → a handler from api/functions/, through the Lambda-event adapter
+//        edge          → a server-rendered page from api/edge/
+//        redirect      → a 301
+//        missing-asset → a real 404, so a superseded chunk is a fetch error and not a MIME error
+//        spa           → the SPA shell
+//   3. the SPA shell, if nothing matched at all.
+//
+// Everything that leaves here goes through `withSiteHeaders`, which applies the site CSP.
+// Static files get their headers from apps/web/public/_headers instead, because Workers serves
+// them without running the Worker at all — see workers/response-headers.ts.
+
+import * as Sentry from '@sentry/cloudflare';
+
+import { withBackgroundDispatcher, type BackgroundDispatcher } from '../api/lib/background.ts';
+import { sentryOptions } from '../api/lib/sentry.ts';
+import { toFunctionEvent, toResponse, type FunctionEvent } from './function-adapter.ts';
+import { FUNCTION_HANDLERS } from './function-handlers.ts';
+import { EDGE_RENDERERS } from './edge-renderers.ts';
+import { matchRoute } from './routes.ts';
+import { withSiteHeaders } from './response-headers.ts';
+
+// `Env` is generated into worker-configuration.d.ts from wrangler.jsonc's bindings and vars, so
+// the ASSETS binding and the URL var are typed from the config itself and can't drift from it.
+// Secrets are read through `process.env` instead, the way all 66 handlers already read their
+// configuration — nodejs_compat populates it from the Worker's vars and secrets alike.
+
+/**
+ * Netlify exposed every function at `/.netlify/functions/<name>` whether or not it had a
+ * friendly route, and three callers depend on that: the GitHub Actions schedules, the internal
+ * handshakes, and anything still pointed at the old paths during the cutover window. Keeping the
+ * prefix costs one `startsWith` and means nothing outside this repository has to change on the
+ * day we switch DNS over — which is also what makes the rollback a DNS change and nothing more.
+ *
+ * It goes when Phase 1b moves the schedules to Cron Triggers and the crawls to Queues.
+ */
+const LEGACY_FUNCTION_PREFIX = '/.netlify/functions/';
+
+/**
+ * `social-card` can't run here: it reads its fonts off disk and loads resvg's WebAssembly binary.
+ * It is also already on its way out — #649 moved card drawing into the weekly generator, and the
+ * endpoint survives only until the last Buffer post scheduled against it has published. Until
+ * then its requests go to the Netlify site, which stays up through the cutover window anyway for
+ * rollback. Buffer is the only caller, and it fetches each card once.
+ *
+ * Delete this, the route, and the function together (see the header of api/functions/social-card.ts).
+ */
+const PROXIED_TO_NETLIFY: ReadonlyArray<string> = ['/api/social-card/'];
+
+function serveSpa(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  // The SPA shell, not whatever this path is. Static assets' own `single-page-application`
+  // handling would do this too, but asking for it explicitly keeps the three places that need
+  // the shell — the catch-all, an unmatched path, and a renderer's `context.next()` — saying
+  // the same thing.
+  return env.ASSETS.fetch(new Request(new URL('/index.html', url.origin), request));
+}
+
+/**
+ * Run a background function in this invocation instead of POSTing to it.
+ *
+ * The handler gets the event it would have got over HTTP, internal secret included, so its own
+ * `isInternalRequest` check runs exactly as it does in production rather than being bypassed.
+ */
+function backgroundDispatcher(ctx: ExecutionContext, request: Request): BackgroundDispatcher {
+  return (functionName, body) => {
+    const handler = FUNCTION_HANDLERS[functionName];
+    if (!handler) return false;
+
+    const secret = process.env.INTERNAL_FUNCTION_SECRET;
+    if (!secret) return false;
+
+    const origin = new URL(request.url).origin;
+    const event: FunctionEvent = {
+      httpMethod: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${secret}` },
+      body,
+      isBase64Encoded: false,
+      queryStringParameters: {},
+      path: `${LEGACY_FUNCTION_PREFIX}${functionName}`,
+      rawUrl: `${origin}${LEGACY_FUNCTION_PREFIX}${functionName}`,
+    };
+
+    ctx.waitUntil(
+      handler(event).catch((error: unknown) => {
+        // The background functions report their own failures; this is the last resort, so an
+        // unhandled rejection can't take the isolate down with it.
+        console.error(
+          `[worker] background ${functionName} threw:`,
+          error instanceof Error ? error.message : String(error),
+        );
+      }),
+    );
+    return true;
+  };
+}
+
+async function route(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (PROXIED_TO_NETLIFY.some((prefix) => url.pathname.startsWith(prefix))) {
+    const siteName = process.env.SITE_NAME;
+    if (siteName) {
+      const target = new URL(url.pathname + url.search, `https://${siteName}.netlify.app`);
+      return fetch(new Request(target, request));
+    }
+    return new Response('Not found', { status: 404 });
+  }
+
+  if (url.pathname.startsWith(LEGACY_FUNCTION_PREFIX)) {
+    const name = url.pathname.slice(LEGACY_FUNCTION_PREFIX.length).replace(/\/$/, '');
+    const handler = FUNCTION_HANDLERS[name];
+    if (!handler) return new Response('Function not found', { status: 404 });
+    return toResponse(await handler(await toFunctionEvent(request)));
+  }
+
+  const matched = matchRoute(url.pathname);
+  if (!matched) return serveSpa(request, env);
+
+  switch (matched.route.kind) {
+    case 'function': {
+      const handler = FUNCTION_HANDLERS[matched.route.name];
+      if (!handler) return new Response('Function not found', { status: 404 });
+      return toResponse(await handler(await toFunctionEvent(request)));
+    }
+
+    case 'edge': {
+      const render = EDGE_RENDERERS[matched.route.name];
+      if (!render) return serveSpa(request, env);
+      // `context.next()` means "not mine — serve the SPA". Every renderer decides that per
+      // request, before any database query: one route, one renderer.
+      return render(request, { next: () => serveSpa(request, env) });
+    }
+
+    case 'redirect':
+      return Response.redirect(new URL(matched.route.to, url.origin).toString(), matched.route.status);
+
+    case 'missing-asset': {
+      // Only reached when the asset genuinely isn't there — real files are served above, before
+      // routing. A 404 rather than the SPA shell: see the note on `missing-asset` in routes.ts.
+      return new Response('Not found', { status: 404 });
+    }
+
+    case 'spa':
+      return serveSpa(request, env);
+  }
+}
+
+/**
+ * Wrapped in Sentry's Worker handler, which starts a client per request and flushes it through
+ * `waitUntil`. That is what makes the functions' `Sentry.captureException` calls reach the
+ * project at all — @sentry/cloudflare has no `init()` of its own (see api/lib/sentry.ts).
+ *
+ * It also reports anything that escapes `fetch` below, which `withSentry` inside each handler
+ * cannot: a throw while routing, or in the adapter.
+ */
+export default Sentry.withSentry(sentryOptions, {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // A real file wins over every route, the way Netlify served the publish directory ahead of
+    // any unforced redirect. `/assets/*` depends on it: the route below exists only to turn a
+    // *missing* chunk into a 404, and would swallow every live chunk without this.
+    //
+    // GET and HEAD only, and not merely as an optimisation: handing the request to another
+    // fetcher consumes its body, so probing for an asset first would leave every POST, PUT and
+    // DELETE with a body that `toFunctionEvent` can no longer read. There are no assets to find
+    // under those methods anyway.
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      const asset = await env.ASSETS.fetch(request);
+      if (asset.status !== 404) return withSiteHeaders(asset);
+    }
+
+    const response = await withBackgroundDispatcher(backgroundDispatcher(ctx, request), () =>
+      route(request, env),
+    );
+    return withSiteHeaders(response);
+  },
+} satisfies ExportedHandler<Env>);

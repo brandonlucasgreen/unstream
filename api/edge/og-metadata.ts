@@ -1,4 +1,4 @@
-import type { Context } from "https://edge.netlify.com";
+import type { Context } from "./edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 // Perform search to get first artist image
@@ -15,7 +15,7 @@ async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ im
 
     if (!response.ok) return {};
 
-    const data = await response.json();
+    const data = (await response.json()) as { results?: { name?: string; imageUrl?: string }[] };
     const results = data.results || [];
 
     if (results.length > 0) {
@@ -113,7 +113,3 @@ export default async function handler(request: Request, context: Context) {
   // For regular browsers: pass through to SPA app (client-side routing handles ?q= natively)
   return context.next();
 }
-
-export const config = {
-  path: "/",
-};
