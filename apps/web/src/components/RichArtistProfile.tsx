@@ -364,11 +364,11 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!payload.tips?.enabled && (!group || group.links.length === 0)) return null;
             return (
               <div key="patronage" className="mb-6 space-y-3">
-                <h2 className="text-xs uppercase tracking-wider text-text-muted">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted text-center">
                   Patronage
                 </h2>
                 {payload.tips?.enabled && (
-                  <div className="platform-pill-row">
+                  <div className="platform-pill-row sm:justify-center">
                     <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
                     {payload.tips.goals.map(goal => (
                       <TipLink
@@ -394,10 +394,10 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!profile?.bio) return null;
             return (
               <div key="bio" className="mb-6">
-                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
                   Bio
                 </h2>
-                <p className="text-text-muted text-sm whitespace-pre-line">
+                <p className="max-w-2xl mx-auto text-center text-text-muted text-sm whitespace-pre-line">
                   {profile.bio}
                 </p>
               </div>
@@ -408,13 +408,13 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!profile?.featuredEmbed) return null;
             return (
               <div key="featured" className="mb-6">
-                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
                   Featured Release
                 </h2>
                 {/* contain:paint clips even a position:fixed child, so an embed saved before its
                     style was filtered still can't cover the page. */}
                 <div className="rounded-xl overflow-hidden [contain:paint]">
-                  <div dangerouslySetInnerHTML={{ __html: profile.featuredEmbed }} />
+                  <div className="text-center" dangerouslySetInnerHTML={{ __html: profile.featuredEmbed }} />
                 </div>
               </div>
             );
@@ -425,10 +425,10 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!group || group.links.length === 0) return null;
             return (
               <div key="social" className="mb-6">
-                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
                   Follow
                 </h2>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {group.links.map(link => {
                     const source = sources[link.platform as SourceId];
                     const linkName = link.displayName || source?.name || link.platform;
@@ -460,7 +460,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             if (!group || group.links.length === 0) return null;
             return (
               <div key={sectionKeyInner} className="mb-6">
-                <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+                <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
                   {SECTION_HEADINGS[sectionKeyInner]}
                 </h2>
                 <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />
@@ -505,7 +505,7 @@ function SectionPillGroups({ group, handleLinkClick }: {
       {groups.map((rows, groupIndex) => (
         <Fragment key={groupIndex}>
           {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
-          <div className="platform-pill-row">
+          <div className="platform-pill-row sm:justify-center">
             {rows.map(link => {
               const badge = (
                 <SourceBadge
