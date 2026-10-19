@@ -70,7 +70,7 @@ export function ReleasesSection({
         Plain <a>, not react-router <Link>: these are served by a Netlify function, so a
         client-side navigation would try to render them in-app and fail.
       */}
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3 flex items-center justify-center gap-2">
+      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
         Releases
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}

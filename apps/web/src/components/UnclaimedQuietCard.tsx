@@ -104,11 +104,11 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
       {/* Platform Links */}
       {links.length > 0 && (
         <div className="pb-8">
-          <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
             Support directly
           </h2>
           {/* Same platform pills as the search results and claimed artist pages. */}
-          <div className="platform-pill-row sm:justify-center">
+          <div className="platform-pill-row">
             {links.map((link) => {
               const badge = (
                 <SourceBadge
@@ -138,10 +138,10 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
       {/* Social Links */}
       {socialLinks.length > 0 && (
         <div className="pb-8">
-          <h2 className="text-xs uppercase tracking-wider text-text-muted text-center mb-3">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
             Follow
           </h2>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="flex flex-wrap gap-2">
             {socialLinks.map((link) => {
               const source = sources[link.platform as SourceId];
               const linkName = link.displayName || source?.name || link.platform;
