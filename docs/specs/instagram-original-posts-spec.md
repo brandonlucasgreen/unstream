@@ -1,6 +1,6 @@
 # Instagram: original posts, or none
 
-**Status:** built 2026-10-01. The cards are drawn by `api/functions/social-card.ts` (a Netlify Function, not an edge function: see "Instagram cards" in `docs/engineering-history.md` for the CPU measurement). The carousel is added to the indie spotlight in `scripts/generate-social-posts.ts`, and goes to Buffer as drafts until `INSTAGRAM_DRAFTS_BEFORE`. Step 4, watching Account Status for 30 days, is still to do.
+**Status:** built 2026-10-01. The cards were first drawn on request by `api/functions/social-card.ts` (a Netlify Function, not an edge function: see "Instagram cards" in `docs/engineering-history.md` for the CPU measurement). They are now drawn by `scripts/generate-social-posts.ts` itself when it schedules the week (`scripts/social-cards.ts`) and uploaded to a public R2 bucket; the endpoint stays only until the posts that still point at it have published. The carousel goes to Buffer as drafts until `INSTAGRAM_DRAFTS_BEFORE`. Step 4, watching Account Status for 30 days, is still to do.
 
 ## Why Instagram is paused
 
@@ -30,13 +30,13 @@ Carousels are also the format Instagram's 2026 data favours. They have the best 
 | Clickable link | No | Captions aren't clickable; use "link in bio" |
 | Grouping with the Threads/Bluesky posts | Yes | add the Instagram variant to the day's `createContentItem` call |
 
-Buffer fetches every image at publish time. Images must therefore be at **public, permanent URLs**. Nothing is uploaded.
+Buffer fetches every image at publish time. Images must therefore be at **public, permanent URLs**. *As built: the generator uploads each card to a public R2 bucket under a key hashed from its bytes, so a URL never changes what it shows.*
 
 ## The build
 
-1. **Render the cards** in an edge function, e.g. `/social-card/{slug}/{n}.png`, from the same data the artist page uses. Deno can render SVG to PNG with a WASM renderer imported from `esm.sh`; that is a new dependency, so check its size against the edge bundle limit. Rendering on request means there's nothing to store or clean up, and Buffer's fetch is the only caller. *As built: a Netlify Function at `/api/social-card/{slug}/{slide}.png`, because a photo slide needs more than the edge's 50ms of CPU.*
+1. **Render the cards** in an edge function, e.g. `/social-card/{slug}/{n}.png`, from the same data the artist page uses. Deno can render SVG to PNG with a WASM renderer imported from `esm.sh`; that is a new dependency, so check its size against the edge bundle limit. Rendering on request means there's nothing to store or clean up, and Buffer's fetch is the only caller. *As built: a Netlify Function at `/api/social-card/{slug}/{slide}.png`, because a photo slide needs more than the edge's 50ms of CPU. Since replaced: the weekly generator draws the cards when it schedules them and uploads them to R2, so each card is fixed with its caption and the site has no endpoint fetching remote images.*
 2. **Add the Instagram variant** to the indie spotlight group in `generate-social-posts.ts`:
-   - card URLs as the assets;
+   - card URLs as the assets (R2 URLs, once the generator has drawn and uploaded the cards);
    - the artist in `userTags` when they have an Instagram link;
    - at most three specific hashtags. Not `#newmusic` or `#newrelease`: they were wrong for 72 of 75 prominent posts, and they attracted the bots.
 3. **Indie artists only.** Prominent artists never reshared, and they're the case where a press photo is least defensible.

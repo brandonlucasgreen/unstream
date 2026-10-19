@@ -33,6 +33,16 @@ jobs:
           # Positional, comma-separated: threads,bluesky,instagram,linkedin (an empty slot skips that platform).
           # Instagram gets the indie spotlights as card carousels, as drafts until INSTAGRAM_DRAFTS_BEFORE.
           BUFFER_CHANNEL_IDS: ${{ secrets.BUFFER_CHANNEL_IDS }}
+          # The generator draws the Instagram cards and uploads them to this public R2 bucket, and
+          # Buffer fetches them from the public address on publish day (scripts/social-cards.ts).
+          # The run stops before generating anything when one of these is missing. The token is
+          # scoped to this bucket alone (Object Read & Write), separate from the backup bucket's;
+          # the account ID is the one db-backup.yml uses.
+          SOCIAL_CARDS_BUCKET: unstream-social-cards
+          SOCIAL_CARDS_PUBLIC_BASE_URL: https://cards.unstream.stream
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          SOCIAL_CARDS_R2_ACCESS_KEY_ID: ${{ secrets.SOCIAL_CARDS_R2_ACCESS_KEY_ID }}
+          SOCIAL_CARDS_R2_SECRET_ACCESS_KEY: ${{ secrets.SOCIAL_CARDS_R2_SECRET_ACCESS_KEY }}
           # No Supabase secrets, deliberately: verified artists and retired-slug aliases come from
           # the public /api/artist-directory. The service key bypasses all RLS, and a scheduled
           # Action that runs `npm ci` is no place to hold it.

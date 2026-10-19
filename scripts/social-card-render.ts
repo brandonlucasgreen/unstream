@@ -2,12 +2,10 @@
  * Draws one Instagram carousel slide (api/shared/social-card.ts says which slides exist and what
  * they say) as a 1080×1350 PNG: an SVG built here, rasterised by resvg compiled to WebAssembly.
  *
- * Why a Netlify Function and not an edge function, which the spec first suggested: edge
- * functions get 50ms of CPU per request, and on an M-series Mac resvg spent ~100ms drawing a
- * slide with a photo on it and ~30ms more encoding the PNG (2026-10-01). A text-only slide fit,
- * a photo slide was over by more than double before counting a slower server CPU. Functions have
- * no CPU cap, and running on Node also means this file is tested in CI and the handler can use
- * db.ts and the SSRF allowlist directly.
+ * The weekly generator calls this when it schedules the week (scripts/social-cards.ts), not the
+ * site on request. A slide with a photo on it took ~100ms to draw and ~30ms more to encode on an
+ * M-series Mac (2026-10-01), past an edge function's 50ms of CPU, and drawing at scheduling time
+ * fixes each card to the caption written with it.
  *
  * The fonts are the site's own (OFL, licences alongside them in social-card-fonts/). They're
  * loaded into resvg directly: it has no system fonts here, and a glyph no loaded font covers
@@ -15,7 +13,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { createRequire } from 'module';
 import { initWasm, Resvg } from '@resvg/resvg-wasm';
 import {
   CARD_HEIGHT,
@@ -26,7 +24,7 @@ import {
   releaseNoun,
   type CardData,
   type CardSlide,
-} from '../shared/social-card.ts';
+} from '../api/shared/social-card';
 
 export interface CardImage {
   mimeType: 'image/jpeg' | 'image/png';
@@ -40,36 +38,50 @@ export function sniffImageType(bytes: Uint8Array): CardImage['mimeType'] | null 
   return null;
 }
 
-// --- Fonts and the renderer, loaded once per warm instance ---
-//
-// Found through __dirname and require, not import.meta: Netlify bundles functions as CommonJS
-// even in this "type": "module" package, and import.meta is empty there. In the deployed zip
-// the fonts sit beside the bundle, as here (netlify.toml's included_files), and resvg is a whole
-// package under node_modules (external_node_modules), so both paths hold in production and under
-// vitest, which provides the same globals.
+// --- Fonts and the renderer, loaded once per process ---
 
-const FONT_FILES = ['DarkerGrotesque-ExtraBold.ttf', 'StackSansHeadline-Regular.ttf', 'StackSansHeadline-SemiBold.ttf'];
+/** In social-card-fonts/, beside this file. */
+export const CARD_FONT_FILES = ['DarkerGrotesque-ExtraBold.ttf', 'StackSansHeadline-Regular.ttf', 'StackSansHeadline-SemiBold.ttf'];
 
-let fontBuffers: Uint8Array[] | null = null;
+export interface CardAssets {
+  fonts: Uint8Array[];
+  /** resvg's WebAssembly binary. */
+  wasm: Uint8Array;
+}
+
+/** The fonts beside this file and resvg's wasm from node_modules, as tsx and vitest run it. */
+function assetsBesideThisFile(): CardAssets {
+  return {
+    fonts: CARD_FONT_FILES.map(file => readFileSync(new URL(`./social-card-fonts/${file}`, import.meta.url))),
+    wasm: readFileSync(createRequire(import.meta.url).resolve('@resvg/resvg-wasm/index_bg.wasm')),
+  };
+}
+
+let loadAssets: () => CardAssets = assetsBesideThisFile;
+let assets: CardAssets | null = null;
 let wasmReady: Promise<void> | null = null;
 
-function loadFonts(): Uint8Array[] {
-  if (!fontBuffers) {
-    fontBuffers = FONT_FILES.map(file => readFileSync(join(__dirname, 'social-card-fonts', file)));
-  }
-  return fontBuffers;
+/**
+ * For api/functions/social-card.ts only, until it's removed: Netlify bundles it as CommonJS,
+ * where import.meta is empty, so it finds the same files its own way.
+ */
+export function loadCardAssetsWith(loader: () => CardAssets): void {
+  loadAssets = loader;
+}
+
+function cardAssets(): CardAssets {
+  assets ??= loadAssets();
+  return assets;
 }
 
 function ensureWasm(): Promise<void> {
-  if (!wasmReady) {
-    wasmReady = initWasm(readFileSync(require.resolve('@resvg/resvg-wasm/index_bg.wasm')));
-  }
+  wasmReady ??= initWasm(cardAssets().wasm);
   return wasmReady;
 }
 
 function resvg(svg: string) {
   return new Resvg(svg, {
-    font: { fontBuffers: loadFonts(), loadSystemFonts: false, defaultFontFamily: 'Stack Sans Headline' },
+    font: { fontBuffers: cardAssets().fonts, loadSystemFonts: false, defaultFontFamily: 'Stack Sans Headline' },
     fitTo: { mode: 'original' },
   });
 }

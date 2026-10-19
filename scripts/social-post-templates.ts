@@ -25,8 +25,8 @@ import {
   payoutFloor,
   purchaseMath,
   releaseNoun,
-  socialCardUrl,
   type CardData,
+  type CardSlide,
   type FeaturedRelease,
 } from '../api/shared/social-card';
 
@@ -35,17 +35,36 @@ export const UNSTREAM_BASE = 'https://unstream.stream';
 export const CHARACTER_LIMITS = { threads: 500, bluesky: 300, instagram: 2200, linkedin: 3000 } as const;
 export type Platform = keyof typeof CHARACTER_LIMITS;
 
+/** Instagram only: an account tagged on an image, at 0-1 fractions of its width and height. */
+export interface UserTag {
+  handle: string;
+  x: number;
+  y: number;
+}
+
 export interface PostImage {
   url: string;
   altText: string;
-  /** Instagram only: accounts tagged on the image, at 0-1 fractions of its width and height. */
-  userTags?: { handle: string; x: number; y: number }[];
+  userTags?: UserTag[];
+}
+
+/**
+ * An Instagram carousel still to be drawn: the facts on the cards, each slide with its alt text,
+ * and who is tagged on the first. The generator draws the cards and puts their URLs in the post's
+ * `images` (scripts/social-cards.ts).
+ */
+export interface Carousel {
+  data: CardData;
+  slides: { slide: CardSlide; altText: string }[];
+  userTags?: UserTag[];
 }
 
 export interface SocialPost {
   platform: Platform;
   text: string;
   images: PostImage[];
+  /** Instagram only, until the generator has drawn it into `images`. */
+  carousel?: Carousel;
   /** LinkedIn only. Company-page posts with a link in the body reach fewer people, so it goes here. */
   firstComment?: string;
 }
@@ -189,25 +208,32 @@ function spotlightBuyLine(p: SellingPlatform, bandcampFriday: boolean, includeRe
  * Three hashtags at most, and never #newmusic or #newrelease: those were wrong on 72 of 75
  * prominent-artist posts and drew 58 of the 66 bot comments from July to September.
  *
- * Null when there are no cards to post, which is only when the card fonts can't draw the name.
+ * Null when there are no cards to post: the card fonts can't draw the name, or the registry
+ * doesn't know the platform. Cards are for claimed artists only, which the generator checks.
  */
 function instagramSpotlight(artist: ArtistContext, p: SellingPlatform, opts: { bandcampFriday: boolean }): SocialPost | null {
+  // A card only states what the artist's own data does, as /api/social-card checked when cards
+  // were drawn on request. The platform is one the artist links to (sellingPlatform skips search
+  // links) and the registry knows, with its everyday payout even on Bandcamp Friday, which the
+  // caption mentions instead. The record is a released one from their catalogue on that platform
+  // (pickCatalogueRelease); a release without a catalogue slug gets no record card.
+  if (!PLATFORMS[p.id]) return null;
   const card: CardData = {
     artistName: artist.name,
     location: artist.location,
     platform: { id: p.id, name: p.name, payout: p.payout },
-    release: p.release,
+    release: p.release?.slug ? p.release : null,
     imageUrl: artist.imageUrl,
   };
   const slides = cardSlides(card);
   if (slides.length === 0) return null;
 
   const handle = artist.instagramHandle;
-  const images: PostImage[] = slides.map((slide, i) => ({
-    url: socialCardUrl(UNSTREAM_BASE, artist.slug, slide, p.id, p.release?.slug ?? null),
-    altText: cardAltText(slide, card),
-    ...(i === 0 && handle ? { userTags: [{ handle, ...ARTIST_TAG_POSITION }] } : {}),
-  }));
+  const carousel: Carousel = {
+    data: card,
+    slides: slides.map(slide => ({ slide, altText: cardAltText(slide, card) })),
+    ...(handle ? { userTags: [{ handle, ...ARTIST_TAG_POSITION }] } : {}),
+  };
 
   const name = handle ? `${artist.name} (@${handle})` : artist.name;
   const from = artist.location ? `, from ${artist.location}` : '';
@@ -218,7 +244,8 @@ function instagramSpotlight(artist: ArtistContext, p: SellingPlatform, opts: { b
   return {
     platform: 'instagram',
     text: `Today's artist: ${name}${from}.\n\n${spotlightBuyLine(p, opts.bandcampFriday, true)}\n\nEvery place to support them directly: ${address}\n\n${platformTag} #indiemusic #supportartists`,
-    images,
+    images: [],
+    carousel,
   };
 }
 

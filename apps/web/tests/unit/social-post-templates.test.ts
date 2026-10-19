@@ -240,18 +240,38 @@ describe('indieSpotlight', () => {
 });
 
 describe('indieSpotlight on Instagram', () => {
-  const CARD = 'https://unstream.stream/api/social-card/courstellation';
+  function slides(post: SocialPost) {
+    return post.carousel?.slides.map(s => s.slide);
+  }
 
-  it('is a carousel of Unstream-drawn cards, photo last, each with alt text', () => {
+  it('is a carousel of Unstream-drawn cards, photo last, each with alt text, left for the generator to draw', () => {
     const instagram = on(indieSpotlight(artist(), { bandcampFriday: false }), 'instagram');
-    expect(instagram.images.map(i => i.url)).toEqual([
-      `${CARD}/buy.png?platform=bandcamp&release=signals`,
-      `${CARD}/record.png?platform=bandcamp&release=signals`,
-      `${CARD}/math.png?platform=bandcamp&release=signals`,
-      `${CARD}/photo.png?platform=bandcamp&release=signals`,
-    ]);
-    expect(instagram.images[0].altText).toBe(`Courstellation, from Phoenix. Buy their music on Bandcamp, where ${BANDCAMP_PAYOUT} of what you pay goes to the artist.`);
-    for (const image of instagram.images) expect(image.altText.length).toBeGreaterThan(10);
+    expect(slides(instagram)).toEqual(['buy', 'record', 'math', 'photo']);
+    expect(instagram.images).toEqual([]);
+    expect(instagram.carousel?.slides[0].altText).toBe(`Courstellation, from Phoenix. Buy their music on Bandcamp, where ${BANDCAMP_PAYOUT} of what you pay goes to the artist.`);
+    for (const { altText } of instagram.carousel!.slides) expect(altText.length).toBeGreaterThan(10);
+  });
+
+  it("draws from the facts the caption names: the platform's registry payout and the catalogue release", () => {
+    const instagram = on(indieSpotlight(artist(), { bandcampFriday: true }), 'instagram');
+    expect(instagram.carousel?.data).toEqual({
+      artistName: 'Courstellation',
+      location: 'Phoenix',
+      // The everyday figure even on Bandcamp Friday; the caption is what mentions the day.
+      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT },
+      release: { title: 'Signals', type: 'album', latest: true, slug: 'signals', artworkUrl: 'https://f4.bcbits.com/img/a0370958576_2.jpg' },
+      imageUrl: 'https://f4.bcbits.com/img/0042724752_23.jpg',
+    });
+  });
+
+  it("makes no cards for a platform the registry doesn't know", () => {
+    const unknown = artist({ platform: { id: 'somewhere', name: 'Somewhere', payout: null, release: null } });
+    expect(indieSpotlight(unknown, { bandcampFriday: false })?.map(p => p.platform)).toEqual(['threads', 'bluesky']);
+  });
+
+  it("leaves out the photo card when the photo's source can't be credited", () => {
+    const instagram = on(indieSpotlight(artist({ imageUrl: 'https://images.example.com/me.jpg' }), { bandcampFriday: false }), 'instagram');
+    expect(slides(instagram)).toEqual(['buy', 'record', 'math']);
   });
 
   it('names the release, the platform and the registry payout, and stays within the caption limit', () => {
@@ -276,22 +296,25 @@ describe('indieSpotlight on Instagram', () => {
     expect(on(indieSpotlight(artist(), { bandcampFriday: true }), 'instagram').text).toContain('#BandcampFriday');
   });
 
-  it('tags the artist on the first card only, and only from their own Instagram link', () => {
+  it('tags the artist (on the first card, once drawn), and only from their own Instagram link', () => {
     const tagged = on(indieSpotlight(artist({ instagramHandle: 'courstellation' }), { bandcampFriday: false }), 'instagram');
-    expect(tagged.images[0].userTags).toEqual([{ handle: 'courstellation', x: 0.5, y: 0.4 }]);
-    expect(tagged.images.slice(1).every(i => !i.userTags)).toBe(true);
+    expect(tagged.carousel?.userTags).toEqual([{ handle: 'courstellation', x: 0.5, y: 0.4 }]);
     expect(tagged.text).toContain('Courstellation (@courstellation)');
 
     const untagged = on(indieSpotlight(artist({ threadsHandle: 'courstellation' }), { bandcampFriday: false }), 'instagram');
-    expect(untagged.images.every(i => !i.userTags)).toBe(true);
+    expect(untagged.carousel?.userTags).toBeUndefined();
     expect(untagged.text).not.toContain('@');
   });
 
   it('leaves out the record card when the release has no artwork or no catalogue entry', () => {
     const noArt = artist({ platform: { id: 'mirlo', name: 'Mirlo', payout: '86-90%', release: release('Signals', 'album', true) } });
-    const urls = on(indieSpotlight(noArt, { bandcampFriday: false }), 'instagram').images.map(i => i.url);
-    expect(urls.some(u => u.includes('/record.png'))).toBe(false);
-    expect(urls[0]).toBe(`${CARD}/buy.png?platform=mirlo`);
+    expect(slides(on(indieSpotlight(noArt, { bandcampFriday: false }), 'instagram'))).toEqual(['buy', 'math', 'photo']);
+
+    // Artwork alone isn't enough: without a catalogue slug the release isn't known to be theirs there.
+    const uncatalogued = artist({
+      platform: { id: 'bandcamp', name: 'Bandcamp', payout: BANDCAMP_PAYOUT, release: { ...release('Signals', 'album', true), artworkUrl: 'https://f4.bcbits.com/img/a1_2.jpg' } },
+    });
+    expect(slides(on(indieSpotlight(uncatalogued, { bandcampFriday: false }), 'instagram'))).not.toContain('record');
   });
 
   it("posts nothing on Instagram when the cards' fonts can't draw the name", () => {

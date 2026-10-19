@@ -7,9 +7,9 @@
  * data — where to buy, the registry payout, the record, the purchase math — and only the last
  * slide is the artist's photo, credited to where it came from.
  *
- * Pure, and shared by the renderer (api/functions/social-card.ts draws the slides) and the post
- * generator (scripts/generate-social-posts.ts links them and writes their alt text), so a slide
- * and its alt text are built from the same figures.
+ * Pure, and shared by the renderer (scripts/social-card-render.ts draws the slides) and the post
+ * copy (scripts/social-post-templates.ts picks them and writes their alt text), so a slide and its
+ * alt text are built from the same figures.
  */
 
 export const CARD_WIDTH = 1080;
@@ -163,7 +163,8 @@ export function cardSlides(data: CardData): CardSlide[] {
       case 'buy': return true;
       case 'record': return !!data.release?.artworkUrl && cardFontsCanDraw(data.release.title);
       case 'math': return !!data.platform.payout && purchaseMath(data.platform.payout) !== null;
-      case 'photo': return !!data.imageUrl;
+      // Only when the credit line can say where the photo came from.
+      case 'photo': return !!data.imageUrl && photoSource(data.imageUrl) !== null;
     }
   });
 }
@@ -230,21 +231,4 @@ export function cardAltText(slide: CardSlide, data: CardData): string {
       return source ? `Photo of ${name}, from their ${source} page.` : `Photo of ${name}.`;
     }
   }
-}
-
-/**
- * A slide's public URL. The platform and the release are chosen when the post is written and
- * travel in the URL, so a slide rendered on publish day — Buffer fetches images then, up to two
- * weeks later — shows the same record the caption names even if the artist has released another.
- */
-export function socialCardUrl(
-  base: string,
-  artistSlug: string,
-  slide: CardSlide,
-  platformId: string,
-  releaseSlug: string | null
-): string {
-  const params = new URLSearchParams({ platform: platformId });
-  if (releaseSlug) params.set('release', releaseSlug);
-  return `${base}/api/social-card/${encodeURIComponent(artistSlug)}/${slide}.png?${params}`;
 }
