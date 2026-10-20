@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+
+import { readJsonc } from './jsonc.ts';
 import { join } from 'node:path';
 
 /**
@@ -16,15 +18,6 @@ import { join } from 'node:path';
  * assumed.
  */
 const repoRoot = join(__dirname, '..', '..');
-
-/** Strip // comments so JSON.parse can read a .jsonc / commented tsconfig. */
-function readJsonc(path: string): Record<string, unknown> {
-  const text = readFileSync(path, 'utf8')
-    .split('\n')
-    .map((line) => (line.trimStart().startsWith('//') ? '' : line))
-    .join('\n');
-  return JSON.parse(text);
-}
 
 const wrangler = readJsonc(join(repoRoot, 'wrangler.jsonc'));
 const workersTsconfig = readJsonc(join(repoRoot, 'workers', 'tsconfig.json'));

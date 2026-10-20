@@ -36,6 +36,44 @@
   // how a slow search gets diagnosed, and without this they go nowhere.
   "observability": { "enabled": true },
 
+  // Long background work: a catalogue crawl runs for 9-13 minutes (DETAIL_BUDGET_MS and
+  // ENRICHMENT_CUTOFF_MS in catalog-artist-background.ts), and `ctx.waitUntil` allows 30
+  // seconds. A queue consumer gets 15 minutes, which is the only budget here that fits — and a
+  // crawl killed part-way still counts as an attempt, so the artist would be skipped for seven
+  // days with nothing reporting a failure.
+  //
+  // `max_batch_size: 1` because one message is one whole crawl; batching would put several
+  // inside one 15-minute budget. `max_concurrency: 1` keeps crawls serial, which is what the
+  // per-artist and per-detail-fetch delays in that file already assume — raising it would
+  // multiply the real request rate at Bandcamp without changing a single delay constant.
+  "queues": {
+    "producers": [{ "binding": "BACKGROUND_QUEUE", "queue": "unstream-background" }],
+    "consumers": [
+      {
+        "queue": "unstream-background",
+        "max_batch_size": 1,
+        "max_concurrency": 1,
+        "max_retries": 3,
+        "dead_letter_queue": "unstream-background-dlq"
+      }
+    ]
+  },
+
+  // The two schedules that were GitHub Actions hitting the Netlify host by name. They named it
+  // deliberately — Bot Fight Mode on the unstream.stream zone challenged the runner's curl and
+  // cost six days of cataloguing — and a Cron Trigger removes the HTTP hop that was being
+  // challenged at all. Same cadences the workflows used.
+  //
+  // Those workflows stay until the cutover, because until then they are what actually runs:
+  // crons only fire on a deployed Worker. They are deleted as a cutover step, or the sweep runs
+  // twice while Netlify is kept for rollback.
+  "triggers": {
+    "crons": [
+      "0 1,13 * * *", // recatalog-sweep, every 12 hours
+      "*/30 * * * *" // tips-review-notify
+    ]
+  },
+
   "routes": [
     { "pattern": "unstream.stream", "custom_domain": true },
     { "pattern": "www.unstream.stream", "custom_domain": true }
@@ -78,5 +116,34 @@
     // on Workers it has to be stated, or Buffer's card fetches 404 and posts publish without
     // their images. Goes with the proxy.
     "SITE_NAME": "unstream"
+  },
+
+  // A staging Worker (next.unstream.stream, which 1e stands up) shares one production Supabase
+  // with the real site, so it must not run scheduled work or consume the production queue. Both
+  // are removed here structurally rather than guarded at runtime: an empty `crons` cannot fire,
+  // and a separate queue cannot take a message meant for production. `scheduled()` also checks
+  // the production URL at runtime, as a second line.
+  //
+  // `URL` has to be overridden here anyway — Sentry tags its environment from it, and a staging
+  // deploy that left it as production would file its errors as production's.
+  "env": {
+    "staging": {
+      "triggers": { "crons": [] },
+      "queues": {
+        "producers": [{ "binding": "BACKGROUND_QUEUE", "queue": "unstream-background-staging" }],
+        "consumers": [
+          {
+            "queue": "unstream-background-staging",
+            "max_batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 3
+          }
+        ]
+      },
+      "vars": {
+        "URL": "https://next.unstream.stream",
+        "SITE_NAME": "unstream"
+      }
+    }
   }
 }

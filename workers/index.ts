@@ -28,6 +28,7 @@ import { toFunctionEvent, toResponse, type FunctionEvent } from './function-adap
 import { FUNCTION_HANDLERS } from './function-handlers.ts';
 import { EDGE_RENDERERS } from './edge-renderers.ts';
 import { matchRoute } from './routes.ts';
+import { CRON_FUNCTIONS, parseBackgroundMessage, type BackgroundMessage } from './background-queue.ts';
 import { withEdgeCache } from './edge-cache.ts';
 import { withSiteHeaders } from './response-headers.ts';
 
@@ -46,6 +47,35 @@ import { withSiteHeaders } from './response-headers.ts';
  * It goes when Phase 1b moves the schedules to Cron Triggers and the crawls to Queues.
  */
 const LEGACY_FUNCTION_PREFIX = '/.netlify/functions/';
+
+/** The one `URL` value that means "this is the real site", as api/lib/sentry.ts also reads it. */
+const PRODUCTION_SITE_URL = 'https://unstream.stream';
+
+/**
+ * Why scheduled work must not run here, or null when it may.
+ *
+ * Two gates, both fail-closed, because every runtime that is not the production Worker still
+ * talks to the *production* Supabase — a sweep writes real catalogue rows and the tips notifier
+ * sends real notifications, so running one from staging or a laptop is not a dry run.
+ *
+ * - `SCHEDULED_JOBS_ENABLED` is deliberately absent from wrangler.jsonc's `vars`, so it has to be
+ *   set on the production Worker and nowhere else. Same shape as `RELEASE_CATALOG_ENABLED`, for
+ *   the same reason. This is the gate that holds under `wrangler dev`, where `URL` is inherited
+ *   from the top-level vars and therefore *does* say production.
+ * - `URL` catches a staging deploy that was handed the variable by accident.
+ *
+ * It returns the reason rather than a boolean so the log line says which gate stopped it: a job
+ * silently not running is the failure this whole phase exists to remove.
+ */
+function scheduledWorkRefusal(): string | null {
+  if (process.env.SCHEDULED_JOBS_ENABLED !== 'true') {
+    return 'SCHEDULED_JOBS_ENABLED is not "true" — this is not the production Worker';
+  }
+  if (process.env.URL !== PRODUCTION_SITE_URL) {
+    return `URL is ${process.env.URL ?? 'unset'}, not production`;
+  }
+  return null;
+}
 
 /**
  * `social-card` can't run here: it reads its fonts off disk and loads resvg's WebAssembly binary.
@@ -79,42 +109,60 @@ function serveSpa(request: Request, env: Env): Promise<Response> {
 }
 
 /**
- * Run a background function in this invocation instead of POSTing to it.
+ * Put a background function on the queue.
+ *
+ * Returns false — so the caller falls back to its own path — when the function isn't one we have,
+ * or when the enqueue itself fails. It does NOT return true for work that merely started: a queue
+ * accepting a message is a promise to run it, with retries and a dead-letter queue behind it,
+ * which is the whole reason this is a queue and not `ctx.waitUntil`.
+ */
+function backgroundDispatcher(env: Env): BackgroundDispatcher {
+  return async (functionName, body) => {
+    if (!Object.hasOwn(FUNCTION_HANDLERS, functionName)) return false;
+
+    try {
+      await env.BACKGROUND_QUEUE.send({ functionName, body } satisfies BackgroundMessage);
+      return true;
+    } catch (error) {
+      console.error(
+        `[worker] could not enqueue ${functionName}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+      return false;
+    }
+  };
+}
+
+/**
+ * Run one background function, as the queue consumer and the cron handler both need to.
  *
  * The handler gets the event it would have got over HTTP, internal secret included, so its own
  * `isInternalRequest` check runs exactly as it does in production rather than being bypassed.
  */
-function backgroundDispatcher(ctx: ExecutionContext, request: Request): BackgroundDispatcher {
-  return (functionName, body) => {
-    const handler = Object.hasOwn(FUNCTION_HANDLERS, functionName) ? FUNCTION_HANDLERS[functionName] : undefined;
-    if (!handler) return false;
+async function runBackgroundFunction(functionName: string, body: string): Promise<void> {
+  const handler = Object.hasOwn(FUNCTION_HANDLERS, functionName) ? FUNCTION_HANDLERS[functionName] : undefined;
+  if (!handler) throw new Error(`no such background function: ${functionName}`);
 
-    const secret = process.env.INTERNAL_FUNCTION_SECRET;
-    if (!secret) return false;
+  const secret = process.env.INTERNAL_FUNCTION_SECRET;
+  if (!secret) throw new Error(`INTERNAL_FUNCTION_SECRET is not set, so ${functionName} cannot authenticate`);
 
-    const origin = new URL(request.url).origin;
-    const event: FunctionEvent = {
-      httpMethod: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${secret}` },
-      body,
-      isBase64Encoded: false,
-      queryStringParameters: {},
-      path: `${LEGACY_FUNCTION_PREFIX}${functionName}`,
-      rawUrl: `${origin}${LEGACY_FUNCTION_PREFIX}${functionName}`,
-    };
-
-    ctx.waitUntil(
-      handler(event).catch((error: unknown) => {
-        // The background functions report their own failures; this is the last resort, so an
-        // unhandled rejection can't take the isolate down with it.
-        console.error(
-          `[worker] background ${functionName} threw:`,
-          error instanceof Error ? error.message : String(error),
-        );
-      }),
-    );
-    return true;
+  const origin = process.env.URL ?? 'https://unstream.stream';
+  const event: FunctionEvent = {
+    httpMethod: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${secret}` },
+    body,
+    isBase64Encoded: false,
+    queryStringParameters: {},
+    path: `${LEGACY_FUNCTION_PREFIX}${functionName}`,
+    rawUrl: `${origin}${LEGACY_FUNCTION_PREFIX}${functionName}`,
   };
+
+  const result = await handler(event);
+  // A background function reports its own failures and answers 200 either way, so a non-2xx here
+  // is the dispatcher's problem — auth, a bad body — and is worth a retry rather than a shrug.
+  if (result && result.statusCode >= 400) {
+    throw new Error(`${functionName} answered ${result.statusCode}`);
+  }
 }
 
 async function route(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -215,9 +263,72 @@ export default Sentry.withSentry(sentryOptions, {
       if (asset.status !== 404) return withSiteHeaders(asset);
     }
 
-    const response = await withBackgroundDispatcher(backgroundDispatcher(ctx, request), () =>
+    const response = await withBackgroundDispatcher(backgroundDispatcher(env), () =>
       route(request, env, ctx),
     );
     return withSiteHeaders(response);
+  },
+
+  /**
+   * The queue consumer: 15 minutes per invocation, which is the budget a catalogue crawl needs
+   * and the reason this exists.
+   *
+   * A thrown error retries the message (three times, then the dead-letter queue), so failures
+   * are visible as a backlog rather than as nothing happening — the thing that made "the six
+   * days nothing was catalogued" invisible. Messages are acked one at a time rather than with
+   * `batch.ackAll()`, so one poisoned message can't discard the rest of its batch.
+   */
+  async queue(batch: MessageBatch<unknown>, _env: Env, _ctx: ExecutionContext): Promise<void> {
+    for (const message of batch.messages) {
+      const parsed = parseBackgroundMessage(message.body);
+      if (!parsed) {
+        console.error('[worker] dropping an unreadable queue message:', JSON.stringify(message.body)?.slice(0, 200));
+        message.ack();
+        continue;
+      }
+
+      try {
+        await runBackgroundFunction(parsed.functionName, parsed.body);
+        message.ack();
+      } catch (error) {
+        console.error(
+          `[worker] queued ${parsed.functionName} failed (attempt ${message.attempts}):`,
+          error instanceof Error ? error.message : String(error),
+        );
+        message.retry();
+      }
+    }
+  },
+
+  /**
+   * Cron Triggers, replacing the two GitHub Actions schedules.
+   *
+   * Guarded on the production URL as well as by the empty `crons` on the staging environment:
+   * staging shares one production Supabase with the real site, so a sweep running there would
+   * write real catalogue rows and a tips notifier would send real notifications. Structural
+   * first, runtime second — and it says so out loud rather than skipping silently, because a
+   * job that never starts never fails.
+   */
+  async scheduled(event: ScheduledController, _env: Env, ctx: ExecutionContext): Promise<void> {
+    const functionName = CRON_FUNCTIONS[event.cron];
+    if (!functionName) {
+      console.error(`[worker] no function mapped to cron "${event.cron}" — check wrangler.jsonc`);
+      return;
+    }
+
+    const refusal = scheduledWorkRefusal();
+    if (refusal) {
+      console.warn(`[worker] skipping scheduled ${functionName}: ${refusal}`);
+      return;
+    }
+
+    ctx.waitUntil(
+      runBackgroundFunction(functionName, JSON.stringify({ trigger: 'scheduled' })).catch((error: unknown) => {
+        console.error(
+          `[worker] scheduled ${functionName} failed:`,
+          error instanceof Error ? error.message : String(error),
+        );
+      }),
+    );
   },
 } satisfies ExportedHandler<Env>);

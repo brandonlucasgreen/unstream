@@ -77,7 +77,7 @@ export async function requestArtistCatalog(
 
   // On Workers the crawl runs in this invocation's waitUntil — no handshake to be challenged,
   // and no configuration to be missing. See api/lib/background.ts.
-  if (dispatchBackgroundFunction('catalog-artist-background', body)) return true;
+  if (await dispatchBackgroundFunction('catalog-artist-background', body)) return true;
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
 
@@ -160,7 +160,7 @@ export async function triggerCatalogNow(artistId: string): Promise<TriggerCatalo
   }
 
   // On Workers, straight into waitUntil — see requestArtistCatalog above.
-  if (dispatchBackgroundFunction('catalog-artist-background', JSON.stringify({ artistIds: [artistId], trigger: 'saved' satisfies CatalogTrigger }))) {
+  if (await dispatchBackgroundFunction('catalog-artist-background', JSON.stringify({ artistIds: [artistId], trigger: 'saved' satisfies CatalogTrigger }))) {
     return { ok: true };
   }
 

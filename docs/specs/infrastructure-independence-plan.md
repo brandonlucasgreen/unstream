@@ -1,9 +1,9 @@
 # Infrastructure independence: Netlify → Cloudflare, GitHub → Codeberg
 
 **Date:** 2026-10-18
-**Status:** Decided (Brandon, 2026-10-18). Phases 1a, 1c and 1d built and verified locally, not
-cut over (see "Where Phase 1 stands"). **Phase 1b is a prerequisite for the cutover, not a
-follow-up** — two blockers found on 2026-10-19 say why.
+**Status:** Decided (Brandon, 2026-10-18). Phases 1a, 1b, 1c and 1d built and verified locally,
+not cut over (see "Where Phase 1 stands"). 1b was promoted from follow-up to prerequisite on
+2026-10-19 and built the same day.
 **Scope:** everything around the database. Supabase stays for data and sign-in; the database is
 a later decision (see "Later").
 
@@ -223,7 +223,7 @@ database move (or a self-hosted build) then needs no client release.
 
 ### Where Phase 1 stands (2026-10-18)
 
-**Built and verified locally: 1a, 1c and 1d.** The Worker runs the whole site — 66 handlers, 7
+**Built and verified locally: 1a, 1b, 1c and 1d.** The Worker runs the whole site — 66 handlers, 7
 server-rendered pages, the SPA — and `npm run verify` is green (2,191 API and Worker tests, 1,340
 web tests, a clean typecheck of every handler the Worker imports). It bundles to 666 KB gzipped
 and was walked through end to end under `wrangler dev`: API routes, the retired-guides redirects,
@@ -233,11 +233,12 @@ rather than returning the SPA, and POST bodies reaching handlers intact.
 **Not cut over.** Production is still Netlify, and nothing here changes that; see "What Brandon
 has to do" below.
 
-### Phase 1b is a prerequisite for the cutover (found 2026-10-19)
+### Phase 1b: done, and it was a prerequisite (2026-10-19)
 
 1b was filed as the next nice thing: Queues for retries, a dead-letter queue, a visible backlog.
-Checking the numbers turned up two blockers instead. **Neither affects production today** —
-nothing is cut over — but both would bite on the day it is, and both are silent.
+Checking the numbers turned up two blockers instead, which is why it moved ahead of the cutover
+and was built immediately. **Neither affected production** — nothing is cut over — but both would
+have bitten on the day it was, and both were silent.
 
 **1. `ctx.waitUntil` gives 30 seconds. A catalogue crawl needs 9 to 13 minutes.**
 
@@ -252,8 +253,12 @@ returns *before* the crawl starts, so an artist killed at 30 seconds is recorded
 is not retried until the cooldown expires. The symptom is a catalogue that looks healthy and
 quietly stops filling — the exact shape of "The six days nothing was catalogued".
 
-Queue consumers get **15 minutes**, which is why the crawls belong there. Until they are moved,
-the Worker must not be the thing serving cataloguing.
+Queue consumers get **15 minutes**, which is why the crawls belong there. **Done:** the
+dispatcher now enqueues (`BACKGROUND_QUEUE`, one message per crawl, `max_concurrency: 1` so the
+existing pacing delays still mean what they say), and a consumer runs it with retries and a
+dead-letter queue behind it. The dispatcher is also `async` now and its answer means something —
+it used to return `true` the moment work reached `waitUntil`, so a caller recorded acceptance for
+work that could still be cancelled.
 
 *(The other two `waitUntil` users are fine: search persistence is a handful of upserts. The
 Bandcamp collection sync is the one to measure before trusting it — a large collection may not
@@ -269,11 +274,20 @@ keep reaching the *idle Netlify site*, running the old code; once Netlify is ret
 later, they fail outright, and a job that never starts never reports a failure.
 
 Repointing them at Cloudflare walks straight back into Bot Fight Mode, so that is not the fix.
-**Cron Triggers are**, because they remove the HTTP hop altogether — which is also what makes
-`INTERNAL_FUNCTION_SECRET` and `internal-origin.ts` redundant.
+**Cron Triggers are**, because they remove the HTTP hop altogether. **Done:** both schedules are
+`triggers.crons` in wrangler.jsonc on their original cadences, and the two workflow files now
+carry a header saying they must be deleted at cutover — crons only fire on a deployed Worker, so
+until DNS moves the workflows are still what runs, and leaving them afterwards means the job runs
+twice against one Supabase.
 
-**What this changes:** do 1b before 1e. The ordering in "The phases, in order" above is otherwise
-unchanged.
+**And one thing the plan had not accounted for: staging would have run them.** A Cron Trigger
+fires on any deployed Worker that declares one, and 1e stands up `next.unstream.stream` against
+the *same production Supabase*. A sweep there writes real catalogue rows; the tips notifier sends
+real notifications. So the staging environment declares `crons: []` and its own queue —
+structural, not a runtime check — and `scheduled()` additionally refuses unless
+`SCHEDULED_JOBS_ENABLED` is `"true"` *and* `URL` is production. That variable is deliberately not
+in wrangler.jsonc's `vars`: it is the gate that holds under `wrangler dev`, where `URL` is
+inherited and does say production. Both gates log which one stopped them.
 
 **1c is done.** One correction to the plan, and one thing the plan had right that most of the
 internet does not:
@@ -360,14 +374,19 @@ Nothing in this phase touches production. To take it further:
    is what turns purging back on. Keep the Netlify ones until that site is retired — both are
    purged while both can serve. `URL` is already set as a var in `wrangler.jsonc`;
    `SENTRY_RELEASE` is worth setting at deploy time, which Netlify never did.
-3. **Get Phase 1b built** — Queues and Cron Triggers. Not optional: without it, cataloguing
-   stops quietly a day after the cutover, and the scheduled jobs keep driving a Netlify site that
-   is about to be switched off. See the blockers section below.
-4. **Stand up `next.unstream.stream`** (a custom hostname on the zone, not `workers.dev`) and
-   walk 1e's checklist against real data — above all sign-in, a save, a tip in test mode, a
+3. **Create the two queues** before the first deploy — `wrangler queues create unstream-background`
+   and `unstream-background-dlq` — or the deploy fails on a consumer with no queue behind it.
+4. **Set `SCHEDULED_JOBS_ENABLED=true` on the production Worker, and nowhere else.** Without it
+   the Cron Triggers fire and refuse, loudly, and nothing is swept. With it on staging, staging
+   sweeps production.
+5. **Stand up `next.unstream.stream`** with `wrangler deploy --env staging` (a custom hostname on
+   the zone, not `workers.dev`) and walk 1e's checklist against real data — above all sign-in, a save, a tip in test mode, a
    catalogue crawl, and the purge-by-tag check, since those are the paths no local run can
    exercise.
-5. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
+6. **Delete `recatalog-sweep.yml` and `tips-review-notify.yml`** as part of the cutover, or each
+   job runs twice — once from the Cron Trigger, once from the workflow still driving the idle
+   Netlify site, against one Supabase. Both files carry a header saying so.
+7. **Then, and only then, point `unstream.stream` at the Worker.** Rollback is pointing it back;
    keep the Netlify site for two weeks.
 
 ### Phase 2: Upstash → Cloudflare (no cost change)

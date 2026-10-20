@@ -126,7 +126,7 @@ export function selfDispatchOrigin(host: string | undefined): string | null {
 async function requestSync(userId: string, host: string | undefined): Promise<boolean> {
   // On Workers the import runs in this invocation's waitUntil — no handshake to be challenged.
   // See api/lib/background.ts.
-  if (dispatchBackgroundFunction('bandcamp-sync-background', JSON.stringify({ userId }))) return true;
+  if (await dispatchBackgroundFunction('bandcamp-sync-background', JSON.stringify({ userId }))) return true;
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
   const siteUrl = selfDispatchOrigin(host) ?? process.env.URL;

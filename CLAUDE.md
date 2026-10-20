@@ -301,14 +301,23 @@ anything under `api/edge/`.
   zone, where free-plan Bot Fight Mode challenges it with no way to exempt it — the exact failure
   that catalogued nothing for six days. A caller that finds no dispatcher still falls back to the
   old handshake, which is how `npm run dev` and the tests keep working.
-- **`waitUntil` allows 30 seconds, and a catalogue crawl needs 9–13 minutes.** That ceiling is
-  shared across every `waitUntil` call in a request, and whatever hasn't settled is cancelled.
-  Search persistence fits easily; **cataloguing does not**, and a crawl killed at 30 seconds still
-  counts as an attempt (`claimArtistForCatalog` writes `last_attempted_at` before it starts), so
-  the artist is skipped until the cooldown lapses — a catalogue that looks healthy and quietly
-  stops filling. Queue consumers get 15 minutes, which is where the crawls belong. **This makes
-  Phase 1b a prerequisite for the cutover, not a follow-up**; don't let the Worker serve
-  cataloguing until it is done.
+- **`waitUntil` allows 30 seconds, and a catalogue crawl needs 9–13 minutes**, which is why the
+  long jobs go on a **queue** (15 minutes) and not `waitUntil`. A crawl killed at 30 seconds would
+  still count as an attempt (`claimArtistForCatalog` writes `last_attempted_at` before it starts),
+  so the artist is skipped until the cooldown lapses — a catalogue that looks healthy and quietly
+  stops filling. `dispatchBackgroundFunction` enqueues and is `async`: its answer means "a queue
+  has this and will retry it", not "something started". Search persistence still uses `waitUntil`,
+  which it fits inside easily.
+- **The two schedules are Cron Triggers**, replacing GitHub Actions that POSTed to the Netlify
+  host by name. `recatalog-sweep.yml` and `tips-review-notify.yml` still exist and still run —
+  crons only fire on a deployed Worker — and both carry a header saying they must be **deleted at
+  cutover**, or each job runs twice against one Supabase.
+- **Scheduled work is fail-closed, because staging shares production's database.** `scheduled()`
+  refuses unless `SCHEDULED_JOBS_ENABLED` is `"true"` *and* `URL` is production, and says which
+  gate stopped it. That variable is deliberately absent from `wrangler.jsonc`'s `vars`: it is the
+  gate that holds under `wrangler dev`, where `URL` is inherited and does say production. The
+  `staging` environment also declares `crons: []` and its own queue, so it can't fire or steal a
+  message structurally.
 - **Sentry is `@sentry/cloudflare`,** same DSN and project. It has no `init()`: the client is
   created per request by the wrapper around the Worker's default export, which is also what ties
   flushing to `waitUntil`. Each handler's own `withSentry` still flushes before returning.

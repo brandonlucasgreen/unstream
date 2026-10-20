@@ -109,7 +109,7 @@ export async function requestSearchPersist(results: PersistableResult[]): Promis
     const body = JSON.stringify({ results: payload });
 
     // Workers first: no handshake, no configuration needed, nothing that can be challenged.
-    if (dispatchBackgroundFunction('persist-search-results-background', body)) return 'background';
+    if (await dispatchBackgroundFunction('persist-search-results-background', body)) return 'background';
 
     const secret = process.env.INTERNAL_FUNCTION_SECRET;
     const origin = internalFunctionOrigin();
