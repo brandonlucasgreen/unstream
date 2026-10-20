@@ -121,3 +121,34 @@ describe('purgeCacheTags', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe('the purge hosts are on the outbound allowlist', () => {
+  /**
+   * Both URLs are constants with only a zone or site id interpolated into the *path*, so neither
+   * has a host anything could redirect. They are checked anyway because every other constant-URL
+   * fetch in this backend does (digest-feed.ts, stripe.ts), and because the allowlist is meant to
+   * be the inventory of every host the backend talks to — a purge target missing from it reads
+   * as "nothing purges" to whoever greps it next.
+   */
+  it('lists both, so the inventory is complete', async () => {
+    const { ALLOWED_OUTBOUND_HOSTNAMES } = await import('../middleware');
+
+    expect(ALLOWED_OUTBOUND_HOSTNAMES.has('api.cloudflare.com')).toBe(true);
+    expect(ALLOWED_OUTBOUND_HOSTNAMES.has('api.netlify.com')).toBe(true);
+  });
+
+  it('refuses to purge a host the allowlist does not cover', async () => {
+    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
+    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
+
+    const middleware = await import('../middleware');
+    const spy = vi.spyOn(middleware, 'isUrlHostnameAllowed').mockReturnValue(false);
+    try {
+      await purgeCacheTags(['artist-mono'], 'Test');
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining('not on the outbound allowlist'));
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});

@@ -18,6 +18,7 @@
 // retired.
 
 import { getClient } from './db';
+import { isUrlHostnameAllowed } from './middleware';
 
 /**
  * Fire the purge and report what happened, without ever throwing at the caller.
@@ -39,14 +40,22 @@ export async function purgeCacheTags(tags: string[], label: string): Promise<voi
   console.log(`[${label}] Purged ${purged.join(' and ')} cache for ${tags.join(', ')}`);
 }
 
+/** Netlify's purge endpoint. Constant, and on ALLOWED_OUTBOUND_HOSTNAMES. */
+const NETLIFY_PURGE_URL = 'https://api.netlify.com/api/v1/purge';
+
 /** Returns the CDN's name when it was asked to purge, or null when it isn't configured. */
 async function purgeNetlify(tags: string[], label: string): Promise<string | null> {
   const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
   const token = process.env.NETLIFY_API_TOKEN;
   if (!siteId || !token) return null;
 
+  if (!isUrlHostnameAllowed(NETLIFY_PURGE_URL)) {
+    console.error(`[${label}] Netlify purge host is not on the outbound allowlist`);
+    return null;
+  }
+
   try {
-    const response = await fetch('https://api.netlify.com/api/v1/purge', {
+    const response = await fetch(NETLIFY_PURGE_URL, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ site_id: siteId, cache_tags: tags }),
@@ -75,8 +84,14 @@ async function purgeCloudflare(tags: string[], label: string): Promise<string | 
   const token = process.env.CLOUDFLARE_PURGE_TOKEN;
   if (!zoneId || !token) return null;
 
+  const url = `https://api.cloudflare.com/client/v4/zones/${encodeURIComponent(zoneId)}/purge_cache`;
+  if (!isUrlHostnameAllowed(url)) {
+    console.error(`[${label}] Cloudflare purge host is not on the outbound allowlist`);
+    return null;
+  }
+
   try {
-    const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ tags }),
