@@ -8,6 +8,7 @@ import { getClient, resolveOwnedArtist } from './db';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
+import { purgeCacheTags } from './purge-cache';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 import { safeEmbedStyle } from '../shared/embed-style';
 import { normalizeSectionOrder } from '../shared/page-sections';
@@ -150,25 +151,12 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
     console.error('[Profile] Redis cache purge failed:', e);
   }
 
-  try {
-    const siteId = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
-    const token = process.env.NETLIFY_API_TOKEN;
-    if (siteId && token) {
-      await fetch('https://api.netlify.com/api/v1/purge', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ site_id: siteId, cache_tags: [`artist-${slug}`, `artist-page-${slug}`] }),
-      });
-      console.log(`[Profile] Purged CDN cache for artist-${slug} and artist-page-${slug}`);
-    } else {
-      console.warn('[Profile] NETLIFY_SITE_ID or NETLIFY_API_TOKEN not set, skipping CDN purge');
-    }
-  } catch (e) {
-    console.error('[Profile] CDN cache purge failed:', e);
-  }
+  // Through the shared helper, which purges whichever CDNs are configured. This used to be a
+  // hand-rolled fetch straight at Netlify's purge API, which was invisible as long as Netlify
+  // was the only CDN — and would have gone on purging a CDN that no longer served the site
+  // after the Cloudflare cutover, leaving an artist's own edit stale for the whole TTL.
+  // `artist-page-${slug}` is purged nowhere else.
+  await purgeCacheTags([`artist-${slug}`, `artist-page-${slug}`], 'Profile');
 }
 
 // Removing a claim un-verifies the artist rather than deleting them. The artists row is public

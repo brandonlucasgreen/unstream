@@ -44,7 +44,12 @@ function toStoredCopy(response: Response, cdnPolicy: string): Response {
 function fromStoredCopy(response: Response): Response {
   const browserPolicy = response.headers.get(BROWSER_POLICY_HEADER);
   return withHeaders(response, (headers) => {
+    // A page that declared no browser policy must not acquire one on a cache hit. Setting it
+    // only when present would leave the CDN's own value in `Cache-Control` — so a page served
+    // with no caching instructions at all on a miss would tell the visitor's browser
+    // `public, s-maxage=3600` on every hit afterwards.
     if (browserPolicy) headers.set('Cache-Control', browserPolicy);
+    else headers.delete('Cache-Control');
     headers.delete(BROWSER_POLICY_HEADER);
   });
 }
@@ -74,13 +79,29 @@ export async function withEdgeCache(
   const response = await render();
 
   const cdnPolicy = response.headers.get('CDN-Cache-Control');
-  if (response.status !== 200 || !cdnPolicy || cdnPolicy.includes('no-store')) return response;
-  // A Set-Cookie would make this a per-visitor response; the Cache API refuses it outright, and
-  // a page that grew one should stop being cached rather than start throwing.
-  if (response.headers.has('Set-Cookie')) return response;
+  if (response.status !== 200 || !cdnPolicy) return response;
 
-  // Stored after the response has gone, so a visitor never waits for the write.
-  ctx.waitUntil(cache.put(request, toStoredCopy(response.clone(), cdnPolicy)));
+  // Everything the Cache API would refuse, refused here instead — because `put` rejects
+  // *silently* from inside waitUntil, which would leave a route looking cached (the header is
+  // there, `cache: true` is set) while every hit stays a miss and keeps paying its Supabase
+  // reads. That is the precise failure this module exists to prevent, so the guard is explicit
+  // rather than delegated.
+  if (/no-store|no-cache|private/.test(cdnPolicy)) return response;
+  // A Set-Cookie would make this a per-visitor response. `Vary: *` means "never reusable".
+  if (response.headers.has('Set-Cookie')) return response;
+  if (response.headers.get('Vary')?.trim() === '*') return response;
+
+  // Stored after the response has gone, so a visitor never waits for the write. The rejection
+  // handler is the backstop for whatever the guard above hasn't anticipated: an unguarded
+  // rejection here marks the invocation errored even though the visitor got their 200.
+  ctx.waitUntil(
+    cache.put(request, toStoredCopy(response.clone(), cdnPolicy)).catch((error: unknown) => {
+      console.warn(
+        `[edge-cache] could not store ${new URL(request.url).pathname}:`,
+        error instanceof Error ? error.message : String(error),
+      );
+    }),
+  );
 
   return response;
 }

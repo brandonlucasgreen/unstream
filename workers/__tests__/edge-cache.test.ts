@@ -97,6 +97,39 @@ describe('what gets stored', () => {
     expect(cache.put).not.toHaveBeenCalled();
   });
 
+  it.each(['private, s-maxage=3600', 'no-cache, s-maxage=3600', 'public, no-store'])(
+    'never stores a policy the Cache API would refuse: %s',
+    async (policy) => {
+      // put() rejects these silently from inside waitUntil, which would leave the route looking
+      // cached while every hit stayed a miss.
+      const refused = new Response('x', { status: 200, headers: { 'CDN-Cache-Control': policy } });
+
+      await withEdgeCache(new Request(URL_UNDER_TEST), ctx, async () => refused);
+
+      expect(cache.put).not.toHaveBeenCalled();
+    },
+  );
+
+  it('never stores a response that says it is never reusable (Vary: *)', async () => {
+    const varied = new Response('x', {
+      status: 200,
+      headers: { 'CDN-Cache-Control': 'public, s-maxage=3600', Vary: '*' },
+    });
+
+    await withEdgeCache(new Request(URL_UNDER_TEST), ctx, async () => varied);
+
+    expect(cache.put).not.toHaveBeenCalled();
+  });
+
+  it('survives a cache.put that rejects, without failing the response', async () => {
+    cache.put.mockRejectedValueOnce(new Error('413 payload too large'));
+
+    const response = await withEdgeCache(new Request(URL_UNDER_TEST), ctx, async () => releasePage());
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('page');
+  });
+
   it('never stores a response carrying a cookie', async () => {
     const personal = new Response('x', {
       status: 200,
@@ -134,6 +167,21 @@ describe('what a visitor gets back', () => {
 
     expect(hit.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate');
     expect(hit.headers.get('x-browser-cache-control')).toBeNull();
+  });
+
+  it('does not invent a browser policy for a page that declared none', async () => {
+    // The stored copy carries the CDN policy in Cache-Control because that is all the Cache API
+    // reads. Handing it back unchanged would tell the browser `public, s-maxage=3600` for a page
+    // that was served with no caching instructions at all.
+    const noBrowserPolicy = new Response('x', {
+      status: 200,
+      headers: { 'CDN-Cache-Control': 'public, s-maxage=3600' },
+    });
+
+    await withEdgeCache(new Request(URL_UNDER_TEST), ctx, async () => noBrowserPolicy.clone());
+    const hit = await withEdgeCache(new Request(URL_UNDER_TEST), ctx, async () => noBrowserPolicy.clone());
+
+    expect(hit.headers.get('Cache-Control')).toBeNull();
   });
 
   it('serves the stored body on a hit without rendering again', async () => {

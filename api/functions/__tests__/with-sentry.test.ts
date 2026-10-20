@@ -9,12 +9,15 @@ import { join } from 'node:path';
  */
 
 const mocks = vi.hoisted(() => ({
+  // `init` has to be here: withSentry only flushes where this module bound the client, which is
+  // Node. See api/functions/__tests__/sentry-client-binding.test.ts for why that gate exists.
+  init: vi.fn(),
   captureException: vi.fn(),
   captureMessage: vi.fn(),
   flush: vi.fn(() => Promise.resolve(true)),
 }));
 
-vi.mock('@sentry/cloudflare', () => mocks);
+vi.mock('@sentry/node', () => mocks);
 
 // Captures only go anywhere when a DSN is set, and withSentry only flushes then. The DSN stays
 // set for the whole file: isSentryInitialized() reads the environment when it is called, not

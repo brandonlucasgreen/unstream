@@ -134,6 +134,13 @@ describe('route order', () => {
     expect(matchRoute('/dashboard')?.route).toMatchObject({ kind: 'spa' });
   });
 
+  it('sends bare /guides to /platforms, not /faq', () => {
+    // Netlify's `/guides/*` did not match the bare path, so it fell through to the exact rule.
+    // Our splat does match a bare prefix, so the order here has to differ from netlify.toml to
+    // keep the same answer. This is the assertion whose absence let the difference through.
+    expect(matchRoute('/guides')?.route).toMatchObject({ kind: 'redirect', to: '/platforms' });
+  });
+
   it('keeps the retired guides redirects, specific slugs before the catch-all', () => {
     expect(matchRoute('/guides/every-platform-unstream-supports-compared')?.route).toMatchObject({
       kind: 'redirect',
@@ -185,5 +192,30 @@ describe('which routes may be cached', () => {
       (route) => 'cache' in route && route.cache && /\/(claim|tips|me|admin|analytics|newsletter)\//.test(route.pattern),
     );
     expect(writeRoutes).toEqual([]);
+  });
+});
+
+describe('a malformed URL must not take the router down', () => {
+  /**
+   * `decodeURIComponent` throws URIError on a bad escape, and matchPattern runs before any
+   * handler — so an unguarded decode turns a crafted URL into a Worker error page.
+   */
+  it.each(['/a/mono/bar%zz', '/u/bad%zz/releases.xml', '/a/mono/%', '/a/mono/%E0%A4%A'])(
+    '%s still routes',
+    (pathname) => {
+      expect(() => matchRoute(pathname)).not.toThrow();
+      expect(matchRoute(pathname)).not.toBeNull();
+    },
+  );
+
+  it('passes an undecodable segment through raw rather than failing the match', () => {
+    expect(matchPattern('/a/:artist/:release', '/a/mono/bar%zz')).toEqual({
+      artist: 'mono',
+      release: 'bar%zz',
+    });
+  });
+
+  it('still decodes a well-formed segment', () => {
+    expect(matchPattern('/u/:handle', '/u/caf%C3%A9')).toEqual({ handle: 'café' });
   });
 });

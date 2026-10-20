@@ -172,8 +172,12 @@ const FUNCTION_ROUTES: Route[] = [
   { pattern: '/guides/why-i-built-unstream', kind: 'redirect', to: 'https://dispatch.kidlightbulbs.com/archive/introducing-unstream-a-simple-way-to-search/', status: 301 },
   { pattern: '/guides/every-platform-unstream-supports-compared', kind: 'redirect', to: '/platforms', status: 301 },
   { pattern: '/guides/bandcamp-and-beyond-alternative-music-platforms-worth-knowing', kind: 'redirect', to: '/platforms', status: 301 },
-  { pattern: '/guides/*', kind: 'redirect', to: '/faq', status: 301 },
+  // Above the splat, unlike netlify.toml, and deliberately: Netlify's `/guides/*` did not match
+  // the bare `/guides`, so that request fell through to this rule and went to /platforms. Our
+  // splat *does* match a bare prefix (see matchPattern), so leaving the original order would
+  // quietly send /guides to /faq instead.
   { pattern: '/guides', kind: 'redirect', to: '/platforms', status: 301 },
+  { pattern: '/guides/*', kind: 'redirect', to: '/faq', status: 301 },
   { pattern: '/assets/*', kind: 'missing-asset' },
   { pattern: '/*', kind: 'spa' },];
 
@@ -223,7 +227,6 @@ export function matchPattern(pattern: string, pathname: string): Record<string, 
     if (pathname === prefix || pathname.startsWith(`${prefix}/`)) return {};
     return null;
   }
-  if (pattern === '/*') return {};
 
   const patternParts = pattern.split('/');
   const pathParts = pathname.replace(/\/$/, '').split('/');
@@ -236,7 +239,16 @@ export function matchPattern(pattern: string, pathname: string): Record<string, 
     const patternPart = patternParts[i];
     if (patternPart.startsWith(':')) {
       if (!pathParts[i]) return null;
-      params[patternPart.slice(1)] = decodeURIComponent(pathParts[i]);
+      try {
+        params[patternPart.slice(1)] = decodeURIComponent(pathParts[i]);
+      } catch {
+        // A malformed escape (`%zz`, a lone `%`) makes decodeURIComponent throw, and this runs
+        // before any handler, so the throw would escape the router and Cloudflare would answer
+        // an error page for `/u/bad%zz/releases.xml`. Netlify's redirect engine didn't decode
+        // at all. These params are informational — every handler re-reads `event.path` itself —
+        // so an undecodable segment is passed through raw rather than being allowed to 500.
+        params[patternPart.slice(1)] = pathParts[i];
+      }
       continue;
     }
     if (patternPart !== pathParts[i]) return null;

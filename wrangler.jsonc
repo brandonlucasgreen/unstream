@@ -46,14 +46,37 @@
   // npm support there is still beta with the native-binary and runtime-import gaps Netlify
   // documents. So the import stays a URL in the source, and the Worker's bundler points it at
   // the npm package that is already a dependency. Delete this when the Netlify site is retired.
+  //
+  // `@sentry/node` → `@sentry/cloudflare` for the same reason, in the other direction:
+  // api/lib/sentry.ts imports the Node SDK because Netlify is still production and only
+  // `init()` binds a client there, while on Workers the client is created per request by
+  // `Sentry.withSentry`. The Node SDK does bundle and run here, but it carries OpenTelemetry
+  // and a stack of Node internals a Worker has no use for, and its transport under workerd is
+  // unproven.
+  //
+  // Measured cost: the bundle goes from 667 KB to 876 KB gzipped, because resolving through the
+  // alias picks @sentry/cloudflare's `nodejs_compat` build rather than its slim one. That is the
+  // right build for this Worker — nodejs_compat is on, and that variant uses AsyncLocalStorage
+  // for async-context isolation. Checked that it is still ONE copy of the SDK, not two:
+  // getCurrentScope, getDefaultCurrentScope and getGlobalSingleton each appear exactly once in
+  // the bundle, so api/lib/sentry.ts's captures and the client `Sentry.withSentry` creates in
+  // workers/index.ts share one registry. Against a 10 MB limit the size is not worth avoiding.
+  //
+  // Delete this when Netlify is retired and the import can simply be `@sentry/cloudflare`.
   "alias": {
-    "https://esm.sh/@supabase/supabase-js@2": "@supabase/supabase-js"
+    "https://esm.sh/@supabase/supabase-js@2": "@supabase/supabase-js",
+    "@sentry/node": "@sentry/cloudflare"
   },
 
   "vars": {
     // Mirrors what Netlify exposed at runtime, which api/lib/sentry.ts and
     // api/lib/internal-origin.ts both read to tell production from anything else. Everything
     // secret is a Worker secret instead (`wrangler secret put`), never a var.
-    "URL": "https://unstream.stream"
+    "URL": "https://unstream.stream",
+    // Only used to proxy /api/social-card/* back to the Netlify site until that function is
+    // deleted (see PROXIED_TO_NETLIFY in workers/index.ts). Netlify injected this at runtime;
+    // on Workers it has to be stated, or Buffer's card fetches 404 and posts publish without
+    // their images. Goes with the proxy.
+    "SITE_NAME": "unstream"
   }
 }

@@ -58,13 +58,24 @@ const LEGACY_FUNCTION_PREFIX = '/.netlify/functions/';
  */
 const PROXIED_TO_NETLIFY: ReadonlyArray<string> = ['/api/social-card/'];
 
+/** Path prefixes that only ever resolve to a handler or a renderer, never to a file on disk. */
+const NEVER_AN_ASSET: ReadonlyArray<string> = ['/api/', '/.netlify/functions/', '/a/', '/u/', '/tip/', '/feed/', '/digest/'];
+
+function isNeverAnAsset(pathname: string): boolean {
+  return NEVER_AN_ASSET.some((prefix) => pathname.startsWith(prefix));
+}
+
 function serveSpa(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   // The SPA shell, not whatever this path is. Static assets' own `single-page-application`
   // handling would do this too, but asking for it explicitly keeps the three places that need
   // the shell — the catch-all, an unmatched path, and a renderer's `context.next()` — saying
   // the same thing.
-  return env.ASSETS.fetch(new Request(new URL('/index.html', url.origin), request));
+  //
+  // A plain GET, deliberately: `new Request(url, request)` would carry the caller's method and
+  // body across, so a POST to an unmatched path would be POSTed at the asset binding and answered
+  // 405 instead of returning the shell the way Netlify's catch-all rewrite did.
+  return env.ASSETS.fetch(new URL('/index.html', url.origin).toString());
 }
 
 /**
@@ -75,7 +86,7 @@ function serveSpa(request: Request, env: Env): Promise<Response> {
  */
 function backgroundDispatcher(ctx: ExecutionContext, request: Request): BackgroundDispatcher {
   return (functionName, body) => {
-    const handler = FUNCTION_HANDLERS[functionName];
+    const handler = Object.hasOwn(FUNCTION_HANDLERS, functionName) ? FUNCTION_HANDLERS[functionName] : undefined;
     if (!handler) return false;
 
     const secret = process.env.INTERNAL_FUNCTION_SECRET;
@@ -113,14 +124,19 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
     const siteName = process.env.SITE_NAME;
     if (siteName) {
       const target = new URL(url.pathname + url.search, `https://${siteName}.netlify.app`);
-      return fetch(new Request(target, request));
+      // A bare GET, not `new Request(target, request)`: these are public card images fetched by
+      // Buffer, and there is no reason to forward a caller's cookies or Authorization header to
+      // another host just because the path matched.
+      return fetch(target.toString(), { method: 'GET' });
     }
     return new Response('Not found', { status: 404 });
   }
 
   if (url.pathname.startsWith(LEGACY_FUNCTION_PREFIX)) {
     const name = url.pathname.slice(LEGACY_FUNCTION_PREFIX.length).replace(/\/$/, '');
-    const handler = FUNCTION_HANDLERS[name];
+    // `hasOwn`, not a bare index: the map is an object literal, so `/.netlify/functions/constructor`
+    // would otherwise resolve to Object's own constructor and be invoked as a handler.
+    const handler = Object.hasOwn(FUNCTION_HANDLERS, name) ? FUNCTION_HANDLERS[name] : undefined;
     if (!handler) return new Response('Function not found', { status: 404 });
     return toResponse(await handler(await toFunctionEvent(request)));
   }
@@ -130,14 +146,18 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
   switch (matched.route.kind) {
     case 'function': {
-      const handler = FUNCTION_HANDLERS[matched.route.name];
+      const handler = Object.hasOwn(FUNCTION_HANDLERS, matched.route.name)
+        ? FUNCTION_HANDLERS[matched.route.name]
+        : undefined;
       if (!handler) return new Response('Function not found', { status: 404 });
       const run = async () => toResponse(await handler(await toFunctionEvent(request)));
       return matched.route.cache ? withEdgeCache(request, ctx, run) : run();
     }
 
     case 'edge': {
-      const render = EDGE_RENDERERS[matched.route.name];
+      const render = Object.hasOwn(EDGE_RENDERERS, matched.route.name)
+        ? EDGE_RENDERERS[matched.route.name]
+        : undefined;
       if (!render) return serveSpa(request, env);
       // `context.next()` means "not mine — serve the SPA". Every renderer decides that per
       // request, before any database query: one route, one renderer.
@@ -145,8 +165,14 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
       return matched.route.cache ? withEdgeCache(request, ctx, renderPage) : renderPage();
     }
 
-    case 'redirect':
-      return Response.redirect(new URL(matched.route.to, url.origin).toString(), matched.route.status);
+    case 'redirect': {
+      const target = new URL(matched.route.to, url.origin);
+      // Netlify appended the incoming query string when the destination had none, so a
+      // /plus?utm_source=… link kept its attribution through the redirect. Dropping it loses
+      // every campaign parameter on the retired /guides URLs and on /plus, silently.
+      if (!target.search) target.search = url.search;
+      return Response.redirect(target.toString(), matched.route.status);
+    }
 
     case 'missing-asset': {
       // Only reached when the asset genuinely isn't there — real files are served above, before
@@ -169,15 +195,22 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
  */
 export default Sentry.withSentry(sentryOptions, {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    // A real file wins over every route, the way Netlify served the publish directory ahead of
-    // any unforced redirect. `/assets/*` depends on it: the route below exists only to turn a
-    // *missing* chunk into a 404, and would swallow every live chunk without this.
+    const url = new URL(request.url);
+
+    // Cloudflare serves a matching asset *before* this Worker is invoked at all, so real files
+    // already win over routes without help from here — this probe is the fallback for anything
+    // the platform passed through, and the reason /assets/* can 404 rather than fall into the
+    // SPA. It is NOT what applies headers to static files: those never reach this code, which is
+    // why apps/web/public/_headers exists and must stay.
     //
     // GET and HEAD only, and not merely as an optimisation: handing the request to another
-    // fetcher consumes its body, so probing for an asset first would leave every POST, PUT and
-    // DELETE with a body that `toFunctionEvent` can no longer read. There are no assets to find
-    // under those methods anyway.
-    if (request.method === 'GET' || request.method === 'HEAD') {
+    // fetcher consumes its body, so probing first would leave every POST, PUT and DELETE with a
+    // body that `toFunctionEvent` can no longer read.
+    //
+    // Skipped for the prefixes that can never name a file, so a search — already fanning out to
+    // ~17 upstreams against a per-request subrequest budget — doesn't spend a round trip finding
+    // that out. Adding a static file under one of these would need this list revisited.
+    if ((request.method === 'GET' || request.method === 'HEAD') && !isNeverAnAsset(url.pathname)) {
       const asset = await env.ASSETS.fetch(request);
       if (asset.status !== 404) return withSiteHeaders(asset);
     }
