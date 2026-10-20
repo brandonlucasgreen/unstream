@@ -35,6 +35,7 @@ import {
 import { buildAtom, buildIcs, type FeedRelease } from '../shared/feed-format';
 import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 import { PLATFORMS } from '../shared/platform-registry';
+import { decodePathSegment } from '../shared/path-segments';
 
 const SITE = 'https://unstream.stream';
 
@@ -147,11 +148,21 @@ export function parsePath(path: string):
   const priv = path.match(/^\/feed\/f\/([^/]+)\.(ics|xml)$/);
   if (priv) return { kind: 'token', token: priv[1], format: priv[2] as Format };
 
+  // A segment that can't be percent-decoded can't be a handle or a slug we minted, so it is "no
+  // such feed" — the caller's 404 — rather than a throw out of a function that hasn't looked
+  // anything up yet. `decodeURIComponent` raises URIError on `%zz`, a lone `%` or a truncated
+  // sequence, and calendar clients retry a 500 on their own schedule forever.
   const handle = path.match(/^\/u\/([^/]+)\/releases\.(ics|xml)$/);
-  if (handle) return { kind: 'handle', handle: decodeURIComponent(handle[1]), format: handle[2] as Format };
+  if (handle) {
+    const decoded = decodePathSegment(handle[1]);
+    return decoded === null ? null : { kind: 'handle', handle: decoded, format: handle[2] as Format };
+  }
 
   const artist = path.match(/^\/a\/([^/]+)\/releases\.(ics|xml)$/);
-  if (artist) return { kind: 'artist', slug: decodeURIComponent(artist[1]), format: artist[2] as Format };
+  if (artist) {
+    const decoded = decodePathSegment(artist[1]);
+    return decoded === null ? null : { kind: 'artist', slug: decoded, format: artist[2] as Format };
+  }
 
   return null;
 }
