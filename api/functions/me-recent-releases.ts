@@ -1,7 +1,7 @@
 // API endpoint: /api/me/recent-releases
 //
 // GET — shortlists of upcoming and recent releases by the signed-in fan's saved artists, for the
-// "Upcoming Releases" and "Recent Releases" sections of /collection.
+// "Upcoming Releases" and "Recent Releases" sections of /my-collection.
 //
 // Follows the same conventions as the other me-* endpoints (bearer auth against the anon client,
 // hand-rolled permissive CORS) and is in api/tsconfig.json's typecheck include — keep it there.

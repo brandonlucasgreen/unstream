@@ -5343,7 +5343,7 @@ function feedSince(now: Date): string {
  * row at the time; a save made from a search result used to send a synthetic key
  * (`rodneyowl`, `qobuz-pearljam`, `nameonly-…`), which matched nothing, so the row was written
  * with `artist_id: null`. Measured 2026-08-07: **25 of 37 live rows**. Every feature keyed on
- * `artist_id` — this feed, the /collection shortlist — was silently blind to two thirds of
+ * `artist_id` — this feed, the /my-collection shortlist — was silently blind to two thirds of
  * everyone's saved artists.
  *
  * The client that wrote those keys is fixed, but the rows are already in the database and a

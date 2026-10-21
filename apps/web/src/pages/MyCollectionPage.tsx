@@ -24,7 +24,7 @@ import { NewsletterPrompt } from '../components/NewsletterPrompt';
  * data dependency justifying the second. Now every section fetches as soon as the page
  * mounts and shows its own skeleton, so the wall-clock cost is the slowest single request.
  */
-export function CollectionPage() {
+export function MyCollectionPage() {
   const { session, isLoading: authLoading, savedArtists, artistsLoaded } = useAuth();
   const [upcomingReleases, setUpcomingReleases] = useState<RecentRelease[]>([]);
   const [recentReleases, setRecentReleases] = useState<RecentRelease[]>([]);
@@ -48,7 +48,7 @@ export function CollectionPage() {
       })
       .catch(e => {
         if (controller.signal.aborted) return;
-        Sentry.captureException(e, { extra: { context: 'collection.loadRecentReleases' } });
+        Sentry.captureException(e, { extra: { context: 'myCollection.loadRecentReleases' } });
         setReleasesError("Couldn't load recent releases. Try refreshing.");
       });
 
@@ -65,7 +65,7 @@ export function CollectionPage() {
 
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
-          <h1 className="text-2xl font-bold">Collection</h1>
+          <h1 className="text-2xl font-bold">My Collection</h1>
 
           <WelcomeBanner />
 

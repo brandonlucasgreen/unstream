@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { CollectionGrid } from './CollectionGrid';
 
-// The /collection page's own section: the owner's view of their collection (Support Loop Step 3).
+// The /my-collection page's own section: the owner's view of their collection (Support Loop Step 3).
 // The public page (/u/:handle) shows only purchased, non-hidden items; here the owner
 // sees everything, including hidden items (marked), and can hide/unhide each one.
 // The empty state points at the import — that's the action that fills this in.
@@ -81,7 +81,7 @@ export function CollectionSection() {
         <svg className="w-5 h-5 text-accent-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
-        Your Collection
+        My Collection
       </h2>
 
       {error && <p className="text-sm text-red-400 mb-3">{error}</p>}

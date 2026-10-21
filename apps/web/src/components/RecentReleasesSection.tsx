@@ -116,7 +116,7 @@ export function RecentReleasesSection({
   );
 }
 
-/** The /collection section heading treatment, shared so both headings match exactly. */
+/** The /my-collection section heading treatment, shared so both headings match exactly. */
 function SectionHeading({ title, action }: { title: string; action: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 mb-4">

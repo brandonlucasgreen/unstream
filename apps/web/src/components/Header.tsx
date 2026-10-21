@@ -122,7 +122,7 @@ export function Header() {
     label: t('nav.account.label'),
     items: [
       { to: '/my-artists', label: t('nav.account.myArtists') },
-      { to: '/collection', label: t('nav.account.collection') },
+      { to: '/my-collection', label: t('nav.account.collection') },
       { to: '/settings', label: t('nav.account.settings') },
     ],
   };

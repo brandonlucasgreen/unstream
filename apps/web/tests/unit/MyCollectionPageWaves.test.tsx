@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// /collection's request timing.
+// /my-collection's request timing.
 //
 // Its predecessor /dashboard held one `loading` flag covering /api/artist-auth,
 // /api/saved-artists and /api/me/recent-releases, and rendered nothing until the slowest
@@ -26,7 +26,7 @@ vi.mock('../../src/components/Footer', () => ({ Footer: () => null }));
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-import { CollectionPage } from '../../src/pages/CollectionPage';
+import { MyCollectionPage } from '../../src/pages/MyCollectionPage';
 
 /** A request that never answers, standing in for a slow endpoint. */
 function pending() {
@@ -37,7 +37,7 @@ function urlsRequested(): string[] {
   return mockFetch.mock.calls.map(call => String(call[0]));
 }
 
-describe('CollectionPage request waves', () => {
+describe('MyCollectionPage request waves', () => {
   beforeEach(() => {
     mockFetch.mockReset();
     mockUseAuth.mockReturnValue({
@@ -65,7 +65,7 @@ describe('CollectionPage request waves', () => {
 
     render(
       <MemoryRouter>
-        <CollectionPage />
+        <MyCollectionPage />
       </MemoryRouter>
     );
 
@@ -83,7 +83,7 @@ describe('CollectionPage request waves', () => {
 
     render(
       <MemoryRouter>
-        <CollectionPage />
+        <MyCollectionPage />
       </MemoryRouter>
     );
 
@@ -102,7 +102,7 @@ describe('CollectionPage request waves', () => {
 
     render(
       <MemoryRouter>
-        <CollectionPage />
+        <MyCollectionPage />
       </MemoryRouter>
     );
 

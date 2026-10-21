@@ -5,7 +5,7 @@ import type { SavedArtist } from '../contexts/AuthContext';
 import { SkeletonScreen } from './Skeleton';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
 
-// The saved-artists block on /collection: artists saved to come back to, and which of them
+// The saved-artists block on /my-collection: artists saved to come back to, and which of them
 // have actually been supported.
 //
 // The list comes from AuthContext — the same one the save buttons on search results and

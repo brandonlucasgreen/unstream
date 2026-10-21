@@ -31,7 +31,7 @@ if (import.meta.env.PROD) {
 const ClaimPage = lazyWithRetry(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
 const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
 const MyArtistsPage = lazyWithRetry(() => import('./pages/MyArtistsPage.tsx').then(m => ({ default: m.MyArtistsPage })))
-const CollectionPage = lazyWithRetry(() => import('./pages/CollectionPage.tsx').then(m => ({ default: m.CollectionPage })))
+const MyCollectionPage = lazyWithRetry(() => import('./pages/MyCollectionPage.tsx').then(m => ({ default: m.MyCollectionPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
@@ -67,11 +67,12 @@ function ArtistLoginRedirect() {
   return <Navigate to="/login" replace />
 }
 
-// The dashboard split into /my-artists (artist management) and /collection (the fan's
+// The dashboard split into /my-artists (artist management) and /my-collection (the fan's
 // releases, collection and saved artists). Both old routes stay for bookmarks and links in
-// emails already sent, and land on the fan half — what most accounts came for.
+// emails already sent, and land on the fan half — what most accounts came for. (Sign-in
+// itself resolves between the two; see services/accountHome.ts.)
 function DashboardRedirect() {
-  return <Navigate to="/collection" replace />
+  return <Navigate to="/my-collection" replace />
 }
 
 createRoot(document.getElementById('root')!).render(
@@ -119,7 +120,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/my-artists" element={<MyArtistsPage />} />
-              <Route path="/collection" element={<CollectionPage />} />
+              <Route path="/my-collection" element={<MyCollectionPage />} />
               {/* One frame for the three artist settings tabs, so switching tabs swaps only the content. */}
               <Route path="/artist-edit/:slug" element={<ArtistSettingsLayout />}>
                 <Route index element={<ArtistEditPage />} />

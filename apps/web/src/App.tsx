@@ -11,6 +11,7 @@ import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
 import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
 import { analytics } from './services/analytics';
+import { resolveAccountHome } from './services/accountHome';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
 import { ScreenshotCarousel } from './components/ScreenshotCarousel';
@@ -47,11 +48,14 @@ function App() {
     if (session) loadSavedArtists();
   }, [session]);
 
-  // PWA: redirect logged-in users to their collection on app launch
+  // PWA: a signed-in launch opens the account home rather than an empty search box.
   useEffect(() => {
-    if (isStandalone && session && !searchParams.get('q') && !searchParams.get('url')) {
-      navigate('/collection', { replace: true });
-    }
+    if (!isStandalone || !session || searchParams.get('q') || searchParams.get('url')) return;
+    let cancelled = false;
+    resolveAccountHome(session.access_token).then(path => {
+      if (!cancelled) navigate(path, { replace: true });
+    });
+    return () => { cancelled = true; };
   }, [isStandalone, session]);
 
   // Track current search to handle race conditions

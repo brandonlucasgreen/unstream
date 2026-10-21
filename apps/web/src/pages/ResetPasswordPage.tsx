@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { updatePassword } from '../services/auth';
 import { useAuth } from '../contexts/AuthContext';
+import { resolveAccountHome } from '../services/accountHome';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { PageSkeleton } from '../components/PageSkeleton';
@@ -38,7 +39,8 @@ export function ResetPasswordPage() {
         setError(updateError);
       } else {
         setSuccess(true);
-        setTimeout(() => navigate('/collection', { replace: true }), 2000);
+        const home = await resolveAccountHome(session!.access_token);
+        setTimeout(() => navigate(home, { replace: true }), 2000);
       }
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.resetPasswordSubmit' } });

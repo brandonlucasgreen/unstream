@@ -5,7 +5,7 @@ import { dismissWelcome } from '../services/auth';
 import { shouldShowWelcome } from '../utils/welcome';
 
 /**
- * A one-time greeting at the top of /collection for a newly created account.
+ * A one-time greeting at the top of /my-collection for a newly created account.
  *
  * Sign-up is a magic link, so before this a new fan confirmed their email and landed on a
  * page with no acknowledgement that anything had happened. Hides immediately on dismiss; the
