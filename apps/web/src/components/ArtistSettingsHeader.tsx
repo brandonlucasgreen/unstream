@@ -42,8 +42,8 @@ export function ArtistSettingsHeader({ slug, artistName, active }: {
 
   return (
     <div className="space-y-4">
-      <Link to="/dashboard" className="text-sm text-text-muted hover:text-text-primary transition-colors">
-        &larr; Dashboard
+      <Link to="/my-artists" className="text-sm text-text-muted hover:text-text-primary transition-colors">
+        &larr; My Artists
       </Link>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         {artistName ? (

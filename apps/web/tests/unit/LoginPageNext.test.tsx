@@ -57,11 +57,11 @@ describe('LoginPage ?next=', () => {
     expect(document.body.textContent).toContain("fan@example.com. Click the link and we'll bring you back to save your tip.");
   });
 
-  it('ignores a next that leaves the site, and goes to the dashboard', async () => {
+  it('ignores a next that leaves the site, and goes to the collection', async () => {
     state.search = `?next=${encodeURIComponent('//evil.example/x')}`;
     state.session = { user: { email: 'fan@example.com' } };
     render(<LoginPage />);
-    expect(state.navigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+    expect(state.navigate).toHaveBeenCalledWith('/collection', { replace: true });
   });
 
   it('keeps the plain magic link without next', async () => {

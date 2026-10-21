@@ -30,7 +30,8 @@ if (import.meta.env.PROD) {
 // lazyWithRetry adds a one-shot reload when a chunk belongs to a superseded deploy.
 const ClaimPage = lazyWithRetry(() => import('./pages/ClaimPage.tsx').then(m => ({ default: m.ClaimPage })))
 const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
-const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage.tsx').then(m => ({ default: m.DashboardPage })))
+const MyArtistsPage = lazyWithRetry(() => import('./pages/MyArtistsPage.tsx').then(m => ({ default: m.MyArtistsPage })))
+const CollectionPage = lazyWithRetry(() => import('./pages/CollectionPage.tsx').then(m => ({ default: m.CollectionPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
@@ -66,10 +67,11 @@ function ArtistLoginRedirect() {
   return <Navigate to="/login" replace />
 }
 
-// The artist dashboard merged into /dashboard. The route stays for old bookmarks and links in
-// emails already sent.
-function ArtistDashboardRedirect() {
-  return <Navigate to="/dashboard" replace />
+// The dashboard split into /my-artists (artist management) and /collection (the fan's
+// releases, collection and saved artists). Both old routes stay for bookmarks and links in
+// emails already sent, and land on the fan half — what most accounts came for.
+function DashboardRedirect() {
+  return <Navigate to="/collection" replace />
 }
 
 createRoot(document.getElementById('root')!).render(
@@ -112,10 +114,12 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/a/:slug" element={<ArtistPage />} />
               <Route path="/claim/:slug" element={<ClaimPage />} />
               <Route path="/artist-login" element={<ArtistLoginRedirect />} />
-              <Route path="/artist-dashboard" element={<ArtistDashboardRedirect />} />
+              <Route path="/artist-dashboard" element={<DashboardRedirect />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard" element={<DashboardRedirect />} />
+              <Route path="/my-artists" element={<MyArtistsPage />} />
+              <Route path="/collection" element={<CollectionPage />} />
               {/* One frame for the three artist settings tabs, so switching tabs swaps only the content. */}
               <Route path="/artist-edit/:slug" element={<ArtistSettingsLayout />}>
                 <Route index element={<ArtistEditPage />} />

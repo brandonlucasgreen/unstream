@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { CollectionGrid } from './CollectionGrid';
 
-// Dashboard section: the owner's view of their collection (Support Loop Step 3).
+// The /collection page's own section: the owner's view of their collection (Support Loop Step 3).
 // The public page (/u/:handle) shows only purchased, non-hidden items; here the owner
 // sees everything, including hidden items (marked), and can hide/unhide each one.
 // The empty state points at the import — that's the action that fills this in.

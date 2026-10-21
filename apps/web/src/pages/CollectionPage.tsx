@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { ClaimedArtistsSection } from '../components/ClaimedArtistsSection';
 import { SavedArtistsSection } from '../components/SavedArtistsSection';
 import { CollectionSection } from '../components/CollectionSection';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
@@ -14,16 +13,18 @@ import { WelcomeBanner } from '../components/WelcomeBanner';
 import { NewsletterPrompt } from '../components/NewsletterPrompt';
 
 /**
- * The signed-in home, as a composition of sections that each load on their own.
+ * The fan's home: releases from the artists they follow, the records they've bought, and
+ * the artists they've saved. The artist half of the old /dashboard now lives at
+ * /my-artists.
  *
- * It used to hold one `loading` flag covering three fetches, and render nothing until the
- * slowest of them settled. Because `CollectionSection` only mounted after that, the
- * collection read — the heaviest one on the page — didn't *start* until the other three had
- * finished. Four requests in two serial waves, with no data dependency justifying the
- * second. Now every section fetches as soon as the page mounts and shows its own skeleton,
- * so the wall-clock cost is the slowest single request rather than the sum of two rounds.
+ * It is a composition of sections that each load on their own. The page used to hold one
+ * `loading` flag covering three fetches and render nothing until the slowest settled.
+ * Because `CollectionSection` only mounted after that, the collection read — the heaviest
+ * one on the page — didn't *start* until the others had finished: two serial waves with no
+ * data dependency justifying the second. Now every section fetches as soon as the page
+ * mounts and shows its own skeleton, so the wall-clock cost is the slowest single request.
  */
-export function DashboardPage() {
+export function CollectionPage() {
   const { session, isLoading: authLoading, savedArtists, artistsLoaded } = useAuth();
   const [upcomingReleases, setUpcomingReleases] = useState<RecentRelease[]>([]);
   const [recentReleases, setRecentReleases] = useState<RecentRelease[]>([]);
@@ -47,7 +48,7 @@ export function DashboardPage() {
       })
       .catch(e => {
         if (controller.signal.aborted) return;
-        Sentry.captureException(e, { extra: { context: 'dashboard.loadRecentReleases' } });
+        Sentry.captureException(e, { extra: { context: 'collection.loadRecentReleases' } });
         setReleasesError("Couldn't load recent releases. Try refreshing.");
       });
 
@@ -64,16 +65,14 @@ export function DashboardPage() {
 
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl font-bold">Collection</h1>
 
           <WelcomeBanner />
 
           <NewsletterPrompt email={session?.user?.email} source="unstream" />
 
-          <ClaimedArtistsSection />
-
           {/*
-            Upcoming and Recent Releases — above Saved Artists because they are the part of
+            Upcoming and Recent Releases — above the collection because they are the part of
             this page that changes, and only rendered once the fan has saved somebody: an
             empty releases box for a fan with no saved artists would be a second empty state
             saying the same thing as the one below it. `artistsLoaded` gates it so the box

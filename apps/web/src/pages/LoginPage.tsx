@@ -29,7 +29,7 @@ export function LoginPage() {
   // tip to their account) passes itself here so they come back to it, by password or magic link.
   const [searchParams] = useSearchParams();
   const next = safeNextPath(searchParams.get('next'), window.location.origin);
-  const afterSignIn = next ?? '/dashboard';
+  const afterSignIn = next ?? '/collection';
   const savingTip = !!next?.startsWith('/tip/thanks');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -155,7 +155,7 @@ export function LoginPage() {
                   <p className="font-medium">Signed in as <strong className="text-text-primary">{session.user.email}</strong></p>
                   <button
                     type="button"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/collection')}
                     className="text-sm text-accent-primary hover:underline"
                   >
                     Go to Dashboard

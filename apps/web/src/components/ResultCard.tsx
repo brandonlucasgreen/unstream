@@ -52,7 +52,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
   // `result.id` is a search-pipeline key — `nameonly-…`, `known-…`, or a platform-derived handle
   // like `rodneyowl` — and matches no row in the artists table. Saving under one wrote
   // `artist_id: null`, which made the save invisible to every feature keyed on the artist: the
-  // release feeds, the /dashboard shortlist, and the `requestArtistCatalog` call that is supposed
+  // release feeds, the /collection shortlist, and the `requestArtistCatalog` call that is supposed
   // to make a save the strongest signal to go and crawl someone.
   //
   // `knownSlug` is the fix and it was already in the payload: `attachArtistPageSlugs` gives every

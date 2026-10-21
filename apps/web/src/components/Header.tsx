@@ -114,13 +114,25 @@ export function Header() {
     ],
   };
 
+  // Everything a signed-in person owns, behind one label. The dashboard used to be a
+  // single page of artist management, releases, collection and saved artists; it is now
+  // My Artists and Collection, and this group is where further account pages go rather
+  // than another top-level nav item each.
+  const accountGroup: NavGroup = {
+    label: t('nav.account.label'),
+    items: [
+      { to: '/my-artists', label: t('nav.account.myArtists') },
+      { to: '/collection', label: t('nav.account.collection') },
+      { to: '/settings', label: t('nav.account.settings') },
+    ],
+  };
+
   // Shared by the inline desktop nav and the mobile hamburger menu, so new
   // items only need adding in one place.
   const navItems: NavEntry[] = session
     ? [
         ...(isAdmin ? [adminGroup] : []),
-        { to: '/dashboard', label: t('nav.dashboard'), emphasis: true },
-        { to: '/settings', label: t('nav.settings') },
+        accountGroup,
       ]
     : [
         { to: '/platforms', label: t('nav.platforms') },

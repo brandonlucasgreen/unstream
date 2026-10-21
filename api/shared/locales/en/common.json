@@ -1,7 +1,11 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "settings": "Settings",
+    "account": {
+      "label": "Account",
+      "myArtists": "My Artists",
+      "collection": "Collection",
+      "settings": "Settings"
+    },
     "platforms": "Platforms",
     "faq": "FAQ",
     "pressKit": "Press kit",

@@ -47,10 +47,10 @@ function App() {
     if (session) loadSavedArtists();
   }, [session]);
 
-  // PWA: redirect logged-in users to dashboard on app launch
+  // PWA: redirect logged-in users to their collection on app launch
   useEffect(() => {
     if (isStandalone && session && !searchParams.get('q') && !searchParams.get('url')) {
-      navigate('/dashboard', { replace: true });
+      navigate('/collection', { replace: true });
     }
   }, [isStandalone, session]);
 
