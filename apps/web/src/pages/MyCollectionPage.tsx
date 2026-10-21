@@ -76,9 +76,12 @@ export function MyCollectionPage() {
             empty state saying the same thing as the one below it. `artistsLoaded` gates it so
             the box doesn't flash in and out while the list is still arriving.
 
-            That gate now also hides the calendar from a fan who has saved nobody, which is the
-            intended trade: their feed would carry nothing, and the subscription is only useful
-            once there is an artist to follow.
+            That gate also hides the Release calendar from a fan who has saved nobody — asked
+            and answered (Brandon, 2026-10-21): leave it gated. Their feed would carry nothing,
+            and the subscription only means something once there is an artist to follow. So
+            don't "fix" the calendar's reachability by ungating this section or by moving the
+            subscribe control back to /settings, where in months of being live not one fan ever
+            minted a token.
           */}
           {artistsLoaded && savedArtists.length > 0 && (
             <RecentReleasesSection
