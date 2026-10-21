@@ -143,3 +143,42 @@ describe('parseBackgroundMessage', () => {
     expect(workerSource).toContain('message.ack()');
   });
 });
+
+describe('no deploy can take over the production domain by accident', () => {
+  /**
+   * A route with `custom_domain: true` claims its hostname on deploy, and `routes` is *inherited*
+   * by every named environment. With unstream.stream at the top level, the first `wrangler
+   * deploy` was the cutover, and `wrangler deploy --env staging` would have reassigned the
+   * production domain to the staging Worker. Wrangler says so — "Deploying this environment will
+   * reassign these custom domains away from the top-level Worker" — but only as a warning.
+   *
+   * So the production hostname appears nowhere until a reviewed cutover change adds it.
+   */
+  const PRODUCTION_HOSTS = ['unstream.stream', 'www.unstream.stream'];
+  const routesOf = (config: Record<string, unknown>) =>
+    ((config.routes ?? []) as { pattern: string; custom_domain?: boolean }[]);
+
+  it('claims no custom domain at the top level, so a plain deploy lands on workers.dev', () => {
+    const claimed = routesOf(wrangler).filter((r) => r.custom_domain).map((r) => r.pattern);
+    expect(claimed).toEqual([]);
+  });
+
+  it('gives every named environment its own routes, so none inherits a domain it should not have', () => {
+    for (const [name, env] of Object.entries(wrangler.env as Record<string, Record<string, unknown>>)) {
+      expect(env.routes, `env.${name} must declare its routes`).toBeDefined();
+    }
+  });
+
+  it('never points a named environment at the production hostname', () => {
+    for (const [name, env] of Object.entries(wrangler.env as Record<string, Record<string, unknown>>)) {
+      for (const route of routesOf(env)) {
+        expect(PRODUCTION_HOSTS, `env.${name} claims ${route.pattern}`).not.toContain(route.pattern);
+      }
+    }
+  });
+
+  it('puts staging on its own hostname on the zone, where caching and purge can be tested', () => {
+    const staging = (wrangler.env as Record<string, Record<string, unknown>>).staging;
+    expect(routesOf(staging)).toEqual([{ pattern: 'next.unstream.stream', custom_domain: true }]);
+  });
+});

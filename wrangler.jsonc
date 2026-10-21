@@ -74,10 +74,21 @@
     ]
   },
 
-  "routes": [
-    { "pattern": "unstream.stream", "custom_domain": true },
-    { "pattern": "www.unstream.stream", "custom_domain": true }
-  ],
+  // **No custom domains here, deliberately — so no deploy can take over unstream.stream by
+  // accident.** A route with `custom_domain: true` claims its hostname on deploy, and `routes` is
+  // *inherited* by every named environment. With unstream.stream listed here, the first
+  // `wrangler deploy` WAS the cutover, and `wrangler deploy --env staging` would have reassigned
+  // the production domain to the staging Worker — wrangler only warns, it doesn't stop. What
+  // happens to the existing A records pointing at Netlify is undocumented.
+  //
+  // So a plain `wrangler deploy` lands on the Worker's workers.dev address, where it serves no
+  // real traffic, and the cutover is a separate, reviewed change that adds these two routes:
+  //
+  //   { "pattern": "unstream.stream", "custom_domain": true },
+  //   { "pattern": "www.unstream.stream", "custom_domain": true }
+  //
+  // That change is the point of no easy return for DNS. It should be its own PR.
+  "routes": [],
 
   // The server-rendered pages in api/edge/ still run on Netlify's edge too, for as long as that
   // site is kept for rollback, and that runtime is Deno: it resolves Supabase from esm.sh, and
@@ -128,6 +139,11 @@
   // deploy that left it as production would file its errors as production's.
   "env": {
     "staging": {
+      // Its own hostname, stated explicitly. `routes` is inherited, so an environment that names
+      // none takes the top-level ones — which is how a staging deploy could have claimed the
+      // production domain. A custom domain on the zone, not workers.dev: the Cache API is only
+      // functional on custom domains, and purge-by-tag is zone-scoped.
+      "routes": [{ "pattern": "next.unstream.stream", "custom_domain": true }],
       "triggers": { "crons": [] },
       "queues": {
         "producers": [{ "binding": "BACKGROUND_QUEUE", "queue": "unstream-background-staging" }],

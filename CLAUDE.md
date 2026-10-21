@@ -343,6 +343,13 @@ anything under `api/edge/`.
   name. `purgeCacheTags` purges Netlify and Cloudflare, each when its own credentials are set
   (`CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN`), so cutover and rollback need no code change.
   Purge-by-tag is on every Cloudflare plan since April 2025, whatever older write-ups say.
+- **No deploy can claim `unstream.stream` until the cutover PR adds it.** A route with
+  `custom_domain: true` takes its hostname on deploy, and wrangler's `routes` key is *inherited*
+  by named environments — so with the production domain at the top level, the first
+  `wrangler deploy` was the cutover, and `--env staging` would have reassigned the production
+  domain to staging (wrangler only warns). The top level now declares `routes: []`, every named
+  environment must state its own, and `background-jobs.test.ts` fails otherwise. A plain
+  `wrangler deploy` lands on `workers.dev`; `--env staging` lands on `next.unstream.stream`.
 - **`npm run dev:worker`** runs it locally against the same production Supabase `npm run dev`
   uses. `npx wrangler deploy --dry-run` bundles without an account and is the fastest way to
   check a change still builds.
