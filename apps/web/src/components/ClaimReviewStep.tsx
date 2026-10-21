@@ -169,7 +169,7 @@ export function ClaimReviewStep({
         </div>
         {reviewLinks.length === 0 && (
           <p className="text-sm text-text-muted text-center py-2">
-            No links discovered. You can add links later from your dashboard.
+            No links discovered. You can add links later from My Artists.
           </p>
         )}
       </section>

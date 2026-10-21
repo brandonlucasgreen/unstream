@@ -6,6 +6,7 @@ import { withSentry } from '../lib/sentry';
 import { authenticateApiKey, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
 import { checkApiRateLimit, getClientIp } from './ratelimit';
 import { getArtistBySlug, resolveArtistSlugAlias } from './db';
+import { decodePathSegment } from '../shared/path-segments';
 
 interface NetlifyEvent {
   httpMethod: string;
@@ -52,7 +53,10 @@ async function handleRequest(event: NetlifyEvent) {
   let slug: string | undefined;
   if (event.path) {
     const match = event.path.match(/\/api\/v1\/artist\/([^/]+)$/);
-    if (match) slug = decodeURIComponent(match[1]);
+    // Left undefined when the segment can't be decoded, so the "slug required" answer below
+    // handles it. decodeURIComponent raises URIError on a malformed escape, which reached a
+    // public endpoint as a 500 from code that hadn't looked anything up yet.
+    if (match) slug = decodePathSegment(match[1]) ?? undefined;
   }
   if (!slug) slug = event.queryStringParameters?.slug;
 

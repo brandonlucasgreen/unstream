@@ -103,7 +103,7 @@ export function isTamperedErrorConstructorError(message: string): boolean {
  * that matters.
  */
 const DROPPED_REQUEST_MESSAGES = [
-  // Safari / WebKit — the wording behind the DashboardPage reports
+  // Safari / WebKit — the wording behind the signed-in-page reports
   'Load failed',
   // Chrome / Edge
   'Failed to fetch',
@@ -118,9 +118,9 @@ const DROPPED_REQUEST_MESSAGES = [
  * The user went through a tunnel, closed the tab mid-request, or (on iOS Safari,
  * which is where most of these come from) backgrounded the page while a fetch was
  * still open and WebKit tore the connection down. Every caller already handles it:
- * DashboardPage, for one, catches it and shows "Failed to load your profiles.
- * Please try again." So the browser is telling us about someone's wifi, and there
- * is no code change that would make it stop.
+ * ClaimedArtistsSection, for one, catches it and shows "Couldn't load your artist
+ * profiles. Try refreshing." So the browser is telling us about someone's wifi, and
+ * there is no code change that would make it stop.
  *
  * Matched with `endsWith` rather than `includes`, because the browser's phrasing
  * is a substring of messages we throw ourselves for a response that *did* arrive

@@ -513,7 +513,7 @@
   to = "/.netlify/functions/me-feed-token"
   status = 200
 
-# The "Recent Releases" shortlist on /dashboard — the same window the private feed above serves,
+# The "Recent Releases" shortlist on /my-collection — the same window the private feed above serves,
 # read straight rather than as a calendar.
 [[redirects]]
   from = "/api/me/recent-releases"

@@ -3,9 +3,14 @@ name: Database backup
 # Nightly encrypted backup of the production Supabase database to Cloudflare R2, proven
 # restorable on every run. Restore steps: docs/database-backups.md.
 #
-# Why this exists: the project is on Supabase's free plan, which keeps no backups we can restore.
-# Before this workflow, a bad migration or a mistaken DELETE would have lost fans' saved artists,
-# claims, collections, usernames, API keys and tip records for good.
+# Why this exists alongside Supabase's own backups: Pro keeps daily backups for 7 days, held in
+# the Supabase account and restorable only back into Supabase. This workflow covers what that
+# leaves open — 30 days of retention, a copy at a second vendor that survives losing the Supabase
+# account itself, encryption to a key only the owner holds, plain SQL restorable anywhere, and a
+# restore proven on every run rather than assumed. docs/specs/infrastructure-independence-plan.md
+# deliberately leaves the database on Supabase, so this is the hedge against that one remaining
+# single point of failure. (On the free plan, before the Pro upgrade, there was no restorable
+# backup at all and this workflow was the only copy.)
 #
 # What a run does:
 #   1. Dumps roles, schema and data with `supabase db dump` — Supabase's documented backup method.
@@ -76,7 +81,12 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned, not `latest`: resolving `latest` calls api.github.com unauthenticated, which
+          # is 60 requests an hour shared across every runner on that IP, and a noisy neighbour
+          # failed a nightly backup on 2026-10-20. A pinned version skips the lookup and downloads
+          # the release asset directly. Pin the version a run has proven a restore with; bump it
+          # deliberately, and check the next run goes green.
+          version: 2.121.0
 
       - name: Install age
         run: sudo apt-get update -qq && sudo apt-get install -y -qq age

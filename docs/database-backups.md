@@ -1,7 +1,14 @@
 # Database backups and restores
 
-Supabase's free plan keeps no backups we can restore, so `.github/workflows/db-backup.yml` makes
-its own. This page covers what it keeps, how to tell it's working, and how to restore. Every
+Supabase Pro keeps daily backups for 7 days, but they live in the Supabase account and restore
+only back into Supabase. `.github/workflows/db-backup.yml` keeps a second copy that covers what
+those don't: 30 days of retention, a different vendor, encryption to a key only we hold, plain
+SQL restorable anywhere, and a restore proven on every run. Reach for Supabase's own backups
+first for an ordinary "undo last night" — they're faster and need no key. Reach for these when
+the Supabase project itself is the problem, when you need something older than 7 days, or when
+the database has to come up somewhere other than Supabase.
+
+This page covers what the R2 backup keeps, how to tell it's working, and how to restore. Every
 command here was tested against a local Supabase stack built from `supabase/migrations/`.
 
 ## What's kept, and where

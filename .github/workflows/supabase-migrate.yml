@@ -68,7 +68,10 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned for the same reason as db-backup.yml: `latest` resolves through an
+          # unauthenticated api.github.com call that shares a 60/hour limit with every other
+          # runner on the IP. Keep the two workflows on the same version.
+          version: 2.121.0
 
       - name: Push migrations
         if: steps.changes.outputs.changed == 'true'

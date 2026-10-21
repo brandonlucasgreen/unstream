@@ -13,7 +13,7 @@ export function ClaimDoneStep({ slug, discoveredLinks, alreadyVerified }: ClaimD
       <p className="text-xl font-bold">Profile claimed!</p>
       {alreadyVerified ? (
         <p className="text-sm text-text-muted">
-          Your artist page is already live and verified. You can edit your profile from your dashboard.
+          Your artist page is already live and verified. You can edit your profile from My Artists.
         </p>
       ) : (
         <p className="text-sm text-text-muted">
