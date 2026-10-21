@@ -5,8 +5,8 @@
 // navigation would render, so a direct load and an in-app click produce the same UI (see
 // docs/postmortems/UNS-100-bifurcation-retro.md). Only crawlers get this static render.
 
-import { edgeEnv } from "./edge-context.ts";
-import type { Context } from "./edge-context.ts";
+import { edgeEnv } from "../shared/edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 

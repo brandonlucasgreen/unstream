@@ -1,5 +1,5 @@
-import { edgeEnv } from "./edge-context.ts";
-import type { Context } from "./edge-context.ts";
+import { edgeEnv } from "../shared/edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";

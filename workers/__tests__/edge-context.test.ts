@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 
-import { edgeEnv } from '../../api/edge/edge-context.ts';
+import { edgeEnv } from '../../api/shared/edge-context.ts';
 
 /**
  * The server-rendered pages read their configuration through `edgeEnv` because they run on two

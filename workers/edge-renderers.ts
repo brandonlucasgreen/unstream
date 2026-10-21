@@ -11,7 +11,7 @@ import staticPageMeta from '../api/edge/static-page-meta.ts';
 import tipPageMeta from '../api/edge/tip-page-meta.ts';
 import uHandle from '../api/edge/u-handle.ts';
 
-import type { EdgeRenderer } from '../api/edge/edge-context.ts';
+import type { EdgeRenderer } from '../api/shared/edge-context.ts';
 
 export const EDGE_RENDERERS: Record<string, EdgeRenderer> = {
   'artist-page-static': artistPageStatic,

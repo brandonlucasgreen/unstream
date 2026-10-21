@@ -13,8 +13,8 @@
 // the page everyone else sees. The SPA's client-side document.title ("Tip {artist}") keeps
 // matching what the card says.
 
-import { edgeEnv } from "./edge-context.ts";
-import type { Context } from "./edge-context.ts";
+import { edgeEnv } from "../shared/edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { buildTipPageMetaHtml, isTipSlug, TIP_RESERVED_SLUGS } from "../shared/tip-page-meta.ts";

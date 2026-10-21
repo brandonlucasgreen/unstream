@@ -1,4 +1,4 @@
-import type { Context } from "./edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 
 interface PlatformLink {

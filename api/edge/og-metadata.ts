@@ -1,4 +1,4 @@
-import type { Context } from "./edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 // Perform search to get first artist image
