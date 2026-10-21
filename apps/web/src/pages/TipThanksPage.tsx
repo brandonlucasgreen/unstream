@@ -110,7 +110,7 @@ export function TipThanksPage() {
               ) : save.kind === 'saved' ? (
                 <p>
                   Saved to your account.{' '}
-                  <Link to="/settings#tips" className="text-accent-primary hover:underline">See your tips</Link>
+                  <Link to="/my-collection#tips" className="text-accent-primary hover:underline">See your tips</Link>
                 </p>
               ) : save.kind === 'failed' ? (
                 <p className="text-text-secondary">{save.message}</p>

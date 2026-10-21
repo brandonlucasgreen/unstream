@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-// The Settings "Your tips" list: hidden until there's a tip, then each with artist, amount and status.
+// The "Tip History" list on /my-collection: hidden until there's a tip, then each with artist,
+// amount and status.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
-  useLocation: () => ({ pathname: '/settings', search: '', hash: '' }),
+  useLocation: () => ({ pathname: '/my-collection', search: '', hash: '' }),
 }));
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: { access_token: 'tok' } }) }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -35,7 +36,7 @@ describe('YourTips', () => {
       tip({ id: 't2', artistName: 'Honeycrush', artistSlug: 'honeycrush', amountCents: 1000, paidCents: 1000, status: 'refunded' }),
     ] })));
     render(<YourTips />);
-    expect(await screen.findByRole('heading', { name: 'Your tips' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Tip History' })).toBeTruthy();
     expect(screen.getByText('Kid Lightbulbs').getAttribute('href')).toBe('/a/kid-lightbulbs');
     expect(screen.getByText('$5.00')).toBeTruthy();
     expect(screen.getByText('you paid $5.46')).toBeTruthy();

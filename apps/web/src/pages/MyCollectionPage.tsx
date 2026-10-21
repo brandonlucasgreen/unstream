@@ -10,7 +10,7 @@ import { CollectionSection } from '../components/CollectionSection';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 import { WelcomeBanner } from '../components/WelcomeBanner';
-import { NewsletterPrompt } from '../components/NewsletterPrompt';
+import { YourTips } from '../components/YourTips';
 
 /**
  * The fan's home: releases from the artists they follow, the records they've bought, and
@@ -69,14 +69,16 @@ export function MyCollectionPage() {
 
           <WelcomeBanner />
 
-          <NewsletterPrompt email={session?.user?.email} source="unstream" />
-
           {/*
-            Upcoming and Recent Releases — above the collection because they are the part of
-            this page that changes, and only rendered once the fan has saved somebody: an
-            empty releases box for a fan with no saved artists would be a second empty state
-            saying the same thing as the one below it. `artistsLoaded` gates it so the box
-            doesn't flash in and out while the list is still arriving.
+            Releases — Upcoming, Recent and the calendar — above the collection because they are
+            the part of this page that changes, and only rendered once the fan has saved
+            somebody: an empty releases box for a fan with no saved artists would be a second
+            empty state saying the same thing as the one below it. `artistsLoaded` gates it so
+            the box doesn't flash in and out while the list is still arriving.
+
+            That gate now also hides the calendar from a fan who has saved nobody, which is the
+            intended trade: their feed would carry nothing, and the subscription is only useful
+            once there is an artist to follow.
           */}
           {artistsLoaded && savedArtists.length > 0 && (
             <RecentReleasesSection
@@ -95,6 +97,9 @@ export function MyCollectionPage() {
           <CollectionSection />
 
           <SavedArtistsSection />
+
+          {/* Tips this fan has left. Renders nothing until there's one to show. */}
+          <YourTips />
         </div>
       </main>
 

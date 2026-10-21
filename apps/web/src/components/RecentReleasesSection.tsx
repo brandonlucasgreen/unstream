@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate } from '../../../../api/shared/release-display';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { PlatformIcon } from './PlatformIcon';
@@ -20,22 +20,25 @@ export interface RecentRelease {
 }
 
 /**
- * What the fans' half of the dashboard was missing: what the artists you saved have put out.
+ * Everything release-shaped on /my-collection, under one "Releases" heading: what the artists
+ * you saved have announced, what they've just put out, and the calendar to subscribe to both.
  *
  * Release alerts have only ever existed in the Mac app and the browser extension, and the private
  * release feed shipped with its only entry point buried on /settings — where, in the months it
- * has been live, not one fan ever minted a token. This is the web's first fan-facing release
- * surface, and the natural home for that subscribe control.
+ * has been live, not one fan ever minted a token. The calendar is a feature, not a setting, so it
+ * now sits with the lists it feeds on rather than among passwords and notification toggles.
  *
- * **Two sections, not one.** The window (past 30 days plus everything upcoming) is
- * `getFeedReleasesForUser`'s, deliberately — the feed and the dashboard disagreeing about what
- * counts as recent would read as a bug in whichever one you happened to be looking at — but an
- * album that isn't out yet is not a *recent release*, and a heading that said so was wrong on its
- * own terms. Upcoming leads, because it is the news; the server sends the two lists already split
- * and capped separately.
+ * **One section, three subheadings.** The window for the lists (past 30 days plus everything
+ * upcoming) is `getFeedReleasesForUser`'s, deliberately — the feed and the page disagreeing about
+ * what counts as recent would read as a bug in whichever one you happened to be looking at — but
+ * an album that isn't out yet is not a *recent release*, so the two are headed apart. Upcoming
+ * leads, because it is the news; the server sends the two lists already split and capped
+ * separately.
  *
- * Only the sections with something in them render. When neither does, one box says so under the
- * "Recent Releases" heading rather than two boxes explaining the same silence.
+ * Only the subheadings with something under them render. When neither list has anything, one box
+ * says so rather than two boxes explaining the same silence. The calendar is always last and
+ * always there — through the empty state and through a failed read, since a fan with nothing out
+ * this month is exactly who wants telling when something is.
  *
  * Presentational — the page fetches, and hands the auth-dependent subscribe panel in as a prop.
  *
@@ -54,33 +57,24 @@ export function RecentReleasesSection({
   subscribePanel: ReactNode;
   error?: string | null;
 }) {
-  const [showSubscribe, setShowSubscribe] = useState(false);
+  const lists = [
+    { title: 'Upcoming', releases: upcoming },
+    { title: 'Recent', releases: recent },
+  ].filter(list => list.releases.length > 0);
 
-  /*
-    One control for the pair, not one per section: both lists come out of the same feed token, so
-    a second button would be a second treatment for one action. It rides whichever heading comes
-    first, so it always sits at the top of the block.
-  */
-  const subscribeControl = (
-    <SubscribeToggle open={showSubscribe} onToggle={() => setShowSubscribe(v => !v)} />
-  );
-  const revealedPanel = showSubscribe ? (
-    <div className="mb-4 p-4 rounded-lg bg-bg-secondary border border-border">{subscribePanel}</div>
-  ) : null;
+  return (
+    <section>
+      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg className="w-5 h-5 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+        </svg>
+        Releases
+      </h2>
 
-  const groups = [
-    { title: 'Upcoming Releases', releases: upcoming },
-    { title: 'Recent Releases', releases: recent },
-  ].filter(group => group.releases.length > 0);
+      <div className="space-y-6">
+        {error && <p className="text-sm text-text-muted">{error}</p>}
 
-  if (error || groups.length === 0) {
-    return (
-      <section>
-        <SectionHeading title="Recent Releases" action={subscribeControl} />
-        {revealedPanel}
-        {error ? (
-          <p className="text-sm text-text-muted">{error}</p>
-        ) : (
+        {!error && lists.length === 0 && (
           /*
             Said rather than hidden. Most fans will have saved artists with nothing out this month,
             and an empty section that vanishes reads as a feature that isn't working — where the
@@ -95,69 +89,43 @@ export function RecentReleasesSection({
             </p>
           </div>
         )}
-      </section>
-    );
-  }
 
-  return (
-    <div className="space-y-8">
-      {groups.map((group, index) => (
-        <section key={group.title}>
-          <SectionHeading title={group.title} action={index === 0 ? subscribeControl : null} />
-          {index === 0 && revealedPanel}
-          <div className="grid gap-2 sm:grid-cols-2">
-            {group.releases.map(release => (
-              <ReleaseRow key={`${release.artistSlug}/${release.releaseSlug}`} release={release} />
-            ))}
+        {lists.map(list => (
+          <div key={list.title}>
+            <Subheading>{list.title}</Subheading>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {list.releases.map(release => (
+                <ReleaseRow key={`${release.artistSlug}/${release.releaseSlug}`} release={release} />
+              ))}
+            </div>
           </div>
-        </section>
-      ))}
-    </div>
+        ))}
+
+        {/*
+          Last, and unconditional: both lists come out of the one feed token, so the calendar
+          belongs to the pair rather than to either, and it is the part of this section that still
+          has something to offer when they are empty or failed to load. Rendering the panel outright
+          mints nothing — ReleaseFeedControls deliberately asks for a token only when pressed.
+        */}
+        <div>
+          <Subheading>
+            <CalendarIcon />
+            <RssIcon />
+            Release calendar
+          </Subheading>
+          <div className="p-4 rounded-lg bg-bg-secondary border border-border">{subscribePanel}</div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-/** The /my-collection section heading treatment, shared so both headings match exactly. */
-function SectionHeading({ title, action }: { title: string; action: ReactNode }) {
+/** One item inside the Releases section — smaller than the section's own heading, same for each. */
+function Subheading({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 mb-4">
-      <h2 className="text-lg font-semibold flex items-center gap-2">
-        <svg className="w-5 h-5 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
-        </svg>
-        {title}
-      </h2>
-      {action}
-    </div>
-  );
-}
-
-/**
- * Two formats, one action: the calendar and the RSS marks both come from the same feed token, so
- * a pair of buttons that did the same thing would be two treatments for one action. The marks stay
- * side by side and stroked at the same weight — the artist page's heading treatment — because that
- * pairing is what reads as "subscribe" without a word of explanation.
- *
- * A button rather than a link, unlike the artist page's, because a fan's feed URL contains a
- * credential that doesn't exist until they ask for one. Pressing this only reveals the panel;
- * minting still takes the explicit press inside it.
- */
-function SubscribeToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={open}
-      aria-label="Subscribe to these releases in a calendar app or RSS reader"
-      title="Subscribe in a calendar app or RSS reader"
-      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-colors shrink-0 ${
-        open
-          ? 'border-accent-primary/40 text-accent-primary bg-accent-primary/10'
-          : 'border-border text-text-muted hover:text-text-primary hover:border-border-hover'
-      }`}
-    >
-      <CalendarIcon />
-      <RssIcon />
-    </button>
+    <h3 className="text-sm font-semibold text-text-secondary mb-3 flex items-center gap-1.5">
+      {children}
+    </h3>
   );
 }
 
@@ -231,9 +199,10 @@ function ReleaseRow({ release }: { release: RecentRelease }) {
 
 /**
  * The same pair as `ReleasesSection`'s heading, drawn as strokes at the same weight so they read
- * as one control rather than two icons from different sets.
+ * as one mark rather than two icons from different sets — the two formats the one feed token
+ * serves.
  *
- * `aria-hidden` because the button around them already carries the accessible name.
+ * `aria-hidden` because the subheading's own text names the thing.
  */
 function CalendarIcon() {
   return (

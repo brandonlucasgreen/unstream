@@ -10,10 +10,9 @@ import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { EmailChangeForm } from '../components/EmailChangeForm';
 import { refreshSessionAfterEmailChange } from '../services/auth';
 import { SharingControls } from '../components/SharingControls';
-import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
+import { NewsletterPrompt } from '../components/NewsletterPrompt';
 import { NotificationPreferences } from '../components/NotificationPreferences';
 import { BandcampConnect } from '../components/BandcampConnect';
-import { YourTips } from '../components/YourTips';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
@@ -204,14 +203,12 @@ export function SettingsPage() {
             <BandcampConnect />
           </section>
 
-          {/* Tips this fan has left. Renders nothing until there's one to show. */}
-          <YourTips />
-
-          {/* Release feed section */}
-          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Release calendar</h2>
-            <ReleaseFeedControls />
-          </section>
+          {/* The one-time Lightbulbs On invitation, which used to sit on the signed-in home. It
+              lands directly above Notifications because both are "which emails do I get" — and
+              because a dismissible banner at the top of this page would compete with the
+              email-change confirmation banner above. Renders nothing once dismissed or signed up,
+              and keeps the `unstream` source tag so the Buttondown cohort stays continuous. */}
+          <NewsletterPrompt email={session?.user?.email} source="unstream" />
 
           {/* Notifications section. The id is the anchor every notification email's opt-out
               footer links to (see subscriptionFooter in api/functions/notifications.ts). */}
