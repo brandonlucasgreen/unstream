@@ -1,6 +1,6 @@
 # Curator posts: tag the artists you champion
 
-**Status:** proposed 2026-10-21, as Brandon's Buffer Commit hackathon entry. Nothing is built. Three things in "Open questions" need checking before the build starts. The UI mockup is the "Unstream curator posts" design canvas.
+**Status:** proposed 2026-10-21, as Brandon's Buffer Commit hackathon entry. Nothing is built. "Build plan" lists the order to build it in, starting with checking the open questions. The UI mockup is the "Unstream curator posts" design canvas (see "UI").
 
 ## Who it's for
 
@@ -133,16 +133,88 @@ Rules:
 - A mention never triggers cataloguing. Search was cut off from triggering it for disk I/O reasons, and a curator's list would be the same mistake one step removed.
 - No new Redis use beyond the rate limits.
 
+## UI
+
+Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/VRfB79Cqx7ixg1ByoU7hFP, private to Brandon). Its first version was too text-heavy, and the revision sets the direction: **controls and the preview, almost no explanatory copy.**
+
+- **Compose (`/curator/new`).**
+  - **Top row:** the title, the template as a dropdown pill (links to the template editor), and the channels as icons.
+  - **Left column:** a search box (with a paste-a-list icon), then one compact row per artist: image, name, release in small grey, payout figure, and an Instagram and a Facebook circle. Teal means the handle is known and the artist will be tagged. A dashed yellow outline means it's missing; clicking it adds one.
+  - **Right column:** Instagram/Facebook tabs; the cover card large, with its tags drawn on; the caption collapsed to one line; and a split send button (share now, queue, schedule, draft).
+  - No status sentences and no checklist. The circles already say who gets tagged.
+- **Template editor:** name, Post, Each artist, Hashtags (up to 3), with clickable variable chips under the Post field and a filled-in sample beside it.
+- **Connect:** "Buffer connected" plus a checklist of the account's channels. Instagram and Facebook can be ticked; every other network shows "Not supported yet".
+- **Sent:** one row per channel with a "View post" link, and three result tiles (reach, artist page visits, clicks to buy) left empty until there's data.
+- **Cards:** the existing card style (`scripts/social-card-render.ts`). The cover card has kicker, title, and one row per artist with tag bubbles; each artist card has kicker, name, location, payout panel and the release.
+
 ## Hackathon cut
 
-1. Connect by personal API key, pick channels.
-2. One built-in template, plus editing it inline. Saved templates come later.
-3. `@` mentions with stored-artist suggestions; no paste-a-list.
-4. Instagram and Facebook previews, cards drawn, tags on the cover card.
-5. Share now, or save as a Buffer draft.
-6. Address book: adding a handle works for this post only, not saved yet.
+**No migrations.** `npm run dev` runs against production Supabase, and a migration applied from an unmerged branch blocks every later migration on `main` (see "Database / migrations" in `CLAUDE.md`). So the hackathon build stores nothing new:
+
+1. **Buffer access from env vars, admin only.** `BUFFER_CURATOR_ACCESS_TOKEN` and `BUFFER_CURATOR_ORG_ID`, gated to `ADMIN_EMAIL` the way tips are (`canSetUpTips`). No connect screen yet: channels come from Buffer's `channels` query.
+2. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
+3. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
+4. **Instagram and Facebook previews,** cards drawn, tags on the cover card.
+5. **Share now, or save as a Buffer draft.**
+6. **Missing handles** can be typed in for this post only.
 
 Demo: pick "Tonight's show", mention five artists, add one missing Instagram handle, watch both previews fill, Share Now, then open the posts in Buffer.
+
+## Build plan
+
+For a local Claude Code session on this branch (`spec/curator-posts`). Read `CLAUDE.md` first: the `npm run dev` traps (the empty-`.env` shadow, worktrees serving the main checkout's functions) all apply.
+
+**0. Before writing code: check the unknowns with Buffer drafts.** These decide parts of steps 4–5.
+- Instagram: create a draft carousel on the `kidlightbulbs` channel (Cult of Lightbulbs org) with `userTags` for two real handles and one that doesn't exist. Note whether Buffer accepts it and what it does with the bad handle.
+- Facebook: create a draft on the Kid Lightbulbs page with `metadata.facebook.annotations` for a Page mention. Note whether it tags.
+- Delete both drafts afterwards. Record what you found in "Open questions".
+
+**1. Buffer client: `api/functions/buffer-client.ts`.**
+- A small GraphQL `fetch` wrapper for `https://api.buffer.com`, modelled on `bufferGraphQL` in `scripts/generate-social-posts.ts`. Add `api.buffer.com` to `ALLOWED_OUTBOUND_HOSTNAMES`.
+- Functions: `listChannels(orgId)`, `getServiceLimits(orgId)` (the `configuration` query's `LengthRule`s), `createPost`, `createContentItem`, `addPostToContentItem`, and `ensureTag` (lift the generator's tag logic).
+- Test it with a stubbed `fetch`. It's a pure module, so tests are easy.
+
+**2. Rendering: `api/functions/curator-posts.ts`, pure, no I/O.**
+- `renderTemplate(template, artists, network, curator)` returns the caption.
+- Rules for missing values, per the spec's variables table: `{release}` drops its " – "; `{artist}` falls back to the name; Instagram's `{link}` becomes "link in bio".
+- Splits into a thread only where the network supports one. Instagram and Facebook don't, so an over-limit caption is an error the UI shows.
+- `handleFor(artist, network, addressBook)`: only the artist's own link for that network, then the curator's entry, then null.
+- This is where most tests go. Cover every missing-value case, every network, and the `#newmusic`/`#newrelease` block.
+
+**3. Cards.**
+- Add a `cover` slide and a `curator-artist` slide to `scripts/social-card-render.ts` (kicker from the curator's show name; footer `via @handle · unstream.stream`).
+- Upload with `publishCard` / `cardKey` from `scripts/social-cards.ts`, using the same fetch-it-back check.
+- **Conflict to settle first:** `api/functions/social-card.ts` is scheduled for removal, and its header says to remove `loadCardAssetsWith` with it. But a Netlify Function bundles as CommonJS and needs that same font-loading workaround to render cards. Either keep `loadCardAssetsWith` and change that header, or render cards some other way. Don't silently delete what the new function needs.
+- **R2 credentials** (`R2_ACCOUNT_ID`, `SOCIAL_CARDS_R2_ACCESS_KEY_ID`, `SOCIAL_CARDS_R2_SECRET_ACCESS_KEY`, plus the bucket's public URL setting) are only in GitHub secrets today. Add them to the Netlify site, then check they appear in `npm run dev`'s "Injected project settings env vars" line. Buffer has to fetch the cards, so a localhost URL won't work.
+
+**4. Endpoint: `api/functions/curator-compose.ts`.**
+- `POST /api/curator/preview` and `POST /api/curator/send`, routed in `netlify.toml`.
+- Admin-gated through `authenticateAdmin` for the hackathon. Export through `withSentry`, list the file in `api/tsconfig.json`'s include, and add tests in `__tests__/`.
+- The body carries artist ids, an optional release per artist, the post's template text, typed-in handles and the send mode.
+- **Everything else is looked up on the server:** artist rows and links through `db.ts`, payouts from `platform-registry.ts`, and handles from the artist's links plus the typed-in ones. Check typed-in handles against Instagram's username format.
+- `preview` returns each network's caption, its tags and what's missing, without drawing any cards.
+- `send`:
+  1. Draws and uploads the cards.
+  2. Creates the Instagram post on its own, with tags on the first image.
+  3. Creates the Facebook post as a content item.
+  4. Adds the Instagram post to that content item.
+  5. Tags everything `unstream: curator`.
+  6. Returns the posts' Buffer ids and links.
+  
+  A failed Instagram post must not take the Facebook post down with it.
+
+**5. Page: `apps/web/src/pages/CuratorComposePage.tsx` at `/curator/new`.**
+- Lazy-loaded in `main.tsx`, shown only to admins (`AuthContext`'s admin check).
+- Build it to the mockup's revised compose screen: the artist rows, the network circles, the preview tabs, the collapsed caption and the split send button.
+- The search reuses the header's suggestion component if it fits.
+- Preview requests run on a short debounce. The cover card in the page is HTML drawn to look like the real card, not the rendered PNG.
+
+**6. Check.**
+- `npm run verify` passes.
+- Using `npm run dev`, run Share Now to the Cult of Lightbulbs Instagram and Facebook. They're real channels, so use the draft mode until the tagging behaviour has been seen once.
+- Before committing, `git checkout -- deno.lock`, since `npm run dev` rewrites it.
+
+**After the hackathon:** move the Buffer token, templates and address book into tables (the "Backend" section above), in a migration merged to `main` before any branch depends on it. Then OAuth, paste a list, and results.
 
 ## Later
 
