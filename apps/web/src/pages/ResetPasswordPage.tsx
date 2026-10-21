@@ -79,7 +79,7 @@ export function ResetPasswordPage() {
             <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
               <p className="font-medium">Password updated</p>
               <p className="text-sm text-text-muted">
-                Redirecting to your dashboard...
+                Taking you to your account...
               </p>
             </div>
           ) : hasValidSession ? (

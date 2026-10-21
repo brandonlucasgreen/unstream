@@ -325,7 +325,7 @@ function App() {
                marketing page hands it to the header: there are no download
                links competing for the CTA, and launching the installed app onto
                a screen with no input to type in is a dead end. Signed-in users
-               never see this — they're redirected to /dashboard above. */
+               never see this — they're redirected to their account home above. */
             <div className="space-y-6">
               <SearchBar
                 onSearch={handleSearch}

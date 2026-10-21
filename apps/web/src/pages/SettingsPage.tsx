@@ -11,6 +11,7 @@ import { EmailChangeForm } from '../components/EmailChangeForm';
 import { refreshSessionAfterEmailChange } from '../services/auth';
 import { SharingControls } from '../components/SharingControls';
 import { NewsletterPrompt } from '../components/NewsletterPrompt';
+import { ReleaseFeedOffSwitch } from '../components/ReleaseFeedOffSwitch';
 import { NotificationPreferences } from '../components/NotificationPreferences';
 import { BandcampConnect } from '../components/BandcampConnect';
 import { PageSkeleton } from '../components/PageSkeleton';
@@ -201,6 +202,14 @@ export function SettingsPage() {
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Bandcamp collection</h2>
             <BandcampConnect />
+          </section>
+
+          {/* Revoking the private release feed, and nothing else about it — subscribing lives
+              under Releases on /my-collection. A token outlives the saved artists that justified
+              it, so the off switch can't sit behind the same gate; see the component's own note. */}
+          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+            <h2 className="text-lg font-semibold">Release feed</h2>
+            <ReleaseFeedOffSwitch />
           </section>
 
           {/* The one-time Lightbulbs On invitation, which used to sit on the signed-in home. It

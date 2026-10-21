@@ -75,7 +75,7 @@ export function PrivacyPolicyPage() {
               </P>
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>
-                  <strong>Artist performance stats.</strong> The numbers on an artist's dashboard
+                  <strong>Artist performance stats.</strong> The numbers an artist sees for their own profile
                   are daily totals per artist: how many searches they appeared in, how many times
                   their page was viewed, how many times each platform link was clicked. A counter
                   goes up by one. No user ID, no session, no IP address, nothing about who did it
@@ -233,7 +233,7 @@ export function PrivacyPolicyPage() {
                 <li><strong>Upstash</strong> — the temporary cache and rate-limiting store.</li>
                 <li><strong>GoatCounter</strong> — cookie-free website analytics.</li>
                 <li><strong>Sentry</strong> — error reports, configured not to send IP addresses, cookies or request headers, and with the query string stripped from the page address.</li>
-                <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation on your dashboard.</li>
+                <li><strong>Buttondown</strong> — Brandon's newsletter, [lightbulbs on], which carries Unstream's updates. Only if you subscribe, through a signup form, the checkbox when you claim a profile, or the one-time invitation in your account settings.</li>
                 <li><strong>Ko-fi</strong> and <strong>Apple</strong> — support and in-app purchases. We never see your payment details.</li>
                 <li><strong>Stripe</strong> — tips to artists. You pay the artist through their own Stripe account; Stripe handles your card details and we never see them. We keep a record that a tip happened, its amount and, if you were signed in or saved the tip to your account afterwards, your account. Stripe asks for your email address at checkout; we pass it back to Stripe so the artist's receipt reaches you, and we don't keep it.</li>
               </ul>

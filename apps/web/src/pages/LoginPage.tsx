@@ -258,7 +258,7 @@ export function LoginPage() {
               <p className="font-medium">Check your email</p>
               <p className="text-sm text-text-muted">
                 We sent a sign-in link to <strong className="text-text-primary">{email}</strong>.{' '}
-                {savingTip ? 'Click the link and we\'ll bring you back to save your tip.' : 'Click the link to access your dashboard.'}
+                {savingTip ? 'Click the link and we\'ll bring you back to save your tip.' : 'Click the link to sign in.'}
               </p>
               <button
                 type="button"
