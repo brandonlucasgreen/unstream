@@ -12,6 +12,9 @@ import App from './App.tsx'
 import { ArtistPage } from './pages/ArtistPage.tsx'
 import { AppLoadingFallback, AppErrorFallback } from './components/AppFallback'
 import { ScrollToTop } from './components/ScrollToTop'
+// Eager, unlike every page below: the catch-all exists for navigations that have already gone
+// wrong, and a superseded build's chunks are deleted — exactly when it is most needed.
+import { NotFoundPage } from './pages/NotFoundPage.tsx'
 import { lazyWithRetry } from './utils/lazyWithRetry'
 import { StaleBuildBanner } from './components/StaleBuildBanner'
 
@@ -151,6 +154,18 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/tip/thanks" element={<TipThanksPage />} />
               <Route path="/tip/:slug" element={<TipPage />} />
               <Route path="/u/:handle" element={<PublicSavedArtistsPage />} />
+              {/*
+                Matched only when nothing else is — React Router ranks routes by specificity, so
+                sitting last is for readability, not correctness. Without it an unknown path
+                rendered an empty #root — indistinguishable from a crash, and the shape a stale
+                service worker takes when it meets a route its build predates.
+
+                Paths Netlify serves itself (the edge-rendered artist and release pages, the feed
+                functions, the /guides 301s) never reach the SPA on a page load, so this cannot
+                shadow them; `netlify.toml` and the worker's navigateFallbackDenylist are what
+                keep that true.
+              */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
