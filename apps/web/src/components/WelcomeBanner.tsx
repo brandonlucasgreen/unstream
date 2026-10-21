@@ -5,7 +5,7 @@ import { dismissWelcome } from '../services/auth';
 import { shouldShowWelcome } from '../utils/welcome';
 
 /**
- * A one-time greeting at the top of the dashboard for a newly created account.
+ * A one-time greeting at the top of /my-collection for a newly created account.
  *
  * Sign-up is a magic link, so before this a new fan confirmed their email and landed on a
  * page with no acknowledgement that anything had happened. Hides immediately on dismiss; the
@@ -33,7 +33,7 @@ export function WelcomeBanner() {
           Welcome to Unstream
         </h2>
         <p className="text-sm text-text-secondary">
-          Your email is confirmed and you're signed in. This is your dashboard: artists you
+          Your email is confirmed and you're signed in. This is your collection: artists you
           save show up here, along with their new releases, so you know when there's something
           to support.{' '}
           <Link to="/" className="text-accent-primary hover:underline">

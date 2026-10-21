@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 export type NavItem = {
   to: string;
   label: string;
-  /** Accent-coloured, for primary destinations (Dashboard, admin alerts). */
+  /** Accent-coloured, for a destination needing attention (an admin queue with items in it). */
   emphasis?: boolean;
   /**
    * Render as a filled button in the desktop header. The drawer ignores this —

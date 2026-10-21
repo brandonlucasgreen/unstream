@@ -203,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // This is the sign-up path for most fans (the save-artist prompt), so where the link lands
     // is their first impression. With no `emailRedirectTo` Supabase falls back to the Site URL,
     // which dropped new accounts on the home page with no sign they'd signed up. /login is the
-    // redirect LoginPage already uses, and it forwards a session straight to /dashboard, where
+    // redirect LoginPage already uses, and it forwards a session straight to /my-collection, where
     // WelcomeBanner greets them. The pending save survives the hop: it's applied from
     // localStorage on whichever page the session arrives.
     const { error } = await supabase.auth.signInWithOtp({

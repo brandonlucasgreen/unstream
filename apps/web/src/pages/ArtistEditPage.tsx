@@ -464,7 +464,7 @@ export function ArtistEditPage() {
         return;
       }
 
-      navigate('/dashboard', { replace: true });
+      navigate('/my-artists', { replace: true });
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'artistEdit.removeArtist' } });
       set('error', 'Network error. Please try again.');
@@ -910,7 +910,7 @@ export function ArtistEditPage() {
           {form.saving ? 'Saving...' : 'Save changes'}
         </button>
         <Link
-          to="/dashboard"
+          to="/my-artists"
           className="text-sm text-text-muted hover:text-text-primary transition-colors"
         >
           Cancel

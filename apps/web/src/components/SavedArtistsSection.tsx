@@ -5,8 +5,8 @@ import type { SavedArtist } from '../contexts/AuthContext';
 import { SkeletonScreen } from './Skeleton';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
 
-// The fan half of the dashboard: artists saved to come back to, and which of them have
-// actually been supported.
+// The saved-artists block on /my-collection: artists saved to come back to, and which of them
+// have actually been supported.
 //
 // The list comes from AuthContext — the same one the save buttons on search results and
 // artist pages read — rather than a second copy fetched here. Two copies is how removing an

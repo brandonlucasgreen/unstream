@@ -11,7 +11,7 @@ interface NewsletterCheckboxProps {
  *
  * Deliberately not on /login. That page is both sign-up and sign-in, and it can't tell which
  * before the person is authenticated without revealing whether an address has an account
- * (account enumeration). New fans get the one-time NewsletterPrompt on /dashboard instead, which
+ * (account enumeration). New fans get the one-time NewsletterPrompt on /my-collection instead, which
  * they land on straight after their first sign-in.
  */
 export function NewsletterCheckbox({ checked, onChange }: NewsletterCheckboxProps) {

@@ -10,6 +10,7 @@ import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { LegalConsent } from '../components/LegalConsent';
 import { safeNextPath } from '../utils/safeNextPath';
+import { resolveAccountHome, COLLECTION_HOME } from '../services/accountHome';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 
@@ -29,7 +30,6 @@ export function LoginPage() {
   // tip to their account) passes itself here so they come back to it, by password or magic link.
   const [searchParams] = useSearchParams();
   const next = safeNextPath(searchParams.get('next'), window.location.origin);
-  const afterSignIn = next ?? '/dashboard';
   const savingTip = !!next?.startsWith('/tip/thanks');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,11 +37,21 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<ViewMode>('form');
 
+  // A page that sent someone here gets them straight back. Otherwise the destination
+  // depends on whether they have a verified artist, which takes a request to answer —
+  // `cancelled` keeps a late answer from navigating after this page is gone.
   useEffect(() => {
-    if (!authLoading && session) {
-      navigate(afterSignIn, { replace: true });
+    if (authLoading || !session) return;
+    if (next) {
+      navigate(next, { replace: true });
+      return;
     }
-  }, [session, authLoading, navigate, afterSignIn]);
+    let cancelled = false;
+    resolveAccountHome(session.access_token).then(path => {
+      if (!cancelled) navigate(path, { replace: true });
+    });
+    return () => { cancelled = true; };
+  }, [session, authLoading, navigate, next]);
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -155,10 +165,10 @@ export function LoginPage() {
                   <p className="font-medium">Signed in as <strong className="text-text-primary">{session.user.email}</strong></p>
                   <button
                     type="button"
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate(COLLECTION_HOME)}
                     className="text-sm text-accent-primary hover:underline"
                   >
-                    Go to Dashboard
+                    Go to your account
                   </button>
                 </div>
               ) : (
@@ -248,7 +258,7 @@ export function LoginPage() {
               <p className="font-medium">Check your email</p>
               <p className="text-sm text-text-muted">
                 We sent a sign-in link to <strong className="text-text-primary">{email}</strong>.{' '}
-                {savingTip ? 'Click the link and we\'ll bring you back to save your tip.' : 'Click the link to access your dashboard.'}
+                {savingTip ? 'Click the link and we\'ll bring you back to save your tip.' : 'Click the link to sign in.'}
               </p>
               <button
                 type="button"
