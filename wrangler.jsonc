@@ -1,0 +1,149 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "unstream",
+  "main": "workers/index.ts",
+
+  // Workers' behaviour is pinned to this date, so upgrading the runtime is a deliberate edit
+  // rather than something that happens under us on a redeploy. On or after 2026-08-04,
+  // `nodejs_compat` is on by default; it is listed anyway because the port depends on it —
+  // `process.env`, `node:async_hooks` for api/lib/background.ts, `node:crypto` and `Buffer` are
+  // all load-bearing, and a silent loss of any of them would be very hard to read backwards from
+  // the symptom.
+  "compatibility_date": "2026-10-18",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The built SPA. Requests that match a file here are served without running the Worker, which
+  // is both faster and free, so index.html, /assets/* and the PWA files never touch the code.
+  // Their headers come from apps/web/public/_headers for that reason — see workers/response-headers.ts.
+  "assets": {
+    "directory": "apps/web/dist",
+    "binding": "ASSETS",
+    // The Worker decides what an unmatched path means: a route, a server-rendered page, or the
+    // SPA shell. Without this, Workers would answer them itself and the route table would never run.
+    "not_found_handling": "none",
+    // Serve files at exactly the path asked for. The default ("auto-trailing-slash") treats
+    // /index.html as a pretty-URL alias and 307s it to /, which is the one path the Worker asks
+    // for by name every time it serves the SPA shell — so the default turned every SPA route
+    // into a redirect loop back through the router.
+    "html_handling": "none"
+  },
+
+  // Run near Supabase rather than near each visitor. A search makes several sequential database
+  // reads, so the round trips to the database dominate; the one trip from the visitor doesn't.
+  "placement": { "mode": "smart" },
+
+  // Logs in the dashboard. The functions' console.log lines — [search-timing] above all — are
+  // how a slow search gets diagnosed, and without this they go nowhere.
+  "observability": { "enabled": true },
+
+  // Long background work: a catalogue crawl runs for 9-13 minutes (DETAIL_BUDGET_MS and
+  // ENRICHMENT_CUTOFF_MS in catalog-artist-background.ts), and `ctx.waitUntil` allows 30
+  // seconds. A queue consumer gets 15 minutes, which is the only budget here that fits — and a
+  // crawl killed part-way still counts as an attempt, so the artist would be skipped for seven
+  // days with nothing reporting a failure.
+  //
+  // `max_batch_size: 1` because one message is one whole crawl; batching would put several
+  // inside one 15-minute budget. `max_concurrency: 1` keeps crawls serial, which is what the
+  // per-artist and per-detail-fetch delays in that file already assume — raising it would
+  // multiply the real request rate at Bandcamp without changing a single delay constant.
+  "queues": {
+    "producers": [{ "binding": "BACKGROUND_QUEUE", "queue": "unstream-background" }],
+    "consumers": [
+      {
+        "queue": "unstream-background",
+        "max_batch_size": 1,
+        "max_concurrency": 1,
+        "max_retries": 3,
+        "dead_letter_queue": "unstream-background-dlq"
+      }
+    ]
+  },
+
+  // The two schedules that were GitHub Actions hitting the Netlify host by name. They named it
+  // deliberately — Bot Fight Mode on the unstream.stream zone challenged the runner's curl and
+  // cost six days of cataloguing — and a Cron Trigger removes the HTTP hop that was being
+  // challenged at all. Same cadences the workflows used.
+  //
+  // Those workflows stay until the cutover, because until then they are what actually runs:
+  // crons only fire on a deployed Worker. They are deleted as a cutover step, or the sweep runs
+  // twice while Netlify is kept for rollback.
+  "triggers": {
+    "crons": [
+      "0 1,13 * * *", // recatalog-sweep, every 12 hours
+      "*/30 * * * *" // tips-review-notify
+    ]
+  },
+
+  "routes": [
+    { "pattern": "unstream.stream", "custom_domain": true },
+    { "pattern": "www.unstream.stream", "custom_domain": true }
+  ],
+
+  // The server-rendered pages in api/edge/ still run on Netlify's edge too, for as long as that
+  // site is kept for rollback, and that runtime is Deno: it resolves Supabase from esm.sh, and
+  // npm support there is still beta with the native-binary and runtime-import gaps Netlify
+  // documents. So the import stays a URL in the source, and the Worker's bundler points it at
+  // the npm package that is already a dependency. Delete this when the Netlify site is retired.
+  //
+  // `@sentry/node` → `@sentry/cloudflare` for the same reason, in the other direction:
+  // api/lib/sentry.ts imports the Node SDK because Netlify is still production and only
+  // `init()` binds a client there, while on Workers the client is created per request by
+  // `Sentry.withSentry`. The Node SDK does bundle and run here, but it carries OpenTelemetry
+  // and a stack of Node internals a Worker has no use for, and its transport under workerd is
+  // unproven.
+  //
+  // Measured cost: the bundle goes from 667 KB to 876 KB gzipped, because resolving through the
+  // alias picks @sentry/cloudflare's `nodejs_compat` build rather than its slim one. That is the
+  // right build for this Worker — nodejs_compat is on, and that variant uses AsyncLocalStorage
+  // for async-context isolation. Checked that it is still ONE copy of the SDK, not two:
+  // getCurrentScope, getDefaultCurrentScope and getGlobalSingleton each appear exactly once in
+  // the bundle, so api/lib/sentry.ts's captures and the client `Sentry.withSentry` creates in
+  // workers/index.ts share one registry. Against a 10 MB limit the size is not worth avoiding.
+  //
+  // Delete this when Netlify is retired and the import can simply be `@sentry/cloudflare`.
+  "alias": {
+    "https://esm.sh/@supabase/supabase-js@2": "@supabase/supabase-js",
+    "@sentry/node": "@sentry/cloudflare"
+  },
+
+  "vars": {
+    // Mirrors what Netlify exposed at runtime, which api/lib/sentry.ts and
+    // api/lib/internal-origin.ts both read to tell production from anything else. Everything
+    // secret is a Worker secret instead (`wrangler secret put`), never a var.
+    "URL": "https://unstream.stream",
+    // Only used to proxy /api/social-card/* back to the Netlify site until that function is
+    // deleted (see PROXIED_TO_NETLIFY in workers/index.ts). Netlify injected this at runtime;
+    // on Workers it has to be stated, or Buffer's card fetches 404 and posts publish without
+    // their images. Goes with the proxy.
+    "SITE_NAME": "unstream"
+  },
+
+  // A staging Worker (next.unstream.stream, which 1e stands up) shares one production Supabase
+  // with the real site, so it must not run scheduled work or consume the production queue. Both
+  // are removed here structurally rather than guarded at runtime: an empty `crons` cannot fire,
+  // and a separate queue cannot take a message meant for production. `scheduled()` also checks
+  // the production URL at runtime, as a second line.
+  //
+  // `URL` has to be overridden here anyway — Sentry tags its environment from it, and a staging
+  // deploy that left it as production would file its errors as production's.
+  "env": {
+    "staging": {
+      "triggers": { "crons": [] },
+      "queues": {
+        "producers": [{ "binding": "BACKGROUND_QUEUE", "queue": "unstream-background-staging" }],
+        "consumers": [
+          {
+            "queue": "unstream-background-staging",
+            "max_batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 3
+          }
+        ]
+      },
+      "vars": {
+        "URL": "https://next.unstream.stream",
+        "SITE_NAME": "unstream"
+      }
+    }
+  }
+}

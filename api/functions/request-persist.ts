@@ -18,6 +18,7 @@ import { Sentry } from '../lib/sentry';
 import { persistSearchResults, type PersistableResult } from './db';
 import { checkSentryDedup } from './ratelimit';
 import { internalFunctionOrigin } from '../lib/internal-origin';
+import { dispatchBackgroundFunction } from '../lib/background';
 
 /**
  * The most this sends to the background function, in bytes of JSON.
@@ -105,6 +106,11 @@ export async function requestSearchPersist(results: PersistableResult[]): Promis
     const payload = toPersistPayload(results);
     if (payload.length === 0) return 'none';
 
+    const body = JSON.stringify({ results: payload });
+
+    // Workers first: no handshake, no configuration needed, nothing that can be challenged.
+    if (await dispatchBackgroundFunction('persist-search-results-background', body)) return 'background';
+
     const secret = process.env.INTERNAL_FUNCTION_SECRET;
     const origin = internalFunctionOrigin();
     if (!secret || !origin) {
@@ -114,7 +120,6 @@ export async function requestSearchPersist(results: PersistableResult[]): Promis
       return 'inline-unconfigured';
     }
 
-    const body = JSON.stringify({ results: payload });
     const bytes = Buffer.byteLength(body);
     if (bytes > MAX_PERSIST_PAYLOAD_BYTES) {
       await reportDispatchProblem('oversize', `payload ${bytes} bytes for ${payload.length} artists`);

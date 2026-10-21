@@ -5,7 +5,8 @@
 // navigation would render, so a direct load and an in-app click produce the same UI (see
 // docs/postmortems/UNS-100-bifurcation-retro.md). Only crawlers get this static render.
 
-import { Context } from "https://edge.netlify.com";
+import { edgeEnv } from "../shared/edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
@@ -67,8 +68,8 @@ export default async function handler(request: Request, context: Context) {
       return context.next();
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
+    const supabaseUrl = edgeEnv("SUPABASE_URL");
+    const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
     if (!supabaseUrl || !supabaseKey) return context.next();
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -87,8 +88,8 @@ export default async function handler(request: Request, context: Context) {
         .from('usernames')
         .select('user_id, username, saved_artists_public, location')
         .eq('username', handle)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .maybeSingle();
 
       if (!unameData) {
         clearTimeout(timeoutId);
@@ -321,7 +322,7 @@ export default async function handler(request: Request, context: Context) {
         // sync), so the TTL only bounds staleness if a purge is missed — it is not the
         // freshness mechanism, and at 300s this was 3 queries per handle per five minutes
         // of crawler traffic.
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         'Cache-Tag': `user-share-${handle}`,
       },
     });

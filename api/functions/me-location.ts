@@ -71,10 +71,14 @@ async function handleRequest(event: {
   // A clean UPDATE is used when the row exists; only the absence of a row triggers the
   // "set username first" error.
   async function hasUsernameRow(): Promise<boolean | { statusCode: number; headers: typeof CORS_HEADERS; body: string }> {
-    const { data: existing, error } = await client
+    // Captured locally: the guards above narrowed both of these, but a closure doesn't inherit
+    // that narrowing — TypeScript has to assume something reassigned them in between.
+    const db = client!;
+    const caller = user!;
+    const { data: existing, error } = await db
       .from('usernames')
       .select('user_id')
-      .eq('user_id', user.userId)
+      .eq('user_id', caller.userId)
       .maybeSingle();
 
     if (error) {

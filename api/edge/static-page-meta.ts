@@ -1,4 +1,4 @@
-import { Context } from "https://edge.netlify.com";
+import type { Context } from "../shared/edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
 // Link-preview metadata for the hand-written static pages — currently /press, /contact and /platforms.
@@ -110,7 +110,3 @@ export default async function handler(request: Request, context: Context) {
 
   return context.next();
 }
-
-export const config = {
-  path: ["/press", "/contact"],
-};

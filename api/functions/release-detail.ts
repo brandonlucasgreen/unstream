@@ -229,7 +229,7 @@ async function handleRequest(event: {
       headers: {
         ...CORS_HEADERS,
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
         // Tagged by the canonical slug, so one purge clears the response whichever slug was
         // asked for — an alias URL and the live URL are separate CDN entries of the same answer.
         'Cache-Tag': `release-detail-${artistSlug}-${release}`,

@@ -40,7 +40,7 @@ describe('digest-feed', () => {
     expect(res.body).toBe(FEED);
     expect(res.headers['Content-Type']).toBe('application/rss+xml; charset=utf-8');
     expect(res.headers['X-Robots-Tag']).toBe('noindex, nofollow');
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=3600');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=3600');
   });
 
   it('404s, uncached, before the first issue exists', async () => {

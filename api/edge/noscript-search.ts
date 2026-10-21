@@ -1,4 +1,4 @@
-import { Context } from "https://edge.netlify.com";
+import type { Context } from "../shared/edge-context.ts";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 
 interface PlatformLink {
@@ -269,7 +269,7 @@ function renderPage(query: string, results: SearchResult[], error?: string): str
 </html>`;
 }
 
-export default async function handler(request: Request, context: Context) {
+export default async function handler(request: Request, _context: Context) {
   const url = new URL(request.url);
   const query = url.searchParams.get('q')?.trim() || '';
 
@@ -296,7 +296,7 @@ export default async function handler(request: Request, context: Context) {
       });
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { results?: SearchResult[] };
     const results: SearchResult[] = data.results || [];
 
     return new Response(renderPage(query, results), {
@@ -312,7 +312,3 @@ export default async function handler(request: Request, context: Context) {
     });
   }
 }
-
-export const config = {
-  path: "/search",
-};

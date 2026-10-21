@@ -263,7 +263,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       headers: {
         ...CORS_HEADERS,
         'Cache-Control': 'public, max-age=0, must-revalidate',
-        'Netlify-CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
         // The canonical slug, not the requested one, so an alias URL's cached copy is purged
         // by the same call as the artist's own.
         'Cache-Tag': `artist-page-${artistRow.slug}`,

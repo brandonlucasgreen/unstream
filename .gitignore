@@ -86,3 +86,9 @@ supabase/.temp/
 *.mobileprovision
 sparkle-private-key*.txt
 
+# Wrangler's local state: the miniflare simulation of KV, caches and assets that
+# `npm run dev:worker` builds. Regenerated on every run.
+.wrangler/
+# Worker secrets for local runs, the wrangler equivalent of .env. Never committed.
+.dev.vars
+.dev.vars.*

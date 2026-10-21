@@ -82,7 +82,7 @@ async function handleRequest(event: { httpMethod: string; headers?: Record<strin
       ...corsHeaders,
       'X-Request-Id': requestId,
       'Cache-Control': 'public, max-age=3600',
-      'Netlify-CDN-Cache-Control': 's-maxage=86400',
+      'CDN-Cache-Control': 's-maxage=86400',
     },
     body: JSON.stringify(v1Response({ platforms }, requestId)),
   };

@@ -15,7 +15,8 @@
 // `/a/artist/release` and artist-page-static would otherwise answer first. The regex here
 // matches exactly two path segments so single-segment artist URLs never reach it.
 
-import { Context } from "https://edge.netlify.com";
+import { edgeEnv } from "../shared/edge-context.ts";
+import type { Context } from "../shared/edge-context.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
@@ -147,7 +148,7 @@ interface SourceRow {
 async function passThrough(context: Context): Promise<Response> {
   const response = await context.next();
   const headers = new Headers(response.headers);
-  headers.set('Netlify-CDN-Cache-Control', 'no-store');
+  headers.set('CDN-Cache-Control', 'no-store');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -162,8 +163,8 @@ export default async function handler(request: Request, context: Context) {
     const artistSlug = decodeURIComponent(segments[1]);
     const releaseSlug = decodeURIComponent(segments[2]);
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_KEY");
+    const supabaseUrl = edgeEnv("SUPABASE_URL");
+    const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
     if (!supabaseUrl || !supabaseKey) return passThrough(context);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -187,8 +188,8 @@ export default async function handler(request: Request, context: Context) {
         .from('artists')
         .select('id, name, image_url')
         .eq('slug', artistSlug)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .maybeSingle();
 
       // A retired slug still resolves. Most of the aliases in production (44 of them as of
       // 2026-08-07) came from the accent-folding reslug in #410 (`beyonc` -> `beyonce`), and a
@@ -212,8 +213,8 @@ export default async function handler(request: Request, context: Context) {
           .from('artist_slug_aliases')
           .select('artists!inner(slug)')
           .eq('alias', artistSlug.toLowerCase())
-          .maybeSingle()
-          .abortSignal(controller.signal);
+          .abortSignal(controller.signal)
+          .maybeSingle();
 
         const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
@@ -246,8 +247,8 @@ export default async function handler(request: Request, context: Context) {
         .eq('artist_id', artist.id)
         .eq('slug', releaseSlug)
         .eq('is_hidden', false)
-        .maybeSingle()
-        .abortSignal(controller.signal);
+        .abortSignal(controller.signal)
+        .maybeSingle();
 
       if (!releaseData) {
         clearTimeout(timeoutId);
@@ -482,14 +483,22 @@ export default async function handler(request: Request, context: Context) {
         // traffic. Artist edits don't wait for it — they purge (see purgeArtistCaches in
         // api/functions/artist-releases.ts).
         //
-        // This header does nothing on its own: Netlify caches an edge function's response only
-        // when the function opts in, which is the `cache = "manual"` on this function's entry in
-        // netlify.toml. Until that line existed (2026-10-18), every hit queried Supabase.
-        'Netlify-CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        // This header does nothing on its own, on either platform, and that is worth saying
+        // plainly because it fails silently both times. Netlify caches an edge function's
+        // response only when the function opts in (`cache = "manual"` on its netlify.toml
+        // entry); a Worker's response is cached only when the Worker stores it (`cache: true`
+        // on this route, which turns on workers/edge-cache.ts). Until the Netlify line existed
+        // (2026-10-18) every hit queried Supabase while looking perfectly healthy.
+        //
+        // `CDN-Cache-Control` rather than `Netlify-CDN-Cache-Control`: both platforms honour the
+        // standard name, so one header serves whichever is live. The separate `Cache-Control`
+        // above is what the *browser* is told, and it stays short because prices are
+        // user-visible; the Worker keeps the two apart across a cache hit.
+        'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         // Two tags: the specific page, plus one shared by every release page of this artist.
-        // Netlify purges by exact tag with no wildcards, and an artist editing their catalogue
-        // needs all of their release pages gone at once — this is the only way to say that in
-        // one purge call.
+        // Purging is by exact tag with no wildcards on both platforms, and an artist editing
+        // their catalogue needs all of their release pages gone at once — this is the only way
+        // to say that in one purge call.
         'Cache-Tag': `release-${artistSlug}-${releaseSlug},artist-releases-${artistSlug}`,
       },
     });

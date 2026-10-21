@@ -116,7 +116,7 @@ describe('social-card: what gets drawn', () => {
     const res = await request('buy');
     expect(res.statusCode).toBe(200);
     expect(res.headers['Content-Type']).toBe('image/png');
-    expect(res.headers['Netlify-CDN-Cache-Control']).toContain('s-maxage=2592000');
+    expect(res.headers['CDN-Cache-Control']).toContain('s-maxage=2592000');
     expect(res.isBase64Encoded).toBe(true);
     expect(pngSize(res.body)).toEqual({ width: 1080, height: 1350 });
     // Nothing on this slide comes from an image host.
@@ -210,7 +210,7 @@ describe('social-card: what it refuses to draw', () => {
     mocks.fetch.mockImplementation(async () => imageResponse(WEBP_HEADER));
     const res = await request('photo');
     expect(res.statusCode).toBe(404);
-    expect(res.headers['Netlify-CDN-Cache-Control']).toBe('public, s-maxage=300');
+    expect(res.headers['CDN-Cache-Control']).toBe('public, s-maxage=300');
   });
 });
 
@@ -238,6 +238,6 @@ describe("social-card: never caching an answer it didn't get", () => {
     mocks.fetch.mockImplementation(async () => imageResponse(Buffer.from(''), 404));
     const res = await request('photo');
     expect(res.statusCode).toBe(404);
-    expect(res.headers['Netlify-CDN-Cache-Control']).toBe('public, s-maxage=300');
+    expect(res.headers['CDN-Cache-Control']).toBe('public, s-maxage=300');
   });
 });

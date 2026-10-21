@@ -1,0 +1,29 @@
+# Headers for the static files Workers serves without running the Worker.
+#
+# Workers' static assets use the same `_headers` syntax Netlify did, so these are the three
+# `[[headers]]` blocks netlify.toml carried, with the same values and the same reasons. The
+# Worker applies the same CSP to the responses it generates itself; workers/response-headers.ts
+# holds that copy, and workers/__tests__/response-headers.test.ts fails if the two disagree.
+
+# The staleness probe in buildFreshness.ts compares this file's id against the one baked into the
+# running bundle. A cached response would echo the tab's own build back to it forever, so the
+# banner would never appear.
+/build-id.json
+  Cache-Control: no-store, max-age=0
+
+# The one file that must never be answered from cache, for the same reason as the one above — and
+# the pair belongs together. /build-id.json is how staleness is DETECTED; this is how it gets
+# RESOLVED. The browser discovers a new worker only by re-fetching /sw.js, so under a long
+# max-age that check can be satisfied by an old copy while the installed worker keeps serving its
+# precached build. On 2026-08-24 a Safari session was pinned to a build whose /assets/* had all
+# been deleted, running that dead code until it threw. Protecting only the detector is the worst
+# of both — the banner appears, and the refresh behind it re-serves the very build it is warning
+# about.
+#
+# `max-age=0, must-revalidate` rather than `no-store`: it still forces a check on every request,
+# but lets the ETag answer 304 instead of resending the file.
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' gc.zgo.at letterbird.co; style-src 'self' 'unsafe-inline' api.fonts.coollabs.io; font-src cdn.fonts.coollabs.io; connect-src 'self' https://*.supabase.co https://unstream.goatcounter.com https://letterbird.co https://*.ingest.us.sentry.io; img-src 'self' https: data:; frame-src https:; object-src 'none'; base-uri 'self'

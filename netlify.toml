@@ -8,6 +8,16 @@
   # build); the script explains itself and errs toward deploying.
   ignore = "bash scripts/netlify-ignore-build.sh"
 
+# Pinned because the repo now has dependencies that require it: `wrangler` and `miniflare`
+# both declare `node >= 22`, added with the Cloudflare Worker (workers/). Netlify pinned no
+# version before, so the build ran on whatever its image defaulted to — fine while every
+# dependency was happy on 20, and a silent trap once one wasn't. Vite 7 already needed
+# 20.19+, so this only moves the floor that was already implied.
+#
+# Pin it here rather than in a .nvmrc so it sits next to the build command it constrains.
+[build.environment]
+  NODE_VERSION = "22"
+
 # Deploy Previews are the single largest consumer of build minutes here: ~200 PRs a
 # month at ~1.4 min each is ~280 of a 300-minute allowance, spent on previews that are
 # rarely opened because testing happens against production instead. Production deploys

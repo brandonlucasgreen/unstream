@@ -1,3 +1,8 @@
+# ⚠️ REPLACED BY A CRON TRIGGER AT CUTOVER — DELETE THIS FILE THEN.
+# The Worker runs this on the same schedule (`triggers.crons` in wrangler.jsonc), but crons only
+# fire on a deployed Worker, so until DNS moves this workflow is still what actually runs. Leaving
+# it after the cutover means the job runs twice: once from the Cron Trigger and once from here,
+# against the Netlify site kept idle for rollback — which shares the same production Supabase.
 name: Tips review notifications
 
 # Pushes an ntfy alert whenever an artist newly lands in the admin tip review list — a row in

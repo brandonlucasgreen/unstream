@@ -505,8 +505,14 @@ export async function checkSentryDedup(key: string, ttlSeconds: number): Promise
  * Extract client IP from Netlify function event headers.
  */
 export function getClientIp(headers: Record<string, string | undefined>): string {
-  // Prefer Netlify's trusted header (cannot be spoofed by clients)
-  return headers['x-nf-client-connection-ip']
+  // Prefer the platform's own header, which it overwrites on every request and a client
+  // therefore cannot spoof: `cf-connecting-ip` on Workers, Netlify's two before that. They are
+  // all listed because the Netlify site stays up through the cutover window for rollback, and
+  // because getting this wrong doesn't error — it collapses every visitor into one rate-limit
+  // bucket, which looks like working software until the first busy minute.
+  // `x-forwarded-for` last: it is client-supplied and only worth reading when nothing else answered.
+  return headers['cf-connecting-ip']
+    || headers['x-nf-client-connection-ip']
     || headers['client-ip']
     || headers['x-forwarded-for']?.split(',')[0]?.trim()
     || 'unknown';

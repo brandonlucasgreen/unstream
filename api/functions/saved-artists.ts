@@ -23,6 +23,16 @@ function getServiceClient() {
 }
 
 /**
+ * The client as the helpers below receive it: non-null.
+ *
+ * `getClient()` returns null when Supabase isn't configured, and the handler turns that into a
+ * loud 500 before any of them is called. Saying `ReturnType<typeof getServiceClient>` here
+ * instead put the null back into every helper, where it could never actually arrive — and since
+ * none of this file was in api/tsconfig.json's include list, nothing said so.
+ */
+type ServiceClient = NonNullable<ReturnType<typeof getServiceClient>>;
+
+/**
  * Report a save/remove this endpoint refused or couldn't complete.
  *
  * Nothing else sees these. `console.error` in a Lambda is written to a log nobody reads, the
@@ -228,7 +238,7 @@ async function handleRequest(event: {
 // Resolve a slug to an existing artists table row (no creation).
 // Only claimed/verified artists will have rows.
 async function findExistingArtist(
-  client: ReturnType<typeof getServiceClient>,
+  client: ServiceClient,
   slug: string,
 ): Promise<{ id: string; name: string; slug: string; image_url: string | null } | null> {
   // Exact and case-insensitive lookups run in parallel; exact match wins.
@@ -247,7 +257,7 @@ async function findExistingArtist(
   return exact || ciData;
 }
 
-async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   const artistName = body.name as string | undefined;
   const artistImageUrl = body.imageUrl as string | undefined;
@@ -351,7 +361,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
   }
 }
 
-async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
     await reportSavedArtistFailure('remove-missing-artist-id', 'Remove rejected — no artistId in the body', {
@@ -426,7 +436,7 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
   }
 }
 
-async function handleCheck(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+async function handleCheck(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
   const artistSlugs = body.artistIds as string[];
   if (!artistSlugs || !Array.isArray(artistSlugs)) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistIds array is required' }) };
@@ -469,7 +479,7 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
   }
 }
 
-async function handleSupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+async function handleSupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
@@ -534,7 +544,7 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
   }
 }
 
-async function handleUnsupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ReturnType<typeof getServiceClient>) {
+async function handleUnsupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };

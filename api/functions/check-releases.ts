@@ -300,7 +300,7 @@ async function checkMirlo(mirloUrl: string): Promise<ReleaseResult | null> {
       const rssText = await response.text();
 
       // Parse all items from RSS
-      const items: typeof mirloRssCache.items = [];
+      const items: NonNullable<typeof mirloRssCache>['items'] = [];
       const itemRegex = /<item>[\s\S]*?<\/item>/g;
       let match;
 
