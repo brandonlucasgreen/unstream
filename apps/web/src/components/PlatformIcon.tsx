@@ -1,3 +1,4 @@
+import { SOCIAL_ICON_PATHS } from '../../../../api/shared/social-icon-paths';
 import type { SourceId } from '../types';
 
 // SVG paths from Simple Icons (https://simpleicons.org) — MIT licensed, except
@@ -43,12 +44,18 @@ interface PlatformIconProps {
 }
 
 export function PlatformIcon({ sourceId, color, emoji, className = 'w-4 h-4' }: PlatformIconProps) {
-  const icon = SIMPLE_ICON_PATHS[sourceId];
+  // The social marks live in api/shared/ because the crawler-rendered artist page draws them too.
+  // Without them this fell through to the emoji below — and for a social platform that "emoji" is
+  // the platform's own name in sources.ts, so a YouTube link rendered the word `youtube`.
+  const icon = SIMPLE_ICON_PATHS[sourceId] ?? SOCIAL_ICON_PATHS[sourceId];
 
   if (icon) {
+    // Only the hand-carved marks here carry a fillRule (Ampwall's knob slot); the shared social
+    // paths are plain Simple Icons geometry and have none.
+    const fillRule = 'fillRule' in icon ? icon.fillRule : undefined;
     return (
       <svg className={className} viewBox="0 0 24 24" fill={color}>
-        <path d={icon.d} fillRule={icon.fillRule} clipRule={icon.fillRule} />
+        <path d={icon.d} fillRule={fillRule} clipRule={fillRule} />
       </svg>
     );
   }
