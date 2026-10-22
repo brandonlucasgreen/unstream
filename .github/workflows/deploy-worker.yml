@@ -1,0 +1,135 @@
+name: Deploy Worker
+
+# Deploys the Cloudflare Worker (workers/, wrangler.jsonc) on every push to main.
+#
+# Without this, the Cloudflare cutover would quietly break the one thing everybody relies on:
+# that merging to main reaches users. Netlify builds main on its own; nothing builds the Worker.
+# After the cutover every fix would merge, go green, build an idle Netlify site, and never reach
+# production — with nothing failing to say so.
+#
+# **Automatic deploys are off until switched on.** A push to main is skipped unless the repository
+# *variable* WORKER_DEPLOY_ENABLED is "true" (Settings → Secrets and variables → Actions →
+# Variables). A deploy needs the queues and the Worker's secrets to exist first, so flipping that
+# variable is a step in the cutover checklist (docs/specs/infrastructure-independence-plan.md), not
+# a default. Unset, main stays green and nothing deploys. A hand-run (workflow_dispatch) always
+# runs — someone chose it — which is how staging is deployed before automatic deploys exist.
+#
+# Before the cutover a push to main deploys the production Worker to its workers.dev address only,
+# because wrangler.jsonc names no production hostname — harmless, and it keeps that Worker current
+# for checking. The cutover PR adds the hostname; merging it is what moves unstream.stream, here,
+# so there is never a deploy from an unmerged branch for main to undo.
+#
+# Codeberg can't run Cloudflare's own Git-connected builds, which is why this is a workflow rather
+# than a dashboard setting: Phase 4 of the plan ports it to .forgejo/workflows/ as it is.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which Worker to deploy
+        type: choice
+        options: [production, staging]
+        default: production
+
+# One deploy per environment at a time, never cancelled half-way: a cancelled `wrangler deploy`
+# can leave the Worker's script and its assets from different commits.
+concurrency:
+  group: deploy-worker-${{ inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ vars.WORKER_DEPLOY_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    # A typical run is a few minutes. The concurrency group above is never cancelled, so a hung
+    # step would otherwise hold it for GitHub's six-hour default and block every deploy behind it.
+    timeout-minutes: 30
+    # **Production deploys only from main, enforced twice.** A hand-run from another branch would
+    # put that branch on unstream.stream until the next merge quietly replaced it. A hand-run uses
+    # the workflow file *from the branch it runs on*, so a check written in this file is only as
+    # good as that branch's copy of it. The GitHub environment is the half no branch can edit: the
+    # `production` environment's deployment-branch rule (Settings → Environments) allows main only,
+    # and GitHub refuses the job before any step runs. The step below says the same thing in the
+    # run's log. Staging may be deployed from any branch; trying a branch out is what it is for.
+    #
+    # Not a wall against a deliberately edited branch: one that switches this to `staging` and
+    # deploys production anyway still can, because a Cloudflare API token can't be limited to one
+    # Worker, so staging's token can deploy production's. It stops the accidents.
+    environment: ${{ inputs.environment || 'production' }}
+    env:
+      TARGET_ENV: ${{ inputs.environment || 'production' }}
+    steps:
+      - name: Refuse a production deploy from anything but main
+        if: ${{ env.TARGET_ENV == 'production' && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::Production deploys only from main; this run is on ${GITHUB_REF}. Pick 'staging' to try a branch."
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # wrangler and miniflare both require Node 22.
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Deploying is gated on the same suites ci.yml runs. Netlify never was — a red main
+      # deployed anyway (CLAUDE.md, "Deployment") — and there's no reason to keep that. It repeats
+      # ci.yml's run on a push, deliberately: a hand-run deploy of a branch has no ci.yml run to
+      # wait on, and one gate in one file is simpler than chaining workflows.
+      - name: Typecheck and test
+        run: npm run verify
+
+      # wrangler.jsonc's build.command runs `npm run build` first, so the SPA uploaded is always
+      # the one built from this commit. SENTRY_RELEASE tags server events with the commit they
+      # came from, which Netlify never did.
+      #
+      # **The build needs the values Netlify injects into its own builds.** Vite inlines every
+      # VITE_* variable into the bundle at build time, so a build without them ships a site whose
+      # sign-in says "Auth not configured" and whose browser errors go nowhere — with no build
+      # error. COMMIT_REF names the build (the Sentry release and /build-id.json, which is how an
+      # open tab learns it is stale); without it both read 'dev' and the refresh prompt never
+      # appears. SUPABASE_URL / SUPABASE_SERVICE_KEY give the sitemap its real lastmod dates;
+      # SENTRY_AUTH_TOKEN / SENTRY_ORG / SENTRY_PROJECT upload the source maps to the project
+      # Netlify's builds use (vite.config.ts falls back to 'unstream-web' without the last).
+      - name: Deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_SENTRY_ENV: ${{ env.TARGET_ENV }}
+          COMMIT_REF: ${{ github.sha }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          # Refuse rather than ship a silently broken site: nothing in the build checks these. The
+          # Sentry three are here too — without them the build only warns, and browser errors
+          # arrive minified and unreadable.
+          missing=""
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_SENTRY_DSN SUPABASE_URL SUPABASE_SERVICE_KEY \
+                      SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub secrets the build inlines or reads:$missing. Copy them from Netlify's Production context (Site configuration → Environment variables)."
+            exit 1
+          fi
+
+          if [ "$TARGET_ENV" = "staging" ]; then
+            npx wrangler deploy --env staging --var "SENTRY_RELEASE:${GITHUB_SHA}"
+          else
+            npx wrangler deploy --var "SENTRY_RELEASE:${GITHUB_SHA}"
+          fi

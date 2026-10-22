@@ -11,6 +11,8 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { isUrlHostnameAllowed } from './middleware';
+import { isProductionSite } from '../lib/production-site';
+import { Sentry } from '../lib/sentry';
 
 const STRIPE_API = 'https://api.stripe.com';
 /** Pinned so a Stripe-side default change can't alter behaviour under us. */
@@ -18,12 +20,40 @@ export const STRIPE_API_VERSION = '2025-03-31.basil';
 
 export type StripeMode = 'test' | 'live';
 
-/** The mode of the configured key, or null when tips are switched off (no key). */
+/** Reported once per isolate, so a misconfigured deployment is one Sentry event, not one per request. */
+let reportedLiveKeyOffProduction = false;
+
+/**
+ * The mode of the configured key, or null when tips are switched off.
+ *
+ * **A live key on staging or `npm run dev` switches tips off.** Every caller already treats null
+ * as "tips are off", so this is the one place that can refuse a live key outright. Both share
+ * production Supabase, and a live key on either turns a "test" tip into a real charge on a real
+ * card, recorded as a live payment. The deploy checklist says to give staging a test key; this is
+ * what holds if someone copies Production's values instead, which is the natural reading of "the
+ * values Netlify holds".
+ *
+ * Netlify deploy previews are NOT covered: a preview's `URL` is the production address, so
+ * `isProductionSite()` can't tell it apart (api/lib/production-site.ts). A preview stays safe only
+ * because the Deploy Preview context holds a test key — never put the live key there.
+ */
 export function stripeMode(): StripeMode | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
   if (key.startsWith('sk_test_') || key.startsWith('rk_test_')) return 'test';
-  if (key.startsWith('sk_live_') || key.startsWith('rk_live_')) return 'live';
+  if (key.startsWith('sk_live_') || key.startsWith('rk_live_')) {
+    if (isProductionSite()) return 'live';
+    if (!reportedLiveKeyOffProduction) {
+      reportedLiveKeyOffProduction = true;
+      console.error(`[stripe] live key on ${process.env.URL ?? 'an unknown URL'}, not production — tips switched off`);
+      Sentry.captureMessage('[stripe] live Stripe key configured outside production; tips switched off', {
+        level: 'error',
+        tags: { stripe_guard: 'live-key-off-production' },
+        extra: { url: process.env.URL ?? null },
+      });
+    }
+    return null;
+  }
   return null;
 }
 

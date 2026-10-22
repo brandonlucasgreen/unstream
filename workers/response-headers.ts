@@ -7,6 +7,8 @@
 // static file never passes through here; `workers/__tests__/response-headers.test.ts` is what
 // keeps the two copies identical.
 
+import { isProductionSite } from '../api/lib/production-site.ts';
+
 /**
  * The site-wide Content-Security-Policy.
  *
@@ -33,17 +35,26 @@ const CONTENT_SECURITY_POLICY =
 /**
  * Apply the site-wide headers to a response the Worker generated.
  *
- * Only the CSP, and only here: static files are served without running the Worker, so their
+ * The CSP, and only here: static files are served without running the Worker, so their
  * headers — including `/sw.js` and `/build-id.json`, whose caching rules are load-bearing — come
  * from `apps/web/public/_headers` and never pass through this function. Repeating them here
  * would be dead code that looks like a safety net.
  *
+ * **Every hostname but the real site is `noindex`.** Staging (next.unstream.stream) and the
+ * Worker's workers.dev address serve production's data in full, so a search engine that found
+ * either would index a second copy of every artist and release page. Every HTML page passes
+ * through here — `html_handling: "none"` means no path but `/index.html` itself is answered as a
+ * static file — so this covers them all, and robots.txt stays `Allow` so crawlers can read it.
+ * Decided by the hostname asked for, not the `URL` var: before the cutover the production Worker
+ * says `URL=https://unstream.stream` while answering on workers.dev.
+ *
  * Returns a new Response rather than mutating: a Response from the static-asset binding has
  * immutable headers.
  */
-export function withSiteHeaders(response: Response): Response {
+export function withSiteHeaders(response: Response, requestOrigin: string): Response {
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
+  if (!isProductionSite(requestOrigin)) headers.set('X-Robots-Tag', 'noindex');
 
   return new Response(response.body, {
     status: response.status,

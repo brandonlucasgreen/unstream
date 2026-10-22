@@ -220,6 +220,10 @@ describe('status changes', () => {
 
 describe('Stripe mode', () => {
   it('ignores events from the other mode, before reading or writing anything', async () => {
+    // A live key only counts as live on the production site (stripeMode's guard), so this test
+    // has to say it is running there.
+    const savedUrl = process.env.URL;
+    process.env.URL = 'https://unstream.stream';
     process.env.STRIPE_SECRET_KEY = 'sk_live_abc';
     try {
       const res = await deliver(paidSession());
@@ -228,6 +232,8 @@ describe('Stripe mode', () => {
       expect(db.tables.tip_payments ?? []).toHaveLength(0);
     } finally {
       delete process.env.STRIPE_SECRET_KEY;
+      if (savedUrl === undefined) delete process.env.URL;
+      else process.env.URL = savedUrl;
     }
   });
 });

@@ -32,7 +32,7 @@ function headerFromFile(section: string, name: string): string | undefined {
 }
 
 function workerHeader(name: string): string | null {
-  return withSiteHeaders(new Response('x')).headers.get(name);
+  return withSiteHeaders(new Response('x'), 'https://unstream.stream').headers.get(name);
 }
 
 describe('the Worker and _headers agree on the CSP', () => {
@@ -83,7 +83,7 @@ describe('withSiteHeaders', () => {
       headers: { 'Content-Type': 'application/json', 'X-Request-Id': 'abc' },
     });
 
-    const result = withSiteHeaders(original);
+    const result = withSiteHeaders(original, 'https://unstream.stream');
 
     expect(result.status).toBe(201);
     expect(result.headers.get('x-request-id')).toBe('abc');
@@ -93,6 +93,22 @@ describe('withSiteHeaders', () => {
   it('works on a response whose headers are immutable', () => {
     // A response from the static-asset binding has immutable headers, so this must not mutate.
     const immutable = Response.redirect('https://unstream.stream/support', 301);
-    expect(() => withSiteHeaders(immutable)).not.toThrow();
+    expect(() => withSiteHeaders(immutable, 'https://unstream.stream')).not.toThrow();
+  });
+});
+
+describe('only the real site is indexable', () => {
+  // Staging and workers.dev serve production's data in full; indexed, they would be a second copy
+  // of every artist and release page.
+  it.each([
+    ['staging', 'https://next.unstream.stream'],
+    ['the workers.dev address', 'https://unstream.example.workers.dev'],
+    ['wrangler dev', 'http://localhost:8787'],
+  ])('marks %s noindex', (_where, origin) => {
+    expect(withSiteHeaders(new Response('x'), origin).headers.get('X-Robots-Tag')).toBe('noindex');
+  });
+
+  it('leaves unstream.stream indexable', () => {
+    expect(withSiteHeaders(new Response('x'), 'https://unstream.stream').headers.get('X-Robots-Tag')).toBeNull();
   });
 });
