@@ -12,6 +12,14 @@
   "compatibility_date": "2026-10-18",
   "compatibility_flags": ["nodejs_compat"],
 
+  // **Every deploy builds the site first.** `assets.directory` below is apps/web/dist, which is
+  // gitignored and only refreshed by `npm run build` — so without this, `wrangler deploy` uploads
+  // whatever dist a machine last built, with no error. A checkout last built weeks ago would ship
+  // that weeks-old bundle, sitemap and feeds to production; a fresh clone with no dist fails.
+  // Wrangler runs this before every deploy, so a bare `wrangler deploy` is as safe as the npm
+  // script. It is the same `npm run build` Netlify runs: generators, typecheck, then Vite.
+  "build": { "command": "npm run build" },
+
   // The built SPA. Requests that match a file here are served without running the Worker, which
   // is both faster and free, so index.html, /assets/* and the PWA files never touch the code.
   // Their headers come from apps/web/public/_headers for that reason — see workers/response-headers.ts.
@@ -82,12 +90,19 @@
   // happens to the existing A records pointing at Netlify is undocumented.
   //
   // So a plain `wrangler deploy` lands on the Worker's workers.dev address, where it serves no
-  // real traffic, and the cutover is a separate, reviewed change that adds these two routes:
+  // real traffic, and the cutover is a separate, reviewed change that adds this one route:
   //
-  //   { "pattern": "unstream.stream", "custom_domain": true },
-  //   { "pattern": "www.unstream.stream", "custom_domain": true }
+  //   { "pattern": "unstream.stream", "custom_domain": true }
   //
   // That change is the point of no easy return for DNS. It should be its own PR.
+  //
+  // **Not www.** Today Netlify answers www.unstream.stream with a 301 to the apex. The Worker has
+  // no such redirect, so making www a Worker custom domain would serve the whole site a second
+  // time on www — duplicate pages for search engines, and a separate browser origin, so a fan who
+  // lands there isn't signed in. www gets a Cloudflare Single Redirect rule instead (the same shape
+  // the three spare domains already use), which runs at the edge before any Worker or static
+  // asset, so it covers every path — including the static files a Worker-side redirect would
+  // never see, since those are served without running the Worker.
   "routes": [],
 
   // The server-rendered pages in api/edge/ still run on Netlify's edge too, for as long as that
@@ -152,13 +167,19 @@
             "queue": "unstream-background-staging",
             "max_batch_size": 1,
             "max_concurrency": 1,
-            "max_retries": 3
+            "max_retries": 3,
+            // Its own, so a message that keeps failing during a staging test is kept to read
+            // rather than dropped after three tries — and never mixed into production's.
+            "dead_letter_queue": "unstream-background-staging-dlq"
           }
         ]
       },
       "vars": {
         "URL": "https://next.unstream.stream",
-        "SITE_NAME": "unstream"
+        "SITE_NAME": "unstream",
+        // Explicit, because the URL-derived fallback would call this "development" — and an error
+        // on staging is neither a laptop nor production.
+        "SENTRY_ENV": "staging"
       }
     }
   }

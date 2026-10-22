@@ -16,7 +16,8 @@
 //        spa           → the SPA shell
 //   3. the SPA shell, if nothing matched at all.
 //
-// Everything that leaves here goes through `withSiteHeaders`, which applies the site CSP.
+// Everything that leaves here goes through `withSiteHeaders`, which applies the site CSP and,
+// on any hostname but unstream.stream, keeps search engines from indexing the page.
 // Static files get their headers from apps/web/public/_headers instead, because Workers serves
 // them without running the Worker at all — see workers/response-headers.ts.
 
@@ -24,6 +25,7 @@ import * as Sentry from '@sentry/cloudflare';
 
 import { withBackgroundDispatcher, type BackgroundDispatcher } from '../api/lib/background.ts';
 import { sentryOptions } from '../api/lib/sentry.ts';
+import { isProductionSite } from '../api/lib/production-site.ts';
 import { toFunctionEvent, toResponse, type FunctionEvent } from './function-adapter.ts';
 import { FUNCTION_HANDLERS } from './function-handlers.ts';
 import { EDGE_RENDERERS } from './edge-renderers.ts';
@@ -48,9 +50,6 @@ import { withSiteHeaders } from './response-headers.ts';
  */
 const LEGACY_FUNCTION_PREFIX = '/.netlify/functions/';
 
-/** The one `URL` value that means "this is the real site", as api/lib/sentry.ts also reads it. */
-const PRODUCTION_SITE_URL = 'https://unstream.stream';
-
 /**
  * Why scheduled work must not run here, or null when it may.
  *
@@ -71,7 +70,7 @@ function scheduledWorkRefusal(): string | null {
   if (process.env.SCHEDULED_JOBS_ENABLED !== 'true') {
     return 'SCHEDULED_JOBS_ENABLED is not "true" — this is not the production Worker';
   }
-  if (process.env.URL !== PRODUCTION_SITE_URL) {
+  if (!isProductionSite()) {
     return `URL is ${process.env.URL ?? 'unset'}, not production`;
   }
   return null;
@@ -260,13 +259,13 @@ export default Sentry.withSentry(sentryOptions, {
     // that out. Adding a static file under one of these would need this list revisited.
     if ((request.method === 'GET' || request.method === 'HEAD') && !isNeverAnAsset(url.pathname)) {
       const asset = await env.ASSETS.fetch(request);
-      if (asset.status !== 404) return withSiteHeaders(asset);
+      if (asset.status !== 404) return withSiteHeaders(asset, url.origin);
     }
 
     const response = await withBackgroundDispatcher(backgroundDispatcher(env), () =>
       route(request, env, ctx),
     );
-    return withSiteHeaders(response);
+    return withSiteHeaders(response, url.origin);
   },
 
   /**

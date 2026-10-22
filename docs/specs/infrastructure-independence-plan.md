@@ -364,79 +364,162 @@ before the cutover — edit an artist, then confirm their release page re-render
 
 ### What Brandon has to do
 
-Phase 1 is on `main` and deployed to Netlify; nothing has been deployed to Cloudflare. The order
-below is chosen so that **no step before the last one can affect production**, and so that the
-last one is a reviewed change rather than a command.
+Phase 1 is on `main` and running on Netlify; nothing has been deployed to Cloudflare. The order
+below is chosen so that **no step before the last one can affect what fans see or what production
+data says**, and so that the last step is a reviewed, merged PR rather than a command someone runs.
 
-**Why the order matters (corrected 2026-10-21).** A Worker route with `custom_domain: true` claims
-its hostname on deploy, and wrangler's `routes` key is *inherited* by named environments. As first
-written, `wrangler.jsonc` listed `unstream.stream` at the top level, which meant the first
-`wrangler deploy` *was* the cutover, and step 5 of this checklist — `wrangler deploy --env staging`
-— would have reassigned the production domain to the staging Worker. Wrangler said so itself, as a
-warning: "Deploying this environment will reassign these custom domains away from the top-level
-Worker." What happens to the existing A records pointing at Netlify is undocumented. The fix is
-that the production hostname now appears nowhere in the config until the cutover PR adds it, and a
-test fails if it comes back.
+**Two corrections this order is built around (2026-10-21).**
 
-**Before anything is deployed**
+- *Routes are inherited.* A Worker route claims its hostname on deploy, and wrangler's `routes`
+  key is inherited by named environments. When `unstream.stream` was listed at the top level of
+  `wrangler.jsonc`, the first deploy *was* the cutover, and `wrangler deploy --env staging` would
+  have reassigned the production domain to the staging Worker — wrangler said so, but only as a
+  warning. Now no config names the production hostname until the cutover PR adds it, and a test
+  fails if any form of route points at it.
+- *A code review found six more launch blockers in the first rewrite of this list:* staging could
+  be given the live Stripe key; `wrangler deploy` didn't build the site; www would have stopped
+  redirecting; nothing would deploy the Worker after cutover; the scheduled jobs were switched on
+  days early; and a staging step asked for a catalogue crawl that CLAUDE.md forbids. Each is fixed
+  in code where it can be, and below where it can't.
+
+#### The secrets
+
+Set with `wrangler secret bulk <file.json>` (add `--env staging` for staging) from a JSON file kept
+**outside the repository**, deleted afterwards — or one at a time with `npx wrangler secret put
+<NAME>`. Staging and production are separate Workers (`unstream-staging` and `unstream`) with
+separate secret stores.
+
+**Every one of these must be a Secret, never a plain-text Variable — the two flags above all.**
+`wrangler deploy` replaces the Worker's plain-text variables with `wrangler.jsonc`'s `vars` and
+carries forward only secrets, so anything added in the dashboard as a "Text" variable is deleted by
+the next deploy — and from step 8 on, every merge is a deploy. `SCHEDULED_JOBS_ENABLED` lost that
+way stops the sweep and the tips notifier with no error. If you use the dashboard, choose the
+*Secret* type.
+
+| Secret | Production Worker | Staging Worker |
+|---|---|---|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, `SUPABASE_JWT_SECRET` | Netlify's values | **Same** — staging uses production's database |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Netlify's values | Same |
+| `INTERNAL_FUNCTION_SECRET`, `SESSION_HASH_SECRET` | Netlify's values | Same |
+| `BANDCAMP_CREDENTIAL_KEY` | Netlify's value | **Same — must be.** It decrypts the stored Bandcamp credentials; a different key can't read them |
+| `SENTRY_DSN`, `ADMIN_EMAIL`, `ALLOWED_API_EMAILS`, `MIRLO_API_KEY`, `ALGOLIA_APP_ID`, `ALGOLIA_API_KEY` | Netlify's values | Same |
+| `RESEND_API_KEY`, `BUTTONDOWN_API_KEY` | Netlify's values | Same — and, like `npm run dev`, staging can then send real email |
+| `NTFY_SERVER_URL`, `NTFY_TOKEN`, `NTFY_TOPIC` | Netlify's values | Omit — only the scheduled tips notifier uses them, and staging runs no schedules |
+| `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN` | From step 2 | Same — an edit made on staging changes production data, so it should purge production's cache |
+| `NETLIFY_SITE_ID`, `NETLIFY_API_TOKEN` | Netlify's values, **until Netlify is retired** — both CDNs are purged while both can serve | Same |
+| **`STRIPE_SECRET_KEY`, `STRIPE_CONNECT_WEBHOOK_SECRET`** | Netlify's **Production** context — the live key | **Netlify's Deploy Preview context — the `sk_test_` key, never the live one.** A live key on staging turns a test tip into a real charge. The code now refuses one anyway (`stripeMode()` switches tips off for a live key outside production), but don't rely on the safety net |
+| **`RELEASE_CATALOG_ENABLED`** | `true` | **Omit.** CLAUDE.md: anything sharing production Supabase writes real catalogue rows and spends the real crawl budget |
+| **`SCHEDULED_JOBS_ENABLED`** | `true` — **only at step 12**, not before | **Never** |
+| `URL`, `SITE_NAME`, `SENTRY_ENV` | Set by `wrangler.jsonc` — don't add | Set by `wrangler.jsonc` — don't add |
+| `SENTRY_RELEASE` | Set per deploy by the workflow — don't add | Same |
+| `CONTEXT`, `COMMIT_REF`, `COMMIT_SHA`, `SITE_ID`, `NODE_ENV` | Netlify-only; don't add | Don't add |
+
+If `wrangler secret bulk` says the Worker doesn't exist yet, deploy it first (the workflow, by
+hand) and set the secrets straight after — both Workers are on hostnames no fan uses until step 11.
+
+#### Before anything is deployed
 
 1. **Enable Workers Paid** ($5/month) on the Cloudflare account that holds the DNS zone.
 2. **Make a Cache Purge API token** scoped to the `unstream.stream` zone, and note the zone id.
-   These become `CLOUDFLARE_PURGE_TOKEN` and `CLOUDFLARE_ZONE_ID`, which turn purging on.
-3. **Create the three queues** — `unstream-background`, `unstream-background-dlq` and
-   `unstream-background-staging`. A queue consumer with no queue behind it fails the deploy. (The
-   first version of this list named two; staging has its own so it can never take a message meant
-   for production.)
+3. **Create the four queues** — `unstream-background`, `unstream-background-dlq`,
+   `unstream-background-staging` and `unstream-background-staging-dlq`. A queue consumer with no
+   queue behind it fails the deploy.
+4. **Move www's redirect to Cloudflare.** Create a Single Redirect rule for `www.unstream.stream`
+   → `https://unstream.stream` + the same path, preserving the query string, 301 — the same rule the
+   three spare domains already use. Safe to do now: today Netlify answers www with that exact
+   redirect, so nothing a visitor sees changes, and it stops depending on Netlify before the
+   cutover rather than after. Check: `curl -I https://www.unstream.stream/foo?x=1` →
+   `301 location: https://unstream.stream/foo?x=1`, now without an `x-nf-request-id` header.
+5. **Allow staging's sign-in.** In Supabase → Authentication → URL Configuration, add
+   `https://next.unstream.stream/**` to the redirect URLs. Without it a magic link sent from
+   staging lands you signed in on *production*, and step 7's sign-in check would pass while testing
+   the wrong site.
 
-**Staging — `next.unstream.stream`**
+#### Staging — `next.unstream.stream`
 
-4. **Set staging's secrets**, then `wrangler deploy --env staging`. It is a *separate Worker*
-   (`unstream-staging`) with its own secret store, so it needs its own full copy: the values
-   Netlify holds, minus the build-time ones that never reached a function (`CONTEXT`,
-   `COMMIT_REF`, `COMMIT_SHA`), plus the two from step 2. **Do not set `SCHEDULED_JOBS_ENABLED`
-   here** — staging shares production's Supabase, so a sweep on staging writes real rows.
-5. **Walk 1e's checklist on staging** against real data: sign-in, a save, a tip in test mode, a
-   catalogue crawl through the queue, and the purge-by-tag check (load a release page twice for a
-   `cf-cache-status: HIT`, edit that artist, confirm it re-renders). These are the paths no local
-   run can exercise.
+6. **Give GitHub what the build needs, set staging's secrets, then deploy staging from GitHub.**
+   In GitHub → Settings → Secrets and variables → Actions, add these repository secrets:
+   `CLOUDFLARE_API_TOKEN` (Cloudflare's "Edit Cloudflare Workers" token template) and
+   `CLOUDFLARE_ACCOUNT_ID`; and, copied from Netlify's Production context, `VITE_SUPABASE_URL`,
+   `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`,
+   `SENTRY_AUTH_TOKEN` and `SENTRY_ORG`. The build runs on GitHub, so it has none of the values
+   Netlify injects into its own builds; Vite inlines the `VITE_*` ones into the bundle, and a build
+   without them succeeds and ships a site whose sign-in says "Auth not configured". The workflow
+   refuses to deploy when one is missing. Then set staging's Worker secrets (the table above) and
+   run the *Deploy Worker* workflow by hand with `environment: staging`. **Not `wrangler deploy`
+   from a laptop:** a local build reads your `.env`, so it would pass step 7 while hiding a missing
+   GitHub secret that production's build would then ship without.
+7. **Walk 1e's checklist on staging**, against real data:
+   - sign in, save an artist, unsave it;
+   - a tip with Stripe's test card `4242 4242 4242 4242` — it should appear as a *test* payment in
+     Stripe's dashboard, never a live one;
+   - **the queue:** re-sync your own Bandcamp collection in `/settings`. That enqueues
+     `bandcamp-sync-background`, so it exercises the queue end to end with a write that is
+     legitimately yours, and you can watch the message arrive and be acknowledged on the queue's
+     page in the Cloudflare dashboard. *Catalogue crawls are not tested here* — they need
+     `RELEASE_CATALOG_ENABLED`, which staging must not have; they are checked after the cutover;
+   - the purge-by-tag check: load a release page twice for `cf-cache-status: HIT`, edit that
+     artist, confirm it re-renders rather than serving the old copy;
+   - **not indexable:** `curl -sI https://next.unstream.stream/ | grep -i x-robots-tag` →
+     `noindex`. Staging serves production's data, and indexed it would duplicate every page.
 
-**The production Worker, not yet serving**
+#### The production Worker, not yet serving
 
-6. **Set production's secrets**, then `wrangler deploy` (no `--env`). With no custom domain in the
-   config this lands on the Worker's `workers.dev` address and serves no real traffic. Set
-   `SCHEDULED_JOBS_ENABLED=true` on **this Worker only**. Its Cron Triggers start firing now, but
-   the Worker is only reachable on `workers.dev`, so nothing user-facing is affected — and the
-   sweep is idempotent (`claimArtistForCatalog`'s cooldown), so running alongside the GitHub
-   workflow for a while costs nothing.
+8. **Turn on automatic deploys.** In GitHub → Settings → Secrets and variables → Actions, set the
+   **variable** `WORKER_DEPLOY_ENABLED` to `true` (the secrets are already there from step 6). From
+   here every merge to `main` deploys the production Worker, after `npm run verify` passes. A
+   production deploy only ever runs from `main`; the workflow refuses one from any other branch.
+9. **Set production's secrets** — everything in the table except `SCHEDULED_JOBS_ENABLED`, as
+   Secrets — and run the workflow by hand once, from `main`. With no production hostname in the config it lands on the Worker's
+   `workers.dev` address and serves no real traffic. Check it there: an artist page, a crawler
+   render, `/api/v1/status`.
 
-**The cutover — one PR**
+#### The cutover — one PR, deployed by merging it
 
-7. **Write down the current DNS records** for `unstream.stream` and `www.unstream.stream` —
-   export them from the Cloudflare dashboard, or screenshot them. Their *content* (the Netlify
-   origin behind the proxy) isn't visible from outside, because a proxied lookup only returns
-   Cloudflare's own addresses. Rollback depends on them, and what adding a Custom Domain does to
-   existing A records is undocumented.
-8. **Open the cutover PR**, containing exactly two things, which must land together:
-   - the two routes in `wrangler.jsonc`, `unstream.stream` and `www.unstream.stream` with
-     `custom_domain: true` (the comment above `routes` has them verbatim);
-   - the deletion of `recatalog-sweep.yml` and `tips-review-notify.yml`.
+10. **Write down the current DNS record** for `unstream.stream` — export it from the Cloudflare
+    dashboard or screenshot it. Its content (the Netlify origin behind the proxy) isn't visible from
+    outside, because a proxied lookup returns only Cloudflare's addresses, and rollback depends on
+    it.
+11. **Open the cutover PR**, containing exactly two things:
+    - the one route in `wrangler.jsonc`, `{ "pattern": "unstream.stream", "custom_domain": true }`
+      (the comment above `routes` has it verbatim — the apex only; www is step 4's redirect);
+    - the deletion of `recatalog-sweep.yml` and `tips-review-notify.yml`.
 
-   Together because they are two halves of one switch: with the routes and without the deletions,
-   each job runs twice; with the deletions and without the routes, neither scheduler runs.
-9. **Run `wrangler deploy` from that branch first, then merge it.** Deploying first means there is
-   never a moment with no scheduler — briefly both run, which is harmless — whereas merging first
-   would leave a gap. The deploy is the moment `unstream.stream` moves.
-10. **Rollback** is removing the two routes and deploying, then recreating the records from step 7.
-    Removing a Custom Domain deletes the record Cloudflare made for it; it does not bring back
-    whatever was there before. Keep the Netlify site for two weeks so there is something to point
-    them at.
+    They are two halves of one switch: with the route and without the deletions each job runs
+    twice; with the deletions and without the route, neither scheduler runs.
+12. **Set `SCHEDULED_JOBS_ENABLED=true` on the production Worker as a Secret
+    (`npx wrangler secret put SCHEDULED_JOBS_ENABLED`, then type `true`), then merge.** A plain-text
+    dashboard Variable would be wiped by the very deploy this merge triggers. The workflow
+    deploys within a few minutes of the merge, and that deploy is the moment `unstream.stream`
+    moves. Setting the flag just beforehand means the two schedulers overlap for minutes rather
+    than leaving a gap — harmless at these cadences, since the sweep is cooldown-protected. The
+    tips notifier could double-send in that window; that is the cost of the overlap, and it is
+    minutes, not the days it would have been.
 
-**After the cutover**
+    If the deploy fails with a permissions error, the API token from step 8 also needs
+    *Zone → DNS → Edit* on `unstream.stream`: a custom domain writes a DNS record, and this is the
+    first deploy that creates one.
 
-- Watch Sentry for the *absence* of events as much as for new ones; silence and health look alike.
-- Watch Supabase I/O for a step change. On Netlify the `CDN-Cache-Control` rename is proven —
-  `cache-status: hit; ttl=86400` on production — but on the Worker caching goes through the Cache
-  API instead, which is a different mechanism.
+**Rollback**
+
+13. In the Cloudflare dashboard, remove the `unstream.stream` custom domain from the `unstream`
+    Worker (Settings → Domains & Routes), recreate the record from step 10, and delete
+    `SCHEDULED_JOBS_ENABLED` from the Worker (`npx wrangler secret delete SCHEDULED_JOBS_ENABLED`). Then revert the cutover PR, which brings the two
+    workflows back so Netlify resumes the schedules. Do the dashboard steps explicitly rather than
+    relying on a redeploy: removing a custom domain deletes the record Cloudflare made, and does
+    not restore what was there. Keep the Netlify site for two weeks so there is something to point
+    the record back at.
+
+#### After the cutover
+
+- **Catalogue crawls:** within twelve hours the Cron sweep should produce `release_catalog_state`
+  rows with `last_trigger = 'scheduled'` and a recent `last_attempted_at`, and the queue's page
+  should show messages consumed. Nothing new there after a day means the scheduled path is broken.
+- **Sentry:** watch for the *absence* of events as much as new ones; silence and health look alike.
+  Events should now carry `environment: production` and a `release` matching the deployed commit.
+- **Supabase I/O:** on Netlify the `CDN-Cache-Control` rename is proven
+  (`cache-status: hit; ttl=86400`); on the Worker caching goes through the Cache API instead, a
+  different mechanism. A step change upward means it isn't caching.
 
 **Optional and independent: 1f.** Pointing the Mac app and extension at an
 `unstream.stream/auth/v1/*` proxy only matters for the later database move, and needs a client

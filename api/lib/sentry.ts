@@ -31,8 +31,7 @@
  */
 
 import * as SentrySDK from '@sentry/node';
-
-const PRODUCTION_SITE_URL = 'https://unstream.stream';
+import { isProductionSite } from './production-site';
 
 /**
  * Which environment to tag events with.
@@ -50,8 +49,7 @@ export function resolveSentryEnvironment(): string {
   const explicit = process.env.SENTRY_ENV;
   if (explicit) return explicit;
 
-  const siteUrl = process.env.URL?.replace(/\/$/, '');
-  return siteUrl === PRODUCTION_SITE_URL ? 'production' : 'development';
+  return isProductionSite() ? 'production' : 'development';
 }
 
 /**

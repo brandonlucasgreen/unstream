@@ -46,6 +46,16 @@ describe('the queue is wired end to end', () => {
   it('sends failures somewhere visible rather than dropping them', () => {
     expect((queues.consumers[0] as { dead_letter_queue?: string }).dead_letter_queue).toBeTruthy();
   });
+
+  it('gives every named environment its own dead-letter queue too', () => {
+    // `queues` isn't inherited, so an environment that restates its consumer can silently lose
+    // the dead-letter queue — and production's must not collect another environment's failures.
+    for (const [name, env] of Object.entries(wrangler.env as Record<string, { queues: typeof queues }>)) {
+      const dlq = (env.queues.consumers[0] as { dead_letter_queue?: string }).dead_letter_queue;
+      expect(dlq, `env.${name}`).toBeTruthy();
+      expect(dlq, `env.${name}`).not.toBe((queues.consumers[0] as { dead_letter_queue?: string }).dead_letter_queue);
+    }
+  });
 });
 
 describe('every cron has a function, and every function a file', () => {
@@ -84,7 +94,8 @@ describe('scheduled work is fail-closed', () => {
   });
 
   it('also checks the production URL, for a staging deploy handed the variable by accident', () => {
-    expect(workerSource).toContain('PRODUCTION_SITE_URL');
+    // The same check stripe.ts and sentry.ts use, so the three gates can't disagree.
+    expect(workerSource).toContain('isProductionSite()');
   });
 
   it('says which gate stopped it rather than skipping quietly', () => {
@@ -146,39 +157,85 @@ describe('parseBackgroundMessage', () => {
 
 describe('no deploy can take over the production domain by accident', () => {
   /**
-   * A route with `custom_domain: true` claims its hostname on deploy, and `routes` is *inherited*
-   * by every named environment. With unstream.stream at the top level, the first `wrangler
-   * deploy` was the cutover, and `wrangler deploy --env staging` would have reassigned the
-   * production domain to the staging Worker. Wrangler says so — "Deploying this environment will
-   * reassign these custom domains away from the top-level Worker" — but only as a warning.
+   * A route claims live traffic on deploy, and `routes` is *inherited* by every named environment.
+   * With unstream.stream at the top level, the first `wrangler deploy` was the cutover, and
+   * `wrangler deploy --env staging` would have reassigned the production domain to the staging
+   * Worker. Wrangler says so — "Deploying this environment will reassign these custom domains
+   * away from the top-level Worker" — but only as a warning.
    *
    * So the production hostname appears nowhere until a reviewed cutover change adds it.
+   *
+   * Every form of routing counts, not just custom domains: wrangler also takes a singular `route`
+   * key, plain-string routes, and zone routes (`pattern` + `zone_name`) on the existing proxied
+   * hostname — each sends production traffic to the Worker just as surely. A guard that checked
+   * only `custom_domain: true` objects let all of those through.
    */
   const PRODUCTION_HOSTS = ['unstream.stream', 'www.unstream.stream'];
-  const routesOf = (config: Record<string, unknown>) =>
-    ((config.routes ?? []) as { pattern: string; custom_domain?: boolean }[]);
+  type RouteEntry = string | { pattern?: string; custom_domain?: boolean; zone_name?: string };
 
-  it('claims no custom domain at the top level, so a plain deploy lands on workers.dev', () => {
-    const claimed = routesOf(wrangler).filter((r) => r.custom_domain).map((r) => r.pattern);
-    expect(claimed).toEqual([]);
+  /** Every route a config declares, whichever key or shape it used. */
+  const routeEntries = (config: Record<string, unknown>): RouteEntry[] => {
+    const entries: RouteEntry[] = [];
+    if (config.route !== undefined) entries.push(config.route as RouteEntry);
+    for (const entry of (config.routes ?? []) as RouteEntry[]) entries.push(entry);
+    return entries;
+  };
+
+  /**
+   * The hostname a route pattern matches: `*unstream.stream/*` and `*.unstream.stream/*` count too.
+   * A pattern with no hostname of its own (a bare wildcard) matches everything in its zone, so the
+   * zone is the hostname it claims.
+   */
+  const hostOf = (entry: RouteEntry): string => {
+    const pattern = typeof entry === 'string' ? entry : (entry.pattern ?? '');
+    const host = pattern.replace(/^\*\.?/, '').split('/')[0];
+    if (host === '' && typeof entry !== 'string' && entry.zone_name) return entry.zone_name;
+    return host;
+  };
+
+  const claimsProduction = (config: Record<string, unknown>) =>
+    routeEntries(config).map(hostOf).filter((host) => PRODUCTION_HOSTS.includes(host));
+
+  it('claims nothing at the top level, so a plain deploy lands on workers.dev', () => {
+    expect(routeEntries(wrangler)).toEqual([]);
   });
 
-  it('gives every named environment its own routes, so none inherits a domain it should not have', () => {
+  it('gives every named environment its own routes, so none inherits one it should not have', () => {
     for (const [name, env] of Object.entries(wrangler.env as Record<string, Record<string, unknown>>)) {
-      expect(env.routes, `env.${name} must declare its routes`).toBeDefined();
+      expect(env.routes ?? env.route, `env.${name} must declare its routes`).toBeDefined();
     }
   });
 
-  it('never points a named environment at the production hostname', () => {
+  it('never points a named environment at the production hostname, in any route form', () => {
     for (const [name, env] of Object.entries(wrangler.env as Record<string, Record<string, unknown>>)) {
-      for (const route of routesOf(env)) {
-        expect(PRODUCTION_HOSTS, `env.${name} claims ${route.pattern}`).not.toContain(route.pattern);
-      }
+      expect(claimsProduction(env), `env.${name}`).toEqual([]);
     }
   });
 
   it('puts staging on its own hostname on the zone, where caching and purge can be tested', () => {
     const staging = (wrangler.env as Record<string, Record<string, unknown>>).staging;
-    expect(routesOf(staging)).toEqual([{ pattern: 'next.unstream.stream', custom_domain: true }]);
+    expect(routeEntries(staging)).toEqual([{ pattern: 'next.unstream.stream', custom_domain: true }]);
+  });
+
+  describe('the guard itself recognises every way of routing production', () => {
+    // Checked against hand-built configs, so a future edit to hostOf/routeEntries can't quietly
+    // weaken the assertions above.
+    it.each([
+      ['a custom domain', { routes: [{ pattern: 'unstream.stream', custom_domain: true }] }],
+      ['a zone route', { routes: [{ pattern: 'unstream.stream/*', zone_name: 'unstream.stream' }] }],
+      ['a string route', { routes: ['unstream.stream/*'] }],
+      ['a leading-wildcard route', { routes: ['*unstream.stream/*'] }],
+      ['a subdomain wildcard', { routes: ['*.unstream.stream/*'] }],
+      ['a zone-wide catch-all', { routes: [{ pattern: '*/*', zone_name: 'unstream.stream' }] }],
+      ['the singular `route` key', { route: 'unstream.stream/*' }],
+      ['www', { routes: [{ pattern: 'www.unstream.stream', custom_domain: true }] }],
+    ])('flags %s', (_label, config) => {
+      expect(claimsProduction(config as Record<string, unknown>)).not.toEqual([]);
+    });
+
+    it('does not flag the staging hostname', () => {
+      expect(claimsProduction({ routes: [{ pattern: 'next.unstream.stream', custom_domain: true }] })).toEqual([]);
+      expect(claimsProduction({ routes: [{ pattern: 'next.unstream.stream/*', zone_name: 'unstream.stream' }] })).toEqual([]);
+    });
   });
 });
