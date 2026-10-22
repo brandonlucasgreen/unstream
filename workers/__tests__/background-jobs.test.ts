@@ -50,10 +50,12 @@ describe('the queue is wired end to end', () => {
   it('gives every named environment its own dead-letter queue too', () => {
     // `queues` isn't inherited, so an environment that restates its consumer can silently lose
     // the dead-letter queue — and production's must not collect another environment's failures.
-    for (const [name, env] of Object.entries(wrangler.env as Record<string, { queues: typeof queues }>)) {
-      const dlq = (env.queues.consumers[0] as { dead_letter_queue?: string }).dead_letter_queue;
-      expect(dlq, `env.${name}`).toBeTruthy();
-      expect(dlq, `env.${name}`).not.toBe((queues.consumers[0] as { dead_letter_queue?: string }).dead_letter_queue);
+    type Consumer = { dead_letter_queue?: string };
+    const productionDlq = (queues.consumers[0] as Consumer).dead_letter_queue;
+    for (const [name, env] of Object.entries(wrangler.env as Record<string, { queues?: { consumers?: Consumer[] } }>)) {
+      const dlq = env.queues?.consumers?.[0]?.dead_letter_queue;
+      expect(dlq, `env.${name} must declare its own dead-letter queue`).toBeTruthy();
+      expect(dlq, `env.${name} must not share production's dead-letter queue`).not.toBe(productionDlq);
     }
   });
 });

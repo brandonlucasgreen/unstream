@@ -363,7 +363,8 @@ anything under `api/edge/`.
   `.github/workflows/deploy-worker.yml` deploys on every push to main once the repository
   variable `WORKER_DEPLOY_ENABLED` is `"true"`, after `npm run verify` passes — without it,
   nothing would deploy the Worker after the cutover and every merge would silently stop reaching
-  users. Production deploys only from main. **That build runs on GitHub, not Netlify, so it gets
+  users. Production deploys only from main — enforced by the GitHub `production` environment's
+  branch rule, since a hand-run uses the chosen branch's copy of the workflow. **That build runs on GitHub, not Netlify, so it gets
   none of Netlify's build-time env**: the `VITE_*` values Vite inlines (Supabase sign-in, the
   Sentry DSN), `COMMIT_REF` and the sitemap's Supabase read are passed in from GitHub secrets, and
   the workflow refuses to deploy if one is missing — a build without them succeeds and ships a
@@ -477,7 +478,7 @@ The root `vitest.config.ts` covers both trees so `npx vitest` works from the rep
 
 Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`; edge routes, `/api/*` redirects and headers/CSP live in `netlify.toml`.
 
-**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
+**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`, and the Worker's `workers/` and `wrangler.jsonc` (deployed by `deploy-worker.yml`, never by Netlify). **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
 
 **Deploy Previews are opt-in per push.** `[context.deploy-preview]` runs `scripts/netlify-ignore-preview.sh`, which cancels the preview unless the PR's head commit message contains `[preview]` — so by default a PR gets no preview URL and its Netlify checks don't run (configuration, not breakage). #451 turned them off because they ate the build allowance; add the marker only to the push you actually want to open on a phone or share. A preview runs the real functions against **production** Supabase, same as `npm run dev`. Without the marker, **`npm run dev` is the only way to exercise the real backend before merging.**
 

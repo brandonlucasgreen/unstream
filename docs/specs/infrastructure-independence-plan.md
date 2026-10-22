@@ -192,7 +192,11 @@ a prerequisite for the cutover" below for the two blockers that moved it.
 - `wrangler dev` replaces `netlify dev`, which removes the `netlify dev` traps from CLAUDE.md.
   Like now, it runs against production Supabase.
 - Every uploaded version gets a preview URL, so **per-PR previews come back without spending a
-  build allowance**.
+  build allowance**. **Upload them to the staging Worker (`wrangler versions upload --env
+  staging`), never the production one.** A version of the production Worker carries its
+  `URL=https://unstream.stream` and its live Stripe key, so `isProductionSite()` would call a PR's
+  unreviewed code production and let it take real payments — the same gap Netlify deploy previews
+  have. Staging's `URL` and test key keep a preview harmless.
 
 **1e. Cutover**
 
@@ -442,7 +446,13 @@ hand) and set the secrets straight after — both Workers are on hostnames no fa
    `CLOUDFLARE_API_TOKEN` (Cloudflare's "Edit Cloudflare Workers" token template) and
    `CLOUDFLARE_ACCOUNT_ID`; and, copied from Netlify's Production context, `VITE_SUPABASE_URL`,
    `VITE_SUPABASE_ANON_KEY`, `VITE_SENTRY_DSN`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`,
-   `SENTRY_AUTH_TOKEN` and `SENTRY_ORG`. The build runs on GitHub, so it has none of the values
+   `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT`. Then, in Settings → Environments,
+   create **`production`** with *Deployment branches and tags* set to **Selected branches: `main`**,
+   and **`staging`** with no rule. The workflow names one of the two on every run, and the
+   `production` rule is what stops a hand-run from another branch reaching unstream.stream — a
+   check GitHub makes before the job starts, which no branch's copy of the workflow can remove.
+   (GitHub creates an environment the first time a run names it, *without* that rule, so create
+   `production` before the first production run.) The build runs on GitHub, so it has none of the values
    Netlify injects into its own builds; Vite inlines the `VITE_*` ones into the bundle, and a build
    without them succeeds and ships a site whose sign-in says "Auth not configured". The workflow
    refuses to deploy when one is missing. Then set staging's Worker secrets (the table above) and

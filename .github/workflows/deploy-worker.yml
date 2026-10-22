@@ -49,12 +49,21 @@ jobs:
     # A typical run is a few minutes. The concurrency group above is never cancelled, so a hung
     # step would otherwise hold it for GitHub's six-hour default and block every deploy behind it.
     timeout-minutes: 30
+    # **Production deploys only from main, enforced twice.** A hand-run from another branch would
+    # put that branch on unstream.stream until the next merge quietly replaced it. A hand-run uses
+    # the workflow file *from the branch it runs on*, so a check written in this file is only as
+    # good as that branch's copy of it. The GitHub environment is the half no branch can edit: the
+    # `production` environment's deployment-branch rule (Settings → Environments) allows main only,
+    # and GitHub refuses the job before any step runs. The step below says the same thing in the
+    # run's log. Staging may be deployed from any branch; trying a branch out is what it is for.
+    #
+    # Not a wall against a deliberately edited branch: one that switches this to `staging` and
+    # deploys production anyway still can, because a Cloudflare API token can't be limited to one
+    # Worker, so staging's token can deploy production's. It stops the accidents.
+    environment: ${{ inputs.environment || 'production' }}
     env:
       TARGET_ENV: ${{ inputs.environment || 'production' }}
     steps:
-      # **Production deploys only from main.** A hand-run from another branch would put that
-      # branch on unstream.stream until the next merge quietly replaced it. Staging may be
-      # deployed from any branch; trying a branch out is what it is for.
       - name: Refuse a production deploy from anything but main
         if: ${{ env.TARGET_ENV == 'production' && github.ref != 'refs/heads/main' }}
         run: |
@@ -89,7 +98,8 @@ jobs:
       # error. COMMIT_REF names the build (the Sentry release and /build-id.json, which is how an
       # open tab learns it is stale); without it both read 'dev' and the refresh prompt never
       # appears. SUPABASE_URL / SUPABASE_SERVICE_KEY give the sitemap its real lastmod dates;
-      # SENTRY_AUTH_TOKEN / SENTRY_ORG upload the source maps.
+      # SENTRY_AUTH_TOKEN / SENTRY_ORG / SENTRY_PROJECT upload the source maps to the project
+      # Netlify's builds use (vite.config.ts falls back to 'unstream-web' without the last).
       - name: Deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -103,10 +113,14 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
-          # Refuse rather than ship a silently broken site: nothing in the build checks these.
+          # Refuse rather than ship a silently broken site: nothing in the build checks these. The
+          # Sentry three are here too — without them the build only warns, and browser errors
+          # arrive minified and unreadable.
           missing=""
-          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_SENTRY_DSN SUPABASE_URL SUPABASE_SERVICE_KEY; do
+          for name in VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY VITE_SENTRY_DSN SUPABASE_URL SUPABASE_SERVICE_KEY \
+                      SENTRY_AUTH_TOKEN SENTRY_ORG SENTRY_PROJECT; do
             if [ -z "${!name}" ]; then missing="$missing $name"; fi
           done
           if [ -n "$missing" ]; then
