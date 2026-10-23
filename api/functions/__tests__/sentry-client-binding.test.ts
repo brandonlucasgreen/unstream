@@ -1,15 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 
 /**
- * Netlify is production until the Cloudflare cutover, and the rollback path for two weeks after.
- * On that runtime `init()` is the only thing that binds a Sentry client — `@sentry/cloudflare`
- * has none, and creates its client per request inside `Sentry.withSentry`, which only runs in
- * the Worker.
+ * On Netlify's functions `init()` is the only thing that binds a Sentry client.
  *
- * An earlier revision of api/lib/sentry.ts imported `@sentry/cloudflare` directly, so off Workers
- * no client was ever bound: `captureException` queued into nothing and `flush()` returned false,
- * while `isSentryInitialized()` kept returning true because the DSN was set. Every server-side
- * event would have been dropped silently the day it merged — the same class as the 29-hour
+ * An earlier revision of api/lib/sentry.ts imported a different Sentry SDK, under which no client
+ * was ever bound: `captureException` queued into nothing and `flush()` returned false, while
+ * `isSentryInitialized()` kept returning true because the DSN was set. Every server-side event
+ * would have been dropped silently the day it merged — the same class as the 29-hour
  * release-alert outage that was reported as `environment: development`.
  *
  * This asserts the binding actually happens, which is the part that was wrong and the part no

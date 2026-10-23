@@ -6,8 +6,9 @@ not cut over (see "Where Phase 1 stands"). 1b was promoted from follow-up to pre
 2026-10-19 and built the same day. **Shelved (Brandon, 2026-10-23): Unstream stays on Netlify.** Bandcamp
 challenges every page request from a Cloudflare Worker (`bandcamp-from-workers.md`), so the cutover
 would cost Bandcamp discovery, card data and the catalogue. What to do if Netlify ends the legacy
-plan, or Bandcamp starts challenging Netlify, is in `hosting-contingency-plans.md`. Nothing below is
-scheduled.
+plan, or Bandcamp starts challenging Netlify, is in `hosting-contingency-plans.md`. The Worker code
+and its Cloudflare resources were removed the same day; they're in git history at `9dbb9376`.
+Nothing below is scheduled.
 **Scope:** everything around the database. Supabase stays for data and sign-in; the database is
 a later decision (see "Later").
 

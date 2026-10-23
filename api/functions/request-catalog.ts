@@ -11,7 +11,6 @@
 
 import type { CatalogTrigger } from './db';
 import { internalFunctionOrigin } from '../lib/internal-origin';
-import { dispatchBackgroundFunction } from '../lib/background';
 
 /** Matches MAX_ARTISTS_PER_RUN in catalog-artist-background.ts. */
 const MAX_ARTISTS_PER_REQUEST = 25;
@@ -73,12 +72,6 @@ export async function requestArtistCatalog(
     return false;
   }
 
-  const body = JSON.stringify({ artistIds: ids, trigger });
-
-  // On Workers the crawl runs in this invocation's waitUntil — no handshake to be challenged,
-  // and no configuration to be missing. See api/lib/background.ts.
-  if (await dispatchBackgroundFunction('catalog-artist-background', body)) return true;
-
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
 
   // The site's netlify.app host, never `URL`, which goes through Cloudflare (see
@@ -103,7 +96,7 @@ export async function requestArtistCatalog(
           'Content-Type': 'application/json',
           Authorization: `Bearer ${secret}`,
         },
-        body,
+        body: JSON.stringify({ artistIds: ids, trigger }),
         signal: controller.signal,
       });
       status = response.status;
@@ -157,11 +150,6 @@ export async function triggerCatalogNow(artistId: string): Promise<TriggerCatalo
       status: 503,
       error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).',
     };
-  }
-
-  // On Workers, straight into waitUntil — see requestArtistCatalog above.
-  if (await dispatchBackgroundFunction('catalog-artist-background', JSON.stringify({ artistIds: [artistId], trigger: 'saved' satisfies CatalogTrigger }))) {
-    return { ok: true };
   }
 
   const secret = process.env.INTERNAL_FUNCTION_SECRET;

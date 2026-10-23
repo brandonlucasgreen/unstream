@@ -483,17 +483,14 @@ export default async function handler(request: Request, context: Context) {
         // traffic. Artist edits don't wait for it — they purge (see purgeArtistCaches in
         // api/functions/artist-releases.ts).
         //
-        // This header does nothing on its own, on either platform, and that is worth saying
-        // plainly because it fails silently both times. Netlify caches an edge function's
-        // response only when the function opts in (`cache = "manual"` on its netlify.toml
-        // entry); a Worker's response is cached only when the Worker stores it (`cache: true`
-        // on this route, which turns on workers/edge-cache.ts). Until the Netlify line existed
-        // (2026-10-18) every hit queried Supabase while looking perfectly healthy.
+        // This header does nothing on its own, and that is worth saying plainly because it fails
+        // silently. Netlify caches an edge function's response only when the function opts in
+        // (`cache = "manual"` on its netlify.toml entry). Until that line existed (2026-10-18)
+        // every hit queried Supabase while looking perfectly healthy.
         //
-        // `CDN-Cache-Control` rather than `Netlify-CDN-Cache-Control`: both platforms honour the
-        // standard name, so one header serves whichever is live. The separate `Cache-Control`
-        // above is what the *browser* is told, and it stays short because prices are
-        // user-visible; the Worker keeps the two apart across a cache hit.
+        // `CDN-Cache-Control` rather than `Netlify-CDN-Cache-Control`: Netlify honours the
+        // standard name, and so do other CDNs. The separate `Cache-Control` above is what the
+        // *browser* is told, and it stays short because prices are user-visible.
         'CDN-Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
         // Two tags: the specific page, plus one shared by every release page of this artist.
         // Purging is by exact tag with no wildcards on both platforms, and an artist editing

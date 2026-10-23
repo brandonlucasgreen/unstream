@@ -156,34 +156,45 @@ Before committing:
    current prices then.
 3. Check that Cloudflare stays in front for DNS, CDN, the www redirect and cache purge.
 
-### What carries over from the shelved Cloudflare work
+### What to reuse from the removed Cloudflare Worker
 
-The Worker port was written so the handlers didn't change, and most of it isn't Cloudflare-specific:
-- **`workers/routes.ts`:** the whole routing table, already replacing `netlify.toml`'s redirects and
-  edge entries, with a parity test.
+The Worker port was removed on 2026-10-23, but it's in git history. The last commit on `main` with
+it intact is **`9dbb9376`**: `git show 9dbb9376:workers/routes.ts`. Most of it wasn't
+Cloudflare-specific:
+- **`workers/routes.ts`:** the whole routing table, replacing `netlify.toml`'s redirects and edge
+  entries, with a parity test (`workers/__tests__/routes.test.ts`).
 - **`workers/function-adapter.ts`:** turns a standard `Request` into the Lambda-style event the
   handlers take, and their result back into a `Response`. A Node server needs exactly this.
-- **`api/lib/background.ts`:** the dispatcher seam that let background jobs leave HTTP handshakes.
+- **`api/lib/background.ts`:** a dispatcher seam that let background jobs skip the HTTP handshake.
   On a Node host it becomes an in-process queue or a worker component.
-- **The edge renderers, `edgeEnv()`, the Supabase import alias:** the pages already run outside
-  Netlify's Deno runtime.
-- **`api/lib/production-site.ts`, `stripeMode()`'s live-key guard, the fail-closed scheduled-job
-  gate, and `scripts/copy-worker-secrets.mjs`'s write-only-secret handling.**
+- **`scripts/copy-worker-secrets.mjs`:** copies env values out of Netlify without displaying them,
+  and detects Netlify's write-only mask.
 
-What would be new: a small Node HTTP entrypoint over `routes.ts` and the adapter, a job runner for
-the background functions and the two schedules, and a deploy workflow.
+Still in the codebase, because they hold on Netlify too:
+- the edge renderers' `edgeEnv()` and their small `Context`;
+- `CDN-Cache-Control`;
+- `api/lib/production-site.ts` and `stripeMode()`'s live-key guard;
+- every function type-checking under strict mode.
+
+What a move would need on top: a small Node HTTP entrypoint over the routes and adapter, a job runner
+for the background functions and the two schedules, and a deploy workflow.
 
 ---
 
-## The Cloudflare pieces that exist now (2026-10-23)
+## Removed on 2026-10-23
 
-Deciding what to do with these is separate from the decision above.
+Brandon cancelled Workers Paid; the rest was deleted the same day:
+- **Cloudflare:** the `unstream-staging` Worker (next.unstream.stream, its custom domain and
+  secrets), the placeholder `unstream` Worker, and the four queues.
+- **GitHub:** the `production` and `staging` environments and the Worker-deploy secrets.
+- **The repo:** `workers/`, `wrangler.jsonc`, `deploy-worker.yml`, `scripts/copy-worker-secrets.mjs`,
+  `api/lib/background.ts`, the Cloudflare cache purge, `apps/web/public/_headers` (a duplicate of
+  netlify.toml's headers), and the `wrangler` and `@sentry/cloudflare` dependencies.
 
-| Piece | Cost now | Option |
-|---|---|---|
-| Workers Paid | $5 a month | Cancel; nothing on it serves fans |
-| Staging Worker `unstream-staging` on next.unstream.stream, with its secrets | Free once Paid is cancelled | Leave (useful for trying things), or delete it and its DNS record |
-| Placeholder production Worker `unstream` (one secret, no routes) | Free | Delete |
-| Four queues | Free while idle | Delete with the Workers, or leave |
-| GitHub `production`/`staging` environments, the 10 deploy secrets, `deploy-worker.yml` | Free; deploys only by hand while `WORKER_DEPLOY_ENABLED` is unset | Leave, or remove with the workflow |
-| `workers/` code, `wrangler.jsonc`, and CLAUDE.md's rules about them | **Ongoing:** each new function needs a route in `workers/routes.ts`, and edge code must keep running on Deno and Workers | Keep while it's the template for Scenario 2, or remove and keep the type-checking some other way |
+**Kept:** the www → apex Single Redirect rule in Cloudflare. It does what Netlify's redirect did,
+earlier and at the edge.
+
+**Brandon to revoke or remove by hand** (no API access for these):
+- the "Edit Cloudflare Workers" API token and the cache-purge token;
+- `https://next.unstream.stream/**` in Supabase's redirect URLs;
+- the Stripe test-mode webhook endpoint for next.unstream.stream, if one was created.

@@ -23,7 +23,7 @@
     "preview:release": "npx tsx scripts/preview-release-page.ts",
     "catalog:artist": "npx tsx scripts/catalog-artist.ts",
     "test:web": "cd apps/web && npx vitest run",
-    "test:api": "npx vitest run api/functions/ workers/",
+    "test:api": "npx vitest run api/functions/",
     "test": "npm run test:web && npm run test:api",
     "test:watch": "cd apps/web && npx vitest",
     "test:unit": "cd apps/web && npx vitest run tests/unit",
@@ -35,15 +35,10 @@
     "migrate:link": "supabase link --project-ref bwogclqzpsbvqbyhhqbz",
     "migrate:dry-run": "supabase db push --dry-run --linked",
     "migrate:list": "supabase migration list --linked",
-    "audit:strings": "tsx scripts/audit-ui-strings.ts",
-    "dev:worker": "npx wrangler dev",
-    "deploy:worker": "npx wrangler deploy",
-    "typecheck:workers": "npx tsc -p workers/tsconfig.json",
-    "test:workers": "npx vitest run workers/"
+    "audit:strings": "tsx scripts/audit-ui-strings.ts"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "^2.6.2",
-    "@sentry/cloudflare": "^10.76.2",
     "@sentry/node": "^10.56.0",
     "@sentry/react": "^10.56.0",
     "@supabase/supabase-js": "^2.99.1",
@@ -86,7 +81,6 @@
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.0",
-    "wrangler": "^4.151.1"
+    "vitest": "^4.1.0"
   }
 }
