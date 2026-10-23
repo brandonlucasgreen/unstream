@@ -72,7 +72,7 @@ const WORKER_COMMON = [
   'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_KEY', 'SUPABASE_JWT_SECRET',
   'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN',
   'INTERNAL_FUNCTION_SECRET', 'SESSION_HASH_SECRET', 'BANDCAMP_CREDENTIAL_KEY',
-  'SENTRY_DSN', 'ADMIN_EMAIL', 'ALLOWED_API_EMAILS', 'MIRLO_API_KEY',
+  'SENTRY_DSN', 'ADMIN_EMAIL', 'ALLOWED_API_EMAILS',
   // Netlify holds this one misspelled, so the code (which reads ALGOLIA_API_KEY) never sees it there.
   { name: 'ALGOLIA_API_KEY', from: 'ALGOLAI_API_KEY' },
   'RESEND_API_KEY', 'BUTTONDOWN_API_KEY', 'NETLIFY_API_TOKEN', 'NETLIFY_SITE_ID',
@@ -87,8 +87,9 @@ const TARGETS = {
   // Staging takes Stripe's TEST key, and the signing secret of a test-mode endpoint at
   // https://next.unstream.stream/api/tips/webhook, so both are by hand and never copied.
   staging: [...WORKER_COMMON, { name: 'STRIPE_SECRET_KEY', byHand: true }, { name: 'STRIPE_CONNECT_WEBHOOK_SECRET', byHand: true }],
+  // MIRLO_API_KEY only matters to catalogue crawls, which run on production alone.
   production: [
-    ...WORKER_COMMON, 'STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET',
+    ...WORKER_COMMON, 'MIRLO_API_KEY', 'STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET',
     'RELEASE_CATALOG_ENABLED', 'NTFY_SERVER_URL', 'NTFY_TOPIC', 'NTFY_TOKEN',
   ],
 };

@@ -388,10 +388,18 @@ data says**, and so that the last step is a reviewed, merged PR rather than a co
 
 #### The secrets
 
-Set with `wrangler secret bulk <file.json>` (add `--env staging` for staging) from a JSON file kept
-**outside the repository**, deleted afterwards — or one at a time with `npx wrangler secret put
-<NAME>`. Staging and production are separate Workers (`unstream-staging` and `unstream`) with
-separate secret stores.
+**Use `node scripts/copy-worker-secrets.mjs github|staging|production`** (`--dry-run` first). It
+copies what Netlify will reveal straight into `gh secret set` / `wrangler secret bulk`, generates
+`INTERNAL_FUNCTION_SECRET` and `SESSION_HASH_SECRET` fresh (only the Worker checks them), and
+lists the rest with where to find each. It never prints a value.
+
+**"Netlify's values" can't always be copied.** Netlify keeps anything marked secret write-only:
+`netlify env:get` answers with sixteen asterisks and the last four characters, and its dashboard
+won't reveal it either. Eleven of these are like that (the Supabase service key and JWT secret, the
+Upstash token, both generated secrets, the Bandcamp key, the Sentry auth token, the Mirlo and
+Resend keys, and both Stripe values), so they come from where they were made. The script detects
+the masked form and never copies it. Staging and production are separate Workers
+(`unstream-staging` and `unstream`) with separate secret stores.
 
 **Every one of these must be a Secret, never a plain-text Variable — the two flags above all.**
 `wrangler deploy` replaces the Worker's plain-text variables with `wrangler.jsonc`'s `vars` and
@@ -406,9 +414,12 @@ way stops the sweep and the tips notifier with no error. If you use the dashboar
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Netlify's values | Same |
 | `INTERNAL_FUNCTION_SECRET`, `SESSION_HASH_SECRET` | Netlify's values | Same |
 | `BANDCAMP_CREDENTIAL_KEY` | Netlify's value | **Same — must be.** It decrypts the stored Bandcamp credentials; a different key can't read them |
-| `SENTRY_DSN`, `ADMIN_EMAIL`, `ALLOWED_API_EMAILS`, `MIRLO_API_KEY`, `ALGOLIA_APP_ID`, `ALGOLIA_API_KEY` | Netlify's values | Same |
+| `SENTRY_DSN`, `ADMIN_EMAIL`, `ALLOWED_API_EMAILS` | Netlify's values | Same |
+| `ALGOLIA_API_KEY` | **Netlify's `ALGOLAI_API_KEY`** — misspelled there, so Netlify has been skipping Even search; the Worker gets the right name (`ALGOLIA_APP_ID` has a default in the code) | Same |
+| `MIRLO_API_KEY` | From Mirlo's 2026-08-02 email granting it — write-only in Netlify | Omit — only catalogue crawls use it |
 | `RESEND_API_KEY`, `BUTTONDOWN_API_KEY` | Netlify's values | Same — and, like `npm run dev`, staging can then send real email |
-| `NTFY_SERVER_URL`, `NTFY_TOKEN`, `NTFY_TOPIC` | Netlify's values | Omit — only the scheduled tips notifier uses them, and staging runs no schedules |
+| `NTFY_SERVER_URL`, `NTFY_TOPIC` | Netlify's values | Omit — only the scheduled tips notifier uses them, and staging runs no schedules |
+| `NTFY_TOKEN` | **From your ntfy account — Netlify has none**, so the notifier can't push today | Omit |
 | `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN` | From step 2 | Same — an edit made on staging changes production data, so it should purge production's cache |
 | `NETLIFY_SITE_ID`, `NETLIFY_API_TOKEN` | Netlify's values, **until Netlify is retired** — both CDNs are purged while both can serve | Same |
 | **`STRIPE_SECRET_KEY`, `STRIPE_CONNECT_WEBHOOK_SECRET`** | Netlify's **Production** context — the live key | **Netlify's Deploy Preview context — the `sk_test_` key, never the live one.** A live key on staging turns a test tip into a real charge. The code now refuses one anyway (`stripeMode()` switches tips off for a live key outside production), but don't rely on the safety net |
@@ -521,6 +532,12 @@ hand) and set the secrets straight after — both Workers are on hostnames no fa
     the record back at.
 
 #### After the cutover
+
+- **The two values Netlify had wrong:** search for an artist who is on Even and confirm an Even
+  link appears (Netlify never showed one; Sentry now reports `[EVEN] ALGOLIA_API_KEY is not set`
+  if the key is missing). And send yourself a test push with the ntfy token you set
+  (`curl -H "Authorization: Bearer <token>" -d test <NTFY_SERVER_URL>/<NTFY_TOPIC>` in your own
+  terminal) so the tips notifier's next real alert isn't the first test.
 
 - **Catalogue crawls:** within twelve hours the Cron sweep should produce `release_catalog_state`
   rows with `last_trigger = 'scheduled'` and a recent `last_attempted_at`, and the queue's page
