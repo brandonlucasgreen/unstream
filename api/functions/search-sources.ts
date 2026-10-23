@@ -733,6 +733,9 @@ async function searchBeatport(query: string, prefetched?: Promise<PrefetchedCach
   return coerceNameOnlyCache(data);
 }
 
+/** Reported once per isolate, so a missing key is one Sentry event, not one per search. */
+let reportedMissingEvenKey = false;
+
 // Search EVEN via Algolia API (direct-to-fan marketplace)
 async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('even', query);
@@ -749,7 +752,18 @@ async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>):
         const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
         const algoliaApiKey = process.env.ALGOLIA_API_KEY;
         if (!algoliaApiKey) {
-          console.warn('[EVEN] Missing ALGOLIA_API_KEY env var, skipping Even search');
+          // A missing key is a deployment fault, not "this artist isn't on Even": don't cache it,
+          // and say so once. Netlify held this key misspelled (ALGOLAI_API_KEY) for months, so
+          // every search quietly skipped Even and cached the empty answer as true.
+          fetchFailed = true;
+          if (!reportedMissingEvenKey) {
+            reportedMissingEvenKey = true;
+            console.error('[EVEN] ALGOLIA_API_KEY is not set; Even search is off');
+            Sentry.captureMessage('[EVEN] ALGOLIA_API_KEY is not set; Even search is off', {
+              level: 'error',
+              tags: { platform: 'even' },
+            });
+          }
           return results;
         }
 
