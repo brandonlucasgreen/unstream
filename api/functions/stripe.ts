@@ -26,12 +26,10 @@ let reportedLiveKeyOffProduction = false;
 /**
  * The mode of the configured key, or null when tips are switched off.
  *
- * **A live key on staging or `npm run dev` switches tips off.** Every caller already treats null
- * as "tips are off", so this is the one place that can refuse a live key outright. Both share
- * production Supabase, and a live key on either turns a "test" tip into a real charge on a real
- * card, recorded as a live payment. The deploy checklist says to give staging a test key; this is
- * what holds if someone copies Production's values instead, which is the natural reading of "the
- * values Netlify holds".
+ * **A live key under `npm run dev` switches tips off.** Every caller already treats null as
+ * "tips are off", so this is the one place that can refuse a live key outright. Local runs share
+ * production Supabase, and a live key there turns a "test" tip into a real charge on a real card,
+ * recorded as a live payment.
  *
  * Netlify deploy previews are NOT covered: a preview's `URL` is the production address, so
  * `isProductionSite()` can't tell it apart (api/lib/production-site.ts). A preview stays safe only

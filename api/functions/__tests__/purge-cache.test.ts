@@ -4,22 +4,19 @@ vi.mock('../db', () => ({ getClient: () => null }));
 
 import { purgeCacheTags } from '../purge-cache';
 
-/**
- * Both CDNs are purged while both can be serving: Netlify is production until the cutover and
- * stays up for two weeks afterwards as the rollback path. A purge that reached only one of them
- * would leave stale pages on the other, and the rollback is exactly the moment nobody is
- * watching for that.
- */
 const saved = {
   NETLIFY_SITE_ID: process.env.NETLIFY_SITE_ID,
   SITE_ID: process.env.SITE_ID,
   NETLIFY_API_TOKEN: process.env.NETLIFY_API_TOKEN,
-  CLOUDFLARE_ZONE_ID: process.env.CLOUDFLARE_ZONE_ID,
-  CLOUDFLARE_PURGE_TOKEN: process.env.CLOUDFLARE_PURGE_TOKEN,
 };
 
 function clearCredentials() {
   for (const key of Object.keys(saved)) delete process.env[key];
+}
+
+function setNetlifyCredentials() {
+  process.env.NETLIFY_SITE_ID = 'site123';
+  process.env.NETLIFY_API_TOKEN = 'token';
 }
 
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -47,64 +44,38 @@ function urlsCalled(): string[] {
 }
 
 describe('purgeCacheTags', () => {
-  it('purges Cloudflare by tag when its credentials are set', async () => {
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
+  it('purges Netlify by tag when its credentials are set', async () => {
+    setNetlifyCredentials();
 
     await purgeCacheTags(['artist-mono', 'artist-releases-mono'], 'Test');
 
-    expect(urlsCalled()).toEqual(['https://api.cloudflare.com/client/v4/zones/zone123/purge_cache']);
+    expect(urlsCalled()).toEqual(['https://api.netlify.com/api/v1/purge']);
     const init = fetchMock.mock.calls[0][1] as RequestInit;
-    expect(JSON.parse(String(init.body))).toEqual({ tags: ['artist-mono', 'artist-releases-mono'] });
+    expect(JSON.parse(String(init.body))).toEqual({ site_id: 'site123', cache_tags: ['artist-mono', 'artist-releases-mono'] });
     expect(init.headers).toMatchObject({ Authorization: 'Bearer token' });
   });
 
-  it('purges Netlify when its credentials are set', async () => {
-    process.env.NETLIFY_SITE_ID = 'site123';
-    process.env.NETLIFY_API_TOKEN = 'token';
-
-    await purgeCacheTags(['artist-mono'], 'Test');
-
-    expect(urlsCalled()).toEqual(['https://api.netlify.com/api/v1/purge']);
-  });
-
-  it('purges both when both are configured, which is the cutover window', async () => {
-    process.env.NETLIFY_SITE_ID = 'site123';
-    process.env.NETLIFY_API_TOKEN = 'token';
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'cf-token';
-
-    await purgeCacheTags(['artist-mono'], 'Test');
-
-    expect(urlsCalled().sort()).toEqual([
-      'https://api.cloudflare.com/client/v4/zones/zone123/purge_cache',
-      'https://api.netlify.com/api/v1/purge',
-    ]);
-  });
-
-  it('does nothing, loudly, when neither is configured', async () => {
+  it('does nothing, loudly, when it is not configured', async () => {
     await purgeCacheTags(['artist-mono'], 'Test');
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('no CDN purge credentials set'));
   });
 
-  it('reports a throttled Cloudflare purge instead of counting it as done', async () => {
-    // A purge being rate-limited looks exactly like a purge that worked, and the symptom — an
+  it('reports a refused purge instead of counting it as done', async () => {
+    // A purge that was refused looks exactly like a purge that worked, and the symptom — an
     // artist's edit not showing for an hour — gets blamed on the edit.
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
-    fetchMock.mockResolvedValueOnce(new Response('rate limited', { status: 429 }));
+    setNetlifyCredentials();
+    fetchMock.mockResolvedValueOnce(new Response('nope', { status: 401 }));
 
     await purgeCacheTags(['artist-mono'], 'Test');
 
-    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('rate limited'));
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('HTTP 401'));
     expect(console.log).not.toHaveBeenCalled();
   });
 
   it('never throws at the caller when a purge fails outright', async () => {
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
+    setNetlifyCredentials();
     fetchMock.mockRejectedValueOnce(new Error('network down'));
 
     // The write this purge follows has already succeeded; stale-for-the-TTL beats failing an
@@ -113,8 +84,7 @@ describe('purgeCacheTags', () => {
   });
 
   it('makes no call at all for an empty tag list', async () => {
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
+    setNetlifyCredentials();
 
     await purgeCacheTags([], 'Test');
 
@@ -122,24 +92,20 @@ describe('purgeCacheTags', () => {
   });
 });
 
-describe('the purge hosts are on the outbound allowlist', () => {
+describe('the purge host is on the outbound allowlist', () => {
   /**
-   * Both URLs are constants with only a zone or site id interpolated into the *path*, so neither
-   * has a host anything could redirect. They are checked anyway because every other constant-URL
-   * fetch in this backend does (digest-feed.ts, stripe.ts), and because the allowlist is meant to
-   * be the inventory of every host the backend talks to — a purge target missing from it reads
-   * as "nothing purges" to whoever greps it next.
+   * The URL is a constant, so it has no host anything could redirect. It is checked anyway
+   * because every other constant-URL fetch in this backend does (digest-feed.ts, stripe.ts), and
+   * because the allowlist is meant to be the inventory of every host the backend talks to.
    */
-  it('lists both, so the inventory is complete', async () => {
+  it('lists it, so the inventory is complete', async () => {
     const { ALLOWED_OUTBOUND_HOSTNAMES } = await import('../middleware');
 
-    expect(ALLOWED_OUTBOUND_HOSTNAMES.has('api.cloudflare.com')).toBe(true);
     expect(ALLOWED_OUTBOUND_HOSTNAMES.has('api.netlify.com')).toBe(true);
   });
 
   it('refuses to purge a host the allowlist does not cover', async () => {
-    process.env.CLOUDFLARE_ZONE_ID = 'zone123';
-    process.env.CLOUDFLARE_PURGE_TOKEN = 'token';
+    setNetlifyCredentials();
 
     const middleware = await import('../middleware');
     const spy = vi.spyOn(middleware, 'isUrlHostnameAllowed').mockReturnValue(false);

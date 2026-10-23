@@ -1,4 +1,4 @@
-// CDN cache purge by tag.
+// Netlify CDN cache purge by tag.
 //
 // The pages that server-render artist and release data set long CDN TTLs (a day for the
 // crawler-only artist page, an hour for release pages, which everyone sees). That is only safe
@@ -6,16 +6,9 @@
 // `Cache-Tag` headers in api/edge/artist-page-static.ts and api/edge/release-page.ts. Only the
 // release page is actually cached; see the note on CDN_CACHE_CONTROL in artist-page-static.
 //
-// Both CDNs purge by *exact* tag — there are no wildcards — which is why release pages carry a
+// Netlify purges by *exact* tag — there are no wildcards — which is why release pages carry a
 // shared `artist-releases-${slug}` tag alongside their own: it's the only way to clear all of one
 // artist's release pages in a single call.
-//
-// **Both are purged while both can be serving.** Netlify is production until the cutover and
-// stays up for two weeks afterwards as the rollback path, so a purge that only reached one of
-// them would leave stale pages behind on the other — and the rollback is exactly the moment
-// nobody would be watching for it. Each is tried only when its own credentials are set, so
-// whichever is configured is the one that gets purged. Drop the Netlify half when that site is
-// retired.
 
 import { getClient } from './db';
 import { isUrlHostnameAllowed } from './middleware';
@@ -31,13 +24,12 @@ import { isUrlHostnameAllowed } from './middleware';
 export async function purgeCacheTags(tags: string[], label: string): Promise<void> {
   if (tags.length === 0) return;
 
-  const purged = (await Promise.all([purgeNetlify(tags, label), purgeCloudflare(tags, label)])).filter(Boolean);
-
-  if (purged.length === 0) {
+  const purged = await purgeNetlify(tags, label);
+  if (purged === null) {
     console.warn(`[${label}] no CDN purge credentials set, skipping purge for ${tags.join(', ')}`);
     return;
   }
-  console.log(`[${label}] Purged ${purged.join(' and ')} cache for ${tags.join(', ')}`);
+  console.log(`[${label}] Purged ${purged} cache for ${tags.join(', ')}`);
 }
 
 /** Netlify's purge endpoint. Constant, and on ALLOWED_OUTBOUND_HOSTNAMES. */
@@ -67,43 +59,6 @@ async function purgeNetlify(tags: string[], label: string): Promise<string | nul
     return 'Netlify';
   } catch (error) {
     console.error(`[${label}] Netlify purge failed for ${tags.join(', ')}:`, error);
-    return null;
-  }
-}
-
-/**
- * Cloudflare's purge-by-tag. Available on every plan since April 2025 — it used to be
- * Enterprise-only, and most of what's written about it still says so.
- *
- * Rate-limited per plan, and a refusal is reported rather than swallowed: a purge that is being
- * throttled looks exactly like a purge that worked, and the symptom — an artist's edit not
- * showing for an hour — is the kind of thing that gets blamed on the edit instead.
- */
-async function purgeCloudflare(tags: string[], label: string): Promise<string | null> {
-  const zoneId = process.env.CLOUDFLARE_ZONE_ID;
-  const token = process.env.CLOUDFLARE_PURGE_TOKEN;
-  if (!zoneId || !token) return null;
-
-  const url = `https://api.cloudflare.com/client/v4/zones/${encodeURIComponent(zoneId)}/purge_cache`;
-  if (!isUrlHostnameAllowed(url)) {
-    console.error(`[${label}] Cloudflare purge host is not on the outbound allowlist`);
-    return null;
-  }
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tags }),
-    });
-    if (!response.ok) {
-      const detail = response.status === 429 ? ' (rate limited)' : '';
-      console.error(`[${label}] Cloudflare purge refused (HTTP ${response.status})${detail} for ${tags.join(', ')}`);
-      return null;
-    }
-    return 'Cloudflare';
-  } catch (error) {
-    console.error(`[${label}] Cloudflare purge failed for ${tags.join(', ')}:`, error);
     return null;
   }
 }

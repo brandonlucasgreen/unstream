@@ -23,7 +23,7 @@ These inform engineering trade-offs, not just marketing copy — when a decision
 - **Frontend**: React 19 SPA, React Router 7, Tailwind CSS v4, Vite 7, TypeScript. PWA-enabled (`vite-plugin-pwa`); most pages lazy-loaded in `apps/web/src/main.tsx`.
 - **Backend**: Netlify Functions (serverless API, `api/functions/`, Node) + Edge Functions (SSR/SEO, `api/edge/`, Deno — see `deno.lock`).
 - **Database**: Supabase (Postgres with RLS) — artist profiles, analytics, merge overrides, API keys, verification requests, saved/supported artists, public usernames, releases, collections, Bandcamp probe cache.
-- **Enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages. **Caching / rate limiting**: Upstash Redis. **Monitoring**: Sentry (`apps/web/src/services/sentry.ts`, `api/lib/sentry.ts`). **Every function in `api/functions/` must export its handler through `withSentry`** (`export const handler = withSentry(handleRequest)`): an invocation can be torn down the moment it has answered — on Lambda the process froze outright — so without the flush it adds, events captured just before returning never reach Sentry. `with-sentry.test.ts` fails on a function that forgets. `api/lib/sentry.ts` imports `@sentry/node`, which wrangler aliases to `@sentry/cloudflare` in the Worker bundle — **don't "tidy" that import to `@sentry/cloudflare`**: only `@sentry/node`'s `init()` binds a client on Netlify, and losing it drops every server-side event silently. See "The Cloudflare Worker" below. **Analytics**: GoatCounter + custom Supabase analytics. **Email**: Resend for transactional mail (`api/lib/resend.ts`, `notifications.ts`) — release alerts, claim decisions.
+- **Enrichment**: MusicBrainz, Wikidata, Wikipedia, Discogs, Linktree, Bandcamp artist pages. **Caching / rate limiting**: Upstash Redis. **Monitoring**: Sentry (`apps/web/src/services/sentry.ts`, `api/lib/sentry.ts`). **Every function in `api/functions/` must export its handler through `withSentry`** (`export const handler = withSentry(handleRequest)`): an invocation can be torn down the moment it has answered — on Lambda the process froze outright — so without the flush it adds, events captured just before returning never reach Sentry. `with-sentry.test.ts` fails on a function that forgets. `api/lib/sentry.ts` must import `@sentry/node`: only its `init()` binds a client on Netlify's functions, and an SDK without it drops every server-side event silently (`sentry-client-binding.test.ts`). **Analytics**: GoatCounter + custom Supabase analytics. **Email**: Resend for transactional mail (`api/lib/resend.ts`, `notifications.ts`) — release alerts, claim decisions.
 - **Integrations**: public REST API (v1), social post automation, ListenBrainz scrobbling (Mac app only; the backend has no ListenBrainz code).
 - **Clients**: web app, universal Apple app (macOS menu bar + iOS, SwiftUI), browser extension (Chrome + Firefox, MV3). **Hosting**: Netlify.
 
@@ -33,7 +33,6 @@ Only the non-obvious parts; `ls` covers the rest.
 
 - **`api/functions/`** — Netlify serverless functions, **the live backend**: `search-sources.ts` (Phase 1 orchestration, the big one), `search-musicbrainz.ts` (Phase 2), `search-utils.ts` + `search-parsers.ts` (pure, unit-testable logic), `middleware.ts` (CORS, auth, validation, SSRF allowlist), `cache.ts`, `ratelimit.ts`, `db.ts` (service-role Supabase), `__tests__/`.
 - **`api/edge/`** — `og-metadata`, `artist-page-static`, `release-page`, `noscript-search`, `u-handle`, `static-page-meta`. **`api/search/`** — only `bandcamp-probe.ts` and `enrichment.ts` are live; **`api/embed/`** is dead too (see below). **`api/shared/`** — code both Node and Deno (or Node and the web client) import, e.g. `platform-registry.ts`, `bandcamp-identity.ts`, `artist-bio.ts`, `crawler-detection.ts`, `release-display.ts`, `desktop-release.ts`. **`api/lib/`** — `resend.ts`, `sentry.ts`, `reserved-handles.ts`, `excluded-artists.ts`, `non-artist-names.ts`, `html.ts`.
-- **`workers/`** — the Cloudflare Worker that runs everything (routes, the Lambda-event adapter, the handler and renderer maps). Phase 1 of the infrastructure plan; **not live yet** — see "The Cloudflare Worker" below.
 - **`apps/web/`** — the SPA: `src/services/sources.ts` is platform config + search client, `src/contexts/AuthContext` holds auth and saved artists, `public/` carries the generated `sitemap.xml` / `dispatch.xml`, `tests/` is `unit/` + `integration/` + `fixtures/`.
 - **`apps/web/server/`** — dev-only API served by Vite, **not production**. See "Local dev".
 - **`apps/mac/`** — universal Apple app (macOS menu bar + iOS), SwiftUI. **`project.yml` is the XcodeGen definition and the source of truth for targets — edit it, not the `.xcodeproj`.** **`apps/extension/`** — MV3 extension, one content script per streaming site, two manifests.
@@ -46,16 +45,13 @@ Only the non-obvious parts; `ls` covers the rest.
 npm run dev        # Full stack: netlify dev :8888 — real functions, edge functions,
                    #   production Supabase data + auth. Use this by default (still production).
 npm run dev:fast   # Vite only :5173 (no functions, no auth). CSS/layout only.
-npm run dev:worker # wrangler dev :8787 — the Cloudflare Worker (not live yet; see below)
 npm run verify     # THE CI GATE: typecheck + API + web unit tests (~45s)
 npm run build      # Full build (see below) · npm run preview · npm run lint (advisory)
 
 npm run test       # web + API · test:web · test:unit (CI) · test:api (CI) · test:watch
 npm run test:integration   # live-API search accuracy; separate, not in CI
-npm run typecheck          # root + apps/web + workers (CI and build)
-npm run typecheck:api      # api/ — listed files only, see below
-npm run typecheck:workers  # the Worker — every handler and renderer it imports
-npm run test:workers       # the Worker's own tests · deploy:worker (not live yet)
+npm run typecheck          # root + apps/web (CI and build)
+npm run typecheck:api      # api/ — every function, see below
 
 npm run generate:artists|generate:data|generate:social   # Wikidata list, artist JSON, posts
 npm run sync:bandcamp-dates · backfill:artist-rows · backfill:locations
@@ -73,9 +69,7 @@ npm run migrate:link|migrate:dry-run|migrate:list        # Supabase CLI, --linke
 
 **The test suites are not part of the build** — they run in GitHub Actions (`ci.yml`), because Actions minutes are free here and Netlify builds are not. So **run `npm run verify` before considering work done**, and note that **a red CI run does not stop a deploy**: Netlify builds whatever lands on `main`, which is not branch-protected.
 
-**Typecheck coverage: `api/tsconfig.json` is no longer the whole story.** It still checks only the files its `include` lists (~40 functions) plus whatever they import. But `workers/tsconfig.json` typechecks the Worker's entry point, which statically imports **all 66 routed handlers and all 7 server-rendered pages** — so `npm run typecheck` now covers the backend that `api/tsconfig.json` never did. Turning that on is what surfaced, and fixed, a run of latent strict-mode errors in `saved-artists`, `me-location`, `check-releases` and every edge function; see "The Cloudflare Worker" below.
-
-Two things still escape it: `social-card` (excluded from the Worker — it reads fonts off disk) and anything neither config imports. When you add a function, give it a route in `workers/routes.ts` and it is typechecked by construction; `api/tsconfig.json`'s include list is still worth adding to, because it is what `typecheck:api` and the editor use.
+**Typecheck coverage: every function, not the edge functions.** `api/tsconfig.json` includes `functions/*.ts`, so a new function is checked under strict mode by existing, along with everything it imports (`db.ts`, `middleware.ts`, the parsers, `api/search/*`, `api/lib/*`). That became possible in 2026-10, when the Cloudflare Worker port typechecked every handler and its latent strict-mode errors (`saved-artists`, `me-location`, `check-releases`) were fixed. The edge functions in `api/edge/` are **not** typechecked: they import from URLs (`esm.sh`, `edge.netlify.com`) that only Deno resolves.
 
 ## Key patterns
 
@@ -273,122 +267,28 @@ The Mac app ships as a direct GitHub release and updates itself with Sparkle 2 (
 - **Sparkle compares `CFBundleVersion`, not the marketing version.** An appcast whose `sparkle:version` is `3.6.0` against an installed `CFBundleVersion` of `15` offers no update. Bump the build number on every release.
 - **The sandbox needs three things at once**: `SUEnableInstallerLauncherService` in `Info-macOS.plist`, the `-spks`/`-spki` `mach-lookup` entitlement exceptions, and the app staying sandboxed. Break one and updates download fine then fail to install — which reads as success right up to the last step. The Developer ID `archive` + `-exportArchive` path also re-signs Sparkle's XPC helpers; don't hand-roll `codesign --deep`.
 
-### The Cloudflare Worker — built, not yet live
+### Cloudflare Workers: tried and removed (2026-10-23)
 
-`workers/` runs the whole site on Cloudflare Workers: the same 66 function handlers and the same
-7 server-rendered pages, in one Worker in front of the built SPA. It is Phase 1 of
-`docs/specs/infrastructure-independence-plan.md`. **Production is still Netlify** until Brandon
-points DNS at the Worker, and Netlify is kept idle for two weeks after that for rollback — so
-until then every change has to work on *both*, and that is the main thing to know when editing
-anything under `api/edge/`.
+The whole site was ported to a Cloudflare Worker (#653, #663) and then removed, because Bandcamp
+challenges every page request from a Worker: no Bandcamp discovery, card data or catalogue
+(`docs/specs/bandcamp-from-workers.md`). **Unstream stays on Netlify's legacy plan; don't propose
+moving to Workers.** If Netlify ends that plan, or Bandcamp starts challenging Netlify, follow
+`docs/specs/hosting-contingency-plans.md`. It also says what carries over from the port, now in
+git history. A few things from the port stay, because they hold on Netlify too:
 
-- **`workers/routes.ts` is the routing source of truth**, replacing netlify.toml's 72 redirects
-  and 10 edge-function entries. First match wins, and order is load-bearing in the same two
-  places it always was: the release feeds sit above the page renderers, and the release page
-  above `/a/*`. `workers/__tests__/routes.test.ts` asserts every netlify.toml entry still has a
-  route, and goes when netlify.toml does.
-- **`workers/function-adapter.ts` is the only thing that knows about both worlds.** It builds the
-  Lambda-style `event` the handlers take and turns their `{ statusCode, headers, body }` back
-  into a `Response`, matching Netlify exactly: lowercased header names, a flat
-  `queryStringParameters`, the *original* path in `path` and `rawUrl`, and `pathParameters` left
-  undefined. Handlers are untouched by the port.
-- **Static files never run the Worker**, which is what makes them free. Their headers therefore
-  come from `apps/web/public/_headers`, not from the Worker — including the two caching rules
-  for `/sw.js` and `/build-id.json` that keep a stale build from pinning itself. The CSP is
-  stated in both places and `workers/__tests__/response-headers.test.ts` keeps them identical.
-- **Background work never makes an HTTP handshake on the Worker** (`api/lib/background.ts`).
-  Search persistence, catalogue crawls and the Bandcamp sync used to POST to a background
-  function; on Cloudflare that call would leave the edge and come straight back into our own
-  zone, where free-plan Bot Fight Mode challenges it with no way to exempt it — the exact failure
-  that catalogued nothing for six days. On the Worker, search persistence runs in `waitUntil` and
-  the long jobs go on a queue (next bullet). A caller that finds no dispatcher still falls back to
-  the old handshake, which is how `npm run dev` and the tests keep working.
-- **`waitUntil` allows 30 seconds, and a catalogue crawl needs 9–13 minutes**, which is why the
-  long jobs go on a **queue** (15 minutes) and not `waitUntil`. A crawl killed at 30 seconds would
-  still count as an attempt (`claimArtistForCatalog` writes `last_attempted_at` before it starts),
-  so the artist is skipped until the cooldown lapses — a catalogue that looks healthy and quietly
-  stops filling. `dispatchBackgroundFunction` enqueues and is `async`: its answer means "a queue
-  has this and will retry it", not "something started". Search persistence still uses `waitUntil`,
-  which it fits inside easily.
-- **The two schedules are Cron Triggers**, replacing GitHub Actions that POSTed to the Netlify
-  host by name. `recatalog-sweep.yml` and `tips-review-notify.yml` still exist and still run —
-  crons only fire on a deployed Worker — and both carry a header saying they must be **deleted at
-  cutover**, or each job runs twice against one Supabase.
-- **Scheduled work is fail-closed, because staging shares production's database.** `scheduled()`
-  refuses unless `SCHEDULED_JOBS_ENABLED` is `"true"` *and* `URL` is production, and says which
-  gate stopped it. That variable is deliberately absent from `wrangler.jsonc`'s `vars`: it is the
-  gate that holds under `wrangler dev`, where `URL` is inherited and does say production. The
-  `staging` environment also declares `crons: []` and its own queue, so it can't fire or steal a
-  message structurally.
-- **Sentry: one import, two SDKs.** `api/lib/sentry.ts` imports `@sentry/node`; wrangler's
-  `alias` swaps in `@sentry/cloudflare` for the Worker bundle. On Node (Netlify, `npm run dev`,
-  scripts, CI) `init()` binds the client; on Workers there is no `init()` and the client is created
-  per request by `Sentry.withSentry` around the Worker's default export, which also flushes through
-  `waitUntil`. `isSentryInitialized()` reports whether this module bound a client, never merely
-  whether a DSN is set. `sentry-client-binding.test.ts` fails against the single-SDK shape that
-  once dropped every server-side event on Netlify.
-- **`api/edge/*.ts` must keep running on Deno too.** Read configuration with `edgeEnv()`
-  (`api/shared/edge-context.ts`), never a bare `process.env` — `process` doesn't exist on Netlify's
-  edge and the first request would throw. Supabase stays a `https://esm.sh/...` import for the
-  same reason (npm support there is beta); wrangler's `alias` and the matching `paths` in
-  `workers/tsconfig.json` point it at the npm package when it bundles, pinned by
-  `workers/__tests__/bundler-alias.test.ts`.
-- **`/api/social-card/*` is proxied to the Netlify site**, because the function reads fonts off
-  disk and loads resvg's wasm. It is already scheduled for deletion (#649 moved card drawing into
-  the weekly generator); remove the proxy, the route and the function together.
-- **A response the Worker builds is cached only when the Worker stores it.** `CDN-Cache-Control`
-  is inert on its own — Cloudflare's CDN caches what comes back from an *origin*, which a Worker
-  response never is. `workers/edge-cache.ts` is the mechanism and a route opts in with
-  `cache: true`, the same shape as Netlify's `cache = "manual"` and the same silent failure if
-  you forget. **The cache key is the URL**, so only routes where one URL is one response for
-  everyone may opt in: the release page and six credential-free API reads. The crawler/browser
-  pages and anything varying by API key or sign-in must stay out — `workers/routes.ts` says
-  which and why, and a test holds the line.
-- **`CDN-Cache-Control`, not `Netlify-CDN-Cache-Control`.** Both platforms honour the standard
-  name. `purgeCacheTags` purges Netlify and Cloudflare, each when its own credentials are set
-  (`CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN`), so cutover and rollback need no code change.
-  Purge-by-tag is on every Cloudflare plan since April 2025, whatever older write-ups say.
-- **No deploy can claim `unstream.stream` until the cutover PR adds it.** A route takes its
-  hostname on deploy, and wrangler's `routes` key is *inherited* by named environments — so with
-  the production domain at the top level, the first `wrangler deploy` was the cutover, and
-  `--env staging` would have reassigned the production domain to staging (wrangler only warns).
-  The top level declares `routes: []`, every named environment states its own, and
-  `background-jobs.test.ts` fails on any route form — custom domain, zone route, string, or the
-  singular `route` key — that points at the production hostname. A plain `wrangler deploy` lands
-  on `workers.dev`; `--env staging` on `next.unstream.stream`. **The cutover adds the apex only:**
-  www stays a Cloudflare redirect rule, because the Worker would otherwise serve the whole site a
-  second time on www.
-- **Every deploy builds first, and merges deploy themselves.** `wrangler.jsonc`'s `build.command`
-  runs `npm run build` before any `wrangler deploy`, so a stale `apps/web/dist` can never ship.
-  `.github/workflows/deploy-worker.yml` deploys on every push to main once the repository
-  variable `WORKER_DEPLOY_ENABLED` is `"true"`, after `npm run verify` passes — without it,
-  nothing would deploy the Worker after the cutover and every merge would silently stop reaching
-  users. Production deploys only from main — enforced by the GitHub `production` environment's
-  branch rule, since a hand-run uses the chosen branch's copy of the workflow. **That build runs on GitHub, not Netlify, so it gets
-  none of Netlify's build-time env**: the `VITE_*` values Vite inlines (Supabase sign-in, the
-  Sentry DSN), `COMMIT_REF` and the sitemap's Supabase read are passed in from GitHub secrets, and
-  the workflow refuses to deploy if one is missing — a build without them succeeds and ships a
-  site whose sign-in is dead.
-- **Worker flags must be Secrets, not Variables.** `wrangler deploy` replaces the Worker's
-  plain-text variables with `wrangler.jsonc`'s `vars` and carries forward only secrets, so a
-  `SCHEDULED_JOBS_ENABLED` or `RELEASE_CATALOG_ENABLED` added as a dashboard Variable is deleted by
-  the next merge, and the sweep stops without an error. Set them with `npx wrangler secret put`.
-- **Every hostname but unstream.stream is `noindex`** (`withSiteHeaders`): staging and workers.dev
-  serve production's data, and indexed they would duplicate every page.
-- **A live Stripe key on staging or `npm run dev` switches tips off.** `stripeMode()` returns null —
-  which every caller reads as "tips are off" — for a live key when `isProductionSite()` is false,
-  and reports it once. Both share production Supabase, so a live key there turns a test tip into a
-  real charge. **Netlify deploy previews are not covered** — a preview's `URL` is the production
-  address — so the Deploy Preview context must keep its test key. `api/lib/production-site.ts` is the one definition of
-  "production" that this, the Sentry environment and the scheduled-job gate all use.
-- **`npm run dev:worker`** runs it locally against the same production Supabase `npm run dev`
-  uses. `npx wrangler deploy --dry-run` bundles without an account and is the fastest way to
-  check a change still builds.
-- **Re-run `npx wrangler types --path workers/worker-configuration.d.ts` after editing
-  `wrangler.jsonc`.** That file is generated and committed; it is also why `process.env` stays
-  typed, which `@cloudflare/workers-types` would quietly turn into `any`. It runs `build.command`
-  (the whole `npm run build`) first, so `git checkout` the feed XML afterwards — and if that build
-  fails, the file it writes silently drops the `mainModule` block; check the diff.
+- **`api/edge/*.ts` read configuration with `edgeEnv()`** (`api/shared/edge-context.ts`), never a
+  bare `process.env`: `process` doesn't exist on Netlify's Deno edge, and the first request would
+  throw. The renderers take the small `Context` declared there rather than Netlify's type.
+- **`CDN-Cache-Control`, not `Netlify-CDN-Cache-Control`.** Netlify honours the standard name.
+- **A live Stripe key under `npm run dev` switches tips off.** `stripeMode()` returns null (which
+  every caller reads as "tips are off") for a live key when `isProductionSite()` is false, and
+  reports it once. **Netlify deploy previews are not covered:** a preview's `URL` is the
+  production address, so the Deploy Preview context must keep its test key.
+  `api/lib/production-site.ts` is the one definition of "production" that this and the Sentry
+  environment use.
+- **Netlify keeps secret-flagged env vars write-only.** `netlify env:get` returns sixteen
+  asterisks and the last four characters, and the dashboard can't reveal them. Anything copying
+  values out of Netlify must detect that mask, and the real values come from where they were made.
 
 ### Edge functions (SSR/SEO)
 
@@ -452,7 +352,7 @@ The schema is the migrations: timestamp-prefixed files in `supabase/migrations/`
 
 **Backups:** Pro keeps daily backups for 7 days, inside the Supabase account and restorable only back into Supabase. `db-backup.yml` keeps a second copy that covers what those don't — 30 days, another vendor, our own key, plain SQL, and a restore proven every run: it dumps the database nightly, encrypts it with age, uploads it to the `unstream-db-backup` R2 bucket, and restores the dump into a throwaway local stack before finishing. A failed run opens a "Database backup failing" issue. Restore steps, and what the backup doesn't hold: `docs/database-backups.md`. **Both this and `supabase-migrate.yml` pin the Supabase CLI version rather than taking `latest`** — resolving `latest` is an unauthenticated api.github.com call sharing a 60/hour limit with every runner on the IP, and it failed a nightly backup on 2026-10-20. Bump the pin deliberately, in both files together.
 
-**On Supabase Pro since 2026-10-19** (planned 2026-10-06, for the dedicated instance that fixes free-tier outages like the 09-19 wedge). If Pro's disk throttling ever shows up, add Small compute (2 GB) first. Pro's own 7-day backups don't retire `db-backup.yml` — see Backups above for what each one covers. If the database ever leaves Supabase the company, the recommended route (2026-10-19) is Supabase's own open-source stack on Hetzner, via Elestio or Coolify, which keeps the code and sign-in unchanged ("Later: the database" in `docs/specs/infrastructure-independence-plan.md`); a move to DigitalOcean Managed PostgreSQL stays fully planned in `docs/specs/digitalocean-database-plan.md`. Read both before proposing a database move. **Reaffirmed 2026-10-18:** the hosting plan (`docs/specs/infrastructure-independence-plan.md`) moves the app from Netlify to Cloudflare Workers, Upstash to Cloudflare, and GitHub to Codeberg, and deliberately leaves the database and sign-in on Supabase. Read it before proposing any hosting or provider change, and don't add a dependency on a provider it's moving away from.
+**On Supabase Pro since 2026-10-19** (planned 2026-10-06, for the dedicated instance that fixes free-tier outages like the 09-19 wedge). If Pro's disk throttling ever shows up, add Small compute (2 GB) first. Pro's own 7-day backups don't retire `db-backup.yml` — see Backups above for what each one covers. If the database ever leaves Supabase the company, the recommended route (2026-10-19) is Supabase's own open-source stack on Hetzner, via Elestio or Coolify, which keeps the code and sign-in unchanged ("Later: the database" in `docs/specs/infrastructure-independence-plan.md`); a move to DigitalOcean Managed PostgreSQL stays fully planned in `docs/specs/digitalocean-database-plan.md`. Read both before proposing a database move. **The hosting plan** (`docs/specs/infrastructure-independence-plan.md`, 2026-10-18) leaves the database and sign-in on Supabase. Its app move to Cloudflare Workers was **shelved on 2026-10-23**: the app stays on Netlify, and `docs/specs/hosting-contingency-plans.md` covers what to do if that has to change. Read both before proposing any hosting or provider change.
 
 When adding a table or column: new migration, RLS policies included, `IF NOT EXISTS` / `DROP ... IF EXISTS` guards for idempotency, comments explaining the change. Server-only tables (like `bandcamp_slug_probes`) enable RLS with *no* policies — the service-role client bypasses RLS, anon gets nothing — and should say so in a comment so the missing policies don't read as an oversight.
 
@@ -478,11 +378,11 @@ The root `vitest.config.ts` covers both trees so `npx vitest` works from the rep
 
 Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from `api/functions/`, edge functions from `api/edge/`; edge routes, `/api/*` redirects and headers/CSP live in `netlify.toml`.
 
-**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`, and the Worker's `workers/` and `wrangler.jsonc` (deployed by `deploy-worker.yml`, never by Netlify). **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
+**Not every push deploys.** `netlify.toml`'s `ignore` setting runs `scripts/netlify-ignore-build.sh`, which cancels the build when a push touches only paths Netlify never publishes — `apps/mac/`, `apps/extension/`, `supabase/`, `docs/`, `.github/`, `README.md`, `CLAUDE.md`. **Its exit code is inverted: 0 cancels, 1 builds**, and every branch defaults to deploying, because a skipped deploy leaves production silently stale. `data/` and `scripts/` are deliberately absent, since `data/` is copied into `dist/` and `scripts/` generates the manifests, feeds and sitemap — so if you add a path whose contents reach the built site, check it isn't shadowed.
 
 **Deploy Previews are opt-in per push.** `[context.deploy-preview]` runs `scripts/netlify-ignore-preview.sh`, which cancels the preview unless the PR's head commit message contains `[preview]` — so by default a PR gets no preview URL and its Netlify checks don't run (configuration, not breakage). #451 turned them off because they ate the build allowance; add the marker only to the push you actually want to open on a phone or share. A preview runs the real functions against **production** Supabase, same as `npm run dev`. Without the marker, **`npm run dev` is the only way to exercise the real backend before merging.**
 
-GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h) · `db-backup.yml` (nightly encrypted backup to R2, see Database / migrations) · `deploy-worker.yml` (deploys the Cloudflare Worker on push to main, once `WORKER_DEPLOY_ENABLED` is set) · `mac-build.yml` (compiles the Apple app and runs XCTest on `apps/mac/` changes; never signs or uploads) · `industry-digest.yml` (Fridays) · `weekly-analytics-recap.yml` (paused, manual dispatch only).
+GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h) · `db-backup.yml` (nightly encrypted backup to R2, see Database / migrations) · `mac-build.yml` (compiles the Apple app and runs XCTest on `apps/mac/` changes; never signs or uploads) · `industry-digest.yml` (Fridays) · `weekly-analytics-recap.yml` (paused, manual dispatch only).
 
 ## Engineering principles
 

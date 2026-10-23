@@ -394,17 +394,11 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.
   'api.stripe.com',
-  // The two CDN purge APIs (api/functions/purge-cache.ts). Both are fetched at constant URLs —
-  // only a zone or site id from configuration is interpolated, and into the path, so neither
-  // call has a host anything could redirect. They are listed and checked anyway, because that is
-  // what the other constant-URL fetches here do (digest-feed.ts, stripe.ts) and because this set
-  // is the inventory of every host this backend talks to.
-  //
-  // Both, not one: Netlify is production until the Cloudflare cutover and the rollback path for
-  // two weeks after, so purgeCacheTags purges whichever is configured. Drop api.netlify.com when
-  // that site is retired.
+  // Netlify's CDN purge API (api/functions/purge-cache.ts). Fetched at a constant URL, so there is
+  // no host anything could redirect; listed and checked anyway, because that is what the other
+  // constant-URL fetches here do (digest-feed.ts, stripe.ts) and because this set is the
+  // inventory of every host this backend talks to.
   'api.netlify.com',
-  'api.cloudflare.com',
 ]);
 
 /**

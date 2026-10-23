@@ -12,7 +12,6 @@
 // stored, echoed back, or attached to a Sentry event.
 
 import { Sentry, withSentry } from '../lib/sentry';
-import { dispatchBackgroundFunction } from '../lib/background';
 import { getClient } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -124,10 +123,6 @@ export function selfDispatchOrigin(host: string | undefined): string | null {
  * request-catalog.ts: Netlify answers 202 immediately, so there is no result to read back.
  */
 async function requestSync(userId: string, host: string | undefined): Promise<boolean> {
-  // On Workers the import runs in this invocation's waitUntil — no handshake to be challenged.
-  // See api/lib/background.ts.
-  if (await dispatchBackgroundFunction('bandcamp-sync-background', JSON.stringify({ userId }))) return true;
-
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
   const siteUrl = selfDispatchOrigin(host) ?? process.env.URL;
   if (!secret || !siteUrl) {

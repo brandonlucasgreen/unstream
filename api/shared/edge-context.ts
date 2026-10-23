@@ -1,13 +1,12 @@
 // What a server-rendered page gets besides the request.
 //
-// These seven renderers were Netlify Edge Functions, which are Deno and take a `Context` from
-// `https://edge.netlify.com`. They are already Web-standard code — `Request` in, `Response` out —
-// so the whole Netlify surface they ever used was `context.next()`. This is that, and nothing
-// else, so the renderers themselves read the same on Workers as they did on Deno.
+// These seven renderers are Netlify Edge Functions, which run on Deno. They are Web-standard
+// code — `Request` in, `Response` out — and the only part of Netlify's `Context` they use is
+// `context.next()`, so this declares just that rather than importing Netlify's type. It also keeps
+// them portable: nothing in them is tied to one host.
 //
-// `next()` means "this request isn't mine — serve the SPA." On Netlify it continued down the
-// edge chain to the static file; here it fetches the SPA shell from the Worker's static assets.
-// The meaning is unchanged and so is the rule it exists for: every one of these renderers
+// `next()` means "this request isn't mine — serve the SPA": on Netlify it continues down the edge
+// chain to the static file. The rule it exists for: every one of these renderers
 // decides, per request and before any database query, whether it answers or the SPA does. One
 // route, one renderer (CLAUDE.md, and docs/postmortems/UNS-100-bifurcation-retro.md for what the
 // other shape cost).
@@ -20,16 +19,11 @@ export interface Context {
 export type EdgeRenderer = (request: Request, context: Context) => Promise<Response>;
 
 /**
- * Read a configuration value, on either runtime these pages run on.
+ * Read a configuration value.
  *
- * They run in two places until the cutover is done: Netlify's edge, which is Deno and has
- * `Deno.env`, and the Worker, which has `process.env` through nodejs_compat. Neither global
- * exists on the other runtime, so both lookups are guarded — a bare `process.env` here would
- * throw on Deno and take every server-rendered page down with it, and the Netlify site has to
- * keep working for the whole rollback window.
- *
- * Deno first, because that is the one still serving production. Delete the Deno branch when the
- * Netlify site is retired.
+ * Netlify's edge is Deno, which has `Deno.env` and no `process`; the unit tests import these
+ * pages under Node, which has `process.env` and no `Deno`. Both lookups are guarded, because a bare
+ * `process.env` here would throw on Deno and take every server-rendered page down with it.
  */
 export function edgeEnv(name: string): string | undefined {
   const deno = (globalThis as { Deno?: { env?: { get(key: string): string | undefined } } }).Deno;

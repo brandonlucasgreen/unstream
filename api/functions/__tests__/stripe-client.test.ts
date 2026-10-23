@@ -70,14 +70,13 @@ describe('stripeMode', () => {
   });
 
   /**
-   * Staging and `npm run dev` share production Supabase. A live key on either turns a "test" tip
-   * into a real charge on a real card, recorded as a live payment — and the natural way to set up
-   * staging is to copy "the values Netlify holds", which on the Production context includes the
-   * live key. So a live key off production switches tips off. (A Netlify deploy preview's `URL` is
-   * the production address, so it can't be covered here; its test key is what protects it.)
+   * `npm run dev` shares production Supabase, so a live key there turns a "test" tip into a real
+   * charge on a real card, recorded as a live payment. So a live key off production switches tips
+   * off. (A Netlify deploy preview's `URL` is the production address, so it can't be covered here;
+   * its test key is what protects it.)
    */
   it.each([
-    ['the staging Worker', 'https://next.unstream.stream'],
+    ['another host', 'https://example.netlify.app'],
     ['npm run dev', 'http://localhost:8888'],
     ['a deployment with no URL at all', undefined],
   ])('switches tips off for a live key on %s', (_where, url) => {
@@ -88,8 +87,8 @@ describe('stripeMode', () => {
     expect(stripeMode()).toBeNull();
   });
 
-  it('still allows a test key everywhere, which is what staging and dev are meant to use', () => {
-    process.env.URL = 'https://next.unstream.stream';
+  it('still allows a test key everywhere, which is what dev is meant to use', () => {
+    process.env.URL = 'http://localhost:8888';
     process.env.STRIPE_SECRET_KEY = 'sk_test_abc';
 
     expect(stripeMode()).toBe('test');
