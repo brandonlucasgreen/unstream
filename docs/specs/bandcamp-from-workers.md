@@ -1,8 +1,9 @@
 # Bandcamp blocks Cloudflare Workers: what depends on it, and the options
 
 **Date:** 2026-10-23
-**Status:** Open. **The Cloudflare cutover is paused on this** (Brandon, 2026-10-23). He will
-write to Bandcamp, but we assume no reply.
+**Status:** Resolved by not moving (Brandon, 2026-10-23). Unstream stays on Netlify; see
+`hosting-contingency-plans.md`. Kept as the record of what was found and why each option was
+weighed.
 
 ## What happens
 

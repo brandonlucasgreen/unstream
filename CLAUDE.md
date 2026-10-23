@@ -273,14 +273,16 @@ The Mac app ships as a direct GitHub release and updates itself with Sparkle 2 (
 - **Sparkle compares `CFBundleVersion`, not the marketing version.** An appcast whose `sparkle:version` is `3.6.0` against an installed `CFBundleVersion` of `15` offers no update. Bump the build number on every release.
 - **The sandbox needs three things at once**: `SUEnableInstallerLauncherService` in `Info-macOS.plist`, the `-spks`/`-spki` `mach-lookup` entitlement exceptions, and the app staying sandboxed. Break one and updates download fine then fail to install — which reads as success right up to the last step. The Developer ID `archive` + `-exportArchive` path also re-signs Sparkle's XPC helpers; don't hand-roll `codesign --deep`.
 
-### The Cloudflare Worker — built, not yet live
+### The Cloudflare Worker — built, shelved
 
 `workers/` runs the whole site on Cloudflare Workers: the same 66 function handlers and the same
 7 server-rendered pages, in one Worker in front of the built SPA. It is Phase 1 of
-`docs/specs/infrastructure-independence-plan.md`. **Production is still Netlify** until Brandon
-points DNS at the Worker, and Netlify is kept idle for two weeks after that for rollback — so
-until then every change has to work on *both*, and that is the main thing to know when editing
-anything under `api/edge/`.
+`docs/specs/infrastructure-independence-plan.md`. **Shelved 2026-10-23: Unstream stays on Netlify.**
+Bandcamp challenges every page request from a Worker (`docs/specs/bandcamp-from-workers.md`), so
+don't propose resuming the cutover; `docs/specs/hosting-contingency-plans.md` is what to follow if
+Netlify ends the legacy plan or Bandcamp starts challenging Netlify. While the code stays, every
+change still has to work on *both*, and that is the main thing to know when editing anything under
+`api/edge/`.
 
 - **`workers/routes.ts` is the routing source of truth**, replacing netlify.toml's 72 redirects
   and 10 edge-function entries. First match wins, and order is load-bearing in the same two
