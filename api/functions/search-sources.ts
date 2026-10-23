@@ -736,6 +736,14 @@ async function searchBeatport(query: string, prefetched?: Promise<PrefetchedCach
 /** Reported once per isolate, so a missing key is one Sentry event, not one per search. */
 let reportedMissingEvenKey = false;
 
+/**
+ * Shorter than the other platforms' 5 s, on purpose. From Cloudflare Workers, Algolia's DSN host
+ * gets no response at all on roughly one request in four (staging, 2026-10-23: about 7 of 28),
+ * while a healthy answer takes 70–260 ms, and every search waits for its slowest platform. A
+ * timeout here isn't cached as "not on Even" (fetchFailed), so the next search simply asks again.
+ */
+const EVEN_TIMEOUT_MS = 1500;
+
 // Search EVEN via Algolia API (direct-to-fan marketplace)
 async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>): Promise<Map<string, NameOnlyEntry>> {
   const cacheKey = artistCacheKey('even', query);
@@ -775,7 +783,7 @@ async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>):
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ query, hitsPerPage: 10 }),
-        }, 5000);
+        }, EVEN_TIMEOUT_MS);
 
         if (!response.ok) { fetchFailed = true; return results; }
 
