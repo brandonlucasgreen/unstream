@@ -3,7 +3,10 @@
 **Date:** 2026-10-18
 **Status:** Decided (Brandon, 2026-10-18). Phases 1a, 1b, 1c and 1d built and verified locally,
 not cut over (see "Where Phase 1 stands"). 1b was promoted from follow-up to prerequisite on
-2026-10-19 and built the same day.
+2026-10-19 and built the same day. **Cutover PAUSED (2026-10-23): Bandcamp challenges every page
+request from a Cloudflare Worker**, so Bandcamp discovery, card data and the catalogue would stop.
+Don't take checklist step 10 or later until `bandcamp-from-workers.md` is resolved. Staging
+(next.unstream.stream) stays up for testing everything else.
 **Scope:** everything around the database. Supabase stays for data and sign-in; the database is
 a later decision (see "Later").
 
