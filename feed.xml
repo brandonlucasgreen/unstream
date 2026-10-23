@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Unstream industry digest</title>
+    <link>https://github.com/brandonlucasgreen/unstream/tree/industry-digest</link>
+    <atom:link href="https://unstream.stream/digest/feed.xml" rel="self" type="application/rss+xml" />
+    <description>A weekly, LLM-compiled digest of music-industry news relevant to Unstream. Unlisted.</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 23 Oct 2026 15:45:02 GMT</lastBuildDate>
+    <item>
+      <title>Weekly Brief: AI Lawsuits, Streaming Growth, and Direct‑Fan Opportunities</title>
+      <link>https://github.com/brandonlucasgreen/unstream/blob/industry-digest/2026-W43.md</link>
+      <guid isPermaLink="false">unstream-industry-digest-2026-W43</guid>
+      <pubDate>Fri, 23 Oct 2026 14:00:00 GMT</pubDate>
+      <description>AI copyright battles heat up, Spotify shows strong premium growth, and new merch channels give indie artists more ways to earn.</description>
+      <content:encoded><![CDATA[<p>This week’s news centers on two intersecting forces: the expanding economics of streaming and the legal turbulence around AI‑generated music. Both trends reshape how independent artists earn and how fans discover and support them. Unstream can use these signals to refine its platform recommendations and alerts.</p>
+<h2>Streaming &amp; Market Trends</h2>
+<h3>Spotify reports 16% YoY revenue growth in Q3 2026</h3>
+<p>Spotify posted solid Q3 results, with revenue up 16% year‑over‑year and double‑digit subscriber growth across all regions. The strong performance signals continued market strength for streaming services, affecting payout calculations and the competitive landscape for direct‑to‑fan platforms that Unstream indexes.</p>
+<p><a href="https://www.digitalmusicnews.com/2026/10/22/spotify-stock-q3-2026-earnings/">Digital Music News</a></p>
+<h3>Latin America becomes Spotify’s second‑largest subscriber market</h3>
+<p>Spotify’s Q3 deck shows 24% of its 306 million premium users now live in Latin America, with over 10% paying for the service. The shift highlights a growing pool of paying fans outside traditional Western markets, where many independent artists rely on direct sales that Unstream can surface.</p>
+<p><a href="https://www.musicbusinessworldwide.com/latin-america-is-catching-north-america-as-spotifys-second-biggest-subscriber-market-and-over-1-in-10-people-there-now-pay-for-it/">Music Business Worldwide</a></p>
+<h3>Spotify positions itself as an AI ‘agent’ for music creators</h3>
+<p>Co‑CEOs announced a new AI‑driven tool that will act as a personal agent, curating and remixing tracks for users. The move could reshape royalty flows and data access, making it crucial for Unstream to monitor how artist payouts may be affected by AI‑mediated distribution.</p>
+<p><a href="https://musically.com/2026/10/23/spotify-is-now-an-agent-co-ceo-outlines-companys-ai-plan/">Music Ally</a></p>
+<h2>AI, Copyright &amp; Legal Battles</h2>
+<h3>Reservoir Media sues Suno and Anthropic over AI copyright infringement</h3>
+<p>Reservoir filed lawsuits demanding nearly $340 million in damages, alleging the AI firms trained on its catalog without permission. This case underscores the legal risk for AI music generators and may prompt platforms to adjust how they display AI‑generated content.</p>
+<p><a href="https://musically.com/2026/10/23/reservoir-hits-suno-and-anthropic-with-copyright-infringement-lawsuits/">Music Ally</a> · <a href="https://www.digitalmusicnews.com/2026/10/22/reservoir-media-suno-anthropic-lawsuit/">Digital Music News</a></p>
+<h3>AI music platform Suno seeks streaming data from MLC in subpoena battle</h3>
+<p>Suno demanded extensive DSP‑specific streaming data from the Mechanical Licensing Collective as part of its defense against infringement claims. The request highlights the growing demand for granular streaming metrics, which could inform Unstream’s data‑driven recommendations.</p>
+<p><a href="https://www.digitalmusicnews.com/2026/10/22/suno-mlc-subpoena/">Digital Music News</a></p>
+<h3>Anthropic’s Claude accused of diluting copyrighted lyrics</h3>
+<p>Music publishers argued that the AI model’s generated lyrics infringe on existing works, raising questions about fair‑use in training data. The outcome may affect how AI tools are permitted to use copyrighted lyrics, impacting artists’ control over their words.</p>
+<p><a href="https://completemusicupdate.com/claudes-lyrics-are-diluting-real-lyrics-say-music-publishers-in-latest-anthropic-proceedings/">CMU</a></p>
+<h3>AFM launches ‘Human Made Human Paid’ campaign against unlabeled AI deals</h3>
+<p>The American Federation of Musicians is pressuring major labels to obtain explicit consent before using recordings in AI models, citing zero payments to musicians. This advocacy could lead to new licensing standards that benefit the artists Unstream highlights.</p>
+<p><a href="https://completemusicupdate.com/major-labels-are-getting-massive-corporate-payouts-for-ai-licensing-but-paying-musicians-zero-says-afms-human-made-human-paid-campaign/">CMU</a></p>
+<h3>Former Eminem employee pleads guilty to leaking unreleased tracks</h3>
+<p>Joseph Strange admitted to selling over 10 unreleased Eminem files, which were streamed millions of times before removal. The case illustrates the vulnerability of unreleased content and the importance of secure distribution channels for artists.</p>
+<p><a href="https://completemusicupdate.com/former-eminem-employee-faces-up-to-five-years-in-jail-after-pleading-guilty-to-stealing-and-selling-unreleased-music-files/">CMU</a> · <a href="https://www.musicbusinessworldwide.com/former-eminem-employee-pleads-guilty-to-selling-unreleased-tracks-that-were-later-accessed-8m-times-on-streaming-platforms/">Music Business Worldwide</a> · <a href="https://www.digitalmusicnews.com/2026/10/22/former-eminem-employee-plea-copyright-infringement/">Digital Music News</a> · <a href="https://www.billboard.com/pro/eminem-employee-pleads-guilty-stealing-unreleased-songs/">Billboard Business</a></p>
+<h2>Fan Discovery &amp; Direct‑to‑Fan Opportunities</h2>
+<h3>Pinterest rolls out holiday tools for artist merchandise</h3>
+<p>The platform is encouraging artists to set up shoppable pins ahead of Black Friday, targeting its 640 million users. This channel offers another direct‑to‑fan revenue stream that Unstream can surface for artists seeking non‑streaming sales.</p>
+<p><a href="https://musically.com/2026/10/23/get-ready-to-promote-artist-merch-on-pinterest-this-holiday-season/">Music Ally</a></p>
+<h3>Unified Music Group CEO says fans live beyond algorithmic feeds</h3>
+<p>In an interview, Jaddan Comerford emphasized community‑based discovery and offline networks as key to independent artist growth. Unstream can leverage this insight by highlighting non‑algorithmic pathways in its search results.</p>
+<p><a href="https://musically.com/2026/10/23/unified-music-group-boss-says-fans-can-be-found-away-from-the-feed/">Music Ally</a></p>
+<h2>Platform Highlights</h2>
+<h3>Bandcamp Daily spotlights ‘The Power of P.E.E.’ as a rising Gen Z act</h3>
+<p>The feature draws attention to a 1990s math‑pop band gaining traction on Bandcamp, illustrating how niche releases can find audiences through the marketplace. Unstream’s inclusion of such artists reinforces its mission to surface direct‑to‑fan options.</p>
+<p><a href="https://daily.bandcamp.com/features/pee-now-more-charm-and-more-tender-feature">Bandcamp Daily</a></p>
+<h3>Bandcamp Daily curates top Latin releases for September 2026</h3>
+<p>The roundup showcases a diverse set of Latin artists available for purchase on Bandcamp, a platform that returns 80‑85% of revenue to creators. Highlighting these releases aligns with Unstream’s goal to promote high‑payout marketplaces.</p>
+<p><a href="https://daily.bandcamp.com/best-latin/the-best-latin-music-on-bandcamp-september-2026">Bandcamp Daily</a></p>
+<h2>For Unstream</h2>
+<ul>
+<li>Add alerts for AI‑related copyright rulings that could affect payout displays.</li>
+<li>Explore integrating Pinterest shoppable‑pin data to surface merch opportunities.</li>
+<li>Track legal outcomes of the Reservoir and Suno cases to refine AI‑generated content labeling.</li>
+</ul>
+<hr>
+<p><em>Compiled by gpt-oss:120b from 90 stories. Every link above comes from a fetched feed or search result, not from the model.</em></p>
+]]></content:encoded>
+    </item>
+  </channel>
+</rss>
