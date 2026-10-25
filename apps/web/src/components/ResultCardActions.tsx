@@ -3,7 +3,6 @@ import { useState } from 'react';
 import type { SearchResult } from '../types';
 import { getSource } from './ResultCardUtils';
 import { analytics } from '../services/analytics';
-import { artistSlug } from '../../../../api/shared/artist-slug';
 
 interface ResultCardActionsProps {
   result: SearchResult;
@@ -13,11 +12,12 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
 
-  // The slug of this artist's page when the server placed them (`knownSlug`, from
-  // attachArtistPageSlugs), else the server's own slug function — never a client-side copy, which
-  // turned Björk into `bj-rk` and a non-Latin name into an empty path. A name with nothing to
-  // slug gets no claim link rather than a link to /claim/.
-  const claimSlug = result.knownSlug || artistSlug(result.name);
+  // The slug of the artist row the server holds (`knownSlug`, from attachArtistPageSlugs, which
+  // uses the canonical accent-folding artistSlug). Never derived here: a client-side regex turned
+  // Björk into `bj-rk`, and a result with no slug — an unverified one, or the client-built
+  // MusicBrainz fallback — has no row, so a claim on it fails at "Artist not found"
+  // (claim-artist.ts). No slug, no claim link.
+  const claimSlug = result.knownSlug;
 
   const handleReportSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();

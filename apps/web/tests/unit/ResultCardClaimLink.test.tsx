@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Audit 2026-10-25 #6: the claim link rebuilt the slug with an ASCII-stripping regex, so Björk's
-// card linked to /claim/bj-rk while the server's row is `bjork`, and a non-Latin name produced
-// /claim/. The link now uses the server's slug: knownSlug when present, else the shared artistSlug.
+// card linked to /claim/bj-rk while the server's row is `bjork`. The link now uses only the slug
+// the server sends (knownSlug), and a result without one has no row to claim, so it gets no link.
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
@@ -23,21 +23,21 @@ function claimHref(overrides: Partial<SearchResult>): string | null {
 afterEach(cleanup);
 
 describe('the claim link', () => {
-  it('uses the server-placed knownSlug first', () => {
+  it('uses the server-placed knownSlug', () => {
+    expect(claimHref({ name: 'Björk', knownSlug: 'bjork' })).toBe('/claim/bjork');
+  });
+
+  it('never rebuilds a slug from the name', () => {
     expect(claimHref({ name: 'Björk', knownSlug: 'bjork-2' })).toBe('/claim/bjork-2');
   });
 
-  it('folds accents like the server when there is no knownSlug', () => {
-    expect(claimHref({ name: 'Björk' })).toBe('/claim/bjork');
+  it('offers no claim link when the server sent no slug, since there is no row to claim', () => {
+    expect(claimHref({ name: 'Björk' })).toBeNull();
     cleanup();
-    expect(claimHref({ name: 'Sébastien Tellier' })).toBe('/claim/sebastien-tellier');
+    expect(claimHref({ name: '坂本龍一', matchConfidence: 'unverified' })).toBeNull();
   });
 
-  it('keeps letters NFD cannot decompose', () => {
-    expect(claimHref({ name: 'Łukasz' })).toBe('/claim/lukasz');
-  });
-
-  it('offers no claim link for a name with nothing to slug', () => {
-    expect(claimHref({ name: '坂本龍一' })).toBeNull();
+  it('offers no claim link on a claimed result', () => {
+    expect(claimHref({ name: 'Björk', knownSlug: 'bjork', matchConfidence: 'claimed' })).toBeNull();
   });
 });
