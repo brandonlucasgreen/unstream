@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import {
   BADGE_BACKDROP,
@@ -115,5 +117,32 @@ describe('registry-wide badge contrast (audit 2026-10-25 #8)', () => {
         `Bandcamp Friday chip in ${theme}`
       ).toBeGreaterThanOrEqual(AA);
     }
+  });
+});
+
+// The tokens above only help where components use them. These are the classes they replace:
+// fixed Tailwind colours that fail AA in one theme (light-theme status text at ~1.7-2.7:1, accent
+// text at 3.45:1, white on an accent fill at 2.84-3.60:1). Use text-error / text-success /
+// text-warning / text-link, and text-accent-foreground on bg-accent-primary.
+describe('components use the contrast tokens', () => {
+  const srcDir = fileURLToPath(new URL('../../src', import.meta.url));
+  const files = (readdirSync(srcDir, { recursive: true }) as string[])
+    .filter(f => f.endsWith('.tsx'))
+    .map(f => ({ name: f, text: readFileSync(join(srcDir, f), 'utf8') }));
+
+  it.each([
+    ['text-red-400 / text-red-500', /(?<![\w-])text-red-(400|500)(?![\w/-])/],
+    ['text-green-400 / text-green-500', /(?<![\w-])text-green-(400|500)(?![\w/-])/],
+    ['text-yellow-400..600 / text-amber-400', /(?<![\w-])text-(yellow-(400|500|600)|amber-400)(?![\w/-])/],
+    ['text-accent-primary', /(?<![\w-])text-accent-primary(?![\w/-])/],
+  ])('no component uses %s', (_label, pattern) => {
+    expect(files.filter(f => pattern.test(f.text)).map(f => f.name)).toEqual([]);
+  });
+
+  it('puts the accent-foreground ink, not white, on a solid accent fill', () => {
+    const offenders = files.filter(f =>
+      f.text.split('\n').some(line => /(?<![\w-])bg-accent-primary(?![\w/-])/.test(line) && /(?<![\w:-])text-white(?![\w/-])/.test(line))
+    );
+    expect(offenders.map(f => f.name)).toEqual([]);
   });
 });

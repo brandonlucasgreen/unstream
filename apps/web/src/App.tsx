@@ -383,7 +383,7 @@ function App() {
               />
               {!session && (
                 <p className="text-center">
-                  <Link to="/login" className="text-accent-primary hover:underline font-medium">
+                  <Link to="/login" className="text-link hover:underline font-medium">
                     {t('cta.signInToSave')}
                   </Link>
                 </p>
@@ -415,7 +415,7 @@ function App() {
 
           {/* Error state */}
           {error && (
-            <div role="alert" className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center">
+            <div role="alert" className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-error text-center">
               {error}
             </div>
           )}
@@ -522,7 +522,7 @@ function App() {
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
               <button
                 onClick={handleMergeSelected}
-                className="px-6 py-3 rounded-xl bg-accent-primary text-white font-medium shadow-lg shadow-accent-primary/30 hover:bg-accent-primary/90 transition-colors flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-accent-primary text-accent-foreground font-medium shadow-lg shadow-accent-primary/30 hover:bg-accent-primary/90 transition-colors flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -595,7 +595,7 @@ function App() {
 
                 <p className="text-text-secondary text-center mt-6">
                   {t('artist:features.freeBody')}{' '}
-                  <a href="/support" className="text-accent-primary hover:underline">
+                  <a href="/support" className="text-link hover:underline">
                     <strong>{t('artist:features.freeSupportLink')}</strong>
                   </a> 🤘
                 </p>

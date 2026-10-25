@@ -15,12 +15,12 @@ export function MacAppPromo() {
             The browser extension does the same for any music playing in your browser (YouTube, Soundcloud, and more).
           </p>
           <p className="text-text-secondary mb-6">
-            Unstream is free because the point is getting money to artists, not charging you to find them. If you find it useful, consider <a href="/support" className="text-accent-primary hover:underline"><strong>supporting its development</strong></a> 🤘
+            Unstream is free because the point is getting money to artists, not charging you to find them. If you find it useful, consider <a href="/support" className="text-link hover:underline"><strong>supporting its development</strong></a> 🤘
           </p>
           <div className="flex flex-col items-center gap-3 mb-2">
             <a
               href="https://github.com/brandonlucasgreen/unstream/releases/latest"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-accent-foreground hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
               onClick={() => analytics.trackDownload()}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

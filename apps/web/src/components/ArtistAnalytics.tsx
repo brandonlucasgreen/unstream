@@ -73,7 +73,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
           <StatTilesSkeleton />
         </SkeletonScreen>
       )}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
 
       {data && !loading && (
         <div className="space-y-3">

@@ -192,7 +192,7 @@ export function ArtistReleasesPage() {
       </p>
 
       {error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
           {error}
         </div>
       )}
@@ -611,7 +611,7 @@ function ReleaseCard({
               <span className="text-xs font-bold uppercase tracking-wide text-text-muted shrink-0">Hidden</span>
             )}
             {release.needsReview && (
-              <span className="text-xs font-bold uppercase tracking-wide text-yellow-500 shrink-0">Needs review</span>
+              <span className="text-xs font-bold uppercase tracking-wide text-warning shrink-0">Needs review</span>
             )}
           </div>
           {meta && <p className="text-xs text-text-muted">{meta}</p>}
@@ -797,7 +797,7 @@ function EditReleaseForm({
             release list, which on a real catalogue is far off-screen from the form being used —
             so a rejected link looked exactly like a button that did nothing. */}
         {linkStatus && (
-          <p id={`add-link-status-${release.id}`} className={`text-xs ${linkStatus.ok ? 'text-green-500' : 'text-red-400'}`}>{linkStatus.message}</p>
+          <p id={`add-link-status-${release.id}`} className={`text-xs ${linkStatus.ok ? 'text-success' : 'text-error'}`}>{linkStatus.message}</p>
         )}
       </div>
     </div>

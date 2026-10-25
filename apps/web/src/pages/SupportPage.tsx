@@ -21,7 +21,7 @@ export function SupportPage() {
           <div className="space-y-4 text-text-secondary text-lg leading-relaxed mb-10">
             <p>
               I'm{' '}
-              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+              <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
                 Brandon
               </a>{' '}
               — an indie musician and tech worker. I build and run Unstream in my spare time.
@@ -60,7 +60,7 @@ export function SupportPage() {
             <ul className="space-y-3 text-text-secondary">
               <li className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">★</span>
-                <span>Star the project on <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">GitHub</a></span>
+                <span>Star the project on <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">GitHub</a></span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">★</span>
@@ -68,7 +68,7 @@ export function SupportPage() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-lg mt-0.5">★</span>
-                <span>Report bugs or suggest features on <a href="https://github.com/brandonlucasgreen/unstream/issues" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">GitHub</a></span>
+                <span>Report bugs or suggest features on <a href="https://github.com/brandonlucasgreen/unstream/issues" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">GitHub</a></span>
               </li>
             </ul>
           </div>

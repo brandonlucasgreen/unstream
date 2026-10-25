@@ -131,7 +131,7 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
             {error}
           </div>
         )}
@@ -140,7 +140,7 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
           <button
             onClick={() => handleRemove(close)}
             disabled={saving}
-            className="px-4 py-2 rounded-xl bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
           >
             {saving ? 'Removing...' : 'Remove link'}
           </button>

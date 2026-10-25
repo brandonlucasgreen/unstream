@@ -70,7 +70,7 @@ export function ResetPasswordPage() {
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
               {error}
             </div>
           )}
@@ -118,7 +118,7 @@ export function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+                className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Set new password'}
               </button>
@@ -131,7 +131,7 @@ export function ResetPasswordPage() {
               </p>
               <Link
                 to="/artist-login"
-                className="inline-block text-sm text-accent-primary hover:underline"
+                className="inline-block text-sm text-link hover:underline"
               >
                 Back to login
               </Link>

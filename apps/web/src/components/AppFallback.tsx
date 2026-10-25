@@ -34,7 +34,7 @@ export function AppErrorFallback() {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+          className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
         >
           Reload
         </button>

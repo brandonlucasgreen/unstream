@@ -157,7 +157,7 @@ export function CollectionGrid({ items }: { items: CollectionGridItem[] }) {
                 aria-current={n === safePage ? 'page' : undefined}
                 className={`min-w-8 px-2 py-1 rounded text-sm ${
                   n === safePage
-                    ? 'bg-accent-primary text-white'
+                    ? 'bg-accent-primary text-accent-foreground'
                     : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
                 }`}
               >

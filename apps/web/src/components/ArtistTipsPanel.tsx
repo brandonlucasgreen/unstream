@@ -53,7 +53,7 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
   return (
     <div className="space-y-4">
       {!settings.livemode && (
-        <p className="text-xs text-yellow-600">Stripe test mode: no real money moves.</p>
+        <p className="text-xs text-warning">Stripe test mode: no real money moves.</p>
       )}
       {settings.foreignAccount ? (
         <p className="text-sm text-text-secondary">
@@ -69,14 +69,14 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
       ) : settings.state === 'stripe_declined' ? (
         <div className="space-y-2 text-sm">
           <p>Stripe didn't approve this account, so it can't take payments.</p>
-          <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">
+          <a href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
             See why in your Stripe dashboard →
           </a>
         </div>
       ) : settings.state === 'onboarding' ? (
         <div className="space-y-2">
           <p className="text-sm">Stripe needs a few more details before fans can tip you.</p>
-          <button type="button" disabled={busy} onClick={() => goToStripe({})} className="px-3 py-2 text-sm rounded-lg bg-accent-primary text-white disabled:opacity-50">
+          <button type="button" disabled={busy} onClick={() => goToStripe({})} className="px-3 py-2 text-sm rounded-lg bg-accent-primary text-accent-foreground disabled:opacity-50">
             Continue on Stripe
           </button>
         </div>
@@ -127,7 +127,7 @@ export function ArtistTipsPanel({ slug, token, settings, onChange }: {
           </div>
         </div>
       )}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
 }
@@ -198,7 +198,7 @@ function ConnectForm({ countries, busy, onConnect }: {
             type="button"
             disabled={busy || !accepted}
             onClick={() => onConnect({ country, acceptAddendum: true })}
-            className="px-3 py-2 rounded-lg bg-accent-primary text-white disabled:opacity-50"
+            className="px-3 py-2 rounded-lg bg-accent-primary text-accent-foreground disabled:opacity-50"
           >
             {busy ? 'Opening Stripe…' : 'Connect Stripe'}
           </button>

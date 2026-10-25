@@ -94,14 +94,14 @@ export function TipGoalsEditor({ token, slug, goals, onChange }: Props) {
               aria-label="Target in dollars"
               className="w-32 px-3 py-2 text-sm bg-bg-primary border border-border rounded-lg"
             />
-            <button type="submit" disabled={busy || !title.trim() || !target} className="px-3 py-2 text-sm rounded-lg bg-accent-primary text-white disabled:opacity-50">
+            <button type="submit" disabled={busy || !title.trim() || !target} className="px-3 py-2 text-sm rounded-lg bg-accent-primary text-accent-foreground disabled:opacity-50">
               Add goal
             </button>
           </div>
           <p className="text-xs text-text-muted">Tips are unconditional: fans are told their tip reaches you whether or not the goal is met.</p>
         </form>
       )}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
 }

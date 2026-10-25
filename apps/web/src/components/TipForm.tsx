@@ -82,7 +82,7 @@ export function TipForm({ data, hydrated = true, initialGoalId = '' }: { data: T
               onClick={() => { setAmountCents(cents); setCustom(''); }}
               className={`min-h-11 rounded-lg border text-sm font-medium transition-colors ${
                 customCents === null && amountCents === cents
-                  ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
+                  ? 'border-accent-primary bg-accent-primary/10 text-link'
                   : 'border-border hover:bg-bg-hover'
               }`}
             >
@@ -105,7 +105,7 @@ export function TipForm({ data, hydrated = true, initialGoalId = '' }: { data: T
           />
         </label>
         {!amountValid && (
-          <p className="mt-1 text-xs text-red-400">
+          <p className="mt-1 text-xs text-error">
             Tips are between {formatUsd(minCents)} and {formatUsd(maxCents)}. Under {formatUsd(minCents)}, card fees take too much of it.
           </p>
         )}
@@ -157,13 +157,13 @@ export function TipForm({ data, hydrated = true, initialGoalId = '' }: { data: T
         </p>
       )}
 
-      {submitError && <p className="text-sm text-red-400">{submitError}</p>}
+      {submitError && <p className="text-sm text-error">{submitError}</p>}
 
       <button
         type="button"
         onClick={pay}
         disabled={!hydrated || !amountValid || submitting}
-        className="w-full min-h-11 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 disabled:opacity-50"
+        className="w-full min-h-11 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 disabled:opacity-50"
       >
         {submitting ? 'Opening Stripe…' : hydrated && breakdown ? `Pay ${formatUsd(breakdown.grossCents)} with Stripe` : 'Pay with Stripe'}
       </button>

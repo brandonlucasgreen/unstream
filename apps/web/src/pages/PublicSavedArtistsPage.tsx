@@ -130,7 +130,7 @@ export function PublicSavedArtistsPage() {
             </p>
             <Link
               to="/"
-              className="inline-block px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+              className="inline-block px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
             >
               Back to Unstream
             </Link>
@@ -168,7 +168,7 @@ export function PublicSavedArtistsPage() {
               onClick={handleCopy}
               className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 copied
-                  ? 'border-green-500/30 text-green-400'
+                  ? 'border-green-500/30 text-success'
                   : 'border-border text-text-muted hover:text-text-primary hover:border-border-hover'
               }`}
             >

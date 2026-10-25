@@ -46,7 +46,7 @@ export function TipButton({ slug, artistName }: { slug: string; artistName: stri
     <TipLink
       slug={slug}
       artistName={artistName}
-      className="inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg border border-accent-primary bg-accent-primary text-white text-sm hover:bg-accent-primary/90 transition-colors"
+      className="inline-flex items-center gap-1.5 min-h-11 px-3 py-2 rounded-lg border border-accent-primary bg-accent-primary text-accent-foreground text-sm hover:bg-accent-primary/90 transition-colors"
     >
       <span aria-hidden="true">♥</span>
       Tip {artistName}

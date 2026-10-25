@@ -167,7 +167,7 @@ export function SettingsPage() {
           <h1 className="text-2xl font-bold">Settings</h1>
 
           {error && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
               {error}
             </div>
           )}
@@ -179,9 +179,9 @@ export function SettingsPage() {
               role="status"
               className={
                 confirmStatus === 'success'
-                  ? 'p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm'
+                  ? 'p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-success text-sm'
                   : confirmStatus === 'error'
-                    ? 'p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm'
+                    ? 'p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm'
                     : 'p-4 rounded-lg bg-bg-secondary border border-border text-text-muted text-sm'
               }
             >

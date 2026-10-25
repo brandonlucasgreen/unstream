@@ -28,7 +28,7 @@ export function StaleBuildBanner() {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-lg bg-accent-primary px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-primary/90"
+          className="rounded-lg bg-accent-primary px-3 py-1.5 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-primary/90"
         >
           Refresh
         </button>

@@ -153,7 +153,7 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
               {error}
             </div>
           )}
@@ -166,7 +166,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => navigate(COLLECTION_HOME)}
-                    className="text-sm text-accent-primary hover:underline"
+                    className="text-sm text-link hover:underline"
                   >
                     Go to your account
                   </button>
@@ -206,7 +206,7 @@ export function LoginPage() {
                           type="button"
                           onClick={handleForgotPassword}
                           disabled={loading}
-                          className="text-xs text-accent-primary hover:underline"
+                          className="text-xs text-link hover:underline"
                         >
                           Forgot password?
                         </button>
@@ -215,7 +215,7 @@ export function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+                      className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
                     >
                       {loading ? 'Signing in...' : 'Sign in'}
                     </button>
@@ -243,7 +243,7 @@ export function LoginPage() {
                     {savingTip ? (
                       <>New to Unstream? Send yourself a sign-in link and we'll create your account.</>
                     ) : (
-                      <>Don't have an account yet? <a href="https://unstream.stream" className="text-accent-primary underline hover:no-underline">Search for an artist</a> you like and click Save.</>
+                      <>Don't have an account yet? <a href="https://unstream.stream" className="text-link underline hover:no-underline">Search for an artist</a> you like and click Save.</>
                     )}
                   </p>
 
@@ -263,7 +263,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setView('form'); setError(null); }}
-                className="text-sm text-accent-primary hover:underline"
+                className="text-sm text-link hover:underline"
               >
                 Back to sign in
               </button>
@@ -280,7 +280,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setView('form'); setError(null); }}
-                className="text-sm text-accent-primary hover:underline"
+                className="text-sm text-link hover:underline"
               >
                 Back to sign in
               </button>

@@ -162,7 +162,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
       {justClaimed && !bannerDismissed && (
         <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-green-400">🎉</span>
+            <span className="text-success">🎉</span>
             <span className="text-sm font-medium text-text-primary">You're verified! Welcome to Unstream.</span>
           </div>
           <button
@@ -195,7 +195,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             {artist.name}
           </h1>
           {artist.matchConfidence === 'claimed' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-primary/15 text-accent-primary">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-primary/15 text-link">
               <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
@@ -268,7 +268,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                 onClick={() => setEmbedTheme('dark')}
                 className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
                   embedTheme === 'dark'
-                    ? 'bg-accent-primary/15 text-accent-primary'
+                    ? 'bg-accent-primary/15 text-link'
                     : 'bg-bg-secondary text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -278,7 +278,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                 onClick={() => setEmbedTheme('light')}
                 className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
                   embedTheme === 'light'
-                    ? 'bg-accent-primary/15 text-accent-primary'
+                    ? 'bg-accent-primary/15 text-link'
                     : 'bg-bg-secondary text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -340,7 +340,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             </pre>
             <button
               onClick={handleCopy}
-              className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors"
+              className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-link hover:bg-accent-primary/20 transition-colors"
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>

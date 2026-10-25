@@ -120,7 +120,7 @@ export function AdminMergePage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-text-muted">No results selected for merging.</p>
-        <button onClick={() => navigate('/')} className="text-accent-primary hover:underline">
+        <button onClick={() => navigate('/')} className="text-link hover:underline">
           Back to search
         </button>
       </div>
@@ -200,7 +200,7 @@ export function AdminMergePage() {
                     checked={link.included}
                     onChange={() => toggleLink(link.id)}
                     aria-label={`Include ${platformName} link`}
-                    className="w-4 h-4 rounded border-border text-accent-primary focus:ring-accent-primary/50 cursor-pointer flex-shrink-0"
+                    className="w-4 h-4 rounded border-border text-link focus:ring-accent-primary/50 cursor-pointer flex-shrink-0"
                   />
                   <span
                     className="text-sm font-medium flex-shrink-0 w-24"
@@ -218,7 +218,7 @@ export function AdminMergePage() {
                   <button
                     onClick={() => removeLink(link.id)}
                     aria-label={`Remove ${platformName} link`}
-                    className="text-text-muted hover:text-red-400 transition-colors flex-shrink-0"
+                    className="text-text-muted hover:text-error transition-colors flex-shrink-0"
                     title="Remove link"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +246,7 @@ export function AdminMergePage() {
 
         {/* Error */}
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
             {error}
           </div>
         )}
@@ -256,7 +256,7 @@ export function AdminMergePage() {
           <button
             onClick={handleSave}
             disabled={saving || includedLinks.length < 2}
-            className="px-6 py-2.5 rounded-xl bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-xl bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Merge Override'}
           </button>

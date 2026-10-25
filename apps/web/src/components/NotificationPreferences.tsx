@@ -94,12 +94,12 @@ export function NotificationPreferences() {
   }
 
   if (!preferences) {
-    return error ? <p className="text-sm text-red-400">{error}</p> : null;
+    return error ? <p className="text-sm text-error">{error}</p> : null;
   }
 
   return (
     <div className="space-y-3">
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
       {TOGGLES.map(({ key, label, description }) => {
         const enabled = preferences[key];
         const busy = togglingKey === key;

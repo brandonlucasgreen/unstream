@@ -484,13 +484,13 @@ export function ArtistEditPage() {
   return (
     <div className="space-y-8">
       {form.error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
           {form.error}
         </div>
       )}
 
       {form.success && (
-        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-success text-sm">
           {form.success}
         </div>
       )}
@@ -513,10 +513,10 @@ export function ArtistEditPage() {
         {form.artistName !== form.originalName && (() => {
           const level = getNameChangeWarning(form.originalName, form.artistName);
           if (level === 'error') {
-            return <p className="text-xs text-red-400">Artist name cannot be empty.</p>;
+            return <p className="text-xs text-error">Artist name cannot be empty.</p>;
           }
           if (level === 'warn') {
-            return <p className="text-xs text-amber-400">This is a significant change from "{form.originalName}". You'll be asked to confirm when saving.</p>;
+            return <p className="text-xs text-warning">This is a significant change from "{form.originalName}". You'll be asked to confirm when saving.</p>;
           }
           return <p className="text-xs text-text-muted">Name will be updated from "{form.originalName}".</p>;
         })()}
@@ -566,7 +566,7 @@ export function ArtistEditPage() {
             {form.customImageUrl && (
               <button
                 onClick={() => set('customImageUrl', null)}
-                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                className="text-xs text-error hover:text-red-300 transition-colors"
               >
                 Remove custom photo
               </button>
@@ -591,7 +591,7 @@ export function ArtistEditPage() {
           />
         </div>
         {form.newSlug !== form.currentSlug && (
-          <p className="text-xs text-amber-400">
+          <p className="text-xs text-warning">
             Changing your slug will update your profile URL. Old links will stop working.
           </p>
         )}
@@ -743,7 +743,7 @@ export function ArtistEditPage() {
             </div>
             <button
               onClick={() => set('featuredEmbed', '')}
-              className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              className="text-xs text-error hover:text-red-300 transition-colors"
             >
               Remove embed
             </button>
@@ -758,7 +758,7 @@ export function ArtistEditPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={addLink}
-              className="text-sm text-accent-primary hover:underline"
+              className="text-sm text-link hover:underline"
             >
               + Add platform
             </button>
@@ -886,7 +886,7 @@ export function ArtistEditPage() {
                   <button
                     onClick={() => removeLink(index)}
                     aria-label={isDivider ? `Remove divider ${index + 1}` : `Remove link ${index + 1}`}
-                    className="text-text-muted hover:text-red-400 transition-colors p-1"
+                    className="text-text-muted hover:text-error transition-colors p-1"
                     title={isDivider ? 'Remove divider' : 'Remove link'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -897,7 +897,7 @@ export function ArtistEditPage() {
 
                 {/* Streaming service warning */}
                 {streamingWarning && (
-                  <p className="text-xs text-amber-400 px-3">
+                  <p className="text-xs text-warning px-3">
                     {streamingWarning}
                   </p>
                 )}
@@ -912,7 +912,7 @@ export function ArtistEditPage() {
         <button
           onClick={handleSave}
           disabled={form.saving}
-          className="px-6 py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+          className="px-6 py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
         >
           {form.saving ? 'Saving...' : 'Save changes'}
         </button>
@@ -927,7 +927,7 @@ export function ArtistEditPage() {
       {/* Danger zone — removing the claim lives here rather than on the dashboard, where it
           sat one click away from Edit and View. */}
       <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-red-400">Danger zone</h2>
+        <h2 className="text-sm font-semibold text-error">Danger zone</h2>
         <p className="text-xs text-text-muted">
           Removing {form.originalName} takes this artist off your account. Your bio, profile
           photo, featured release and link dividers are deleted, and unstream.stream/a/
@@ -938,7 +938,7 @@ export function ArtistEditPage() {
         {!form.removeOpen ? (
           <button
             onClick={() => set('removeOpen', true)}
-            className="px-4 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+            className="px-4 py-2 rounded-lg border border-red-500/40 text-error text-sm font-medium hover:bg-red-500/10 transition-colors"
           >
             Remove this artist
           </button>

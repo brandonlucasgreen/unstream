@@ -71,12 +71,12 @@ export function ResultCardPreview({ resultName, canPlay, previewUrl }: ResultCar
           </button>
         </div>
       ) : embedError ? (
-        <p className="text-xs text-red-400">Could not load preview</p>
+        <p className="text-xs text-error">Could not load preview</p>
       ) : (
         <button
           onClick={handlePlayClick}
           disabled={embedLoading}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-sm bg-accent-primary/10 text-link hover:bg-accent-primary/20 transition-colors ${embedLoading ? 'opacity-50 cursor-wait' : ''}`}
         >
           {embedLoading ? (
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

@@ -266,7 +266,7 @@ export function DownloadGrid() {
           Also available for{' '}
           <a
             href="https://github.com/brandonlucasgreen/unstream/releases/latest"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownload()}
           >
             macOS
@@ -276,7 +276,7 @@ export function DownloadGrid() {
             href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownloadChrome()}
           >
             Chrome
@@ -286,7 +286,7 @@ export function DownloadGrid() {
             href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownloadFirefox()}
           >
             Firefox

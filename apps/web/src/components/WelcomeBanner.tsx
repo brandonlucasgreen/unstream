@@ -36,7 +36,7 @@ export function WelcomeBanner() {
           Your email is confirmed and you're signed in. This is your collection: artists you
           save show up here, along with their new releases, so you know when there's something
           to support.{' '}
-          <Link to="/" className="text-accent-primary hover:underline">
+          <Link to="/" className="text-link hover:underline">
             Search for an artist
           </Link>{' '}
           to get started.

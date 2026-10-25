@@ -74,7 +74,7 @@ export function AdminLinksPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-text-muted">Not authorized.</p>
-        <button onClick={() => navigate('/')} className="text-accent-primary hover:underline">
+        <button onClick={() => navigate('/')} className="text-link hover:underline">
           Back to search
         </button>
       </div>
@@ -94,7 +94,7 @@ export function AdminLinksPage() {
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
             {error}
           </div>
         )}

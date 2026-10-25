@@ -22,7 +22,7 @@ export function TermsOfUsePage() {
 
       <main className="pt-8 px-4 pb-16">
         <div className="max-w-3xl mx-auto">
-          <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
+          <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-link text-text-primary">
             <h1 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h1>
             <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
 
@@ -57,7 +57,7 @@ export function TermsOfUsePage() {
                 </li>
                 <li>
                   If something looks wrong, email{' '}
-                  <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  <a href="mailto:support@unstream.stream" className="text-link hover:text-accent-secondary transition-colors underline">
                     support@unstream.stream
                   </a>
                   . We would much rather fix it than argue about it.
@@ -78,7 +78,7 @@ export function TermsOfUsePage() {
               </P>
               <P>
                 Our{' '}
-                <Link to="/privacy-policy" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <Link to="/privacy-policy" className="text-link hover:text-accent-secondary transition-colors underline">
                   Privacy Policy
                 </Link>{' '}
                 explains what data we collect and why. It's part of this agreement.
@@ -298,7 +298,7 @@ export function TermsOfUsePage() {
             <Section n={10} title="API, apps, extension, and bot">
               <P>
                 <strong>Public API.</strong> We offer a versioned REST API, documented on our{' '}
-                <Link to="/developers" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <Link to="/developers" className="text-link hover:text-accent-secondary transition-colors underline">
                   developers page
                 </Link>
                 . API keys are issued to you, tied to your account, and not to be shared or resold. Requests are rate
@@ -584,7 +584,7 @@ export function TermsOfUsePage() {
             <Section n={24} title="Contact">
               <P>
                 Questions, corrections, takedown notices, account deletion, or anything else about these Terms:{' '}
-                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <a href="mailto:support@unstream.stream" className="text-link hover:text-accent-secondary transition-colors underline">
                   support@unstream.stream
                 </a>
                 .

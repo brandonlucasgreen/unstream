@@ -99,7 +99,7 @@ export function LoginInterstitial({ artistId, artistName, artistImageUrl, onClos
             </p>
 
             {error && (
-              <p className="text-sm text-red-400 mb-3">{error}</p>
+              <p className="text-sm text-error mb-3">{error}</p>
             )}
 
             {!showPassword ? (
@@ -115,7 +115,7 @@ export function LoginInterstitial({ artistId, artistName, artistImageUrl, onClos
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2 px-4 rounded-lg bg-accent-primary text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="w-full py-2 px-4 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {loading ? 'Sending...' : 'Send login link'}
                 </button>
@@ -147,7 +147,7 @@ export function LoginInterstitial({ artistId, artistName, artistImageUrl, onClos
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2 px-4 rounded-lg bg-accent-primary text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="w-full py-2 px-4 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {loading ? 'Signing in...' : 'Sign in'}
                 </button>

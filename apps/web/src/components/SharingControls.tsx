@@ -111,7 +111,7 @@ export function SharingControls() {
         </p>
         <Link
           to="/settings"
-          className="inline-block mt-2 px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+          className="inline-block mt-2 px-3 py-1.5 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
         >
           Set username
         </Link>
@@ -129,9 +129,9 @@ export function SharingControls() {
           you've saved, and your location if you've set one, at a link anyone can open and search
           engines can index. Hidden items stay private, and your email address is never published.
           See the{' '}
-          <Link to="/terms#section-6" className="text-accent-primary hover:underline">Terms of Use</Link>.
+          <Link to="/terms#section-6" className="text-link hover:underline">Terms of Use</Link>.
         </p>
-        {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+        {error && <p className="text-sm text-error mt-2">{error}</p>}
         <button
           onClick={() => handleToggle(true)}
           disabled={toggling}
@@ -151,7 +151,7 @@ export function SharingControls() {
         Anyone with the link can see the releases in your collection and the artists you've
         saved. Items you've hidden stay private.
       </p>
-      {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+      {error && <p className="text-sm text-error mt-2">{error}</p>}
       <div className="flex items-center gap-2 mt-2 flex-wrap">
         <span className="text-sm text-text-muted font-mono truncate max-w-xs">
           {sharing.public_url}
@@ -168,7 +168,7 @@ export function SharingControls() {
           onClick={handleCopy}
           className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
             copied
-              ? 'border-green-500/30 text-green-400'
+              ? 'border-green-500/30 text-success'
               : 'border-border text-text-muted hover:text-text-primary hover:border-border-hover'
           }`}
         >
@@ -177,7 +177,7 @@ export function SharingControls() {
         <button
           onClick={() => handleToggle(false)}
           disabled={toggling}
-          className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-error hover:border-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {toggling ? 'Disabling…' : 'Make private'}
         </button>

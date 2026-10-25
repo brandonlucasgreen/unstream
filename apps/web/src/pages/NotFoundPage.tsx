@@ -53,9 +53,9 @@ export function NotFoundPage() {
             copy of the site cached in your browser can reach for a page that has since moved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4 text-sm">
-            <Link to="/" className="text-accent-primary hover:underline">Search for an artist</Link>
-            <Link to="/artists" className="text-accent-primary hover:underline">Browse artists</Link>
-            <Link to="/faq" className="text-accent-primary hover:underline">FAQ</Link>
+            <Link to="/" className="text-link hover:underline">Search for an artist</Link>
+            <Link to="/artists" className="text-link hover:underline">Browse artists</Link>
+            <Link to="/faq" className="text-link hover:underline">FAQ</Link>
           </div>
         </div>
       </main>

@@ -53,7 +53,7 @@ export function NavDropdown({ group }: { group: NavGroup }) {
         aria-controls={open ? panelId : undefined}
         className={`flex items-center gap-1 transition-colors ${
           group.emphasis
-            ? 'text-accent-primary font-medium hover:underline'
+            ? 'text-link font-medium hover:underline'
             : 'text-text-muted hover:text-text-primary'
         }`}
       >
@@ -77,7 +77,7 @@ export function NavDropdown({ group }: { group: NavGroup }) {
               to={item.to}
               onClick={() => setOpen(false)}
               className={`block px-4 py-2 text-sm hover:bg-bg-hover transition-colors ${
-                item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                item.emphasis ? 'text-link font-medium' : 'text-text-primary'
               }`}
             >
               {item.label}

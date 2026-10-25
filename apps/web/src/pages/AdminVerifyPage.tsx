@@ -130,7 +130,7 @@ export function AdminVerifyPage() {
           </h1>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
               {error}
             </div>
           )}
@@ -178,13 +178,13 @@ export function AdminVerifyPage() {
                               href={req.website_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-accent-primary hover:underline"
+                              className="text-link hover:underline"
                             >
                               {req.website_url}
                             </a>
                           </p>
                         )}
-                        <p className={`text-xs ${req.link_back_completed ? 'text-green-400' : 'text-yellow-400'}`}>
+                        <p className={`text-xs ${req.link_back_completed ? 'text-success' : 'text-warning'}`}>
                           {req.link_back_completed
                             ? '✓ link-back completed'
                             : '⚠ link-back not completed — manual verification required'}
@@ -256,8 +256,8 @@ export function AdminVerifyPage() {
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             req.status === 'approved'
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-red-500/10 text-red-400'
+                              ? 'bg-green-500/10 text-success'
+                              : 'bg-red-500/10 text-error'
                           }`}
                         >
                           {req.status}

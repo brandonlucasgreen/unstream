@@ -126,7 +126,7 @@ export function MobileNav({
             {items.map(entry => isNavGroup(entry) ? (
               <div key={entry.label} className="border-b border-border">
                 <p className={`px-6 pt-4 pb-1 text-xs font-medium uppercase tracking-wider ${
-                  entry.emphasis ? 'text-accent-primary' : 'text-text-muted'
+                  entry.emphasis ? 'text-link' : 'text-text-muted'
                 }`}>
                   {entry.label}
                 </p>
@@ -136,7 +136,7 @@ export function MobileNav({
                     to={item.to}
                     onClick={close}
                     className={`block px-6 py-3 text-base hover:bg-bg-hover transition-colors ${
-                      item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                      item.emphasis ? 'text-link font-medium' : 'text-text-primary'
                     }`}
                   >
                     {item.label}
@@ -151,7 +151,7 @@ export function MobileNav({
                 rel="noopener noreferrer"
                 onClick={close}
                 className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
-                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                  entry.emphasis ? 'text-link font-medium' : 'text-text-primary'
                 }`}
               >
                 {entry.label}
@@ -162,7 +162,7 @@ export function MobileNav({
                 to={entry.to}
                 onClick={close}
                 className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
-                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                  entry.emphasis ? 'text-link font-medium' : 'text-text-primary'
                 }`}
               >
                 {entry.label}

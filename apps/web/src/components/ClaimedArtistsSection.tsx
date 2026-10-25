@@ -60,7 +60,7 @@ export function ClaimedArtistsSection() {
 
   return (
     <section>
-      {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-error mb-3">{error}</p>}
 
       {profiles === null ? (
         !error && <ArtistRowsSkeleton count={2} />
@@ -75,7 +75,7 @@ export function ClaimedArtistsSection() {
             <p className="text-text-muted">You haven't claimed an artist profile yet.</p>
             <p className="text-text-muted text-sm mt-1">
               If you're an artist,{' '}
-              <Link to="/" className="text-accent-primary hover:underline">
+              <Link to="/" className="text-link hover:underline">
                 search for your name
               </Link>{' '}
               and claim your profile to edit your links, bio and releases.
@@ -111,7 +111,7 @@ export function ClaimedArtistsSection() {
                   <div className="flex items-center gap-2 mt-3">
                     <Link
                       to={`/artist-edit/${profile.slug}`}
-                      className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
                     >
                       Edit
                     </Link>

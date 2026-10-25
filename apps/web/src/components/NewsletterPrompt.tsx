@@ -63,7 +63,7 @@ export function NewsletterPrompt({ email, source }: NewsletterPromptProps) {
               type="button"
               onClick={subscribe}
               disabled={status === 'submitting'}
-              className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
             >
               {status === 'submitting' ? 'Subscribing...' : 'Subscribe'}
             </button>

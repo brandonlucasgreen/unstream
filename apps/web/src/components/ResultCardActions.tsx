@@ -57,7 +57,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
               <button
                 onClick={handleReportSubmit}
                 disabled={!reportText.trim()}
-                className="px-3 py-1.5 text-xs font-medium bg-accent-primary/10 text-accent-primary rounded-lg hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium bg-accent-primary/10 text-link rounded-lg hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Send Report
               </button>
@@ -75,7 +75,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
             {result.type === 'artist' && result.matchConfidence !== 'claimed' && claimSlug ? (
               <Link
                 to={`/claim/${claimSlug}`}
-                className="text-xs text-text-secondary hover:text-accent-primary transition-colors flex items-center gap-1"
+                className="text-xs text-text-secondary hover:text-link transition-colors flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

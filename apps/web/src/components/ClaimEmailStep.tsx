@@ -31,7 +31,7 @@ export function ClaimEmailStep({ email, setEmail, loading, subscribe, setSubscri
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {loading ? 'Sending...' : 'Send sign-in link'}
       </button>

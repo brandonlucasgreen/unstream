@@ -48,7 +48,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
   {
     label: 'URL',
     value: (
-      <a href="https://unstream.stream" className="text-accent-primary hover:underline">
+      <a href="https://unstream.stream" className="text-link hover:underline">
         unstream.stream
       </a>
     ),
@@ -61,7 +61,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
         href="https://github.com/brandonlucasgreen/unstream"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-accent-primary hover:underline"
+        className="text-link hover:underline"
       >
         Open source on GitHub
       </a>
@@ -80,7 +80,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
           href="https://github.com/brandonlucasgreen/unstream/releases/latest"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent-primary hover:underline"
+          className="text-link hover:underline"
         >
           GitHub Releases
         </a>{' '}
@@ -101,7 +101,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
           href="https://unstream.goatcounter.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent-primary hover:underline"
+          className="text-link hover:underline"
         >
           public
         </a>
@@ -116,7 +116,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
   {
     label: 'Press contact',
     value: (
-      <a href="mailto:press@unstream.stream" className="text-accent-primary hover:underline">
+      <a href="mailto:press@unstream.stream" className="text-link hover:underline">
         press@unstream.stream
       </a>
     ),
@@ -130,7 +130,7 @@ const FACTS: { label: string; value: React.ReactNode }[] = [
           href="https://kidlightbulbs.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent-primary hover:underline"
+          className="text-link hover:underline"
         >
           Kid Lightbulbs
         </a>
@@ -308,7 +308,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
         <button
           type="button"
           onClick={handleCopy}
-          className="text-xs font-medium text-accent-primary hover:underline shrink-0"
+          className="text-xs font-medium text-link hover:underline shrink-0"
         >
           {copied ? 'Copied' : 'Copy'}
         </button>
@@ -392,7 +392,7 @@ export function PressPage() {
                 ListenBrainz, surfaces library services like Hoopla and Freegal so "free and legal
                 with your library card" is a first-class answer, ships an iOS Shortcut that takes a
                 share-sheet link from Spotify or Apple Music, has a{' '}
-                <Link to="/developers" className="text-accent-primary hover:underline">
+                <Link to="/developers" className="text-link hover:underline">
                   public API
                 </Link>
                 , and flags Bandcamp Friday in the web app and the extension.
@@ -466,15 +466,15 @@ export function PressPage() {
               />
               <div className="text-sm text-text-secondary">
                 <p className="mb-2">
-                  <a href="/icon-512.png" download className="text-accent-primary hover:underline">
+                  <a href="/icon-512.png" download className="text-link hover:underline">
                     512×512 PNG
                   </a>
                   {' · '}
-                  <a href="/icon-192.png" download className="text-accent-primary hover:underline">
+                  <a href="/icon-192.png" download className="text-link hover:underline">
                     192×192 PNG
                   </a>
                   {' · '}
-                  <a href="/favicon.svg" download className="text-accent-primary hover:underline">
+                  <a href="/favicon.svg" download className="text-link hover:underline">
                     SVG
                   </a>
                 </p>
@@ -484,7 +484,7 @@ export function PressPage() {
                     href="https://github.com/brandonlucasgreen/unstream/tree/main/assets/logos"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent-primary hover:underline"
+                    className="text-link hover:underline"
                   >
                     assets/logos
                   </a>{' '}
@@ -505,7 +505,7 @@ export function PressPage() {
                 href="https://unstream.goatcounter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent-primary hover:underline"
+                className="text-link hover:underline"
               >
                 public
               </a>{' '}
@@ -537,7 +537,7 @@ export function PressPage() {
                     href="https://kidlightbulbs.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent-primary hover:underline"
+                    className="text-link hover:underline"
                   >
                     Kid Lightbulbs
                   </a>{' '}
@@ -546,7 +546,7 @@ export function PressPage() {
                     href="https://buffer.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent-primary hover:underline"
+                    className="text-link hover:underline"
                   >
                     Buffer
                   </a>
@@ -557,7 +557,7 @@ export function PressPage() {
                   <a
                     href="/brandon-lucas-green.jpg"
                     download
-                    className="text-accent-primary hover:underline"
+                    className="text-link hover:underline"
                   >
                     Download the photo
                   </a>{' '}
@@ -573,7 +573,7 @@ export function PressPage() {
             <p className="text-text-secondary leading-relaxed">
               <a
                 href="mailto:press@unstream.stream"
-                className="text-accent-primary hover:underline"
+                className="text-link hover:underline"
               >
                 press@unstream.stream
               </a>{' '}
@@ -582,7 +582,7 @@ export function PressPage() {
             </p>
             <p className="text-text-secondary leading-relaxed mt-3">
               Not press?{' '}
-              <Link to="/contact" className="text-accent-primary hover:underline">
+              <Link to="/contact" className="text-link hover:underline">
                 The contact page
               </Link>{' '}
               is the better door.

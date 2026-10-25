@@ -51,7 +51,7 @@ export function ArtistSettingsHeader({ slug, artistName, active }: {
         ) : (
           <div className="h-9 w-48 rounded bg-bg-secondary animate-pulse" aria-hidden="true" />
         )}
-        <Link to={`/a/${slug}`} className="text-sm text-accent-primary hover:underline">
+        <Link to={`/a/${slug}`} className="text-sm text-link hover:underline">
           View live profile
         </Link>
       </div>

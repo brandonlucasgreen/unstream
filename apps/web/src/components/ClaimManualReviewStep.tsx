@@ -46,7 +46,7 @@ export function ClaimManualReviewStep({
       <button
         type="submit"
         disabled={manualReviewSubmitting || manualReviewMessage.trim().length === 0}
-        className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {manualReviewSubmitting ? 'Submitting...' : 'Submit verification request'}
       </button>

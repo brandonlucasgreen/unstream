@@ -46,7 +46,7 @@ export function ResultCardHeader({
             checked={!!isSelected}
             onChange={() => onToggleSelect(result.id)}
             onClick={(e) => e.stopPropagation()}
-            className="w-5 h-5 rounded border-border text-accent-primary focus:ring-accent-primary/50 cursor-pointer"
+            className="w-5 h-5 rounded border-border text-link focus:ring-accent-primary/50 cursor-pointer"
           />
         </div>
       )}
@@ -70,12 +70,12 @@ export function ResultCardHeader({
       <div className="flex-1 min-w-0">
         {result.matchConfidence !== 'claimed' && (
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-accent-primary whitespace-nowrap">
+            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-primary/10 text-link whitespace-nowrap">
               {typeLabel[result.type]}
             </span>
             {result.matchConfidence === 'unverified' && (
               <span
-                className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-500 flex items-center gap-1 whitespace-nowrap"
+                className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-warning flex items-center gap-1 whitespace-nowrap"
                 title={result.unverifiedReason === 'conflicting-releases'
                   ? 'This may be a different artist with the same name — its releases don’t match the verified result'
                   : 'We couldn’t cross-check this against release data on other platforms'}

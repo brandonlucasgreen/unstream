@@ -76,17 +76,17 @@ export function LocationField({ currentLocation, accessToken, onSaved }: Locatio
       </div>
 
       {error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-error">{error}</p>
       )}
 
       {success && !error && (
-        <p className="text-sm text-green-400">{success}</p>
+        <p className="text-sm text-success">{success}</p>
       )}
 
       <button
         type="submit"
         disabled={loading || isUnchanged}
-        className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {loading ? 'Saving...' : 'Save location'}
       </button>
