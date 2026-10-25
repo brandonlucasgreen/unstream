@@ -148,7 +148,12 @@
     50% { transform: scaleY(1); }
   }
 
+  /* Dialog's drawer variant (the mobile nav) slides in from the right when it opens. */
+  @keyframes dialog-drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .dialog-drawer[open] { animation: dialog-drawer-in 250ms ease-out; }
+
   @media (prefers-reduced-motion: reduce) {
+    .dialog-drawer[open] { animation: none; }
     .skeleton::after { animation: none; opacity: 0.5; }
     .skeleton-fade-in { animation: none; }
     .eq-bars span { animation: none; transform: scaleY(0.6); }

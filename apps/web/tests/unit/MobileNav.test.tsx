@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MobileNav, type NavEntry, type NavItem } from 'src/components/MobileNav';
@@ -23,35 +23,39 @@ function trigger() {
   return screen.getByLabelText('Open menu');
 }
 
-// The drawer stays mounted so it can animate shut, so "closed" means inert and
-// translated off-screen rather than absent from the DOM.
-function drawer() {
-  return screen.getByLabelText('Main menu');
+// The drawer is a modal <dialog> (see Dialog.tsx), mounted only while open: the browser makes the
+// page behind it inert and keeps Tab inside it, which the old always-mounted overlay didn't.
+function dialog() {
+  return document.querySelector('dialog');
 }
 function isOpen() {
-  return trigger().getAttribute('aria-expanded') === 'true'
-    && !drawer().parentElement?.hasAttribute('inert')
-    && drawer().className.includes('translate-x-0');
+  return trigger().getAttribute('aria-expanded') === 'true' && !!dialog()?.hasAttribute('open');
 }
 
 describe('MobileNav', () => {
-  afterEach(() => {
-    cleanup();
+  beforeEach(() => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener: () => {}, removeEventListener: () => {} }));
   });
 
-  it('starts closed, with the drawer inert and off-screen', () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('starts closed, with no drawer on the page', () => {
     render(<MobileNav items={loggedInItems} />);
 
     expect(isOpen()).toBe(false);
-    expect(drawer().className).toContain('translate-x-full');
-    expect(drawer().parentElement?.hasAttribute('inert')).toBe(true);
+    expect(dialog()).toBeNull();
   });
 
-  it('slides open when the hamburger is clicked', () => {
+  it('opens as a modal dialog named by the menu when the hamburger is clicked', () => {
     render(<MobileNav items={loggedInItems} />);
 
     fireEvent.click(trigger());
     expect(isOpen()).toBe(true);
+    expect(screen.getByRole('dialog', { name: 'Main menu' })).toBeTruthy();
+    expect(screen.getByRole('navigation', { name: 'Main menu' })).toBeTruthy();
   });
 
   it('shows only Login when signed out', () => {
@@ -91,19 +95,24 @@ describe('MobileNav', () => {
     expect(isOpen()).toBe(false);
   });
 
-  it('closes on Escape, on the close button and on a backdrop tap', () => {
+  // Escape is the browser's: it fires `cancel` on the dialog, then closes it. The old drawer's own
+  // Escape handler closed without returning focus to the hamburger.
+  it('closes on Escape, on the close button and on a backdrop tap, refocusing the hamburger', () => {
     render(<MobileNav items={loggedInItems} />);
 
     fireEvent.click(trigger());
-    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent(dialog()!, new Event('cancel', { cancelable: true }));
+    dialog()!.close();
     expect(isOpen()).toBe(false);
+    expect(document.activeElement).toBe(trigger());
 
     fireEvent.click(trigger());
     fireEvent.click(screen.getByLabelText('Close menu'));
     expect(isOpen()).toBe(false);
 
     fireEvent.click(trigger());
-    fireEvent.click(drawer().previousElementSibling as Element);
+    // A click on the <dialog> element itself is a click on its backdrop.
+    fireEvent.click(dialog()!);
     expect(isOpen()).toBe(false);
   });
 
@@ -125,22 +134,6 @@ describe('MobileNav', () => {
 
     fireEvent.click(screen.getByLabelText('Close menu'));
     expect(document.activeElement).toBe(trigger());
-  });
-
-  // A scrolling focus makes the browser scroll the clipped overlay sideways to
-  // reveal the still-off-screen panel, which snaps it into place and fights the
-  // slide-in. Both focus calls must opt out.
-  it('focuses without scrolling', () => {
-    const focus = vi.spyOn(HTMLButtonElement.prototype, 'focus');
-    render(<MobileNav items={loggedInItems} />);
-
-    fireEvent.click(trigger());
-    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
-
-    fireEvent.click(screen.getByLabelText('Close menu'));
-    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
-
-    focus.mockRestore();
   });
 
   // Admin pages arrive as a group. The drawer shows them as a labelled block of

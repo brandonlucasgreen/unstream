@@ -5,7 +5,7 @@
 // Cmd/Ctrl-click keeps the link's normal meaning; the window loads the artist's tip data and shows
 // the form, with a goal preselected when one was clicked; clicks inside it don't reach the clickable
 // UI the button sits in; and closing it removes it.
-import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TipButton, TipLink } from 'src/components/TipButton';
@@ -13,14 +13,7 @@ import { TipButton, TipLink } from 'src/components/TipButton';
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: null }) }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
-// jsdom has <dialog> but not its modal methods.
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
-  HTMLDialogElement.prototype.close = function () {
-    this.removeAttribute('open');
-    this.dispatchEvent(new Event('close'));
-  };
-});
+// jsdom's missing <dialog> methods are stood in for in tests/setup.ts.
 
 const fetchMock = vi.fn();
 const tipPage = {
