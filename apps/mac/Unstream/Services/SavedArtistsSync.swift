@@ -28,6 +28,10 @@ class SavedArtistsSync: ObservableObject {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         self.session = URLSession(configuration: config)
+        if let data = UserDefaults.standard.data(forKey: pendingKey),
+           let saved = try? JSONDecoder().decode([PendingChange].self, from: data) {
+            pendingChanges = saved
+        }
     }
 
     // MARK: - Pull
@@ -146,13 +150,11 @@ class SavedArtistsSync: ObservableObject {
     private let pendingKey = "sync.pendingChanges"
     private var isFlushing = false
 
-    private(set) var pendingChanges: [PendingChange] {
-        get {
-            guard let data = UserDefaults.standard.data(forKey: pendingKey) else { return [] }
-            return (try? JSONDecoder().decode([PendingChange].self, from: data)) ?? []
-        }
-        set {
-            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: pendingKey)
+    /// Loaded once in `init`, persisted on every change, so the outbox survives a relaunch
+    /// without decoding UserDefaults on every read.
+    private(set) var pendingChanges: [PendingChange] = [] {
+        didSet {
+            UserDefaults.standard.set(try? JSONEncoder().encode(pendingChanges), forKey: pendingKey)
         }
     }
 
@@ -199,20 +201,20 @@ class SavedArtistsSync: ObservableObject {
 
         while let change = pendingChanges.first {
             switch await send(change) {
-            case .sent(let serverTime):
-                pendingChanges = Array(pendingChanges.dropFirst())
-                // Move the cursor only when nothing else is waiting: a cursor past an unsent
-                // change is harmless, but one past another device's change would skip it.
-                if let serverTime, pendingChanges.isEmpty, lastSyncTime != nil {
-                    lastSyncTime = serverTime
-                }
+            case .sent:
+                // The sync cursor is deliberately left alone. Moving it to this save's
+                // server_time would make the next incremental pull skip whatever another
+                // device changed while this one was offline — the case the outbox exists for.
+                // The pull reads this change back along with everything else.
+                pendingChanges.removeFirst()
             case .rejected:
-                pendingChanges = Array(pendingChanges.dropFirst())
+                pendingChanges.removeFirst()
+                // Undo the optimistic change with a full pull, then say why. In that order:
+                // pull() clears syncError when it starts, which used to wipe this message.
+                await pull(force: true)
                 syncError = change.action == .save
                     ? "Couldn't save \(change.name) to your account"
                     : "Couldn't remove \(change.name) from your account"
-                // Undo the optimistic change; the next full pull shows the server's truth.
-                await pull(force: true)
                 return
             case .unauthorized:
                 syncError = "Session expired — sign in again"
@@ -225,7 +227,7 @@ class SavedArtistsSync: ObservableObject {
     }
 
     private enum SendOutcome {
-        case sent(serverTime: String?)
+        case sent
         case rejected
         case unauthorized
         case offline
@@ -252,12 +254,11 @@ class SavedArtistsSync: ObservableObject {
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
         do {
-            let (data, response) = try await session.data(for: request)
+            let (_, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else { return .offline }
             switch http.statusCode {
             case 200...299:
-                let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-                return .sent(serverTime: responseBody?["server_time"] as? String)
+                return .sent
             case 401:
                 return .unauthorized
             case 408, 429, 500...599:
