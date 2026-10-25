@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { SearchResult } from '../types';
 import { getSource } from './ResultCardUtils';
 import { analytics } from '../services/analytics';
+import { artistSlug } from '../../../../api/shared/artist-slug';
 
 interface ResultCardActionsProps {
   result: SearchResult;
@@ -11,6 +12,12 @@ interface ResultCardActionsProps {
 export function ResultCardActions({ result }: ResultCardActionsProps) {
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
+
+  // The slug of this artist's page when the server placed them (`knownSlug`, from
+  // attachArtistPageSlugs), else the server's own slug function — never a client-side copy, which
+  // turned Björk into `bj-rk` and a non-Latin name into an empty path. A name with nothing to
+  // slug gets no claim link rather than a link to /claim/.
+  const claimSlug = result.knownSlug || artistSlug(result.name);
 
   const handleReportSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,9 +72,9 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
         ) : (
           <div className="flex items-center justify-between">
             {/* Claim - left */}
-            {result.type === 'artist' && result.matchConfidence !== 'claimed' ? (
+            {result.type === 'artist' && result.matchConfidence !== 'claimed' && claimSlug ? (
               <Link
-                to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
+                to={`/claim/${claimSlug}`}
                 className="text-xs text-text-secondary hover:text-accent-primary transition-colors flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >

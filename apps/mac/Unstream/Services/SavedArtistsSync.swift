@@ -368,7 +368,7 @@ enum SavedArtistsRouter {
 }
 
 /// An artist slug computed on the device, for an artist the search didn't place on a page.
-/// **Mirrors `artistSlug()` in api/functions/db.ts** — accents folded, not stripped (Björk is
+/// **Mirrors `artistSlug()` in api/shared/artist-slug.ts** — accents folded, not stripped (Björk is
 /// `bjork`, not `bj-rk`), so a save resolves to the same artist row the server would create.
 enum ArtistSlug {
     private static let nonDecomposingLatin: [Character: String] = [

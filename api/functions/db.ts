@@ -2,8 +2,8 @@
 // All operations are optional — if Supabase is not configured, they no-op gracefully.
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { artistSlug } from '../shared/artist-slug';
 import {
-  foldToAscii,
   isBandcampSearchLink,
   normalizeUrlForMatch,
   urlMatchPrefilter,
@@ -40,29 +40,9 @@ export function getClient(): SupabaseClient | null {
   return supabase;
 }
 
-/**
- * Generate a URL-safe slug from an artist name.
- *
- * Accents are **folded, not stripped**. The old version ran the raw name through
- * `[^a-z0-9]+ -> '-'`, which mangled every accented artist into something unfindable:
- *
- *   Björk             -> bj-rk               (now bjork)
- *   Sébastien Tellier -> s-bastien-tellier   (now sebastien-tellier)
- *   Hüsker Dü         -> h-sker-d            (now husker-du)
- *   Łukasz            -> ukasz               (now lukasz — the Ł used to vanish outright)
- *
- * Fans reported being unable to find accented artists, and it was worse than an ugly URL: the
- * mangled form is what `persistSearchResults` upserts `on conflict (slug)`, so an artist typed with
- * accents and one typed without produced two rows and two half-populated pages.
- *
- * **Changing this changes what an existing artist's slug computes to**, which is why
- * `artist_slug_aliases` exists — a row whose stored slug is the old mangled form has to be
- * re-slugged and its old slug aliased, or the next search creates a third row. See
- * `scripts/merge-duplicate-artists.ts` and migration 20260803180000.
- */
-export function artistSlug(name: string): string {
-  return foldToAscii(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
+// artistSlug lives in api/shared/artist-slug.ts so the web client (claim links) computes the same
+// slug; re-exported here for the many server importers.
+export { artistSlug };
 
 // Determine if a platform URL is a direct link (not a search URL).
 // Exported so scripts/backfill-published-artist-rows.ts stores exactly what a search would store.
