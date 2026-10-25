@@ -198,6 +198,7 @@ class ReleaseAlertManager: ObservableObject {
         isChecking = true
         let checkStartedAt = Date()
         var failedCount = 0
+        var uncheckableCount = 0
         var targets: [CheckTarget] = []
         var listUnavailable = false
         // Only a complete check moves `lastCheckDate`; a failed or partial one leaves it, so the
@@ -207,7 +208,8 @@ class ReleaseAlertManager: ObservableObject {
             isChecking = false
             let outcome = listUnavailable
                 ? ReleaseCheckOutcome.unreachable(date: checkStartedAt)
-                : ReleaseCheckOutcome(total: targets.count, failedCount: failedCount, date: checkStartedAt)
+                : ReleaseCheckOutcome(total: targets.count, failedCount: failedCount,
+                                      uncheckableCount: uncheckableCount, date: checkStartedAt)
             checkState.lastCheckOutcome = outcome
             lastCheckOutcome = outcome
             if outcome.status == .complete {
@@ -241,14 +243,19 @@ class ReleaseAlertManager: ObservableObject {
 
             // The server returns every release in the window, not just the newest, so an artist
             // who put out two records since the last check produces two alerts.
-            if let found = await checkViaAPI(
+            switch await checkViaAPI(
                 artistName: target.artistName,
                 platforms: target.platforms,
                 sinceDays: sinceDays
             ) {
+            case .checked(let found):
                 artistLastChecked[key] = checkStartedAt
                 foundNewReleases.append(contentsOf: found)
-            } else {
+            case .uncheckable:
+                // Not checked, so the date stays put: once they're catalogued, the first real
+                // check asks for the whole window.
+                uncheckableCount += 1
+            case .failed:
                 failedCount += 1
             }
         }
@@ -279,34 +286,40 @@ class ReleaseAlertManager: ObservableObject {
         }
     }
 
+    private enum ArtistCheckResult {
+        case checked([NewRelease])
+        case uncheckable
+        case failed
+    }
+
     /// Ask the server what's new for one artist, and keep only what we haven't seen before.
-    /// Nil when the server didn't answer, so the caller counts a failure instead of "nothing new".
     private func checkViaAPI(
         artistName: String,
         platforms: [String: String],
         sinceDays: Int?
-    ) async -> [NewRelease]? {
+    ) async -> ArtistCheckResult {
         do {
             let results = try await releaseAPI.checkReleases(
                 artistName: artistName,
                 platforms: platforms,
                 sinceDays: sinceDays
             )
-            return Self.selectUnseen(results, artistName: artistName, state: &checkState)
-        } catch ReleaseCheckAPIError.httpError(let statusCode) where !Self.isTransientCheckFailure(statusCode) {
-            // A 400 is the server's answer for an artist it can neither find in the catalogue
-            // nor scrape: checked, nothing to report.
-            return []
+            return .checked(Self.selectUnseen(results, artistName: artistName, state: &checkState))
+        } catch ReleaseCheckAPIError.httpError(let statusCode) where Self.isUncheckableArtistStatus(statusCode) {
+            return .uncheckable
         } catch {
             print("API check failed for \(artistName): \(error)")
-            return nil
+            return .failed
         }
     }
 
-    /// A status that means "the server didn't answer" rather than an answer. Mirrors
-    /// `isTransientCheckFailure` in apps/extension/lib/release-alerts.js.
-    nonisolated static func isTransientCheckFailure(_ statusCode: Int) -> Bool {
-        statusCode == 408 || statusCode == 429 || statusCode >= 500
+    /// Whether a status means "nothing to check for this artist yet": the server's 400 for an
+    /// artist that is neither catalogued nor reachable through a link it will fetch — common for
+    /// account entries, which carry no links. Every other non-2xx (401, 403 from a bot challenge,
+    /// 404, 429, 5xx) is a failure. Mirrors `isUncheckableArtistStatus` in
+    /// apps/extension/lib/release-alerts.js.
+    nonisolated static func isUncheckableArtistStatus(_ statusCode: Int) -> Bool {
+        statusCode == 400
     }
 
     /// One artist to ask the server about.
@@ -317,8 +330,9 @@ class ReleaseAlertManager: ObservableObject {
 
     /// The artists a release check covers: the account's saved list when signed in
     /// (`syncedArtists` non-nil), otherwise the list saved on this device. Account entries carry
-    /// no links, so they borrow a same-named local entry's when there is one; with none, the
-    /// server answers from the release catalogue, which never reads `platforms` anyway.
+    /// no links, so they borrow a same-named local entry's when there is one. With none, only a
+    /// catalogued artist can be checked; for anyone else the server answers 400, which is counted
+    /// as "can't check yet" (see `isUncheckableArtistStatus`), never as checked.
     nonisolated static func checkTargets(syncedArtists: [SyncedArtist]?, localEntries: [SupportEntry]) -> [CheckTarget] {
         guard let syncedArtists else {
             return localEntries.map { CheckTarget(artistName: $0.artistName, platforms: platformUrls(for: $0)) }

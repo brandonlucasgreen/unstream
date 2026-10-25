@@ -19,7 +19,7 @@ import {
   releaseSummaryLine,
   releasesFromResponse,
   summarizeCheck,
-  isTransientCheckFailure,
+  isUncheckableArtistStatus,
   lastSuccessfulCheckFor,
   selectUnseenReleases,
   sinceDaysForCheck,
@@ -269,17 +269,19 @@ describe('sinceDaysForCheck', () => {
 
 // Audit 2026-10-25 #4: a failure is never a successful check.
 describe('check outcomes', () => {
-  it('is complete, partial or failed by how many artists answered', () => {
+  it('is complete, partial or failed by how many checkable artists answered', () => {
     expect(summarizeCheck(3, 0).status).toBe('complete');
     expect(summarizeCheck(3, 1).status).toBe('partial');
     expect(summarizeCheck(3, 3).status).toBe('failed');
+    // One artist with nothing to check yet doesn't make a run partial, and the other two
+    // failing is a failed run, not a partial one.
+    expect(summarizeCheck(3, 0, 1).status).toBe('complete');
+    expect(summarizeCheck(3, 2, 1).status).toBe('failed');
   });
 
-  it('counts a 400 as an answer and a 429, 5xx or no response as a failure', () => {
-    expect(isTransientCheckFailure(400)).toBe(false);
-    expect(isTransientCheckFailure(429)).toBe(true);
-    expect(isTransientCheckFailure(503)).toBe(true);
-    expect(isTransientCheckFailure(undefined)).toBe(true);
+  it('reads only a 400 as "nothing to check yet"; a 403 challenge or 404 is a failure', () => {
+    expect(isUncheckableArtistStatus(400)).toBe(true);
+    for (const status of [401, 403, 404, 429, 503]) expect(isUncheckableArtistStatus(status)).toBe(false);
   });
 
   it('prefers an artist\'s own last successful check over the check-wide date', () => {
