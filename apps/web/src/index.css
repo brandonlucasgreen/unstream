@@ -190,38 +190,32 @@
   }
 
   /* The homepage's equalizer band (EqualizerBand.tsx): the same mark at hero
-     size. Each bar sets its own height, resting level (--eq-low) and delay
-     inline. Centred flex overflows evenly on both sides, so a narrow screen
-     crops the quiet ends rather than the peak. */
+     size. The component sets each bar's scale; bars shrink to fit, so a phone
+     still shows every band from bass to treble. */
   .eq-band {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    gap: 5px;
+    gap: 3px;
     height: 3.5rem;
-    margin-bottom: 30px;
-    overflow: hidden;
+    margin-bottom: 0.5rem;
   }
 
   @media (min-width: 768px) {
-    .eq-band { height: 5rem; }
+    .eq-band { height: 5rem; gap: 5px; }
   }
 
   .eq-band span {
-    flex: 0 0 8px;
+    flex: 1 1 0;
+    max-width: 8px;
+    height: 100%;
     border-radius: 4px 4px 2px 2px;
     transform-origin: bottom;
-    animation: eq-breathe 1.4s ease-in-out infinite;
   }
 
   .eq-band span:nth-child(3n+1) { background: var(--color-fill-primary); }
   .eq-band span:nth-child(3n+2) { background: var(--color-fill-secondary); }
   .eq-band span:nth-child(3n) { background: var(--color-fill-tertiary); }
-
-  @keyframes eq-breathe {
-    0%, 100% { transform: scaleY(var(--eq-low)); }
-    50% { transform: scaleY(1); }
-  }
 
   /* Dialog's drawer variant (the mobile nav) slides in from the right when it opens. */
   @keyframes dialog-drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -232,7 +226,6 @@
     .skeleton::after { animation: none; opacity: 0.5; }
     .skeleton-fade-in { animation: none; }
     .eq-bars span { animation: none; transform: scaleY(0.6); }
-    .eq-band span { animation: none; transform: scaleY(var(--eq-low)); }
   }
 
   /* One word of a heading picked out in the accents. A highlighter fill was the
