@@ -16,7 +16,6 @@ import { resolveAccountHome } from './services/accountHome';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
 import { HomeFeatures } from './components/HomeFeatures';
-import { EqualizerBand } from './components/EqualizerBand';
 import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { badgeColors } from './utils/colors';
@@ -345,7 +344,7 @@ function App() {
           searches. Leaving it up pushed the first result below the fold on a
           phone. The marketing byline is dropped entirely in PWA mode. */}
       {!hasSearched && (
-      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4"}>
+      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4 hero-glow"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
             {/* Darker Grotesque's cap height is ~20% shorter than the body face
@@ -362,7 +361,6 @@ function App() {
               </p>
             )}
           </div>
-          {!isStandalone && <EqualizerBand />}
         </div>
       </div>
       )}

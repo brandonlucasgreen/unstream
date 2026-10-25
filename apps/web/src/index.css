@@ -16,7 +16,7 @@
   --color-accent-tertiary: #ffe66d;
 
   /* Decorative fills: shapes that carry no text of their own (the homepage's
-     equalizer band and feature tiles). Text needs the light theme's darkened
+     hero glow and feature tiles). Text needs the light theme's darkened
      accents, but a fill doesn't, so light mode keeps these bright instead of
      turning the yellow mustard. Same values as the accents in dark mode. */
   --color-fill-primary: #ff6b35;
@@ -72,6 +72,7 @@
   --skeleton-base: #2b2b2b;
   --skeleton-sheen: rgba(255, 255, 255, 0.06);
   --skeleton-sheen-accent: rgba(255, 107, 53, 0.16);
+  --hero-glow: 0.26;
 }
 
 /* Light theme follows the OS setting — there is no in-app toggle. Plain CSS
@@ -107,6 +108,8 @@
     --skeleton-base: #e3e3e3;
     --skeleton-sheen: rgba(255, 255, 255, 0.7);
     --skeleton-sheen-accent: rgba(229, 90, 43, 0.11);
+    /* Pastel on white needs a little more colour to register at all. */
+    --hero-glow: 0.32;
   }
 }
 
@@ -189,33 +192,30 @@
     50% { transform: scaleY(1); }
   }
 
-  /* The homepage's equalizer band (EqualizerBand.tsx): the same mark at hero
-     size. The component sets each bar's scale; bars shrink to fit, so a phone
-     still shows every band from bass to treble. */
-  .eq-band {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 3px;
-    height: 3.5rem;
-    margin-bottom: 0.5rem;
+  /* Soft pools of the three accents behind the homepage hero, like coloured
+     stage lights. Painted behind the hero's own content (isolation + z-index -1)
+     and reaching down behind the download buttons, which paint over it. Kept
+     inside the hero's width so it can never cause a sideways scroll. */
+  .hero-glow {
+    position: relative;
+    isolation: isolate;
   }
 
-  @media (min-width: 768px) {
-    .eq-band { height: 5rem; gap: 5px; }
+  .hero-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 150%;
+    z-index: -1;
+    pointer-events: none;
+    /* Faded with opacity rather than color-mix: the build's fallback for
+       browsers without color-mix would paint the accents at full strength. */
+    opacity: var(--hero-glow);
+    background:
+      radial-gradient(38% 55% at 20% 35%, var(--color-fill-primary), transparent 70%),
+      radial-gradient(36% 50% at 80% 30%, var(--color-fill-secondary), transparent 70%),
+      radial-gradient(30% 45% at 52% 80%, var(--color-fill-tertiary), transparent 70%);
   }
-
-  .eq-band span {
-    flex: 1 1 0;
-    max-width: 8px;
-    height: 100%;
-    border-radius: 4px 4px 2px 2px;
-    transform-origin: bottom;
-  }
-
-  .eq-band span:nth-child(3n+1) { background: var(--color-fill-primary); }
-  .eq-band span:nth-child(3n+2) { background: var(--color-fill-secondary); }
-  .eq-band span:nth-child(3n) { background: var(--color-fill-tertiary); }
 
   /* Dialog's drawer variant (the mobile nav) slides in from the right when it opens. */
   @keyframes dialog-drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
