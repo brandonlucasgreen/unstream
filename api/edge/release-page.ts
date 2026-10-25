@@ -152,6 +152,53 @@ async function passThrough(context: Context): Promise<Response> {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+// The answer when the database didn't answer — a timeout, a query error, missing configuration.
+//
+// Not a pass-through: the next renderer is the SPA, whose catch-all is NotFoundPage, so an outage
+// read "this page doesn't exist" — permanent-sounding, and wrong. Not a second renderer either:
+// this is a static document from the same function, so the one-route-one-renderer rule holds.
+// A 503 with Retry-After tells crawlers to come back rather than drop the URL, and no-store keeps
+// the CDN (this function opts into caching) from pinning the outage to the URL.
+function temporarilyUnavailable(artistSlug?: string): Response {
+  const artistLink = artistSlug
+    ? `<a href="/a/${escapeHtml(encodeURIComponent(artistSlug))}">Go to the artist's page</a>`
+    : `<a href="/">Go to Unstream</a>`;
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Temporarily unavailable | Unstream</title>
+  <style>${CSS}
+  .unavailable { max-width: 560px; margin: 0 auto; padding: 64px 24px; text-align: center; }
+  .unavailable h1 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+  .unavailable p { color: var(--muted); font-size: 16px; line-height: 1.5; margin-bottom: 24px; }
+  .unavailable nav { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="brand">${LOGO_SVG} Unstream</a>
+  </header>
+  <main class="unavailable">
+    <h1>This page is temporarily unavailable</h1>
+    <p>We couldn't load this release just now. It's still here; this is usually brief.</p>
+    <nav><a href="">Try again</a>${artistLink}</nav>
+  </main>
+</body>
+</html>`;
+  return new Response(html, {
+    status: 503,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'CDN-Cache-Control': 'no-store',
+      'Retry-After': '60',
+    },
+  });
+}
+
 export default async function handler(request: Request, context: Context) {
   try {
     const url = new URL(request.url);
@@ -165,7 +212,7 @@ export default async function handler(request: Request, context: Context) {
 
     const supabaseUrl = edgeEnv("SUPABASE_URL");
     const supabaseKey = edgeEnv("SUPABASE_SERVICE_KEY");
-    if (!supabaseUrl || !supabaseKey) return passThrough(context);
+    if (!supabaseUrl || !supabaseKey) return temporarilyUnavailable(artistSlug);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -184,12 +231,15 @@ export default async function handler(request: Request, context: Context) {
     };
 
     try {
-      const { data: artistData } = await supabase
+      // A query error comes back as `error`, not a throw. Unchecked, it read as "no such
+      // artist" (and below, "no such release"), so an outage became a not-found.
+      const { data: artistData, error: artistError } = await supabase
         .from('artists')
         .select('id, name, image_url')
         .eq('slug', artistSlug)
         .abortSignal(controller.signal)
         .maybeSingle();
+      if (artistError) throw artistError;
 
       // A retired slug still resolves. Most of the aliases in production (44 of them as of
       // 2026-08-07) came from the accent-folding reslug in #410 (`beyonc` -> `beyonce`), and a
@@ -209,12 +259,13 @@ export default async function handler(request: Request, context: Context) {
       // Duplicates resolveArtistSlugAlias in api/functions/db.ts — edge functions run on Deno and
       // cannot import from api/functions.
       if (!artistData) {
-        const { data: alias } = await supabase
+        const { data: alias, error: aliasError } = await supabase
           .from('artist_slug_aliases')
           .select('artists!inner(slug)')
           .eq('alias', artistSlug.toLowerCase())
           .abortSignal(controller.signal)
           .maybeSingle();
+        if (aliasError) throw aliasError;
 
         const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
         clearTimeout(timeoutId);
@@ -236,7 +287,7 @@ export default async function handler(request: Request, context: Context) {
       // One round trip for the release, its sources and their offers. `is_hidden` is filtered
       // in the query rather than after: a suppressed release must be indistinguishable from one
       // that was never catalogued, which is the point of having the column.
-      const { data: releaseData } = await supabase
+      const { data: releaseData, error: releaseError } = await supabase
         .from('releases')
         .select(`
           title, release_type, release_date, date_precision, status, artwork_url,
@@ -249,6 +300,7 @@ export default async function handler(request: Request, context: Context) {
         .eq('is_hidden', false)
         .abortSignal(controller.signal)
         .maybeSingle();
+      if (releaseError) throw releaseError;
 
       if (!releaseData) {
         clearTimeout(timeoutId);
@@ -262,9 +314,10 @@ export default async function handler(request: Request, context: Context) {
       }
       release = releaseData;
     } catch {
-      // Timeout or error — fall through to the SPA rather than showing a broken page.
+      // Timeout or query error: the release may well exist, so say "temporarily unavailable",
+      // never the SPA's not-found page.
       clearTimeout(timeoutId);
-      return passThrough(context);
+      return temporarilyUnavailable(artistSlug);
     }
 
     clearTimeout(timeoutId);

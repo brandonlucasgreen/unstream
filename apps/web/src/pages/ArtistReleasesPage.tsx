@@ -84,6 +84,10 @@ export function ArtistReleasesPage() {
   const [releases, setReleases] = useState<OwnerRelease[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Set when the releases themselves couldn't be loaded, as opposed to an action failing
+  // (`error` covers both). Without it a failed load rendered "No releases catalogued yet" and
+  // the add/reorder controls under the error — a claim about the catalogue we didn't have.
+  const [loadFailed, setLoadFailed] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -111,9 +115,11 @@ export function ArtistReleasesPage() {
       setReleases(data.releases || []);
       setCatalog(data.catalog ?? null);
       setArtistName(data.artistName);
+      setLoadFailed(false);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'artistReleases.fetch' } });
       setError(err instanceof Error ? err.message : 'Failed to load releases.');
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -193,6 +199,14 @@ export function ArtistReleasesPage() {
 
       {loading ? (
         <TabSkeleton label="Loading releases" />
+      ) : loadFailed ? (
+        <button
+          type="button"
+          onClick={fetchReleases}
+          className="text-sm font-medium text-text-primary underline hover:no-underline"
+        >
+          Try loading your releases again
+        </button>
       ) : (
         <>
           {/* Above the list, not below it: scanning is where an artist starts, and on a real
