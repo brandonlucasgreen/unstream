@@ -11,6 +11,14 @@ interface ResultCardActionsProps {
 export function ResultCardActions({ result }: ResultCardActionsProps) {
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
+  // Same artist-row identity the save path uses (`saveKey` in ResultCard), minus the
+  // pipeline id: a claim has to land on the page the database actually holds. The slug
+  // comes from the server (`attachArtistPageSlugs` writes the canonical `artistSlug` into
+  // `knownSlug`), so regenerating it here with a local regex is gone — that regex had no
+  // accent folding and turned Björk into `bj-rk`, a page that doesn't exist. A result
+  // carrying no slug (unverified results, the client-built MusicBrainz fallback) has no
+  // row to claim, so it gets no claim link rather than a guessed address.
+  const claimSlug = result.claimedSlug || result.knownSlug;
 
   const handleReportSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,9 +73,9 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
         ) : (
           <div className="flex items-center justify-between">
             {/* Claim - left */}
-            {result.type === 'artist' && result.matchConfidence !== 'claimed' ? (
+            {result.type === 'artist' && result.matchConfidence !== 'claimed' && claimSlug ? (
               <Link
-                to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
+                to={`/claim/${claimSlug}`}
                 className="text-xs text-text-secondary hover:text-accent-primary transition-colors flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >
