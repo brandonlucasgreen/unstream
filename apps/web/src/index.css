@@ -105,6 +105,13 @@
     @apply bg-bg-primary text-text-primary font-body antialiased;
     min-height: 100vh;
   }
+
+  /* RouteOrientation focuses the page's <h1> after a navigation so a screen reader starts
+     there. A heading isn't a control, so it gets no focus ring: Safari draws one on any
+     programmatic focus that follows a tap, which showed a box around every page title. */
+  h1[tabindex="-1"]:focus {
+    outline: none;
+  }
 }
 
 @layer components {
