@@ -15,7 +15,7 @@ import { searchOutcome, platformFailureMessageKey, partialMessageKey, type Searc
 import { resolveAccountHome } from './services/accountHome';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
-import { ScreenshotCarousel } from './components/ScreenshotCarousel';
+import { HomeFeatures } from './components/HomeFeatures';
 import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { badgeColors } from './utils/colors';
@@ -344,7 +344,7 @@ function App() {
           searches. Leaving it up pushed the first result below the fold on a
           phone. The marketing byline is dropped entirely in PWA mode. */}
       {!hasSearched && (
-      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4"}>
+      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4 hero-glow"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
             {/* Darker Grotesque's cap height is ~20% shorter than the body face
@@ -366,7 +366,9 @@ function App() {
       )}
 
       {/* Search section */}
-      <main className="px-4 pb-16">
+      {/* `relative` keeps the hero's glow behind the download buttons: the hero
+          is positioned, so an unpositioned <main> would paint beneath it. */}
+      <main className="relative px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           {isStandalone ? (
             /* App home. Search keeps a prominent input here even though the
@@ -536,70 +538,7 @@ function App() {
           {!isStandalone && (
           <div className="mt-16 space-y-12">
 
-              {/* App Features */}
-              <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
-                <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
-                  {t('artist:features.heading')}
-                </h2>
-                <div className="flex flex-col md:flex-row items-start gap-8">
-                  <div className="flex-1">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="flex gap-3">
-                        <div className="text-2xl">💛</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.tipTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.tipBody')}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="text-2xl">🎧</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.detectionTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.detectionBody')}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="text-2xl">📋</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.saveTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.saveBody')}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="text-2xl">🔔</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.releaseTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.releaseBody')}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="text-2xl">🎵</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.scrobbleTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.scrobbleBody')}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <div className="text-2xl">🔒</div>
-                        <div>
-                          <h3 className="font-semibold text-text-primary mb-1">{t('artist:features.anonymousTitle')}</h3>
-                          <p className="text-text-muted text-sm">{t('artist:features.anonymousBody')}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start">
-                    <ScreenshotCarousel />
-                  </div>
-                </div>
-
-                <p className="text-text-secondary text-center mt-6">
-                  {t('artist:features.freeBody')}{' '}
-                  <a href="/support" className="text-link hover:underline">
-                    <strong>{t('artist:features.freeSupportLink')}</strong>
-                  </a> 🤘
-                </p>
-              </div>
+              <HomeFeatures />
 
               <div className="bg-surface-secondary rounded-2xl p-6 md:p-8 border border-border">
                 <h2 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary mb-6 text-center md:text-left heading-accent">
