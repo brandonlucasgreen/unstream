@@ -238,8 +238,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
       {showLoginInterstitial && (
         <LoginInterstitial
-          artistId={result.claimedSlug || result.id}
+          artistId={saveKey}
           artistName={result.name}
+          artistImageUrl={result.imageUrl}
           onClose={() => setShowLoginInterstitial(false)}
         />
       )}

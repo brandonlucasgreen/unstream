@@ -12,22 +12,31 @@
 // placeable result, server-side, precisely so no client has to derive it.
 
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ResultCard } from 'src/components/ResultCard';
 import type { SearchResult } from 'src/types';
 
 const saveArtist = vi.fn();
 const removeSavedArtist = vi.fn();
+const writePendingSave = vi.fn();
 let savedKeys: string[] = [];
+let session: { user: { id: string } } | null = { user: { id: 'u1' } };
 
 vi.mock('src/contexts/AuthContext', () => ({
   useAuth: () => ({
-    session: { user: { id: 'u1' } },
+    session,
     isArtistSaved: (key: string) => savedKeys.includes(key),
     saveArtist,
     removeSavedArtist,
+    signInWithMagicLink: vi.fn().mockResolvedValue(undefined),
+    signInWithPassword: vi.fn(),
   }),
+}));
+
+vi.mock('src/services/pendingSave', () => ({
+  writePendingSave: (...args: unknown[]) => writePendingSave(...args),
+  clearPendingSave: vi.fn(),
 }));
 
 vi.mock('src/services/analytics', () => ({
@@ -65,7 +74,9 @@ function show(result: SearchResult) {
 beforeEach(() => {
   saveArtist.mockClear();
   removeSavedArtist.mockClear();
+  writePendingSave.mockClear();
   savedKeys = [];
+  session = { user: { id: 'u1' } };
 });
 afterEach(cleanup);
 
@@ -119,5 +130,21 @@ describe('the key a result card saves under', () => {
     fireEvent.click(screen.getByRole('button', { name: /saved/i }));
 
     expect(removeSavedArtist).toHaveBeenCalledWith('rodney-owl');
+  });
+});
+
+// Audit 2026-10-25 #5: the signed-out path handed the login interstitial `claimedSlug || id`, so a
+// save resumed after sign-in landed on the synthetic pipeline id for a known-but-unclaimed artist.
+describe('the key a signed-out save resumes under', () => {
+  it('stores the same knownSlug the signed-in save uses', async () => {
+    session = null;
+    show(makeResult());
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    fireEvent.change(screen.getByPlaceholderText('your@email.com'), { target: { value: 'fan@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /send login link/i }));
+
+    await waitFor(() => expect(writePendingSave).toHaveBeenCalled());
+    expect(writePendingSave.mock.calls[0][0]).toMatchObject({ artistId: 'rodney-owl', artistName: 'Rodney Owl' });
   });
 });

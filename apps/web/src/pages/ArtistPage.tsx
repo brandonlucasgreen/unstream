@@ -149,6 +149,7 @@ export function ArtistPage() {
         <LoginInterstitial
           artistId={artistId}
           artistName={artistName}
+          artistImageUrl={artistImageUrl || undefined}
           onClose={() => setShowLoginInterstitial(false)}
         />
       )}

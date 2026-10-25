@@ -17,6 +17,7 @@ import { ScrollToTop } from './components/ScrollToTop'
 import { NotFoundPage } from './pages/NotFoundPage.tsx'
 import { lazyWithRetry } from './utils/lazyWithRetry'
 import { StaleBuildBanner } from './components/StaleBuildBanner'
+import { PendingSaveNotice } from './components/PendingSaveNotice'
 
 initSentry()
 
@@ -109,6 +110,8 @@ createRoot(document.getElementById('root')!).render(
         <StaleBuildBanner />
       </Sentry.ErrorBoundary>
       <AuthProvider>
+        {/* Wherever a sign-in lands, a save asked for before it that then failed says so here. */}
+        <PendingSaveNotice />
         <BrowserRouter>
           <ScrollToTop />
           <Suspense fallback={<AppLoadingFallback />}>

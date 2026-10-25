@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { readPendingSave, clearPendingSave, type PendingSave } from '../services/pendingSave';
 
 const ADMIN_EMAIL = 'info@kidlightbulbs.com';
 
@@ -45,6 +46,13 @@ interface AuthContextValue {
    * don't know — so consumers need this to tell a load in progress from one that gave up.
    */
   savedArtistsError: string | null;
+  /**
+   * A save requested before sign-in that failed once the session arrived. Kept (in storage too)
+   * until it succeeds or the fan dismisses it; PendingSaveNotice offers the retry.
+   */
+  failedPendingSave: PendingSave | null;
+  retryPendingSave: () => Promise<void>;
+  dismissPendingSave: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -401,21 +409,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, savedArtists]);
 
-  // Check localStorage for pending save (from unauthenticated clicks)
-  useEffect(() => {
-    if (session) {
-      const pendingSave = localStorage.getItem('pendingSave');
-      if (pendingSave) {
-        try {
-          const { artistId, notes } = JSON.parse(pendingSave);
-          localStorage.removeItem('pendingSave'); // Clear immediately to prevent retries
-          saveArtist(artistId, notes);
-        } catch {
-          localStorage.removeItem('pendingSave');
-        }
-      }
+  // A save asked for while signed out (LoginInterstitial), resumed once a session exists. The
+  // request is cleared only on a confirmed save; a failure stays stored and surfaces as
+  // `failedPendingSave` with a retry. Attempted automatically once per signed-in user — the ref,
+  // not clearing storage, is what stops a failing save from retrying on every render (a rollback
+  // changes `saveArtist`'s identity, which would re-run this effect).
+  const [failedPendingSave, setFailedPendingSave] = useState<PendingSave | null>(null);
+  const pendingSaveAttemptedFor = useRef<string | null>(null);
+
+  const retryPendingSave = useCallback(async () => {
+    const pending = readPendingSave();
+    if (!pending) {
+      setFailedPendingSave(null);
+      return;
     }
-  }, [session, saveArtist]);
+    const saved = await saveArtist(pending.artistId, pending.notes, pending.artistName, pending.artistImageUrl);
+    if (saved) {
+      clearPendingSave();
+      setFailedPendingSave(null);
+    } else {
+      setFailedPendingSave(pending);
+    }
+  }, [saveArtist]);
+
+  const dismissPendingSave = useCallback(() => {
+    clearPendingSave();
+    setFailedPendingSave(null);
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      pendingSaveAttemptedFor.current = null;
+      setFailedPendingSave(null);
+      return;
+    }
+    if (pendingSaveAttemptedFor.current === session.user.id) return;
+    pendingSaveAttemptedFor.current = session.user.id;
+    retryPendingSave();
+  }, [session, retryPendingSave]);
 
   const loadSavedArtists = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
@@ -456,7 +487,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError, failedPendingSave, retryPendingSave, dismissPendingSave }}>
       {children}
     </AuthContext.Provider>
   );

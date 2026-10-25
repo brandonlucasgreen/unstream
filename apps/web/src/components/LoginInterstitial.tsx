@@ -2,14 +2,21 @@ import { useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { LegalConsent } from './LegalConsent';
+import { writePendingSave, clearPendingSave } from '../services/pendingSave';
 
 interface LoginInterstitialProps {
+  /**
+   * The key to save under once signed in — the caller's own save key, exactly as its direct
+   * save path uses it (ResultCard's `saveKey`), so a save resumed after sign-in can't land on a
+   * different identifier than one made while signed in.
+   */
   artistId: string;
   artistName?: string;
+  artistImageUrl?: string;
   onClose: () => void;
 }
 
-export function LoginInterstitial({ artistId, artistName, onClose }: LoginInterstitialProps) {
+export function LoginInterstitial({ artistId, artistName, artistImageUrl, onClose }: LoginInterstitialProps) {
   const { signInWithMagicLink, signInWithPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,13 +34,13 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
     setLoading(true);
     setError('');
     try {
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
+      writePendingSave({ artistId, artistName, artistImageUrl });
       await signInWithMagicLink(email.trim());
       setMagicSent(true);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.magicLinkInterstitial' } });
       setError('Failed to send magic link. Try again.');
-      localStorage.removeItem('pendingSave');
+      clearPendingSave();
     } finally {
       setLoading(false);
     }
@@ -48,13 +55,13 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
     setLoading(true);
     setError('');
     try {
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
+      writePendingSave({ artistId, artistName, artistImageUrl });
       await signInWithPassword(email.trim(), password);
       onClose(); // AuthContext will pick up the pending save
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'auth.passwordInterstitial' } });
       setError('Invalid email or password');
-      localStorage.removeItem('pendingSave');
+      clearPendingSave();
     } finally {
       setLoading(false);
     }
