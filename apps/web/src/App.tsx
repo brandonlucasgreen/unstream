@@ -366,7 +366,9 @@ function App() {
       )}
 
       {/* Search section */}
-      <main className="px-4 pb-16">
+      {/* `relative` keeps the hero's glow behind the download buttons: the hero
+          is positioned, so an unpositioned <main> would paint beneath it. */}
+      <main className="relative px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           {isStandalone ? (
             /* App home. Search keeps a prominent input here even though the

@@ -72,7 +72,7 @@
   --skeleton-base: #2b2b2b;
   --skeleton-sheen: rgba(255, 255, 255, 0.06);
   --skeleton-sheen-accent: rgba(255, 107, 53, 0.16);
-  --hero-glow: 0.26;
+  --hero-glow: 0.5;
 }
 
 /* Light theme follows the OS setting — there is no in-app toggle. Plain CSS
@@ -109,7 +109,7 @@
     --skeleton-sheen: rgba(255, 255, 255, 0.7);
     --skeleton-sheen-accent: rgba(229, 90, 43, 0.11);
     /* Pastel on white needs a little more colour to register at all. */
-    --hero-glow: 0.32;
+    --hero-glow: 0.5;
   }
 }
 
@@ -194,8 +194,9 @@
 
   /* Soft pools of the three accents behind the homepage hero, like coloured
      stage lights. Painted behind the hero's own content (isolation + z-index -1)
-     and reaching down behind the download buttons, which paint over it. Kept
-     inside the hero's width so it can never cause a sideways scroll. */
+     and reaching down behind the download buttons; <main> is positioned so it
+     paints over the glow rather than under it. Never
+     wider than the hero, so it can't cause a sideways scroll. */
   .hero-glow {
     position: relative;
     isolation: isolate;
@@ -204,17 +205,24 @@
   .hero-glow::before {
     content: '';
     position: absolute;
-    inset: 0 0 auto;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Sized to the content column, not the window: at full width on a desktop
+       the pools drift out to the margins and leave the headline unlit. */
+    width: min(100%, 64rem);
     height: 150%;
     z-index: -1;
     pointer-events: none;
     /* Faded with opacity rather than color-mix: the build's fallback for
        browsers without color-mix would paint the accents at full strength. */
     opacity: var(--hero-glow);
+    /* Each pool fades to nothing before the box's edge, or the box shows as a
+       hard line where it cuts a pool off. */
     background:
-      radial-gradient(38% 55% at 20% 35%, var(--color-fill-primary), transparent 70%),
-      radial-gradient(36% 50% at 80% 30%, var(--color-fill-secondary), transparent 70%),
-      radial-gradient(30% 45% at 52% 80%, var(--color-fill-tertiary), transparent 70%);
+      radial-gradient(27% 42% at 28% 42%, var(--color-fill-primary), transparent),
+      radial-gradient(27% 42% at 72% 40%, var(--color-fill-secondary), transparent),
+      radial-gradient(24% 30% at 50% 66%, var(--color-fill-tertiary), transparent);
   }
 
   /* Dialog's drawer variant (the mobile nav) slides in from the right when it opens. */
