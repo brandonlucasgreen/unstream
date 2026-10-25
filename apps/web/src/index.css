@@ -15,6 +15,14 @@
   --color-accent-secondary: #4ecdc4;
   --color-accent-tertiary: #ffe66d;
 
+  /* Decorative fills: shapes that carry no text of their own (the homepage's
+     equalizer band and feature tiles). Text needs the light theme's darkened
+     accents, but a fill doesn't, so light mode keeps these bright instead of
+     turning the yellow mustard. Same values as the accents in dark mode. */
+  --color-fill-primary: #ff6b35;
+  --color-fill-secondary: #4ecdc4;
+  --color-fill-tertiary: #ffe66d;
+
   /* Text set on an accent fill. Both theme accents are mid-luminance oranges,
      so white never cleared WCAG AA on them (2.84:1 dark, 3.60:1 light) — dark
      ink does (audit 2026-10-25 #8). */
@@ -85,6 +93,8 @@
        as text and behind white button labels. */
     --color-accent-secondary: #16695f;
     --color-accent-tertiary: #b8910a;
+    --color-fill-secondary: #3bb5ac;
+    --color-fill-tertiary: #ffd84d;
     --color-link: #c2410c;
     --color-success: #166534;
     --color-warning: #92400e;
@@ -179,6 +189,40 @@
     50% { transform: scaleY(1); }
   }
 
+  /* The homepage's equalizer band (EqualizerBand.tsx): the same mark at hero
+     size. Each bar sets its own height, resting level (--eq-low) and delay
+     inline. Centred flex overflows evenly on both sides, so a narrow screen
+     crops the quiet ends rather than the peak. */
+  .eq-band {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    height: 3.5rem;
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .eq-band { height: 5rem; }
+  }
+
+  .eq-band span {
+    flex: 0 0 8px;
+    border-radius: 4px 4px 2px 2px;
+    transform-origin: bottom;
+    animation: eq-breathe 1.4s ease-in-out infinite;
+  }
+
+  .eq-band span:nth-child(3n+1) { background: var(--color-fill-primary); }
+  .eq-band span:nth-child(3n+2) { background: var(--color-fill-secondary); }
+  .eq-band span:nth-child(3n) { background: var(--color-fill-tertiary); }
+
+  @keyframes eq-breathe {
+    0%, 100% { transform: scaleY(var(--eq-low)); }
+    50% { transform: scaleY(1); }
+  }
+
   /* Dialog's drawer variant (the mobile nav) slides in from the right when it opens. */
   @keyframes dialog-drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
   .dialog-drawer[open] { animation: dialog-drawer-in 250ms ease-out; }
@@ -188,6 +232,7 @@
     .skeleton::after { animation: none; opacity: 0.5; }
     .skeleton-fade-in { animation: none; }
     .eq-bars span { animation: none; transform: scaleY(0.6); }
+    .eq-band span { animation: none; transform: scaleY(var(--eq-low)); }
   }
 
   /* One word of a heading picked out in the accents. A highlighter fill was the
