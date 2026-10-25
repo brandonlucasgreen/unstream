@@ -26,13 +26,13 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 min-h-11 px-2 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
-        title={`Search for this artist on ${label}`}
+        aria-label={`Search ${label} for this artist (opens in a new tab)`}
         onClick={() => { analytics.trackPlatformClick(label); onClick?.(); }}
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <span>{label}</span>
+        <span>Search {label}</span>
         <svg className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>

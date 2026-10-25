@@ -15,6 +15,7 @@ import {
   categorizePlatforms,
   allKnownSourceIds,
   getReleaseInfo,
+  getDisplayPlatforms,
 } from './ResultCardUtils';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -112,10 +113,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
     platformsWithRelease,
     canPlay,
     previewUrl,
-    verifiedPlatforms,
   } = getReleaseInfo(result);
 
-  const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
+  const categorized = categorizePlatforms(getDisplayPlatforms(result), allKnownSourceIds);
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
