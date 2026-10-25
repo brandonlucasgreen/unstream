@@ -49,6 +49,11 @@ export function SettingsPage() {
   );
   const [confirmMessage, setConfirmMessage] = useState<string | null>(null);
 
+  // Keyed on the user, not the session object: Supabase hands over a new session on every token
+  // refresh (hourly, and on tab focus), and re-running this load drops the page back to its
+  // skeleton — unmounting the email and password forms and whatever the fan was typing.
+  const userId = session?.user?.id;
+
   useEffect(() => {
     if (authLoading) return;
     if (!session) return;
@@ -77,7 +82,8 @@ export function SettingsPage() {
       setLoading(false);
     }
     loadSettings();
-  }, [session, authLoading, attempt]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see userId above
+  }, [userId, authLoading, attempt]);
 
   // Applying a confirmation link: POST the token, then drop it from the URL so a reload
   // or a shared link can't replay a used token — the banner below shows the outcome.
