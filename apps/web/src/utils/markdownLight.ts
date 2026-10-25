@@ -26,7 +26,7 @@ export function markdownToHtml(md: string): string {
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text: string, url: string) => {
         const external = /^https?:\/\//i.test(url);
         const newTab = external ? ' target="_blank" rel="noopener noreferrer"' : '';
-        return `<a href="${url}"${newTab} class="text-accent-primary hover:underline">${text}</a>`;
+        return `<a href="${url}"${newTab} class="text-link hover:underline">${text}</a>`;
       })
       // Bold+italic: ***text*** or ___text___
       .replace(/\*\*\*(.+?)\*\*\*/g, '<strong class="text-text-primary"><em>$1</em></strong>')

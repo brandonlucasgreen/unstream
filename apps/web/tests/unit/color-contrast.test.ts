@@ -127,7 +127,7 @@ describe('registry-wide badge contrast (audit 2026-10-25 #8)', () => {
 describe('components use the contrast tokens', () => {
   const srcDir = fileURLToPath(new URL('../../src', import.meta.url));
   const files = (readdirSync(srcDir, { recursive: true }) as string[])
-    .filter(f => f.endsWith('.tsx'))
+    .filter(f => f.endsWith('.tsx') || f.endsWith('.ts'))
     .map(f => ({ name: f, text: readFileSync(join(srcDir, f), 'utf8') }));
 
   it.each([
