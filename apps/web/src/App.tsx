@@ -6,7 +6,7 @@ import { SearchBar } from './components/SearchBar';
 import { ResultCard } from './components/ResultCard';
 
 import { Header } from './components/Header';
-import { LoadingLabel, SkeletonScreen } from './components/Skeleton';
+import { LoadingLabel } from './components/Skeleton';
 import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
 import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
@@ -309,6 +309,22 @@ function App() {
     failure: searchFailure,
   });
 
+  // The one sentence a screen reader hears about the search, in a polite live region that stays
+  // mounted (a region inserted along with its text often isn't announced). Results arriving,
+  // emptiness and failure were all silent before; only the first skeleton had status semantics.
+  const query = searchParams.get('q') ?? '';
+  const searchStatus = !hasSearched || error ? ''
+    : outcome === 'loading' ? t('status.searchingPlatforms')
+    : outcome === 'failed' && searchFailure ? t(searchFailure.messageKey)
+    : outcome === 'empty' ? `${t('artist:results.emptyTitle')}: ${query}`
+    : [
+        results.length === 1
+          ? t('artist:results.foundOne', { count: results.length })
+          : t('artist:results.foundMany', { count: results.length }),
+        outcome === 'partial' && searchFailure ? t(partialMessageKey(searchFailure)) : '',
+        isLoading || isEnriching ? t('status.loadingMoreSources') : '',
+      ].filter(Boolean).join('. ');
+
   const handleMergeSelected = useCallback(() => {
     const selectedResults = results.filter(r => selectedForMerge.has(r.id));
     navigate('/admin/merge', { state: { results: selectedResults } });
@@ -390,25 +406,26 @@ function App() {
             </div>
           )}
 
+          <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{searchStatus}</p>
+
           {/* Error state */}
           {error && (
-            <div className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center">
+            <div role="alert" className="mt-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center">
               {error}
             </div>
           )}
 
           {/* Results */}
           {hasSearched && !error && (
-            <div className="mt-8">
+            <div className="mt-8" aria-busy={isLoading || isEnriching}>
               {outcome === 'loading' ? (
-                <SkeletonScreen label={t('skeleton.searchingPlatforms')}>
-                  <div className="space-y-4">
-                    <LoadingLabel>
-                      {isLoading ? t('status.searchingPlatforms') : t('status.loadingMoreSources')}
-                    </LoadingLabel>
-                    <SearchResultsSkeleton />
-                  </div>
-                </SkeletonScreen>
+                // Hidden from screen readers: the status region above already says "Searching".
+                <div className="skeleton-fade-in space-y-4" aria-hidden="true">
+                  <LoadingLabel>
+                    {isLoading ? t('status.searchingPlatforms') : t('status.loadingMoreSources')}
+                  </LoadingLabel>
+                  <SearchResultsSkeleton />
+                </div>
               ) : outcome === 'results' || outcome === 'partial' ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">

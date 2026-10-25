@@ -26,7 +26,7 @@ export function PrivacyPolicyPage() {
       <main className="pt-8 px-4 pb-16">
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
-            <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
+            <h1 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h1>
             <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">

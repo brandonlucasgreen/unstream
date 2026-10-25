@@ -68,6 +68,11 @@ export function PublicSavedArtistsPage() {
       .finally(() => setLoading(false));
   }, [handle, attempt]);
 
+  // The route's generic "Collection" title, made specific once the owner is known.
+  useEffect(() => {
+    if (data?.owner_display_name) document.title = `${data.owner_display_name}'s collection | Unstream`;
+  }, [data?.owner_display_name]);
+
   const handleCopy = async () => {
     const url = window.location.href;
     try {

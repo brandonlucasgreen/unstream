@@ -84,7 +84,7 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
 
       <Header />
 
-      <div className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col">
         <div className="pt-8 pb-8 text-center px-6">
           <h1 className="text-2xl font-bold mb-2">{title}</h1>
           {!loading && !loadFailed && (
@@ -170,7 +170,7 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
             </div>
           </>
         )}
-      </div>
+      </main>
 
       <Footer />
     </div>
