@@ -222,7 +222,7 @@ export function DownloadGrid() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-md mx-auto items-stretch">
         {buttons.map((btn) => {
-          const className = `flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${btn.bg} text-white ${btn.hoverBg} transition-colors font-medium shadow-lg ${btn.shadow} whitespace-nowrap`;
+          const className = `flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${btn.bg} text-accent-foreground ${btn.hoverBg} transition-colors font-medium shadow-lg ${btn.shadow} whitespace-nowrap`;
 
           if (btn.onClick) {
             return (

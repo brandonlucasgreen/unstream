@@ -1,7 +1,8 @@
 import type { Source } from '../types';
 import { analytics } from '../services/analytics';
 import { isBandcampFriday } from '../utils/bandcamp-friday';
-import { badgeColors } from '../utils/colors';
+import { badgeColors, compositeOver, fitTextColor, withAlpha, BADGE_BACKDROP } from '../utils/colors';
+import { usePrefersLightTheme } from '../hooks/usePrefersLightTheme';
 import { PlatformIcon } from './PlatformIcon';
 
 interface SourceBadgeProps {
@@ -14,6 +15,10 @@ interface SourceBadgeProps {
 }
 
 export function SourceBadge({ source, url, isDirectLink, displayName, onClick }: SourceBadgeProps) {
+  // Badge text is fitted for contrast against a theme-specific composited
+  // background, so the badge needs to know which theme is active.
+  const lightTheme = usePrefersLightTheme();
+  const theme = lightTheme ? 'light' : 'dark';
   const label = displayName ?? source.name;
   // If we have a direct link, show as verified even if source is normally searchOnly
   const isSearchOnly = isDirectLink ? false : (source.searchOnly ?? false);
@@ -52,8 +57,19 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
     if (source.aiPolicyUrl) window.open(source.aiPolicyUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Theme-aware colors: dark/light/medium brand colors all get readable text + bg
-  const { textColor, bgColor } = badgeColors(source.color);
+  // Theme-aware colors: the text is fitted against the badge's own composited
+  // background, not just the raw brand color.
+  const { textColor, bgColor } = badgeColors(source.color, theme);
+
+  // The payout chip sits on a stronger tint of the brand color layered over the
+  // badge's own tint, so its text gets its own contrast fit. On Bandcamp Friday
+  // the chip switches to Bandcamp's cyan.
+  const payoutBg = isBCFriday ? '#1da0c320' : withAlpha(source.color, '30');
+  const payoutFg = isBCFriday ? '#1da0c3' : source.color;
+  const payoutColor = fitTextColor(
+    payoutFg,
+    compositeOver(payoutBg, compositeOver(bgColor, BADGE_BACKDROP[theme]))
+  );
 
   return (
     <a
@@ -73,9 +89,10 @@ export function SourceBadge({ source, url, isDirectLink, displayName, onClick }:
         {label}
         {hasPayoutPercent ? (
           <span
-            className={`payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help${isBCFriday ? ' bandcamp-friday-payout' : ''}`}
+            className="payout-badge relative text-[10px] font-semibold px-1 py-0.5 rounded cursor-help"
             style={{
-              backgroundColor: isBCFriday ? '#1da0c320' : `${source.color}30`,
+              backgroundColor: payoutBg,
+              color: payoutColor,
             }}
           >
             {displayPayout}
