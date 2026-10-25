@@ -147,16 +147,22 @@ struct ReleaseCheckOutcome: Codable, Equatable {
     private(set) var status: Status
     let total: Int
     let failedCount: Int
+    /// Artists the server had nothing to check for yet (no catalogue, no usable link — its 400).
+    /// Not checked, but not a failure to retry; they don't make a run partial. Optional so an
+    /// outcome saved by the previous build still decodes.
+    let uncheckableCount: Int?
     let date: Date
 
-    init(total: Int, failedCount: Int, date: Date = Date()) {
+    init(total: Int, failedCount: Int, uncheckableCount: Int = 0, date: Date = Date()) {
         self.total = total
         self.failedCount = failedCount
+        self.uncheckableCount = uncheckableCount
         self.date = date
+        let checkable = total - uncheckableCount
         if failedCount == 0 {
             status = .complete
         } else {
-            status = failedCount >= total ? .failed : .partial
+            status = failedCount >= checkable ? .failed : .partial
         }
     }
 
@@ -167,12 +173,21 @@ struct ReleaseCheckOutcome: Codable, Equatable {
         return outcome
     }
 
-    /// What to tell the fan, or nil when the check reached everyone.
+    /// What to tell the fan, or nil when every artist was checked.
     var problemDescription: String? {
+        let uncheckable = uncheckableCount ?? 0
         switch status {
-        case .complete: return nil
-        case .failed: return "The last check couldn't reach Unstream, so new releases may be missing."
-        case .partial: return "The last check reached \(total - failedCount) of \(total) artists."
+        case .failed:
+            return "The last check couldn't reach Unstream, so new releases may be missing."
+        case .partial:
+            let checkable = total - uncheckable
+            return "The last check reached \(checkable - failedCount) of \(checkable) artists."
+        case .complete where uncheckable > 0:
+            return uncheckable == 1
+                ? "1 saved artist can't be checked until Unstream catalogues them."
+                : "\(uncheckable) saved artists can't be checked until Unstream catalogues them."
+        case .complete:
+            return nil
         }
     }
 }

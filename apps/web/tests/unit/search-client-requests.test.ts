@@ -68,6 +68,11 @@ describe('searchPlatforms failures', () => {
     expect(response.partial).toBe(true);
   });
 
+  it('throws a SearchRequestError on a 200 that is not JSON (a challenge page)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('<html>challenge</html>', { status: 200 }));
+    await expect(searchPlatforms('Radiohead')).rejects.toBeInstanceOf(SearchRequestError);
+  });
+
   it('throws when every part of a multi-artist search fails', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 503 }));
     await expect(searchPlatforms('Kid Lightbulbs feat. ilyBBY')).rejects.toBeInstanceOf(SearchRequestError);

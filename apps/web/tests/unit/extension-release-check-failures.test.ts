@@ -13,7 +13,11 @@ type MessageHandler = (
   sendResponse: (value: unknown) => void
 ) => unknown;
 
-type CheckResult = { checked: boolean; newCount: number; outcome: { status: string; total: number; failedCount: number } };
+type CheckResult = {
+  checked: boolean;
+  newCount: number;
+  outcome: { status: string; total: number; failedCount: number; uncheckableCount: number };
+};
 type CheckState = {
   lastCheckDate: number;
   artistLastChecked?: Record<string, number>;
@@ -24,6 +28,7 @@ const storage: Record<string, unknown> = {};
 const requests: { artistName: string; sinceDays: number }[] = [];
 const FORTY_TWO_DAYS_AGO = Date.now() - 42 * 24 * 60 * 60 * 1000;
 let downIsOffline = false;
+let downStatus = 503;
 let messageHandler: MessageHandler;
 
 function runCheck(): Promise<CheckResult> {
@@ -36,6 +41,7 @@ const state = () => storage.releaseCheckState as CheckState;
 
 let first: CheckResult;
 let second: CheckResult;
+let third: CheckResult;
 
 beforeAll(async () => {
   const noop = () => {};
@@ -80,10 +86,10 @@ beforeAll(async () => {
     requests.push(body);
     if (body.artistName === 'Down') {
       if (downIsOffline) throw new TypeError('Failed to fetch');
-      return { ok: false, status: 503, json: async () => ({}) };
+      return { ok: false, status: downStatus, json: async () => ({}) };
     }
     if (body.artistName === 'Never Catalogued') {
-      // The server's answer for an artist it has nothing to check: an answer, not a failure.
+      // The server has nothing to check for this artist yet: not checked, but not a failure.
       return { ok: false, status: 400, json: async () => ({ error: 'no platform' }) };
     }
     return { ok: true, json: async () => ({ artistName: body.artistName, releases: [] }) };
@@ -95,19 +101,24 @@ beforeAll(async () => {
   downIsOffline = true;
   requests.length = 0;
   second = await runCheck();
+  // A Cloudflare bot challenge answers 403. It must count as a failure, not as "checked".
+  downIsOffline = false;
+  downStatus = 403;
+  third = await runCheck();
 });
 
 describe('a check where one artist could not be reached', () => {
   it('reports a partial check, not "no new releases"', () => {
-    expect(first.outcome).toMatchObject({ status: 'partial', total: 3, failedCount: 1 });
+    expect(first.outcome).toMatchObject({ status: 'partial', total: 3, failedCount: 1, uncheckableCount: 1 });
   });
 
   it('does not move the check-wide date forward', () => {
     expect(state().lastCheckDate).toBe(FORTY_TWO_DAYS_AGO);
   });
 
-  it('records a successful check only for the artists that answered', () => {
-    expect(Object.keys(state().artistLastChecked ?? {}).sort()).toEqual(['Never Catalogued', 'Up']);
+  it('records a successful check only for the artist that was really checked', () => {
+    // Not 'Never Catalogued': a 400 means it wasn't checked, so its window must not narrow.
+    expect(Object.keys(state().artistLastChecked ?? {})).toEqual(['Up']);
   });
 
   it('asks the next check for the whole missed window for the artist that failed', () => {
@@ -119,6 +130,12 @@ describe('a check where one artist could not be reached', () => {
 
   it('treats a network error the same way, and keeps the outcome for the popup', () => {
     expect(second.outcome.status).toBe('partial');
+  });
+
+  it('counts a 403 bot challenge as a failure, never as checked', () => {
+    expect(third.outcome).toMatchObject({ status: 'partial', failedCount: 1 });
+    expect(state().artistLastChecked?.Down).toBeUndefined();
+    expect(state().lastCheckDate).toBe(FORTY_TWO_DAYS_AGO);
     expect(state().lastCheckOutcome?.status).toBe('partial');
   });
 });

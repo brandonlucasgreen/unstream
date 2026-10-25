@@ -9,7 +9,7 @@ import { Header } from './components/Header';
 import { LoadingLabel } from './components/Skeleton';
 import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
-import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
+import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult, SearchRequestError } from './services/sources';
 import { analytics } from './services/analytics';
 import { searchOutcome, platformFailureMessageKey, partialMessageKey, type SearchFailure } from './services/searchOutcome';
 import { resolveAccountHome } from './services/accountHome';
@@ -228,7 +228,11 @@ function App() {
             });
           }
         } catch (enrichErr) {
-          Sentry.captureException(enrichErr, { extra: { context: 'search.musicbrainzEnrichment' } });
+          // A 429 is the rate limiter working (Phase 2 shares the strict bucket with Phase 1),
+          // not a fault worth an alert — the same rule searchSingle follows.
+          if (!(enrichErr instanceof SearchRequestError && enrichErr.status === 429)) {
+            Sentry.captureException(enrichErr, { extra: { context: 'search.musicbrainzEnrichment' } });
+          }
           console.error('MusicBrainz enrichment failed:', enrichErr);
           // Phase 1's cards still stand; what's lost is anything MusicBrainz would have added,
           // and with no cards, the right to say this artist isn't here.
@@ -245,8 +249,9 @@ function App() {
       // searchPlatforms has already reported the request failure to Sentry. Any stored
       // cards on screen stay, labelled as partial; with none, the page says the search
       // failed and offers a retry — never "No results found".
+      // fullResultsArrived stays false on purpose: a stored-artists preview that lands after a
+      // fast failure (an instant 429, say) is all the fan will get, so it must still show.
       if (currentSearchRef.current === searchId) {
-        fullResultsArrived = true;
         setSearchFailure({ stage: 'platforms', messageKey: platformFailureMessageKey(err) });
         setIsLoading(false);
       }

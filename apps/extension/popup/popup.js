@@ -1466,11 +1466,14 @@ async function loadLastCheckTime() {
     elements.lastCheckTime.textContent =
       "Last check couldn't reach Unstream, so new releases may be missing. Check now to retry.";
   } else if (outcome?.status === 'partial') {
-    const checked = outcome.total - outcome.failedCount;
+    const checkable = outcome.total - (outcome.uncheckableCount ?? 0);
     elements.lastCheckTime.textContent =
-      `Last check reached ${checked} of ${outcome.total} artists. Check now to retry the rest.`;
+      `Last check reached ${checkable - outcome.failedCount} of ${checkable} artists. Check now to retry the rest.`;
   } else if (releaseCheckState.lastCheckDate) {
-    elements.lastCheckTime.textContent = `Last checked: ${formatDate(releaseCheckState.lastCheckDate)}`;
+    const uncheckable = outcome?.uncheckableCount ?? 0;
+    const note = uncheckable === 0 ? ''
+      : ` · ${uncheckable} artist${uncheckable === 1 ? '' : 's'} can't be checked until Unstream catalogues them`;
+    elements.lastCheckTime.textContent = `Last checked: ${formatDate(releaseCheckState.lastCheckDate)}${note}`;
   }
 }
 

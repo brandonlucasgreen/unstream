@@ -475,11 +475,21 @@ final class ReleaseAlertTests: XCTestCase {
                        "The last check reached 2 of 3 artists.")
     }
 
-    /// Same split as the extension: a 400 is the server's answer, a 429 or 5xx is not.
-    func testOnlyTransientStatusesCountAsFailures() {
-        XCTAssertFalse(ReleaseAlertManager.isTransientCheckFailure(400))
-        XCTAssertTrue(ReleaseAlertManager.isTransientCheckFailure(429))
-        XCTAssertTrue(ReleaseAlertManager.isTransientCheckFailure(503))
+    /// Same split as the extension: only a 400 means "nothing to check yet"; a 403 bot challenge,
+    /// a 404, a 429 or a 5xx is a failure.
+    func testOnlyA400MeansNothingToCheck() {
+        XCTAssertTrue(ReleaseAlertManager.isUncheckableArtistStatus(400))
+        for status in [401, 403, 404, 429, 503] {
+            XCTAssertFalse(ReleaseAlertManager.isUncheckableArtistStatus(status))
+        }
+    }
+
+    /// Artists with nothing to check yet don't make a run partial, but they are said out loud.
+    func testUncheckableArtistsAreCountedNotHidden() {
+        let outcome = ReleaseCheckOutcome(total: 3, failedCount: 0, uncheckableCount: 1)
+        XCTAssertEqual(outcome.status, .complete)
+        XCTAssertEqual(outcome.problemDescription, "1 saved artist can't be checked until Unstream catalogues them.")
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 2, uncheckableCount: 1).status, .failed)
     }
 
     /// State saved by an older build has no per-artist dates or outcome, and must still load.

@@ -641,7 +641,14 @@ async function searchSingle(query: string, deferEnrichment = false): Promise<Sea
     }
     throw new SearchRequestError(`Search API error: ${response.status}`, response.status);
   }
-  return await response.json();
+  // A 200 that isn't JSON (a CDN or bot-challenge page) is a failed search, and a silent one
+  // unless reported here: App.tsx leaves Sentry to this function.
+  try {
+    return await response.json();
+  } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.platformSearch.parse' } });
+    throw new SearchRequestError('Search API returned an unreadable response', response.status);
+  }
 }
 
 /**

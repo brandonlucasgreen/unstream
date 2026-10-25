@@ -17,7 +17,7 @@ import {
   selectUnseenReleases,
   sinceDaysForCheck,
   lastSuccessfulCheckFor,
-  isTransientCheckFailure,
+  isUncheckableArtistStatus,
   summarizeCheck,
 } from '../lib/release-alerts.js';
 
@@ -602,6 +602,7 @@ async function checkForNewReleases() {
   const checkStartedAt = Date.now();
   const foundNewReleases = [];
   let failedCount = 0;
+  let uncheckableCount = 0;
 
   for (const artistName of artistNames) {
     const artistData = savedArtistsData[artistName];
@@ -628,6 +629,12 @@ async function checkForNewReleases() {
     // Call release check API
     try {
       const result = await checkReleaseAPI(artistName, platforms, sinceDays);
+      if (result === UNCHECKABLE) {
+        // Not checked, so the date stays put: once they're catalogued, the first real check
+        // asks for the whole window.
+        uncheckableCount++;
+        continue;
+      }
       releaseCheckState.artistLastChecked[artistName] = checkStartedAt;
 
       // Every release in the window, not just the newest — an artist who put out two records
@@ -662,7 +669,7 @@ async function checkForNewReleases() {
 
   // The check-wide date moves only on a complete check: it decides whether startup re-checks
   // (more than a week old), and a failed or partial check is exactly when that should happen.
-  const outcome = summarizeCheck(artistNames.length, failedCount, checkStartedAt);
+  const outcome = summarizeCheck(artistNames.length, failedCount, uncheckableCount, checkStartedAt);
   releaseCheckState.lastCheckOutcome = outcome;
   if (outcome.status === 'complete') releaseCheckState.lastCheckDate = checkStartedAt;
   await chrome.storage.local.set({ releaseCheckState });
@@ -673,7 +680,10 @@ async function checkForNewReleases() {
   return { checked: outcome.status !== 'failed', newCount: foundNewReleases.length, outcome };
 }
 
-// Call the release check API
+/** checkReleaseAPI's answer for an artist the server has nothing to check for yet. */
+const UNCHECKABLE = Symbol('uncheckable');
+
+// Call the release check API. Resolves with the response, or UNCHECKABLE; throws on any failure.
 async function checkReleaseAPI(artistName, platforms, sinceDays) {
   const url = `${API_BASE}/check-releases`;
 
@@ -684,9 +694,10 @@ async function checkReleaseAPI(artistName, platforms, sinceDays) {
   });
 
   if (!response.ok) {
-    // A 400 is the server's answer for an artist it has nothing to check; anything transient
-    // is a failure the caller counts, so it never reads as "no new releases".
-    if (!isTransientCheckFailure(response.status)) return null;
+    // A 400 is the server saying it has nothing to check for this artist yet. Anything else —
+    // a 403 bot challenge, a 404, a 429, a 5xx — is a failure the caller counts, so it never
+    // reads as "no new releases".
+    if (isUncheckableArtistStatus(response.status)) return UNCHECKABLE;
     throw new Error(`API error: ${response.status}`);
   }
 
