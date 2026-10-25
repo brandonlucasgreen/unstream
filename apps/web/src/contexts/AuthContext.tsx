@@ -45,6 +45,14 @@ interface AuthContextValue {
    * don't know — so consumers need this to tell a load in progress from one that gave up.
    */
   savedArtistsError: string | null;
+  /**
+   * A pending save from an unauthenticated click (LoginInterstitial) that failed after
+   * sign-in. The intent stays in localStorage until a save is confirmed, so this survives
+   * a reload and clears when a retry succeeds. The landing page renders the retry.
+   */
+  pendingSaveFailure: { artistId: string; artistName?: string } | null;
+  /** Re-run the pending save that previously failed. */
+  retryPendingSave: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -401,21 +409,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, savedArtists]);
 
-  // Check localStorage for pending save (from unauthenticated clicks)
-  useEffect(() => {
-    if (session) {
-      const pendingSave = localStorage.getItem('pendingSave');
-      if (pendingSave) {
-        try {
-          const { artistId, notes } = JSON.parse(pendingSave);
-          localStorage.removeItem('pendingSave'); // Clear immediately to prevent retries
-          saveArtist(artistId, notes);
-        } catch {
-          localStorage.removeItem('pendingSave');
-        }
-      }
+  // The pending save from an unauthenticated click (LoginInterstitial stores it before
+  // redirecting to sign in). This used to delete the intent before the save ran, and never
+  // looked at the outcome — so a save that failed (or ran under a pipeline id instead of the
+  // canonical slug) vanished without a trace. Now the intent is cleared only once a save is
+  // confirmed, a failure is surfaced as `pendingSaveFailure` for the landing page to render
+  // with a retry, and the automatic attempt runs once per session so a persisting failure
+  // can't loop — the manual retry and any later sign-in can still re-run it.
+  const [pendingSaveFailure, setPendingSaveFailure] = useState<{ artistId: string; artistName?: string } | null>(null);
+  const pendingSaveAttemptedForRef = useRef<string | null>(null);
+
+  const attemptPendingSave = useCallback(async (payload: { artistId: string; artistName?: string; notes?: string }) => {
+    const saved = await saveArtist(payload.artistId, payload.notes, payload.artistName);
+    if (saved) {
+      localStorage.removeItem('pendingSave');
+      setPendingSaveFailure(null);
+    } else {
+      setPendingSaveFailure({ artistId: payload.artistId, artistName: payload.artistName });
     }
-  }, [session, saveArtist]);
+  }, [saveArtist]);
+
+  useEffect(() => {
+    if (!session) return;
+    const raw = localStorage.getItem('pendingSave');
+    if (!raw) return;
+    let payload: { artistId: string; artistName?: string; notes?: string };
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      localStorage.removeItem('pendingSave');
+      return;
+    }
+    if (!payload?.artistId) {
+      localStorage.removeItem('pendingSave');
+      return;
+    }
+    if (pendingSaveAttemptedForRef.current === session.user.id) return;
+    pendingSaveAttemptedForRef.current = session.user.id;
+    attemptPendingSave(payload);
+  }, [session, attemptPendingSave]);
+
+  const retryPendingSave = useCallback(() => {
+    const raw = localStorage.getItem('pendingSave');
+    if (!raw) {
+      setPendingSaveFailure(null);
+      return;
+    }
+    try {
+      const payload = JSON.parse(raw) as { artistId: string; artistName?: string; notes?: string };
+      if (!payload?.artistId) {
+        localStorage.removeItem('pendingSave');
+        setPendingSaveFailure(null);
+        return;
+      }
+      attemptPendingSave(payload);
+    } catch {
+      localStorage.removeItem('pendingSave');
+      setPendingSaveFailure(null);
+    }
+  }, [attemptPendingSave]);
 
   const loadSavedArtists = useCallback(async (signal?: AbortSignal) => {
     if (!session) return;
@@ -456,7 +508,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPassword = !!user?.user_metadata?.has_password;
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError }}>
+    <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError, pendingSaveFailure, retryPendingSave }}>
       {children}
     </AuthContext.Provider>
   );

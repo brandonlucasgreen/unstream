@@ -27,7 +27,9 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
     setLoading(true);
     setError('');
     try {
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
+      // The artist name rides along so the resumed save (and its failure banner) can
+      // speak about the artist, not a raw slug.
+      localStorage.setItem('pendingSave', JSON.stringify({ artistId, artistName }));
       await signInWithMagicLink(email.trim());
       setMagicSent(true);
     } catch (e) {
@@ -48,7 +50,7 @@ export function LoginInterstitial({ artistId, artistName, onClose }: LoginInters
     setLoading(true);
     setError('');
     try {
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
+      localStorage.setItem('pendingSave', JSON.stringify({ artistId, artistName }));
       await signInWithPassword(email.trim(), password);
       onClose(); // AuthContext will pick up the pending save
     } catch (e) {

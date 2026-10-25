@@ -25,7 +25,7 @@ import { YourTips } from '../components/YourTips';
  * mounts and shows its own skeleton, so the wall-clock cost is the slowest single request.
  */
 export function MyCollectionPage() {
-  const { session, isLoading: authLoading, savedArtists, artistsLoaded } = useAuth();
+  const { session, isLoading: authLoading, savedArtists, artistsLoaded, pendingSaveFailure, retryPendingSave, isArtistSaved } = useAuth();
   const [upcomingReleases, setUpcomingReleases] = useState<RecentRelease[]>([]);
   const [recentReleases, setRecentReleases] = useState<RecentRelease[]>([]);
   const [releasesError, setReleasesError] = useState<string | null>(null);
@@ -66,6 +66,23 @@ export function MyCollectionPage() {
       <main className="flex-1 p-6">
         <div className="max-w-6xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold">My Collection</h1>
+
+          {/* A pending save from before sign-in whose resumed save failed (audit #5): the
+              intent is still in localStorage, so offer the retry here rather than letting
+              the save vanish. Hides itself if the artist was saved by hand in the meantime. */}
+          {pendingSaveFailure && !isArtistSaved(pendingSaveFailure.artistId) && (
+            <div className="p-3 rounded-lg bg-warning/10 border border-warning/30 text-warning text-sm flex flex-wrap items-center justify-between gap-2">
+              <span>
+                We couldn&rsquo;t save {pendingSaveFailure.artistName || 'that artist'} to your collection.
+              </span>
+              <button
+                onClick={retryPendingSave}
+                className="px-3 py-1 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors"
+              >
+                Try again
+              </button>
+            </div>
+          )}
 
           <WelcomeBanner />
 

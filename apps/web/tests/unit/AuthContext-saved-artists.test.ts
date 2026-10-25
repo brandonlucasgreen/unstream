@@ -192,30 +192,28 @@ describe('AuthContext saved artists state management', () => {
       localStorage.clear();
     });
 
-    it('stores pending save in localStorage before redirect', () => {
+    it('stores pending save (with the artist name) before redirect', () => {
       const artistId = '123e4567-e89b-12d3-a456-426614174000';
 
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
+      localStorage.setItem('pendingSave', JSON.stringify({ artistId, artistName: 'Test Artist' }));
 
       const stored = JSON.parse(localStorage.getItem('pendingSave')!);
       expect(stored.artistId).toBe(artistId);
+      expect(stored.artistName).toBe('Test Artist');
     });
 
-    it('clears pendingSave immediately on read, not after save', () => {
+    it('keeps the pending save in localStorage until a save is confirmed (audit #5)', () => {
       const artistId = '123e4567-e89b-12d3-a456-426614174000';
 
       localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
 
-      // Simulate the read-and-clear pattern from AuthContext
+      // Reading the intent is no longer the clear point: it survives until AuthContext's
+      // save actually succeeds, so a failed resumed save stays retryable instead of
+      // vanishing. The behavioral coverage lives in AuthContext-pending-save.test.tsx,
+      // driven through the real AuthProvider; this pins the storage contract itself.
       const pendingSave = localStorage.getItem('pendingSave');
-      localStorage.removeItem('pendingSave'); // Clear immediately
-
-      // Even if save fails, localStorage is already cleared
-      expect(localStorage.getItem('pendingSave')).toBeNull();
       expect(pendingSave).not.toBeNull();
-
-      const parsed = JSON.parse(pendingSave!);
-      expect(parsed.artistId).toBe(artistId);
+      expect(JSON.parse(pendingSave!).artistId).toBe(artistId);
     });
 
     it('handles corrupted pendingSave gracefully', () => {
