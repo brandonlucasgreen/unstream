@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
 import { ArtistPage } from 'src/pages/ArtistPage';
 
 // Mock react-router-dom
@@ -223,13 +223,33 @@ describe('ArtistPage', () => {
     });
   });
 
-  it('renders NotFoundCard on network error', async () => {
+  // A failed request is not a missing artist (audit 2026-10-25 #2): "We couldn't find that
+  // artist" after an outage tells a fan the artist isn't on Unstream.
+  it('renders a retryable error, not NotFoundCard, on a network error', async () => {
     mockUseParams.mockReturnValue({ slug: 'error-artist' });
     vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
     render(<ArtistPage />);
     await waitFor(() => {
-      expect(screen.getByTestId('not-found-card')).toBeTruthy();
+      expect(screen.getByRole('alert').textContent).toContain("couldn't load this artist");
     });
+    expect(screen.queryByTestId('not-found-card')).toBeNull();
+  });
+
+  it('renders a retryable error on a 500, and retrying refetches', async () => {
+    mockUseParams.mockReturnValue({ slug: 'kid-lightbulbs' });
+    const fetchSpy = vi.spyOn(global, 'fetch')
+      .mockResolvedValueOnce(new Response(null, { status: 500 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(claimedPayload), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+    render(<ArtistPage />);
+    const retry = await screen.findByRole('button', { name: 'Try again' });
+    expect(screen.queryByTestId('not-found-card')).toBeNull();
+    fireEvent.click(retry);
+    await waitFor(() => {
+      expect(screen.getByTestId('rich-artist-profile')).toBeTruthy();
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 
   it('passes justClaimed=true when ?claimed param is present', async () => {

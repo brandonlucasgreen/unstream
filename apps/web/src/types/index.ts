@@ -122,6 +122,9 @@ export interface SearchResponse {
   query: string;
   results: SearchResult[];
   hasPendingEnrichment?: boolean; // True if MusicBrainz data should be fetched separately
+  // Client-only: a multi-artist search where some of the split queries failed, so these
+  // results are what the rest returned. Never sent by the server.
+  partial?: boolean;
 }
 
 // A short artist bio — one source, never stitched together. `text` is plain text with

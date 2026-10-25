@@ -11,6 +11,7 @@ import { SearchResultsSkeleton } from './components/LoadingSkeletons';
 import type { SearchResult } from './types';
 import { HOMEPAGE_SOURCE_CATEGORIES, sources, sourceCategories, searchPlatforms, fetchStoredArtists, resolveArtistUrl, fetchMusicBrainzData, mergeWithMusicBrainzData, buildMusicBrainzFallbackResult } from './services/sources';
 import { analytics } from './services/analytics';
+import { searchOutcome, platformFailureMessageKey, partialMessageKey, type SearchFailure } from './services/searchOutcome';
 import { resolveAccountHome } from './services/accountHome';
 import { useAuth } from './contexts/AuthContext';
 import { DownloadGrid } from './components/DownloadGrid';
@@ -29,7 +30,9 @@ function App() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
+  // A failed link resolution (?url=). Search failures are `searchFailure` below.
   const [error, setError] = useState<string | null>(null);
+  const [searchFailure, setSearchFailure] = useState<SearchFailure | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [resolvedQuery, setResolvedQuery] = useState<string>('');
   const [isResolving, setIsResolving] = useState(false);
@@ -168,6 +171,7 @@ function App() {
     setIsLoading(true);
     setIsEnriching(false);
     setError(null);
+    setSearchFailure(null);
     setHasSearched(true);
     // Cleared rather than left behind the skeleton: stored artists for this query may
     // render before the full search finishes, and must not appear beside the last one's.
@@ -195,10 +199,13 @@ function App() {
       if (currentSearchRef.current !== searchId) return;
 
       fullResultsArrived = true;
-      // The full results always contain the stored artists, so an empty response with
-      // stored cards on screen means the search failed (searchPlatforms swallows errors
-      // into an empty list). Keep what we have rather than replacing it with "No results".
+      // The full results always contain the stored artists. An empty response with stored
+      // cards on screen shouldn't happen, but if it does, keep the cards rather than
+      // replacing artists we know exist with "No results".
       setResults(prev => (response.results.length === 0 && prev.length > 0 ? prev : response.results));
+      if (response.partial) {
+        setSearchFailure({ stage: 'some-queries', messageKey: 'error.searchIncomplete' });
+      }
       setIsLoading(false);
       analytics.trackSearchResults(response.results.length > 0, response.results.length);
 
@@ -213,7 +220,7 @@ function App() {
           const mbData = await fetchMusicBrainzData(query);
 
           // Check if this is still the current search before updating
-          if (currentSearchRef.current === searchId && mbData) {
+          if (currentSearchRef.current === searchId) {
             setResults(prev => {
               if (prev.length > 0) return mergeWithMusicBrainzData(prev, mbData);
               const fallback = buildMusicBrainzFallbackResult(mbData);
@@ -223,6 +230,11 @@ function App() {
         } catch (enrichErr) {
           Sentry.captureException(enrichErr, { extra: { context: 'search.musicbrainzEnrichment' } });
           console.error('MusicBrainz enrichment failed:', enrichErr);
+          // Phase 1's cards still stand; what's lost is anything MusicBrainz would have added,
+          // and with no cards, the right to say this artist isn't here.
+          if (currentSearchRef.current === searchId) {
+            setSearchFailure({ stage: 'enrichment', messageKey: 'error.searchIncomplete' });
+          }
         } finally {
           if (currentSearchRef.current === searchId) {
             setIsEnriching(false);
@@ -230,14 +242,21 @@ function App() {
         }
       }
     } catch (err) {
-      Sentry.captureException(err, { extra: { context: 'search.platformSearch' } });
+      // searchPlatforms has already reported the request failure to Sentry. Any stored
+      // cards on screen stay, labelled as partial; with none, the page says the search
+      // failed and offers a retry — never "No results found".
       if (currentSearchRef.current === searchId) {
-        setError(t('error.searchFailed'));
+        fullResultsArrived = true;
+        setSearchFailure({ stage: 'platforms', messageKey: platformFailureMessageKey(err) });
         setIsLoading(false);
       }
       console.error(err);
     }
-  }, [setSearchParams, t]);
+  }, [setSearchParams]);
+
+  const handleRetrySearch = useCallback(() => {
+    if (lastSearchedRef.current) handleSearch(lastSearchedRef.current);
+  }, [handleSearch]);
 
   // Clear everything a search produced, without touching the URL. Split out of
   // handleGoHome so the effect above can reset in response to the URL losing its
@@ -247,6 +266,7 @@ function App() {
     setResults([]);
     setHasSearched(false);
     setError(null);
+    setSearchFailure(null);
     setResolvedQuery('');
     setIsEnriching(false);
     setSelectedForMerge(new Set());
@@ -281,6 +301,13 @@ function App() {
         : r
     ));
   }, []);
+
+  const outcome = searchOutcome({
+    isLoading,
+    isEnriching,
+    resultCount: results.length,
+    failure: searchFailure,
+  });
 
   const handleMergeSelected = useCallback(() => {
     const selectedResults = results.filter(r => selectedForMerge.has(r.id));
@@ -373,14 +400,16 @@ function App() {
           {/* Results */}
           {hasSearched && !error && (
             <div className="mt-8">
-              {isLoading && results.length === 0 ? (
+              {outcome === 'loading' ? (
                 <SkeletonScreen label={t('skeleton.searchingPlatforms')}>
                   <div className="space-y-4">
-                    <LoadingLabel>{t('status.searchingPlatforms')}</LoadingLabel>
+                    <LoadingLabel>
+                      {isLoading ? t('status.searchingPlatforms') : t('status.loadingMoreSources')}
+                    </LoadingLabel>
                     <SearchResultsSkeleton />
                   </div>
                 </SkeletonScreen>
-              ) : results.length > 0 ? (
+              ) : outcome === 'results' || outcome === 'partial' ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     {isLoading ? (
@@ -405,6 +434,17 @@ function App() {
                       )}
                     </div>
                   </div>
+                  {outcome === 'partial' && searchFailure && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-sm text-text-secondary">
+                      <span>{t(partialMessageKey(searchFailure))}</span>
+                      <button
+                        onClick={handleRetrySearch}
+                        className="font-medium text-text-primary underline hover:no-underline"
+                      >
+                        {t('action.retry')}
+                      </button>
+                    </div>
+                  )}
                   {results.map((result) => (
                     <ResultCard
                       key={result.id}
@@ -415,6 +455,26 @@ function App() {
                       onLinkRemoved={handleLinkRemoved}
                     />
                   ))}
+                </div>
+              ) : outcome === 'failed' && searchFailure ? (
+                <div className="text-center py-16">
+                  <p className="text-text-primary text-lg">{t(searchFailure.messageKey)}</p>
+                  <div className="mt-4 flex items-center justify-center gap-6">
+                    <button
+                      onClick={handleRetrySearch}
+                      className="text-sm font-medium text-text-primary underline hover:no-underline"
+                    >
+                      {t('action.retry')}
+                    </button>
+                    {!isStandalone && (
+                      <button
+                        onClick={handleGoHome}
+                        className="text-sm text-text-muted hover:text-text-primary transition-colors"
+                      >
+                        {t('results.clear')}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-16">

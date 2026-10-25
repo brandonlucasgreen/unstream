@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { searchPlatforms, fetchStoredArtists } from '../../src/services/sources';
+import { searchPlatforms, fetchStoredArtists, fetchMusicBrainzData, SearchRequestError } from '../../src/services/sources';
 
 // What the search box asks the server for.
 //
@@ -40,6 +40,44 @@ describe('searchPlatforms', () => {
     const urls = requestedUrls(fetchSpy);
     expect(urls.length).toBeGreaterThan(1);
     for (const url of urls) expect(url.searchParams.has('enrichment')).toBe(false);
+  });
+});
+
+// A failed search must not look like an empty one (audit 2026-10-25 #2).
+describe('searchPlatforms failures', () => {
+  it('throws with the status on a 429 instead of returning no results', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 429 }));
+    await expect(searchPlatforms('Radiohead')).rejects.toMatchObject({ name: 'SearchRequestError', status: 429 });
+  });
+
+  it('throws without a status on a network error', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+    const error = await searchPlatforms('Radiohead').catch(e => e);
+    expect(error).toBeInstanceOf(SearchRequestError);
+    expect(error.status).toBeUndefined();
+  });
+
+  it('marks a multi-artist search partial when only some parts answer', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const q = new URL(String(input), 'https://unstream.stream').searchParams.get('query');
+      return q === 'ilyBBY'
+        ? new Response('{}', { status: 500 })
+        : okJson({ query: q, results: [] });
+    });
+    const response = await searchPlatforms('Kid Lightbulbs feat. ilyBBY');
+    expect(response.partial).toBe(true);
+  });
+
+  it('throws when every part of a multi-artist search fails', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 503 }));
+    await expect(searchPlatforms('Kid Lightbulbs feat. ilyBBY')).rejects.toBeInstanceOf(SearchRequestError);
+  });
+});
+
+describe('fetchMusicBrainzData', () => {
+  it('throws on a failed request rather than looking like "not known"', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 500 }));
+    await expect(fetchMusicBrainzData('Radiohead')).rejects.toBeInstanceOf(SearchRequestError);
   });
 });
 
