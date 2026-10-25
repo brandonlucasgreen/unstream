@@ -173,4 +173,37 @@ final class SavedArtistsSyncTests: XCTestCase {
         XCTAssertNil(artist.claimed)
         XCTAssertNil(artist.deleted)
     }
+    // MARK: - Outbox (audit 2026-10-25 #3)
+
+    private func artist(_ slug: String, _ name: String) -> SyncedArtist {
+        SyncedArtist(id: slug, artistId: slug, name: name, slug: slug, imageUrl: nil,
+                     supported: nil, lastModified: nil, deviceId: nil, claimed: nil, deleted: nil)
+    }
+
+    /// A queued save shows up in the list before the server has it, and a queued remove hides
+    /// the artist — so a pull while offline doesn't undo what the fan just did.
+    @MainActor
+    func testPendingChangesApplyOnTopOfTheServerList() {
+        let server = [artist("tool", "Tool"), artist("radiohead", "Radiohead")]
+        let changes = [
+            SavedArtistsSync.PendingChange(action: .save, slug: "bjork", name: "Björk", imageUrl: nil),
+            SavedArtistsSync.PendingChange(action: .remove, slug: "tool", name: "Tool", imageUrl: nil),
+        ]
+        let result = SavedArtistsSync.applying(changes, to: server)
+        XCTAssertEqual(result.map(\.slug), ["bjork", "radiohead"])
+    }
+
+    // MARK: - Device-computed slugs mirror the server's artistSlug()
+
+    func testArtistSlugFoldsAccentsLikeTheServer() {
+        XCTAssertEqual(ArtistSlug.make("Björk"), "bjork")
+        XCTAssertEqual(ArtistSlug.make("Sébastien Tellier"), "sebastien-tellier")
+        XCTAssertEqual(ArtistSlug.make("Hüsker Dü"), "husker-du")
+        XCTAssertEqual(ArtistSlug.make("Łukasz"), "lukasz")
+        XCTAssertEqual(ArtistSlug.make("Sigur Rós & Æ"), "sigur-ros-ae")
+    }
+
+    func testArtistSlugIsEmptyForANameWithNoLatinLetters() {
+        XCTAssertEqual(ArtistSlug.make("坂本龍一"), "")
+    }
 }

@@ -202,24 +202,25 @@ class ReleaseAlertManager: ObservableObject {
             scheduleNextFriday9am()
         }
 
-        let entries = supportListManager.entries
+        // Signed in, the account's saved list is the one to check (see SavedArtistsRouter);
+        // pulled first, because it starts empty on every launch.
+        var syncedArtists: [SyncedArtist]? = nil
+        if AuthService.shared.isSignedIn {
+            await SavedArtistsSync.shared.pull()
+            syncedArtists = SavedArtistsSync.shared.syncedArtists
+        }
+        let targets = Self.checkTargets(syncedArtists: syncedArtists, localEntries: supportListManager.entries)
         var foundNewReleases: [NewRelease] = []
 
         // Asked once, before the loop, because the `defer` above moves `lastCheckDate` to now.
         let sinceDays = Self.lookbackDays(since: checkState.lastCheckDate)
 
-        for entry in entries {
-            // Every link we hold, and no gate on which ones. The server tries the release
-            // catalogue first and ignores `platforms` entirely on that path, so an artist known
-            // only through Discogs or Jam.coop — Discogs is the *largest* link population we
-            // have — used to be skipped over a question one database read answers.
-            let platforms = Self.platformUrls(for: entry)
-
+        for target in targets {
             // The server returns every release in the window, not just the newest, so an artist
             // who put out two records since the last check produces two alerts.
             foundNewReleases.append(contentsOf: await checkViaAPI(
-                artistName: entry.artistName,
-                platforms: platforms,
+                artistName: target.artistName,
+                platforms: target.platforms,
                 sinceDays: sinceDays
             ))
         }
@@ -265,7 +266,32 @@ class ReleaseAlertManager: ObservableObject {
         }
     }
 
+    /// One artist to ask the server about.
+    struct CheckTarget: Equatable {
+        let artistName: String
+        let platforms: [String: String]
+    }
+
+    /// The artists a release check covers: the account's saved list when signed in
+    /// (`syncedArtists` non-nil), otherwise the list saved on this device. Account entries carry
+    /// no links, so they borrow a same-named local entry's when there is one; with none, the
+    /// server answers from the release catalogue, which never reads `platforms` anyway.
+    nonisolated static func checkTargets(syncedArtists: [SyncedArtist]?, localEntries: [SupportEntry]) -> [CheckTarget] {
+        guard let syncedArtists else {
+            return localEntries.map { CheckTarget(artistName: $0.artistName, platforms: platformUrls(for: $0)) }
+        }
+        return syncedArtists.map { artist in
+            let local = localEntries.first { $0.artistName.lowercased() == artist.name.lowercased() }
+            return CheckTarget(artistName: artist.name, platforms: local.map(platformUrls(for:)) ?? [:])
+        }
+    }
+
     /// Which of a saved artist's links to send with an alert check.
+    ///
+    /// Every link we hold, and no gate on which ones. The server tries the release
+    /// catalogue first and ignores `platforms` entirely on that path, so an artist known
+    /// only through Discogs or Jam.coop — Discogs is the *largest* link population we
+    /// have — used to be skipped over a question one database read answers.
     ///
     /// All of them, keyed by platform id. The server reads this only on its live-scrape
     /// fallback, and only for the platforms it can scrape, so anything else is ignored rather

@@ -431,7 +431,7 @@ struct PopoverView: View {
     /// The saved count rides in the segment label — a segmented control has no badge
     /// slot, and the count is useful enough to keep.
     private var savedTabTitle: String {
-        let count = supportListManager.entries.count
+        let count = auth.isSignedIn ? sync.syncedArtists.count : supportListManager.entries.count
         return count > 0 ? "Saved (\(count))" : "Saved"
     }
 

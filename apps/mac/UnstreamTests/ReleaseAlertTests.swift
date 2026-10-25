@@ -435,4 +435,31 @@ final class ReleaseAlertTests: XCTestCase {
 
         XCTAssertNil(ReleaseAlertManager.lookbackDays(since: now.addingTimeInterval(3600), now: now))
     }
+    // MARK: - Which saved list gets checked (audit 2026-10-25 #3)
+
+    private func synced(_ name: String) -> SyncedArtist {
+        SyncedArtist(id: name, artistId: name, name: name, slug: name.lowercased(), imageUrl: nil,
+                     supported: nil, lastModified: nil, deviceId: nil, claimed: nil, deleted: nil)
+    }
+
+    /// Signed in, the account's list is checked — not the device list, which held only what
+    /// this device's heart had saved and so ignored everything saved on the web.
+    func testSignedInChecksTheAccountList() {
+        let local = SupportEntry(artistName: "Device Only", imageUrl: nil, platforms: [])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: [synced("Web Saved")], localEntries: [local])
+        XCTAssertEqual(targets.map(\.artistName), ["Web Saved"])
+    }
+
+    func testAccountEntriesBorrowLinksFromASameNamedLocalEntry() {
+        let local = SupportEntry(artistName: "kid lightbulbs", imageUrl: nil,
+                                 platforms: [SavedPlatform(sourceId: "bandcamp", url: "https://kidlightbulbs.bandcamp.com")])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: [synced("Kid Lightbulbs")], localEntries: [local])
+        XCTAssertEqual(targets.first?.platforms, ["bandcamp": "https://kidlightbulbs.bandcamp.com"])
+    }
+
+    func testSignedOutChecksTheDeviceList() {
+        let local = SupportEntry(artistName: "Device Only", imageUrl: nil, platforms: [])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: nil, localEntries: [local])
+        XCTAssertEqual(targets.map(\.artistName), ["Device Only"])
+    }
 }
