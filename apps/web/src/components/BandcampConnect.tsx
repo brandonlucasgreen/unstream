@@ -216,7 +216,7 @@ export function BandcampConnect() {
   }
 
   if (!status) {
-    return error ? <p className="text-sm text-red-400">{error}</p> : null;
+    return error ? <p className="text-sm text-error">{error}</p> : null;
   }
 
   if (!status.connected) {
@@ -233,7 +233,7 @@ export function BandcampConnect() {
               href="https://bandcamp.com/settings?pane=fan"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent-primary hover:underline"
+              className="text-link hover:underline"
             >
               Bandcamp's Fan Settings
             </a>{' '}
@@ -245,7 +245,7 @@ export function BandcampConnect() {
             same, and Unstream fills it in.
           </li>
         </ol>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <form onSubmit={handleConnect} className="space-y-3">
           <div>
             <label htmlFor="bandcamp-username" className="block text-sm text-text-primary mb-1">
@@ -276,7 +276,7 @@ export function BandcampConnect() {
           <button
             type="submit"
             disabled={submitting || !username.trim() || !credential}
-            className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? 'Connecting…' : 'Connect Bandcamp'}
           </button>
@@ -303,7 +303,7 @@ export function BandcampConnect() {
       )}
 
       {status.syncStatus === 'error' && status.syncError && (
-        <p className="text-sm text-red-400">{status.syncError}</p>
+        <p className="text-sm text-error">{status.syncError}</p>
       )}
 
       {status.syncStatus === 'idle' && (
@@ -315,7 +315,7 @@ export function BandcampConnect() {
         </p>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {!confirmingDisconnect ? (
         <div className="flex gap-3">
@@ -333,7 +333,7 @@ export function BandcampConnect() {
             type="button"
             onClick={() => setConfirmingDisconnect(true)}
             disabled={submitting}
-            className="px-3 py-1.5 rounded-lg border border-border text-sm text-red-400 hover:bg-bg-primary disabled:opacity-50"
+            className="px-3 py-1.5 rounded-lg border border-border text-sm text-error hover:bg-bg-primary disabled:opacity-50"
           >
             Disconnect
           </button>
@@ -357,7 +357,7 @@ export function BandcampConnect() {
               type="button"
               onClick={() => handleDisconnect(true)}
               disabled={submitting}
-              className="px-3 py-1.5 rounded-lg border border-border text-sm text-red-400 hover:bg-bg-primary disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg border border-border text-sm text-error hover:bg-bg-primary disabled:opacity-50"
             >
               Disconnect and delete items
             </button>

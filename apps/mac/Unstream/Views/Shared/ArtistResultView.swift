@@ -39,6 +39,9 @@ struct ArtistResultView: View {
     var showPhoto: Bool = true
     @EnvironmentObject var supportListManager: SupportListManager
     @EnvironmentObject var appState: AppState
+    // Observed so the heart redraws when the account list or sign-in state changes.
+    @ObservedObject private var sync = SavedArtistsSync.shared
+    @ObservedObject private var auth = AuthService.shared
 
     #if os(macOS)
     /// Set by the popover, which drills down in place rather than opening a window.
@@ -51,7 +54,7 @@ struct ArtistResultView: View {
     #endif
 
     private var isSaved: Bool {
-        supportListManager.isArtistSaved(artist.name)
+        SavedArtistsRouter.isSaved(artist, local: supportListManager)
     }
 
     #if os(iOS)
@@ -123,7 +126,7 @@ struct ArtistResultView: View {
                         shareButton
                     }
 
-                    Button(action: { supportListManager.toggleArtist(artist) }) {
+                    Button(action: { SavedArtistsRouter.toggle(artist, local: supportListManager) }) {
                         Image(systemName: isSaved ? "heart.fill" : "heart")
                             .foregroundColor(isSaved ? .red : .secondary)
                             .font(.system(size: heartIconSize))
@@ -243,7 +246,7 @@ struct ArtistResultView: View {
         .draggable(artistURL)
         .contextMenu {
             Button(isSaved ? "Remove from Saved Artists" : "Save Artist") {
-                supportListManager.toggleArtist(artist)
+                SavedArtistsRouter.toggle(artist, local: supportListManager)
             }
 
             Divider()

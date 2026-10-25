@@ -84,7 +84,7 @@ export function CollectionSection() {
         My Collection
       </h2>
 
-      {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-error mb-3">{error}</p>}
 
       {items === null ? (
         !error && <p className="text-sm text-text-muted">Loading your collection…</p>
@@ -93,7 +93,7 @@ export function CollectionSection() {
           <p className="text-text-muted">No releases in your collection yet.</p>
           <p className="text-text-muted text-sm mt-1">
             Bought music on Bandcamp?{' '}
-            <Link to="/settings" className="text-accent-primary hover:underline">
+            <Link to="/settings" className="text-link hover:underline">
               Connect your collection in Settings
             </Link>{' '}
             and it fills in from what you've actually bought.

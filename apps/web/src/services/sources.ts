@@ -596,30 +596,58 @@ export function mergeSearchResponses(responses: SearchResponse[], originalQuery:
 }
 
 /**
+ * A search request that didn't answer: a network error, a 429 or a 5xx. Thrown rather than
+ * returned as an empty result list, because "nothing came back" and "the search didn't run"
+ * must look different to a fan — the first is "no results", the second is "try again".
+ * `status` is the HTTP status, or undefined when the request never got a response.
+ */
+export class SearchRequestError extends Error {
+  readonly status: number | undefined;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'SearchRequestError';
+    this.status = status;
+  }
+}
+
+/**
  * Perform a single search API call.
  *
  * `deferEnrichment` tells the server not to wait for an uncached MusicBrainz lookup —
  * results come back in a second or two with hasPendingEnrichment set, and App.tsx
  * fetches the enrichment itself from /api/search/musicbrainz. Only for a query whose
  * response reaches that Phase 2 call.
+ *
+ * Throws SearchRequestError when the request fails; see that class for why.
  */
 async function searchSingle(query: string, deferEnrichment = false): Promise<SearchResponse> {
   const params = new URLSearchParams({ query });
   if (deferEnrichment) params.set('enrichment', 'deferred');
 
+  let response: Response;
   try {
-    const response = await fetch(`/api/search/sources?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-    return await response.json();
+    response = await fetch(`/api/search/sources?${params.toString()}`);
   } catch (error) {
     Sentry.captureException(error, { extra: { context: 'search.platformSearch' } });
-    console.error('Failed to search platforms:', error);
-    return {
-      query,
-      results: [],
-    };
+    throw new SearchRequestError('Search request failed to send');
+  }
+  if (!response.ok) {
+    // A 429 is the rate limiter doing its job, not a fault worth an alert.
+    if (response.status !== 429) {
+      Sentry.captureException(new Error(`Search API error: ${response.status}`), {
+        extra: { context: 'search.platformSearch' },
+      });
+    }
+    throw new SearchRequestError(`Search API error: ${response.status}`, response.status);
+  }
+  // A 200 that isn't JSON (a CDN or bot-challenge page) is a failed search, and a silent one
+  // unless reported here: App.tsx leaves Sentry to this function.
+  try {
+    return await response.json();
+  } catch (error) {
+    Sentry.captureException(error, { extra: { context: 'search.platformSearch.parse' } });
+    throw new SearchRequestError('Search API returned an unreadable response', response.status);
   }
 }
 
@@ -663,10 +691,19 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
   // Search all queries in parallel. Not deferred: the merged response carries no
   // hasPendingEnrichment, so Phase 2 never runs for the individual artists and the
   // server has to enrich each one inline.
-  const responses = await Promise.all(uniqueQueries.map(q => searchSingle(q)));
+  const settled = await Promise.allSettled(uniqueQueries.map(q => searchSingle(q)));
+  const responses = settled
+    .filter((s): s is PromiseFulfilledResult<SearchResponse> => s.status === 'fulfilled')
+    .map(s => s.value);
 
-  // Merge and deduplicate results
-  return mergeSearchResponses(responses, query);
+  // Every part failed: that is a failed search, not an empty one.
+  if (responses.length === 0) {
+    throw (settled[0] as PromiseRejectedResult).reason;
+  }
+
+  // Merge and deduplicate results; flag them partial when some parts didn't answer.
+  const merged = mergeSearchResponses(responses, query);
+  return responses.length < settled.length ? { ...merged, partial: true } : merged;
 }
 
 // Resolve artist name from a Spotify or Apple Music URL
@@ -689,19 +726,15 @@ export async function resolveArtistUrl(url: string): Promise<ResolveResult | nul
   }
 }
 
-// Fetch MusicBrainz data for lazy loading enrichment
-export async function fetchMusicBrainzData(query: string): Promise<import('../types').MusicBrainzData | null> {
-  try {
-    const response = await fetch(`/api/search/musicbrainz?query=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      return null;
-    }
-    return await response.json();
-  } catch (error) {
-    Sentry.captureException(error, { extra: { context: 'search.musicbrainzEnrichment' } });
-    console.error('Failed to fetch MusicBrainz data:', error);
-    return null;
+// Fetch MusicBrainz data for lazy loading enrichment. Throws when the request fails, so the
+// caller can tell "MusicBrainz doesn't know this artist" (a normal answer) from "we couldn't
+// ask" — only the first may end in "No results found". App.tsx reports the failure.
+export async function fetchMusicBrainzData(query: string): Promise<import('../types').MusicBrainzData> {
+  const response = await fetch(`/api/search/musicbrainz?query=${encodeURIComponent(query)}`);
+  if (!response.ok) {
+    throw new SearchRequestError(`MusicBrainz enrichment error: ${response.status}`, response.status);
   }
+  return await response.json();
 }
 
 /**

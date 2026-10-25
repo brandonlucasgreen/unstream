@@ -40,7 +40,7 @@ export function ResultCardSocial({ platforms, claimedSlug, onRemoveLink }: Resul
           {onRemoveLink && (
             <button
               onClick={() => onRemoveLink(platform)}
-              className="text-text-muted hover:text-red-400 transition-colors"
+              className="text-text-muted hover:text-error transition-colors"
               title="Remove this link (admin)"
               aria-label={`Remove the ${getSource(platform.sourceId).name} link`}
             >

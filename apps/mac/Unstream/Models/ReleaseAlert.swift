@@ -139,10 +139,68 @@ struct KnownRelease: Codable, Hashable {
 }
 
 /// Persisted state for release checking
+/// How the last release check went. A failed check used to look exactly like a check that found
+/// nothing — and moved `lastCheckDate` forward, narrowing the next window past what it missed.
+struct ReleaseCheckOutcome: Codable, Equatable {
+    enum Status: String, Codable { case complete, partial, failed }
+
+    private(set) var status: Status
+    let total: Int
+    let failedCount: Int
+    /// Artists the server had nothing to check for yet (no catalogue, no usable link — its 400).
+    /// Not checked, but not a failure to retry; they don't make a run partial. Optional so an
+    /// outcome saved by the previous build still decodes.
+    let uncheckableCount: Int?
+    let date: Date
+
+    init(total: Int, failedCount: Int, uncheckableCount: Int = 0, date: Date = Date()) {
+        self.total = total
+        self.failedCount = failedCount
+        self.uncheckableCount = uncheckableCount
+        self.date = date
+        let checkable = total - uncheckableCount
+        if failedCount == 0 {
+            status = .complete
+        } else {
+            status = failedCount >= checkable ? .failed : .partial
+        }
+    }
+
+    /// A check that couldn't even learn who to check (the account's saved list didn't load).
+    static func unreachable(date: Date = Date()) -> ReleaseCheckOutcome {
+        var outcome = ReleaseCheckOutcome(total: 0, failedCount: 0, date: date)
+        outcome.status = .failed
+        return outcome
+    }
+
+    /// What to tell the fan, or nil when every artist was checked.
+    var problemDescription: String? {
+        let uncheckable = uncheckableCount ?? 0
+        switch status {
+        case .failed:
+            return "The last check couldn't reach Unstream, so new releases may be missing."
+        case .partial:
+            let checkable = total - uncheckable
+            return "The last check reached \(checkable - failedCount) of \(checkable) artists."
+        case .complete where uncheckable > 0:
+            return uncheckable == 1
+                ? "1 saved artist can't be checked until Unstream catalogues them."
+                : "\(uncheckable) saved artists can't be checked until Unstream catalogues them."
+        case .complete:
+            return nil
+        }
+    }
+}
+
 struct ReleaseCheckState: Codable {
+    /// When the last *complete* check ran. Decides whether launch re-checks (a week old or more).
     var lastCheckDate: Date?
     var knownReleases: [String: [KnownRelease]]  // artistName (lowercased) -> releases
     var newReleases: [NewRelease]
+    /// Each artist's last successful check (artistName lowercased), so a check that failed for one
+    /// artist asks for that artist's whole missed window next time. Optional for older saved state.
+    var artistLastChecked: [String: Date]?
+    var lastCheckOutcome: ReleaseCheckOutcome?
 
     init() {
         self.lastCheckDate = nil

@@ -158,6 +158,7 @@ class AuthService: ObservableObject {
             // Best effort — clear local state regardless
         }
         session = nil
+        SavedArtistsSync.shared.reset()
     }
 
     // MARK: - Access token

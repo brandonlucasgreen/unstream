@@ -6,6 +6,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { Skeleton, SkeletonScreen } from './Skeleton';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
+import { LoadErrorCard } from './LoadErrorCard';
 
 interface DirectoryArtist {
   slug: string;
@@ -31,9 +32,16 @@ interface ArtistIndexPageProps {
 export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkPrefix, cta }: ArtistIndexPageProps) {
   const [artists, setArtists] = useState<DirectoryArtist[]>([]);
   const [loading, setLoading] = useState(true);
+  // A load that never succeeded, kept apart from an empty directory: it used to fall through to
+  // "0 verified artists", which tells a fan Unstream has nobody. `reloadKey` drives Retry.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     async function load() {
+      setLoading(true);
+      setLoadFailed(false);
+      let loaded = false;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           const res = await fetch(fetchUrl);
@@ -41,6 +49,7 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
           if (res.ok && ctype.includes('application/json')) {
             const data = await res.json();
             setArtists(data.artists || []);
+            loaded = true;
             break;
           }
           if (attempt === 0 && res.status >= 500) continue;
@@ -50,10 +59,11 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
         }
         break;
       }
+      setLoadFailed(!loaded);
       setLoading(false);
     }
     load();
-  }, [fetchUrl]);
+  }, [fetchUrl, reloadKey]);
 
   // Group by first letter
   const grouped: Record<string, DirectoryArtist[]> = {};
@@ -74,10 +84,10 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
 
       <Header />
 
-      <div className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col">
         <div className="pt-8 pb-8 text-center px-6">
           <h1 className="text-2xl font-bold mb-2">{title}</h1>
-          {!loading && (
+          {!loading && !loadFailed && (
             <p className="text-text-muted text-sm">
               {subtitle(artists.length)}
             </p>
@@ -99,6 +109,8 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
             <Skeleton className="h-6 w-8 mb-3" />
             <ArtistRowsSkeleton count={8} />
           </SkeletonScreen>
+        ) : loadFailed ? (
+          <LoadErrorCard title="We couldn't load this list" onRetry={() => setReloadKey(n => n + 1)} />
         ) : (
           <>
             {/* Letter navigation */}
@@ -158,7 +170,7 @@ export function ArtistIndexPage({ title, subtitle, fetchUrl, loadingLabel, linkP
             </div>
           </>
         )}
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -59,6 +59,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
         <select
           value={period}
           onChange={e => setPeriod(e.target.value as Period)}
+          aria-label="Analytics period"
           className="text-xs px-2 py-1 rounded bg-bg-primary border border-border text-text-primary focus:outline-none focus:border-accent-primary"
         >
           {Object.entries(PERIOD_LABELS).map(([value, label]) => (
@@ -72,7 +73,7 @@ export function ArtistAnalytics({ slug }: { slug: string }) {
           <StatTilesSkeleton />
         </SkeletonScreen>
       )}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
 
       {data && !loading && (
         <div className="space-y-3">

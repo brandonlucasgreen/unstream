@@ -25,8 +25,8 @@ export function PrivacyPolicyPage() {
 
       <main className="pt-8 px-4 pb-16">
         <div className="max-w-3xl mx-auto">
-          <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-accent-primary text-text-primary">
-            <h2 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h2>
+          <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-link text-text-primary">
+            <h1 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h1>
             <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
@@ -54,7 +54,7 @@ export function PrivacyPolicyPage() {
                 </li>
                 <li>
                   Ask us for your data or ask us to delete it at{' '}
-                  <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                  <a href="mailto:support@unstream.stream" className="text-link hover:text-accent-secondary transition-colors underline">
                     support@unstream.stream
                   </a>
                   , and we'll do it.
@@ -200,7 +200,7 @@ export function PrivacyPolicyPage() {
                 You can turn sharing off, change your username, or clear your location at any time
                 in your settings. The page goes down, but copies already made by caches, archives
                 or other people are beyond our reach. There's more on this in section 6 of the{' '}
-                <Link to="/terms#section-6" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <Link to="/terms#section-6" className="text-link hover:text-accent-secondary transition-colors underline">
                   Terms of Use
                 </Link>
                 .
@@ -320,7 +320,7 @@ export function PrivacyPolicyPage() {
               <P>
                 Some you can exercise yourself, right now: your saved artists, username, location
                 and sharing setting are all editable in{' '}
-                <Link to="/settings" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <Link to="/settings" className="text-link hover:text-accent-secondary transition-colors underline">
                   your settings
                 </Link>
                 , your newsletter subscription has an unsubscribe link on every issue, and your
@@ -329,7 +329,7 @@ export function PrivacyPolicyPage() {
               <P>
                 For anything else — a copy of everything we hold on you, or deletion of your
                 account and its data — email{' '}
-                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <a href="mailto:support@unstream.stream" className="text-link hover:text-accent-secondary transition-colors underline">
                   support@unstream.stream
                 </a>
                 . We'll respond within 30 days and we won't make you justify the request. If you're
@@ -378,11 +378,11 @@ export function PrivacyPolicyPage() {
             <Section title="Contact">
               <P>
                 Questions, requests, or corrections:{' '}
-                <a href="mailto:support@unstream.stream" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <a href="mailto:support@unstream.stream" className="text-link hover:text-accent-secondary transition-colors underline">
                   support@unstream.stream
                 </a>
                 . The{' '}
-                <Link to="/terms" className="text-accent-primary hover:text-accent-secondary transition-colors underline">
+                <Link to="/terms" className="text-link hover:text-accent-secondary transition-colors underline">
                   Terms of Use
                 </Link>{' '}
                 cover the rest of the relationship.

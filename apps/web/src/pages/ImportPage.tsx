@@ -34,7 +34,7 @@ export function ImportPage() {
 
           {/* Coming soon notice */}
           <div className="bg-accent-primary/5 rounded-2xl p-8 border border-accent-primary/20 text-center">
-            <p className="text-sm font-medium text-accent-primary uppercase tracking-wider mb-2">Coming soon</p>
+            <p className="text-sm font-medium text-link uppercase tracking-wider mb-2">Coming soon</p>
             <p className="text-text-secondary">
               We're building a way to connect your Spotify, Apple Music, or Last.fm library and instantly discover which of your artists are on Bandcamp, Mirlo, Faircamp, and other platforms where you can buy their music outright.
             </p>
@@ -45,7 +45,7 @@ export function ImportPage() {
             <h2 className="font-display text-xl font-semibold text-text-primary mb-6">How it will work</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                 <div>
                   <p className="font-medium text-text-primary">Connect your streaming account</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -54,7 +54,7 @@ export function ImportPage() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                 <div>
                   <p className="font-medium text-text-primary">We match your artists across platforms</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -63,7 +63,7 @@ export function ImportPage() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
                 <div>
                   <p className="font-medium text-text-primary">Start supporting artists directly</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -83,7 +83,7 @@ export function ImportPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-primary text-accent-foreground hover:bg-accent-primary/90 transition-colors font-medium"
               >
                 Search for an artist
               </Link>

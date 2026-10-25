@@ -124,6 +124,13 @@ struct iOSSettingsTab: View {
                             }
                         }
 
+                        if let problem = releaseAlertManager.lastCheckOutcome?.problemDescription,
+                           !releaseAlertManager.isChecking {
+                            Label(problem, systemImage: "exclamationmark.triangle")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+
                         HStack {
                             Spacer()
                             Button {

@@ -67,7 +67,7 @@ export function PlatformsPage() {
           <p className="text-text-secondary text-sm">
             Payout is the share of a sale the artist keeps after the platform's fee. Card processing, usually
             around 2.9% plus 30¢, comes out on top of that, so the exact figure moves a little from sale to sale.
-            The source for each number is in the <Link to="/faq" className="text-accent-primary hover:underline">FAQ</Link>,
+            The source for each number is in the <Link to="/faq" className="text-link hover:underline">FAQ</Link>,
             along with how Bandcamp Fridays change Bandcamp's.
           </p>
 
@@ -116,7 +116,7 @@ function PlatformRow({ platform }: { platform: Source }) {
               href={platform.aiPolicyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-accent-primary hover:underline mt-1 inline-block"
+              className="text-xs text-link hover:underline mt-1 inline-block"
             >
               {platform.aiPolicy === 'formal' ? 'Has a written AI policy' : 'Discourages AI-generated music'}
             </a>

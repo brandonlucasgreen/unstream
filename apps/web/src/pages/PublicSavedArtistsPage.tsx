@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CollectionGrid } from '../components/CollectionGrid';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { ArtistRowsSkeleton } from '../components/LoadingSkeletons';
 import { Skeleton } from '../components/Skeleton';
+import { LoadErrorCard } from '../components/LoadErrorCard';
 
 interface SavedArtistPublic {
   slug: string;
@@ -36,25 +38,40 @@ export function PublicSavedArtistsPage() {
   const [data, setData] = useState<PublicSharingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A network error or 5xx, kept apart from a 404: "private or doesn't exist" after an outage
+  // tells a visitor the list is gone. `attempt` drives Retry.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!handle) return;
+    setLoading(true);
+    setNotFound(false);
+    setLoadFailed(false);
     fetch(`/api/public/saved-artists/${encodeURIComponent(handle)}`)
       .then(res => {
         if (res.status === 404) {
           setNotFound(true);
           return null;
         }
-        if (!res.ok) throw new Error('Failed to load');
+        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
         return res.json();
       })
       .then(d => {
         if (d) setData(d);
       })
-      .catch(() => setNotFound(true))
+      .catch(err => {
+        Sentry.captureException(err, { extra: { context: 'publicSavedArtists.fetch', handle } });
+        setLoadFailed(true);
+      })
       .finally(() => setLoading(false));
-  }, [handle]);
+  }, [handle, attempt]);
+
+  // The route's generic "Collection" title, made specific once the owner is known.
+  useEffect(() => {
+    if (data?.owner_display_name) document.title = `${data.owner_display_name}'s collection | Unstream`;
+  }, [data?.owner_display_name]);
 
   const handleCopy = async () => {
     const url = window.location.href;
@@ -87,6 +104,20 @@ export function PublicSavedArtistsPage() {
     );
   }
 
+  if (loadFailed) {
+    return (
+      <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+        <Header />
+        <main className="flex-1 p-6">
+          <div className="max-w-2xl mx-auto">
+            <LoadErrorCard title="We couldn't load this collection" onRetry={() => setAttempt(n => n + 1)} />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (notFound || !data) {
     return (
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
@@ -99,7 +130,7 @@ export function PublicSavedArtistsPage() {
             </p>
             <Link
               to="/"
-              className="inline-block px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+              className="inline-block px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
             >
               Back to Unstream
             </Link>
@@ -137,7 +168,7 @@ export function PublicSavedArtistsPage() {
               onClick={handleCopy}
               className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                 copied
-                  ? 'border-green-500/30 text-green-400'
+                  ? 'border-green-500/30 text-success'
                   : 'border-border text-text-muted hover:text-text-primary hover:border-border-hover'
               }`}
             >

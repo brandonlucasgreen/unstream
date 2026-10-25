@@ -21,8 +21,13 @@ export function markdownToHtml(md: string): string {
 
   function inlineFormat(text: string): string {
     return text
-      // Links: [text](url)
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-accent-primary hover:underline">$1</a>')
+      // Links: [text](url). Only off-site links open a new tab — an internal page
+      // (or a mail: link) opening in one reads as the site losing your place.
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text: string, url: string) => {
+        const external = /^https?:\/\//i.test(url);
+        const newTab = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+        return `<a href="${url}"${newTab} class="text-link hover:underline">${text}</a>`;
+      })
       // Bold+italic: ***text*** or ___text___
       .replace(/\*\*\*(.+?)\*\*\*/g, '<strong class="text-text-primary"><em>$1</em></strong>')
       // Bold: **text** or __text__

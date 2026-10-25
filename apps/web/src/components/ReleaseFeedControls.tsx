@@ -74,11 +74,11 @@ export function ReleaseFeedControls() {
           Subscribe once in Apple Calendar, Google Calendar, or an RSS reader and see everything
           your saved artists have coming — not one subscription per artist.
         </p>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <button
           onClick={() => call('GET')}
           disabled={busy || !session}
-          className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50"
         >
           {busy ? 'Creating…' : 'Create my feed link'}
         </button>
@@ -93,7 +93,7 @@ export function ReleaseFeedControls() {
         password. Rotating issues new links and stops the old ones working everywhere.
       </p>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {/*
         The extension is in the label as well as the URL. The two links differ *only* in their

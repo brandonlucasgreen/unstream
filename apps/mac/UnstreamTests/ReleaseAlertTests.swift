@@ -435,4 +435,68 @@ final class ReleaseAlertTests: XCTestCase {
 
         XCTAssertNil(ReleaseAlertManager.lookbackDays(since: now.addingTimeInterval(3600), now: now))
     }
+    // MARK: - Which saved list gets checked (audit 2026-10-25 #3)
+
+    private func synced(_ name: String) -> SyncedArtist {
+        SyncedArtist(id: name, artistId: name, name: name, slug: name.lowercased(), imageUrl: nil,
+                     supported: nil, lastModified: nil, deviceId: nil, claimed: nil, deleted: nil)
+    }
+
+    /// Signed in, the account's list is checked — not the device list, which held only what
+    /// this device's heart had saved and so ignored everything saved on the web.
+    func testSignedInChecksTheAccountList() {
+        let local = SupportEntry(artistName: "Device Only", imageUrl: nil, platforms: [])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: [synced("Web Saved")], localEntries: [local])
+        XCTAssertEqual(targets.map(\.artistName), ["Web Saved"])
+    }
+
+    func testAccountEntriesBorrowLinksFromASameNamedLocalEntry() {
+        let local = SupportEntry(artistName: "kid lightbulbs", imageUrl: nil,
+                                 platforms: [SavedPlatform(sourceId: "bandcamp", url: "https://kidlightbulbs.bandcamp.com")])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: [synced("Kid Lightbulbs")], localEntries: [local])
+        XCTAssertEqual(targets.first?.platforms, ["bandcamp": "https://kidlightbulbs.bandcamp.com"])
+    }
+
+    func testSignedOutChecksTheDeviceList() {
+        let local = SupportEntry(artistName: "Device Only", imageUrl: nil, platforms: [])
+        let targets = ReleaseAlertManager.checkTargets(syncedArtists: nil, localEntries: [local])
+        XCTAssertEqual(targets.map(\.artistName), ["Device Only"])
+    }
+    // MARK: - Check outcomes (audit 2026-10-25 #4)
+
+    /// A failed check used to be recorded as a successful one that found nothing.
+    func testCheckOutcomeCountsFailures() {
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 0).status, .complete)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 1).status, .partial)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 3).status, .failed)
+        XCTAssertEqual(ReleaseCheckOutcome.unreachable().status, .failed)
+        XCTAssertNil(ReleaseCheckOutcome(total: 3, failedCount: 0).problemDescription)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 1).problemDescription,
+                       "The last check reached 2 of 3 artists.")
+    }
+
+    /// Same split as the extension: only a 400 means "nothing to check yet"; a 403 bot challenge,
+    /// a 404, a 429 or a 5xx is a failure.
+    func testOnlyA400MeansNothingToCheck() {
+        XCTAssertTrue(ReleaseAlertManager.isUncheckableArtistStatus(400))
+        for status in [401, 403, 404, 429, 503] {
+            XCTAssertFalse(ReleaseAlertManager.isUncheckableArtistStatus(status))
+        }
+    }
+
+    /// Artists with nothing to check yet don't make a run partial, but they are said out loud.
+    func testUncheckableArtistsAreCountedNotHidden() {
+        let outcome = ReleaseCheckOutcome(total: 3, failedCount: 0, uncheckableCount: 1)
+        XCTAssertEqual(outcome.status, .complete)
+        XCTAssertEqual(outcome.problemDescription, "1 saved artist can't be checked until Unstream catalogues them.")
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 2, uncheckableCount: 1).status, .failed)
+    }
+
+    /// State saved by an older build has no per-artist dates or outcome, and must still load.
+    func testOlderSavedStateStillDecodes() throws {
+        let json = #"{"knownReleases":{},"newReleases":[]}"#.data(using: .utf8)!
+        let state = try JSONDecoder().decode(ReleaseCheckState.self, from: json)
+        XCTAssertNil(state.artistLastChecked)
+        XCTAssertNil(state.lastCheckOutcome)
+    }
 }

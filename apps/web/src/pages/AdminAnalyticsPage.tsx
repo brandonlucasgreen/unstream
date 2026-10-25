@@ -284,7 +284,7 @@ export function AdminAnalyticsPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-500 text-sm">Failed to load analytics: {error}</p>
+        <p className="text-error text-sm">Failed to load analytics: {error}</p>
       </div>
     );
   }

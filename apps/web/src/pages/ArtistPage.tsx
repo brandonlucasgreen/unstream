@@ -5,6 +5,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { LoadingProfile } from '../components/LoadingProfile';
 import { NotFoundCard } from '../components/NotFoundCard';
+import { LoadErrorCard } from '../components/LoadErrorCard';
 import { RichArtistProfile } from '../components/RichArtistProfile';
 import { UnclaimedQuietCard } from '../components/UnclaimedQuietCard';
 import { LoginInterstitial } from '../components/LoginInterstitial';
@@ -20,6 +21,10 @@ export function ArtistPage() {
 
   const [payload, setPayload] = useState<ArtistPagePayload | null>(null);
   const [notFound, setNotFound] = useState(false);
+  // A failed request (network, 5xx), kept apart from a confirmed 404: "we couldn't find that
+  // artist" after an outage tells a fan the artist isn't here. Bumping `attempt` retries.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginInterstitial, setShowLoginInterstitial] = useState(false);
 
@@ -37,6 +42,7 @@ export function ArtistPage() {
     let cancelled = false;
     setIsLoading(true);
     setNotFound(false);
+    setLoadFailed(false);
     setPayload(null);
     fetch(`/api/artist-page?slug=${encodeURIComponent(slug)}`)
       .then(r => r.ok ? r.json() : r.status === 404 ? null : Promise.reject(new Error(`HTTP ${r.status}`)))
@@ -48,11 +54,11 @@ export function ArtistPage() {
       .catch(err => {
         if (cancelled) return;
         Sentry.captureException(err, { extra: { context: 'ArtistPage.fetchArtistPage', slug } });
-        setNotFound(true);
+        setLoadFailed(true);
       })
       .finally(() => { if (!cancelled) setIsLoading(false); });
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, attempt]);
 
   useEffect(() => {
     if (slug) analytics.trackArtistPageView(slug);
@@ -109,6 +115,8 @@ export function ArtistPage() {
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
             <LoadingProfile />
+          ) : loadFailed ? (
+            <LoadErrorCard title="We couldn't load this artist" onRetry={() => setAttempt(n => n + 1)} />
           ) : notFound || !payload ? (
             <NotFoundCard slug={slug} />
           ) : payload.profile?.verifiedAt ? (
@@ -141,6 +149,7 @@ export function ArtistPage() {
         <LoginInterstitial
           artistId={artistId}
           artistName={artistName}
+          artistImageUrl={artistImageUrl || undefined}
           onClose={() => setShowLoginInterstitial(false)}
         />
       )}

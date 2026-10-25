@@ -62,16 +62,16 @@ const EVIDENCE_LABEL: Record<DuplicatePair['evidence'], string> = {
 };
 
 const EVIDENCE_STYLE: Record<DuplicatePair['evidence'], string> = {
-  provenance: 'bg-green-500/10 text-green-400 border-green-500/30',
-  'release-overlap': 'bg-green-500/10 text-green-400 border-green-500/30',
+  provenance: 'bg-green-500/10 text-success border-green-500/30',
+  'release-overlap': 'bg-green-500/10 text-success border-green-500/30',
   'accent-fold': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  'name-only': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+  'name-only': 'bg-yellow-500/10 text-warning border-yellow-500/30',
 };
 
 function RowSummary({ row, keep }: { row: DuplicateRow; keep: boolean }) {
   return (
     <div className="flex items-baseline gap-2 text-sm">
-      <span className={`text-xs font-mono uppercase ${keep ? 'text-green-400' : 'text-red-400'}`}>
+      <span className={`text-xs font-mono uppercase ${keep ? 'text-success' : 'text-error'}`}>
         {keep ? 'keep' : 'drop'}
       </span>
       <span className="text-text-primary font-medium">{row.name}</span>
@@ -265,7 +265,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
           {error}
         </div>
       )}
@@ -308,7 +308,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
                       {s.table}: {s.action} ×{s.count}
                     </span>
                   ))}
-                  {p.refused && <span className="block text-red-400">{p.refused}</span>}
+                  {p.refused && <span className="block text-error">{p.refused}</span>}
                 </div>
               )}
 
@@ -325,7 +325,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
                   <button
                     onClick={() => void apply(pair)}
                     disabled={busy === pair.key}
-                    className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/25 disabled:opacity-50"
+                    className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-error text-sm hover:bg-red-500/25 disabled:opacity-50"
                   >
                     Apply merge
                   </button>
@@ -356,7 +356,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
               <RowSummary row={pair.loser} keep={false} />
             </div>
             {pair.blockers.map((b, i) => (
-              <p key={i} className="text-yellow-400 text-xs">⚠ {b}</p>
+              <p key={i} className="text-warning text-xs">⚠ {b}</p>
             ))}
 
             {p && (
@@ -369,7 +369,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
                     {s.table}: {s.action} ×{s.count}
                   </span>
                 ))}
-                {p.refused && <span className="block text-red-400">{p.refused}</span>}
+                {p.refused && <span className="block text-error">{p.refused}</span>}
               </div>
             )}
 
@@ -394,7 +394,7 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
                 <button
                   onClick={() => void apply(pair, true)}
                   disabled={busy === pair.key}
-                  className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm hover:bg-red-500/25 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-error text-sm hover:bg-red-500/25 disabled:opacity-50"
                 >
                   Merge anyway
                 </button>

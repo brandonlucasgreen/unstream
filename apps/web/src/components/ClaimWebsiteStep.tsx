@@ -28,7 +28,7 @@ export function ClaimWebsiteStep({ websiteUrl, setWebsiteUrl, loading, onSubmit 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {loading ? 'Setting up...' : 'Continue'}
       </button>

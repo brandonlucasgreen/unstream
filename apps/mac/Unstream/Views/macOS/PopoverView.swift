@@ -289,19 +289,31 @@ struct PopoverView: View {
                                     nowPlaying: nowPlaying,
                                     artistImageUrl: appState.nowPlayingResults.first?.imageUrl
                                 )
-                                if appState.isLoadingNowPlaying {
+                                switch appState.nowPlayingLookup {
+                                case .loading, .idle:
                                     LoadingView()
-                                } else if !appState.nowPlayingResults.isEmpty {
+                                case .loaded where !appState.nowPlayingResults.isEmpty:
                                     ResultsView(
                                         title: nil,
                                         results: appState.nowPlayingResults,
                                         showArtistPhoto: false
                                     )
-                                } else {
-                                    Text("Searching for platforms...")
+                                case .loaded:
+                                    Text("No platforms found for \(nowPlaying.artist ?? "this artist") yet.")
                                         .font(.callout)
                                         .foregroundColor(.secondary)
                                         .padding(.vertical, 8)
+                                case .failed:
+                                    VStack(spacing: 8) {
+                                        Text("Couldn't look up \(nowPlaying.artist ?? "this artist"). Check your connection.")
+                                            .font(.callout)
+                                            .foregroundColor(.secondary)
+                                            .multilineTextAlignment(.center)
+                                        Button("Retry") {
+                                            Task { await appState.retryNowPlaying() }
+                                        }
+                                    }
+                                    .padding(.vertical, 8)
                                 }
                             }
 
@@ -431,7 +443,7 @@ struct PopoverView: View {
     /// The saved count rides in the segment label — a segmented control has no badge
     /// slot, and the count is useful enough to keep.
     private var savedTabTitle: String {
-        let count = supportListManager.entries.count
+        let count = auth.isSignedIn ? sync.syncedArtists.count : supportListManager.entries.count
         return count > 0 ? "Saved (\(count))" : "Saved"
     }
 

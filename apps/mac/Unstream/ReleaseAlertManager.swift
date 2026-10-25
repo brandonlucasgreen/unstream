@@ -9,6 +9,7 @@ class ReleaseAlertManager: ObservableObject {
     @Published private(set) var newReleases: [NewRelease] = []
     @Published private(set) var isChecking: Bool = false
     @Published private(set) var lastCheckDate: Date?
+    @Published private(set) var lastCheckOutcome: ReleaseCheckOutcome?
 
     // MARK: - Private Properties
 
@@ -51,6 +52,7 @@ class ReleaseAlertManager: ObservableObject {
         let dismissedIds = loadDismissedIds()
         self.newReleases = checkState.newReleases.filter { $0.isActive && !dismissedIds.contains($0.id) }
         self.lastCheckDate = checkState.lastCheckDate
+        self.lastCheckOutcome = checkState.lastCheckOutcome
 
         setupDismissedIdSync()
         setupScheduling()
@@ -194,35 +196,73 @@ class ReleaseAlertManager: ObservableObject {
               releaseAlertsEnabled else { return }
 
         isChecking = true
+        let checkStartedAt = Date()
+        var failedCount = 0
+        var uncheckableCount = 0
+        var targets: [CheckTarget] = []
+        var listUnavailable = false
+        // Only a complete check moves `lastCheckDate`; a failed or partial one leaves it, so the
+        // launch-time "a week since the last check" retry still fires and no window narrows past
+        // what a failure missed. The outcome is kept for the UI until the next check.
         defer {
             isChecking = false
-            checkState.lastCheckDate = Date()
-            lastCheckDate = checkState.lastCheckDate
+            let outcome = listUnavailable
+                ? ReleaseCheckOutcome.unreachable(date: checkStartedAt)
+                : ReleaseCheckOutcome(total: targets.count, failedCount: failedCount,
+                                      uncheckableCount: uncheckableCount, date: checkStartedAt)
+            checkState.lastCheckOutcome = outcome
+            lastCheckOutcome = outcome
+            if outcome.status == .complete {
+                checkState.lastCheckDate = checkStartedAt
+                lastCheckDate = checkStartedAt
+            }
             saveState()
             scheduleNextFriday9am()
         }
 
-        let entries = supportListManager.entries
+        // Signed in, the account's saved list is the one to check (see SavedArtistsRouter);
+        // pulled first, because it starts empty on every launch. A pull that fails is a failed
+        // check — checking nobody and reporting "nothing new" is the bug this guards against.
+        var syncedArtists: [SyncedArtist]? = nil
+        if AuthService.shared.isSignedIn {
+            guard await SavedArtistsSync.shared.pull() else {
+                listUnavailable = true
+                return
+            }
+            syncedArtists = SavedArtistsSync.shared.syncedArtists
+        }
+        targets = Self.checkTargets(syncedArtists: syncedArtists, localEntries: supportListManager.entries)
         var foundNewReleases: [NewRelease] = []
+        var artistLastChecked = checkState.artistLastChecked ?? [:]
 
-        // Asked once, before the loop, because the `defer` above moves `lastCheckDate` to now.
-        let sinceDays = Self.lookbackDays(since: checkState.lastCheckDate)
-
-        for entry in entries {
-            // Every link we hold, and no gate on which ones. The server tries the release
-            // catalogue first and ignores `platforms` entirely on that path, so an artist known
-            // only through Discogs or Jam.coop — Discogs is the *largest* link population we
-            // have — used to be skipped over a question one database read answers.
-            let platforms = Self.platformUrls(for: entry)
+        for target in targets {
+            let key = target.artistName.lowercased()
+            // From this artist's last *successful* check, falling back to the check-wide date
+            // from before per-artist dates existed.
+            let sinceDays = Self.lookbackDays(since: artistLastChecked[key] ?? checkState.lastCheckDate)
 
             // The server returns every release in the window, not just the newest, so an artist
             // who put out two records since the last check produces two alerts.
-            foundNewReleases.append(contentsOf: await checkViaAPI(
-                artistName: entry.artistName,
-                platforms: platforms,
+            switch await checkViaAPI(
+                artistName: target.artistName,
+                platforms: target.platforms,
                 sinceDays: sinceDays
-            ))
+            ) {
+            case .checked(let found):
+                artistLastChecked[key] = checkStartedAt
+                foundNewReleases.append(contentsOf: found)
+            case .uncheckable:
+                // Not checked, so the date stays put: once they're catalogued, the first real
+                // check asks for the whole window.
+                uncheckableCount += 1
+            case .failed:
+                failedCount += 1
+            }
         }
+
+        // Forget artists no longer saved, so a re-save starts from the server's default window.
+        let savedKeys = Set(targets.map { $0.artistName.lowercased() })
+        checkState.artistLastChecked = artistLastChecked.filter { savedKeys.contains($0.key) }
 
         // Update state with new releases.
         //
@@ -246,26 +286,69 @@ class ReleaseAlertManager: ObservableObject {
         }
     }
 
+    private enum ArtistCheckResult {
+        case checked([NewRelease])
+        case uncheckable
+        case failed
+    }
+
     /// Ask the server what's new for one artist, and keep only what we haven't seen before.
     private func checkViaAPI(
         artistName: String,
         platforms: [String: String],
         sinceDays: Int?
-    ) async -> [NewRelease] {
+    ) async -> ArtistCheckResult {
         do {
             let results = try await releaseAPI.checkReleases(
                 artistName: artistName,
                 platforms: platforms,
                 sinceDays: sinceDays
             )
-            return Self.selectUnseen(results, artistName: artistName, state: &checkState)
+            return .checked(Self.selectUnseen(results, artistName: artistName, state: &checkState))
+        } catch ReleaseCheckAPIError.httpError(let statusCode) where Self.isUncheckableArtistStatus(statusCode) {
+            return .uncheckable
         } catch {
             print("API check failed for \(artistName): \(error)")
-            return []
+            return .failed
+        }
+    }
+
+    /// Whether a status means "nothing to check for this artist yet": the server's 400 for an
+    /// artist that is neither catalogued nor reachable through a link it will fetch — common for
+    /// account entries, which carry no links. Every other non-2xx (401, 403 from a bot challenge,
+    /// 404, 429, 5xx) is a failure. Mirrors `isUncheckableArtistStatus` in
+    /// apps/extension/lib/release-alerts.js.
+    nonisolated static func isUncheckableArtistStatus(_ statusCode: Int) -> Bool {
+        statusCode == 400
+    }
+
+    /// One artist to ask the server about.
+    struct CheckTarget: Equatable {
+        let artistName: String
+        let platforms: [String: String]
+    }
+
+    /// The artists a release check covers: the account's saved list when signed in
+    /// (`syncedArtists` non-nil), otherwise the list saved on this device. Account entries carry
+    /// no links, so they borrow a same-named local entry's when there is one. With none, only a
+    /// catalogued artist can be checked; for anyone else the server answers 400, which is counted
+    /// as "can't check yet" (see `isUncheckableArtistStatus`), never as checked.
+    nonisolated static func checkTargets(syncedArtists: [SyncedArtist]?, localEntries: [SupportEntry]) -> [CheckTarget] {
+        guard let syncedArtists else {
+            return localEntries.map { CheckTarget(artistName: $0.artistName, platforms: platformUrls(for: $0)) }
+        }
+        return syncedArtists.map { artist in
+            let local = localEntries.first { $0.artistName.lowercased() == artist.name.lowercased() }
+            return CheckTarget(artistName: artist.name, platforms: local.map(platformUrls(for:)) ?? [:])
         }
     }
 
     /// Which of a saved artist's links to send with an alert check.
+    ///
+    /// Every link we hold, and no gate on which ones. The server tries the release
+    /// catalogue first and ignores `platforms` entirely on that path, so an artist known
+    /// only through Discogs or Jam.coop — Discogs is the *largest* link population we
+    /// have — used to be skipped over a question one database read answers.
     ///
     /// All of them, keyed by platform id. The server reads this only on its live-scrape
     /// fallback, and only for the platforms it can scrape, so anything else is ignored rather

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { TipForm } from './TipForm';
+import { Dialog } from './Dialog';
 import { getTipPageCached, type TipPageData } from '../services/tips';
 
 // The tip window: the /tip/{slug} form opened over search results or the artist page, so a fan tips
-// without leaving where they are until Stripe's own payment page. A native <dialog> shown modally,
-// which gives focus handling, Escape to close and an inert page behind it. Centred on wider screens,
-// a sheet from the bottom on phones. `m-auto` is load-bearing: Tailwind's reset zeroes the margin the
-// browser centres a <dialog> with, which pins it to the top-left corner.
+// without leaving where they are until Stripe's own payment page. Built on Dialog (a native <dialog>
+// shown modally — focus handling, Escape, an inert page behind), which grew out of this component.
+// Centred on wider screens, a sheet from the bottom on phones.
 
 export function TipSheet({ slug, artistName, goalId, onClose }: {
   slug: string;
@@ -15,13 +15,8 @@ export function TipSheet({ slug, artistName, goalId, onClose }: {
   goalId?: string;
   onClose: () => void;
 }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [data, setData] = useState<TipPageData | null>(null);
   const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    dialogRef.current?.showModal();
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,22 +30,9 @@ export function TipSheet({ slug, artistName, goalId, onClose }: {
     return () => { cancelled = true; };
   }, [slug]);
 
-  const close = () => dialogRef.current?.close();
-
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="tip-sheet-title"
-      onClose={onClose}
-      // Clicks inside stay inside: the Tip button can sit within other clickable UI. A click on the
-      // dialog element itself is a click on the dimmed backdrop, which closes it.
-      onClick={e => {
-        e.stopPropagation();
-        if (e.target === e.currentTarget) close();
-      }}
-      onKeyDown={e => e.stopPropagation()}
-      className="m-auto w-full max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-2xl border border-border bg-bg-primary text-text-primary shadow-xl backdrop:bg-black/60 max-sm:max-w-none max-sm:mb-0 max-sm:rounded-b-none"
-    >
+    <Dialog labelledBy="tip-sheet-title" onClose={onClose}>
+      {close => (
       <div className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
@@ -79,6 +61,7 @@ export function TipSheet({ slug, artistName, goalId, onClose }: {
           <TipForm data={data} initialGoalId={goalId} />
         )}
       </div>
-    </dialog>
+      )}
+    </Dialog>
   );
 }

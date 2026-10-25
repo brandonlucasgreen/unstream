@@ -86,7 +86,7 @@ export function TipPage() {
               {data && !data.takingTips ? (
                 <div className="p-4 rounded-xl border border-border space-y-3">
                   <p className="text-sm">{t('artist:tipPage.notTaking', { name: data.artist.name })}</p>
-                  <Link to={`/a/${data.artist.slug}`} className="text-sm text-accent-primary hover:underline">
+                  <Link to={`/a/${data.artist.slug}`} className="text-sm text-link hover:underline">
                     {t('artist:tipPage.seeWhereElse')}
                   </Link>
                 </div>

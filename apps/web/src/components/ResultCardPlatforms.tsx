@@ -28,7 +28,7 @@ function PlatformBadge({ platform, onRemoveLink }: { platform: PlatformLink; onR
       {badge}
       <button
         onClick={() => onRemoveLink(platform)}
-        className="text-text-muted hover:text-red-400 transition-colors"
+        className="text-text-muted hover:text-error transition-colors"
         title="Remove this link (admin)"
         aria-label={`Remove the ${getSource(platform.sourceId).name} link`}
       >
@@ -66,7 +66,7 @@ export function ResultCardPlatforms({ platforms, category, compact = false, onRe
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="text-xs text-accent-primary hover:underline transition-colors"
+          className="text-xs text-link hover:underline transition-colors"
         >
           {showAll ? 'Show less' : `Show all ${platforms.length} platforms`}
         </button>

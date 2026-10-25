@@ -13,7 +13,7 @@ export function ClaimVerifyStep({ verifyUrl, loading, onVerify, onRequestManualR
           Add this link to your website:
         </p>
         <div className="flex items-center gap-2">
-          <code className="flex-1 px-3 py-2 rounded bg-bg-primary border border-border text-sm text-accent-primary break-all">
+          <code className="flex-1 px-3 py-2 rounded bg-bg-primary border border-border text-sm text-link break-all">
             {verifyUrl}
           </code>
           <button
@@ -32,7 +32,7 @@ export function ClaimVerifyStep({ verifyUrl, loading, onVerify, onRequestManualR
       <button
         onClick={onVerify}
         disabled={loading}
-        className="w-full py-2 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {loading ? 'Checking your website...' : 'Verify my website'}
       </button>
@@ -40,7 +40,7 @@ export function ClaimVerifyStep({ verifyUrl, loading, onVerify, onRequestManualR
       <div className="text-center pt-2">
         <button
           onClick={onRequestManualReview}
-          className="text-sm text-text-muted hover:text-accent-primary transition-colors"
+          className="text-sm text-text-muted hover:text-link transition-colors"
         >
           Having trouble? Request manual verification
         </button>

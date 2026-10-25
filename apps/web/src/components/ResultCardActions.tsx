@@ -12,6 +12,13 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportText, setReportText] = useState('');
 
+  // The slug of the artist row the server holds (`knownSlug`, from attachArtistPageSlugs, which
+  // uses the canonical accent-folding artistSlug). Never derived here: a client-side regex turned
+  // Björk into `bj-rk`, and a result with no slug — an unverified one, or the client-built
+  // MusicBrainz fallback — has no row, so a claim on it fails at "Artist not found"
+  // (claim-artist.ts). No slug, no claim link.
+  const claimSlug = result.knownSlug;
+
   const handleReportSubmit = (e: React.MouseEvent) => {
     e.stopPropagation();
     analytics.trackReportIssue();
@@ -50,7 +57,7 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
               <button
                 onClick={handleReportSubmit}
                 disabled={!reportText.trim()}
-                className="px-3 py-1.5 text-xs font-medium bg-accent-primary/10 text-accent-primary rounded-lg hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-medium bg-accent-primary/10 text-link rounded-lg hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Send Report
               </button>
@@ -65,10 +72,10 @@ export function ResultCardActions({ result }: ResultCardActionsProps) {
         ) : (
           <div className="flex items-center justify-between">
             {/* Claim - left */}
-            {result.type === 'artist' && result.matchConfidence !== 'claimed' ? (
+            {result.type === 'artist' && result.matchConfidence !== 'claimed' && claimSlug ? (
               <Link
-                to={`/claim/${result.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
-                className="text-xs text-text-secondary hover:text-accent-primary transition-colors flex items-center gap-1"
+                to={`/claim/${claimSlug}`}
+                className="text-xs text-text-secondary hover:text-link transition-colors flex items-center gap-1"
                 onClick={(e) => e.stopPropagation()}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

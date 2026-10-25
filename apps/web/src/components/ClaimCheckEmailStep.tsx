@@ -32,7 +32,7 @@ export function ClaimCheckEmailStep({
           <button
             onClick={onResend}
             disabled={resendCooldown > 0 || loading}
-            className="text-sm text-accent-primary hover:underline disabled:opacity-50 disabled:no-underline"
+            className="text-sm text-link hover:underline disabled:opacity-50 disabled:no-underline"
           >
             {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend email'}
           </button>

@@ -33,32 +33,53 @@ export const allKnownSourceIds = new Set(
 );
 
 export function categorizePlatforms(
-  verifiedPlatforms: PlatformLink[],
+  platforms: PlatformLink[],
   allKnown: Set<SourceId>
 ): CategorizedPlatforms {
   return {
-    marketplace: verifiedPlatforms.filter(p =>
+    marketplace: platforms.filter(p =>
       sourceCategories.marketplace.sources.includes(p.sourceId)
     ),
-    patronage: verifiedPlatforms.filter(p =>
+    patronage: platforms.filter(p =>
       sourceCategories.patronage.sources.includes(p.sourceId)
     ),
-    library: verifiedPlatforms.filter(p =>
+    library: platforms.filter(p =>
       sourceCategories.library.sources.includes(p.sourceId)
     ),
-    decentralized: verifiedPlatforms.filter(p =>
+    decentralized: platforms.filter(p =>
       sourceCategories.decentralized.sources.includes(p.sourceId)
     ),
-    official: verifiedPlatforms.filter(p =>
+    official: platforms.filter(p =>
       sourceCategories.official.sources.includes(p.sourceId)
     ),
-    social: verifiedPlatforms.filter(p =>
+    social: platforms.filter(p =>
       sourceCategories.social.sources.includes(p.sourceId)
     ),
-    curated: verifiedPlatforms.filter(p =>
+    curated: platforms.filter(p =>
       !allKnown.has(p.sourceId) || sourceCategories.curated.sources.includes(p.sourceId)
     ),
   };
+}
+
+/**
+ * The links a card shows, in the order it shows them. Release verification uses the stricter
+ * `getReleaseInfo().verifiedPlatforms`; display does not, because a search link to Ampwall,
+ * Subvert, Ko-fi or Buy Me a Coffee is still a useful destination — it renders as a labelled
+ * "Search Ampwall" action, never as a verified badge. Filtering them out here once left a
+ * MusicBrainz-only fallback card with no destinations at all.
+ *
+ * The one exception is a Bandcamp search placeholder (`bandcamp.com/search?q=`): it claims a
+ * presence nobody found, and the backend once stored and crawled those as artist pages (#407).
+ *
+ * Direct links come first, so a search action never sits ahead of a real page.
+ */
+export function getDisplayPlatforms(result: SearchResult): PlatformLink[] {
+  const shown = result.platforms.filter(p =>
+    p.sourceId !== 'bandcamp' || isDirectLink(p.url, p.sourceId)
+  );
+  const direct = shown.filter(p => isDirectLink(p.url, p.sourceId));
+  const searches = shown.filter(p => !isDirectLink(p.url, p.sourceId));
+  return [...direct, ...searches];
 }
 
 export interface ReleaseInfo {
@@ -66,7 +87,6 @@ export interface ReleaseInfo {
   platformsWithRelease: PlatformLink[];
   canPlay: boolean;
   previewUrl: string | undefined;
-  verifiedPlatforms: PlatformLink[];
 }
 
 export function getReleaseInfo(result: SearchResult): ReleaseInfo {
@@ -102,6 +122,5 @@ export function getReleaseInfo(result: SearchResult): ReleaseInfo {
     platformsWithRelease,
     canPlay,
     previewUrl,
-    verifiedPlatforms,
   };
 }

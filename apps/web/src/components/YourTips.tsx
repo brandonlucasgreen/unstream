@@ -107,7 +107,7 @@ export function YourTips() {
         Tip History
       </h2>
       {error ? (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-sm text-error">{error}</p>
       ) : (
         <>
           <p className="text-sm text-text-muted">

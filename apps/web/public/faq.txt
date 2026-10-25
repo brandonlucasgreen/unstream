@@ -81,7 +81,7 @@ Unstream shows policy badges for platforms that have formal written policies abo
 Parts of Unstream were built and maintained with the help of AI coding tools like Claude Code and OpenCode.
 
 ### Is there a Windows app / iOS app / Android app / Chrome extension / Firefox extension for Unstream?
-Yes! Unstream is available for [macOS](https://github.com/brandonlucasgreen/unstream/releases/latest), [Chrome](https://chromewebstore.google.com/detail/unstream/ekgpnodajpmdfcbdnbmgcichhbaipnmc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/), and [the web](https://unstream.stream).
+Yes! Unstream is available for [macOS](https://github.com/brandonlucasgreen/unstream/releases/latest), [Chrome](https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/unstream/), and [the web](https://unstream.stream).
 
 ### I’d like to request a feature or improvement. How can I do that?
 Feel free to [open an issue](https://github.com/brandonlucasgreen/unstream/issues) on GitHub to suggest something new or [email me](mailto:support@unstream.stream).

@@ -62,14 +62,14 @@ export function AdminTipsApprovals() {
     load();
   };
 
-  if (!data?.available) return error ? <p className="text-sm text-red-400">{error}</p> : null;
+  if (!data?.available) return error ? <p className="text-sm text-error">{error}</p> : null;
 
   return (
     <section className="space-y-4">
       <h2 className="font-display text-lg font-semibold text-text-primary">
-        Tips accounts {!data.livemode && <span className="text-sm font-normal text-yellow-600">(Stripe test mode)</span>}
+        Tips accounts {!data.livemode && <span className="text-sm font-normal text-warning">(Stripe test mode)</span>}
       </h2>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
       {data.accounts.length === 0 && <p className="text-sm text-text-muted">No artist has connected Stripe yet.</p>}
       {data.accounts.map(a => (
         <div key={a.artistId} className="p-4 rounded-lg border border-border bg-bg-secondary space-y-2 text-sm">
@@ -77,14 +77,14 @@ export function AdminTipsApprovals() {
             <div>
               <p className="text-xs text-text-muted uppercase">Claimed artist</p>
               <p className="font-semibold">{a.artistName}</p>
-              {a.artistSlug && <a href={`/a/${a.artistSlug}`} target="_blank" rel="noreferrer" className="text-accent-primary text-xs">/a/{a.artistSlug}</a>}
+              {a.artistSlug && <a href={`/a/${a.artistSlug}`} target="_blank" rel="noreferrer" className="text-link text-xs">/a/{a.artistSlug}</a>}
               <p className="text-xs text-text-muted">Claim email: {a.claimEmail ?? '—'}</p>
             </div>
             <div>
               <p className="text-xs text-text-muted uppercase">Stripe account</p>
               <p className="font-semibold">{a.stripe.businessName ?? '(no business name yet)'}</p>
               <p className="text-xs text-text-muted">{a.stripe.country ?? '—'} · {a.stripe.email ?? '—'} · {a.stripeAccountId}</p>
-              {a.stripe.error && <p className="text-xs text-red-400">Stripe: {a.stripe.error}</p>}
+              {a.stripe.error && <p className="text-xs text-error">Stripe: {a.stripe.error}</p>}
             </div>
           </div>
           <p className="text-xs text-text-muted">
@@ -92,7 +92,7 @@ export function AdminTipsApprovals() {
             {a.approvedAt && ` · approved ${new Date(a.approvedAt).toLocaleDateString()}`}
           </p>
           {!a.connectedByCurrentOwner && (
-            <p className="text-xs text-red-400">Connected by someone who no longer owns this profile. Don't approve.</p>
+            <p className="text-xs text-error">Connected by someone who no longer owns this profile. Don't approve.</p>
           )}
           <div className="flex flex-wrap items-center gap-2">
             {!a.approvedAt ? (
@@ -101,7 +101,7 @@ export function AdminTipsApprovals() {
                   type="button"
                   disabled={busy === a.artistId || approveBlockers(a).length > 0}
                   onClick={() => act(a, 'approve')}
-                  className="px-3 py-1.5 rounded-lg bg-accent-primary text-white text-xs disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-accent-primary text-accent-foreground text-xs disabled:opacity-50"
                 >
                   Approve tips
                 </button>

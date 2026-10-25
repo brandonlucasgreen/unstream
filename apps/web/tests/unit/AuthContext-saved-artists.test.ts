@@ -187,65 +187,8 @@ describe('AuthContext saved artists state management', () => {
     });
   });
 
-  describe('pending save flow (localStorage)', () => {
-    beforeEach(() => {
-      localStorage.clear();
-    });
-
-    it('stores pending save in localStorage before redirect', () => {
-      const artistId = '123e4567-e89b-12d3-a456-426614174000';
-
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
-
-      const stored = JSON.parse(localStorage.getItem('pendingSave')!);
-      expect(stored.artistId).toBe(artistId);
-    });
-
-    it('clears pendingSave immediately on read, not after save', () => {
-      const artistId = '123e4567-e89b-12d3-a456-426614174000';
-
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId }));
-
-      // Simulate the read-and-clear pattern from AuthContext
-      const pendingSave = localStorage.getItem('pendingSave');
-      localStorage.removeItem('pendingSave'); // Clear immediately
-
-      // Even if save fails, localStorage is already cleared
-      expect(localStorage.getItem('pendingSave')).toBeNull();
-      expect(pendingSave).not.toBeNull();
-
-      const parsed = JSON.parse(pendingSave!);
-      expect(parsed.artistId).toBe(artistId);
-    });
-
-    it('handles corrupted pendingSave gracefully', () => {
-      localStorage.setItem('pendingSave', 'not-valid-json');
-
-      // Should not throw
-      try {
-        const pendingSave = localStorage.getItem('pendingSave');
-        if (pendingSave) {
-          JSON.parse(pendingSave);
-        }
-      } catch {
-        // Clear corrupted data
-        localStorage.removeItem('pendingSave');
-      }
-
-      expect(localStorage.getItem('pendingSave')).toBeNull();
-    });
-
-    it('supports notes field in pending save', () => {
-      const artistId = '123e4567-e89b-12d3-a456-426614174000';
-      const notes = 'Seen live 2024';
-
-      localStorage.setItem('pendingSave', JSON.stringify({ artistId, notes }));
-
-      const stored = JSON.parse(localStorage.getItem('pendingSave')!);
-      expect(stored.artistId).toBe(artistId);
-      expect(stored.notes).toBe(notes);
-    });
-  });
+  // The pending-save flow (signed-out save resumed after sign-in) is covered against the real
+  // AuthProvider in AuthContext-pending-save.test.tsx.
 
   describe('bulk check - validation', () => {
     it('caps at 100 artist IDs', () => {

@@ -1451,12 +1451,29 @@ async function toggleArtistReleases() {
   }
 }
 
-// Load last check time
+// Load last check time, and say so when the last check didn't reach every artist. A failed
+// check used to read "No new releases" for a moment and then nothing at all, which told the fan
+// everything was fine.
 async function loadLastCheckTime() {
   const { releaseCheckState = {} } = await chrome.storage.local.get('releaseCheckState');
-  if (releaseCheckState.lastCheckDate) {
-    const date = new Date(releaseCheckState.lastCheckDate);
-    elements.lastCheckTime.textContent = `Last checked: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  const outcome = releaseCheckState.lastCheckOutcome;
+  const formatDate = (ms) => {
+    const date = new Date(ms);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
+  if (outcome?.status === 'failed') {
+    elements.lastCheckTime.textContent =
+      "Last check couldn't reach Unstream, so new releases may be missing. Check now to retry.";
+  } else if (outcome?.status === 'partial') {
+    const checkable = outcome.total - (outcome.uncheckableCount ?? 0);
+    elements.lastCheckTime.textContent =
+      `Last check reached ${checkable - outcome.failedCount} of ${checkable} artists. Check now to retry the rest.`;
+  } else if (releaseCheckState.lastCheckDate) {
+    const uncheckable = outcome?.uncheckableCount ?? 0;
+    const note = uncheckable === 0 ? ''
+      : ` · ${uncheckable} artist${uncheckable === 1 ? '' : 's'} can't be checked until Unstream catalogues them`;
+    elements.lastCheckTime.textContent = `Last checked: ${formatDate(releaseCheckState.lastCheckDate)}${note}`;
   }
 }
 
@@ -1477,12 +1494,24 @@ async function checkReleasesNow() {
     await loadNewReleases();
     await loadLastCheckTime();
 
+    const status = result?.outcome?.status;
     if (result && result.newCount > 0) {
       elements.checkNowBtn.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
         Found ${result.newCount} new release${result.newCount > 1 ? 's' : ''}!
+      `;
+    } else if (status === 'failed' || status === 'partial') {
+      // Never "No new releases" when some artists weren't checked; the persistent line under
+      // the button says how many.
+      elements.checkNowBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        ${status === 'failed' ? 'Check failed' : 'Check incomplete'}
       `;
     } else {
       elements.checkNowBtn.innerHTML = `

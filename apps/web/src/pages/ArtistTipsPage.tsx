@@ -75,7 +75,7 @@ export function ArtistTipsPage() {
 
   if (!slug) return null;
 
-  if (loadError) return <p className="text-sm text-red-400">{loadError}</p>;
+  if (loadError) return <p className="text-sm text-error">{loadError}</p>;
   if (!settings || !session) return <TabSkeleton label="Loading tips" />;
   if (!settings.available) return <p className="text-sm text-text-muted">Tips aren't available on Unstream yet.</p>;
   if (autoRefresh && !refreshError && !restored) {
@@ -86,7 +86,7 @@ export function ArtistTipsPage() {
       {stripeParam === 'return' && (
         <p className="text-sm text-text-secondary" role="status">Stripe Connect awaiting verification</p>
       )}
-      {refreshError && <p className="text-sm text-red-400">{refreshError}</p>}
+      {refreshError && <p className="text-sm text-error">{refreshError}</p>}
       <ArtistTipsPanel slug={slug} token={session.access_token} settings={settings} onChange={setSettings} />
     </div>
   );

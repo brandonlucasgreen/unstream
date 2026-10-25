@@ -206,9 +206,9 @@ export function Header() {
                 to={entry.to}
                 className={
                   entry.button
-                    ? 'px-4 py-2 rounded-lg bg-accent-primary text-white font-semibold hover:bg-accent-primary/90 transition-colors shadow-sm shadow-accent-primary/20'
+                    ? 'px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground font-semibold hover:bg-accent-primary/90 transition-colors shadow-sm shadow-accent-primary/20'
                     : entry.emphasis
-                      ? 'text-accent-primary hover:underline font-medium'
+                      ? 'text-link hover:underline font-medium'
                       : 'text-text-muted hover:text-text-primary transition-colors'
                 }
               >

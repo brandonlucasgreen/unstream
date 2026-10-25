@@ -28,14 +28,23 @@ class SavedArtistsSync: ObservableObject {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         self.session = URLSession(configuration: config)
+        if let data = UserDefaults.standard.data(forKey: pendingKey),
+           let saved = try? JSONDecoder().decode([PendingChange].self, from: data) {
+            pendingChanges = saved
+        }
     }
 
     // MARK: - Pull
 
     /// Fetch artists modified since the last sync cursor.
     /// Pass `force = true` to do a full pull (no cursor).
-    func pull(force: Bool = false) async {
-        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
+    /// Returns whether the list is now the server's (release checks won't check a stale list).
+    @discardableResult
+    func pull(force: Bool = false) async -> Bool {
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return false }
+
+        // Queued saves and removes go first, so the pull reads them back.
+        if !pendingChanges.isEmpty { await flushPendingChanges() }
 
         isSyncing = true
         syncError = nil
@@ -58,7 +67,7 @@ class SavedArtistsSync: ObservableObject {
 
         guard let url = URL(string: urlString) else {
             isSyncing = false
-            return
+            return false
         }
 
         var request = URLRequest(url: url)
@@ -71,15 +80,15 @@ class SavedArtistsSync: ObservableObject {
                 if http.statusCode == 401 {
                     syncError = "Session expired — sign in again"
                     isSyncing = false
-                    return
+                    return false
                 } else if !(200...299).contains(http.statusCode) {
                     syncError = "Couldn't sync — tap to retry"
                     isSyncing = false
-                    return
+                    return false
                 }
             } else {
                 isSyncing = false
-                return
+                return false
             }
 
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
@@ -103,104 +112,278 @@ class SavedArtistsSync: ObservableObject {
                 syncedArtists = Array(bySlug.values).sorted { $0.name < $1.name }
             }
 
+            // Anything still queued (offline) stays visible as the fan left it, and says so.
+            syncedArtists = Self.applying(pendingChanges, to: syncedArtists)
+            if !pendingChanges.isEmpty {
+                syncError = "Saved on this device — will sync when you're back online"
+            }
             lastSyncTime = decoded.serverTime
         } catch {
             syncError = "Couldn't sync — tap to retry"
             print("[Sync] Pull failed: \(error)")
+            isSyncing = false
+            return false
         }
 
         isSyncing = false
+        return true
     }
 
-    // MARK: - Push (save)
+    // MARK: - Push (outbox)
+    //
+    // Saves and removes are applied to `syncedArtists` at once and queued in an outbox that
+    // outlives a relaunch. Each queued change is sent in order; one that can't reach the server
+    // (offline, timeout, 5xx) stays queued and is retried before the next pull, so a heart
+    // tapped on a train still lands in the account. Only a change the server *rejects* (a 4xx
+    // other than 401) is dropped, with an error naming the artist.
 
-    /// Save an artist to the server.
+    /// A save or remove waiting to reach the server. At most one per slug: a later change to the
+    /// same artist replaces an earlier one, since only the last tap matters.
+    struct PendingChange: Codable, Equatable {
+        enum Action: String, Codable { case save, remove }
+        let action: Action
+        let slug: String
+        let name: String
+        let imageUrl: String?
+    }
+
+    private let pendingKey = "sync.pendingChanges"
+    private var isFlushing = false
+
+    /// Loaded once in `init`, persisted on every change, so the outbox survives a relaunch
+    /// without decoding UserDefaults on every read.
+    private(set) var pendingChanges: [PendingChange] = [] {
+        didSet {
+            UserDefaults.standard.set(try? JSONEncoder().encode(pendingChanges), forKey: pendingKey)
+        }
+    }
+
+    /// Whether the account's saved list holds this artist, counting changes not yet sent.
+    func contains(slug: String) -> Bool {
+        syncedArtists.contains { $0.displaySlug == slug }
+    }
+
+    /// Save an artist to the account. Shown as saved immediately; sent now or, failing that,
+    /// on the next pull.
     func saveArtist(slug: String, name: String, imageUrl: String?) async {
-        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
+        await enqueue(PendingChange(action: .save, slug: slug, name: name, imageUrl: imageUrl))
+    }
 
-        guard let url = URL(string: "\(baseURL)/saved-artists") else { return }
+    /// Remove a saved artist from the account. Removed from the list immediately; sent now or,
+    /// failing that, on the next pull.
+    func removeArtist(slug: String) async {
+        let name = syncedArtists.first { $0.displaySlug == slug }?.name ?? slug
+        await enqueue(PendingChange(action: .remove, slug: slug, name: name, imageUrl: nil))
+    }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    /// Forget everything tied to the signed-in account. Called on sign-out, so one account's
+    /// queued changes can never be sent under the next account to sign in.
+    func reset() {
+        syncedArtists = []
+        pendingChanges = []
+        lastSyncTime = nil
+        syncError = nil
+    }
 
-        let body: [String: Any] = [
-            "action": "save",
-            "artistId": slug,
-            "name": name,
-            "imageUrl": imageUrl ?? "",
-            "device_id": DeviceIDManager.current,
-        ]
+    private func enqueue(_ change: PendingChange) async {
+        var queue = pendingChanges.filter { $0.slug != change.slug }
+        queue.append(change)
+        pendingChanges = queue
+        syncedArtists = Self.applying([change], to: syncedArtists)
+        await flushPendingChanges()
+    }
 
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+    /// Send queued changes in order, stopping at the first that can't reach the server.
+    func flushPendingChanges() async {
+        guard !isFlushing else { return }
+        isFlushing = true
+        defer { isFlushing = false }
 
-        do {
-            let (data, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse {
-                if http.statusCode == 401 {
-                    syncError = "Session expired — sign in again"
-                } else if (200...299).contains(http.statusCode) {
-                    // Update sync cursor from the server's authoritative time
-                    // so subsequent incremental pulls don't miss this save.
-                    if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let serverTime = responseBody["server_time"] as? String {
-                        lastSyncTime = serverTime
-                    }
-                    // Refresh pull to get the server's authoritative version
-                    await pull()
-                } else {
-                    syncError = "Couldn't save — try again"
-                }
+        while let change = pendingChanges.first {
+            switch await send(change) {
+            case .sent:
+                // The sync cursor is deliberately left alone. Moving it to this save's
+                // server_time would make the next incremental pull skip whatever another
+                // device changed while this one was offline — the case the outbox exists for.
+                // The pull reads this change back along with everything else.
+                pendingChanges.removeFirst()
+            case .rejected:
+                pendingChanges.removeFirst()
+                // Undo the optimistic change with a full pull, then say why. In that order:
+                // pull() clears syncError when it starts, which used to wipe this message.
+                await pull(force: true)
+                syncError = change.action == .save
+                    ? "Couldn't save \(change.name) to your account"
+                    : "Couldn't remove \(change.name) from your account"
+                return
+            case .unauthorized:
+                syncError = "Session expired — sign in again"
+                return
+            case .offline:
+                syncError = "Saved on this device — will sync when you're back online"
+                return
             }
-        } catch {
-            syncError = "Couldn't save — try again"
-            print("[Sync] Save failed: \(error)")
         }
     }
 
-    // MARK: - Push (remove)
+    private enum SendOutcome {
+        case sent
+        case rejected
+        case unauthorized
+        case offline
+    }
 
-    /// Remove a saved artist from the server.
-    func removeArtist(slug: String) async {
-        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
-
-        guard let url = URL(string: "\(baseURL)/saved-artists") else { return }
+    private func send(_ change: PendingChange) async -> SendOutcome {
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return .unauthorized }
+        guard let url = URL(string: "\(baseURL)/saved-artists") else { return .rejected }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        let body: [String: Any] = [
-            "action": "remove",
-            "artistId": slug,
+        var body: [String: Any] = [
+            "action": change.action.rawValue,
+            "artistId": change.slug,
             "device_id": DeviceIDManager.current,
         ]
-
+        if change.action == .save {
+            body["name"] = change.name
+            body["imageUrl"] = change.imageUrl ?? ""
+        }
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
 
         do {
-            let (data, response) = try await session.data(for: request)
-            if let http = response as? HTTPURLResponse {
-                if http.statusCode == 401 {
-                    syncError = "Session expired — sign in again"
-                } else if (200...299).contains(http.statusCode) {
-                    // Update sync cursor from the server's authoritative time
-                    if let responseBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let serverTime = responseBody["server_time"] as? String {
-                        lastSyncTime = serverTime
-                    }
-                    // Remove from local list immediately
-                    syncedArtists.removeAll { $0.slug == slug }
-                } else {
-                    syncError = "Couldn't remove — try again"
-                }
+            let (_, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse else { return .offline }
+            switch http.statusCode {
+            case 200...299:
+                return .sent
+            case 401:
+                return .unauthorized
+            case 408, 429, 500...599:
+                return .offline
+            default:
+                return .rejected
             }
         } catch {
-            syncError = "Couldn't remove — try again"
-            print("[Sync] Remove failed: \(error)")
+            print("[Sync] \(change.action.rawValue) failed for \(change.slug): \(error)")
+            return .offline
         }
+    }
+
+    /// The list as it will be once these changes reach the server. Applied after every pull
+    /// too, so a queued save doesn't vanish from the list just because the server hasn't
+    /// heard about it yet.
+    static func applying(_ changes: [PendingChange], to artists: [SyncedArtist]) -> [SyncedArtist] {
+        var result = artists
+        for change in changes {
+            result.removeAll { $0.displaySlug == change.slug }
+            if change.action == .save {
+                result.append(SyncedArtist(
+                    id: "pending-\(change.slug)",
+                    artistId: change.slug,
+                    name: change.name,
+                    slug: change.slug,
+                    imageUrl: change.imageUrl,
+                    supported: nil,
+                    lastModified: nil,
+                    deviceId: DeviceIDManager.current,
+                    claimed: nil,
+                    deleted: nil
+                ))
+            }
+        }
+        return result.sorted { $0.name < $1.name }
+    }
+}
+
+// MARK: - One saved list
+
+/// Where the heart button saves to. **Signed in, the account is the saved list** — on every
+/// device, and for release checks. The local `SupportListManager` list (iCloud key-value
+/// storage) is the signed-out list. Before this, the heart always wrote to the local list, so
+/// on macOS an artist saved before signing in seemed to vanish at sign-in (the popover switches
+/// to the account's list) and release alerts ignored everything saved on the web.
+///
+/// Local entries are never deleted on sign-in: they stay as the signed-out list, and
+/// `SyncedArtistsView` offers to add the ones the account lacks. Merging them silently
+/// would put artists into an account without the fan asking.
+@MainActor
+enum SavedArtistsRouter {
+    /// The identifier an artist is saved under: the slug of their Unstream page when the
+    /// search placed them (as the web and extension do), else a slug computed the way the
+    /// server computes it. Nil when the name has nothing to slug (a name with no Latin
+    /// letters), which can only be saved on this device.
+    static func slug(for artist: ArtistResult) -> String? {
+        if let pageSlug = artist.pageSlug { return pageSlug }
+        let computed = ArtistSlug.make(artist.name)
+        return computed.isEmpty ? nil : computed
+    }
+
+    static func isSaved(_ artist: ArtistResult, local: SupportListManager) -> Bool {
+        if AuthService.shared.isSignedIn, let slug = slug(for: artist) {
+            return SavedArtistsSync.shared.contains(slug: slug)
+        }
+        return local.isArtistSaved(artist.name)
+    }
+
+    static func toggle(_ artist: ArtistResult, local: SupportListManager) {
+        guard AuthService.shared.isSignedIn, let slug = slug(for: artist) else {
+            local.toggleArtist(artist)
+            return
+        }
+        let sync = SavedArtistsSync.shared
+        Task {
+            if sync.contains(slug: slug) {
+                await sync.removeArtist(slug: slug)
+            } else {
+                await sync.saveArtist(slug: slug, name: artist.name, imageUrl: artist.imageUrl)
+            }
+        }
+    }
+
+    /// Artists saved on this device (signed out, or before this build) that the account
+    /// doesn't hold, matched by name or computed slug.
+    static func localEntriesMissingFromAccount(local: SupportListManager) -> [SupportEntry] {
+        let synced = SavedArtistsSync.shared.syncedArtists
+        let names = Set(synced.map { $0.name.lowercased() })
+        let slugs = Set(synced.map { $0.displaySlug })
+        return local.entries.filter { entry in
+            !names.contains(entry.artistName.lowercased()) && !slugs.contains(ArtistSlug.make(entry.artistName))
+        }
+    }
+
+    /// Add local entries to the account, on the fan's say-so. Entries whose name can't be
+    /// slugged stay local only.
+    static func addToAccount(_ entries: [SupportEntry]) {
+        let sync = SavedArtistsSync.shared
+        Task {
+            for entry in entries {
+                let slug = ArtistSlug.make(entry.artistName)
+                guard !slug.isEmpty else { continue }
+                await sync.saveArtist(slug: slug, name: entry.artistName, imageUrl: entry.imageUrl)
+            }
+        }
+    }
+}
+
+/// An artist slug computed on the device, for an artist the search didn't place on a page.
+/// **Mirrors `artistSlug()` in api/shared/artist-slug.ts** — accents folded, not stripped (Björk is
+/// `bjork`, not `bj-rk`), so a save resolves to the same artist row the server would create.
+enum ArtistSlug {
+    private static let nonDecomposingLatin: [Character: String] = [
+        "ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D", "ð": "d", "Ð": "D",
+        "þ": "th", "Þ": "Th", "æ": "ae", "Æ": "Ae", "œ": "oe", "Œ": "Oe", "ß": "ss",
+        "ħ": "h", "Ħ": "H", "ŋ": "n", "Ŋ": "N", "ı": "i", "ŧ": "t", "Ŧ": "T",
+    ]
+
+    static func make(_ name: String) -> String {
+        let stripped = name.applyingTransform(.stripDiacritics, reverse: false) ?? name
+        let folded = stripped.map { nonDecomposingLatin[$0] ?? String($0) }.joined()
+        return folded.lowercased()
+            .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
 }
 

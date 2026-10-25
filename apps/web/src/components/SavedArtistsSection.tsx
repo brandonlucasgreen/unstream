@@ -98,7 +98,7 @@ export function SavedArtistsSection() {
         Saved Artists
       </h2>
 
-      {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
+      {error && <p className="text-sm text-error mb-3">{error}</p>}
 
       {!artistsLoaded && savedArtistsError ? (
         /*
@@ -205,7 +205,7 @@ export function SavedArtistsSection() {
                       </button>
                       <button
                         onClick={() => handleRemove(artist)}
-                        className="p-1.5 rounded-lg border border-border text-text-muted hover:text-red-400 hover:border-red-500/30 transition-colors"
+                        className="p-1.5 rounded-lg border border-border text-text-muted hover:text-error hover:border-red-500/30 transition-colors"
                         title="Remove"
                         aria-label={`Remove ${artist.name}`}
                       >
@@ -245,11 +245,11 @@ export function SavedArtistsSection() {
       )}
 
       {undo && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-accent-primary shadow-lg flex items-center gap-3">
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg bg-accent-primary/10 border border-accent-primary/20 text-link shadow-lg flex items-center gap-3">
           <span className="text-sm font-medium">Removed {undo.name}</span>
           <button
             onClick={() => handleUndo(undo)}
-            className="px-3 py-1 rounded-md bg-accent-primary text-white text-sm font-medium hover:bg-accent-primary/90 transition-colors"
+            className="px-3 py-1 rounded-md bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
           >
             Undo
           </button>

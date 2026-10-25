@@ -65,7 +65,7 @@ export function ResultCardBio({ bio }: ResultCardBioProps) {
           {showToggle && (
             <button
               type="button"
-              className="text-accent-primary hover:underline"
+              className="text-link hover:underline"
               aria-expanded={expanded}
               onClick={(e) => {
                 e.stopPropagation();

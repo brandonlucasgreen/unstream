@@ -109,14 +109,14 @@ export function NewsletterSignup({
             <button
               type="submit"
               disabled={status === 'submitting'}
-              className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
+              className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
             >
               {status === 'submitting' ? 'Subscribing…' : 'Subscribe'}
             </button>
           </div>
 
           {error && (
-            <p className="text-sm text-red-400" role="alert">
+            <p className="text-sm text-error" role="alert">
               {error}
             </p>
           )}
@@ -130,7 +130,7 @@ export function NewsletterSignup({
       {feedUrl && (
         <p className="text-xs text-text-muted">
           Rather not use email?{' '}
-          <a href={feedUrl} className="text-accent-primary hover:underline">
+          <a href={feedUrl} className="text-link hover:underline">
             Subscribe to the {feedLabel}
           </a>
           .

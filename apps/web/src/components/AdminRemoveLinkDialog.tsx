@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import type { PlatformLink } from '../types';
 import { getSource } from './ResultCardUtils';
+import { Dialog } from './Dialog';
 
 interface AdminRemoveLinkDialogProps {
   artistName: string;
@@ -26,10 +27,11 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const titleId = useId();
 
   const source = getSource(platform.sourceId);
 
-  const handleRemove = async () => {
+  const handleRemove = async (close: () => void) => {
     setSaving(true);
     setError(null);
 
@@ -55,7 +57,7 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
       }
 
       onRemoved(platform.url);
-      onClose();
+      close();
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'admin.removeLink' } });
       setError(err instanceof Error ? err.message : 'Failed to remove link.');
@@ -65,9 +67,12 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-      <div className="w-full max-w-md rounded-2xl bg-bg-primary border border-border p-5 space-y-4">
-        <h2 className="font-display text-lg font-bold text-text-primary">Remove this link</h2>
+    // Not dismissible mid-request: Escape or a backdrop click would hide a suppression that may
+    // still land, and the card would keep a link the server has already removed.
+    <Dialog labelledBy={titleId} onClose={onClose} dismissible={!saving}>
+      {close => (
+      <div className="p-5 space-y-4">
+        <h2 id={titleId} className="font-display text-lg font-bold text-text-primary">Remove this link</h2>
 
         <div className="space-y-1 text-sm">
           <p className="text-text-secondary">
@@ -126,27 +131,29 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
             {error}
           </div>
         )}
 
         <div className="flex gap-3 pt-1">
           <button
-            onClick={handleRemove}
+            onClick={() => handleRemove(close)}
             disabled={saving}
-            className="px-4 py-2 rounded-xl bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
           >
             {saving ? 'Removing...' : 'Remove link'}
           </button>
           <button
-            onClick={onClose}
+            onClick={close}
+            disabled={saving}
             className="px-4 py-2 rounded-xl bg-surface border border-border text-text-primary hover:bg-surface-secondary transition-colors"
           >
             Cancel
           </button>
         </div>
       </div>
-    </div>
+      )}
+    </Dialog>
   );
 }

@@ -37,7 +37,7 @@ export function ExtensionPage() {
             <h2 className="font-display text-xl font-semibold text-text-primary mb-6">How it works</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                 <div>
                   <p className="font-medium text-text-primary">Listen to music in your browser</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -46,7 +46,7 @@ export function ExtensionPage() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                 <div>
                   <p className="font-medium text-text-primary">See where to support the artist</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -55,7 +55,7 @@ export function ExtensionPage() {
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-accent-primary flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
+                <div className="w-8 h-8 rounded-full bg-accent-primary/10 text-link flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
                 <div>
                   <p className="font-medium text-text-primary">Save artists and get release alerts</p>
                   <p className="text-sm text-text-secondary mt-1">
@@ -74,7 +74,7 @@ export function ExtensionPage() {
                 href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-primary text-white hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-primary text-accent-foreground hover:bg-accent-primary/90 transition-colors font-medium shadow-lg shadow-accent-primary/20"
                 onClick={() => analytics.trackDownload()}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

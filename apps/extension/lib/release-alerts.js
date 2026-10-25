@@ -41,6 +41,39 @@ export function sinceDaysForCheck(lastCheckDate, now = Date.now()) {
 }
 
 /**
+ * When this artist was last checked *successfully*: their own record, else the check-wide date
+ * from before per-artist records existed. A failed check never moves either, so the next check
+ * asks for the whole window the failure missed rather than starting fresh from the failure.
+ */
+export function lastSuccessfulCheckFor(state, artistName) {
+  return state.artistLastChecked?.[artistName] ?? state.lastCheckDate;
+}
+
+/**
+ * Whether a check-releases response means "there is nothing to check for this artist yet":
+ * a 400, which the server returns when an artist is neither catalogued nor reachable through a
+ * link it is willing to fetch. Not a success — the artist wasn't checked, so their last-checked
+ * date must not move — and not a failure to retry, since asking again changes nothing until they
+ * are catalogued. Every other non-2xx (401, 403 from a bot challenge, 404, 429, 5xx) is a failure.
+ */
+export function isUncheckableArtistStatus(status) {
+  return status === 400;
+}
+
+/**
+ * The outcome of one check run, stored so the popup can say so until the next check instead of
+ * a transient "No new releases" that hid every failure. `failed` when no checkable artist was
+ * reached, `partial` when some were, `complete` when all were. Artists with nothing to check yet
+ * are counted separately and don't make a run partial.
+ */
+export function summarizeCheck(total, failedCount, uncheckableCount = 0, at = Date.now()) {
+  const checkable = total - uncheckableCount;
+  let status = 'complete';
+  if (failedCount > 0) status = failedCount >= checkable ? 'failed' : 'partial';
+  return { status, total, failedCount, uncheckableCount, at };
+}
+
+/**
  * Every release the server reported, from either of its two shapes.
  *
  * `releases` is what the catalog path returns and is the one to read: it holds an artist's second

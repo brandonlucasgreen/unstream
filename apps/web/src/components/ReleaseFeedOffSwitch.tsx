@@ -55,12 +55,12 @@ export function ReleaseFeedOffSwitch() {
     <div className="space-y-3">
       <p className="text-sm text-text-muted">
         Subscribe to your private calendar and RSS links under Releases on{' '}
-        <Link to="/my-collection" className="text-accent-primary hover:underline">My Collection</Link>.
+        <Link to="/my-collection" className="text-link hover:underline">My Collection</Link>.
         If you've created one and want it to stop working — you shared it by accident, or you're
         done with it — turn it off here.
       </p>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {done ? (
         <p className="text-sm text-text-secondary">

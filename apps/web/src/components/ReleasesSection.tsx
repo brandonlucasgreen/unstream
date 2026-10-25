@@ -74,7 +74,7 @@ export function ReleasesSection({
         Releases
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
-          className="text-text-muted hover:text-accent-primary transition-colors"
+          className="text-text-muted hover:text-link transition-colors"
           aria-label="Subscribe to this artist's releases in a calendar app"
           title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
         >
@@ -82,7 +82,7 @@ export function ReleasesSection({
         </a>
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
-          className="text-text-muted hover:text-accent-primary transition-colors"
+          className="text-text-muted hover:text-link transition-colors"
           aria-label="Subscribe to this artist's releases in an RSS reader"
           title="Subscribe in an RSS reader"
         >
@@ -209,7 +209,7 @@ function ReleaseRow({ release, artistSlug }: { release: Release; artistSlug: str
       {/* An upcoming release is the most interesting row here and the easiest to miss at the top
           of a list that otherwise reads as history. */}
       {release.status === 'announced' && (
-        <span className="text-xs font-bold uppercase tracking-wide text-accent-primary shrink-0">
+        <span className="text-xs font-bold uppercase tracking-wide text-link shrink-0">
           Coming
         </span>
       )}

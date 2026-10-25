@@ -18,6 +18,9 @@ import {
   releaseNotificationTitle,
   releaseSummaryLine,
   releasesFromResponse,
+  summarizeCheck,
+  isUncheckableArtistStatus,
+  lastSuccessfulCheckFor,
   selectUnseenReleases,
   sinceDaysForCheck,
   MIN_SINCE_DAYS,
@@ -261,5 +264,29 @@ describe('sinceDaysForCheck', () => {
   it('falls back to the default on a first run or a nonsense timestamp', () => {
     expect(sinceDaysForCheck(undefined, now)).toBe(MIN_SINCE_DAYS);
     expect(sinceDaysForCheck(now + 5 * DAY, now)).toBe(MIN_SINCE_DAYS);
+  });
+});
+
+// Audit 2026-10-25 #4: a failure is never a successful check.
+describe('check outcomes', () => {
+  it('is complete, partial or failed by how many checkable artists answered', () => {
+    expect(summarizeCheck(3, 0).status).toBe('complete');
+    expect(summarizeCheck(3, 1).status).toBe('partial');
+    expect(summarizeCheck(3, 3).status).toBe('failed');
+    // One artist with nothing to check yet doesn't make a run partial, and the other two
+    // failing is a failed run, not a partial one.
+    expect(summarizeCheck(3, 0, 1).status).toBe('complete');
+    expect(summarizeCheck(3, 2, 1).status).toBe('failed');
+  });
+
+  it('reads only a 400 as "nothing to check yet"; a 403 challenge or 404 is a failure', () => {
+    expect(isUncheckableArtistStatus(400)).toBe(true);
+    for (const status of [401, 403, 404, 429, 503]) expect(isUncheckableArtistStatus(status)).toBe(false);
+  });
+
+  it('prefers an artist\'s own last successful check over the check-wide date', () => {
+    const state = { lastCheckDate: 1, artistLastChecked: { A: 5 } };
+    expect(lastSuccessfulCheckFor(state, 'A')).toBe(5);
+    expect(lastSuccessfulCheckFor(state, 'B')).toBe(1);
   });
 });

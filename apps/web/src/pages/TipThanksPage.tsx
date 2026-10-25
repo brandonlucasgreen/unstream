@@ -103,14 +103,14 @@ export function TipThanksPage() {
                     Sign in or create an account and we'll save this tip to it, so you can see every tip you've
                     left in one place. Entirely optional.
                   </p>
-                  <Link to={signInHref} className="inline-block text-accent-primary hover:underline">
+                  <Link to={signInHref} className="inline-block text-link hover:underline">
                     Save this tip to my account →
                   </Link>
                 </>
               ) : save.kind === 'saved' ? (
                 <p>
                   Saved to your account.{' '}
-                  <Link to="/my-collection#tips" className="text-accent-primary hover:underline">See your tips</Link>
+                  <Link to="/my-collection#tips" className="text-link hover:underline">See your tips</Link>
                 </p>
               ) : save.kind === 'failed' ? (
                 <p className="text-text-secondary">{save.message}</p>
@@ -128,7 +128,7 @@ export function TipThanksPage() {
             <p>
               <strong className="text-text-primary">Need a refund?</strong> The artist is the seller, so refunds
               come from them; their contact details are on your receipt. If you can't reach them, email{' '}
-              <a href="mailto:support@unstream.stream" className="text-accent-primary hover:underline">support@unstream.stream</a>{' '}
+              <a href="mailto:support@unstream.stream" className="text-link hover:underline">support@unstream.stream</a>{' '}
               and we'll pass it on. <Link to={`/faq#${TIP_FAQ_ANCHOR}`} className="underline">How tipping works</Link>
             </p>
           </div>
@@ -139,7 +139,7 @@ export function TipThanksPage() {
                 Back to the artist
               </Link>
             )}
-            <Link to="/" className="px-4 py-2 rounded-lg bg-accent-primary text-white text-sm hover:bg-accent-primary/90">
+            <Link to="/" className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground text-sm hover:bg-accent-primary/90">
               Find more artists
             </Link>
           </div>

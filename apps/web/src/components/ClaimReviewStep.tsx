@@ -67,7 +67,7 @@ export function ClaimReviewStep({
           <div className="flex-1 space-y-2">
             {customImageUrl ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-green-400">New photo selected</span>
+                <span className="text-sm text-success">New photo selected</span>
                 <button
                   onClick={() => setCustomImageUrl(null)}
                   className="text-xs text-text-muted hover:text-text-primary"
@@ -178,7 +178,7 @@ export function ClaimReviewStep({
       <button
         onClick={onConfirm}
         disabled={loading}
-        className="w-full py-3 rounded-lg bg-accent-primary text-white font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+        className="w-full py-3 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
       >
         {loading ? 'Saving...' : 'This looks good — go to my page'}
       </button>

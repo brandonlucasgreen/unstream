@@ -101,7 +101,7 @@ export function AdminFlagsPage() {
           </div>
 
           {error && (
-            <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">
               {error}
             </div>
           )}
@@ -128,7 +128,7 @@ export function AdminFlagsPage() {
                       <h2 className="font-semibold text-text-primary">{label}</h2>
                       <p className="text-text-muted text-sm">{copy?.caption ?? 'No description yet.'}</p>
                       <p className="text-text-muted text-xs mt-1 font-mono">{name}</p>
-                      <p className={`text-xs mt-1 ${enabled ? 'text-green-400' : 'text-yellow-400'}`}>
+                      <p className={`text-xs mt-1 ${enabled ? 'text-success' : 'text-warning'}`}>
                         {enabled ? 'Live to everyone' : 'Admin-only'}
                       </p>
                     </div>

@@ -5,6 +5,7 @@ import SwiftUI
 struct SyncedArtistsView: View {
     @ObservedObject var sync = SavedArtistsSync.shared
     @ObservedObject var auth = AuthService.shared
+    @EnvironmentObject var supportListManager: SupportListManager
     /// Called with the artist display name when an unclaimed artist row is tapped.
     var onSearchArtist: ((String) -> Void)? = nil
 
@@ -12,10 +13,13 @@ struct SyncedArtistsView: View {
         VStack(alignment: .leading, spacing: 8) {
             if !auth.isSignedIn {
                 signedOutState
-            } else if sync.syncedArtists.isEmpty {
-                emptyState
             } else {
-                artistList
+                deviceOnlyNotice
+                if sync.syncedArtists.isEmpty {
+                    emptyState
+                } else {
+                    artistList
+                }
             }
         }
         .task {
@@ -40,6 +44,36 @@ struct SyncedArtistsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
+    }
+
+    /// Artists saved on this device that the account doesn't have — saved while signed out,
+    /// or by a build whose heart only saved locally. Offered, not merged: adding them to an
+    /// account is the fan's call. They are never deleted from the device either way.
+    @ViewBuilder
+    private var deviceOnlyNotice: some View {
+        let missing = SavedArtistsRouter.localEntriesMissingFromAccount(local: supportListManager)
+        if !missing.isEmpty {
+            HStack(spacing: 8) {
+                Image(systemName: "iphone.and.arrow.forward")
+                    .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
+                Text(missing.count == 1
+                     ? "1 artist is saved only on this device."
+                     : "\(missing.count) artists are saved only on this device.")
+                    .font(.smallerText)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Button("Add to Account") {
+                    SavedArtistsRouter.addToAccount(missing)
+                }
+                .font(.smallerText)
+                .accessibilityLabel(missing.count == 1
+                                    ? "Add the artist saved on this device to your account"
+                                    : "Add the \(missing.count) artists saved on this device to your account")
+            }
+            .padding(.horizontal, 4)
+            .padding(.vertical, 4)
+        }
     }
 
     private var emptyState: some View {

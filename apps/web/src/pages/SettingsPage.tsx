@@ -31,6 +31,10 @@ export function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Bumped by Retry. A failed load leaves `settings` null, and the sections built from it are
+  // replaced by a retry rather than rendered from defaults: an empty username field, no email,
+  // and "Set password" for someone who has one all read as facts about the account.
+  const [attempt, setAttempt] = useState(0);
   // Set when a new pending change starts or one is cancelled, so the banner tracks the
   // server without a refetch; the first load seeds it from the settings payload.
   const [pendingEmailChange, setPendingEmailChange] = useState<string | null>(null);
@@ -45,11 +49,18 @@ export function SettingsPage() {
   );
   const [confirmMessage, setConfirmMessage] = useState<string | null>(null);
 
+  // Keyed on the user, not the session object: Supabase hands over a new session on every token
+  // refresh (hourly, and on tab focus), and re-running this load drops the page back to its
+  // skeleton — unmounting the email and password forms and whatever the fan was typing.
+  const userId = session?.user?.id;
+
   useEffect(() => {
     if (authLoading) return;
     if (!session) return;
 
     async function loadSettings() {
+      setLoading(true);
+      setError(null);
       try {
         const response = await fetch('/api/me/settings', {
           headers: { 'Authorization': `Bearer ${session!.access_token}` },
@@ -71,7 +82,8 @@ export function SettingsPage() {
       setLoading(false);
     }
     loadSettings();
-  }, [session, authLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see userId above
+  }, [userId, authLoading, attempt]);
 
   // Applying a confirmation link: POST the token, then drop it from the URL so a reload
   // or a shared link can't replay a used token — the banner below shows the outcome.
@@ -155,7 +167,7 @@ export function SettingsPage() {
           <h1 className="text-2xl font-bold">Settings</h1>
 
           {error && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
               {error}
             </div>
           )}
@@ -167,9 +179,9 @@ export function SettingsPage() {
               role="status"
               className={
                 confirmStatus === 'success'
-                  ? 'p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm'
+                  ? 'p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-success text-sm'
                   : confirmStatus === 'error'
-                    ? 'p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm'
+                    ? 'p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm'
                     : 'p-4 rounded-lg bg-bg-secondary border border-border text-text-muted text-sm'
               }
             >
@@ -177,20 +189,38 @@ export function SettingsPage() {
             </div>
           )}
 
+          {!settings && (
+            <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-3">
+              <h2 className="text-lg font-semibold">Profile, email and password</h2>
+              <p className="text-sm text-text-muted">
+                These couldn't be loaded, so they're hidden rather than shown blank.
+              </p>
+              <button
+                type="button"
+                onClick={() => setAttempt(n => n + 1)}
+                className="text-sm font-medium text-text-primary underline hover:no-underline"
+              >
+                Try again
+              </button>
+            </section>
+          )}
+
           {/* Profile section */}
+          {settings && (
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Profile</h2>
             <UsernameField
-              currentUsername={settings?.username ?? null}
+              currentUsername={settings.username}
               accessToken={session!.access_token}
               onSaved={(username) => setSettings(prev => prev ? { ...prev, username } : prev)}
             />
             <LocationField
-              currentLocation={settings?.location ?? null}
+              currentLocation={settings.location}
               accessToken={session!.access_token}
               onSaved={(location) => setSettings(prev => prev ? { ...prev, location } : prev)}
             />
           </section>
+          )}
 
           {/* Public profile section */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
@@ -231,24 +261,28 @@ export function SettingsPage() {
 
           {/* Email section (UNS-212). Sits directly above the password fields, per the
               issue. Pending-change display lives inside the form so it refreshes in place. */}
+          {settings && (
           <section id="email-change" className="scroll-mt-24 p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Email</h2>
             <EmailChangeForm
               accessToken={session!.access_token}
-              currentEmail={settings?.email ?? ''}
+              currentEmail={settings.email}
               pendingEmail={pendingEmailChange}
               onPendingChange={setPendingEmailChange}
             />
           </section>
+          )}
 
           {/* Password section */}
+          {settings && (
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
             <h2 className="text-lg font-semibold">Password</h2>
             <PasswordChangeForm
               accessToken={session!.access_token}
-              hasPassword={!!settings?.hasPassword}
+              hasPassword={settings.hasPassword}
             />
           </section>
+          )}
         </div>
       </main>
 

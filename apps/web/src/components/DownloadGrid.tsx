@@ -1,6 +1,7 @@
 import React from 'react';
 import { analytics } from '../services/analytics';
 import { usePWA } from '../hooks/usePWA';
+import { Dialog } from './Dialog';
 
 export function DownloadGrid() {
   const {
@@ -15,6 +16,7 @@ export function DownloadGrid() {
     handleInstallClick,
     handleIOSInstallClick,
   } = usePWA();
+  const iosTitleId = React.useId();
 
   if (isStandalone) return null;
 
@@ -222,7 +224,7 @@ export function DownloadGrid() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-md mx-auto items-stretch">
         {buttons.map((btn) => {
-          const className = `flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${btn.bg} text-white ${btn.hoverBg} transition-colors font-medium shadow-lg ${btn.shadow} whitespace-nowrap`;
+          const className = `flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${btn.bg} text-accent-foreground ${btn.hoverBg} transition-colors font-medium shadow-lg ${btn.shadow} whitespace-nowrap`;
 
           if (btn.onClick) {
             return (
@@ -264,7 +266,7 @@ export function DownloadGrid() {
           Also available for{' '}
           <a
             href="https://github.com/brandonlucasgreen/unstream/releases/latest"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownload()}
           >
             macOS
@@ -274,7 +276,7 @@ export function DownloadGrid() {
             href="https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownloadChrome()}
           >
             Chrome
@@ -284,7 +286,7 @@ export function DownloadGrid() {
             href="https://addons.mozilla.org/en-US/firefox/addon/unstream/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent-primary hover:underline"
+            className="text-link hover:underline"
             onClick={() => analytics.trackDownloadFirefox()}
           >
             Firefox
@@ -292,17 +294,12 @@ export function DownloadGrid() {
         </p>
       )}
 
-      {/* iOS "Add to Home Screen" overlay */}
+      {/* iOS "Add to Home Screen" instructions */}
       {showIOSOverlay && (
-        <div
-          className="fixed inset-0 bg-black/70 z-50 flex items-end justify-center pb-8 px-4"
-          onClick={() => setShowIOSOverlay(false)}
-        >
-          <div
-            className="bg-bg-secondary rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-bold text-text-primary mb-3">Add Unstream to your Home Screen</h3>
+        <Dialog labelledBy={iosTitleId} onClose={() => setShowIOSOverlay(false)}>
+          {close => (
+          <div className="p-6">
+            <h3 id={iosTitleId} className="text-lg font-bold text-text-primary mb-3">Add Unstream to your Home Screen</h3>
             <ol className="text-text-secondary space-y-2 mb-4">
               <li className="flex items-start gap-2">
                 <span className="text-accent-secondary font-bold">1.</span>
@@ -319,12 +316,13 @@ export function DownloadGrid() {
             </ol>
             <button
               className="w-full py-3 rounded-xl bg-accent-secondary text-white font-medium hover:opacity-90 transition-opacity"
-              onClick={() => setShowIOSOverlay(false)}
+              onClick={close}
             >
               Got it
             </button>
           </div>
-        </div>
+          )}
+        </Dialog>
       )}
     </>
   );

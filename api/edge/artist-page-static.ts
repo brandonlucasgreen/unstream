@@ -916,7 +916,9 @@ export default async function handler(request: Request, context: Context) {
       ${releasesHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">
         <p style="font-size:16px;color:var(--muted)">Are you ${artistName}?</p>
-        <a href="/claim?slug=${escapeHtml(slug)}" class="claim-cta">Claim this profile</a>
+        <!-- The SPA route is /claim/:slug; /claim?slug=… matches no route and renders
+             the not-found page. -->
+        <a href="/claim/${escapeHtml(slug)}" class="claim-cta">Claim this profile</a>
       </div>
     </div>
   </div>

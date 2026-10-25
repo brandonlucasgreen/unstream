@@ -219,6 +219,24 @@ describe('applyPendingOrder', () => {
   const b = { id: 'b' };
   const c = { id: 'c' };
 
+  // Audit 2026-10-25 #7: a failed load used to show its error *and* "No releases catalogued yet"
+  // with the add-release controls, a claim about a catalogue the page never received.
+  it('shows a retry, not an empty catalogue, when the releases fail to load', async () => {
+    mockFetch.mockReset();
+    mockFetch
+      .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({ error: 'Database unavailable' }) })
+      .mockResolvedValue({ ok: true, json: async () => ({ releases: [releaseItem()] }) });
+    renderPage();
+
+    const retry = await screen.findByRole('button', { name: /try loading your releases again/i });
+    expect(screen.getByText('Database unavailable')).toBeTruthy();
+    expect(screen.queryByText('No releases catalogued yet.')).toBeNull();
+    expect(screen.queryByText('+ Add a release we missed')).toBeNull();
+
+    fireEvent.click(retry);
+    await waitFor(() => expect(screen.getByText('Ruined Castle')).toBeTruthy());
+  });
+
   it('leaves the server order alone when nothing is pending', () => {
     expect(applyPendingOrder([a, b, c], null)).toEqual([a, b, c]);
   });

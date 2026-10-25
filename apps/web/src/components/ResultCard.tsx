@@ -15,6 +15,7 @@ import {
   categorizePlatforms,
   allKnownSourceIds,
   getReleaseInfo,
+  getDisplayPlatforms,
 } from './ResultCardUtils';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -112,10 +113,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
     platformsWithRelease,
     canPlay,
     previewUrl,
-    verifiedPlatforms,
   } = getReleaseInfo(result);
 
-  const categorized = categorizePlatforms(verifiedPlatforms, allKnownSourceIds);
+  const categorized = categorizePlatforms(getDisplayPlatforms(result), allKnownSourceIds);
 
   const hasRelease = !!latestRelease && platformsWithRelease.length > 0;
 
@@ -145,7 +145,7 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
               all, which is not a warning about this result and, for a
               MusicBrainz-only card, has no "other results" to compare with. */}
           {result.matchConfidence === 'unverified' && result.unverifiedReason === 'conflicting-releases' && (
-            <div className="flex items-start gap-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-yellow-600 text-xs">
+            <div className="flex items-start gap-2 p-2 rounded bg-yellow-500/5 border border-yellow-500/20 text-warning text-xs">
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -238,8 +238,9 @@ export function ResultCard({ result, isAdmin, isSelected, onToggleSelect, onLink
 
       {showLoginInterstitial && (
         <LoginInterstitial
-          artistId={result.claimedSlug || result.id}
+          artistId={saveKey}
           artistName={result.name}
+          artistImageUrl={result.imageUrl}
           onClose={() => setShowLoginInterstitial(false)}
         />
       )}

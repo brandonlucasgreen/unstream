@@ -58,8 +58,17 @@
   "results": {
     "clear": "Clear"
   },
+  "action": {
+    "retry": "Try again"
+  },
   "error": {
-    "searchFailed": "Failed to search. Please try again.",
+    "searchFailed": "The search didn't go through. Please try again.",
+    "searchOffline": "You seem to be offline. Reconnect, then try again.",
+    "searchRateLimited": "That's a lot of searches in a short time. Wait a minute, then try again.",
+    "searchIncomplete": "We couldn't finish this search, so we can't say whether this artist is here. Please try again.",
+    "searchPartial": "Part of this search didn't go through, so these results may be incomplete.",
+    "searchPartialStored": "The platform search didn't go through. These are the artists Unstream already knows; there may be more.",
+    "enrichmentFailed": "Some sources didn't load, so these results may be missing links.",
     "resolveLinkFailed": "Failed to resolve link. Try searching manually.",
     "resolveLinkNotFound": "Could not find artist from that link. Try searching manually."
   },

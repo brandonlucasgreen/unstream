@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Dialog } from './Dialog';
 
 export type NavItem = {
   to: string;
@@ -37,9 +38,11 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
  * desktop header renders the same items inline, so all of this is hidden from
  * `sm` up.
  *
- * The drawer stays mounted and animates via transforms so it slides both open
- * and shut. `inert` keeps the closed panel out of the tab order and the
- * accessibility tree, which conditional rendering would otherwise handle.
+ * Built on Dialog's drawer variant, a modal <dialog>: the page behind is inert
+ * (the old overlay left it keyboard-focusable), Tab stays in the drawer, and
+ * every way out — the close button, Escape, the backdrop, a link — goes through
+ * one close that returns focus to the hamburger. The old Escape handler skipped
+ * that. It slides in; it closes without sliding out (see Dialog for why).
  */
 export function MobileNav({
   items,
@@ -55,35 +58,15 @@ export function MobileNav({
   const closeRef = useRef<HTMLButtonElement>(null);
   const { t } = useTranslation();
 
+  // Widening past `sm` while open would leave a modal drawer over a desktop header that no longer
+  // shows the hamburger to close it; close it instead.
   useEffect(() => {
     if (!open) return;
-
-    // Move focus into the drawer, and lock the page behind it so the content
-    // doesn't scroll under the overlay.
-    //
-    // preventScroll is load-bearing: the panel is still transformed off-screen
-    // when this runs, so a scrolling focus makes the browser scroll the clipped
-    // overlay sideways to reveal the button. That snaps the panel into place and
-    // drags the overlay's contents with it, fighting the slide-in animation.
-    closeRef.current?.focus({ preventScroll: true });
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    const wide = window.matchMedia('(min-width: 640px)');
+    const handleChange = () => { if (wide.matches) setOpen(false); };
+    wide.addEventListener('change', handleChange);
+    return () => wide.removeEventListener('change', handleChange);
   }, [open]);
-
-  function close() {
-    setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
-  }
 
   return (
     <>
@@ -94,31 +77,28 @@ export function MobileNav({
         className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors sm:hidden"
         aria-label={t('nav.openMenu')}
         aria-expanded={open}
-        aria-controls="mobile-nav"
+        aria-controls={open ? 'mobile-nav' : undefined}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
 
-      <div
-        className={`fixed inset-0 z-50 overflow-hidden sm:hidden ${open ? '' : 'pointer-events-none'}`}
-        inert={!open}
+      {open && (
+      <Dialog
+        variant="drawer"
+        labelledBy="mobile-nav-title"
+        onClose={() => setOpen(false)}
+        initialFocusRef={closeRef}
+        returnFocusRef={triggerRef}
       >
-        <div
-          onClick={close}
-          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-250 motion-reduce:transition-none ${
-            open ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-
+        {close => (
         <nav
           id="mobile-nav"
           aria-label={t('nav.mainMenu')}
-          className={`absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-border bg-bg-primary shadow-2xl transition-transform duration-250 ease-out motion-reduce:transition-none ${
-            open ? 'translate-x-0' : 'translate-x-full'
-          }`}
+          className="flex h-full flex-col"
         >
+          <h2 id="mobile-nav-title" className="sr-only">{t('nav.mainMenu')}</h2>
           {/* Close button sits where the hamburger was, so the drawer reads as
               opening out of the header rather than landing on top of it. */}
           <div className="flex items-center justify-end p-4">
@@ -146,7 +126,7 @@ export function MobileNav({
             {items.map(entry => isNavGroup(entry) ? (
               <div key={entry.label} className="border-b border-border">
                 <p className={`px-6 pt-4 pb-1 text-xs font-medium uppercase tracking-wider ${
-                  entry.emphasis ? 'text-accent-primary' : 'text-text-muted'
+                  entry.emphasis ? 'text-link' : 'text-text-muted'
                 }`}>
                   {entry.label}
                 </p>
@@ -156,7 +136,7 @@ export function MobileNav({
                     to={item.to}
                     onClick={close}
                     className={`block px-6 py-3 text-base hover:bg-bg-hover transition-colors ${
-                      item.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                      item.emphasis ? 'text-link font-medium' : 'text-text-primary'
                     }`}
                   >
                     {item.label}
@@ -171,7 +151,7 @@ export function MobileNav({
                 rel="noopener noreferrer"
                 onClick={close}
                 className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
-                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                  entry.emphasis ? 'text-link font-medium' : 'text-text-primary'
                 }`}
               >
                 {entry.label}
@@ -182,7 +162,7 @@ export function MobileNav({
                 to={entry.to}
                 onClick={close}
                 className={`border-b border-border px-6 py-4 text-base hover:bg-bg-hover transition-colors ${
-                  entry.emphasis ? 'text-accent-primary font-medium' : 'text-text-primary'
+                  entry.emphasis ? 'text-link font-medium' : 'text-text-primary'
                 }`}
               >
                 {entry.label}
@@ -203,7 +183,9 @@ export function MobileNav({
             </button>
           )}
         </nav>
-      </div>
+        )}
+      </Dialog>
+      )}
     </>
   );
 }
