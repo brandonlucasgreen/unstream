@@ -127,9 +127,9 @@
         <!-- Manual Search -->
         <section id="search-section" class="section">
           <div class="search-box">
-            <input type="text" id="search-input" placeholder="Search for an artist..." />
-            <button id="search-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <input type="text" id="search-input" placeholder="Search for an artist..." aria-label="Search for an artist" />
+            <button id="search-btn" aria-label="Search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -144,8 +144,8 @@
         <section id="auth-section" class="section hidden">
           <h2 class="section-title">Log in to sync your saved artists</h2>
           <form id="auth-form" class="auth-form">
-            <input type="email" id="auth-email" class="auth-input" placeholder="Email" required autocomplete="email">
-            <input type="password" id="auth-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+            <input type="email" id="auth-email" class="auth-input" placeholder="Email" aria-label="Email" required autocomplete="email">
+            <input type="password" id="auth-password" class="auth-input" placeholder="Password" aria-label="Password" autocomplete="current-password">
             <button type="submit" id="auth-submit" class="auth-submit">Sign in</button>
             <div id="auth-error" class="auth-error hidden"></div>
           </form>

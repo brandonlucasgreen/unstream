@@ -628,6 +628,7 @@ function ReleaseCard({
             <button
               onClick={onDismiss}
               disabled={busy(`dismiss-${release.id}`)}
+              aria-label={`Not a duplicate: ${release.title}`}
               className="px-3 py-1 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors disabled:opacity-50"
             >
               {busy(`dismiss-${release.id}`) ? 'Working...' : 'Not a duplicate'}
@@ -635,6 +636,7 @@ function ReleaseCard({
             <button
               onClick={() => onMerge(release.id, release.flaggedAgainst!.id)}
               disabled={busy(`merge-${release.id}`)}
+              aria-label={`Merge ${release.flaggedAgainst.title} into ${release.title}`}
               className="px-3 py-1 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition-colors disabled:opacity-50"
             >
               {busy(`merge-${release.id}`) ? 'Merging...' : 'Same release — keep this one'}
@@ -647,12 +649,14 @@ function ReleaseCard({
         <button
           onClick={onHide}
           disabled={busy(`hide-${release.id}`)}
+          aria-label={release.isHidden ? `Unhide ${release.title}` : `Hide ${release.title}`}
           className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors disabled:opacity-50"
         >
           {busy(`hide-${release.id}`) ? 'Working...' : release.isHidden ? 'Unhide' : 'Hide'}
         </button>
         <button
           onClick={onToggleEdit}
+          aria-label={editing ? `Cancel editing ${release.title}` : `Edit ${release.title}`}
           className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors"
         >
           {editing ? 'Cancel' : 'Edit / add link'}
@@ -714,22 +718,25 @@ function EditReleaseForm({
   return (
     <div className="pt-3 border-t border-border space-y-4">
       <div className="space-y-2">
-        <label className="block text-xs font-medium text-text-muted">Title</label>
+        <label htmlFor={`edit-title-${release.id}`} className="block text-xs font-medium text-text-muted">Title</label>
         <input
+          id={`edit-title-${release.id}`}
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
           className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         />
-        <label className="block text-xs font-medium text-text-muted">Release date</label>
+        <label htmlFor={`edit-date-${release.id}`} className="block text-xs font-medium text-text-muted">Release date</label>
         <input
+          id={`edit-date-${release.id}`}
           type="date"
           value={releaseDate}
           onChange={e => setReleaseDate(e.target.value)}
           className="w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         />
-        <label className="block text-xs font-medium text-text-muted">Artwork URL</label>
+        <label htmlFor={`edit-artwork-${release.id}`} className="block text-xs font-medium text-text-muted">Artwork URL</label>
         <input
+          id={`edit-artwork-${release.id}`}
           type="text"
           value={artworkUrl}
           onChange={e => setArtworkUrl(e.target.value)}
@@ -745,6 +752,7 @@ function EditReleaseForm({
             })
           }
           disabled={busy}
+          aria-label={`Save changes to ${release.title}`}
           className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-500 transition-colors disabled:opacity-50"
         >
           {busy ? 'Saving...' : 'Save changes'}
@@ -752,11 +760,12 @@ function EditReleaseForm({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-xs font-medium text-text-muted">Add a platform link</label>
+        <label htmlFor={`add-link-url-${release.id}`} className="block text-xs font-medium text-text-muted">Add a platform link</label>
         <div className="flex flex-wrap gap-2">
           <select
             value={linkPlatform}
             onChange={e => setLinkPlatform(e.target.value)}
+            aria-label="Platform"
             className="px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
           >
             {PLATFORM_OPTIONS.map(p => (
@@ -766,15 +775,19 @@ function EditReleaseForm({
             ))}
           </select>
           <input
+            id={`add-link-url-${release.id}`}
             type="text"
             value={linkUrl}
             onChange={e => setLinkUrl(e.target.value)}
             placeholder="https://..."
+            aria-invalid={linkStatus && !linkStatus.ok ? true : undefined}
+            aria-describedby={linkStatus ? `add-link-status-${release.id}` : undefined}
             className="flex-1 min-w-[160px] px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
           />
           <button
             onClick={handleAddLink}
             disabled={linkBusy || !linkUrl.trim()}
+            aria-label={`Add link to ${release.title}`}
             className="px-3 py-1.5 rounded-lg bg-bg-secondary border border-border text-text-primary text-xs font-medium hover:bg-bg-hover transition-colors disabled:opacity-50"
           >
             {linkBusy ? 'Adding...' : 'Add link'}
@@ -784,7 +797,7 @@ function EditReleaseForm({
             release list, which on a real catalogue is far off-screen from the form being used —
             so a rejected link looked exactly like a button that did nothing. */}
         {linkStatus && (
-          <p className={`text-xs ${linkStatus.ok ? 'text-green-500' : 'text-red-400'}`}>{linkStatus.message}</p>
+          <p id={`add-link-status-${release.id}`} className={`text-xs ${linkStatus.ok ? 'text-green-500' : 'text-red-400'}`}>{linkStatus.message}</p>
         )}
       </div>
     </div>
@@ -808,8 +821,9 @@ function AddReleaseForm({
 
   return (
     <div className="p-4 rounded-xl bg-surface border border-border space-y-3">
-      <label className="block text-xs font-medium text-text-muted">Title</label>
+      <label htmlFor="add-release-title" className="block text-xs font-medium text-text-muted">Title</label>
       <input
+        id="add-release-title"
         type="text"
         value={title}
         onChange={e => setTitle(e.target.value)}
@@ -821,6 +835,7 @@ function AddReleaseForm({
         <select
           value={releaseType}
           onChange={e => setReleaseType(e.target.value)}
+          aria-label="Release type"
           className="px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         >
           {RELEASE_TYPES.map(t => (
@@ -833,6 +848,7 @@ function AddReleaseForm({
           type="date"
           value={releaseDate}
           onChange={e => setReleaseDate(e.target.value)}
+          aria-label="Release date"
           className="px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         />
       </div>
@@ -841,6 +857,7 @@ function AddReleaseForm({
         <select
           value={platform}
           onChange={e => setPlatform(e.target.value)}
+          aria-label="Platform"
           className="px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         >
           {PLATFORM_OPTIONS.map(p => (
@@ -854,6 +871,7 @@ function AddReleaseForm({
           value={url}
           onChange={e => setUrl(e.target.value)}
           placeholder="https://..."
+          aria-label="Link URL"
           className="flex-1 min-w-[160px] px-3 py-2 rounded-lg bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary/50"
         />
       </div>

@@ -808,6 +808,7 @@ export function ArtistEditPage() {
                     <button
                       onClick={() => moveLink(index, -1)}
                       disabled={index === 0}
+                      aria-label={`Move link ${index + 1} up`}
                       className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
                       title="Move up"
                     >
@@ -816,6 +817,7 @@ export function ArtistEditPage() {
                     <button
                       onClick={() => moveLink(index, 1)}
                       disabled={index === form.links.length - 1}
+                      aria-label={`Move link ${index + 1} down`}
                       className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
                       title="Move down"
                     >
@@ -837,6 +839,7 @@ export function ArtistEditPage() {
                         value={link.displayName || ''}
                         onChange={e => updateLink(index, 'displayName', e.target.value)}
                         placeholder="Link name"
+                        aria-label={`Link ${index + 1} name`}
                         className="w-28 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary"
                       />
                       <input
@@ -844,6 +847,7 @@ export function ArtistEditPage() {
                         value={link.url}
                         onChange={e => updateLink(index, 'url', e.target.value)}
                         placeholder="https://..."
+                        aria-label={`Link ${index + 1} URL`}
                         className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
                       />
                     </div>
@@ -853,6 +857,7 @@ export function ArtistEditPage() {
                       <select
                         value={link.platform}
                         onChange={e => updateLink(index, 'platform', e.target.value)}
+                        aria-label={`Link ${index + 1} platform`}
                         className="px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary text-sm focus:outline-none focus:border-accent-primary"
                       >
                         {ALL_PLATFORMS.filter(p => p.id !== 'other').map(p => (
@@ -871,6 +876,7 @@ export function ArtistEditPage() {
                         value={link.url}
                         onChange={e => updateLink(index, 'url', e.target.value)}
                         placeholder="https://..."
+                        aria-label={`Link ${index + 1} URL`}
                         className="flex-1 px-2 py-1.5 rounded bg-bg-primary border border-border text-text-primary placeholder-text-muted text-sm focus:outline-none focus:border-accent-primary min-w-0"
                       />
                     </>
@@ -879,6 +885,7 @@ export function ArtistEditPage() {
                   {/* Remove button */}
                   <button
                     onClick={() => removeLink(index)}
+                    aria-label={isDivider ? `Remove divider ${index + 1}` : `Remove link ${index + 1}`}
                     className="text-text-muted hover:text-red-400 transition-colors p-1"
                     title={isDivider ? 'Remove divider' : 'Remove link'}
                   >

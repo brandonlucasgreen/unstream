@@ -148,8 +148,9 @@ export function AdminMergePage() {
 
         {/* Artist name */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Artist Name</label>
+          <label htmlFor="merge-artist-name" className="text-sm font-medium text-text-primary">Artist Name</label>
           <input
+            id="merge-artist-name"
             type="text"
             value={artistName}
             onChange={(e) => setArtistName(e.target.value)}
@@ -159,12 +160,13 @@ export function AdminMergePage() {
 
         {/* Image URL */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Image URL (optional)</label>
+          <label htmlFor="merge-image-url" className="text-sm font-medium text-text-primary">Image URL (optional)</label>
           <div className="flex gap-3 items-center">
             {imageUrl && (
               <img src={imageUrl} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" />
             )}
             <input
+              id="merge-image-url"
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
@@ -174,14 +176,16 @@ export function AdminMergePage() {
           </div>
         </div>
 
-        {/* Platform links */}
+        {/* Platform links — the heading names the group; each row's controls are
+            labelled with their own platform so they read apart from the rest. */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">
+          <p className="text-sm font-medium text-text-primary">
             Platform Links ({includedLinks.length} included, {excludedLinks.length} excluded)
-          </label>
+          </p>
           <div className="space-y-2">
             {links.map((link) => {
               const source = sources[link.sourceId as keyof typeof sources];
+              const platformName = source?.name || link.sourceId;
               return (
                 <div
                   key={link.id}
@@ -195,22 +199,25 @@ export function AdminMergePage() {
                     type="checkbox"
                     checked={link.included}
                     onChange={() => toggleLink(link.id)}
+                    aria-label={`Include ${platformName} link`}
                     className="w-4 h-4 rounded border-border text-accent-primary focus:ring-accent-primary/50 cursor-pointer flex-shrink-0"
                   />
                   <span
                     className="text-sm font-medium flex-shrink-0 w-24"
                     style={{ color: source?.color }}
                   >
-                    {source?.icon} {source?.name || link.sourceId}
+                    {source?.icon} {platformName}
                   </span>
                   <input
                     type="text"
                     value={link.url}
                     onChange={(e) => updateLinkUrl(link.id, e.target.value)}
+                    aria-label={`${platformName} URL`}
                     className="flex-1 px-2 py-1 rounded bg-bg-secondary border border-border/50 text-text-primary text-sm focus:outline-none focus:ring-1 focus:ring-accent-primary/50"
                   />
                   <button
                     onClick={() => removeLink(link.id)}
+                    aria-label={`Remove ${platformName} link`}
                     className="text-text-muted hover:text-red-400 transition-colors flex-shrink-0"
                     title="Remove link"
                   >
@@ -226,8 +233,9 @@ export function AdminMergePage() {
 
         {/* Notes */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Notes (optional)</label>
+          <label htmlFor="merge-notes" className="text-sm font-medium text-text-primary">Notes (optional)</label>
           <textarea
+            id="merge-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Reason for this merge..."

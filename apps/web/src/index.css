@@ -15,9 +15,27 @@
   --color-accent-secondary: #4ecdc4;
   --color-accent-tertiary: #ffe66d;
 
+  /* Text set on an accent fill. Both theme accents are mid-luminance oranges,
+     so white never cleared WCAG AA on them (2.84:1 dark, 3.60:1 light) — dark
+     ink does (audit 2026-10-25 #8). */
+  --color-accent-foreground: #160b05;
+
+  /* Text links on page and card backgrounds. The dark theme keeps the accent
+     orange (6.6:1 on #121212); the light theme needs a darker orange, since the
+     accent fill color manages only 3.45:1 on #fafafa. */
+  --color-link: #ff6b35;
+
+  /* Status text colors, per theme. The dark values already cleared AA on the
+     dark backgrounds; the light theme was reading Tailwind's 400-weight
+     defaults at roughly 1.7:1 (success), 1.8:1 (warning) and 2.7:1 (error). */
+  --color-success: #22c55e;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+
   --color-text-primary: #f0f0f0;
   --color-text-secondary: #999999;
-  --color-text-muted: #808080;
+  /* #808080 read at 4.41:1 on the #1a1a1a card surface — a shade under AA. */
+  --color-text-muted: #8a8a8a;
 
   --color-border: #2a2a2a;
   --color-border-hover: #3a3a3a;
@@ -63,8 +81,14 @@
     --color-border: #e0e0e0;
     --color-border-hover: #d0d0d0;
     --color-accent-primary: #e55a2b;
-    --color-accent-secondary: #3bb5ac;
+    /* #3bb5ac read at 2.50:1 as text on white; the darker teal clears AA both
+       as text and behind white button labels. */
+    --color-accent-secondary: #16695f;
     --color-accent-tertiary: #b8910a;
+    --color-link: #c2410c;
+    --color-success: #166534;
+    --color-warning: #92400e;
+    --color-error: #b91c1c;
     --color-surface: #f8f8f8;
     --color-surface-secondary: #f0f0f0;
 
@@ -294,15 +318,20 @@
 
   /* Custom tooltip for AI policy badges */
   /* Bandcamp Friday badge */
-  .bandcamp-friday-payout {
-    color: #1da0c3;
-  }
-
   .bandcamp-friday-label {
     font-size: 12px;
     font-weight: 700;
     color: #1da0c3;
     animation: bc-friday-pulse 2s ease-in-out infinite;
+  }
+
+  /* #1da0c3 reads at ~2.7:1 on the light theme's white cards, so the Friday
+     label switches to a darker cyan there (audit 2026-10-25 #8). The payout
+     chip's color is set inline against its own composited background. */
+  @media (prefers-color-scheme: light) {
+    .bandcamp-friday-label {
+      color: #0e7490;
+    }
   }
 
   @keyframes bc-friday-pulse {
