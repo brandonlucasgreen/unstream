@@ -16,6 +16,9 @@ import {
   releaseNotificationTitle,
   selectUnseenReleases,
   sinceDaysForCheck,
+  lastSuccessfulCheckFor,
+  isTransientCheckFailure,
+  summarizeCheck,
 } from '../lib/release-alerts.js';
 
 const API_BASE = 'https://unstream.stream/api';
@@ -587,19 +590,18 @@ async function checkForNewReleases() {
   const artistNames = Object.keys(savedArtistsData);
 
   if (artistNames.length === 0) {
-    return { checked: true, newCount: 0 };
+    return { checked: true, newCount: 0, outcome: summarizeCheck(0, 0) };
   }
 
   // Get current state
   const { releaseCheckState = { knownReleases: {}, newReleases: [] } } = await chrome.storage.local.get('releaseCheckState');
   if (!releaseCheckState.knownReleases) releaseCheckState.knownReleases = {};
 
-  // How far back to ask. Left unsent, the server looks back 31 days, so a browser that was closed
-  // for six weeks came back, found nothing older than that, and recorded a fresh check date —
-  // losing the gap permanently.
-  const sinceDays = sinceDaysForCheck(releaseCheckState.lastCheckDate);
+  if (!releaseCheckState.artistLastChecked) releaseCheckState.artistLastChecked = {};
 
+  const checkStartedAt = Date.now();
   const foundNewReleases = [];
+  let failedCount = 0;
 
   for (const artistName of artistNames) {
     const artistData = savedArtistsData[artistName];
@@ -617,9 +619,16 @@ async function checkForNewReleases() {
       if (p && p.sourceId && p.url) platforms[p.sourceId] = p.url;
     }
 
+    // How far back to ask, from this artist's last *successful* check. Left unsent, the server
+    // looks back 31 days, so a browser that was closed for six weeks came back, found nothing
+    // older than that, and recorded a fresh check date — losing the gap permanently. Per artist,
+    // because a check that failed for one artist must not narrow the next window for them.
+    const sinceDays = sinceDaysForCheck(lastSuccessfulCheckFor(releaseCheckState, artistName));
+
     // Call release check API
     try {
       const result = await checkReleaseAPI(artistName, platforms, sinceDays);
+      releaseCheckState.artistLastChecked[artistName] = checkStartedAt;
 
       // Every release in the window, not just the newest — an artist who put out two records
       // since the last check produces two alerts. selectUnseenReleases marks each one known as
@@ -628,8 +637,14 @@ async function checkForNewReleases() {
         ...selectUnseenReleases(releasesFromResponse(result), artistName, releaseCheckState.knownReleases)
       );
     } catch (error) {
+      failedCount++;
       console.error(`Release check failed for ${artistName}:`, error);
     }
+  }
+
+  // Forget artists no longer saved, so a re-save starts from the server's default window.
+  for (const name of Object.keys(releaseCheckState.artistLastChecked)) {
+    if (!(name in savedArtistsData)) delete releaseCheckState.artistLastChecked[name];
   }
 
   // Update state with new releases
@@ -645,14 +660,17 @@ async function checkForNewReleases() {
     }
   }
 
-  // Update last check date
-  releaseCheckState.lastCheckDate = Date.now();
+  // The check-wide date moves only on a complete check: it decides whether startup re-checks
+  // (more than a week old), and a failed or partial check is exactly when that should happen.
+  const outcome = summarizeCheck(artistNames.length, failedCount, checkStartedAt);
+  releaseCheckState.lastCheckOutcome = outcome;
+  if (outcome.status === 'complete') releaseCheckState.lastCheckDate = checkStartedAt;
   await chrome.storage.local.set({ releaseCheckState });
 
   // Schedule next check
   scheduleNextReleaseCheck();
 
-  return { checked: true, newCount: foundNewReleases.length };
+  return { checked: outcome.status !== 'failed', newCount: foundNewReleases.length, outcome };
 }
 
 // Call the release check API
@@ -666,6 +684,9 @@ async function checkReleaseAPI(artistName, platforms, sinceDays) {
   });
 
   if (!response.ok) {
+    // A 400 is the server's answer for an artist it has nothing to check; anything transient
+    // is a failure the caller counts, so it never reads as "no new releases".
+    if (!isTransientCheckFailure(response.status)) return null;
     throw new Error(`API error: ${response.status}`);
   }
 

@@ -13,9 +13,23 @@ struct ReleasesTab: View {
                             .font(.system(size: 48))
                             .foregroundColor(.secondary.opacity(0.5))
 
-                        Text("No new releases")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
+                        if let problem = releaseAlertManager.lastCheckOutcome?.problemDescription,
+                           releaseAlertManager.releaseAlertsEnabled {
+                            // Never a bare "No new releases" after a check that didn't reach everyone.
+                            Text(problem)
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                            Button("Retry") {
+                                Task { await releaseAlertManager.checkNow() }
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(releaseAlertManager.isChecking)
+                        } else {
+                            Text("No new releases")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                        }
 
                         if releaseAlertManager.releaseAlertsEnabled {
                             Text("We check your saved artists weekly.\nNew releases will appear here.")

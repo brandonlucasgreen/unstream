@@ -18,6 +18,9 @@ import {
   releaseNotificationTitle,
   releaseSummaryLine,
   releasesFromResponse,
+  summarizeCheck,
+  isTransientCheckFailure,
+  lastSuccessfulCheckFor,
   selectUnseenReleases,
   sinceDaysForCheck,
   MIN_SINCE_DAYS,
@@ -261,5 +264,27 @@ describe('sinceDaysForCheck', () => {
   it('falls back to the default on a first run or a nonsense timestamp', () => {
     expect(sinceDaysForCheck(undefined, now)).toBe(MIN_SINCE_DAYS);
     expect(sinceDaysForCheck(now + 5 * DAY, now)).toBe(MIN_SINCE_DAYS);
+  });
+});
+
+// Audit 2026-10-25 #4: a failure is never a successful check.
+describe('check outcomes', () => {
+  it('is complete, partial or failed by how many artists answered', () => {
+    expect(summarizeCheck(3, 0).status).toBe('complete');
+    expect(summarizeCheck(3, 1).status).toBe('partial');
+    expect(summarizeCheck(3, 3).status).toBe('failed');
+  });
+
+  it('counts a 400 as an answer and a 429, 5xx or no response as a failure', () => {
+    expect(isTransientCheckFailure(400)).toBe(false);
+    expect(isTransientCheckFailure(429)).toBe(true);
+    expect(isTransientCheckFailure(503)).toBe(true);
+    expect(isTransientCheckFailure(undefined)).toBe(true);
+  });
+
+  it('prefers an artist\'s own last successful check over the check-wide date', () => {
+    const state = { lastCheckDate: 1, artistLastChecked: { A: 5 } };
+    expect(lastSuccessfulCheckFor(state, 'A')).toBe(5);
+    expect(lastSuccessfulCheckFor(state, 'B')).toBe(1);
   });
 });

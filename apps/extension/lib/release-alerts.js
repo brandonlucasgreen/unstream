@@ -41,6 +41,36 @@ export function sinceDaysForCheck(lastCheckDate, now = Date.now()) {
 }
 
 /**
+ * When this artist was last checked *successfully*: their own record, else the check-wide date
+ * from before per-artist records existed. A failed check never moves either, so the next check
+ * asks for the whole window the failure missed rather than starting fresh from the failure.
+ */
+export function lastSuccessfulCheckFor(state, artistName) {
+  return state.artistLastChecked?.[artistName] ?? state.lastCheckDate;
+}
+
+/**
+ * Whether a check-releases response means "the server didn't answer" (try again later) rather
+ * than an answer. A 400 is an answer — it is what the server returns for an artist it can
+ * neither find in the catalogue nor scrape — so it counts as checked with nothing new. A 429,
+ * a 5xx, or no response at all is not.
+ */
+export function isTransientCheckFailure(status) {
+  return status === undefined || status === 408 || status === 429 || status >= 500;
+}
+
+/**
+ * The outcome of one check run: `complete` when every artist was checked, `partial` when some
+ * were, `failed` when none were. Stored so the popup can say so until the next check, instead
+ * of a transient "No new releases" that hid every failure.
+ */
+export function summarizeCheck(total, failedCount, at = Date.now()) {
+  let status = 'complete';
+  if (failedCount > 0) status = failedCount >= total ? 'failed' : 'partial';
+  return { status, total, failedCount, at };
+}
+
+/**
  * Every release the server reported, from either of its two shapes.
  *
  * `releases` is what the catalog path returns and is the one to read: it holds an artist's second

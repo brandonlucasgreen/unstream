@@ -139,10 +139,53 @@ struct KnownRelease: Codable, Hashable {
 }
 
 /// Persisted state for release checking
+/// How the last release check went. A failed check used to look exactly like a check that found
+/// nothing — and moved `lastCheckDate` forward, narrowing the next window past what it missed.
+struct ReleaseCheckOutcome: Codable, Equatable {
+    enum Status: String, Codable { case complete, partial, failed }
+
+    private(set) var status: Status
+    let total: Int
+    let failedCount: Int
+    let date: Date
+
+    init(total: Int, failedCount: Int, date: Date = Date()) {
+        self.total = total
+        self.failedCount = failedCount
+        self.date = date
+        if failedCount == 0 {
+            status = .complete
+        } else {
+            status = failedCount >= total ? .failed : .partial
+        }
+    }
+
+    /// A check that couldn't even learn who to check (the account's saved list didn't load).
+    static func unreachable(date: Date = Date()) -> ReleaseCheckOutcome {
+        var outcome = ReleaseCheckOutcome(total: 0, failedCount: 0, date: date)
+        outcome.status = .failed
+        return outcome
+    }
+
+    /// What to tell the fan, or nil when the check reached everyone.
+    var problemDescription: String? {
+        switch status {
+        case .complete: return nil
+        case .failed: return "The last check couldn't reach Unstream, so new releases may be missing."
+        case .partial: return "The last check reached \(total - failedCount) of \(total) artists."
+        }
+    }
+}
+
 struct ReleaseCheckState: Codable {
+    /// When the last *complete* check ran. Decides whether launch re-checks (a week old or more).
     var lastCheckDate: Date?
     var knownReleases: [String: [KnownRelease]]  // artistName (lowercased) -> releases
     var newReleases: [NewRelease]
+    /// Each artist's last successful check (artistName lowercased), so a check that failed for one
+    /// artist asks for that artist's whole missed window next time. Optional for older saved state.
+    var artistLastChecked: [String: Date]?
+    var lastCheckOutcome: ReleaseCheckOutcome?
 
     init() {
         self.lastCheckDate = nil

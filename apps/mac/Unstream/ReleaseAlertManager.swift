@@ -9,6 +9,7 @@ class ReleaseAlertManager: ObservableObject {
     @Published private(set) var newReleases: [NewRelease] = []
     @Published private(set) var isChecking: Bool = false
     @Published private(set) var lastCheckDate: Date?
+    @Published private(set) var lastCheckOutcome: ReleaseCheckOutcome?
 
     // MARK: - Private Properties
 
@@ -51,6 +52,7 @@ class ReleaseAlertManager: ObservableObject {
         let dismissedIds = loadDismissedIds()
         self.newReleases = checkState.newReleases.filter { $0.isActive && !dismissedIds.contains($0.id) }
         self.lastCheckDate = checkState.lastCheckDate
+        self.lastCheckOutcome = checkState.lastCheckOutcome
 
         setupDismissedIdSync()
         setupScheduling()
@@ -194,36 +196,66 @@ class ReleaseAlertManager: ObservableObject {
               releaseAlertsEnabled else { return }
 
         isChecking = true
+        let checkStartedAt = Date()
+        var failedCount = 0
+        var targets: [CheckTarget] = []
+        var listUnavailable = false
+        // Only a complete check moves `lastCheckDate`; a failed or partial one leaves it, so the
+        // launch-time "a week since the last check" retry still fires and no window narrows past
+        // what a failure missed. The outcome is kept for the UI until the next check.
         defer {
             isChecking = false
-            checkState.lastCheckDate = Date()
-            lastCheckDate = checkState.lastCheckDate
+            let outcome = listUnavailable
+                ? ReleaseCheckOutcome.unreachable(date: checkStartedAt)
+                : ReleaseCheckOutcome(total: targets.count, failedCount: failedCount, date: checkStartedAt)
+            checkState.lastCheckOutcome = outcome
+            lastCheckOutcome = outcome
+            if outcome.status == .complete {
+                checkState.lastCheckDate = checkStartedAt
+                lastCheckDate = checkStartedAt
+            }
             saveState()
             scheduleNextFriday9am()
         }
 
         // Signed in, the account's saved list is the one to check (see SavedArtistsRouter);
-        // pulled first, because it starts empty on every launch.
+        // pulled first, because it starts empty on every launch. A pull that fails is a failed
+        // check — checking nobody and reporting "nothing new" is the bug this guards against.
         var syncedArtists: [SyncedArtist]? = nil
         if AuthService.shared.isSignedIn {
-            await SavedArtistsSync.shared.pull()
+            guard await SavedArtistsSync.shared.pull() else {
+                listUnavailable = true
+                return
+            }
             syncedArtists = SavedArtistsSync.shared.syncedArtists
         }
-        let targets = Self.checkTargets(syncedArtists: syncedArtists, localEntries: supportListManager.entries)
+        targets = Self.checkTargets(syncedArtists: syncedArtists, localEntries: supportListManager.entries)
         var foundNewReleases: [NewRelease] = []
-
-        // Asked once, before the loop, because the `defer` above moves `lastCheckDate` to now.
-        let sinceDays = Self.lookbackDays(since: checkState.lastCheckDate)
+        var artistLastChecked = checkState.artistLastChecked ?? [:]
 
         for target in targets {
+            let key = target.artistName.lowercased()
+            // From this artist's last *successful* check, falling back to the check-wide date
+            // from before per-artist dates existed.
+            let sinceDays = Self.lookbackDays(since: artistLastChecked[key] ?? checkState.lastCheckDate)
+
             // The server returns every release in the window, not just the newest, so an artist
             // who put out two records since the last check produces two alerts.
-            foundNewReleases.append(contentsOf: await checkViaAPI(
+            if let found = await checkViaAPI(
                 artistName: target.artistName,
                 platforms: target.platforms,
                 sinceDays: sinceDays
-            ))
+            ) {
+                artistLastChecked[key] = checkStartedAt
+                foundNewReleases.append(contentsOf: found)
+            } else {
+                failedCount += 1
+            }
         }
+
+        // Forget artists no longer saved, so a re-save starts from the server's default window.
+        let savedKeys = Set(targets.map { $0.artistName.lowercased() })
+        checkState.artistLastChecked = artistLastChecked.filter { savedKeys.contains($0.key) }
 
         // Update state with new releases.
         //
@@ -248,11 +280,12 @@ class ReleaseAlertManager: ObservableObject {
     }
 
     /// Ask the server what's new for one artist, and keep only what we haven't seen before.
+    /// Nil when the server didn't answer, so the caller counts a failure instead of "nothing new".
     private func checkViaAPI(
         artistName: String,
         platforms: [String: String],
         sinceDays: Int?
-    ) async -> [NewRelease] {
+    ) async -> [NewRelease]? {
         do {
             let results = try await releaseAPI.checkReleases(
                 artistName: artistName,
@@ -260,10 +293,20 @@ class ReleaseAlertManager: ObservableObject {
                 sinceDays: sinceDays
             )
             return Self.selectUnseen(results, artistName: artistName, state: &checkState)
+        } catch ReleaseCheckAPIError.httpError(let statusCode) where !Self.isTransientCheckFailure(statusCode) {
+            // A 400 is the server's answer for an artist it can neither find in the catalogue
+            // nor scrape: checked, nothing to report.
+            return []
         } catch {
             print("API check failed for \(artistName): \(error)")
-            return []
+            return nil
         }
+    }
+
+    /// A status that means "the server didn't answer" rather than an answer. Mirrors
+    /// `isTransientCheckFailure` in apps/extension/lib/release-alerts.js.
+    nonisolated static func isTransientCheckFailure(_ statusCode: Int) -> Bool {
+        statusCode == 408 || statusCode == 429 || statusCode >= 500
     }
 
     /// One artist to ask the server about.

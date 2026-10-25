@@ -462,4 +462,31 @@ final class ReleaseAlertTests: XCTestCase {
         let targets = ReleaseAlertManager.checkTargets(syncedArtists: nil, localEntries: [local])
         XCTAssertEqual(targets.map(\.artistName), ["Device Only"])
     }
+    // MARK: - Check outcomes (audit 2026-10-25 #4)
+
+    /// A failed check used to be recorded as a successful one that found nothing.
+    func testCheckOutcomeCountsFailures() {
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 0).status, .complete)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 1).status, .partial)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 3).status, .failed)
+        XCTAssertEqual(ReleaseCheckOutcome.unreachable().status, .failed)
+        XCTAssertNil(ReleaseCheckOutcome(total: 3, failedCount: 0).problemDescription)
+        XCTAssertEqual(ReleaseCheckOutcome(total: 3, failedCount: 1).problemDescription,
+                       "The last check reached 2 of 3 artists.")
+    }
+
+    /// Same split as the extension: a 400 is the server's answer, a 429 or 5xx is not.
+    func testOnlyTransientStatusesCountAsFailures() {
+        XCTAssertFalse(ReleaseAlertManager.isTransientCheckFailure(400))
+        XCTAssertTrue(ReleaseAlertManager.isTransientCheckFailure(429))
+        XCTAssertTrue(ReleaseAlertManager.isTransientCheckFailure(503))
+    }
+
+    /// State saved by an older build has no per-artist dates or outcome, and must still load.
+    func testOlderSavedStateStillDecodes() throws {
+        let json = #"{"knownReleases":{},"newReleases":[]}"#.data(using: .utf8)!
+        let state = try JSONDecoder().decode(ReleaseCheckState.self, from: json)
+        XCTAssertNil(state.artistLastChecked)
+        XCTAssertNil(state.lastCheckOutcome)
+    }
 }

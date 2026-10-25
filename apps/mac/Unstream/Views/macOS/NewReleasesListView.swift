@@ -28,12 +28,24 @@ struct NewReleasesListView: View {
                     Image(systemName: "sparkles")
                         .font(.title2)
                         .foregroundColor(.secondary)
-                    Text("No new releases")
-                        .font(.callout)
-                        .foregroundColor(.secondary)
-                    Text("We check your saved artists weekly.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary.opacity(0.7))
+                    // Never a bare "No new releases" after a check that didn't reach everyone.
+                    if let problem = releaseAlertManager.lastCheckOutcome?.problemDescription {
+                        Text(problem)
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button("Retry") {
+                            Task { await releaseAlertManager.checkNow() }
+                        }
+                        .disabled(releaseAlertManager.isChecking)
+                    } else {
+                        Text("No new releases")
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+                        Text("We check your saved artists weekly.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary.opacity(0.7))
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)

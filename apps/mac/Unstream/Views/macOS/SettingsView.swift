@@ -183,12 +183,18 @@ struct SettingsView: View {
                                 .controlSize(.small)
                         }
 
-                        Button("Check Now") {
+                        Button(alertManager.lastCheckOutcome?.problemDescription == nil ? "Check Now" : "Retry") {
                             Task {
                                 await alertManager.checkNow()
                             }
                         }
                         .disabled(alertManager.isChecking)
+                    }
+
+                    if let problem = alertManager.lastCheckOutcome?.problemDescription, !alertManager.isChecking {
+                        Label(problem, systemImage: "exclamationmark.triangle")
+                            .font(.caption)
+                            .foregroundColor(.orange)
                     }
 
                     #if DEBUG

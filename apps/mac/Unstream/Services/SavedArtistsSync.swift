@@ -34,8 +34,10 @@ class SavedArtistsSync: ObservableObject {
 
     /// Fetch artists modified since the last sync cursor.
     /// Pass `force = true` to do a full pull (no cursor).
-    func pull(force: Bool = false) async {
-        guard let token = try? await AuthService.shared.currentAccessToken() else { return }
+    /// Returns whether the list is now the server's (release checks won't check a stale list).
+    @discardableResult
+    func pull(force: Bool = false) async -> Bool {
+        guard let token = try? await AuthService.shared.currentAccessToken() else { return false }
 
         // Queued saves and removes go first, so the pull reads them back.
         if !pendingChanges.isEmpty { await flushPendingChanges() }
@@ -61,7 +63,7 @@ class SavedArtistsSync: ObservableObject {
 
         guard let url = URL(string: urlString) else {
             isSyncing = false
-            return
+            return false
         }
 
         var request = URLRequest(url: url)
@@ -74,15 +76,15 @@ class SavedArtistsSync: ObservableObject {
                 if http.statusCode == 401 {
                     syncError = "Session expired — sign in again"
                     isSyncing = false
-                    return
+                    return false
                 } else if !(200...299).contains(http.statusCode) {
                     syncError = "Couldn't sync — tap to retry"
                     isSyncing = false
-                    return
+                    return false
                 }
             } else {
                 isSyncing = false
-                return
+                return false
             }
 
             let decoded = try JSONDecoder().decode(SyncResponse.self, from: data)
@@ -115,9 +117,12 @@ class SavedArtistsSync: ObservableObject {
         } catch {
             syncError = "Couldn't sync — tap to retry"
             print("[Sync] Pull failed: \(error)")
+            isSyncing = false
+            return false
         }
 
         isSyncing = false
+        return true
     }
 
     // MARK: - Push (outbox)
