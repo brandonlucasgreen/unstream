@@ -34,6 +34,7 @@
     "shared/path-segments.ts",
     "functions/__tests__/path-segments.test.ts",
     "functions/__tests__/digest-feed.test.ts",
+    "functions/__tests__/dispatch-feed.test.ts",
     "functions/__tests__/feature-flags.test.ts",
     "shared/tips-flag.ts",
     "functions/__tests__/tips-flag.test.ts",
