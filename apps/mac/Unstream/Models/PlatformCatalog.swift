@@ -5,7 +5,7 @@ import Foundation
 // The app's copy of api/shared/platform-registry.ts, which is the source of truth: names, colors
 // and payouts must match it (apps/web/tests/unit/platform-registry-copies.test.ts checks the
 // payouts). The icons are SF Symbols, since the registry's emoji don't suit native UI; a platform
-// with its own logo in BrandIcons.swift (Subvert) draws that instead.
+// with its own logo in BrandIcons.swift (`platformLogos`) draws that instead.
 
 /// Configuration for a platform's display properties
 struct PlatformConfig {

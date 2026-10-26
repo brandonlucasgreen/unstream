@@ -31,6 +31,21 @@ describe('platform logo copies', () => {
   });
 });
 
+// The Mac app's platform pills draw every mark the web's PlatformIcon does (platformLogos in
+// BrandIcons.swift), from copies of SIMPLE_ICON_PATHS.
+describe('Mac app platform marks', () => {
+  const markIds = Object.keys(SIMPLE_ICON_PATHS) as (keyof typeof SIMPLE_ICON_PATHS)[];
+
+  it.each(markIds)('%s is the same path in the Mac app', (id) => {
+    expect(macBrandIcons).toContain(`static let ${id} = "${SIMPLE_ICON_PATHS[id]!.d}"`);
+  });
+
+  it.each(markIds)('%s is drawn in the Mac app with the same fill rule', (id) => {
+    const evenOdd = SIMPLE_ICON_PATHS[id]!.fillRule === 'evenodd' ? ', evenOdd: true' : '';
+    expect(macBrandIcons).toContain(`"${id}": PlatformLogo(path: BrandIconPaths.${id}${evenOdd}),`);
+  });
+});
+
 describe('platformLogoSvg', () => {
   it('draws the logo in the surrounding text colour', () => {
     const svg = platformLogoSvg('subvert', 18)!;

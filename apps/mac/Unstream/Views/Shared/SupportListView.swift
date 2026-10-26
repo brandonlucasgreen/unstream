@@ -312,7 +312,6 @@ struct SavedPlatformBadge: View {
     #endif
 
     private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp", "subvert"]
 
     private var isSocialPlatform: Bool {
         socialPlatformIds.contains(platform.sourceId)
@@ -380,7 +379,7 @@ struct SavedPlatformBadge: View {
 
     @ViewBuilder
     private func platformIcon(size: CGFloat) -> some View {
-        if brandIconPlatforms.contains(platform.sourceId) {
+        if BrandIcon.hasLogo(platform.sourceId) {
             BrandIcon(
                 platform: platform.sourceId,
                 size: size,

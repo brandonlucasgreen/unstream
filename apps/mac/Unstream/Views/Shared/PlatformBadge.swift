@@ -40,9 +40,10 @@ struct PlatformBadge: View {
     var body: some View {
         Button(action: openPlatform) {
             HStack(spacing: spacing) {
-                if let logo = platformLogoPaths[result.sourceId] {
-                    // No fill, so the shape takes the pill's foreground colour like the symbol does.
-                    BrandIconShape(path: logo)
+                if let logo = platformLogos[result.sourceId] {
+                    // Filled with the foreground style, so the mark takes the pill's colour like the symbol does.
+                    BrandIconShape(path: logo.path)
+                        .fill(.foreground, style: FillStyle(eoFill: logo.evenOdd))
                         .frame(width: iconSize, height: iconSize)
                 } else {
                     Image(systemName: result.icon)
