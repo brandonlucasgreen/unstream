@@ -249,7 +249,8 @@ export function parseBandcampReleaseCounts(html: string): { albums: number; trac
 /**
  * Read the raw location string from a Bandcamp page, e.g. "Northampton, Massachusetts".
  *
- * Artist and /music pages carry this in a `class="location"` element. Returned raw so
+ * Artist and /music pages carry this in a `class="location"` element (a `<span>`);
+ * /community, read for accounts behind a custom domain, uses an `<h3>`. Returned raw so
  * the caller can run it through parseLocationString — this module stays I/O and
  * dependency free.
  *
@@ -260,11 +261,56 @@ export function parseBandcampReleaseCounts(html: string): { albums: number; trac
  */
 export function parseBandcampPageLocation(html: string): string | null {
   const match = html.match(
-    /<(?:p|div|span)[^>]+class="[^"]*\blocation\b[^"]*"[^>]*>([^<]+)<\/(?:p|div|span)>/,
+    /<(?:p|div|span|h3)[^>]+class="[^"]*\blocation\b[^"]*"[^>]*>([^<]+)<\/(?:p|div|span|h3)>/,
   );
   if (!match) return null;
   const raw = match[1].replace(/\s+/g, ' ').trim();
   return raw.length > 0 && raw.length <= 120 ? raw : null;
+}
+
+/**
+ * Read the band name from a Bandcamp /community page.
+ *
+ * For an account behind a custom domain, /community is the one page that names the artist
+ * without looping (see bandcamp-probe.ts). It has no data-band block; its og:title is
+ * "<name>'s Community", or "<name>' Community" after a trailing s ("Sufjan Stevens'
+ * Community"). Null for anything else rather than a guess, since the name is the identity
+ * check.
+ */
+export function parseBandcampCommunityName(html: string): string | null {
+  const match = html.match(/<meta property="og:title" content="([^"]+)"/);
+  if (!match) return null;
+  const title = match[1]
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .trim();
+  const name = title.match(/^(.+?)['’]s? Community$/)?.[1]?.trim();
+  return name || null;
+}
+
+/**
+ * Read an account's releases from its Bandcamp sitemap.
+ *
+ * `<slug>.bandcamp.com/sitemap.xml` is listed in the account's robots.txt and, unlike every
+ * page of an account behind a custom domain, doesn't redirect. It lists each /album/ and
+ * /track/ URL. Tracks include every track of every album, so `tracks` is only a "has
+ * releases" signal. Titles come from the album URL slugs, normalized the way
+ * parseBandcampReleaseTitles normalizes titles ("into-the-trees" -> "intothetrees"), and
+ * fall back to track slugs for an account with no albums.
+ */
+export function parseBandcampSitemap(xml: string): { albums: number; tracks: number; releaseTitles: string[] } {
+  const albumSlugs = new Set<string>();
+  const trackSlugs = new Set<string>();
+  for (const match of xml.matchAll(/<loc>\s*https:\/\/[^<\s]+?\/(album|track)\/([^<\s/?#]+)\s*<\/loc>/g)) {
+    (match[1] === 'album' ? albumSlugs : trackSlugs).add(match[2]);
+  }
+  const titleSlugs = albumSlugs.size > 0 ? albumSlugs : trackSlugs;
+  return {
+    albums: albumSlugs.size,
+    tracks: trackSlugs.size,
+    releaseTitles: [...titleSlugs].map(slug => normalizeForComparison(slug)).filter(Boolean),
+  };
 }
 
 /**
