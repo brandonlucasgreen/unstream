@@ -40,6 +40,17 @@ const CITIZEN_BEGIN_AREA = {
   'iso-3166-2-codes': ['US-MI'],
 };
 
+// GET /ws/2/artist/0171668b-ba7a-4cef-8a28-22aa782dd56c?fmt=json (top-level country "US")
+const ZOE_KEATING_AREA = {
+  name: 'Vermont',
+  type: null,
+  'iso-3166-2-codes': ['US-VT'],
+};
+const ZOE_KEATING_BEGIN_AREA = {
+  name: 'Guelph',
+  type: null,
+};
+
 describe('parseMusicBrainzArea', () => {
   it('reads a null-type area with an ISO 3166-1 code as a country, not a city', () => {
     const location = parseMusicBrainzArea(FOO_FIGHTERS_AREA, undefined, 'US');
@@ -61,14 +72,50 @@ describe('parseMusicBrainzArea', () => {
     expect(location).toEqual({ city: 'Michigan', country: 'United States', countryCode: 'US' });
   });
 
-  it('prefers a subdivision over the country beside a known city', () => {
+  // area and begin-area are two independent places. Splicing a begin-area city onto an
+  // area subdivision rendered Zoë Keating as "Guelph, Vermont": she was born in Guelph,
+  // Ontario, and MusicBrainz files her under Vermont.
+  it('uses a specific area on its own, never beside the begin-area', () => {
+    const location = parseMusicBrainzArea(ZOE_KEATING_AREA, ZOE_KEATING_BEGIN_AREA, 'US');
+
+    expect(location).toEqual({ city: 'Vermont', country: 'United States', countryCode: 'US' });
+  });
+
+  it('prefers a city area over a begin-area city', () => {
     const location = parseMusicBrainzArea(
-      CITIZEN_BEGIN_AREA,
-      { name: 'Detroit', type: null },
+      { name: 'Sacramento', type: null },
+      { name: 'Guelph', type: null },
       'US',
     );
 
-    expect(location).toEqual({ city: 'Detroit', country: 'Michigan', countryCode: 'US' });
+    expect(location).toEqual({ city: 'Sacramento', country: 'United States', countryCode: 'US' });
+  });
+
+  it('drops a begin-area subdivision that belongs to another country', () => {
+    const ontario = { name: 'Ontario', type: null, 'iso-3166-2-codes': ['CA-ON'] };
+
+    expect(parseMusicBrainzArea(FOO_FIGHTERS_AREA, ontario, 'US')).toEqual({
+      country: 'United States',
+      countryCode: 'US',
+    });
+  });
+
+  it('keeps the area country when the begin-area is a different country', () => {
+    const canada = { name: 'Canada', type: null, 'iso-3166-1-codes': ['CA'] };
+
+    expect(parseMusicBrainzArea(FOO_FIGHTERS_AREA, canada, 'US')).toEqual({
+      country: 'United States',
+      countryCode: 'US',
+    });
+  });
+
+  it('takes the begin-area country when there is no area', () => {
+    const canada = { name: 'Canada', type: null, 'iso-3166-1-codes': ['CA'] };
+
+    expect(parseMusicBrainzArea(undefined, canada, undefined)).toEqual({
+      country: 'Canada',
+      countryCode: 'CA',
+    });
   });
 
   it('still honours an explicit Country type when ISO codes are absent', () => {
