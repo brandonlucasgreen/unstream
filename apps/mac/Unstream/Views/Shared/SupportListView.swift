@@ -312,7 +312,7 @@ struct SavedPlatformBadge: View {
     #endif
 
     private let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
+    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp", "subvert"]
 
     private var isSocialPlatform: Bool {
         socialPlatformIds.contains(platform.sourceId)

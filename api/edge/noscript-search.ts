@@ -1,5 +1,6 @@
 import type { Context } from "../shared/edge-context.ts";
 import { PLATFORMS } from "../shared/platform-registry.ts";
+import { platformLogoSvg } from "../shared/platform-logos.ts";
 
 interface PlatformLink {
   sourceId: string;
@@ -74,7 +75,7 @@ function renderResultCard(result: SearchResult): string {
       if (!info) return '';
       const label = info.searchOnly ? `Search ${info.name}` : info.name;
       return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" class="platform-link">
-        <span class="platform-icon">${info.icon}</span>
+        <span class="platform-icon">${platformLogoSvg(p.sourceId, 18) ?? info.icon}</span>
         <span class="platform-name">${escapeHtml(label)}</span>
         ${info.payoutPercent ? `<span class="payout">${info.payoutPercent} to artist</span>` : ''}
         <span class="external-icon">↗</span>

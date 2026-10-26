@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { NewsletterSignup } from '../components/NewsletterSignup';
+import { PlatformIcon } from '../components/PlatformIcon';
 import { sources, sourceCategories } from '../services/sources';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
@@ -107,7 +108,9 @@ function PlatformRow({ platform }: { platform: Source }) {
             rel="noopener noreferrer"
             className="font-medium text-text-primary hover:underline"
           >
-            <span aria-hidden="true" className="mr-2">{platform.icon}</span>
+            <span aria-hidden="true" className="mr-2 inline-flex align-[-2px]">
+              <PlatformIcon sourceId={platform.id} color="currentColor" emoji={platform.icon} emojiClassName="" />
+            </span>
             {platform.name}
           </a>
           <p className="text-text-secondary text-sm">{platform.description}</p>

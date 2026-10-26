@@ -334,6 +334,12 @@ body {
   flex-shrink: 0;
 }
 
+.result-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
 .result-name {
   font-size: 13px;
   font-weight: 500;

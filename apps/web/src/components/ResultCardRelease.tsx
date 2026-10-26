@@ -1,5 +1,6 @@
 import type { SearchResult } from '../types';
 import { getSource } from './ResultCardUtils';
+import { PlatformIcon } from './PlatformIcon';
 import { ResultCardPreview } from './ResultCardPreview';
 import { analytics } from '../services/analytics';
 import { badgeColors } from '../utils/colors';
@@ -64,7 +65,13 @@ export function ResultCardRelease({ result, latestRelease, platformsWithRelease,
                     else analytics.trackPlatformClick(platform.displayName ?? getSource(platform.sourceId).name);
                   }}
                 >
-                  <span>{getSource(platform.sourceId).icon}</span>
+                  <PlatformIcon
+                    sourceId={platform.sourceId}
+                    color={textColor}
+                    emoji={getSource(platform.sourceId).icon}
+                    className="w-3 h-3"
+                    emojiClassName=""
+                  />
                   <span>{platform.displayName ?? getSource(platform.sourceId).name}</span>
                 </a>
               );
