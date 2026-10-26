@@ -30,6 +30,8 @@ import {
 import {
   isBandcampChallenge,
   parseBandcampBandIdentity,
+  parseBandcampCommunityName,
+  parseBandcampSitemap,
   parseBandcampBio,
   parseBandcampImage,
   parseBandcampPageLocation,
@@ -78,6 +80,11 @@ export interface BandcampProbeResult {
   /** The artist's own sidebar bio, raw text; '' when the page shows none. */
   bio?: string;
   /**
+   * The custom domain the account sits behind (e.g. "music.zoekeating.com"). Such an
+   * account was read from /community and /sitemap.xml, so it has no bio or band id.
+   */
+  customDomain?: string;
+  /**
    * Slug candidates actually attempted, in order.
    *
    * Cached so a negative can be reused only for queries whose candidates it covers.
@@ -93,15 +100,26 @@ const MIN_REQUEST_MS = 1200;
 
 interface CandidateOutcome {
   verdict: Exclude<BandcampProbeVerdict, 'absent'>;
-  identity?: { id: number; name: string };
+  /** `id` is null for an account read through /community, which doesn't carry it. */
+  identity?: { id: number | null; name: string };
   counts: { albums: number; tracks: number };
   location?: string;
   releaseTitles?: string[];
   imageUrl?: string;
   bio?: string;
+  /** The account sits behind this custom domain; see probeCustomDomainAccount. */
+  customDomain?: string;
   /** Bandcamp asked us to back off. Stop the whole round, don't try more candidates. */
   rateLimited?: boolean;
 }
+
+const PROBE_HEADERS = { 'User-Agent': 'Unstream/1.0 (+https://unstream.stream)' };
+
+// Bandcamp redirects some alias slugs to the right account on another subdomain, which the
+// probe follows. A redirect anywhere else is a custom domain.
+const MAX_BANDCAMP_HOPS = 3;
+
+const UNDECIDED: CandidateOutcome = { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
 
 /** Fetch and classify a single candidate slug. Returns null if the slug has no account. */
 async function probeCandidate(slug: string, timeoutMs: number): Promise<CandidateOutcome | null> {
@@ -111,54 +129,35 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
   // only [a-z0-9-] and cannot alter the host. Validated anyway as defence in depth.
   if (!isUrlHostnameAllowed(url)) return null;
 
+  const startedAt = Date.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  let response: Response;
+  let fetched: MusicPageFetch;
   try {
-    response = await globalThis.fetch(url, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Unstream/1.0 (+https://unstream.stream)' },
-    });
+    fetched = await fetchMusicPage(url, controller.signal);
   } finally {
     clearTimeout(timeout);
   }
 
+  if (fetched.kind === 'custom-domain') {
+    return probeCustomDomainAccount(slug, fetched.host, timeoutMs - (Date.now() - startedAt));
+  }
+  const response = fetched.response;
+
   // No such account. This is a real answer, not a failure.
   if (response.status === 404) return null;
 
-  // Bandcamp does rate-limit, and firing the remaining candidates into an active
-  // 429 is both rude and pointless. Flag it so the caller abandons the round.
-  if (response.status === 429 || response.status === 503) {
-    const shouldCapture = await checkSentryDedup('uns152:bandcamp-rate-limited', 60 * 60);
-    if (shouldCapture) {
-      Sentry.captureMessage('Bandcamp rate-limited the probe', {
-        level: 'warning',
-        extra: { url, status: response.status, retryAfter: response.headers.get('retry-after') },
-        tags: { platform: 'bandcamp' },
-      });
-    }
-    return { verdict: 'undecided', counts: { albums: 0, tracks: 0 }, rateLimited: true };
-  }
+  if (isRateLimited(response)) return rateLimitedOutcome(url, response);
 
-  if (!response.ok) return { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
+  if (!response.ok) return UNDECIDED;
 
   const html = await response.text();
 
-  if (isBandcampChallenge(html)) {
-    const shouldCapture = await checkSentryDedup('uns152:bandcamp-music-challenge', 6 * 60 * 60);
-    if (shouldCapture) {
-      Sentry.captureMessage('Bandcamp /music blocked by bot challenge', {
-        level: 'warning',
-        extra: { url, responseBytes: html.length },
-        tags: { platform: 'bandcamp' },
-      });
-    }
-    return { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
-  }
+  if (isBandcampChallenge(html)) return challengeOutcome(url, html);
 
   const identity = parseBandcampBandIdentity(html);
   // A 200 with no identity block isn't a page we understand; don't treat it as absent.
-  if (!identity) return { verdict: 'undecided', counts: { albums: 0, tracks: 0 } };
+  if (!identity) return UNDECIDED;
 
   const counts = parseBandcampReleaseCounts(html);
   const location = parseBandcampPageLocation(html) ?? undefined;
@@ -166,6 +165,146 @@ async function probeCandidate(slug: string, timeoutMs: number): Promise<Candidat
   const imageUrl = parseBandcampImage(html) ?? undefined;
   const bio = parseBandcampBio(html);
   return { verdict: 'accepted', identity, counts, location, releaseTitles, imageUrl, bio };
+}
+
+type MusicPageFetch =
+  | { kind: 'page'; response: Response }
+  | { kind: 'custom-domain'; host: string };
+
+/**
+ * GET an account's /music page, following redirects by hand.
+ *
+ * Automatic following is what hid custom domains. A Bandcamp Pro artist can put their own
+ * domain in front of their account (music.zoekeating.com is a CNAME to dom.bandcamp.com).
+ * For a server-side request, <slug>.bandcamp.com then redirects to that domain and the
+ * domain redirects straight back, forever; a browser gets the page. fetch gave up after 20
+ * hops and the probe answered "undecided" — never cached, so every search re-ran the loop,
+ * and the artist went missing whenever MusicBrainz didn't list their Bandcamp.
+ */
+async function fetchMusicPage(url: string, signal: AbortSignal): Promise<MusicPageFetch> {
+  let current = url;
+  for (let hop = 0; hop <= MAX_BANDCAMP_HOPS; hop++) {
+    const response = await globalThis.fetch(current, { signal, redirect: 'manual', headers: PROBE_HEADERS });
+    const target = redirectTarget(response, current);
+    if (!target) return { kind: 'page', response };
+    if (!isBandcampHost(target.hostname)) return { kind: 'custom-domain', host: target.hostname };
+    current = target.toString();
+  }
+  // Thrown, not returned: the caller treats a throw as "couldn't find out".
+  throw new Error(`more than ${MAX_BANDCAMP_HOPS} Bandcamp redirects from ${url}`);
+}
+
+function redirectTarget(response: Response, from: string): URL | null {
+  if (response.status < 300 || response.status >= 400) return null;
+  const location = response.headers.get('location');
+  if (!location) return null;
+  try {
+    const target = new URL(location, from);
+    return target.protocol === 'https:' || target.protocol === 'http:' ? target : null;
+  } catch {
+    return null;
+  }
+}
+
+function isBandcampHost(hostname: string): boolean {
+  return hostname === 'bandcamp.com' || hostname.endsWith('.bandcamp.com');
+}
+
+/**
+ * Read an account that sits behind a custom domain from the two pages that don't loop.
+ *
+ * - `/community` names the artist in its og:title, so the usual name check still runs, and
+ *   carries the same og:image photo and location as /music. It has no band id and no bio.
+ * - `/sitemap.xml`, which the account's robots.txt advertises, lists every release URL: the
+ *   release count that keeps out parked accounts, and titles for disambiguation.
+ *
+ * The account's artist URL stays <slug>.bandcamp.com, which opens normally in a browser.
+ */
+async function probeCustomDomainAccount(slug: string, customDomain: string, timeoutMs: number): Promise<CandidateOutcome> {
+  const base = `https://${slug}.bandcamp.com`;
+  if (timeoutMs <= 0) return UNDECIDED;
+  console.log(`[Bandcamp probe] ${slug} is behind the custom domain ${customDomain}`);
+
+  const signal = AbortSignal.timeout(timeoutMs);
+  const [communityResponse, sitemapResponse] = await Promise.all([
+    globalThis.fetch(`${base}/community`, { signal, redirect: 'manual', headers: PROBE_HEADERS }),
+    globalThis.fetch(`${base}/sitemap.xml`, { signal, redirect: 'manual', headers: PROBE_HEADERS }),
+  ]);
+
+  for (const response of [communityResponse, sitemapResponse]) {
+    if (isRateLimited(response)) return rateLimitedOutcome(response.url || base, response);
+  }
+  if (!communityResponse.ok || !sitemapResponse.ok) {
+    return reportCustomDomainGap(slug, customDomain, `community ${communityResponse.status}, sitemap ${sitemapResponse.status}`);
+  }
+
+  const [html, xml] = await Promise.all([communityResponse.text(), sitemapResponse.text()]);
+  if (isBandcampChallenge(html)) return challengeOutcome(`${base}/community`, html);
+
+  const name = parseBandcampCommunityName(html);
+  // Every sitemap lists at least the account's home page. One with no <loc> at all is not a
+  // sitemap we understand, and must not be read as "no releases".
+  if (!name || !xml.includes('<loc>')) {
+    return reportCustomDomainGap(slug, customDomain, !name ? 'no name on /community' : 'unreadable sitemap');
+  }
+
+  const { albums, tracks, releaseTitles } = parseBandcampSitemap(xml);
+  return {
+    verdict: 'accepted',
+    identity: { id: null, name },
+    counts: { albums, tracks },
+    location: parseBandcampPageLocation(html) ?? undefined,
+    releaseTitles,
+    imageUrl: parseBandcampImage(html) ?? undefined,
+    // The bio is only on the pages that loop. '' rather than undefined so the cache row reads
+    // "nothing to read here" and isn't re-probed for a bio on every search.
+    bio: '',
+    customDomain,
+  };
+}
+
+// A page we expected to read on a custom-domain account wasn't there. Unknown, not a miss:
+// reported, because it means Bandcamp changed one of the two pages this path relies on.
+async function reportCustomDomainGap(slug: string, customDomain: string, reason: string): Promise<CandidateOutcome> {
+  const shouldCapture = await checkSentryDedup(`bandcamp-custom-domain:${reason}`, 6 * 60 * 60);
+  if (shouldCapture) {
+    Sentry.captureMessage('Bandcamp custom-domain account could not be read', {
+      level: 'warning',
+      extra: { slug, customDomain, reason },
+      tags: { platform: 'bandcamp' },
+    });
+  }
+  return UNDECIDED;
+}
+
+function isRateLimited(response: Response): boolean {
+  return response.status === 429 || response.status === 503;
+}
+
+// Bandcamp does rate-limit, and firing the remaining candidates into an active
+// 429 is both rude and pointless. Flag it so the caller abandons the round.
+async function rateLimitedOutcome(url: string, response: Response): Promise<CandidateOutcome> {
+  const shouldCapture = await checkSentryDedup('uns152:bandcamp-rate-limited', 60 * 60);
+  if (shouldCapture) {
+    Sentry.captureMessage('Bandcamp rate-limited the probe', {
+      level: 'warning',
+      extra: { url, status: response.status, retryAfter: response.headers.get('retry-after') },
+      tags: { platform: 'bandcamp' },
+    });
+  }
+  return { ...UNDECIDED, rateLimited: true };
+}
+
+async function challengeOutcome(url: string, html: string): Promise<CandidateOutcome> {
+  const shouldCapture = await checkSentryDedup('uns152:bandcamp-music-challenge', 6 * 60 * 60);
+  if (shouldCapture) {
+    Sentry.captureMessage('Bandcamp /music blocked by bot challenge', {
+      level: 'warning',
+      extra: { url, responseBytes: html.length },
+      tags: { platform: 'bandcamp' },
+    });
+  }
+  return UNDECIDED;
 }
 
 /**
@@ -233,7 +372,7 @@ export async function probeBandcampArtist(
           verdict: 'rejected_name',
           artistUrl: null,
           bandName: identity.name,
-          bandId: identity.id,
+          bandId: identity.id ?? undefined,
           albumCount: counts.albums,
           trackCount: counts.tracks,
           matchedSlug: slug,
@@ -249,7 +388,7 @@ export async function probeBandcampArtist(
         verdict: 'rejected_empty',
         artistUrl: null,
         bandName: identity.name,
-        bandId: identity.id,
+        bandId: identity.id ?? undefined,
         albumCount: 0,
         trackCount: 0,
         matchedSlug: slug,
@@ -262,7 +401,7 @@ export async function probeBandcampArtist(
       verdict: 'accepted',
       artistUrl: `https://${slug}.bandcamp.com`,
       bandName: identity.name,
-      bandId: identity.id,
+      bandId: identity.id ?? undefined,
       albumCount: counts.albums,
       trackCount: counts.tracks,
       matchedSlug: slug,
@@ -270,6 +409,7 @@ export async function probeBandcampArtist(
       releaseTitles: outcome.releaseTitles,
       imageUrl: outcome.imageUrl,
       bio: outcome.bio,
+      customDomain: outcome.customDomain,
       probedSlugs,
     };
   }
@@ -362,6 +502,9 @@ export async function findBandcampArtist(
     // keeps meaning only "written before bios existed".
     bio: result.bio ?? '',
     probed_slugs: result.probedSlugs,
+    // Only when set, so a write for an ordinary account never depends on the column existing
+    // (migration 20261026120000 and this code deploy separately).
+    ...(result.customDomain ? { custom_domain: result.customDomain } : {}),
   });
 
   return result.artistUrl

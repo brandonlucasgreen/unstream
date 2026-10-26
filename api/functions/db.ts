@@ -3594,6 +3594,12 @@ export interface BandcampProbeRow {
   /** The artist's sidebar bio. '' = checked, none shown; NULL = row predates bios. */
   bio: string | null;
   /**
+   * The custom domain the account sits behind, when it has one. Written by the probe, not
+   * read back: nothing needs it yet, and leaving it out of getBandcampProbe's select means a
+   * read can't fail if this code deploys before its migration.
+   */
+  custom_domain?: string | null;
+  /**
    * Slug candidates actually attempted in this probe round.
    *
    * `query_norm` strips punctuation, so "Morice" and "Mo-Rice" share one row —
