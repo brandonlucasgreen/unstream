@@ -510,12 +510,13 @@
   to = "/.netlify/functions/feed-releases"
   status = 200
 
-# The industry digest's feed (digest-feed.ts). Unlisted; above the SPA catch-all for the same
+# The old industry digest's feed, retired 2026-10-25 for the dispatch below. A 301 so a feed
+# reader that subscribed to it follows to the new one. Above the SPA catch-all for the same
 # reason as the release feeds.
 [[redirects]]
   from = "/digest/feed.xml"
-  to = "/.netlify/functions/digest-feed"
-  status = 200
+  to = "/digest/dispatch.xml"
+  status = 301
 
 # The weekly dispatch feed (dispatch-feed.ts). Unlisted, same pattern as above. Not /dispatch.xml,
 # which is the frozen archive of the old Discord Dispatch.
