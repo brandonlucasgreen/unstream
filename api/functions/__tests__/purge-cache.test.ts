@@ -95,7 +95,7 @@ describe('purgeCacheTags', () => {
 describe('the purge host is on the outbound allowlist', () => {
   /**
    * The URL is a constant, so it has no host anything could redirect. It is checked anyway
-   * because every other constant-URL fetch in this backend does (digest-feed.ts, stripe.ts), and
+   * because every other constant-URL fetch in this backend does (dispatch-feed.ts, stripe.ts), and
    * because the allowlist is meant to be the inventory of every host the backend talks to.
    */
   it('lists it, so the inventory is complete', async () => {
