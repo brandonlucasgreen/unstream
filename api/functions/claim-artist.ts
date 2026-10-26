@@ -11,6 +11,7 @@ import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notificati
 import { escapeHtml } from '../lib/html';
 import { safeFetch } from './safe-fetch';
 import { websiteMatchesKnownLink } from './claim-verification';
+import { sendAdminPush } from '../lib/ntfy';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -308,6 +309,32 @@ const CORS_HEADERS = {
 const PENDING_CLAIM_HOLD_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
+ * Push a claim that just landed in /admin/verify to the admin's phone, so it doesn't sit there
+ * until someone happens to look. The request is already filed, so a failed push is reported and
+ * the claim carries on.
+ */
+async function alertClaimAwaitingReview(artistName: string, slug: string, reason: string) {
+  const pushed = await sendAdminPush({
+    title: `Claim to review: ${artistName}`,
+    message: `${reason} Artist page: https://unstream.stream/a/${slug}`,
+    tags: ['artist', 'claim'],
+    click: 'https://unstream.stream/admin/verify',
+  });
+  if (!pushed) {
+    Sentry.captureMessage('Claim review push failed', { level: 'warning', extra: { artistSlug: slug } });
+  }
+}
+
+/** The website's host for a notification, or the raw value if it doesn't parse. */
+function siteName(websiteUrl: string): string {
+  try {
+    return new URL(websiteUrl).hostname;
+  } catch {
+    return websiteUrl;
+  }
+}
+
+/**
  * A claim whose link-back passed on a website we don't already hold for the artist: file it
  * for manual review instead of verifying. Idempotent: a second verify finds the pending request.
  */
@@ -355,6 +382,11 @@ async function queueClaimForReview(
     level: 'info',
     extra: { artistSlug: claim.slug, artistName: claim.artistName, websiteUrl: claim.websiteUrl },
   });
+  await alertClaimAwaitingReview(
+    claim.artistName,
+    claim.slug,
+    `The link-back is on ${siteName(claim.websiteUrl)}, a site we don't hold for them. Check it's really theirs.`
+  );
   return pendingResponse;
 }
 
@@ -924,6 +956,7 @@ async function handleRequest(event: {
       extra: { artistSlug: slug, artistName: artist.name, userId, messageLength: message?.trim().length || 0 },
     });
     console.log(`[Claim] Manual verification request submitted for "${artist.name}" by user ${userId}`);
+    await alertClaimAwaitingReview(artist.name, slug, 'They asked for manual verification and left a note.');
 
     return {
       statusCode: 200,

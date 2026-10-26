@@ -423,7 +423,7 @@ way stops the sweep and the tips notifier with no error. If you use the dashboar
 | `ALGOLIA_API_KEY` | **Netlify's `ALGOLAI_API_KEY`** — misspelled there, so Netlify has been skipping Even search; the Worker gets the right name (`ALGOLIA_APP_ID` has a default in the code) | Same |
 | `MIRLO_API_KEY` | From Mirlo's 2026-08-02 email granting it — write-only in Netlify | Omit — only catalogue crawls use it |
 | `RESEND_API_KEY`, `BUTTONDOWN_API_KEY` | Netlify's values | Same — and, like `npm run dev`, staging can then send real email |
-| `NTFY_SERVER_URL`, `NTFY_TOPIC` | Netlify's values | Omit — only the scheduled tips notifier uses them, and staging runs no schedules |
+| `NTFY_SERVER_URL`, `NTFY_TOPIC` | Netlify's values | Omit — the tips notifier and the claim-review push use them, and staging shouldn't wake the admin's phone |
 | `NTFY_TOKEN` | **From your ntfy account — Netlify has none**, so the notifier can't push today | Omit |
 | `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_PURGE_TOKEN` | From step 2 | Same — an edit made on staging changes production data, so it should purge production's cache |
 | `NETLIFY_SITE_ID`, `NETLIFY_API_TOKEN` | Netlify's values, **until Netlify is retired** — both CDNs are purged while both can serve | Same |
