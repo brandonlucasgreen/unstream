@@ -3,7 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // The claim flow end to end against an in-memory database. The case this pins: a link-back on a
 // website we don't already hold for the artist must not verify the claim or touch their links;
 // it files a manual-review request instead. Before, any page naming the artist and linking
-// back verified instantly and replaced the artist's Bandcamp/Patreon/Ko-fi links.
+// back verified instantly and replaced the artist's Bandcamp/Patreon/Ko-fi links. Every request
+// filed for review also pushes to the admin's phone, once, so it doesn't wait to be noticed.
 
 type Row = Record<string, unknown>;
 
@@ -12,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   safeFetch: vi.fn(),
   sendNotificationOnce: vi.fn(),
   notifySavedArtistsOfNewLinks: vi.fn(() => Promise.resolve()),
+  sendAdminPush: vi.fn(),
+  captureMessage: vi.fn(),
   user: { id: 'user-1', email: 'claimant@example.com' },
 }));
 
@@ -70,7 +73,8 @@ vi.mock('../notifications', () => ({
   sendNotificationOnce: mocks.sendNotificationOnce,
   notifySavedArtistsOfNewLinks: mocks.notifySavedArtistsOfNewLinks,
 }));
-vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: vi.fn(), captureException: vi.fn() } }));
+vi.mock('../../lib/ntfy', () => ({ sendAdminPush: mocks.sendAdminPush }));
+vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: mocks.captureMessage, captureException: vi.fn() } }));
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
     auth: { getUser: () => Promise.resolve({ data: { user: mocks.user }, error: null }) },
@@ -105,6 +109,7 @@ beforeEach(() => {
   process.env.SUPABASE_URL = 'https://test.supabase.co';
   process.env.SUPABASE_ANON_KEY = 'anon-key';
   mocks.user = { id: 'user-1', email: 'claimant@example.com' };
+  mocks.sendAdminPush.mockResolvedValue(true);
   mocks.tables = {
     artists: [{ ...ARTIST }],
     artist_links: [
@@ -127,6 +132,7 @@ describe('claim-artist verify', () => {
     expect(JSON.parse(res.body).verified).toBe(true);
     expect(mocks.tables.artist_profiles[0].verified_at).toBeTruthy();
     expect(mocks.tables.verification_requests).toHaveLength(0);
+    expect(mocks.sendAdminPush).not.toHaveBeenCalled();
   });
 
   it('queues a site we hold nothing for, leaving the profile and links untouched', async () => {
@@ -151,6 +157,12 @@ describe('claim-artist verify', () => {
     });
     expect(mocks.sendNotificationOnce).not.toHaveBeenCalled();
     expect(mocks.notifySavedArtistsOfNewLinks).not.toHaveBeenCalled();
+    expect(mocks.sendAdminPush).toHaveBeenCalledTimes(1);
+    expect(mocks.sendAdminPush.mock.calls[0][0]).toMatchObject({
+      title: 'Claim to review: Kid Lightbulbs',
+      click: 'https://unstream.stream/admin/verify',
+    });
+    expect(mocks.sendAdminPush.mock.calls[0][0].message).toContain('kid-lightbulbs.pages.dev');
   });
 
   it('files one review request however many times verify is pressed', async () => {
@@ -161,6 +173,34 @@ describe('claim-artist verify', () => {
     await post({ action: 'verify', slug: ARTIST.slug });
 
     expect(mocks.tables.verification_requests).toHaveLength(1);
+    expect(mocks.sendAdminPush).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('claim-artist request-manual-review', () => {
+  it('files the request and pushes it to the admin', async () => {
+    const res = await post({ action: 'request-manual-review', slug: ARTIST.slug, message: 'I run this band.' });
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.tables.verification_requests).toHaveLength(1);
+    expect(mocks.sendAdminPush).toHaveBeenCalledTimes(1);
+    expect(mocks.sendAdminPush.mock.calls[0][0]).toMatchObject({
+      title: 'Claim to review: Kid Lightbulbs',
+      click: 'https://unstream.stream/admin/verify',
+    });
+    // The claimant's note and email stay in /admin/verify, not in the push.
+    expect(JSON.stringify(mocks.sendAdminPush.mock.calls[0][0])).not.toMatch(/I run this band|claimant@/);
+  });
+
+  it('still files the request when the push fails, and reports the failure', async () => {
+    mocks.sendAdminPush.mockResolvedValue(false);
+
+    const res = await post({ action: 'request-manual-review', slug: ARTIST.slug, message: 'I run this band.' });
+
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body).submitted).toBe(true);
+    expect(mocks.tables.verification_requests).toHaveLength(1);
+    expect(mocks.captureMessage).toHaveBeenCalledWith('Claim review push failed', expect.anything());
   });
 });
 

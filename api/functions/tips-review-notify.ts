@@ -24,6 +24,7 @@ import { isLiveMode } from './stripe';
 import { cacheGet, cacheSet } from './cache';
 import { getRedis } from './redis';
 import { withSentry, Sentry } from '../lib/sentry';
+import { sendAdminPush } from '../lib/ntfy';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -44,32 +45,14 @@ interface ReviewRow {
   artists: { name: string; slug: string } | { name: string; slug: string }[] | null;
 }
 
-async function pushNtfy(artistName: string, slug: string, createdAt: string): Promise<boolean> {
-  const server = process.env.NTFY_SERVER_URL;
-  const topic = process.env.NTFY_TOPIC;
-  const token = process.env.NTFY_TOKEN;
-  if (!server || !topic || !token) {
-    console.error('[tips-review-notify] NTFY_SERVER_URL/NTFY_TOPIC/NTFY_TOKEN not configured — cannot push');
-    return false;
-  }
-  const res = await fetch(server.replace(/\/$/, '') + '/' + topic, {
-    signal: AbortSignal.timeout(10_000), // a stuck push must not hang the whole run
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Title: `New tip review: ${artistName}`,
-      Priority: 'default',
-      Tags: 'artist,tips',
-      // Clicking the notification opens the admin tips review page (auth still applies there).
-      Click: 'https://unstream.stream/admin/tips',
-    },
-    body: `${artistName} just finished Stripe Connect onboarding and is awaiting tip review. Connected ${createdAt.slice(0, 10)}. Review: https://unstream.stream/admin/tips (artist page: https://unstream.stream/a/${slug})`,
+function pushReviewAlert(artistName: string, slug: string, createdAt: string): Promise<boolean> {
+  return sendAdminPush({
+    title: `New tip review: ${artistName}`,
+    message: `${artistName} just finished Stripe Connect onboarding and is awaiting tip review. Connected ${createdAt.slice(0, 10)}. Artist page: https://unstream.stream/a/${slug}`,
+    tags: ['artist', 'tips'],
+    // Clicking the notification opens the admin tips review page (auth still applies there).
+    click: 'https://unstream.stream/admin/tips',
   });
-  if (!res.ok) {
-    console.error(`[tips-review-notify] ntfy responded ${res.status}`);
-    return false;
-  }
-  return true;
 }
 
 async function handleRequest(event: HandlerEvent) {
@@ -116,7 +99,7 @@ async function handleRequest(event: HandlerEvent) {
     const a = Array.isArray(row.artists) ? row.artists[0] : row.artists;
     const name = a?.name ?? row.stripe_account_id;
     const slug = a?.slug ?? '';
-    if (await pushNtfy(name, slug, row.created_at)) {
+    if (await pushReviewAlert(name, slug, row.created_at)) {
       alerted.push(row.stripe_account_id);
     }
   }

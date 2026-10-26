@@ -63,7 +63,7 @@ function secretHeaders() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  process.env = { ...originalEnv, INTERNAL_FUNCTION_SECRET: SECRET, NTFY_SERVER_URL: 'https://ntfy.example', NTFY_TOPIC: 'hermes-alerts', NTFY_TOKEN: 'tk' };
+  process.env = { ...originalEnv, INTERNAL_FUNCTION_SECRET: SECRET, NTFY_SERVER_URL: 'https://ntfy.example', NTFY_TOPIC: 'admin-alerts', NTFY_TOKEN: 'tk' };
   mocks.getRedis.mockReturnValue({ ready: true });
   mocks.cacheGet.mockResolvedValue([]);
   mocks.cacheSet.mockResolvedValue(true);
@@ -92,8 +92,9 @@ describe('tips-review-notify', () => {
     expect(mocks.fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = mocks.fetchMock.mock.calls[0];
     expect(String(url)).toContain('ntfy');
-    expect((init.headers as Record<string, string>).Title).toBe('New tip review: Kid Lightbulbs');
-    expect((init.headers as Record<string, string>).Click).toContain('/admin/tips');
+    const sent = JSON.parse(init.body as string);
+    expect(sent.title).toBe('New tip review: Kid Lightbulbs');
+    expect(sent.click).toContain('/admin/tips');
     // The alerted account joins the watermark; the old one stays.
     const committed = mocks.cacheSet.mock.calls[0][1] as string[];
     expect(committed).toEqual(expect.arrayContaining(['acct_old', 'acct_new']));
