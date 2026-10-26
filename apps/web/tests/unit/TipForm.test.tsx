@@ -58,6 +58,25 @@ describe('TipForm goal from the link', () => {
     render(<TipForm data={{ ...data, goals: [] }} initialGoalId={OPEN_GOAL} />);
     expect((await payAndReadBody()).goalId).toBeUndefined();
   });
+
+  // The /tip page mounts the form before its data arrives (TipPage's static shell), so the goals
+  // aren't there yet when the form first renders. A goal link's `?goal=` was dropped that way and
+  // the tip reached the artist without counting towards the goal (Michael Boezi, 2026-10-26).
+  it('preselects the goal once the goals arrive after mounting', async () => {
+    const pending: TipPageData = { artist: { ...data.artist, id: '' }, takingTips: true };
+    const { rerender } = render(<TipForm data={pending} hydrated={false} initialGoalId={OPEN_GOAL} />);
+    rerender(<TipForm data={data} hydrated initialGoalId={OPEN_GOAL} />);
+    expect((screen.getByRole('radio') as HTMLInputElement).checked).toBe(true);
+    expect((await payAndReadBody()).goalId).toBe(OPEN_GOAL);
+  });
+
+  it('keeps "No goal, just a tip" once the fan has chosen it', async () => {
+    const { rerender } = render(<TipForm data={data} initialGoalId={OPEN_GOAL} />);
+    fireEvent.click(screen.getByText('No goal, just a tip'));
+    rerender(<TipForm data={{ ...data, goals: [...data.goals!] }} initialGoalId={OPEN_GOAL} />);
+    expect((screen.getByRole('radio') as HTMLInputElement).checked).toBe(false);
+    expect((await payAndReadBody()).goalId).toBeUndefined();
+  });
 });
 
 describe('TipForm "How tipping works" link', () => {
