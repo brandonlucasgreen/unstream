@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { SOCIAL_ICON_PATHS } from "../shared/social-icon-paths.ts";
+import { platformLogoSvg } from "../shared/platform-logos.ts";
 import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import {
   groupLinksIntoSections,
@@ -130,7 +131,7 @@ function renderReleaseRow(release: ReleaseRow, artistSlug: string): string {
   const platformsHtml = orderedSourcePlatforms(sources)
     .map(p => {
       const info = PLATFORM_INFO[p];
-      return `<span title="${escapeHtml(info?.name || p)}" style="font-size:13px">${info?.icon || '🔗'}</span>`;
+      return `<span title="${escapeHtml(info?.name || p)}" style="font-size:13px">${platformLogoSvg(p, 13) ?? info?.icon ?? '🔗'}</span>`;
     })
     .join('');
 
@@ -221,7 +222,7 @@ function renderClaimedSections({
     const isOther = p.platform === 'other' || p.platform.startsWith('other_');
     const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
     const linkColor = info?.color || '#71717a';
-    const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
+    const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : platformLogoSvg(p.platform, 18) ?? info.icon) : '🔗';
     const isBCFriday = p.platform === 'bandcamp' && isBandcampFriday();
     const payout = isBCFriday ? '~97%' : info?.payoutPercent;
     const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
@@ -683,7 +684,7 @@ export default async function handler(request: Request, context: Context) {
       const isOther = p.platform === 'other' || p.platform.startsWith('other_');
       const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
       const linkColor = info?.color || '#71717a';
-      const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : info.icon) : '🔗';
+      const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : platformLogoSvg(p.platform, 18) ?? info.icon) : '🔗';
       const isBCFriday = p.platform === 'bandcamp' && bcFriday;
       const payout = isBCFriday ? '~97%' : info?.payoutPercent;
       const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';

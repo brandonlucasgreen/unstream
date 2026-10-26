@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import type { SearchResult } from '../types';
 import { sources } from '../services/sources';
+import { PlatformIcon } from '../components/PlatformIcon';
 
 interface MergeLink {
   id: string;
@@ -203,10 +204,13 @@ export function AdminMergePage() {
                     className="w-4 h-4 rounded border-border text-link focus:ring-accent-primary/50 cursor-pointer flex-shrink-0"
                   />
                   <span
-                    className="text-sm font-medium flex-shrink-0 w-24"
+                    className="text-sm font-medium flex-shrink-0 w-24 inline-flex items-center gap-1"
                     style={{ color: source?.color }}
                   >
-                    {source?.icon} {platformName}
+                    {source && (
+                      <PlatformIcon sourceId={source.id} color="currentColor" emoji={source.icon} className="w-3.5 h-3.5" emojiClassName="" />
+                    )}
+                    {platformName}
                   </span>
                   <input
                     type="text"

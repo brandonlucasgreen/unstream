@@ -20,6 +20,7 @@ import type { Context } from "../shared/edge-context.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
+import { platformLogoSvg } from "../shared/platform-logos.ts";
 import {
   AVAILABILITY_LABELS,
   AVAILABILITY_ORDER,
@@ -402,7 +403,7 @@ export default async function handler(request: Request, context: Context) {
 
       return `<div class="source">
         <div class="source-head">
-          <span style="font-size:18px">${info?.icon || '🔗'}</span>
+          <span style="font-size:18px">${platformLogoSvg(source.platform, 18) ?? info?.icon ?? '🔗'}</span>
           <span style="flex:1;font-weight:600">${escapeHtml(name)}</span>
           ${payoutPercent ? `<span style="font-size:12px;color:var(--muted)">${escapeHtml(payoutPercent)} to artist</span>` : ''}
           ${isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : ''}

@@ -40,8 +40,14 @@ struct PlatformBadge: View {
     var body: some View {
         Button(action: openPlatform) {
             HStack(spacing: spacing) {
-                Image(systemName: result.icon)
-                    .font(.system(size: iconSize))
+                if let logo = platformLogoPaths[result.sourceId] {
+                    // No fill, so the shape takes the pill's foreground colour like the symbol does.
+                    BrandIconShape(path: logo)
+                        .frame(width: iconSize, height: iconSize)
+                } else {
+                    Image(systemName: result.icon)
+                        .font(.system(size: iconSize))
+                }
                 Text(isSubtle ? "Search \(result.displayName)" : result.displayName)
                     .font(labelFont)
 
