@@ -387,16 +387,13 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
   'images.subvert.fm',
   'cdn.jam.coop',
-  // The weekly dispatch feed, relayed by dispatch-feed.ts from the repo's industry-digest
-  // branch. That function fetches one constant URL; nothing user-supplied reaches this host.
-  'raw.githubusercontent.com',
   // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.
   'api.stripe.com',
   // Netlify's CDN purge API (api/functions/purge-cache.ts). Fetched at a constant URL, so there is
   // no host anything could redirect; listed and checked anyway, because that is what the other
-  // constant-URL fetches here do (dispatch-feed.ts, stripe.ts) and because this set is the
+  // constant-URL fetches here do (stripe.ts) and because this set is the
   // inventory of every host this backend talks to.
   'api.netlify.com',
 ]);

@@ -621,7 +621,6 @@ SMTP); move when it's generally available.
   | `supabase-migrate.yml`, `db-backup.yml` | Straight ports |
   | `semantic-revert-check.yml` | Its PR comments use the GitHub API; port to Forgejo's |
   | `mac-build.yml` | Host mode on the Mac Studio |
-  | (no workflow) | `dispatch-feed.ts` reads the `industry-digest` branch from `raw.githubusercontent.com`; switch it to Codeberg's raw URL and update the SSRF allowlist |
   | `schedule-social-posts.yml` | Commits back; needs a Codeberg push token |
   | `weekly-analytics-recap.yml` | Paused; port or delete |
 

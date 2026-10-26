@@ -319,11 +319,9 @@ A weekly music-industry briefing. **The workflow changed on 2026-04-17:** it is 
 
 The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 
-### Weekly dispatch feed
+### No weekly digest in this repo
 
-A separate, unlisted weekly analysis for Brandon, written outside this repo by the "Unstream digest (Fri 9am)" cron to `dispatch.xml` on the **`industry-digest` branch** — never `main`, never `apps/web/public/`, so a new issue costs no deploy. `api/functions/dispatch-feed.ts` relays that file at **`/digest/dispatch.xml`** (noindexed, CDN-cached for an hour, linked from nothing); its one host, `raw.githubusercontent.com`, is on `ALLOWED_OUTBOUND_HOSTNAMES`. **Don't delete that branch** — it is where the feed lives. Not to be confused with `/dispatch.xml`, the frozen archive of The Dispatch above.
-
-It replaced the Ollama-compiled industry digest (`industry-digest.yml`, `scripts/industry-digest/`, `digest-feed.ts`), removed on 2026-10-25; `/digest/feed.xml` 301s to the dispatch, and the code is in git history.
+Brandon's weekly Unstream analysis runs on his Mac Studio (a Hermes cron) and is served from there, not from unstream.stream. Both repo-hosted versions were removed on 2026-10-25: the Ollama-compiled industry digest (`industry-digest.yml`, `scripts/industry-digest/`, `digest-feed.ts`, #672) and its short-lived replacement relay (`dispatch-feed.ts` at `/digest/dispatch.xml`, #671), along with the `industry-digest` branch they read. **Don't bring a digest back into this repo:** the repo is public, so anything on any branch is readable by anyone, and the analysis draws on Brandon's private notes. The code is in git history.
 
 ### API middleware & security
 
