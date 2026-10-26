@@ -31,10 +31,23 @@ describe('platform logo copies', () => {
   });
 });
 
+const markIds = Object.keys(SIMPLE_ICON_PATHS) as (keyof typeof SIMPLE_ICON_PATHS)[];
+
+// The extension popup's result pills draw every mark the web's PlatformIcon does (PLATFORM_LOGOS
+// in popup.js), in the pill's text colour.
+describe('extension platform marks', () => {
+  it.each(markIds)('%s is the same path and fill rule in the extension pills', (id) => {
+    const icon = SIMPLE_ICON_PATHS[id]!;
+    const rule = icon.fillRule === 'evenodd' ? ' fill-rule="evenodd"' : '';
+    expect(extensionPopup).toContain(
+      `  ${id}: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor"${rule} d="${icon.d}"/></svg>',`
+    );
+  });
+});
+
 // The Mac app's platform pills draw every mark the web's PlatformIcon does (platformLogos in
 // BrandIcons.swift), from copies of SIMPLE_ICON_PATHS.
 describe('Mac app platform marks', () => {
-  const markIds = Object.keys(SIMPLE_ICON_PATHS) as (keyof typeof SIMPLE_ICON_PATHS)[];
 
   it.each(markIds)('%s is the same path in the Mac app', (id) => {
     expect(macBrandIcons).toContain(`static let ${id} = "${SIMPLE_ICON_PATHS[id]!.d}"`);
