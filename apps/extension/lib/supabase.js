@@ -30,12 +30,23 @@ export async function getStoredSession() {
   if (session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
     // Token expired — try refresh
     const refreshed = await refreshSession(session);
-    if (refreshed) return refreshed;
-    // Refresh failed — clear session
-    await clearSession();
-    return null;
+    if (refreshed.session) return refreshed.session;
+    // Only Supabase saying no ends the session. Clearing on any failure signed people out for
+    // good whenever the browser opened offline or a laptop woke before Wi-Fi did; an unreachable
+    // server keeps the stored session, and the next call tries the refresh again.
+    if (refreshed.rejected) {
+      await clearSession();
+      return null;
+    }
+    return session;
   }
   return session;
+}
+
+// Whether a failed refresh response means the session is over (Supabase rejected the refresh
+// token), as opposed to the server being unavailable for now. 429 is rate limiting, not a no.
+export function refreshRejectsSession(status) {
+  return status >= 400 && status < 500 && status !== 429;
 }
 
 async function storeSession(session) {
@@ -114,9 +125,10 @@ export async function signOut() {
   await clearSession();
 }
 
-// Refresh an expired access token
+// Refresh an expired access token. Resolves to { session } on success, { rejected: true } when
+// Supabase refused the refresh token, or { unavailable: true } when it couldn't be asked.
 async function refreshSession(session) {
-  if (!session?.refresh_token) return null;
+  if (!session?.refresh_token) return { rejected: true };
 
   try {
     const response = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
@@ -125,7 +137,9 @@ async function refreshSession(session) {
       body: JSON.stringify({ refresh_token: session.refresh_token }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return refreshRejectsSession(response.status) ? { rejected: true } : { unavailable: true };
+    }
 
     const data = await response.json();
     const newSession = {
@@ -136,9 +150,10 @@ async function refreshSession(session) {
     };
 
     await storeSession(newSession);
-    return newSession;
+    return { session: newSession };
   } catch {
-    return null;
+    // Offline, DNS, a dropped connection: nothing was decided about the session.
+    return { unavailable: true };
   }
 }
 
