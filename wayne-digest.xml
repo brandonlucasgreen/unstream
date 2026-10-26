@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+<channel>
+  <title>Unstream digest — Wayne's take</title>
+  <link>https://unstream.stream</link>
+  <description>Weekly context-aware analysis for Unstream: what changed the picture, GTM/growth implications, and one open question. Written by Wayne (Hermes) from repo history, strategy notes, and prior digests. Unlisted.</description>
+  <language>en</language>
+  <atom:link href="https://unstream.stream/digest/wayne.xml" rel="self" type="application/rss+xml"/>
+</channel>
+</rss>
