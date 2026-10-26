@@ -344,7 +344,7 @@ function App() {
           searches. Leaving it up pushed the first result below the fold on a
           phone. The marketing byline is dropped entirely in PWA mode. */}
       {!hasSearched && (
-      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4 hero-glow"}>
+      <div className={isStandalone ? "pt-20 px-4" : "pt-14 px-4"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-[30px]">
             {/* Darker Grotesque's cap height is ~20% shorter than the body face
@@ -366,9 +366,7 @@ function App() {
       )}
 
       {/* Search section */}
-      {/* `relative` keeps the hero's glow behind the download buttons: the hero
-          is positioned, so an unpositioned <main> would paint beneath it. */}
-      <main className="relative px-4 pb-16">
+      <main className="px-4 pb-16">
         <div className="max-w-4xl mx-auto">
           {isStandalone ? (
             /* App home. Search keeps a prominent input here even though the
