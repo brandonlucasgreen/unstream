@@ -364,6 +364,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'wikidata.org',
   'www.wikidata.org',
   'en.wikipedia.org',
+  // Artist photos' licence metadata (api/search/commons-photo.ts). The photos themselves load
+  // in the browser from Wikimedia's image hosts and are never fetched server-side.
+  'commons.wikimedia.org',
   // Search / discovery
   'S64VD9CU46-dsn.algolia.net',
   'S64VD9CU46.algolianet.com',

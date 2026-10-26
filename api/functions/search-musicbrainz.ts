@@ -29,6 +29,7 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
     bandcampSubdomain: null,
     bio: null,
     bioFetchFailed: false,
+    commonsPhoto: null,
   };
 }
 

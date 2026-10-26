@@ -33,6 +33,10 @@ export function ResultCardHeader({
 }: ResultCardHeaderProps) {
   const [imageError, setImageError] = useState(false);
   const artistPath = artistPagePath(result);
+  // A Commons photo stands in only when the card has no photo of its own, and is never shown
+  // without its credit (CC BY / BY-SA require the author and licence beside it).
+  const commonsPhoto = result.imageUrl ? undefined : result.commonsPhoto;
+  const photoUrl = result.imageUrl ?? commonsPhoto?.url;
 
   return (
     <div
@@ -52,9 +56,9 @@ export function ResultCardHeader({
       )}
       {/* Thumbnail */}
       <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-bg-secondary">
-        {result.imageUrl && !imageError ? (
+        {photoUrl && !imageError ? (
           <img
-            src={result.imageUrl}
+            src={photoUrl}
             alt={result.name}
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
@@ -95,6 +99,19 @@ export function ResultCardHeader({
           <p className="text-text-muted text-xs">
             {[result.location?.city, result.location?.country ?? result.location?.countryCode].filter(Boolean).join(', ')}
           </p>
+        )}
+        {commonsPhoto && !imageError && (
+          // Wraps rather than truncates: the author's name is what the licence requires, and at
+          // phone width a truncated line kept only "Pho…". The server caps the name's length.
+          <a
+            href={commonsPhoto.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-text-muted text-xs break-words hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Photo: {commonsPhoto.author || 'Wikimedia Commons'} · {commonsPhoto.license} ↗
+          </a>
         )}
         {result.artist && (
           <p className="text-text-secondary text-sm truncate">

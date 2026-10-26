@@ -4,6 +4,7 @@
 import { bandcampSubdomainOf, bandcampSubdomainConflicts } from '../shared/bandcamp-identity';
 import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
 import { normalizeAccents, foldToAscii } from '../shared/artist-slug';
+import type { CommonsPhoto } from '../search/commons-photo';
 
 export type SourceId =
   | 'bandcamp'
@@ -114,6 +115,9 @@ export interface AggregatedResult {
   bio?: ArtistBio;
   // A claimed artist turned bios off. Clients must not fill one in from Phase 2 either.
   bioSuppressed?: boolean;
+  // A Wikimedia Commons photo, only on a card with no imageUrl. Clients must show its credit
+  // with it; it is kept out of imageUrl so it is never stored or shown uncredited.
+  commonsPhoto?: CommonsPhoto;
   // The artist takes tips on Unstream right now, so the card shows a Tip button
   // (docs/specs/artist-patronage-spec.md §3.1). Absent otherwise.
   tipsEnabled?: true;
@@ -551,10 +555,12 @@ export function isCacheableMbResult(result: {
   artistName: string | null;
   enrichmentComplete: boolean;
   bioFetchFailed?: boolean;
+  photoFetchFailed?: boolean;
 }): boolean {
   if (result.searchFailed) return false;
   if (result.artistName !== null && !result.enrichmentComplete) return false;
   if (result.bioFetchFailed) return false;
+  if (result.photoFetchFailed) return false;
   return true;
 }
 
@@ -1139,11 +1145,7 @@ export function attachBios(
     // The Discogs bio needs the Discogs link on the card itself: an admin suppression that
     // removed the link has said that page isn't this artist, so its bio isn't either.
     const hasMbDiscogs = mb !== null && mb.discogsUrl !== null && result.platforms.some(p => p.url === mb.discogsUrl);
-    const isMbTarget = mb !== null && (
-      result.id === mb.resultId ||
-      hasMbDiscogs ||
-      (mb.officialUrl !== null && result.platforms.some(p => p.url === mb.officialUrl))
-    );
+    const isMbTarget = mb !== null && isMusicBrainzTarget(result, mb);
 
     const bio = pickBio([
       bandcampBio,
@@ -1151,6 +1153,32 @@ export function attachBios(
       isMbTarget ? makeBio('wikipedia', mb.wikipediaSummary, mb.wikipediaUrl) : null,
     ]);
     if (bio) result.bio = bio;
+  }
+}
+
+// The result MusicBrainz enriched: by id, or by the Discogs or official-site link enrichment
+// put on it (a merge can change the id, not the links).
+function isMusicBrainzTarget(result: AggregatedResult, mb: MbBioInput): boolean {
+  return result.id === mb.resultId ||
+    (mb.discogsUrl !== null && result.platforms.some(p => p.url === mb.discogsUrl)) ||
+    (mb.officialUrl !== null && result.platforms.some(p => p.url === mb.officialUrl));
+}
+
+/**
+ * Give the MusicBrainz artist's card their Commons photo, in place, when it has no photo of its
+ * own: a Bandcamp photo, an admin's, or the artist's own upload always wins. Run beside
+ * attachBios, after disambiguation, for the same reason. Claimed cards are left alone — the
+ * artist chose their picture, or chose to have none.
+ */
+export function attachCommonsPhoto(
+  results: AggregatedResult[],
+  mb: MbBioInput | null,
+  photo: CommonsPhoto | null,
+): void {
+  if (!mb || !photo) return;
+  for (const result of results) {
+    if (result.type !== 'artist' || result.matchConfidence === 'claimed' || result.imageUrl) continue;
+    if (isMusicBrainzTarget(result, mb)) result.commonsPhoto = photo;
   }
 }
 

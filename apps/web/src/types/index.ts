@@ -111,6 +111,9 @@ export interface SearchResult {
   bio?: ArtistBio;
   // A claimed artist turned bios off; Phase 2 must not fill one in.
   bioSuppressed?: boolean;
+  // A Wikimedia Commons photo, sent only for a card with no imageUrl. Never shown without its
+  // credit, and never saved: that is why it isn't imageUrl. Mirrors api/search/commons-photo.ts.
+  commonsPhoto?: CommonsPhoto;
   // Geographic location from MusicBrainz, Bandcamp, or Mirlo enrichment
   location?: ArtistLocation;
   // The artist takes tips on Unstream right now: show Tip (→ /tip/{slug}).
@@ -125,6 +128,17 @@ export interface SearchResponse {
   // Client-only: a multi-artist search where some of the split queries failed, so these
   // results are what the rest returned. Never sent by the server.
   partial?: boolean;
+}
+
+// A freely licensed artist photo from Wikimedia Commons and the credit its licence requires.
+export interface CommonsPhoto {
+  url: string;
+  // Plain text; '' only for a public-domain photo.
+  author: string;
+  // e.g. "CC BY-SA 2.0"
+  license: string;
+  // The Commons file page, where the full attribution lives.
+  sourceUrl: string;
 }
 
 // A short artist bio — one source, never stitched together. `text` is plain text with
@@ -158,6 +172,8 @@ export interface MusicBrainzData {
   location?: ArtistLocation;
   // Only fills a card with none — see mergeWithMusicBrainzData.
   bio?: ArtistBio | null;
+  // Likewise: only for a card with no photo, and never a claimed one.
+  commonsPhoto?: CommonsPhoto | null;
   // The Bandcamp account MusicBrainz lists for this artist, even if retired. A result on a
   // different subdomain is a same-name stranger and must not be enriched.
   bandcampSubdomain?: string | null;

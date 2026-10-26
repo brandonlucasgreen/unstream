@@ -35,6 +35,7 @@ import {
   applyMergeOverrides,
   applyLinkSuppressions,
   attachBios,
+  attachCommonsPhoto,
   mergeStoredArtistsIntoResults,
   displayNameFromSlug,
   isBandcampSearchLink,
@@ -1540,8 +1541,8 @@ async function searchAllPlatforms(
 
   const finalResults = filterAndSort(finalMerged, query);
 
-  // Phase 6: Bios. Last, because splits and merges rebuild result objects.
-  attachBios(finalResults, collectBandcampBios(allResults, mbData), mbData && mbData.artistName !== null ? {
+  // Phase 6: Bios and Commons photos. Last, because splits and merges rebuild result objects.
+  const mbInput = mbData && mbData.artistName !== null ? {
     resultId: mbResultId,
     discogsUrl: mbData.discogsUrl,
     officialUrl: mbData.officialUrl,
@@ -1549,7 +1550,10 @@ async function searchAllPlatforms(
     discogsProfile: mbData.discogsProfile ?? null,
     wikipediaSummary: mbData.wikipediaSummary,
     wikipediaUrl: mbData.wikipediaUrl,
-  } : null);
+  } : null;
+  attachBios(finalResults, collectBandcampBios(allResults, mbData), mbInput);
+  // `?? null`: likewise for entries written before photos existed.
+  attachCommonsPhoto(finalResults, mbInput, mbData?.commonsPhoto ?? null);
 
   // Enrichment counts as applied only when the identity matched AND the
   // url-rels data actually arrived. Claiming completion on a partial fetch is

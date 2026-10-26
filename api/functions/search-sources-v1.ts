@@ -77,13 +77,15 @@ async function handleRequest(event: NetlifyEvent) {
   try {
     const data = JSON.parse(coreResult.body);
 
-    // Bios aren't part of the v1 contract yet. Wikipedia text is CC BY-SA, and passing it to
-    // API consumers is a licensing decision to document in openapi.yaml on purpose, not a
-    // side effect of the app's search response growing a field.
+    // Bios and Commons photos aren't part of the v1 contract yet. Wikipedia text and most
+    // Commons photos are CC BY-SA, and passing them to API consumers is a licensing decision to
+    // document in openapi.yaml on purpose, not a side effect of the app's search response
+    // growing a field.
     if (Array.isArray(data.results)) {
       for (const result of data.results as Record<string, unknown>[]) {
         delete result.bio;
         delete result.bioSuppressed;
+        delete result.commonsPhoto;
       }
     }
 

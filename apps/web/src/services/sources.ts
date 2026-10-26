@@ -565,6 +565,9 @@ export function mergeSearchResponses(responses: SearchResponse[], originalQuery:
         if (!existing.imageUrl && result.imageUrl) {
           existing.imageUrl = result.imageUrl;
         }
+        if (!existing.commonsPhoto && result.commonsPhoto) {
+          existing.commonsPhoto = result.commonsPhoto;
+        }
         // Upgrade match confidence if verified
         if (result.matchConfidence === 'verified') {
           existing.matchConfidence = 'verified';
@@ -815,6 +818,7 @@ export function buildMusicBrainzFallbackResult(
     wikipediaSummary: mbData.wikipediaSummary || undefined,
     wikipediaUrl: mbData.wikipediaUrl || undefined,
     bio: mbData.bio || undefined,
+    commonsPhoto: mbData.commonsPhoto || undefined,
   };
 }
 
@@ -1056,6 +1060,7 @@ export function mergeWithMusicBrainzData(
       wikipediaSummary: mbData.wikipediaSummary || undefined,
       wikipediaUrl: mbData.wikipediaUrl || undefined,
       bio: result.bio ?? (canFillBio(result, mbNormalized) ? mbData.bio ?? undefined : undefined),
+      commonsPhoto: result.commonsPhoto ?? (canFillPhoto(result, mbNormalized) ? mbData.commonsPhoto ?? undefined : undefined),
       location: mbData.location || result.location,
     };
   });
@@ -1067,6 +1072,14 @@ export function mergeWithMusicBrainzData(
 // "Synthetic Ruby".
 function canFillBio(result: import('../types').SearchResult, mbNormalized: string): boolean {
   return !result.bioSuppressed &&
+    result.matchConfidence !== 'claimed' &&
+    normalizeForComparison(result.name) === mbNormalized;
+}
+
+// The Commons photo follows the same rule, and also never displaces a photo the card already
+// has: a Bandcamp, admin or artist-chosen picture always wins.
+function canFillPhoto(result: import('../types').SearchResult, mbNormalized: string): boolean {
+  return !result.imageUrl &&
     result.matchConfidence !== 'claimed' &&
     normalizeForComparison(result.name) === mbNormalized;
 }

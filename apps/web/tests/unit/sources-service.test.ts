@@ -263,6 +263,36 @@ describe('mergeWithMusicBrainzData bios', () => {
   });
 });
 
+// A Commons photo follows the bio's rules, and never displaces a photo the card already has.
+describe('mergeWithMusicBrainzData Commons photos', () => {
+  const commonsPhoto = {
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/x.jpg/330px-x.jpg',
+    author: 'PopTech',
+    license: 'CC BY-SA 2.0',
+    sourceUrl: 'https://commons.wikimedia.org/wiki/File:x.jpg',
+  };
+
+  it('fills a photo-less card of the same name', () => {
+    const merged = mergeWithMusicBrainzData([makeArtistResult('Test Artist')], makeMBData({ commonsPhoto }));
+    expect(merged[0].commonsPhoto).toEqual(commonsPhoto);
+  });
+
+  it('leaves a card with its own photo, a claimed card and a near-miss name alone', () => {
+    const results = [
+      { ...makeArtistResult('Test Artist'), imageUrl: 'https://f4.bcbits.com/img/1.jpg' },
+      { ...makeArtistResult('Test Artist'), id: 'claimed', matchConfidence: 'claimed' as const },
+    ];
+    for (const result of results) {
+      expect(mergeWithMusicBrainzData([result], makeMBData({ commonsPhoto }))[0].commonsPhoto).toBeUndefined();
+    }
+    expect(mergeWithMusicBrainzData([makeArtistResult('Test Artists')], makeMBData({ commonsPhoto }))[0].commonsPhoto).toBeUndefined();
+  });
+
+  it('carries the photo onto a MusicBrainz-only card', () => {
+    expect(buildMusicBrainzFallbackResult(makeMBData({ commonsPhoto }))?.commonsPhoto).toEqual(commonsPhoto);
+  });
+});
+
 describe('mergeWithMusicBrainzData', () => {
   it('returns results unchanged if artistName is null', () => {
     const results = [makeArtistResult('Test')];
