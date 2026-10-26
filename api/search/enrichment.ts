@@ -584,9 +584,7 @@ export interface MusicBrainzArea {
   'iso-3166-2-codes'?: string[];
 }
 
-type AreaKind = 'country' | 'subdivision' | 'city';
-
-function classifyArea(area: MusicBrainzArea): AreaKind {
+function classifyArea(area: MusicBrainzArea): 'country' | 'subdivision' | 'city' {
   if (area['iso-3166-1-codes']?.length || area.type === 'Country') return 'country';
   if (area['iso-3166-2-codes']?.length || area.type === 'Subdivision') return 'subdivision';
   return 'city';
@@ -595,35 +593,61 @@ function classifyArea(area: MusicBrainzArea): AreaKind {
 /**
  * Build a location from a MusicBrainz artist's `area`, `begin-area` and country code.
  *
- * `begin-area` is where the artist is *from*, so it wins on specificity; `area` is where
- * they are now and usually carries the country. Reading either one's `type` is what broke
- * this before: Foo Fighters' area is "United States" with `type: null`, which the old code
- * filed as a city.
+ * `area` is the place MusicBrainz says the artist is identified with, and the top-level
+ * country code is derived from it. `begin-area` is where they were born or formed. They
+ * are two independent places, so the specific slot comes from **one** of them, never a
+ * city from one beside a region from the other — the same rule pickLocation applies across
+ * sources. Zoë Keating's area is Vermont and her begin-area is Guelph (Ontario, where she
+ * was born); splicing them rendered "Guelph, Vermont".
+ *
+ * So an `area` more specific than a country is used alone. Only when `area` is a country
+ * (or absent) may `begin-area` add the specific slot: Foo Fighters are area "United States",
+ * begin-area "Seattle". A begin-area subdivision must carry that country's ISO prefix
+ * (Citizen's "US-MI"); a begin-area city carries no code, so its country cannot be checked
+ * and is taken on trust.
+ *
+ * Classify by ISO codes, not `type`: Foo Fighters' area is "United States" with `type: null`,
+ * which an earlier version filed as a city.
  */
 export function parseMusicBrainzArea(
   area: MusicBrainzArea | null | undefined,
   beginArea: MusicBrainzArea | null | undefined,
   topLevelCountryCode?: string,
 ): ArtistLocation | undefined {
-  const areas = [beginArea, area].filter((a): a is MusicBrainzArea => !!a?.name);
-  const find = (kind: AreaKind) => areas.find(a => classifyArea(a) === kind);
+  const current = area?.name ? area : undefined;
+  const origin = beginArea?.name ? beginArea : undefined;
 
-  const countryArea = find('country');
-  const subdivision = find('subdivision')?.name;
-  const city = find('city')?.name;
+  let specific: MusicBrainzArea | undefined;
+  let countryArea: MusicBrainzArea | undefined;
+  if (current && classifyArea(current) !== 'country') {
+    specific = current;
+  } else {
+    countryArea = current;
+    if (origin && classifyArea(origin) === 'country') {
+      countryArea ??= origin;
+    } else if (origin) {
+      const code = countryArea?.['iso-3166-1-codes']?.[0] ?? topLevelCountryCode;
+      if (isWithinCountry(origin, code)) specific = origin;
+    }
+  }
+
   const countryCode = countryArea?.['iso-3166-1-codes']?.[0] ?? topLevelCountryCode;
   // Most artists' only country signal is the top-level code, with no country area to
   // name it — MusicBrainz files Destroy Boys under area "Sacramento", country "US".
   // Without this the page reads "Sacramento, US".
   const countryName = countryArea?.name ?? countryNameFor(countryCode);
 
-  // Two display slots, filled most-specific first. With a city we show the subdivision
-  // beside it when there is one ("Seattle, Washington") and the country otherwise
-  // ("Seattle, United States"); with no city the subdivision takes the specific slot.
-  if (city) return trimLocation({ city, country: subdivision ?? countryName, countryCode });
-  if (subdivision) return trimLocation({ city: subdivision, country: countryName, countryCode });
+  if (specific) return trimLocation({ city: specific.name, country: countryName, countryCode });
   if (countryName || countryCode) return trimLocation({ country: countryName, countryCode });
   return undefined;
+}
+
+// Whether a city or subdivision can sit beside this country. Only a subdivision's ISO
+// 3166-2 code ("US-MI") names its country; a city has no code, so it is accepted.
+function isWithinCountry(place: MusicBrainzArea, countryCode: string | undefined): boolean {
+  const subdivisionCode = place['iso-3166-2-codes']?.[0];
+  if (!subdivisionCode || !countryCode) return true;
+  return subdivisionCode.toUpperCase().startsWith(`${countryCode.toUpperCase()}-`);
 }
 
 // ISO 3166-1 alpha-2 -> English country name. Intl is in both runtimes we deploy to, so
