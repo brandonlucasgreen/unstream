@@ -517,7 +517,8 @@
   to = "/.netlify/functions/digest-feed"
   status = 200
 
-# Weekly dispatch digest feed (dispatch-feed.ts). Unlisted, same pattern as above.
+# The weekly dispatch feed (dispatch-feed.ts). Unlisted, same pattern as above. Not /dispatch.xml,
+# which is the frozen archive of the old Discord Dispatch.
 [[redirects]]
   from = "/digest/dispatch.xml"
   to = "/.netlify/functions/dispatch-feed"

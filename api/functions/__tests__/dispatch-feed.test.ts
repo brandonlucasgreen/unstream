@@ -1,5 +1,5 @@
 // /digest/dispatch.xml relays the weekly dispatch digest (dispatch.xml on the industry-digest
-// branch). Same contract as digest-feed.test.ts: RSS Content-Type (GitHub serves text/plain),
+// branch). Same contract as digest-feed.test.ts, plus a staleness report: RSS Content-Type (GitHub serves text/plain),
 // noindex, and a GitHub failure is never cached or relayed as if it were the feed.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -7,10 +7,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mocks = vi.hoisted(() => ({ captureMessage: vi.fn() }));
 vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: mocks.captureMessage } }));
 
-import { handler, UPSTREAM_URL } from '../dispatch-feed';
+import { handler, newestIssueDate, STALE_AFTER_DAYS, UPSTREAM_URL } from '../dispatch-feed';
 import { isUrlHostnameAllowed } from '../middleware';
 
 const FEED = '<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel></channel></rss>\n';
+
+function feedWithIssues(...pubDates: string[]): string {
+  const items = pubDates.map((d) => `<item><title>Issue</title><pubDate>${d}</pubDate></item>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>${items}</channel></rss>\n`;
+}
 
 function stubFetch(impl: () => Promise<Response>) {
   const fetchMock = vi.fn(impl);
@@ -63,6 +68,30 @@ describe('dispatch-feed', () => {
       'Dispatch digest feed: GitHub did not answer',
       expect.anything(),
     );
+  });
+
+  it('reports a feed whose newest issue is stale, and still serves it', async () => {
+    const old = new Date(Date.now() - (STALE_AFTER_DAYS + 2) * 86_400_000).toUTCString();
+    const feed = feedWithIssues(old);
+    stubFetch(async () => new Response(feed, { status: 200 }));
+    const res = await handler({ httpMethod: 'GET' });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe(feed);
+    expect(mocks.captureMessage).toHaveBeenCalledWith(expect.stringContaining('no new issue'), expect.anything());
+  });
+
+  it('does not report a fresh feed, or one with no issues yet', async () => {
+    stubFetch(async () => new Response(feedWithIssues(new Date().toUTCString()), { status: 200 }));
+    await handler({ httpMethod: 'GET' });
+    stubFetch(async () => new Response(FEED, { status: 200 }));
+    await handler({ httpMethod: 'GET' });
+    expect(mocks.captureMessage).not.toHaveBeenCalled();
+  });
+
+  it('dates the feed by its newest item, whatever the order', () => {
+    const feed = feedWithIssues('Fri, 16 Oct 2026 13:00:00 GMT', 'Fri, 23 Oct 2026 13:00:00 GMT', 'not a date');
+    expect(newestIssueDate(feed)?.toISOString()).toBe('2026-10-23T13:00:00.000Z');
+    expect(newestIssueDate(FEED)).toBeNull();
   });
 
   it('rejects non-GET methods', async () => {
