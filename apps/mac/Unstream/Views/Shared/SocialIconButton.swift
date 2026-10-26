@@ -13,9 +13,6 @@ struct SocialIconButton: View {
     @State private var safariItem: SafariURL?
     #endif
 
-    // Platforms that have brand SVG icons
-    private let brandIconPlatforms: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube", "bandcamp"]
-
     #if os(iOS)
     private let buttonSize: CGFloat = 44
     private let iconSize: CGFloat = 20
@@ -27,7 +24,7 @@ struct SocialIconButton: View {
     var body: some View {
         Button(action: openPlatform) {
             Group {
-                if brandIconPlatforms.contains(result.sourceId) {
+                if BrandIcon.hasLogo(result.sourceId) {
                     BrandIcon(
                         platform: result.sourceId,
                         size: iconSize,
