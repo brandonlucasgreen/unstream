@@ -1,11 +1,11 @@
 import { isUrlHostnameAllowed } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
 
-// Wayne's weekly Unstream digest feed, at /digest/wayne.xml. Unlisted: nothing on the site links
+// Weekly Unstream dispatch feed, at /digest/dispatch.xml. Unlisted: nothing on the site links
 // to it, it isn't in the sitemap, and it answers with X-Robots-Tag: noindex.
 //
-// The feed is written by the "Unstream digest (Wayne, Fri 9am)" cron to the `industry-digest`
-// branch (wayne-digest.xml) and relayed here — the same pattern as digest-feed.ts. A separate
+// The feed is written by the "Unstream digest (Fri 9am)" cron to the `industry-digest`
+// branch (dispatch.xml) and relayed here — the same pattern as digest-feed.ts. A separate
 // function (rather than teaching digest-feed.ts about paths) keeps each feed's upstream URL
 // hardcoded and the two digests fully independent: a change to one can never break the other.
 //
@@ -13,7 +13,7 @@ import { Sentry, withSentry } from '../lib/sentry';
 // metered Redis command per request to protect a single GitHub fetch.
 
 export const UPSTREAM_URL =
-  'https://raw.githubusercontent.com/brandonlucasgreen/unstream/industry-digest/wayne-digest.xml';
+  'https://raw.githubusercontent.com/brandonlucasgreen/unstream/industry-digest/dispatch.xml';
 
 interface FeedResponse {
   statusCode: number;
@@ -41,14 +41,14 @@ async function handleRequest(event: { httpMethod?: string }): Promise<FeedRespon
   }
 
   if (!isUrlHostnameAllowed(UPSTREAM_URL)) {
-    throw new Error('wayne-feed: raw.githubusercontent.com is missing from ALLOWED_OUTBOUND_HOSTNAMES');
+    throw new Error('dispatch-feed: raw.githubusercontent.com is missing from ALLOWED_OUTBOUND_HOSTNAMES');
   }
 
   let upstream: Response;
   try {
     upstream = await fetch(UPSTREAM_URL, { signal: AbortSignal.timeout(10_000) });
   } catch (error) {
-    Sentry.captureMessage('Wayne digest feed: GitHub did not answer', {
+    Sentry.captureMessage('Dispatch digest feed: GitHub did not answer', {
       level: 'warning',
       extra: { error: (error as Error).message },
     });
@@ -60,7 +60,7 @@ async function handleRequest(event: { httpMethod?: string }): Promise<FeedRespon
   const body = upstream.ok ? await upstream.text() : '';
   // A 200 that isn't a feed (an error page, an empty file) is a failure, not a feed to relay.
   if (!upstream.ok || !body.includes('<rss')) {
-    Sentry.captureMessage('Wayne digest feed: unexpected upstream response', {
+    Sentry.captureMessage('Dispatch digest feed: unexpected upstream response', {
       level: 'warning',
       extra: { status: upstream.status, length: body.length },
     });
