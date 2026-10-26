@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,9 +21,14 @@ export function TipForm({ data, hydrated = true, initialGoalId = '' }: { data: T
   const [amountCents, setAmountCents] = useState(500);
   const [custom, setCustom] = useState('');
   const [coverFees, setCoverFees] = useState(true);
-  const [goalId, setGoalId] = useState<string>(
-    openGoals.some(goal => goal.id === initialGoalId) ? initialGoalId : '',
-  );
+  const initialGoalIsOpen = openGoals.some(goal => goal.id === initialGoalId);
+  const [goalId, setGoalId] = useState<string>(initialGoalIsOpen ? initialGoalId : '');
+  // The /tip page mounts this form before its goals arrive, so a `?goal=` can only be matched once
+  // they do. Without this the goal link's choice was dropped and the tip never counted towards it.
+  // Fires once, when the goal turns up, so a later "No goal, just a tip" isn't undone.
+  useEffect(() => {
+    if (initialGoalIsOpen) setGoalId(initialGoalId);
+  }, [initialGoalIsOpen, initialGoalId]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   // Back from Stripe's page can restore this one from the back/forward cache, still "Opening Stripe…".
