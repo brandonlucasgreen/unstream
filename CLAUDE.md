@@ -319,11 +319,11 @@ A weekly music-industry briefing. **The workflow changed on 2026-04-17:** it is 
 
 The old "commit dispatch work directly to `main`" instruction is dead — do not follow it.
 
-### Industry digest
+### Weekly dispatch feed
 
-A separate, unlisted weekly digest for Brandon: `industry-digest.yml` runs `scripts/industry-digest/` every Friday, an Ollama cloud model compiles it, and it is published as `feed.xml` on the **`industry-digest` branch** — never `main`, never `apps/web/public/`, so a new issue costs no deploy. `api/functions/digest-feed.ts` relays that file at **`/digest/feed.xml`** (noindexed, CDN-cached for an hour, linked from nothing). The model cites numbered stories and never writes a URL; keep it that way. Detail in `scripts/industry-digest/README.md`.
+A separate, unlisted weekly analysis for Brandon, written outside this repo by the "Unstream digest (Fri 9am)" cron to `dispatch.xml` on the **`industry-digest` branch** — never `main`, never `apps/web/public/`, so a new issue costs no deploy. `api/functions/dispatch-feed.ts` relays that file at **`/digest/dispatch.xml`** (noindexed, CDN-cached for an hour, linked from nothing); its one host, `raw.githubusercontent.com`, is on `ALLOWED_OUTBOUND_HOSTNAMES`. **Don't delete that branch** — it is where the feed lives. Not to be confused with `/dispatch.xml`, the frozen archive of The Dispatch above.
 
-The script itself sits outside `ALLOWED_OUTBOUND_HOSTNAMES`: that allowlist guards the site's functions, and the script fetches only the fixed feeds in `sources.ts` and `ollama.com`. `digest-feed.ts` is a function, so its one host (`raw.githubusercontent.com`) is on the list.
+It replaced the Ollama-compiled industry digest (`industry-digest.yml`, `scripts/industry-digest/`, `digest-feed.ts`), removed on 2026-10-25; `/digest/feed.xml` 301s to the dispatch, and the code is in git history.
 
 ### API middleware & security
 
@@ -382,7 +382,7 @@ Pushes to `main` trigger Netlify builds (`npm run build`). Functions deploy from
 
 **Deploy Previews are opt-in per push.** `[context.deploy-preview]` runs `scripts/netlify-ignore-preview.sh`, which cancels the preview unless the PR's head commit message contains `[preview]` — so by default a PR gets no preview URL and its Netlify checks don't run (configuration, not breakage). #451 turned them off because they ate the build allowance; add the marker only to the push you actually want to open on a phone or share. A preview runs the real functions against **production** Supabase, same as `npm run dev`. Without the marker, **`npm run dev` is the only way to exercise the real backend before merging.**
 
-GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h) · `db-backup.yml` (nightly encrypted backup to R2, see Database / migrations) · `mac-build.yml` (compiles the Apple app and runs XCTest on `apps/mac/` changes; never signs or uploads) · `industry-digest.yml` (Fridays) · `weekly-analytics-recap.yml` (paused, manual dispatch only).
+GitHub Actions: `ci.yml` (typecheck + both suites — the gate that used to live in the Netlify build) · `supabase-migrate.yml` · `schedule-social-posts.yml` (weekly, committed back) · `semantic-revert-check.yml` (runs `scripts/semantic-revert-check.py` to flag changes that quietly undo earlier fixes — take it seriously; bug loops in `docs/postmortems/UNS-100-bifurcation-retro.md`) · `upstash-keepalive.yml` · `recatalog-sweep.yml` (every 12h) · `db-backup.yml` (nightly encrypted backup to R2, see Database / migrations) · `mac-build.yml` (compiles the Apple app and runs XCTest on `apps/mac/` changes; never signs or uploads) · `weekly-analytics-recap.yml` (paused, manual dispatch only).
 
 ## Engineering principles
 
