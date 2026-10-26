@@ -1,4 +1,5 @@
 import Foundation
+import os
 import Supabase
 
 /// Manages Supabase auth state for the Unstream app.
@@ -8,6 +9,8 @@ import Supabase
 class AuthService: ObservableObject {
 
     static let shared = AuthService()
+
+    private static let logger = Logger(subsystem: "lol.bgreen.Unstream", category: "auth")
 
     // Public anon key — safe to embed, RLS is the real gatekeeper.
     private let supabaseURL = URL(string: "https://bwogclqzpsbvqbyhhqbz.supabase.co")!
@@ -21,7 +24,11 @@ class AuthService: ObservableObject {
 
     private init() {
         let anonKey = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String ?? ""
-        client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: anonKey)
+        client = SupabaseClient(
+            supabaseURL: supabaseURL,
+            supabaseKey: anonKey,
+            options: SupabaseClientOptions(global: .init(logger: AuthLogger()))
+        )
 
         Task {
             migrateOldKeychainTokens()
@@ -49,9 +56,30 @@ class AuthService: ObservableObject {
                 let validSession = try await client.auth.session
                 session = validSession
             } catch {
-                // Session expired and couldn't be refreshed
-                session = nil
+                // The stored access token has usually expired by launch (the SDK only refreshes
+                // while the app is active), so this is a network call. Signing out on any failure
+                // turned a launch with the network not yet up — after an update, at login — into
+                // a sign-out. Only a session the server has rejected is over; otherwise keep it,
+                // and currentAccessToken() refreshes it on the next request.
+                Self.logger.error("Session refresh at launch failed: \(error.localizedDescription, privacy: .public)")
+                if Self.refreshRejectsSession(error) {
+                    session = nil
+                }
             }
+        }
+    }
+
+    /// Whether a failed refresh means the session is over, as opposed to the server not being
+    /// reachable. Only the server saying no (a 4xx other than rate limiting) or no stored session
+    /// at all ends it; a timeout, a dropped connection or a 5xx is worth trying again.
+    nonisolated static func refreshRejectsSession(_ error: Error) -> Bool {
+        switch error {
+        case AuthError.sessionMissing:
+            return true
+        case let AuthError.api(_, _, _, response):
+            return (400..<500).contains(response.statusCode) && response.statusCode != 429
+        default:
+            return false
         }
     }
 
@@ -173,9 +201,17 @@ class AuthService: ObservableObject {
     /// Use this instead of `accessToken` for network calls.
     func currentAccessToken() async throws -> String? {
         guard session != nil else { return nil }
-        let validSession = try await client.auth.session
-        session = validSession
-        return validSession.accessToken
+        do {
+            let validSession = try await client.auth.session
+            session = validSession
+            return validSession.accessToken
+        } catch {
+            if Self.refreshRejectsSession(error) {
+                Self.logger.error("Session rejected on refresh: \(error.localizedDescription, privacy: .public)")
+                session = nil
+            }
+            throw error
+        }
     }
 
     // MARK: - Keychain migration
@@ -199,5 +235,28 @@ class AuthService: ObservableObject {
         }
 
         UserDefaults.standard.set(true, forKey: migrationFlag)
+    }
+}
+
+/// Sends the Supabase SDK's warnings and errors to the unified log (`log show --predicate
+/// 'subsystem == "lol.bgreen.Unstream"'`). Without a logger the SDK drops them, and a keychain read
+/// or write that failed looked exactly like being signed out. Only the message is logged: the SDK's
+/// additionalContext can carry the refresh token. A message quoting a URL stays private (redacted),
+/// because the one the SDK quotes is the magic-link callback, and that URL holds the sign-in tokens.
+private struct AuthLogger: SupabaseLogger {
+    private let logger = Logger(subsystem: "lol.bgreen.Unstream", category: "supabase")
+
+    func log(message: SupabaseLogMessage) {
+        let type: OSLogType
+        switch message.level {
+        case .error: type = .error
+        case .warning: type = .default
+        case .verbose, .debug: return
+        }
+        if message.message.contains("://") {
+            logger.log(level: type, "\(message.system, privacy: .public): \(message.message, privacy: .private)")
+        } else {
+            logger.log(level: type, "\(message.system, privacy: .public): \(message.message, privacy: .public)")
+        }
     }
 }
