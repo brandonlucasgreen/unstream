@@ -40,6 +40,7 @@ import {
   enrichLocationFallback,
   lookupWikipedia,
 } from '../search/enrichment';
+import { fetchCommonsPhoto, type CommonsPhoto, type CommonsPhotoLookup } from '../search/commons-photo';
 
 // On a miss this is the slowest leg of a search, so an answer is kept for a day. Not
 // longer: "no such artist" is an answer too, cached as long, and new artists add
@@ -84,6 +85,13 @@ export interface EnrichedMusicBrainzResult {
    * kept only for the short failure TTL — a timeout must not hide a bio for a day.
    */
   bioFetchFailed: boolean;
+  /**
+   * The artist's Wikimedia Commons photo (Wikidata P18), with its credit. Only ever shown
+   * with that credit, so it never becomes an `imageUrl`. See api/search/commons-photo.ts.
+   */
+  commonsPhoto: CommonsPhoto | null;
+  /** Commons or Wikidata didn't answer. Kept only for the failure TTL, like bioFetchFailed. */
+  photoFetchFailed: boolean;
   location: ArtistLocation | undefined;
   /**
    * Partial-match artist names from MB's ranked search results (beyond the top
@@ -158,6 +166,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     bandcampBio: null,
     discogsProfile: null,
     bioFetchFailed: false,
+    commonsPhoto: null,
+    photoFetchFailed: false,
     location: undefined,
     suggestedNames: [],
     searchFailed: false,
@@ -370,7 +380,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
 
     // Fetch enrichment data in parallel
     const mirloSlug = artist.name.toLowerCase().replace(/\s+/g, '');
-    const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcampPage, mirloLocation, bandcampStatus] = await Promise.all([
+    const [discogsArtist, officialSiteResult, peertubeLink, wikipediaResult, bandcampPage, mirloLocation, bandcampStatus, commonsPhoto] = await Promise.all([
       discogsUrl ? fetchDiscogsArtist(discogsUrl) : Promise.resolve({ socialLinks: [], profile: null, failed: false }),
       officialUrl ? fetchOfficialSiteSocialLinks(officialUrl) : Promise.resolve({ socialLinks: [], linktreeUrl: null, discoveredPlatforms: [], bandcampUrls: [] }),
       searchPeerTubeChannels(artist.name),
@@ -380,6 +390,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       // Rides in this existing parallel block, so a confirmed-dead link costs no
       // extra wall-clock — and only runs at all when MB actually has a Bandcamp rel.
       bandcampUrl ? checkBandcampSubdomain(bandcampUrl) : Promise.resolve('unknown' as const),
+      wikidataUrl ? fetchCommonsPhoto(wikidataUrl) : Promise.resolve<CommonsPhotoLookup>({ status: 'none' }),
     ]);
 
     // Drop a retired subdomain here, at the single point where MB's Bandcamp link enters
@@ -466,6 +477,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       bandcampBio: bandcampUrl ? bandcampPage?.bio ?? null : null,
       discogsProfile: discogsArtist.profile,
       bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcampUrl !== null && bandcampPage === null),
+      commonsPhoto: commonsPhoto.status === 'found' ? commonsPhoto.photo : null,
+      photoFetchFailed: commonsPhoto.status === 'failed',
       location,
       suggestedNames: collectMbSuggestions(artists, query, artist.name),
       searchFailed: false,
@@ -508,6 +521,12 @@ export interface MusicBrainzSearchResponse {
   bio: ArtistBio | null;
   /** A bio source didn't answer. */
   bioFetchFailed: boolean;
+  /**
+   * A Wikimedia Commons photo of the MusicBrainz artist. Clients show it only on a card with no
+   * photo of its own, and only beside its credit (author, licence, link to the file page).
+   * Added after the shipped app builds, which ignore it.
+   */
+  commonsPhoto: CommonsPhoto | null;
 }
 
 function isSubvertUrl(url: string): boolean {
@@ -557,5 +576,7 @@ export function toMusicBrainzResponse(enrichment: EnrichedMusicBrainzResult): Mu
       makeBio('wikipedia', enrichment.wikipediaSummary, enrichment.wikipediaUrl),
     ]),
     bioFetchFailed: enrichment.bioFetchFailed ?? false,
+    // `?? null`: cache entries written before photos existed lack the field.
+    commonsPhoto: enrichment.commonsPhoto ?? null,
   };
 }
