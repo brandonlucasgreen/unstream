@@ -101,16 +101,16 @@ export function ResultCardHeader({
           </p>
         )}
         {commonsPhoto && !imageError && (
+          // Wraps rather than truncates: the author's name is what the licence requires, and at
+          // phone width a truncated line kept only "Pho…". The server caps the name's length.
           <a
             href={commonsPhoto.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex max-w-full text-text-muted text-xs hover:underline"
+            className="block text-text-muted text-xs break-words hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* The author can be long; the licence must stay visible, so only the name truncates. */}
-            <span className="truncate">Photo: {commonsPhoto.author || 'Wikimedia Commons'}</span>
-            <span className="flex-shrink-0 whitespace-nowrap">&nbsp;· {commonsPhoto.license} ↗</span>
+            Photo: {commonsPhoto.author || 'Wikimedia Commons'} · {commonsPhoto.license} ↗
           </a>
         )}
         {result.artist && (
