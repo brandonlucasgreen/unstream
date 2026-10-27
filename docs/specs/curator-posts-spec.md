@@ -135,7 +135,18 @@ Rules:
 
 ## Backend
 
-**Buffer auth.** OAuth if Unstream can register a client (see "Open questions"). Otherwise the curator pastes a personal API key from Buffer's Settings → API. Either way, the token is encrypted with `credential-crypto.ts` (as for Bandcamp credentials) in `buffer_connections` (`user_id`, encrypted token, organization id, selected channel ids). Server-only: RLS on, no policies, with a comment saying the missing policies are deliberate.
+**Buffer auth: OAuth, one connection per user.** Settled 2026-10-27 — Buffer registers third-party clients at Settings → API, and Brandon can register Unstream's. The 2026 outside reviews that said otherwise (Zernio, PostProxy) are out of date.
+
+- **Authorization Code with PKCE**, which Buffer *requires* of every client, `code_challenge_method=S256`. Authorize at `https://auth.buffer.com/auth`, exchange at `https://auth.buffer.com/token`.
+- Unstream is a **confidential client**: the exchange sends `client_secret` as well as `code_verifier`, and the secret never reaches the browser. `BUFFER_CLIENT_ID` and `BUFFER_CLIENT_SECRET` are Netlify environment variables — the only two this feature needs beyond the card bucket's.
+- **Scopes:** `posts:write` to create the posts, `account:read` to list the curator's channels, and `offline_access`, **without which Buffer issues no refresh token at all**.
+- **An access token lasts an hour** (`expires_in: 3600`), so a curator who connected yesterday has an expired token. Every call refreshes first when the stored token is within a minute of expiry; there is no "just use the stored token" path.
+- **Refresh tokens are single-use, and reusing one revokes the whole grant.** Buffer returns a new refresh token on every refresh and invalidates the old one; replaying an old one logs the curator out of Unstream's integration entirely and they must reconnect. Two consequences the code has to honour:
+  - **Store the new refresh token before using the new access token**, so a crash mid-flight can't leave us holding a token Buffer has already retired.
+  - **Never refresh concurrently for one user.** Two requests refreshing at once would each present the same refresh token, and the second one revokes the grant. Serialise it (a conditional update on the stored token, so only one writer wins) rather than hoping it doesn't happen.
+- A `401` means the curator revoked access in Buffer's settings. Clear the connection and ask them to reconnect; don't retry.
+
+**`buffer_connections`** holds one row per user: `user_id`, encrypted access and refresh tokens, `expires_at`, `organization_id`, selected channel ids. Tokens are encrypted with `credential-crypto.ts`, as Bandcamp credentials are. Server-only: RLS enabled with **no** policies, and a comment saying the missing policies are deliberate — the service-role client bypasses RLS and anon gets nothing.
 
 **Tables.** New migration, `IF NOT EXISTS` guards, RLS owner-only:
 - `curator_templates`: `user_id`, `name`, `post_text`, `line_text`, timestamps.
@@ -257,7 +268,7 @@ Saved templates and the address book; paste a list; a list page per post; OAuth;
 
 ## Open questions
 
-1. **OAuth for third-party apps.** Buffer's docs describe authorization code flow with PKCE and client registration under Settings → API. Two outside reviews in 2026 (Zernio, PostProxy) say third-party clients can't be registered yet. Check internally.
+1. ~~**OAuth for third-party apps.**~~ **Answered 2026-10-27: yes.** Buffer registers third-party clients at Settings → API and Brandon can register Unstream's, so this is built for curators on their own Buffer accounts rather than for one admin token. The flow, scopes and the single-use refresh-token hazard are in "Backend". The outside reviews that said registration was unavailable (Zernio, PostProxy) are out of date.
 2. **Facebook Page mentions through `annotations` — the mechanism is right; rendering is still unproven.** (Draft `6ae0e17e…` on the Kid Lightbulbs page, 2026-10-27, since deleted.) Buffer accepts `metadata.facebook.annotations` and stores it. Three things learned:
    - All four fields are required: `{ content, indices, text, url }`.
    - **`content` is the Page's *Facebook* id, not its Buffer channel id** — Buffer calls it `serviceId`, read with `channel(input: { id: $id }) { serviceId }` (note the id's type is `ChannelId!`, not `String!`). Kid Lightbulbs is Buffer `672d115fda2e3cb64c165cb5` → Facebook `123813724362975`.

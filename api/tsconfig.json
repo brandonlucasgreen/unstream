@@ -88,6 +88,7 @@
     "functions/__tests__/curator-posts.test.ts",
     "functions/__tests__/curator-card.test.ts",
     "functions/__tests__/curator-compose.test.ts",
+    "functions/__tests__/buffer-connections-migration.test.ts",
     "functions/__tests__/tips-checkout.test.ts",
     "functions/__tests__/tips-webhook.test.ts",
     "functions/__tests__/tips-connect-settings.test.ts",
