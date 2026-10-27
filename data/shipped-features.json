@@ -131,5 +131,12 @@
     "description": "Artists connect their own Stripe account and a Tip button appears on their page and in results. You pay them directly — money lands in their own Stripe account, the artist-chosen fee (usually 0%) is shown before you pay, and your receipt comes from the artist's own Stripe. Tip from the site while you listen or from the Mac menu bar app.",
     "date": "2026-10-16",
     "announced": true
+  },
+  {
+    "id": "artist-support-links",
+    "title": "More ways to pay artists directly",
+    "description": "Artists who've claimed their Unstream page can now add Cash App, Steady, Tipeee and Big Cartel links, alongside Venmo, PayPal, Patreon, Ko-fi and Liberapay, so you can support them wherever they take payments.",
+    "date": "2026-10-27",
+    "announced": false
   }
 ]
