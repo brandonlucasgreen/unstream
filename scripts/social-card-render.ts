@@ -63,8 +63,9 @@ let assets: CardAssets | null = null;
 let wasmReady: Promise<void> | null = null;
 
 /**
- * For api/functions/social-card.ts only, until it's removed: Netlify bundles it as CommonJS,
- * where import.meta is empty, so it finds the same files its own way.
+ * For the Netlify functions that draw cards — api/functions/social-card.ts and
+ * curator-compose.ts. Netlify bundles them as CommonJS, where import.meta is empty, so they
+ * find the same files their own way (__dirname and require). Keep this while either exists.
  */
 export function loadCardAssetsWith(loader: () => CardAssets): void {
   loadAssets = loader;

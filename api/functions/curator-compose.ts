@@ -38,10 +38,26 @@ import {
 } from './curator-posts';
 import { curatorCardAltText, MAX_CURATOR_ARTIST_CARDS, type CuratorCardArtist, type CuratorCardData } from '../shared/curator-card';
 import { PLATFORMS } from '../shared/platform-registry';
-import { renderCuratorCard } from '../../scripts/social-card-render';
+import { CARD_FONT_FILES, loadCardAssetsWith, renderCuratorCard } from '../../scripts/social-card-render';
 import { cardBucketFromEnv, publishCard } from '../../scripts/social-cards';
 import { Sentry, withSentry } from '../lib/sentry';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// The renderer finds its fonts through import.meta.url, which is EMPTY in this function's
+// bundle: Netlify builds it as CommonJS despite "type": "module". So they're found through
+// __dirname and require instead, exactly as api/functions/social-card.ts does.
+// netlify.toml's included_files puts scripts/social-card-fonts/ in the zip at the same place
+// relative to this file as in the repo, and external_node_modules ships resvg whole, so both
+// paths hold deployed and under vitest, which provides the same globals.
+//
+// Nothing in the test suite catches this: the tests mock the renderer, and under tsx and vitest
+// import.meta.url works. It fails only when a card is drawn in production.
+loadCardAssetsWith(() => ({
+  fonts: CARD_FONT_FILES.map(file => readFileSync(join(__dirname, '..', '..', 'scripts', 'social-card-fonts', file))),
+  wasm: readFileSync(require.resolve('@resvg/resvg-wasm/index_bg.wasm')),
+}));
 
 /** One Buffer tag for everything this feature creates, so its analytics stand apart. */
 const CURATOR_TAG = { name: 'unstream: curator', color: '#00C8CF' };
