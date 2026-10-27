@@ -261,11 +261,13 @@ For a local Claude Code session. Read `CLAUDE.md` first, especially "Local dev: 
 - **The function really bundles its fonts.** The `included_files` and `external_node_modules` block is in no test, and a missing font only shows up as a failed draw in production. Draw a card through `npm run dev` and check `.netlify/functions-serve/curator-compose/` holds the three `.ttf`s and resvg's `.wasm`.
 - Using `npm run dev`, send to the Cult of Lightbulbs Instagram and Facebook. They're real channels, so use the draft mode until the tagging behaviour has been seen once.
 
-**After the hackathon:** move the Buffer token, templates and address book into tables (the "Backend" section above), in a migration merged to `main` before any branch depends on it — `supabase db push` aborts outright when production holds a version the branch doesn't, so one migration left unmerged blocks everybody's. Then OAuth, paste a list, and results.
+**Already shipped, ahead of this plan:** OAuth, and the Buffer token in `buffer_connections`. The rescope to per-user accounts (2026-10-27) brought both forward from here.
+
+**Still to come:** saved templates and the address book as tables of their own, paste a list, and results. Two rules for their migration, both learned the hard way — merge it to `main` before another branch depends on it, because `supabase db push` aborts outright when production holds a version the branch doesn't; and give it a leading timestamp no other migration has, because Supabase keys on exactly that and silently skips a duplicate.
 
 ## Later
 
-Saved templates and the address book; paste a list; a list page per post; OAuth; a "your last posts" panel pulling `aggregatedPostMetrics` for the `unstream: curator` tag, next to Unstream's own count of clicks through to buy pages.
+Saved templates and the address book; paste a list; a list page per post; a "your last posts" panel pulling `aggregatedPostMetrics` for the `unstream: curator` tag, next to Unstream's own count of clicks through to buy pages. (OAuth was on this list and shipped instead.)
 
 ## Open questions
 
