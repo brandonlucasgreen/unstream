@@ -100,6 +100,19 @@ describe('analytics-traffic', () => {
     fetchMock.mockResolvedValue(new Response('{"error":"rate limited"}', { status: 429 }));
     const res = await get();
     expect(res.statusCode).toBe(502);
-    expect(JSON.parse(res.body)).toEqual({ error: 'GoatCounter did not answer' });
+    expect(JSON.parse(res.body).error).toBe('GoatCounter did not answer');
+  });
+
+  it('passes on GoatCounter’s reason, so the page says which setting is wrong', async () => {
+    fetchMock.mockImplementation(async () => new Response('{"error":"requires stats permissions"}', { status: 403 }));
+    const res = await get();
+    expect(JSON.parse(res.body).detail).toMatch(/responded 403: requires stats permissions$/);
+  });
+
+  it('names a timeout rather than reporting it blank', async () => {
+    fetchMock.mockRejectedValue(Object.assign(new Error('The operation was aborted due to timeout'), { name: 'TimeoutError' }));
+    const res = await get();
+    expect(res.statusCode).toBe(502);
+    expect(JSON.parse(res.body).detail).toMatch(/^TimeoutError/);
   });
 });
