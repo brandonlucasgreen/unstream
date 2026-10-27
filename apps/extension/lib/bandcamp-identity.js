@@ -29,6 +29,18 @@ export function bandcampSubdomainConflicts(mbSubdomain, resultUrl) {
 }
 
 /**
+ * Whether a card with an artist's name is that artist, given the Bandcamp account we know them
+ * by. When several artists share the name (MusicBrainz lists three Paracosms: Los Angeles,
+ * Orlando, Sofia), only the same account on both sides counts.
+ */
+export function nameMatchIsSameArtist(knownSubdomain, nameIsShared, resultUrl) {
+  if (bandcampSubdomainConflicts(knownSubdomain, resultUrl)) return false;
+  if (!nameIsShared) return true;
+  const probed = bandcampSubdomainOf(resultUrl);
+  return !!knownSubdomain && probed === knownSubdomain.toLowerCase();
+}
+
+/**
  * Whether Phase 2's enrichment describes a different artist from the one the popup shows.
  *
  * The popup shows the first Bandcamp link among the results (renderResults keeps the first link
@@ -40,5 +52,7 @@ export function enrichmentIsAnotherArtist(results, enrichment) {
   const shownBandcamp = (results || [])
     .flatMap(r => r.platforms || [])
     .find(p => p.sourceId === 'bandcamp')?.url;
-  return bandcampSubdomainConflicts(enrichment.bandcampSubdomain, shownBandcamp);
+  // `homonyms`: other artists MusicBrainz lists by this name. Older deploys don't send it.
+  const nameIsShared = (enrichment.homonyms?.length ?? 0) > 0;
+  return !nameMatchIsSameArtist(enrichment.bandcampSubdomain, nameIsShared, shownBandcamp);
 }

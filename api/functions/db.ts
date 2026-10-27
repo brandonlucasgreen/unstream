@@ -4360,6 +4360,18 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
 
   // Search does NOT trigger release cataloging. See the note above persistSearchResults.
 
+  // Two cards with one name in one search are two artists — MusicBrainz homonyms, or a card
+  // the release check split off — and the row is keyed by the name's slug, so each would write
+  // its links over the other's and leave one page describing both. That is how /a/paracosm
+  // came to hold a Sofia band's Bandcamp beside an Orlando band's site and socials. With no
+  // way to tell whose row it is, none of them is written.
+  const slugCounts = new Map<string, number>();
+  for (const result of results) {
+    if (result.type !== 'artist') continue;
+    const slug = artistSlug(result.name);
+    slugCounts.set(slug, (slugCounts.get(slug) ?? 0) + 1);
+  }
+
   // Normally runs in persist-search-results-background, after the search has responded, but
   // request-persist.ts falls back to running it inline before the response, so wall-clock time
   // still matters: artists persist concurrently, and each artist's links go up in one bulk
@@ -4376,6 +4388,11 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
     if (validPlatforms.length === 0) return;
 
     let slug = artistSlug(result.name);
+
+    if ((slugCounts.get(slug) ?? 0) > 1) {
+      console.log(`[DB] Skipping persist for "${result.name}": ${slugCounts.get(slug)} artists by that name in one search`);
+      return;
+    }
 
     // Software products, brands and TV shows can carry a MusicBrainz entry and a Beatport
     // listing, and the pipeline's default verdict is 'verified', so without this gate one

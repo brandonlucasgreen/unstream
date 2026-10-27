@@ -125,6 +125,16 @@ actor UnstreamAPI {
         return mb != probed
     }
 
+    /// Whether a card with an artist's name is that artist, given the Bandcamp account we know them
+    /// by. When several artists share the name (MusicBrainz lists three Paracosms: Los Angeles,
+    /// Orlando, Sofia), only the same account on both sides counts.
+    static func nameMatchIsSameArtist(_ knownSubdomain: String?, nameIsShared: Bool, _ resultUrl: String?) -> Bool {
+        if bandcampSubdomainConflicts(knownSubdomain, resultUrl) { return false }
+        guard nameIsShared else { return true }
+        guard let known = knownSubdomain?.lowercased(), !known.isEmpty else { return false }
+        return bandcampSubdomain(of: resultUrl) == known
+    }
+
     func mergeWithMusicBrainzData(results: [ArtistResult], mbData: MusicBrainzResponse) -> [ArtistResult] {
         guard let artistName = mbData.artistName else { return results }
 
@@ -143,8 +153,10 @@ actor UnstreamAPI {
             guard isMatch else { return result }
 
             // Same name, different Bandcamp account: a homonym, not the artist MusicBrainz matched.
+            // When MusicBrainz lists several artists by this name, only the same account will do.
             let bandcampUrl = result.platforms.first(where: { $0.sourceId == "bandcamp" })?.url
-            guard !UnstreamAPI.bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampUrl) else { return result }
+            let nameIsShared = !(mbData.homonyms ?? []).isEmpty
+            guard UnstreamAPI.nameMatchIsSameArtist(mbData.bandcampSubdomain, nameIsShared: nameIsShared, bandcampUrl) else { return result }
 
             var newPlatforms = result.platforms
 

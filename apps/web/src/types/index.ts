@@ -181,6 +181,23 @@ export interface MusicBrainzData {
   // The Bandcamp account MusicBrainz lists for this artist, even if retired. A result on a
   // different subdomain is a same-name stranger and must not be enriched.
   bandcampSubdomain?: string | null;
+  // Other artists MusicBrainz lists under exactly this name. When there are any, only a card
+  // on `bandcampSubdomain` is this artist — see nameMatchIsSameArtist.
+  homonyms?: MusicBrainzHomonym[];
+}
+
+// Another artist with the same name, with only their own MusicBrainz links (see
+// MusicBrainzHomonym in api/functions/musicbrainz-enrichment.ts).
+export interface MusicBrainzHomonym {
+  mbid: string;
+  name: string;
+  disambiguation: string | null;
+  officialUrl: string | null;
+  bandcampUrl: string | null;
+  bandcampSubdomain: string | null;
+  socialLinks: SocialLink[];
+  platformUrls: string[];
+  location?: ArtistLocation;
 }
 
 // Search state

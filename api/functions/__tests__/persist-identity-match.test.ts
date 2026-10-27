@@ -280,3 +280,27 @@ describe('persistSearchResults — the claimed guard follows the match', () => {
     expect((tables.artists as { name: string }[]).map(a => a.name)).toEqual(['Kid Lightbulbs']);
   });
 });
+
+describe('persistSearchResults — several artists by one name', () => {
+  it('writes none of them, since the row is keyed by the name', async () => {
+    // Paracosm: Sofia's Bandcamp card and Orlando's MusicBrainz card in one search. Both used to
+    // write into the one `paracosm` row, which then described both bands.
+    await persistSearchResults([
+      result('Paracosm', [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }]),
+      result('Paracosm', [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }]),
+    ] as never);
+
+    expect(slugs()).toEqual([]);
+    expect(tables.artist_links).toEqual([]);
+  });
+
+  it('still writes the other artists in the same search', async () => {
+    await persistSearchResults([
+      result('Paracosm', [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }]),
+      result('Paracosm', [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }]),
+      result('Yung Paracosm', [{ sourceId: 'bandcamp', url: 'https://yungparacosm.bandcamp.com' }]),
+    ] as never);
+
+    expect(slugs()).toEqual(['yung-paracosm']);
+  });
+});

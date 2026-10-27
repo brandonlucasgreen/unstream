@@ -83,4 +83,13 @@ describe('mergeWithMusicBrainzData (generate-artist-data)', () => {
     // ...but a much longer name that merely contains it is someone else.
     expect(longer).toEqual(results[1]);
   });
+
+  it('needs the same Bandcamp account when MusicBrainz lists several artists by the name', () => {
+    // Paracosm: Orlando (no Bandcamp) ranks first; the result is Sofia's paracosm.bandcamp.com.
+    const sofia = artist('sofia', 'Paracosm', 'https://paracosm.bandcamp.com');
+    const orlando = mb({ artistName: 'Paracosm', bandcampSubdomain: null, homonyms: [{ name: 'paracosm' }] });
+
+    expect(mergeWithMusicBrainzData([sofia], orlando)[0]).toEqual(sofia);
+    expect(sourceIds(mergeWithMusicBrainzData([sofia], { ...orlando, bandcampSubdomain: 'paracosm' })[0])).toContain('officialsite');
+  });
 });

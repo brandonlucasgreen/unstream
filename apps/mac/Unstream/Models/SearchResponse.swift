@@ -66,6 +66,16 @@ struct MusicBrainzResponse: Codable {
     /// retired. A result on a different subdomain is a same-name stranger and must not be
     /// enriched — see `UnstreamAPI.bandcampSubdomainConflicts`. Optional: older deploys don't send it.
     let bandcampSubdomain: String?
+    /// Other artists MusicBrainz lists under exactly this name. When there are any, only a card
+    /// on `bandcampSubdomain` is this artist — see `UnstreamAPI.nameMatchIsSameArtist`. The
+    /// server gives them their own cards; here they only mark the name as shared.
+    /// Optional: older deploys don't send it.
+    let homonyms: [MusicBrainzHomonym]?
+}
+
+struct MusicBrainzHomonym: Codable {
+    let name: String
+    let bandcampSubdomain: String?
 }
 
 struct ArtistResult: Codable, Identifiable {

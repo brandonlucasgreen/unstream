@@ -10,7 +10,7 @@
  * Bandcamp identity check from api/shared/bandcamp-identity.ts.
  */
 
-import { bandcampSubdomainConflicts } from '../api/shared/bandcamp-identity';
+import { nameMatchIsSameArtist } from '../api/shared/bandcamp-identity';
 
 export interface PlatformLink {
   sourceId: string;
@@ -49,6 +49,8 @@ export interface MusicBrainzData {
   socialLinks: SocialLink[];
   /** The Bandcamp subdomain MusicBrainz says is this artist's. Null when it names none. */
   bandcampSubdomain?: string | null;
+  /** Other artists MusicBrainz lists under exactly this name; any at all make the name shared. */
+  homonyms?: unknown[];
 }
 
 export function normalizeForComparison(str: string): string {
@@ -81,10 +83,12 @@ export function mergeWithMusicBrainzData(results: SearchResult[], mbData: MusicB
 
     // Same name, different Bandcamp account: a homonym, not this artist. Merging would put
     // the MusicBrainz artist's official site and socials on a stranger's page — the
-    // Honeycrush (Brooklyn) / Honey Crush (Orlando) case. Same rule as the server's
-    // applyEnrichmentToResults and the web client's merge.
+    // Honeycrush (Brooklyn) / Honey Crush (Orlando) case. When MusicBrainz lists several
+    // artists by this name, only the same account will do (the three Paracosms). Same rule
+    // as the server's applyEnrichmentToResults and the web client's merge.
     const bandcampUrl = result.platforms.find(p => p.sourceId === 'bandcamp')?.url;
-    if (bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampUrl)) return result;
+    const nameIsShared = (mbData.homonyms?.length ?? 0) > 0;
+    if (!nameMatchIsSameArtist(mbData.bandcampSubdomain, nameIsShared, bandcampUrl)) return result;
 
     const newPlatforms = [...result.platforms];
 
