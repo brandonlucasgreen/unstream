@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { UnclaimedQuietCard } from 'src/components/UnclaimedQuietCard';
 import type { ArtistPagePayload } from 'src/types/artist-page';
 
@@ -72,7 +72,7 @@ describe('UnclaimedQuietCard', () => {
 
   it('renders platform links', () => {
     render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
-    expect(screen.getByText('Support directly')).toBeTruthy();
+    expect(screen.getByText('Marketplaces')).toBeTruthy();
     expect(screen.getByText('Bandcamp')).toBeTruthy();
   });
 
@@ -157,5 +157,98 @@ describe('UnclaimedQuietCard', () => {
   it('does not render Powered by Unstream footer', () => {
     render(<UnclaimedQuietCard payload={unclaimedPayload} slug="some-artist" />);
     expect(screen.queryByText('Powered by Unstream')).toBeNull();
+  });
+});
+
+type Link = ArtistPagePayload['links'][number];
+
+const link = (platform: string, url: string, displayName: string, payoutPercent: string | null = null): Link =>
+  ({ platform, url, displayName, payoutPercent, bandcampFriday: false });
+
+const bandcamp = link('bandcamp', 'https://annavonhausswolff.bandcamp.com', 'Bandcamp', '80-85%');
+const patreon = link('patreon', 'https://patreon.com/avh', 'Patreon', '86-90%');
+const officialSite = link('officialsite', 'https://annavonhausswolff.com', 'Official Site');
+const instagram = link('instagram', 'https://instagram.com/avh', 'Instagram');
+const youtube = link('youtube', 'https://youtube.com/@avh', 'YouTube');
+
+const sectionedPayload: ArtistPagePayload = {
+  artist: {
+    id: 'artist-1',
+    slug: 'anna-von-hausswolff',
+    name: 'Anna von Hausswolff',
+    imageUrl: null,
+    matchConfidence: 'verified',
+    country: null,
+    countryCode: null,
+    city: null,
+  },
+  profile: null,
+  linkGroups: [
+    { section: 'patronage', links: [patreon], dividerIndexes: [] },
+    { section: 'marketplaces', links: [bandcamp], dividerIndexes: [] },
+    { section: 'social', links: [instagram, youtube], dividerIndexes: [] },
+    { section: 'official', links: [officialSite], dividerIndexes: [] },
+  ],
+  sectionOrder: ['bio', 'featured', 'patronage', 'marketplaces', 'social'],
+  // The shape the API served from UNS-221 until the fix: socials in `links` *and* in
+  // `socialLinks`. A response like this can sit in the CDN for a day after the deploy, so
+  // the card must not double them up from it.
+  links: [patreon, bandcamp, instagram, youtube, officialSite],
+  socialLinks: [
+    { platform: 'instagram', url: instagram.url, displayName: 'Instagram' },
+    { platform: 'youtube', url: youtube.url, displayName: 'YouTube' },
+  ],
+  bandcampFriday: false,
+};
+
+function headings() {
+  return screen.getAllByRole('heading', { level: 2 }).map(h => h.textContent);
+}
+
+// The pre-generated pages and every other artist nobody has claimed group their links the way a
+// claimed page does — Patronage, Marketplaces, Official, Follow — and show each link once.
+describe('UnclaimedQuietCard link sections', () => {
+  afterEach(cleanup);
+
+  it('uses the claimed page section headings, in the default order', () => {
+    render(<UnclaimedQuietCard payload={sectionedPayload} slug="anna-von-hausswolff" />);
+    expect(headings()).toEqual(['Patronage', 'Marketplaces', 'Official', 'Follow']);
+    expect(screen.queryByText(/support directly/i)).toBeNull();
+  });
+
+  it('shows each social link once, under Follow only', () => {
+    render(<UnclaimedQuietCard payload={sectionedPayload} slug="anna-von-hausswolff" />);
+    for (const social of [instagram, youtube]) {
+      const anchors = screen.getAllByRole('link').filter(a => a.getAttribute('href') === social.url);
+      expect(anchors).toHaveLength(1);
+    }
+    const follow = screen.getByRole('heading', { name: 'Follow' }).parentElement!;
+    expect(within(follow).getAllByRole('link').map(a => a.getAttribute('href'))).toEqual([
+      instagram.url,
+      youtube.url,
+    ]);
+  });
+
+  it('groups the legacy flat fields the same way when a cached response has no sections', () => {
+    const legacy: ArtistPagePayload = {
+      ...sectionedPayload,
+      linkGroups: undefined,
+      sectionOrder: undefined,
+      links: [patreon, bandcamp, officialSite],
+    };
+    render(<UnclaimedQuietCard payload={legacy} slug="anna-von-hausswolff" />);
+    expect(headings()).toEqual(['Patronage', 'Marketplaces', 'Official', 'Follow']);
+    expect(screen.getAllByRole('link').filter(a => a.getAttribute('href') === instagram.url)).toHaveLength(1);
+  });
+
+  it('skips sections with nothing in them', () => {
+    const onlyBandcamp: ArtistPagePayload = {
+      ...sectionedPayload,
+      linkGroups: [{ section: 'marketplaces', links: [bandcamp], dividerIndexes: [] }],
+      links: [bandcamp],
+      socialLinks: [],
+    };
+    render(<UnclaimedQuietCard payload={onlyBandcamp} slug="anna-von-hausswolff" />);
+    expect(headings()).toEqual(['Marketplaces']);
   });
 });
