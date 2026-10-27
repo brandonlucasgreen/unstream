@@ -108,4 +108,18 @@ describe('attachArtistPageSlugs', () => {
       undefined,
     ]);
   });
+
+  it('gives no slug to a card whose name another card shares', () => {
+    // Three Paracosms: the Sofia card already carries the stored row's slug (matched on its
+    // Bandcamp account); Orlando and Los Angeles aren't written anywhere, so `paracosm` isn't theirs.
+    const results = [
+      result({ id: 'sofia', name: 'Paracosm', knownSlug: 'paracosm' }),
+      result({ id: 'orlando', name: 'Paracosm' }),
+      result({ id: 'la', name: 'paracosm' }),
+      result({ id: 'other', name: 'Yung Paracosm' }),
+    ];
+    attachArtistPageSlugs(results);
+
+    expect(results.map(r => r.knownSlug)).toEqual(['paracosm', undefined, undefined, 'yung-paracosm']);
+  });
 });

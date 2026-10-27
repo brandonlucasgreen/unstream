@@ -1621,15 +1621,26 @@ async function searchAllPlatforms(
  * same hand-copied-rule drift that `/api/release`'s server-side `payoutPercent` exists to prevent.
  * One definition, on the server.
  *
- * Two rules, both about not handing out an address that 404s:
+ * Three rules, all about not handing out an address that 404s or belongs to someone else:
  * - **Never overwrite.** A claimed artist keeps `claimedSlug`; a stored card keeps its `knownSlug`.
  * - **Skip unverified results.** `persistSearchResults` doesn't write them, so they have no row.
+ * - **Skip a name more than one card shares.** `persistSearchResults` writes none of those either,
+ *   so any row at that slug is another artist's: with three Paracosms on screen, the Orlando and
+ *   Los Angeles cards both linked to the Sofia band's page.
  */
 export function attachArtistPageSlugs(results: AggregatedResult[]): void {
+  const slugCounts = new Map<string, number>();
+  for (const result of results) {
+    if (result.type !== 'artist') continue;
+    const slug = artistSlug(result.name);
+    slugCounts.set(slug, (slugCounts.get(slug) ?? 0) + 1);
+  }
+
   for (const result of results) {
     if (result.type !== 'artist') continue;
     if (result.claimedSlug || result.knownSlug) continue;
     if (result.matchConfidence === 'unverified') continue;
+    if ((slugCounts.get(artistSlug(result.name)) ?? 0) > 1) continue;
     // The same expression `persistSearchResults` upserts under, so this names the row it writes
     // rather than guessing at one. That write now lands in a background function moments after
     // the response, not before it; a click that beats it gets the artist page's uncached 404.
