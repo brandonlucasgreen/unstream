@@ -304,3 +304,40 @@ describe('persistSearchResults — several artists by one name', () => {
     expect(slugs()).toEqual(['yung-paracosm']);
   });
 });
+
+describe('persistSearchResults — the slug search decided', () => {
+  it('writes same-name artists to addresses of their own, the new one with its city', async () => {
+    await persistSearchResults([
+      { ...result('Paracosm', [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }]), slug: 'paracosm' },
+      { ...result('paracosm', [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com/' }]), slug: 'xparacosm' },
+      {
+        ...result('Paracosm', [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }]),
+        slug: 'paracosm-orlando',
+        location: { city: 'Orlando', country: 'United States', countryCode: 'US' },
+      },
+    ] as never);
+
+    expect(slugs()).toEqual(['paracosm', 'paracosm-orlando', 'xparacosm']);
+    const orlando = (tables.artists as Row[]).find(a => a.slug === 'paracosm-orlando');
+    expect(orlando).toMatchObject({ name: 'Paracosm', city: 'Orlando', country: 'United States', country_code: 'US' });
+    // Only the row being created gets a city.
+    expect((tables.artists as Row[]).filter(a => a.city).map(a => a.slug)).toEqual(['paracosm-orlando']);
+  });
+
+  it('writes nothing for a card search gave no slug', async () => {
+    await persistSearchResults([
+      { ...result('Paracosm', [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }]), slug: null },
+    ] as never);
+
+    expect(slugs()).toEqual([]);
+  });
+
+  it("does not touch an existing row's location", async () => {
+    existingArtist('a1', 'Paracosm', [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }]);
+    await persistSearchResults([
+      { ...result('Paracosm', [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }]), slug: 'paracosm', location: { city: 'Somewhere' } },
+    ] as never);
+
+    expect((tables.artists as Row[]).some(a => a.city === 'Somewhere')).toBe(false);
+  });
+});

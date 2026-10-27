@@ -263,6 +263,23 @@ describe('mergeStoredArtistsIntoResults', () => {
       expect(merged[0]).toEqual(sofia);
     });
 
+    it('matches a stored row with no Bandcamp to its card by the address it was saved at', () => {
+      // Orlando has no Bandcamp, so nothing but the address says which card the row is. Without
+      // this the row would be appended as a second Orlando card on every search.
+      const orlandoLive: AggregatedResult = {
+        id: 'mb-paracosm', name: 'Paracosm', type: 'artist', matchConfidence: 'verified',
+        platforms: [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }],
+        location: { city: 'Orlando' },
+      };
+      const orlandoRow: AggregatedResult = { ...orlandoLive, id: 'known-paracosm-orlando', knownSlug: 'paracosm-orlando', location: undefined };
+      const merged = mergeStoredArtistsIntoResults([sofia, liveLA, orlandoLive], [orlandoRow], 'paracosm');
+
+      expect(merged).toHaveLength(3);
+      expect(merged[2]).toMatchObject({ id: 'mb-paracosm', knownSlug: 'paracosm-orlando' });
+      // ...and not to Sofia, whose own Bandcamp makes them someone else.
+      expect(merged[0].knownSlug).toBeUndefined();
+    });
+
     it("never replaces a live card's own photo", () => {
       const withPhoto = { ...liveLA, imageUrl: 'https://f4.bcbits.com/img/0000000001_23.jpg' };
       const merged = mergeStoredArtistsIntoResults([withPhoto], [stored], 'paracosm');

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { attachArtistPageSlugs } from '../search-sources';
+import { recordSlugs } from '../search-utils';
 import { artistSlug } from '../db';
 import type { AggregatedResult } from '../search-utils';
 
@@ -109,17 +110,39 @@ describe('attachArtistPageSlugs', () => {
     ]);
   });
 
-  it('gives no slug to a card whose name another card shares', () => {
-    // Three Paracosms: the Sofia card already carries the stored row's slug (matched on its
-    // Bandcamp account); Orlando and Los Angeles aren't written anywhere, so `paracosm` isn't theirs.
-    const results = [
-      result({ id: 'sofia', name: 'Paracosm', knownSlug: 'paracosm' }),
-      result({ id: 'orlando', name: 'Paracosm' }),
-      result({ id: 'la', name: 'paracosm' }),
-      result({ id: 'other', name: 'Yung Paracosm' }),
-    ];
-    attachArtistPageSlugs(results);
+  // Three Paracosms in one search. A shared name can't be every one's address, so each gets one
+  // that tells it apart — the same one persistSearchResults writes (recordSlugs), so the card's
+  // page, Claim and save links all name a row that is theirs.
+  describe('cards that share a name', () => {
+    const sofia = () => result({ id: 'sofia', name: 'Paracosm', platforms: [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }] });
+    const la = () => result({ id: 'la', name: 'paracosm', platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com/' }], location: { city: 'Burbank' } });
+    const orlando = () => result({ id: 'orlando', name: 'Paracosm', platforms: [{ sourceId: 'officialsite', url: 'https://paracosmtheband.com/' }], location: { city: 'Orlando', country: 'United States' } });
 
-    expect(results.map(r => r.knownSlug)).toEqual(['paracosm', undefined, undefined, 'yung-paracosm']);
+    it('gives each the address of its Bandcamp account, or its name and city', () => {
+      const results = [sofia(), la(), orlando(), result({ id: 'other', name: 'Yung Paracosm' })];
+      attachArtistPageSlugs(results);
+
+      expect(results.map(r => r.knownSlug)).toEqual(['paracosm', 'xparacosm', 'paracosm-orlando', 'yung-paracosm']);
+    });
+
+    it('gives no slug to a card with nothing to tell it apart', () => {
+      const results = [sofia(), result({ id: 'bare', name: 'Paracosm' })];
+      attachArtistPageSlugs(results);
+
+      expect(results.map(r => r.knownSlug)).toEqual(['paracosm', undefined]);
+    });
+
+    it("keeps a stored row's slug, and gives no one else that address", () => {
+      // The stored-artist merge already matched Sofia to the `paracosm` row; a second card that
+      // would derive the same address (another `paracosm` Bandcamp is impossible, but a city twin
+      // is not) must not be pointed at it.
+      const twin = () => result({ id: 'twin', name: 'Paracosm', location: { city: 'Orlando' } });
+      const results = [{ ...orlando(), knownSlug: 'paracosm-orlando' }, twin()];
+      const slugs = recordSlugs(results);
+      attachArtistPageSlugs(results, slugs);
+
+      expect(results.map(r => r.knownSlug)).toEqual(['paracosm-orlando', undefined]);
+      expect(slugs.get(results[1])).toBeNull();
+    });
   });
 });

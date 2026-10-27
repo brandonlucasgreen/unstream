@@ -55,6 +55,8 @@ export function toPersistPayload(results: PersistableResult[]): PersistableResul
       imageUrl: r.imageUrl,
       matchConfidence: r.matchConfidence,
       platforms: r.platforms.map(p => ({ sourceId: p.sourceId, url: p.url, latestRelease: p.latestRelease })),
+      slug: r.slug,
+      location: r.location ? { city: r.location.city, country: r.location.country, countryCode: r.location.countryCode } : undefined,
     }));
 }
 
@@ -81,12 +83,20 @@ export function parsePersistPayload(body: unknown): PersistableResult[] | null {
         latestRelease: p.latestRelease && typeof p.latestRelease === 'object' ? p.latestRelease : undefined,
       }));
 
+    const location = item.location && typeof item.location === 'object' ? item.location as Record<string, unknown> : null;
     parsed.push({
       type: 'artist',
       name: item.name,
       imageUrl: typeof item.imageUrl === 'string' ? item.imageUrl : undefined,
       matchConfidence: typeof item.matchConfidence === 'string' ? item.matchConfidence : undefined,
       platforms,
+      // null is meaningful ("no row for this card"); anything else that isn't a string is dropped.
+      slug: typeof item.slug === 'string' || item.slug === null ? item.slug : undefined,
+      location: location && typeof location.city === 'string' ? {
+        city: location.city,
+        country: typeof location.country === 'string' ? location.country : undefined,
+        countryCode: typeof location.countryCode === 'string' ? location.countryCode : undefined,
+      } : undefined,
     });
   }
   return parsed;

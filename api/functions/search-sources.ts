@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry, withSentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
-import { artistSlug, getMergeOverrides, getLinkSuppressions } from './db';
+import { getMergeOverrides, getLinkSuppressions } from './db';
 import { requestSearchPersist } from './request-persist';
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
@@ -43,6 +43,7 @@ import {
   nameMatchIsSameArtist,
   attachTipsEnabled,
   resultPageSlug,
+  recordSlugs,
 } from './search-utils';
 
 import {
@@ -1629,30 +1630,27 @@ async function searchAllPlatforms(
  * same hand-copied-rule drift that `/api/release`'s server-side `payoutPercent` exists to prevent.
  * One definition, on the server.
  *
- * Three rules, all about not handing out an address that 404s or belongs to someone else:
+ * The slug is the one `persistSearchResults` is handed for the same card (`recordSlugs`), so it
+ * names the row that search writes rather than guessing at one: the name, or for cards that share
+ * a name, an address that tells them apart (`xparacosm`, `paracosm-orlando`). That write lands in a
+ * background function moments after the response; a click that beats it gets the page's 404.
+ *
+ * Rules, all about not handing out an address that 404s or belongs to someone else:
  * - **Never overwrite.** A claimed artist keeps `claimedSlug`; a stored card keeps its `knownSlug`.
  * - **Skip unverified results.** `persistSearchResults` doesn't write them, so they have no row.
- * - **Skip a name more than one card shares.** `persistSearchResults` writes none of those either,
- *   so any row at that slug is another artist's: with three Paracosms on screen, the Orlando and
- *   Los Angeles cards both linked to the Sofia band's page.
+ * - **No slug without a row of its own.** A same-name card with nothing to tell it apart is not
+ *   written, so it gets no slug — handing it the name's would link it to another artist's page.
  */
-export function attachArtistPageSlugs(results: AggregatedResult[]): void {
-  const slugCounts = new Map<string, number>();
-  for (const result of results) {
-    if (result.type !== 'artist') continue;
-    const slug = artistSlug(result.name);
-    slugCounts.set(slug, (slugCounts.get(slug) ?? 0) + 1);
-  }
-
+export function attachArtistPageSlugs(
+  results: AggregatedResult[],
+  slugs: Map<AggregatedResult, string | null> = recordSlugs(results),
+): void {
   for (const result of results) {
     if (result.type !== 'artist') continue;
     if (result.claimedSlug || result.knownSlug) continue;
     if (result.matchConfidence === 'unverified') continue;
-    if ((slugCounts.get(artistSlug(result.name)) ?? 0) > 1) continue;
-    // The same expression `persistSearchResults` upserts under, so this names the row it writes
-    // rather than guessing at one. That write now lands in a background function moments after
-    // the response, not before it; a click that beats it gets the artist page's uncached 404.
-    result.knownSlug = artistSlug(result.name);
+    const slug = slugs.get(result);
+    if (slug) result.knownSlug = slug;
   }
 }
 
@@ -1738,6 +1736,9 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // Fold stored artists in: claimed cards replace generic same-name results
     // in place, known artists fill holes the platforms missed.
     const finalResults = mergeStoredArtistsIntoResults(results, storedArtists, normalizedQuery);
+    // Where each artist card is stored, decided once: the save below writes there, and the card's
+    // links point there (attachArtistPageSlugs).
+    const slugs = recordSlugs(finalResults);
 
     // Persist artist results to the database. Skip claimed results (already in
     // DB) and known- cards (served FROM the DB — persisting them back would
@@ -1747,9 +1748,9 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // Supabase; `persist` in Server-Timing is the handoff, and its desc says if it fell back to
     // persisting inline. See request-persist.ts. Never throws.
     const persistStartedAt = Date.now();
-    const persistMode = await requestSearchPersist(finalResults.filter(r =>
-      r.matchConfidence !== 'claimed' && !r.id.startsWith('known-')
-    ));
+    const persistMode = await requestSearchPersist(finalResults
+      .filter(r => r.matchConfidence !== 'claimed' && !r.id.startsWith('known-'))
+      .map(r => ({ ...r, slug: slugs.get(r) ?? null })));
     timer.record('persist', Date.now() - persistStartedAt, persistMode);
 
     // Tell the client where each artist's page lives.
@@ -1765,7 +1766,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // hand-copied-rule drift that the release endpoint's server-side `payoutPercent` exists to
     // prevent. One definition, on the server.
     //
-    attachArtistPageSlugs(finalResults);
+    attachArtistPageSlugs(finalResults, slugs);
 
     // Which of these artists take tips, so a result card can show Tip without a request per
     // card. One read for the whole page; an empty set, with no read, while tips are off.

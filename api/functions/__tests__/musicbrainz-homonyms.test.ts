@@ -220,6 +220,12 @@ describe('search-sources: three Paracosms', () => {
     // Orlando has no Bandcamp, so no photo — none is borrowed from anyone else.
     expect((orlando as { imageUrl?: string }).imageUrl).toBeUndefined();
 
+    // Each is saved, and linked, at an address of its own: Bandcamp account, or name and city.
+    // (Sofia's card is unverified here — its releases aren't mocked — and unverified cards get no
+    // page link; attach-artist-page-slugs.test.ts covers its `paracosm`.)
+    const slugOf = (r: unknown) => (r as { knownSlug?: string }).knownSlug;
+    expect([slugOf(losAngeles), slugOf(orlando)]).toEqual(['xparacosm', 'paracosm-orlando']);
+
     // Sofia's MusicBrainz entry, with only an Instagram, doesn't become a second Sofia card, and
     // the "digital design" entry only marked the name as shared.
     expect(results.filter(r => r.name.toLowerCase() === 'paracosm')).toHaveLength(3);

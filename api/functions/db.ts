@@ -4330,6 +4330,14 @@ export interface PersistableResult {
   imageUrl?: string;
   matchConfidence?: string;
   platforms: { sourceId: string; url: string; latestRelease?: unknown }[];
+  /**
+   * The slug the search decided this card is stored under (`recordSlugs`): usually the name's, but
+   * an address that tells same-name artists apart when several share it. Null: the card gets no
+   * row. Absent (callers other than search): derived from the name, as before.
+   */
+  slug?: string | null;
+  /** Where the artist is, written only when their row is first created. */
+  location?: { city?: string; country?: string; countryCode?: string };
 }
 
 /**
@@ -4360,16 +4368,16 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
 
   // Search does NOT trigger release cataloging. See the note above persistSearchResults.
 
-  // Two cards with one name in one search are two artists — MusicBrainz homonyms, or a card
-  // the release check split off — and the row is keyed by the name's slug, so each would write
-  // its links over the other's and leave one page describing both. That is how /a/paracosm
-  // came to hold a Sofia band's Bandcamp beside an Orlando band's site and socials. With no
-  // way to tell whose row it is, none of them is written.
+  // Search hands each card the slug it decided on (`recordSlugs`), which already gives same-name
+  // artists addresses of their own. Two cards that still arrive at one slug are written by
+  // neither: each would write its links over the other's and leave one page describing both,
+  // which is how /a/paracosm came to hold a Sofia band's Bandcamp beside an Orlando band's site.
+  const slugOf = (result: PersistableResult) => result.slug === undefined ? artistSlug(result.name) : result.slug;
   const slugCounts = new Map<string, number>();
   for (const result of results) {
     if (result.type !== 'artist') continue;
-    const slug = artistSlug(result.name);
-    slugCounts.set(slug, (slugCounts.get(slug) ?? 0) + 1);
+    const slug = slugOf(result);
+    if (slug) slugCounts.set(slug, (slugCounts.get(slug) ?? 0) + 1);
   }
 
   // Normally runs in persist-search-results-background, after the search has responded, but
@@ -4387,26 +4395,35 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
     // Only persist artists with at least 1 real direct link
     if (validPlatforms.length === 0) return;
 
-    let slug = artistSlug(result.name);
-
-    if ((slugCounts.get(slug) ?? 0) > 1) {
-      console.log(`[DB] Skipping persist for "${result.name}": ${slugCounts.get(slug)} artists by that name in one search`);
+    const decided = slugOf(result);
+    if (decided === null) {
+      console.log(`[DB] Skipping persist for "${result.name}": shares its name and has nothing to tell it apart`);
       return;
     }
+    let slug = decided;
+
+    if ((slugCounts.get(slug) ?? 0) > 1) {
+      console.log(`[DB] Skipping persist for "${result.name}": ${slugCounts.get(slug)} artists at "${slug}" in one search`);
+      return;
+    }
+
+    // Both lists below are keyed by the name's slug, not the address: `xparacosm` must not let an
+    // excluded or non-artist name through.
+    const nameSlug = artistSlug(result.name);
 
     // Software products, brands and TV shows can carry a MusicBrainz entry and a Beatport
     // listing, and the pipeline's default verdict is 'verified', so without this gate one
     // search mints them a permanent /artist/ page. Checked here rather than earlier because
     // the search response may still legitimately show what it found — it is the durable row
     // that must not exist. See api/lib/non-artist-names.ts.
-    if (isNonArtistSlug(slug)) {
-      console.log(`[DB] Skipping persist for non-artist "${result.name}" (${slug})`);
+    if (isNonArtistSlug(nameSlug)) {
+      console.log(`[DB] Skipping persist for non-artist "${result.name}" (${nameSlug})`);
       return;
     }
 
     // Acts excluded on ethical grounds — a separate, editorial list. See api/lib/excluded-artists.ts.
-    if (isExcludedArtistSlug(slug)) {
-      console.log(`[DB] Skipping persist for excluded artist "${result.name}" (${slug})`);
+    if (isExcludedArtistSlug(nameSlug)) {
+      console.log(`[DB] Skipping persist for excluded artist "${result.name}" (${nameSlug})`);
       return;
     }
 
@@ -4476,6 +4493,13 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
               match_confidence: matchConfidence,
               source: 'auto',
               updated_at: new Date().toISOString(),
+              // Only on a row this search is creating: an existing row's location is
+              // persistEnrichment's to keep, and `paracosm-orlando` should say Orlando from the start.
+              ...(!existing && slug === decided && result.location?.city ? {
+                city: result.location.city,
+                country: result.location.country ?? null,
+                country_code: result.location.countryCode ?? null,
+              } : {}),
             },
             { onConflict: 'slug' }
           )
