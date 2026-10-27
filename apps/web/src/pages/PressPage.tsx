@@ -207,13 +207,13 @@ const SCREENSHOT_GROUPS: {
       },
       {
         src: '/screenshots/web-artist-page-light.webp',
-        alt: 'Unstream artist page for Sarah McLachlan in light mode, showing Bandcamp at 80–85%, an official site, Discogs, and the library services Hoopla and Freegal, above a grid of releases each listing a date, a price, and an estimate of what reaches the artist',
+        alt: 'Unstream artist page for Sarah McLachlan in light mode. Under Marketplaces: Bandcamp at 80–85%, Discogs, and the library services Hoopla and Freegal; under Official, her official site; under Follow, Instagram, TikTok, YouTube and Facebook; then a grid of releases, each listing a date, a price, and an estimate of what reaches the artist',
         caption:
           'An artist page in light mode. Ways to buy and ways to borrow sit side by side, and every release below carries its own price and estimate. The calendar and RSS icons subscribe you to new ones.',
       },
       {
         src: '/screenshots/web-artist-page.webp',
-        alt: "Unstream's artist page for Neko Case in dark mode, listing Bandcamp at 80–85%, Qobuz at ~70%, Discogs, Hoopla, and Freegal under a heading reading Support Directly",
+        alt: "Unstream's artist page for Neko Case in dark mode. Under Marketplaces: Bandcamp at 80–85%, Qobuz at ~70%, Discogs, Hoopla, and Freegal; under Official, her official site; under Follow, Instagram, YouTube and Facebook; then the start of her releases",
         caption:
           'The same page in dark mode. Library services (Hoopla, Freegal) sit alongside the places you can buy.',
       },
