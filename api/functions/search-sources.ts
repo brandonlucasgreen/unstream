@@ -1140,6 +1140,8 @@ function addMusicBrainzCard(
     unverifiedReason: mbConfirmed ? undefined : 'no-release-data',
     musicBrainzConfirmed: mbConfirmed,
     location: mbData.location,
+    // From the Bandcamp page this card links; `?? undefined` for cache entries from before.
+    imageUrl: mbData.bandcampUrl ? mbData.bandcampImageUrl ?? undefined : undefined,
     wikipediaSummary: mbData.wikipediaSummary || undefined,
     wikipediaUrl: mbData.wikipediaUrl || undefined,
   };
@@ -1371,6 +1373,12 @@ function applyEnrichmentToResults(
   result.wikipediaSummary = mbData.wikipediaSummary || undefined;
   result.wikipediaUrl = mbData.wikipediaUrl || undefined;
   result.location = mbData.location || result.location;
+  // MusicBrainz's Bandcamp photo, only for a card with none and only when the card links that
+  // same account — a photo from a page the card doesn't link would be unexplained.
+  const cardBandcamp = bandcampSubdomainOf(newPlatforms.find(p => p.sourceId === 'bandcamp')?.url);
+  if (!result.imageUrl && mbData.bandcampImageUrl && cardBandcamp && cardBandcamp === mbData.bandcampSubdomain) {
+    result.imageUrl = mbData.bandcampImageUrl;
+  }
   return result.id;
 }
 

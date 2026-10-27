@@ -232,4 +232,41 @@ describe('mergeStoredArtistsIntoResults', () => {
       expect(merged[0].knownSlug).toBe('honey-crush');
     });
   });
+
+  // Paracosm: the Los Angeles artist's live card comes only from MusicBrainz, which has no photos;
+  // their stored row (xparacosm) holds their Bandcamp photo.
+  describe('the stored photo', () => {
+    const PHOTO = 'https://f4.bcbits.com/img/0040943917_23.jpg';
+    const stored: AggregatedResult = {
+      id: 'known-xparacosm',
+      name: 'paracosm',
+      type: 'artist',
+      platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com/' }],
+      matchConfidence: 'verified',
+      knownSlug: 'xparacosm',
+      imageUrl: PHOTO,
+    };
+    const liveLA: AggregatedResult = {
+      id: 'mb-paracosm-7b677a62',
+      name: 'paracosm',
+      type: 'artist',
+      platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com/' }],
+      matchConfidence: 'verified',
+    };
+    const sofia: AggregatedResult = { ...generic('Paracosm'), imageUrl: 'https://f4.bcbits.com/img/0018436078_23.jpg' };
+
+    it('fills a live card with none, alongside the slug', () => {
+      const merged = mergeStoredArtistsIntoResults([sofia, liveLA], [stored], 'paracosm');
+      expect(merged).toHaveLength(2);
+      expect(merged[1]).toMatchObject({ id: liveLA.id, knownSlug: 'xparacosm', imageUrl: PHOTO });
+      // Sofia is on another Bandcamp account: their own photo stays, and they get nothing of LA's.
+      expect(merged[0]).toEqual(sofia);
+    });
+
+    it("never replaces a live card's own photo", () => {
+      const withPhoto = { ...liveLA, imageUrl: 'https://f4.bcbits.com/img/0000000001_23.jpg' };
+      const merged = mergeStoredArtistsIntoResults([withPhoto], [stored], 'paracosm');
+      expect(merged[0].imageUrl).toBe(withPhoto.imageUrl);
+    });
+  });
 });

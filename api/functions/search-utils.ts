@@ -1079,9 +1079,15 @@ export function mergeStoredArtistsIntoResults(
       // already covers this name, its knownSlug is worth keeping so the UI
       // can still link to the pre-generated /artist/ page.
       if (sameNameIdx !== -1) {
-        if (artist.knownSlug && !merged[sameNameIdx].knownSlug) {
-          merged[sameNameIdx] = { ...merged[sameNameIdx], knownSlug: artist.knownSlug };
-        }
+        const live = merged[sameNameIdx];
+        // The stored row's photo too, for a live card with none: a card found only through
+        // MusicBrainz has no photo of its own, while the row may hold one from an earlier search
+        // or an admin. Same artist by the check above, so it is theirs.
+        merged[sameNameIdx] = {
+          ...live,
+          knownSlug: live.knownSlug ?? artist.knownSlug,
+          imageUrl: live.imageUrl ?? artist.imageUrl,
+        };
       } else if (!merged.some(r => normalizeForComparison(r.name) === normalizeForComparison(artist.name) && isSameArtist(r))) {
         merged.push(artist);
       }

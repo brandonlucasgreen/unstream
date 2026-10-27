@@ -152,6 +152,36 @@ describe('getMusicBrainzEnrichment: Bandcamp from the artist\'s own site', () =>
   });
 });
 
+describe("getMusicBrainzEnrichment: the artist's Bandcamp photo", () => {
+  it('reads it from /music, not the bare address, which can redirect to a release cover', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.startsWith('https://musicbrainz.org/ws/2/artist/?query=')) {
+        return json({ artists: [{ id: MBID, name: 'Test Artist', score: 100 }] });
+      }
+      if (url.startsWith(`https://musicbrainz.org/ws/2/artist/${MBID}`)) {
+        return json({ relations: [{ type: 'bandcamp', url: { resource: 'https://testartist.bandcamp.com/' } }], 'release-groups': [] });
+      }
+      if (url === 'https://testartist.bandcamp.com/music') {
+        return new Response('<meta property="og:image" content="https://f4.bcbits.com/img/0012345678_23.jpg">', { status: 200 });
+      }
+      if (url === 'https://testartist.bandcamp.com/') {
+        return new Response('<meta property="og:image" content="https://f4.bcbits.com/img/a9999999999_5.jpg">', { status: 200 });
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const { data } = await getMusicBrainzEnrichment('Test Artist');
+
+    expect(data.bandcampImageUrl).toBe('https://f4.bcbits.com/img/0012345678_23.jpg');
+    expect(toMusicBrainzResponse(data)?.imageUrl).toBe('https://f4.bcbits.com/img/0012345678_23.jpg');
+    // The bare address is only ever asked whether it's alive (HEAD), never read for its page.
+    const pageReads = fetchSpy.mock.calls.filter(c => (c[1] as RequestInit | undefined)?.method !== 'HEAD').map(c => String(c[0]));
+    expect(pageReads).toContain('https://testartist.bandcamp.com/music');
+    expect(pageReads).not.toContain('https://testartist.bandcamp.com/');
+  });
+});
+
 describe('peekMusicBrainzEnrichment', () => {
   it('returns the cached enrichment without fetching', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch');

@@ -5,7 +5,7 @@ import { cacheGetOrFetch } from '../functions/cache';
 import { isUrlHostnameAllowed } from '../functions/middleware';
 import { safeFetch } from '../functions/safe-fetch';
 import { findBandcampArtist } from './bandcamp-probe';
-import { parseBandcampBio } from '../functions/search-parsers';
+import { parseBandcampBio, parseBandcampImage } from '../functions/search-parsers';
 import { bandcampSubdomainOf } from '../shared/bandcamp-identity';
 
 // Social platform types
@@ -758,18 +758,24 @@ export interface BandcampPageData {
   location: ArtistLocation | null;
   /** The artist's sidebar bio, raw text; '' when the page shows none. */
   bio: string;
+  /** The artist's photo (og:image), or null when the page shows none. */
+  imageUrl: string | null;
 }
 
-// Fetch location and the artist's bio from a Bandcamp artist profile page — one request.
+// Fetch location, bio and photo from a Bandcamp artist's /music page — one request.
 // Validated against the SSRF allowlist as defense-in-depth.
 // Default cap of 2.5s: this is one page fetch, measured at ~670ms, and it sits on a
 // sequential path inside a function with a 10s ceiling.
+//
+// /music, not the URL as given: an account's bare address can redirect to its newest release,
+// whose og:image is that release's cover art (paracosm.bandcamp.com → /album/--2), while /music
+// always carries the artist's own photo. The subdomain probe reads /music for the same reason.
 export async function fetchBandcampPage(bandcampUrl: string, timeoutMs = 2500): Promise<BandcampPageData | null> {
   if (!isUrlHostnameAllowed(bandcampUrl)) return null;
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    const response = await globalThis.fetch(bandcampUrl, {
+    const response = await globalThis.fetch(`${new URL(bandcampUrl).origin}/music`, {
       signal: controller.signal,
       headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
     });
@@ -777,6 +783,7 @@ export async function fetchBandcampPage(bandcampUrl: string, timeoutMs = 2500): 
     if (!response.ok) return null;
     const html = await response.text();
     const bio = parseBandcampBio(html);
+    const imageUrl = parseBandcampImage(html);
 
     // Iterate all JSON-LD blocks; find the MusicGroup entry which carries the artist location
     const jsonLdPattern = /<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g;
@@ -788,7 +795,7 @@ export async function fetchBandcampPage(bandcampUrl: string, timeoutMs = 2500): 
         for (const entry of entries) {
           if (entry?.['@type'] === 'MusicGroup') {
             const raw = entry?.foundingLocation?.name || entry?.location?.name;
-            if (raw) return { location: parseLocationString(raw), bio };
+            if (raw) return { location: parseLocationString(raw), bio, imageUrl };
           }
         }
       } catch { /* skip malformed blocks */ }
@@ -796,9 +803,9 @@ export async function fetchBandcampPage(bandcampUrl: string, timeoutMs = 2500): 
 
     // Fall back to location element in artist header (Bandcamp uses <p class="location ...">)
     const locationMatch = html.match(/<(?:p|div|span)[^>]+class="[^"]*\blocation\b[^"]*"[^>]*>([^<]+)<\/(?:p|div|span)>/);
-    if (locationMatch) return { location: parseLocationString(locationMatch[1].trim()), bio };
+    if (locationMatch) return { location: parseLocationString(locationMatch[1].trim()), bio, imageUrl };
 
-    return { location: null, bio };
+    return { location: null, bio, imageUrl };
   } catch {
     return null;
   }
