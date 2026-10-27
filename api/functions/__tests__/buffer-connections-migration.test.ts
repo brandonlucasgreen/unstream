@@ -17,7 +17,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 
-const MIGRATION = new URL('../../../supabase/migrations/20261027120000_buffer-connections.sql', import.meta.url);
+const MIGRATION = new URL('../../../supabase/migrations/20261027160000_buffer-connections.sql', import.meta.url);
 const sql = readFileSync(MIGRATION, 'utf8');
 
 const db = new PGlite();
