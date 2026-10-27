@@ -402,6 +402,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // Pushover, for admin push notifications (api/functions/admin-push.ts). Constant URL, checked
   // like the two above.
   'api.pushover.net',
+  // GoatCounter's stats API, for the website traffic panel on /admin/analytics
+  // (api/functions/analytics-traffic.ts). Constant host, checked like the three above.
+  'unstream.goatcounter.com',
 ]);
 
 /**

@@ -11,6 +11,11 @@ import { ALLOWED_RELEASE_DOMAINS } from '../lib/constants.js';
 import { getStoredSession, handleMagicLinkCallback, getAccessToken, signOut } from '../lib/supabase.js';
 import { reconcileCustomSites } from '../lib/custom-sites.js';
 import {
+  LAST_NOW_PLAYING_SEARCH_KEY,
+  isNewNowPlayingSearch,
+  extensionBrowser,
+} from '../lib/search-tracking.js';
+import {
   releasesFromResponse,
   releaseNotificationBody,
   releaseNotificationTitle,
@@ -161,13 +166,36 @@ async function trackActivation(service) {
   trackAppEvent('extension_activated', { streaming_service: service });
 }
 
-// Fire-and-forget product analytics event
+// Whether this detection of `artist` is a new now-playing search (see lib/search-tracking.js).
+// Every detection refreshes the stored time, so an album played straight through stays one
+// search however long it runs. Kept in chrome.storage.local because the MV3 service worker is
+// shut down between tracks; in-memory state would make every track look new.
+async function claimNowPlayingSearch(artist) {
+  const now = Date.now();
+  try {
+    const stored = await chrome.storage.local.get(LAST_NOW_PLAYING_SEARCH_KEY);
+    const isNew = isNewNowPlayingSearch(stored[LAST_NOW_PLAYING_SEARCH_KEY], artist, now);
+    await chrome.storage.local.set({
+      [LAST_NOW_PLAYING_SEARCH_KEY]: { artist: artist.toLowerCase(), seenAt: now },
+    });
+    return isNew;
+  } catch (error) {
+    // Storage failing must not cost the event — count it.
+    console.warn('Search gate unavailable:', error);
+    return true;
+  }
+}
+
+const BROWSER = extensionBrowser(navigator.userAgent);
+
+// Fire-and-forget product analytics event. Every one carries the browser, so the dashboard can
+// show the Chrome and Firefox builds as separate clients.
 async function trackAppEvent(event_type, context = {}) {
   try {
     await fetch(`${API_BASE}/analytics/app-event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type, app: 'extension', context }),
+      body: JSON.stringify({ event_type, app: 'extension', context: { ...context, browser: BROWSER } }),
     });
   } catch {
     // silent fail
@@ -220,10 +248,19 @@ async function handleMusicDetection(data, tabId) {
     return;
   }
 
-  // Analytics fire on every detection, cache hit or not. A listener really did play this
-  // artist, so the artist's search appearance is a real event wherever the results came
-  // from — suppressing it on a cache hit would under-report to the artist.
-  trackAppEvent('search', { has_results: results.length > 0, result_count: results.length });
+  // The product `search` event counts once per listening stretch with an artist, cache hit or
+  // not (see lib/search-tracking.js).
+  if (await claimNowPlayingSearch(artist)) {
+    trackAppEvent('search', {
+      has_results: results.length > 0,
+      result_count: results.length,
+      search_kind: 'now_playing',
+    });
+  }
+
+  // The artist's own search appearance fires on every detection, cache hit or not. A listener
+  // really did play this artist, so it is a real event wherever the results came from —
+  // suppressing it on a cache hit would under-report to the artist.
 
   for (const result of results) {
     if (result.type === 'artist' && result.claimedSlug) {

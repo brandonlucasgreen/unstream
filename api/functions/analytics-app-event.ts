@@ -27,6 +27,17 @@ const VALID_EVENT_TYPES = new Set([
 
 const VALID_APPS = new Set(['web', 'extension', 'mac']);
 
+const ALLOWED_CONTEXT_KEYS = new Set([
+  'has_results', 'result_count', 'platform', 'streaming_service', 'page', 'search_kind', 'browser',
+]);
+
+// Keys the dashboard groups by with a fixed set of answers. Anything else is dropped rather than
+// stored, so a stray value can't add a row to /admin/analytics.
+const ALLOWED_CONTEXT_VALUES: Record<string, Set<string>> = {
+  search_kind: new Set(['typed', 'now_playing']),
+  browser: new Set(['chrome', 'firefox']),
+};
+
 function hashSessionId(ip: string, userAgent: string): string {
   const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   const raw = `${ip}:${userAgent}:${date}`;
@@ -82,13 +93,12 @@ async function handleRequest(event: {
 
   // Sanitize context: only allow primitive values, strip any PII fields
   const safeContext: Record<string, unknown> = {};
-  const ALLOWED_CONTEXT_KEYS = new Set([
-    'has_results', 'result_count', 'platform', 'streaming_service', 'page',
-  ]);
   for (const [k, v] of Object.entries(context)) {
-    if (ALLOWED_CONTEXT_KEYS.has(k) && (typeof v === 'string' || typeof v === 'boolean' || typeof v === 'number')) {
-      safeContext[k] = v;
-    }
+    if (!ALLOWED_CONTEXT_KEYS.has(k)) continue;
+    if (!(typeof v === 'string' || typeof v === 'boolean' || typeof v === 'number')) continue;
+    const allowedValues = ALLOWED_CONTEXT_VALUES[k];
+    if (allowedValues && !allowedValues.has(String(v))) continue;
+    safeContext[k] = v;
   }
 
   const userAgent = event.headers['user-agent'] || '';
