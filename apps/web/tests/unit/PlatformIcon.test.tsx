@@ -36,7 +36,7 @@ describe('Bandcamp uses its Simple Icons mark (UNS-234)', () => {
 });
 
 describe('branded platforms have Simple Icons paths (UNS-220)', () => {
-  it.each(['venmo', 'paypal'] as const)('%s has an entry in SIMPLE_ICON_PATHS', (id) => {
+  it.each(['venmo', 'paypal', 'cashapp', 'bigcartel'] as const)('%s has an entry in SIMPLE_ICON_PATHS', (id) => {
     expect(SIMPLE_ICON_PATHS[id]?.d).toBeTruthy();
     expect(SIMPLE_ICON_PATHS[id]?.d).toMatch(/^M/);
   });

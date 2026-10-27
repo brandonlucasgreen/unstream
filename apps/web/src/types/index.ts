@@ -30,6 +30,10 @@ export type SourceId =
   | 'liberapay'
   | 'venmo'
   | 'paypal'
+  | 'cashapp'
+  | 'steady'
+  | 'tipeee'
+  | 'bigcartel'
   | 'other';
 
 export interface Source {
