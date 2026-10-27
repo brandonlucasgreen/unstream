@@ -87,6 +87,9 @@ function mockMusicBrainz({ failLookupOf }: { failLookupOf?: string } = {}) {
     if (init?.method === 'HEAD' && url.startsWith('https://xparacosm.bandcamp.com')) {
       return new Response(null, { status: 200 });
     }
+    if (url === 'https://xparacosm.bandcamp.com/music') {
+      return new Response('<meta property="og:image" content="https://f4.bcbits.com/img/0040943917_23.jpg">', { status: 200 });
+    }
     return new Response('not found', { status: 404 });
   });
 }
@@ -124,6 +127,9 @@ describe('getMusicBrainzEnrichment: same-name artists', () => {
     expect(la.officialUrl).toBe('https://www.paracosm.cc/');
     expect(la.socialLinks.map(s => s.url)).toEqual(['https://www.instagram.com/paracosm.cc/']);
     expect(la.disambiguation).toBe('hyperpop artist from LA');
+    // Read from their /music page, whose og:image is the artist photo (the bare address can
+    // redirect to a release, whose og:image is cover art).
+    expect(la.imageUrl).toBe('https://f4.bcbits.com/img/0040943917_23.jpg');
     expect(sofia.socialLinks.map(s => s.url)).toEqual(['https://www.instagram.com/paracosmofficial/']);
     expect(sofia.location?.country).toBe('Bulgaria');
     // Not a person or a group by MusicBrainz's account: never looked up, known only from the hit.
@@ -144,6 +150,20 @@ describe('getMusicBrainzEnrichment: same-name artists', () => {
     expect(body.results.filter(r => r.name.toLowerCase() === 'paracosm')).toHaveLength(2);
     expect(body.hasPendingEnrichment).toBe(true);
   }, 20000);
+
+  it("leaves enrichment pending when a same-name artist's Bandcamp page didn't answer", async () => {
+    const fetchSpy = mockMusicBrainz();
+    const answer = fetchSpy.getMockImplementation()!;
+    fetchSpy.mockImplementation(async (input, init) =>
+      String(input) === 'https://xparacosm.bandcamp.com/music' ? new Response('', { status: 503 }) : answer(input, init));
+
+    const { data } = await getMusicBrainzEnrichment('Paracosm');
+
+    // Their link is known; their photo is unknown, not absent.
+    expect(data.homonyms[0].bandcampUrl).toBe('https://xparacosm.bandcamp.com/');
+    expect(data.homonyms[0].imageUrl).toBeNull();
+    expect(data.enrichmentComplete).toBe(false);
+  }, 15000);
 
   it('leaves enrichment pending when a same-name artist could not be looked up', async () => {
     mockMusicBrainz({ failLookupOf: LOS_ANGELES });
@@ -195,6 +215,10 @@ describe('search-sources: three Paracosms', () => {
     expect(urlsOf(orlando!)).toContain('https://www.tiktok.com/@paracosmband');
     expect(urlsOf(orlando!).some(u => u.includes('bandcamp.com'))).toBe(false);
     expect(urlsOf(losAngeles!)).toEqual(expect.arrayContaining(['https://www.paracosm.cc/', 'https://www.instagram.com/paracosm.cc/']));
+    // MusicBrainz has no photos; this one is from the Bandcamp page the card links.
+    expect((losAngeles as { imageUrl?: string }).imageUrl).toBe('https://f4.bcbits.com/img/0040943917_23.jpg');
+    // Orlando has no Bandcamp, so no photo — none is borrowed from anyone else.
+    expect((orlando as { imageUrl?: string }).imageUrl).toBeUndefined();
 
     // Sofia's MusicBrainz entry, with only an Instagram, doesn't become a second Sofia card, and
     // the "digital design" entry only marked the name as shared.

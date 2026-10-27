@@ -5,7 +5,7 @@ import { withSentry } from '../lib/sentry';
 import { persistEnrichment, getLinkSuppressions } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
-import { normalizeSearchQuery, isUrlSuppressed, type LinkSuppression } from './search-utils';
+import { normalizeSearchQuery, isUrlSuppressed, bandcampSubdomainOf, type LinkSuppression } from './search-utils';
 import {
   getMusicBrainzEnrichment,
   toMusicBrainzResponse,
@@ -31,6 +31,7 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
     bioFetchFailed: false,
     commonsPhoto: null,
     homonyms: [],
+    imageUrl: null,
   };
 }
 
@@ -60,14 +61,16 @@ function stripSuppressedLinks(
     socialLinks: result.socialLinks.filter(s => !suppressed(s.url)),
     discoveredPlatforms: result.discoveredPlatforms.filter(p => !suppressed(p.url)),
     platformUrls: result.platformUrls.filter(u => !suppressed(u)),
-    // A suppressed link says that page isn't this artist — so neither is its bio.
+    // A suppressed link says that page isn't this artist — so neither is its bio, nor its photo.
     bio: result.bio && suppressed(result.bio.sourceUrl) ? null : result.bio,
+    imageUrl: result.platformUrls.some(u => bandcampSubdomainOf(u) !== null && suppressed(u)) ? null : result.imageUrl,
     // Suppressions are keyed by name, which homonyms share; Phase 1 strips them from every
     // card with the name, so these go too.
     homonyms: result.homonyms.map(homonym => ({
       ...homonym,
       officialUrl: homonym.officialUrl && suppressed(homonym.officialUrl) ? null : homonym.officialUrl,
       bandcampUrl: homonym.bandcampUrl && suppressed(homonym.bandcampUrl) ? null : homonym.bandcampUrl,
+      imageUrl: homonym.bandcampUrl && suppressed(homonym.bandcampUrl) ? null : homonym.imageUrl,
       socialLinks: homonym.socialLinks.filter(s => !suppressed(s.url)),
       platformUrls: homonym.platformUrls.filter(u => !suppressed(u)),
     })),

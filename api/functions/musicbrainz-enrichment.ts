@@ -73,6 +73,8 @@ export interface MusicBrainzHomonym {
   socialLinks: SocialLink[];
   platformUrls: string[];
   location: ArtistLocation | undefined;
+  /** Their photo from that Bandcamp page; null without a live Bandcamp. */
+  imageUrl: string | null;
 }
 
 // MusicBrainz enriched result interface with full enrichment data
@@ -100,6 +102,12 @@ export interface EnrichedMusicBrainzResult {
   wikipediaUrl: string | null;
   /** Sidebar bio from MB's own Bandcamp relation page; '' when it shows none. */
   bandcampBio: string | null;
+  /**
+   * The artist's photo from that same page. A card found only through MusicBrainz has no other
+   * photo: MusicBrainz has none, and the subdomain probe never reached their account.
+   * Absent from cache entries written before it existed; read it with `?? null`.
+   */
+  bandcampImageUrl: string | null;
   /** The Discogs bio, raw markup. */
   discogsProfile: string | null;
   /**
@@ -296,6 +304,7 @@ async function lookupHomonyms(hits: MusicBrainzSearchHit[]): Promise<{ homonyms:
       socialLinks: [],
       platformUrls: [],
       location: parseMusicBrainzArea(hit.area, hit['begin-area'], hit.country),
+      imageUrl: null,
     };
     homonyms.push(homonym);
     if (lookups >= MAX_HOMONYM_LOOKUPS || !PERFORMER_TYPES.has(hit.type ?? '')) continue;
@@ -322,8 +331,13 @@ async function lookupHomonyms(hits: MusicBrainzSearchHit[]): Promise<{ homonyms:
       // A retired account is dropped as it is for the matched artist, but its claim stays.
       if (relations.bandcampUrl && (await checkBandcampSubdomain(relations.bandcampUrl)) === 'dead') {
         homonym.platformUrls = relations.platformUrls.filter(u => u !== relations.bandcampUrl);
-      } else {
+      } else if (relations.bandcampUrl) {
         homonym.bandcampUrl = relations.bandcampUrl;
+        // Their photo, from the page the card will link to. A page that didn't answer leaves
+        // the photo unknown, not absent, so the answer isn't kept for a day.
+        const page = await fetchBandcampPage(relations.bandcampUrl);
+        if (page === null) complete = false;
+        homonym.imageUrl = page?.imageUrl ?? null;
       }
     } catch (error) {
       console.log(`[MusicBrainz] Homonym lookup error for ${hit.id}:`, (error as Error)?.message);
@@ -355,6 +369,8 @@ export function homonymAsEnrichment(homonym: MusicBrainzHomonym, query: string):
     wikipediaSummary: null,
     wikipediaUrl: null,
     bandcampBio: null,
+    // `?? null`: cache entries written before photos were read lack the field.
+    bandcampImageUrl: homonym.imageUrl ?? null,
     discogsProfile: null,
     bioFetchFailed: false,
     commonsPhoto: null,
@@ -384,6 +400,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     wikipediaSummary: null,
     wikipediaUrl: null,
     bandcampBio: null,
+    bandcampImageUrl: null,
     discogsProfile: null,
     bioFetchFailed: false,
     commonsPhoto: null,
@@ -618,6 +635,8 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       // A retired subdomain's bio belongs to nobody we can link to. A site-sourced account's
       // page was never fetched, so it has no bio here (and that isn't a failure).
       bandcampBio: bandcampUrl ? bandcampPage?.bio ?? null : null,
+      // Same page, same rule: a retired account's photo belongs to nobody we link to.
+      bandcampImageUrl: bandcampUrl ? bandcampPage?.imageUrl ?? null : null,
       discogsProfile: discogsArtist.profile,
       bioFetchFailed: discogsArtist.failed || wikipediaResult.status === 'failed' || (bandcampUrl !== null && bandcampPage === null),
       commonsPhoto: commonsPhoto.status === 'found' ? commonsPhoto.photo : null,
@@ -673,6 +692,11 @@ export interface MusicBrainzSearchResponse {
    * Added after the shipped app builds, which ignore it.
    */
   commonsPhoto: CommonsPhoto | null;
+  /**
+   * The artist's photo from their Bandcamp page (the one in platformUrls). Clients use it only on
+   * a card with no photo of its own. Added after the shipped app builds, which ignore it.
+   */
+  imageUrl: string | null;
   /**
    * Other artists MusicBrainz lists under exactly this name. When there are any, a name match
    * is not evidence that a card is `artistName`: a client merges this enrichment only into a
@@ -731,7 +755,8 @@ export function toMusicBrainzResponse(enrichment: EnrichedMusicBrainzResult): Mu
     bioFetchFailed: enrichment.bioFetchFailed ?? false,
     // `?? null`: cache entries written before photos existed lack the field.
     commonsPhoto: enrichment.commonsPhoto ?? null,
-    // `?? []`: cache entries written before homonyms existed lack the field.
-    homonyms: enrichment.homonyms ?? [],
+    // `?? []` / `?? null`: cache entries written before these existed lack the fields.
+    homonyms: (enrichment.homonyms ?? []).map(h => ({ ...h, imageUrl: h.imageUrl ?? null })),
+    imageUrl: enrichment.bandcampImageUrl ?? null,
   };
 }

@@ -184,6 +184,9 @@ export interface MusicBrainzData {
   // Other artists MusicBrainz lists under exactly this name. When there are any, only a card
   // on `bandcampSubdomain` is this artist — see nameMatchIsSameArtist.
   homonyms?: MusicBrainzHomonym[];
+  // The artist's photo from their Bandcamp page (the one in platformUrls). Only for a card with
+  // no photo of its own, on that same account.
+  imageUrl?: string | null;
 }
 
 // Another artist with the same name, with only their own MusicBrainz links (see
@@ -198,6 +201,7 @@ export interface MusicBrainzHomonym {
   socialLinks: SocialLink[];
   platformUrls: string[];
   location?: ArtistLocation;
+  imageUrl?: string | null;
 }
 
 // Search state

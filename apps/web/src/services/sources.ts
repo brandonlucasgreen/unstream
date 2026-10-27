@@ -859,6 +859,8 @@ export function buildMusicBrainzFallbackResult(
     id: id ?? `mb-${normalizeForComparison(name)}`,
     name,
     type: 'artist',
+    // From the Bandcamp page this card links, and only then.
+    imageUrl: bandcampUrl ? mbData.imageUrl ?? undefined : undefined,
     platforms,
     matchConfidence: confirmed ? 'verified' : 'unverified',
     unverifiedReason: confirmed ? undefined : 'no-release-data',
@@ -899,6 +901,7 @@ export function mergeWithMusicBrainzData(
       platformUrls: homonym.platformUrls,
       location: homonym.location,
       bandcampSubdomain: homonym.bandcampSubdomain,
+      imageUrl: homonym.imageUrl,
     };
     // A card of their own only with somewhere to support or find them, as on the server
     // (homonymWorthACard): socials alone would duplicate a card whose Bandcamp MusicBrainz
@@ -1151,6 +1154,13 @@ function mergeOneMusicBrainzArtist(
       wikipediaUrl: mbData.wikipediaUrl || undefined,
       bio: result.bio ?? (canFillBio(result, mbNormalized) ? mbData.bio ?? undefined : undefined),
       commonsPhoto: result.commonsPhoto ?? (canFillPhoto(result, mbNormalized) ? mbData.commonsPhoto ?? undefined : undefined),
+      // MusicBrainz's Bandcamp photo, only when the card links that same account (as on the server).
+      imageUrl: result.imageUrl ?? (
+        result.matchConfidence !== 'claimed' && mbData.imageUrl && mbData.bandcampSubdomain &&
+        bandcampSubdomainOf(newPlatforms.find(p => p.sourceId === 'bandcamp')?.url) === mbData.bandcampSubdomain.toLowerCase()
+          ? mbData.imageUrl
+          : undefined
+      ),
       location: mbData.location || result.location,
     };
   });

@@ -161,6 +161,23 @@ describe('mergeWithMusicBrainzData: several artists by one name', () => {
     expect(merged[2].platforms.map(p => p.url)).toContain('https://www.paracosm.cc/');
   });
 
+  it("gives Los Angeles's card the photo from their Bandcamp page, and Orlando's none", () => {
+    const withPhoto: MusicBrainzData = { ...orlando, homonyms: [{ ...losAngeles, imageUrl: 'https://f4.bcbits.com/img/0040943917_23.jpg' }, noLinks] };
+    const merged = mergeWithMusicBrainzData([sofia()], withPhoto);
+
+    expect(merged[2].imageUrl).toBe('https://f4.bcbits.com/img/0040943917_23.jpg');
+    expect(merged[1].imageUrl).toBeUndefined();
+  });
+
+  it('fills a photo only on a card that links the same Bandcamp account', () => {
+    const laCard: SearchResult = { ...sofia(), id: 'xparacosm', platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com' }] };
+    const withPhoto: MusicBrainzData = { ...orlando, homonyms: [{ ...losAngeles, imageUrl: 'https://f4.bcbits.com/img/0040943917_23.jpg' }] };
+    const merged = mergeWithMusicBrainzData([sofia(), laCard], withPhoto);
+
+    expect(merged[0].imageUrl).toBeUndefined();
+    expect(merged[1].imageUrl).toBe('https://f4.bcbits.com/img/0040943917_23.jpg');
+  });
+
   it('merges a homonym into the card on their own Bandcamp account', () => {
     const laCard: SearchResult = { ...sofia(), id: 'xparacosm', platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com' }] };
     const merged = mergeWithMusicBrainzData([sofia(), laCard], orlando);
