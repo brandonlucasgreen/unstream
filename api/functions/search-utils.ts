@@ -1,7 +1,7 @@
 // Pure utility functions and types extracted from search-sources.ts
 // No HTTP, cache, or database dependencies.
 
-import { bandcampSubdomainOf, bandcampSubdomainConflicts } from '../shared/bandcamp-identity';
+import { bandcampSubdomainOf, bandcampSubdomainConflicts, nameMatchIsSameArtist } from '../shared/bandcamp-identity';
 import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
 import { normalizeAccents, foldToAscii } from '../shared/artist-slug';
 import type { CommonsPhoto } from '../search/commons-photo';
@@ -649,7 +649,7 @@ export function isBandcampSearchLink(url: string): boolean {
   return url.includes('bandcamp.com/search');
 }
 // Moved to api/shared so the web client's MusicBrainz merge applies the same identity rule.
-export { bandcampSubdomainOf, bandcampSubdomainConflicts };
+export { bandcampSubdomainOf, bandcampSubdomainConflicts, nameMatchIsSameArtist };
 
 /**
  * The artist's own Bandcamp account among links found on their official site or Linktree,
@@ -805,7 +805,7 @@ export function attachAmpwallAndSearchLinks(
   ampwallMatches: Map<string, string>,
   // artistName is null when MusicBrainz had no match — the Bandcamp relation
   // below is only trusted when it belongs to a named artist.
-  mbData?: { artistName: string | null; bandcampUrl?: string | null } | null,
+  mbData?: { artistName: string | null; bandcampUrl?: string | null; homonyms?: unknown[] } | null,
 ): void {
   const usedPlatformUrls = new Set<string>();
 
@@ -842,8 +842,12 @@ export function attachAmpwallAndSearchLinks(
     // got a 404 every time (#407). Saying nothing is the honest answer when the probe came back
     // absent, and it is what the probe's verdict already means.
     if (!result.platforms.some(p => p.sourceId === 'bandcamp')) {
+      // Not when MusicBrainz knows several artists by this name: the name alone doesn't say
+      // this card is the one MB matched (nameMatchIsSameArtist). That artist gets
+      // their Bandcamp on a card of their own instead.
       const mbBandcampUrl = mbData?.bandcampUrl && mbData.artistName &&
-        normalizeForComparison(mbData.artistName) === normalizedName
+        normalizeForComparison(mbData.artistName) === normalizedName &&
+        !mbData.homonyms?.length
         ? mbData.bandcampUrl
         : undefined;
 
@@ -1054,10 +1058,13 @@ export function mergeStoredArtistsIntoResults(
     // A live result with the same name on a different Bandcamp account is a different
     // artist (Honeycrush in Brooklyn vs Honey Crush in Orlando), so it neither covers this
     // one nor inherits their page. Without a Bandcamp link on both sides there is no
-    // evidence either way, and the name decides as before.
+    // evidence either way, and the name decides as before — unless the live results hold
+    // several artists by this name (the three Paracosms), when only the same account does.
     const storedSubdomain = bandcampSubdomainOf(artist.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+    const storedNorm = normalizeForComparison(artist.name);
+    const nameIsShared = results.filter(r => r.type === 'artist' && normalizeForComparison(r.name) === storedNorm).length > 1;
     const isSameArtist = (r: AggregatedResult) =>
-      !bandcampSubdomainConflicts(storedSubdomain, r.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+      nameMatchIsSameArtist(storedSubdomain, nameIsShared, r.platforms.find(p => p.sourceId === 'bandcamp')?.url);
 
     const sameNameIdx = merged.findIndex(r =>
       r.type === 'artist' &&

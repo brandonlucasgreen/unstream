@@ -20,6 +20,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   bandcampSubdomainOf,
   bandcampSubdomainConflicts,
+  nameMatchIsSameArtist,
   isBandcampSearchLink,
   pickArtistBandcampUrl,
 } from '../search-utils';
@@ -67,6 +68,26 @@ describe('bandcampSubdomainConflicts', () => {
 
   it('ignores custom domains rather than guessing they are a different account', () => {
     expect(bandcampSubdomainConflicts('honeyyycrush', 'https://honeycrushing.com/')).toBe(false);
+  });
+});
+
+// Paracosm: MusicBrainz lists a Los Angeles artist (xparacosm), an Orlando band (no Bandcamp)
+// and a Sofia band, and the probe finds paracosm.bandcamp.com (Sofia). With the name shared,
+// "no Bandcamp on one side" stops meaning "no evidence, let the name decide".
+describe('nameMatchIsSameArtist', () => {
+  it('lets the name decide when only one artist goes by it, as before', () => {
+    expect(nameMatchIsSameArtist(null, false, 'https://paracosm.bandcamp.com/')).toBe(true);
+    expect(nameMatchIsSameArtist('paracosm', false, undefined)).toBe(true);
+    expect(nameMatchIsSameArtist('honeyyycrush', false, 'https://honeycrush.bandcamp.com/')).toBe(false);
+  });
+
+  it('needs the same account on both sides when the name is shared', () => {
+    // Orlando, who has no Bandcamp, is not the Sofia card.
+    expect(nameMatchIsSameArtist(null, true, 'https://paracosm.bandcamp.com/')).toBe(false);
+    // Los Angeles is neither the Sofia card nor a card with no Bandcamp at all.
+    expect(nameMatchIsSameArtist('xparacosm', true, 'https://paracosm.bandcamp.com/')).toBe(false);
+    expect(nameMatchIsSameArtist('xparacosm', true, undefined)).toBe(false);
+    expect(nameMatchIsSameArtist('XParacosm', true, 'https://xparacosm.bandcamp.com/music')).toBe(true);
   });
 });
 

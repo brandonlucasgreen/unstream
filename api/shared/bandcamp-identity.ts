@@ -46,3 +46,26 @@ export function bandcampSubdomainConflicts(
   if (!mbSubdomain || !probed) return false;
   return mbSubdomain.toLowerCase() !== probed;
 }
+
+/**
+ * Whether a card with an artist's name is that artist, given the Bandcamp account we know
+ * them by (`knownSubdomain`: MusicBrainz's, or a stored or claimed profile's).
+ *
+ * Usually a name match is enough, unless the two sides name different Bandcamp accounts
+ * (bandcampSubdomainConflicts). But when several artists go by this exact name, the name
+ * says nothing about which of them a card is: Paracosm is a hyperpop artist in Los Angeles,
+ * a punk band in Orlando and a rock band in Sofia, and every "Paracosm" card matches all
+ * three. Merging by name put Orlando's site, socials and city on the Sofia band's Bandcamp
+ * card. So when the name is shared, only the same Bandcamp account on both sides is
+ * evidence; without it, the artist gets a card of their own instead of someone else's.
+ */
+export function nameMatchIsSameArtist(
+  knownSubdomain: string | null | undefined,
+  nameIsShared: boolean,
+  resultUrl: string | null | undefined,
+): boolean {
+  if (bandcampSubdomainConflicts(knownSubdomain, resultUrl)) return false;
+  if (!nameIsShared) return true;
+  const probed = bandcampSubdomainOf(resultUrl);
+  return !!knownSubdomain && probed === knownSubdomain.toLowerCase();
+}

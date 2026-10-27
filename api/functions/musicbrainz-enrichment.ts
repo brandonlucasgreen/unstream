@@ -53,6 +53,28 @@ const MB_FAILURE_CACHE_TTL = 60;
 // Helper to delay execution (for rate limiting)
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Another artist MusicBrainz lists under exactly the matched artist's name. Only their
+ * own links are read (one url-rels lookup each), not the bios and site scraping the
+ * matched artist gets: enough to give them a card of their own, and to know the name is
+ * shared — which is what stops a name match from passing for an identity match
+ * (nameMatchIsSameArtist).
+ */
+export interface MusicBrainzHomonym {
+  mbid: string;
+  name: string;
+  /** MusicBrainz's own note telling them apart, e.g. "hyperpop artist from LA". */
+  disambiguation: string | null;
+  officialUrl: string | null;
+  /** Their live Bandcamp page; null when MusicBrainz lists none or it is retired. */
+  bandcampUrl: string | null;
+  /** The account MusicBrainz names for them, kept even when retired — it still says who they are. */
+  bandcampSubdomain: string | null;
+  socialLinks: SocialLink[];
+  platformUrls: string[];
+  location: ArtistLocation | undefined;
+}
+
 // MusicBrainz enriched result interface with full enrichment data
 export interface EnrichedMusicBrainzResult {
   query: string;
@@ -99,6 +121,11 @@ export interface EnrichedMusicBrainzResult {
    * only — they are verified against Bandcamp before becoming results.
    */
   suggestedNames: string[];
+  /**
+   * Other artists with exactly this name, best-ranked first. Empty for most artists.
+   * Absent from cache entries written before it existed, so read it with `?? []`.
+   */
+  homonyms: MusicBrainzHomonym[];
   /** The MB search itself failed (network / non-2xx). We know nothing. */
   searchFailed: boolean;
   /**
@@ -147,6 +174,199 @@ export async function peekMusicBrainzEnrichment(
   return (value as EnrichedMusicBrainzResult | undefined) ?? null;
 }
 
+const MUSICBRAINZ_HEADERS = {
+  'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
+};
+
+// How many same-name artists get their links looked up. Each lookup is a MusicBrainz
+// request behind a 1.1s rate-limit gap, and on a miss a caller that doesn't defer waits
+// for it. Any further ones still mark the name as shared; they just get no card.
+const MAX_HOMONYM_LOOKUPS = 2;
+
+// Only these are looked up. MusicBrainz also files entries with no type, "Other" or
+// "Character" — Paracosm's third is a "digital design" entry with an Instagram and no
+// releases — and a card for one of those is noise. They still mark the name as shared.
+const PERFORMER_TYPES = new Set(['Person', 'Group', 'Orchestra', 'Choir']);
+
+type MusicBrainzSearchHit = {
+  id: string;
+  name: string;
+  score: number;
+  type?: string | null;
+  disambiguation?: string;
+  country?: string;
+  area?: MusicBrainzArea;
+  'begin-area'?: MusicBrainzArea;
+};
+
+type MusicBrainzRelation = { type: string; url?: { resource: string } };
+
+interface ArtistRelations {
+  officialUrl: string | null;
+  discogsUrl: string | null;
+  bandcampUrl: string | null;
+  wikipediaUrl: string | null;
+  wikidataUrl: string | null;
+  linktreeUrl: string | null;
+  socialLinks: SocialLink[];
+  /** Bandcamp, streaming and store relations: what disambiguation compares cards against. */
+  platformUrls: string[];
+}
+
+const PLATFORM_RELATION_TYPES = new Set([
+  'bandcamp', 'streaming music', 'purchase for download',
+  'download for free', 'free streaming',
+]);
+
+/** The links an artist's MusicBrainz url-rels name. */
+function readArtistRelations(relations: MusicBrainzRelation[]): ArtistRelations {
+  const found: ArtistRelations = {
+    officialUrl: null,
+    discogsUrl: null,
+    bandcampUrl: null,
+    wikipediaUrl: null,
+    wikidataUrl: null,
+    linktreeUrl: null,
+    socialLinks: [],
+    platformUrls: [],
+  };
+  const seenPlatforms = new Set<SocialPlatform>();
+
+  for (const rel of relations) {
+    const url = rel.url?.resource;
+    if (!url) continue;
+
+    if (rel.type === 'official homepage') found.officialUrl ??= url;
+    if (rel.type === 'discogs') found.discogsUrl ??= url;
+    // Most artists have a Wikidata relation rather than a Wikipedia one — MusicBrainz moved
+    // to those years ago. lookupWikipedia resolves it to the English article.
+    if (rel.type === 'wikipedia' && url.includes('en.wikipedia.org')) found.wikipediaUrl ??= url;
+    if (rel.type === 'wikidata') found.wikidataUrl ??= url;
+    if (PLATFORM_RELATION_TYPES.has(rel.type)) found.platformUrls.push(url);
+
+    if (rel.type === 'social network' || rel.type === 'youtube') {
+      if (url.includes('linktr.ee')) {
+        if (!found.linktreeUrl) console.log(`[MusicBrainz] Found Linktree: ${url}`);
+        found.linktreeUrl ??= url;
+        continue;
+      }
+      const socialLink = parseSocialUrl(url);
+      if (socialLink && !seenPlatforms.has(socialLink.platform)) {
+        seenPlatforms.add(socialLink.platform);
+        found.socialLinks.push(socialLink);
+      }
+    }
+  }
+
+  // A 'bandcamp' relation wins; failing that, any relation that points at a Bandcamp page.
+  found.bandcampUrl =
+    relations.find(rel => rel.type === 'bandcamp' && rel.url?.resource)?.url?.resource ??
+    relations.find(rel => bandcampSubdomainOf(rel.url?.resource) !== null)?.url?.resource ??
+    null;
+
+  return found;
+}
+
+/**
+ * The other artists in MusicBrainz's ranked results with exactly the matched artist's
+ * name and the same confidence bar, best-ranked first.
+ */
+export function sameNameHits<T extends { id: string; name: string; score: number }>(hits: T[], matched: T): T[] {
+  const name = normalizeForComparison(matched.name);
+  return hits.filter(hit => hit.id !== matched.id && hit.score >= 95 && normalizeForComparison(hit.name) === name);
+}
+
+/**
+ * Each same-name artist's own links. `complete` is false when a lookup failed: that artist's
+ * links are unknown, not absent, and the enrichment must not be cached as if they were.
+ */
+async function lookupHomonyms(hits: MusicBrainzSearchHit[]): Promise<{ homonyms: MusicBrainzHomonym[]; complete: boolean }> {
+  const homonyms: MusicBrainzHomonym[] = [];
+  let complete = true;
+  let lookups = 0;
+
+  for (const hit of hits) {
+    const homonym: MusicBrainzHomonym = {
+      mbid: hit.id,
+      name: hit.name,
+      disambiguation: hit.disambiguation || null,
+      officialUrl: null,
+      bandcampUrl: null,
+      bandcampSubdomain: null,
+      socialLinks: [],
+      platformUrls: [],
+      location: parseMusicBrainzArea(hit.area, hit['begin-area'], hit.country),
+    };
+    homonyms.push(homonym);
+    if (lookups >= MAX_HOMONYM_LOOKUPS || !PERFORMER_TYPES.has(hit.type ?? '')) continue;
+    lookups++;
+
+    await delay(1100);
+    try {
+      const response = await globalThis.fetch(
+        `https://musicbrainz.org/ws/2/artist/${hit.id}?inc=url-rels&fmt=json`,
+        { headers: MUSICBRAINZ_HEADERS },
+      );
+      if (!response.ok) {
+        console.log(`[MusicBrainz] Homonym lookup failed for ${hit.id}: ${response.status}`);
+        complete = false;
+        continue;
+      }
+      const data = await response.json() as { relations?: MusicBrainzRelation[] };
+      const relations = readArtistRelations(data.relations || []);
+
+      homonym.officialUrl = relations.officialUrl;
+      homonym.socialLinks = relations.socialLinks;
+      homonym.platformUrls = relations.platformUrls;
+      homonym.bandcampSubdomain = bandcampSubdomainOf(relations.bandcampUrl);
+      // A retired account is dropped as it is for the matched artist, but its claim stays.
+      if (relations.bandcampUrl && (await checkBandcampSubdomain(relations.bandcampUrl)) === 'dead') {
+        homonym.platformUrls = relations.platformUrls.filter(u => u !== relations.bandcampUrl);
+      } else {
+        homonym.bandcampUrl = relations.bandcampUrl;
+      }
+    } catch (error) {
+      console.log(`[MusicBrainz] Homonym lookup error for ${hit.id}:`, (error as Error)?.message);
+      complete = false;
+    }
+  }
+
+  return { homonyms, complete };
+}
+
+/**
+ * A same-name artist in the shape the search pipeline merges MusicBrainz data in, so they
+ * go through the same matching and get the same kind of card as the matched artist. Only
+ * their own links: no bios, photos or library eligibility, which were never fetched.
+ */
+export function homonymAsEnrichment(homonym: MusicBrainzHomonym, query: string): EnrichedMusicBrainzResult {
+  return {
+    query,
+    artistName: homonym.name,
+    officialUrl: homonym.officialUrl,
+    discogsUrl: null,
+    bandcampUrl: homonym.bandcampUrl,
+    bandcampSubdomain: homonym.bandcampSubdomain,
+    qobuzUrl: pickQobuzUrl(homonym.platformUrls),
+    hasPre2005Release: false,
+    socialLinks: homonym.socialLinks,
+    discoveredPlatforms: [],
+    platformUrls: homonym.platformUrls,
+    wikipediaSummary: null,
+    wikipediaUrl: null,
+    bandcampBio: null,
+    discogsProfile: null,
+    bioFetchFailed: false,
+    commonsPhoto: null,
+    photoFetchFailed: false,
+    location: homonym.location,
+    suggestedNames: [],
+    homonyms: [],
+    searchFailed: false,
+    enrichmentComplete: true,
+  };
+}
+
 // Search MusicBrainz with full enrichment - fetches social links, location, Wikipedia, etc.
 async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicBrainzResult> {
   const emptyResult: EnrichedMusicBrainzResult = {
@@ -170,6 +390,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     photoFetchFailed: false,
     location: undefined,
     suggestedNames: [],
+    homonyms: [],
     searchFailed: false,
     enrichmentComplete: true,
   };
@@ -180,18 +401,14 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     // below), the rest become discovery candidates via collectMbSuggestions.
     const searchUrl = `https://musicbrainz.org/ws/2/artist/?query=${encodeURIComponent(musicBrainzArtistQuery(query))}&fmt=json&limit=5`;
 
-    const response = await globalThis.fetch(searchUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
+    const response = await globalThis.fetch(searchUrl, { headers: MUSICBRAINZ_HEADERS });
 
     if (!response.ok) {
       console.log('MusicBrainz artist search failed:', response.status);
       return { ...emptyResult, searchFailed: true };
     }
 
-    const data = await response.json() as { artists?: { id: string; name: string; score: number }[] };
+    const data = await response.json() as { artists?: MusicBrainzSearchHit[] };
     const artists = data.artists || [];
 
     if (artists.length === 0) {
@@ -244,11 +461,12 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     // measured there).
     const artistUrl = `https://musicbrainz.org/ws/2/artist/${artist.id}?inc=url-rels+release-groups&fmt=json`;
 
-    const artistResponse = await globalThis.fetch(artistUrl, {
-      headers: {
-        'User-Agent': 'Unstream/1.0 (https://github.com/unstream - ethical music finder)',
-      },
-    });
+    const artistResponse = await globalThis.fetch(artistUrl, { headers: MUSICBRAINZ_HEADERS });
+
+    // Started now, after the lookup above, so its own 1.1s gaps keep MusicBrainz's rate
+    // limit; it then runs alongside the Discogs, Wikipedia and site fetches below, which
+    // don't touch MusicBrainz.
+    const homonymsPromise = lookupHomonyms(sameNameHits(artists, artist));
 
     let officialUrl: string | null = null;
     let discogsUrl: string | null = null;
@@ -258,7 +476,6 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
     let wikipediaUrl: string | null = null;
     let wikidataUrl: string | null = null;
     const socialLinks: SocialLink[] = [];
-    const seenPlatforms = new Set<SocialPlatform>();
     let platformUrls: string[] = [];
 
     let mbLocation: ArtistLocation | undefined;
@@ -290,85 +507,10 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
         artistData.country,
       );
 
-      const relations = artistData.relations || [];
-
-      // Look for official homepage
-      for (const rel of relations) {
-        if (rel.type === 'official homepage' && rel.url?.resource) {
-          officialUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Look for Discogs link
-      for (const rel of relations) {
-        if (rel.type === 'discogs' && rel.url?.resource) {
-          discogsUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Look for Bandcamp link
-      for (const rel of relations) {
-        if (rel.type === 'bandcamp' && rel.url?.resource) {
-          bandcampUrl = rel.url.resource;
-          break;
-        }
-        if (!bandcampUrl && rel.url?.resource) {
-          try {
-            const hostname = new URL(rel.url.resource).hostname;
-            if (hostname.endsWith('.bandcamp.com')) {
-              bandcampUrl = rel.url.resource;
-              break;
-            }
-          } catch {}
-        }
-      }
-
-      // Look for English Wikipedia link
-      for (const rel of relations) {
-        if (rel.type === 'wikipedia' && rel.url?.resource && rel.url.resource.includes('en.wikipedia.org')) {
-          wikipediaUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Most artists have a Wikidata relation instead — MusicBrainz moved to those years ago.
-      // lookupWikipedia resolves it to the English article when there's no direct link.
-      for (const rel of relations) {
-        if (rel.type === 'wikidata' && rel.url?.resource) {
-          wikidataUrl = rel.url.resource;
-          break;
-        }
-      }
-
-      // Extract social links from 'social network' and 'youtube' relation types
-      for (const rel of relations) {
-        if ((rel.type === 'social network' || rel.type === 'youtube') && rel.url?.resource) {
-          const url = rel.url.resource;
-          if (url.includes('linktr.ee') && !linktreeUrl) {
-            linktreeUrl = url;
-            console.log(`[MusicBrainz] Found Linktree: ${linktreeUrl}`);
-            continue;
-          }
-          const socialLink = parseSocialUrl(url);
-          if (socialLink && !seenPlatforms.has(socialLink.platform)) {
-            seenPlatforms.add(socialLink.platform);
-            socialLinks.push(socialLink);
-          }
-        }
-      }
-
-      // Extract platform URLs for disambiguation
-      const platformRelTypes = new Set([
-        'bandcamp', 'streaming music', 'purchase for download',
-        'download for free', 'free streaming',
-      ]);
-      for (const rel of relations) {
-        if (rel.url?.resource && platformRelTypes.has(rel.type)) {
-          platformUrls.push(rel.url.resource);
-        }
-      }
+      const relations = readArtistRelations(artistData.relations || []);
+      ({ officialUrl, discogsUrl, bandcampUrl, wikipediaUrl, wikidataUrl, linktreeUrl } = relations);
+      socialLinks.push(...relations.socialLinks);
+      platformUrls = relations.platformUrls;
       if (platformUrls.length > 0) {
         console.log(`[MusicBrainz] Found ${platformUrls.length} platform URLs`);
       }
@@ -392,6 +534,7 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       bandcampUrl ? checkBandcampSubdomain(bandcampUrl) : Promise.resolve('unknown' as const),
       wikidataUrl ? fetchCommonsPhoto(wikidataUrl) : Promise.resolve<CommonsPhotoLookup>({ status: 'none' }),
     ]);
+    const homonymLookup = await homonymsPromise;
 
     // Drop a retired subdomain here, at the single point where MB's Bandcamp link enters
     // the pipeline, rather than at each of the four places that later read it. Only a
@@ -481,8 +624,11 @@ async function fetchMusicBrainzEnrichment(query: string): Promise<EnrichedMusicB
       photoFetchFailed: commonsPhoto.status === 'failed',
       location,
       suggestedNames: collectMbSuggestions(artists, query, artist.name),
+      homonyms: homonymLookup.homonyms,
       searchFailed: false,
-      enrichmentComplete: artistResponse.ok,
+      // A homonym whose links didn't arrive could be the very artist the fan is after, so a
+      // failed lookup leaves enrichment pending like a failed lookup of the matched artist.
+      enrichmentComplete: artistResponse.ok && homonymLookup.complete,
     };
   } catch (error: unknown) {
     const err = error as { name?: string; message?: string };
@@ -527,6 +673,13 @@ export interface MusicBrainzSearchResponse {
    * Added after the shipped app builds, which ignore it.
    */
   commonsPhoto: CommonsPhoto | null;
+  /**
+   * Other artists MusicBrainz lists under exactly this name. When there are any, a name match
+   * is not evidence that a card is `artistName`: a client merges this enrichment only into a
+   * card on the same Bandcamp account (nameMatchIsSameArtist), and gives each homonym
+   * with links a card of their own. Added after the shipped app builds, which ignore it.
+   */
+  homonyms: MusicBrainzHomonym[];
 }
 
 function isSubvertUrl(url: string): boolean {
@@ -578,5 +731,7 @@ export function toMusicBrainzResponse(enrichment: EnrichedMusicBrainzResult): Mu
     bioFetchFailed: enrichment.bioFetchFailed ?? false,
     // `?? null`: cache entries written before photos existed lack the field.
     commonsPhoto: enrichment.commonsPhoto ?? null,
+    // `?? []`: cache entries written before homonyms existed lack the field.
+    homonyms: enrichment.homonyms ?? [],
   };
 }

@@ -30,6 +30,17 @@ final class BandcampIdentityTests: XCTestCase {
         XCTAssertFalse(UnstreamAPI.bandcampSubdomainConflicts("honeyyycrush", "https://honeycrushing.com/"))
     }
 
+    /// MusicBrainz lists three Paracosms. With the name shared, a missing account is no longer
+    /// "no evidence either way": only the same account on both sides is the same artist.
+    func testASharedNameNeedsTheSameAccount() {
+        XCTAssertTrue(UnstreamAPI.nameMatchIsSameArtist(nil, nameIsShared: false, "https://paracosm.bandcamp.com/"))
+        XCTAssertFalse(UnstreamAPI.nameMatchIsSameArtist(nil, nameIsShared: true, "https://paracosm.bandcamp.com/"))
+        XCTAssertFalse(UnstreamAPI.nameMatchIsSameArtist("xparacosm", nameIsShared: true, "https://paracosm.bandcamp.com/"))
+        XCTAssertFalse(UnstreamAPI.nameMatchIsSameArtist("xparacosm", nameIsShared: true, nil))
+        XCTAssertTrue(UnstreamAPI.nameMatchIsSameArtist("XParacosm", nameIsShared: true, "https://xparacosm.bandcamp.com/music"))
+        XCTAssertFalse(UnstreamAPI.nameMatchIsSameArtist("honeyyycrush", nameIsShared: false, "https://honeycrush.bandcamp.com/"))
+    }
+
     // MARK: - mergeWithMusicBrainzData
 
     private func decode<T: Decodable>(_ type: T.Type, _ json: String) throws -> T {
@@ -64,6 +75,19 @@ final class BandcampIdentityTests: XCTestCase {
 
         XCTAssertTrue(merged[0].platforms.contains { $0.sourceId == "officialsite" })
         XCTAssertTrue(merged[0].platforms.contains { $0.sourceId == "instagram" })
+    }
+
+    func testLeavesASofiaCardAloneWhenOrlandoSharesTheName() async throws {
+        let sofia = try decode(ArtistResult.self, """
+        {"id":"paracosm","name":"Paracosm","type":"artist","platforms":[{"sourceId":"bandcamp","url":"https://paracosm.bandcamp.com/"}],"matchConfidence":"verified"}
+        """)
+        let orlando = try decode(MusicBrainzResponse.self, """
+        {"query":"paracosm","artistName":"Paracosm","officialUrl":"https://paracosmtheband.com/","socialLinks":[{"platform":"tiktok","url":"https://www.tiktok.com/@paracosmband"}],"bandcampSubdomain":null,"homonyms":[{"name":"Paracosm","bandcampSubdomain":"xparacosm","mbid":"7b677a62"}]}
+        """)
+
+        let merged = await UnstreamAPI().mergeWithMusicBrainzData(results: [sofia], mbData: orlando)
+
+        XCTAssertEqual(merged[0].platforms.map(\.sourceId), ["bandcamp"])
     }
 
     func testAnOlderDeployWithoutTheFieldMergesAsBefore() async throws {

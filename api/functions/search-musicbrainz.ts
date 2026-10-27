@@ -30,6 +30,7 @@ function unavailableResult(query: string): MusicBrainzSearchResponse {
     bio: null,
     bioFetchFailed: false,
     commonsPhoto: null,
+    homonyms: [],
   };
 }
 
@@ -61,6 +62,15 @@ function stripSuppressedLinks(
     platformUrls: result.platformUrls.filter(u => !suppressed(u)),
     // A suppressed link says that page isn't this artist — so neither is its bio.
     bio: result.bio && suppressed(result.bio.sourceUrl) ? null : result.bio,
+    // Suppressions are keyed by name, which homonyms share; Phase 1 strips them from every
+    // card with the name, so these go too.
+    homonyms: result.homonyms.map(homonym => ({
+      ...homonym,
+      officialUrl: homonym.officialUrl && suppressed(homonym.officialUrl) ? null : homonym.officialUrl,
+      bandcampUrl: homonym.bandcampUrl && suppressed(homonym.bandcampUrl) ? null : homonym.bandcampUrl,
+      socialLinks: homonym.socialLinks.filter(s => !suppressed(s.url)),
+      platformUrls: homonym.platformUrls.filter(u => !suppressed(u)),
+    })),
   };
 }
 
@@ -126,8 +136,12 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     // Persist enrichment to the artist database.
     // Also persist on MB-miss if we at least captured location (from the
     // Bandcamp/Mirlo fallback), keyed on the normalized query's slug.
+    //
+    // Not when MusicBrainz lists several artists under this name: the stored row is keyed by
+    // the name, so there is no telling whose row it is, and writing one artist's socials and
+    // city into it is how the Paracosm page came to describe two bands at once.
     const persistName = filtered.artistName || (filtered.location ? normalizedQuery : null);
-    if (persistName) {
+    if (persistName && filtered.homonyms.length === 0) {
       try {
         await persistEnrichment(persistName, filtered);
       } catch (err) {

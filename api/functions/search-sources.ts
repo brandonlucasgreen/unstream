@@ -40,7 +40,7 @@ import {
   displayNameFromSlug,
   isBandcampSearchLink,
   bandcampSubdomainOf,
-  bandcampSubdomainConflicts,
+  nameMatchIsSameArtist,
   attachTipsEnabled,
   resultPageSlug,
 } from './search-utils';
@@ -49,6 +49,7 @@ import {
   getMusicBrainzEnrichment,
   peekMusicBrainzEnrichment,
   musicBrainzEnrichmentCacheKey,
+  homonymAsEnrichment,
   type EnrichedMusicBrainzResult,
 } from './musicbrainz-enrichment';
 import { SearchTimer } from './search-timing';
@@ -1062,13 +1063,113 @@ function musicBrainzConfirmsIdentity(mbData: EnrichedMusicBrainzResult): boolean
   );
 }
 
+/**
+ * Phase 2.2: the card for a MusicBrainz artist who isn't any of the platform results —
+ * nothing came back under their name, or only same-name strangers did. This ensures
+ * prominent artists (like King Gizzard & the Lizard Wizard) are findable even when they're
+ * not on any of our indie platforms, and that a homonym isn't dropped for want of a card.
+ * Returns the id of the result that now carries the MB artist, or null when an existing
+ * result already does.
+ */
+function addMusicBrainzCard(
+  aggregated: AggregatedResult[],
+  mbData: EnrichedMusicBrainzResult,
+  nameIsShared: boolean,
+  id: string,
+): string | null {
+  if (mbData.artistName === null) return null;
+  const mbNorm = normalizeForComparison(mbData.artistName);
+  // A homonym on a different Bandcamp account does not count as covering this artist.
+  // Without that exclusion, refusing to enrich the impostor in Phase 2.1 would delete
+  // the real artist from the response entirely rather than listing them separately.
+  const existingMatch = aggregated.some(r =>
+    r.type === 'artist' &&
+    normalizeForComparison(r.name) === mbNorm &&
+    nameMatchIsSameArtist(mbData.bandcampSubdomain, nameIsShared, r.platforms.find(p => p.sourceId === 'bandcamp')?.url)
+  );
+  if (existingMatch) return null;
+
+  const mbPlatforms = [];
+  // Bandcamp only when MusicBrainz gave us a real artist URL. No search-link fallback —
+  // see the note in attachAmpwallAndSearchLinks: a placeholder here is stored as an
+  // ordinary bandcamp link and later crawled as if it were an artist page.
+  if (mbData.bandcampUrl) {
+    mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: mbData.bandcampUrl });
+  }
+  mbPlatforms.push(
+    { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(mbData.artistName)}` },
+    { sourceId: 'subvert' as SourceId, url: `https://www.subvert.fm/discover?q=${encodeURIComponent(mbData.artistName)}&type=artist` },
+    { sourceId: 'kofi' as SourceId, url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(mbData.artistName)}` },
+    { sourceId: 'buymeacoffee' as SourceId, url: 'https://buymeacoffee.com/explore-creators' },
+  );
+  // Add official site, Discogs, social links from enrichment
+  if (mbData.officialUrl) {
+    mbPlatforms.push({ sourceId: 'officialsite' as SourceId, url: mbData.officialUrl });
+  }
+  if (mbData.discogsUrl) {
+    mbPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
+  }
+  if (mbData.qobuzUrl) {
+    mbPlatforms.push({ sourceId: 'qobuz' as SourceId, url: mbData.qobuzUrl });
+  }
+  if (mbData.socialLinks && mbData.socialLinks.length > 0) {
+    for (const social of mbData.socialLinks) {
+      if (!mbPlatforms.some(p => p.sourceId === social.platform)) {
+        mbPlatforms.push({ sourceId: social.platform as SourceId, url: social.url });
+      }
+    }
+  }
+  // Sort: direct links before search-only
+  const searchOnly = new Set(['ampwall', 'subvert', 'kofi', 'buymeacoffee', 'bandcamp']);
+  mbPlatforms.sort((a, b) => {
+    const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore') || a.url.includes('/discover')) ? 1 : 0;
+    const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore') || b.url.includes('/discover')) ? 1 : 0;
+    return aSearch - bSearch;
+  });
+
+  // This card exists because MusicBrainz knows the artist and our platforms
+  // don't. When MB also handed over their real links, that is the verification
+  // — there are no releases to cross-check and nothing to cross-check against.
+  const mbConfirmed = musicBrainzConfirmsIdentity(mbData);
+  const mbResult: AggregatedResult = {
+    id,
+    name: mbData.artistName,
+    type: 'artist',
+    platforms: mbPlatforms,
+    matchConfidence: mbConfirmed ? 'verified' : 'unverified',
+    unverifiedReason: mbConfirmed ? undefined : 'no-release-data',
+    musicBrainzConfirmed: mbConfirmed,
+    location: mbData.location,
+    wikipediaSummary: mbData.wikipediaSummary || undefined,
+    wikipediaUrl: mbData.wikipediaUrl || undefined,
+  };
+  aggregated.push(mbResult);
+  return mbResult.id;
+}
+
+/** MusicBrainz handed over at least one real link for the artist, not just their name. */
+function musicBrainzGaveLinks(mbData: EnrichedMusicBrainzResult): boolean {
+  return !!(mbData.bandcampUrl || mbData.officialUrl || mbData.qobuzUrl || mbData.socialLinks.length > 0);
+}
+
+/**
+ * Whether another artist by the name gets a card of their own: only with somewhere to support
+ * or find them — a Bandcamp, an official site, Qobuz. Socials alone don't: the Sofia Paracosm's
+ * MusicBrainz entry lists only an Instagram, not the Bandcamp the probe already found, so a card
+ * for it would be a second Sofia card beside theirs.
+ */
+function homonymWorthACard(mbData: EnrichedMusicBrainzResult): boolean {
+  return !!(mbData.bandcampUrl || mbData.officialUrl || mbData.qobuzUrl);
+}
+
 // ---------------------------------------------------------------------------
 // Apply enrichment data to aggregated results (adds officialsite, discogs, social links, etc.)
 // Returns the id of the result it enriched, or null — attachBios needs to know which card
 // MusicBrainz's Discogs and Wikipedia bios describe.
 function applyEnrichmentToResults(
   aggregated: AggregatedResult[],
-  mbData: EnrichedMusicBrainzResult
+  mbData: EnrichedMusicBrainzResult,
+  nameIsShared: boolean,
 ): string | null {
   if (!mbData.artistName) {
     // MB-miss path: no confirmed identity, but may still have location from Bandcamp/Mirlo fallback
@@ -1097,9 +1198,10 @@ function applyEnrichmentToResults(
 
     // Same name, different Bandcamp account — a homonym, not this artist. Enriching it
     // would graft the MB artist's location, socials and Wikipedia entry onto a stranger.
+    // When MusicBrainz knows several artists by this name, only the same account will do.
     const bandcampPlatform = result.platforms.find(p => p.sourceId === 'bandcamp');
-    if (bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampPlatform?.url)) {
-      console.log(`[MusicBrainz] "${result.name}" is on a different Bandcamp account than MB lists for "${mbData.artistName}" — not enriching`);
+    if (!nameMatchIsSameArtist(mbData.bandcampSubdomain, nameIsShared, bandcampPlatform?.url)) {
+      console.log(`[MusicBrainz] "${result.name}" is not shown to be the "${mbData.artistName}" MB matched — not enriching`);
       continue;
     }
 
@@ -1434,84 +1536,26 @@ async function searchAllPlatforms(
   // Phase 2: Attach Ampwall + search-only links
   attachAmpwallAndSearchLinks(aggregated, ampwallMatches, mbData);
 
-  // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp)
+  // Phase 2.1: Apply MusicBrainz enrichment (social links, location, Wikipedia, Bandcamp),
+  // once for the artist MB matched and once for each other artist it lists by this name.
+  // Phase 2.2: an MB artist no card turned out to be gets a card of their own.
   let mbResultId: string | null = null;
   if (mbData && mbData.artistName !== null) {
-    mbResultId = applyEnrichmentToResults(aggregated, mbData);
-  }
-
-  // Phase 2.2: Create MB fallback result for artists not found on any platform
-  // If MusicBrainz has a high-confidence match but no platform result matches,
-  // create a result with search-only platforms + MB enrichment data.
-  // This ensures prominent artists (like King Gizzard & the Lizard Wizard)
-  // are findable even when they're not on any of our indie platforms.
-  if (mbData && mbData.artistName !== null) {
-    const mbNorm = normalizeForComparison(mbData.artistName);
-    // A homonym on a different Bandcamp account does not count as covering this artist.
-    // Without that exclusion, refusing to enrich the impostor in Phase 2.1 would delete
-    // the real artist from the response entirely rather than listing them separately.
-    const existingMatch = aggregated.some(r =>
-      r.type === 'artist' &&
-      normalizeForComparison(r.name) === mbNorm &&
-      !bandcampSubdomainConflicts(mbData.bandcampSubdomain, r.platforms.find(p => p.sourceId === 'bandcamp')?.url)
-    );
-    if (!existingMatch) {
-      const mbPlatforms = [];
-      // Bandcamp only when MusicBrainz gave us a real artist URL. No search-link fallback —
-      // see the note in attachAmpwallAndSearchLinks: a placeholder here is stored as an
-      // ordinary bandcamp link and later crawled as if it were an artist page.
-      if (mbData.bandcampUrl) {
-        mbPlatforms.push({ sourceId: 'bandcamp' as SourceId, url: mbData.bandcampUrl });
-      }
-      mbPlatforms.push(
-        { sourceId: 'ampwall' as SourceId, url: `https://ampwall.com/explore?searchStyle=search&query=${encodeURIComponent(mbData.artistName)}` },
-        { sourceId: 'subvert' as SourceId, url: `https://www.subvert.fm/discover?q=${encodeURIComponent(mbData.artistName)}&type=artist` },
-        { sourceId: 'kofi' as SourceId, url: `https://duckduckgo.com/?q=site:ko-fi.com+${encodeURIComponent(mbData.artistName)}` },
-        { sourceId: 'buymeacoffee' as SourceId, url: 'https://buymeacoffee.com/explore-creators' },
-      );
-      // Add official site, Discogs, social links from enrichment
-      if (mbData.officialUrl) {
-        mbPlatforms.push({ sourceId: 'officialsite' as SourceId, url: mbData.officialUrl });
-      }
-      if (mbData.discogsUrl) {
-        mbPlatforms.push({ sourceId: 'discogs' as SourceId, url: mbData.discogsUrl });
-      }
-      if (mbData.qobuzUrl) {
-        mbPlatforms.push({ sourceId: 'qobuz' as SourceId, url: mbData.qobuzUrl });
-      }
-      if (mbData.socialLinks && mbData.socialLinks.length > 0) {
-        for (const social of mbData.socialLinks) {
-          if (!mbPlatforms.some(p => p.sourceId === social.platform)) {
-            mbPlatforms.push({ sourceId: social.platform as SourceId, url: social.url });
-          }
-        }
-      }
-      // Sort: direct links before search-only
-      const searchOnly = new Set(['ampwall', 'subvert', 'kofi', 'buymeacoffee', 'bandcamp']);
-      mbPlatforms.sort((a, b) => {
-        const aSearch = searchOnly.has(a.sourceId) && (a.url.includes('/search?') || a.url.includes('duckduckgo') || a.url.includes('/explore') || a.url.includes('/discover')) ? 1 : 0;
-        const bSearch = searchOnly.has(b.sourceId) && (b.url.includes('/search?') || b.url.includes('duckduckgo') || b.url.includes('/explore') || b.url.includes('/discover')) ? 1 : 0;
-        return aSearch - bSearch;
-      });
-
-      // This card exists because MusicBrainz knows the artist and our platforms
-      // don't. When MB also handed over their real links, that is the verification
-      // — there are no releases to cross-check and nothing to cross-check against.
-      const mbConfirmed = musicBrainzConfirmsIdentity(mbData);
-      const mbResult: AggregatedResult = {
-        id: `mb-${mbNorm}`,
-        name: mbData.artistName,
-        type: 'artist',
-        platforms: mbPlatforms,
-        matchConfidence: mbConfirmed ? 'verified' : 'unverified',
-        unverifiedReason: mbConfirmed ? undefined : 'no-release-data',
-        musicBrainzConfirmed: mbConfirmed,
-        location: mbData.location,
-        wikipediaSummary: mbData.wikipediaSummary || undefined,
-        wikipediaUrl: mbData.wikipediaUrl || undefined,
-      };
-      aggregated.push(mbResult);
-      mbResultId = mbResult.id;
+    // `?? []`: cache entries written before homonyms existed lack the field.
+    const homonyms = mbData.homonyms ?? [];
+    const nameIsShared = homonyms.length > 0;
+    const enrichedId = applyEnrichmentToResults(aggregated, mbData, nameIsShared);
+    // With the name shared, a card needs at least one real link — one that says only "Paracosm"
+    // (a lookup that didn't answer, say) can't be told apart from the others.
+    const primaryCardId = !nameIsShared || musicBrainzGaveLinks(mbData)
+      ? addMusicBrainzCard(aggregated, mbData, nameIsShared, `mb-${normalizeForComparison(mbData.artistName)}`)
+      : null;
+    mbResultId = primaryCardId ?? enrichedId;
+    for (const homonym of homonyms) {
+      const identity = homonymAsEnrichment(homonym, mbData.query);
+      applyEnrichmentToResults(aggregated, identity, true);
+      if (!homonymWorthACard(identity)) continue;
+      addMusicBrainzCard(aggregated, identity, true, `mb-${normalizeForComparison(homonym.name)}-${homonym.mbid.slice(0, 8)}`);
     }
   }
 

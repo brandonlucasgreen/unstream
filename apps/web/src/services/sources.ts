@@ -3,7 +3,7 @@
 // The sources below add client-only fields (description, searchUrlTemplate, hasEmbed, aiPolicy, etc.).
 import type { Source, SourceId, SearchResponse, SearchResult } from '../types';
 import * as Sentry from '@sentry/react';
-import { bandcampSubdomainOf, bandcampSubdomainConflicts } from '../../../../api/shared/bandcamp-identity';
+import { bandcampSubdomainOf, nameMatchIsSameArtist } from '../../../../api/shared/bandcamp-identity';
 
 export const sources: Record<SourceId, Source> = {
   bandcamp: {
@@ -814,7 +814,8 @@ function musicBrainzConfirmsIdentity(mbData: import('../types').MusicBrainzData)
 // platform should still get their official site, socials, and search links
 // instead of an empty results page.
 export function buildMusicBrainzFallbackResult(
-  mbData: import('../types').MusicBrainzData
+  mbData: import('../types').MusicBrainzData,
+  id?: string,
 ): import('../types').SearchResult | null {
   if (!mbData.artistName) return null;
   const name = mbData.artistName;
@@ -855,7 +856,7 @@ export function buildMusicBrainzFallbackResult(
   const confirmed = musicBrainzConfirmsIdentity(mbData);
 
   return {
-    id: `mb-${normalizeForComparison(name)}`,
+    id: id ?? `mb-${normalizeForComparison(name)}`,
     name,
     type: 'artist',
     platforms,
@@ -873,9 +874,48 @@ export function buildMusicBrainzFallbackResult(
 // Merge MusicBrainz data with existing search results
 // Adds officialsite, discogs, hoopla, and freegal platforms to matching artist results.
 // When artistName is null (MB had no match), applies location-only enrichment matched by query.
+// Then the same for each other artist MusicBrainz lists under this name, as the server does
+// in Phase 2.1/2.2: into the card on their Bandcamp account, or a card of their own.
 export function mergeWithMusicBrainzData(
   results: import('../types').SearchResult[],
   mbData: import('../types').MusicBrainzData
+): import('../types').SearchResult[] {
+  const homonyms = mbData.homonyms ?? [];
+  const nameIsShared = homonyms.length > 0;
+  // With the name shared, a card needs at least one real link; one that says only the name
+  // can't be told apart from the others.
+  const primaryHasLinks = Boolean(mbData.officialUrl || mbData.discogsUrl || mbData.socialLinks.length > 0 ||
+    mbData.platformUrls?.some(u => bandcampSubdomainOf(u) !== null));
+  let merged = mergeOneMusicBrainzArtist(results, mbData, nameIsShared,
+    nameIsShared && !primaryHasLinks ? null : undefined);
+  for (const homonym of homonyms) {
+    const homonymData: import('../types').MusicBrainzData = {
+      query: mbData.query,
+      artistName: homonym.name,
+      officialUrl: homonym.officialUrl,
+      discogsUrl: null,
+      hasPre2005Release: false,
+      socialLinks: homonym.socialLinks,
+      platformUrls: homonym.platformUrls,
+      location: homonym.location,
+      bandcampSubdomain: homonym.bandcampSubdomain,
+    };
+    // A card of their own only with somewhere to support or find them, as on the server
+    // (homonymWorthACard): socials alone would duplicate a card whose Bandcamp MusicBrainz
+    // doesn't know. The rest only mark the name as shared.
+    const worthACard = Boolean(homonym.bandcampUrl || homonym.officialUrl || pickQobuzUrl(homonym.platformUrls));
+    merged = mergeOneMusicBrainzArtist(merged, homonymData, true,
+      worthACard ? `mb-${normalizeForComparison(homonym.name)}-${homonym.mbid.slice(0, 8)}` : null);
+  }
+  return merged;
+}
+
+// `fallbackId`: the id of the card to add when no result is this artist; null adds none.
+function mergeOneMusicBrainzArtist(
+  results: import('../types').SearchResult[],
+  mbData: import('../types').MusicBrainzData,
+  nameIsShared: boolean,
+  fallbackId?: string | null,
 ): import('../types').SearchResult[] {
   // MB-miss path: no confirmed identity, but may still have location from Bandcamp/Mirlo fallback
   if (!mbData.artistName) {
@@ -905,10 +945,11 @@ export function mergeWithMusicBrainzData(
 
     // Same name, different Bandcamp account: a homonym, not this artist. Merging would graft
     // the MusicBrainz artist's location, socials and Wikipedia entry onto a stranger — the
-    // Honeycrush (Brooklyn) / Honey Crush (Orlando) report. Same rule as the server's
-    // applyEnrichmentToResults.
+    // Honeycrush (Brooklyn) / Honey Crush (Orlando) report. And when MusicBrainz lists several
+    // artists by this name, only the same account will do (the three Paracosms). Same rule as
+    // the server's applyEnrichmentToResults.
     const bandcampUrl = result.platforms.find(p => p.sourceId === 'bandcamp')?.url;
-    if (bandcampSubdomainConflicts(mbData.bandcampSubdomain, bandcampUrl)) continue;
+    if (!nameMatchIsSameArtist(mbData.bandcampSubdomain, nameIsShared, bandcampUrl)) continue;
 
     matchingIndices.push(i);
   }
@@ -961,7 +1002,8 @@ export function mergeWithMusicBrainzData(
   // another Bandcamp account. Give the MusicBrainz artist a card of their own, as the server
   // does when it enriches inline (Phase 2.2 in search-sources.ts), rather than dropping them.
   if (bestMatchIndex === -1) {
-    const fallback = buildMusicBrainzFallbackResult(mbData);
+    if (fallbackId === null) return results;
+    const fallback = buildMusicBrainzFallbackResult(mbData, fallbackId);
     return fallback && !results.some(r => r.id === fallback.id) ? [...results, fallback] : results;
   }
 

@@ -38,6 +38,17 @@ describe('extension copy of bandcamp-identity', () => {
       }
     }
   });
+
+  it('decides the same name matches, whether or not the name is shared', () => {
+    for (const nameIsShared of [false, true]) {
+      for (const mb of MB_SUBDOMAINS) {
+        for (const url of URLS) {
+          expect(extension.nameMatchIsSameArtist(mb, nameIsShared, url), `${mb} vs ${url}, shared ${nameIsShared}`)
+            .toBe(shared.nameMatchIsSameArtist(mb, nameIsShared, url));
+        }
+      }
+    }
+  });
 });
 
 describe('enrichmentIsAnotherArtist (extension popup)', () => {
@@ -55,6 +66,17 @@ describe('enrichmentIsAnotherArtist (extension popup)', () => {
     expect(extension.enrichmentIsAnotherArtist(orlando, { artistName: 'Honeycrush' })).toBe(false);
     expect(extension.enrichmentIsAnotherArtist([{ type: 'artist', name: 'Honeycrush', platforms: [] }], { bandcampSubdomain: 'honeyyycrush' })).toBe(false);
     expect(extension.enrichmentIsAnotherArtist(null, null)).toBe(false);
+  });
+
+  // MusicBrainz lists three Paracosms. Orlando ranks first and has no Bandcamp, so with only the
+  // conflict check its site and socials landed under Sofia's Bandcamp link.
+  const homonyms = [{ name: 'Paracosm', bandcampSubdomain: 'xparacosm' }];
+  const sofia = [{ type: 'artist', name: 'Paracosm', platforms: [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com/' }] }];
+
+  it('refuses enrichment for a shared name unless the Bandcamp account matches', () => {
+    expect(extension.enrichmentIsAnotherArtist(sofia, { artistName: 'Paracosm', bandcampSubdomain: null, homonyms })).toBe(true);
+    expect(extension.enrichmentIsAnotherArtist([{ type: 'artist', name: 'Paracosm', platforms: [] }], { artistName: 'Paracosm', bandcampSubdomain: null, homonyms })).toBe(true);
+    expect(extension.enrichmentIsAnotherArtist(sofia, { artistName: 'Paracosm', bandcampSubdomain: 'paracosm', homonyms })).toBe(false);
   });
 
   it('checks the first Bandcamp link, the one the popup shows', () => {

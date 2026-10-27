@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mergeWithMusicBrainzData } from '../../src/services/sources';
-import type { SearchResult, MusicBrainzData } from '../../src/types';
+import type { SearchResult, MusicBrainzData, MusicBrainzHomonym } from '../../src/types';
 
 // The Honeycrush report, on the client's merge path.
 //
@@ -93,5 +93,79 @@ describe('mergeWithMusicBrainzData: same name, different Bandcamp account', () =
 
     expect(merged).toHaveLength(1);
     expect(merged[0].platforms.some(p => p.sourceId === 'officialsite')).toBe(true);
+  });
+});
+
+// Paracosm: MusicBrainz ranks an Orlando punk band (no Bandcamp) first and also lists a Los Angeles
+// hyperpop artist (xparacosm) and an entry with no links; the probe found the Sofia band's
+// paracosm.bandcamp.com. Phase 2 on the web is where a deferred search meets this.
+describe('mergeWithMusicBrainzData: several artists by one name', () => {
+  function sofia(): SearchResult {
+    return {
+      id: 'paracosm',
+      name: 'Paracosm',
+      type: 'artist',
+      platforms: [{ sourceId: 'bandcamp', url: 'https://paracosm.bandcamp.com' }],
+      matchConfidence: 'verified',
+    };
+  }
+
+  const losAngeles: MusicBrainzHomonym = {
+    mbid: '7b677a62-b858-41c9-be22-4eacf62eb30f',
+    name: 'paracosm',
+    disambiguation: 'hyperpop artist from LA',
+    officialUrl: 'https://www.paracosm.cc/',
+    bandcampUrl: 'https://xparacosm.bandcamp.com/',
+    bandcampSubdomain: 'xparacosm',
+    socialLinks: [{ platform: 'instagram', url: 'https://www.instagram.com/paracosm.cc/' }],
+    platformUrls: ['https://xparacosm.bandcamp.com/'],
+    location: { city: 'Burbank' },
+  };
+  const noLinks: MusicBrainzHomonym = {
+    mbid: '698d39a9-397e-4544-a404-692f3dd9108b',
+    name: 'paracosm',
+    disambiguation: 'digital design',
+    officialUrl: null,
+    bandcampUrl: null,
+    bandcampSubdomain: null,
+    socialLinks: [],
+    platformUrls: [],
+  };
+
+  const orlando: MusicBrainzData = {
+    query: 'paracosm',
+    artistName: 'Paracosm',
+    officialUrl: 'https://paracosmtheband.com/',
+    discogsUrl: null,
+    hasPre2005Release: false,
+    socialLinks: [{ platform: 'tiktok', url: 'https://www.tiktok.com/@paracosmband' }],
+    platformUrls: [],
+    location: { city: 'Orlando', country: 'United States', countryCode: 'US' },
+    bandcampSubdomain: null,
+    homonyms: [losAngeles, noLinks],
+  };
+
+  it("leaves the Sofia band's card exactly as it was", () => {
+    const card = sofia();
+    expect(mergeWithMusicBrainzData([card], orlando)[0]).toEqual(card);
+  });
+
+  it('gives Orlando and Los Angeles cards of their own, and none to the entry with no links', () => {
+    const merged = mergeWithMusicBrainzData([sofia()], orlando);
+
+    expect(merged).toHaveLength(3);
+    expect(new Set(merged.map(r => r.id)).size).toBe(3);
+    expect(merged[1].location?.city).toBe('Orlando');
+    expect(merged[1].platforms.map(p => p.url)).toContain('https://www.tiktok.com/@paracosmband');
+    expect(merged[2].platforms[0]).toEqual({ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com/' });
+    expect(merged[2].platforms.map(p => p.url)).toContain('https://www.paracosm.cc/');
+  });
+
+  it('merges a homonym into the card on their own Bandcamp account', () => {
+    const laCard: SearchResult = { ...sofia(), id: 'xparacosm', platforms: [{ sourceId: 'bandcamp', url: 'https://xparacosm.bandcamp.com' }] };
+    const merged = mergeWithMusicBrainzData([sofia(), laCard], orlando);
+
+    expect(merged).toHaveLength(3);
+    expect(merged[1].platforms.map(p => p.url)).toContain('https://www.paracosm.cc/');
   });
 });
