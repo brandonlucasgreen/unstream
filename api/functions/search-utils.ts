@@ -3,7 +3,7 @@
 
 import { bandcampSubdomainOf, bandcampSubdomainConflicts, nameMatchIsSameArtist } from '../shared/bandcamp-identity';
 import { makeBio, pickBio, type ArtistBio } from '../shared/artist-bio';
-import { normalizeAccents, foldToAscii } from '../shared/artist-slug';
+import { normalizeAccents, foldToAscii, artistSlug } from '../shared/artist-slug';
 import type { CommonsPhoto } from '../search/commons-photo';
 
 export type SourceId =
@@ -648,6 +648,54 @@ export function isSearchOnlyLink(p: { sourceId: SourceId; url: string }): boolea
 export function isBandcampSearchLink(url: string): boolean {
   return url.includes('bandcamp.com/search');
 }
+/**
+ * The address a card is stored under when other cards in the same search share its name.
+ *
+ * The usual address is the name (`artistSlug`), which several artists can't share: three
+ * Paracosms written to `paracosm` made one page describing two bands. So a same-name card is
+ * stored at its Bandcamp account (`xparacosm`; Sofia's `paracosm`), or, with none, at its name and
+ * MusicBrainz's city for it (`paracosm-orlando`). Both come out the same on every search, so the
+ * same artist always lands on the same row. Null when the card has neither: it can't be told
+ * apart, and gets no row.
+ */
+export function sameNameRecordSlug(result: Pick<AggregatedResult, 'name' | 'platforms' | 'location'>): string | null {
+  const subdomain = bandcampSubdomainOf(result.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+  if (subdomain) return artistSlug(subdomain);
+  const city = result.location?.city;
+  if (city) return `${artistSlug(result.name)}-${artistSlug(city)}`;
+  return null;
+}
+
+/**
+ * The address (slug) each artist card in a search is stored under, decided once so the save and
+ * the card's own links (page, Claim, save) agree. A card that already carries one — claimed, or
+ * matched to a stored row — keeps it; a name no other card shares keeps the name; same-name cards
+ * get `sameNameRecordSlug`. Null when a card can't have a row of its own, including when two
+ * cards would still land on one address.
+ */
+export function recordSlugs(results: AggregatedResult[]): Map<AggregatedResult, string | null> {
+  const artists = results.filter(r => r.type === 'artist');
+  const nameCounts = new Map<string, number>();
+  for (const r of artists) {
+    const nameSlug = artistSlug(r.name);
+    nameCounts.set(nameSlug, (nameCounts.get(nameSlug) ?? 0) + 1);
+  }
+
+  const slugs = new Map<AggregatedResult, string | null>();
+  for (const r of artists) {
+    const nameSlug = artistSlug(r.name);
+    const nameIsShared = (nameCounts.get(nameSlug) ?? 0) > 1;
+    slugs.set(r, r.claimedSlug ?? r.knownSlug ?? (nameIsShared ? sameNameRecordSlug(r) : nameSlug));
+  }
+
+  const holders = new Map<string, number>();
+  for (const slug of slugs.values()) if (slug) holders.set(slug, (holders.get(slug) ?? 0) + 1);
+  for (const [r, slug] of slugs) {
+    if (slug && (holders.get(slug) ?? 0) > 1 && !r.claimedSlug && !r.knownSlug) slugs.set(r, null);
+  }
+  return slugs;
+}
+
 // Moved to api/shared so the web client's MusicBrainz merge applies the same identity rule.
 export { bandcampSubdomainOf, bandcampSubdomainConflicts, nameMatchIsSameArtist };
 
@@ -1062,9 +1110,13 @@ export function mergeStoredArtistsIntoResults(
     // several artists by this name (the three Paracosms), when only the same account does.
     const storedSubdomain = bandcampSubdomainOf(artist.platforms.find(p => p.sourceId === 'bandcamp')?.url);
     const storedNorm = normalizeForComparison(artist.name);
+    const storedSlug = artist.claimedSlug ?? artist.knownSlug;
     const nameIsShared = results.filter(r => r.type === 'artist' && normalizeForComparison(r.name) === storedNorm).length > 1;
     const isSameArtist = (r: AggregatedResult) =>
-      nameMatchIsSameArtist(storedSubdomain, nameIsShared, r.platforms.find(p => p.sourceId === 'bandcamp')?.url);
+      nameMatchIsSameArtist(storedSubdomain, nameIsShared, r.platforms.find(p => p.sourceId === 'bandcamp')?.url) ||
+      // A row with no Bandcamp to match on, saved at the address a same-name card is given
+      // (`paracosm-orlando`), is that card's artist: the address was derived from the card.
+      (nameIsShared && !storedSubdomain && !!storedSlug && storedSlug === sameNameRecordSlug(r));
 
     const sameNameIdx = merged.findIndex(r =>
       r.type === 'artist' &&

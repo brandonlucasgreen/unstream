@@ -133,6 +133,18 @@ describe('parsePersistPayload', () => {
     }]);
   });
 
+  it("carries search's slug decision (null included) and the location through", () => {
+    const [kept, none] = parsePersistPayload({
+      results: [
+        { type: 'artist', name: 'Paracosm', platforms: [], slug: 'paracosm-orlando', location: { city: 'Orlando', countryCode: 'US' } },
+        { type: 'artist', name: 'Paracosm', platforms: [], slug: null, location: { city: 42 } },
+      ],
+    })!;
+    expect(kept).toMatchObject({ slug: 'paracosm-orlando', location: { city: 'Orlando', countryCode: 'US' } });
+    expect(none.slug).toBeNull();
+    expect(none.location).toBeUndefined();
+  });
+
   it('returns null when the body carries no results list', () => {
     expect(parsePersistPayload({})).toBeNull();
     expect(parsePersistPayload(null)).toBeNull();
