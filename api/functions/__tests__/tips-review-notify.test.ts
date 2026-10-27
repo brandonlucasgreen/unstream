@@ -5,8 +5,8 @@
 //     account ids seen last run is the mechanism — these tests drive the fake directly.
 //  2. It must not alert-spam when its own state is missing: with no Redis (no watermark) the run
 //     refuses to classify anything and fails loudly instead of "new artist"ing the whole list.
-//  3. An ntfy failure must not swallow the account: the watermark only commits accounts actually
-//     pushed, so a broken ntfy retries next run.
+//  3. A push failure must not swallow the account: the watermark only commits accounts actually
+//     pushed, so a failed push retries next run.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -63,7 +63,7 @@ function secretHeaders() {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  process.env = { ...originalEnv, INTERNAL_FUNCTION_SECRET: SECRET, NTFY_SERVER_URL: 'https://ntfy.example', NTFY_TOPIC: 'admin-alerts', NTFY_TOKEN: 'tk' };
+  process.env = { ...originalEnv, INTERNAL_FUNCTION_SECRET: SECRET, PUSHOVER_APP_TOKEN: 'app-token', PUSHOVER_USER_KEY: 'user-key' };
   mocks.getRedis.mockReturnValue({ ready: true });
   mocks.cacheGet.mockResolvedValue([]);
   mocks.cacheSet.mockResolvedValue(true);
@@ -91,10 +91,10 @@ describe('tips-review-notify', () => {
     expect(body).toEqual({ ok: true, fresh: 1, alerted: 1, awaiting: 1 });
     expect(mocks.fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = mocks.fetchMock.mock.calls[0];
-    expect(String(url)).toContain('ntfy');
+    expect(String(url)).toBe('https://api.pushover.net/1/messages.json');
     const sent = JSON.parse(init.body as string);
     expect(sent.title).toBe('New tip review: Kid Lightbulbs');
-    expect(sent.click).toContain('/admin/tips');
+    expect(sent.url).toContain('/admin/tips');
     // The alerted account joins the watermark; the old one stays.
     const committed = mocks.cacheSet.mock.calls[0][1] as string[];
     expect(committed).toEqual(expect.arrayContaining(['acct_old', 'acct_new']));
@@ -124,7 +124,7 @@ describe('tips-review-notify', () => {
     expect(mocks.fetchMock).not.toHaveBeenCalled();
   });
 
-  it('retries a still-unknown account when ntfy fails to publish', async () => {
+  it('retries a still-unknown account when the push fails', async () => {
     mocks.client.from.mockReturnValue(rows({ id: 'acct_f', name: 'F', slug: 'f', createdAt: '2026-10-18T01:00:00Z' }));
     mocks.cacheGet.mockResolvedValue([]);
     mocks.fetchMock.mockResolvedValue(new Response('err', { status: 500 }));

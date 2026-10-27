@@ -1,4 +1,4 @@
-// Scheduled job: ntfy push when an artist newly lands in the admin tip review list
+// Scheduled job: push to the admin's phone when an artist newly lands in the admin tip review list
 // (docs/specs/artist-patronage-spec.md §6 gate 3).
 //
 // "The review list" = rows in artist_tip_accounts (this Stripe mode) whose tips_approved_at is
@@ -24,7 +24,7 @@ import { isLiveMode } from './stripe';
 import { cacheGet, cacheSet } from './cache';
 import { getRedis } from './redis';
 import { withSentry, Sentry } from '../lib/sentry';
-import { sendAdminPush } from '../lib/ntfy';
+import { sendAdminPush } from './admin-push';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -49,9 +49,8 @@ function pushReviewAlert(artistName: string, slug: string, createdAt: string): P
   return sendAdminPush({
     title: `New tip review: ${artistName}`,
     message: `${artistName} just finished Stripe Connect onboarding and is awaiting tip review. Connected ${createdAt.slice(0, 10)}. Artist page: https://unstream.stream/a/${slug}`,
-    tags: ['artist', 'tips'],
-    // Clicking the notification opens the admin tips review page (auth still applies there).
-    click: 'https://unstream.stream/admin/tips',
+    // Opens the admin tips review page (auth still applies there).
+    url: 'https://unstream.stream/admin/tips',
   });
 }
 
@@ -111,7 +110,7 @@ async function handleRequest(event: HandlerEvent) {
 
   const body = { ok: true, fresh: fresh.length, alerted: alerted.length, awaiting: rows.length };
   if (alerted.length !== fresh.length) {
-    Sentry.captureMessage(`[tips-review-notify] alerted ${alerted.length}/${fresh.length} — ntfy failures`, { extra: body });
+    Sentry.captureMessage(`[tips-review-notify] alerted ${alerted.length}/${fresh.length} — push failures`, { extra: body });
   }
   return { statusCode: 200, body: JSON.stringify(body) };
 }
