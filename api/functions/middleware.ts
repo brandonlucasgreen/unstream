@@ -395,6 +395,8 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // to. The weekly social generator reaches the same API from GitHub Actions, where this
   // allowlist doesn't apply.
   'api.buffer.com',
+  // Buffer's OAuth endpoints live on a different host from its API (api/functions/buffer-oauth.ts).
+  'auth.buffer.com',
   // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.
