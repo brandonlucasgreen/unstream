@@ -13,9 +13,9 @@ const PAGE_SIZE = 10;
 /**
  * An artist's releases, each linking to its buying guide at `/a/{artist}/{release}`.
  *
- * Placed below Follow: Support directly and Follow together form the links region whose order
- * the artist controls with dividers, and releases are a different kind of thing that shouldn't
- * interrupt that ordering.
+ * Placed below the link sections (Patronage, Marketplaces, Official, Follow), whose order the
+ * artist controls, because releases are a different kind of thing that shouldn't interrupt
+ * that ordering.
  *
  * Renders nothing when there are no releases. An empty "Releases" heading reads as broken, while
  * its absence reads as "nothing here yet" — the truth for any artist nobody has saved or

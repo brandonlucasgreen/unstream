@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { mainLinkDividerIndexes, buildLinkRows, MAX_DIVIDERS } from '../../shared/link-dividers';
 
-// The artist page splits links into "Support directly" (main) and "Follow"
-// (social), but divider positions are stored against the full link order — so
+// The artist page's legacy payload splits links into main (`links`) and social
+// (`socialLinks`), but divider positions are stored against the full link order — so
 // the translation is what these tests care about.
 const link = (platform: string) => ({ platform });
 const isMain = (l: { platform: string }) => l.platform !== 'instagram';

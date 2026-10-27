@@ -3,9 +3,10 @@
 //
 // A divider is a position in the artist's full ordered link list, stored on
 // artist_profiles.link_dividers as "the number of links before it". The artist
-// page renders non-social links ("Support directly") and social links ("Follow")
-// in separate sections, so a stored position has to be translated into the main
-// list before it can be drawn.
+// page's legacy payload carries non-social links (`links`) and social links
+// (`socialLinks`) separately, so a stored position has to be translated into the
+// main list before it can be drawn. The sectioned payload does its own
+// translation per section (groupLinksIntoSections in page-sections.ts).
 
 /**
  * Translate stored divider positions into indexes in the main (non-social) link
