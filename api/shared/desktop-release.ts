@@ -34,14 +34,14 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.8.1',
-  build: '21',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.8.1/Unstream-3.8.1.dmg',
-  lengthBytes: 4355813,
-  edSignature: 'inLcqKSZkeYOxPtwN66QQDFaeo1OxEMX6pS71zukBZosInl80lvpCAs6SnmePJR+Ny2CCQJssNEzSsBng0TBAg==',
-  publishedAt: '2026-10-26T00:00:00Z',
+  shortVersion: '3.8.2',
+  build: '22',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.8.2/Unstream-3.8.2.dmg',
+  lengthBytes: 4357254,
+  edSignature: '5Ac+4EXHILwqWn2WHDdF7yRxgGibZmRpqlgTZk4WHbcIo8aH2YsTTBeEDNdMolWRkwkvqLfCSDsYLw6GU7rEAg==',
+  publishedAt: '2026-10-27T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes: 'Platform links now show each platform\'s own logo instead of a generic symbol. Unstream also keeps you signed in if it can\'t reach the server right after launching, and the heart saves artists to your account when you\'re signed in.',
+  releaseNotes: 'When an artist has added a Cash App, Steady, Tipeee or Big Cartel link, it now shows with its proper name, and Cash App and Big Cartel with their own logos.',
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
