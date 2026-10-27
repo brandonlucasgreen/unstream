@@ -107,7 +107,9 @@ Rules:
 
 **Facebook**
 - The same cards with the caption, and a clickable `{link}`.
-- Tagging is unverified. An `@handle` typed in a Facebook caption tags nobody. Buffer's `metadata.facebook.annotations` (text, indices, url) look like how Page mentions work. If they don't, Facebook gets names and links, with no tags.
+- **Facebook gets names and links, no tags — the fallback, taken deliberately (2026-10-27).** An `@handle` typed in a Facebook caption tags nobody, and the `annotations` mechanism works (open question 2) but needs `content` to be the Page's **numeric Facebook id**. We hold artists' Facebook links as `facebook.com/<name>`, and there is no way to turn one into a Page id without a Graph API call Unstream can't make. The probe only worked because the Page was our own channel, whose id Buffer hands us as `serviceId`.
+- So `{artist}` renders as the artist's **name** on Facebook, never `@handle`. That is also the text an annotation's `indices` would have to point at, so nothing is wasted if Page ids ever become reachable.
+- **A consequence for the UI:** the Facebook circle on each artist row can't mean "will be tagged". It means "we hold their Facebook page", and the mockup's teal/dashed states should say so for that network.
 
 **Cards are drawn in the function, with the generator's own renderer.** An earlier draft drew them in the browser, because a Worker can't read fonts off disk. A Netlify Lambda can, and one already does: `api/functions/social-card.ts` renders these same cards on request, from the same `scripts/social-card-render.ts`. The curator endpoint does the same thing, which means no renderer split, no wasm in the web bundle and no second asset loader.
 
