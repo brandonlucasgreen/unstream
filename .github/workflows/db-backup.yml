@@ -136,10 +136,16 @@ jobs:
           mkdir -p "$RUNNER_TEMP/restore-check"
           cd "$RUNNER_TEMP/restore-check"
           supabase init --force > /dev/null
+          # Not the default 54322: on 2026-10-27 the runner already had something listening there
+          # and `supabase start` died with "address already in use", failing the restore proof
+          # after the backup itself had uploaded. A throwaway stack shouldn't depend on a
+          # runner-image port being free.
+          sed -i 's/^port = 54322$/port = 54722/' supabase/config.toml
+          grep -q '^port = 54722$' supabase/config.toml
           # Only Postgres and Auth: Auth creates the auth tables the users are restored into.
           supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
           "$GITHUB_WORKSPACE/.github/scripts/db-restore-check.sh" "$RUNNER_TEMP/dump" \
-            postgresql://postgres:postgres@127.0.0.1:54322/postgres
+            postgresql://postgres:postgres@127.0.0.1:54722/postgres
 
       - name: Close the failure issue
         if: success()
