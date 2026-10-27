@@ -423,7 +423,11 @@ export function AdminAnalyticsPage() {
     const headers = { Authorization: `Bearer ${session?.access_token}` };
     const getJson = async <T,>(path: string): Promise<T> => {
       const res = await fetch(`${path}?${query}`, { headers });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        // Both endpoints say why in `error`, and the traffic one passes GoatCounter's reason in `detail`.
+        const body = await res.json().catch(() => null) as { error?: string; detail?: string } | null;
+        throw new Error(body?.detail ?? body?.error ?? `HTTP ${res.status}`);
+      }
       return res.json();
     };
 

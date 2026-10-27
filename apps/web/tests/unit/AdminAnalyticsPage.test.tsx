@@ -83,9 +83,9 @@ describe('AdminAnalyticsPage', () => {
   });
 
   it('keeps the search numbers when GoatCounter fails', async () => {
-    respond({ error: 'GoatCounter did not answer' }, 502);
+    respond({ error: 'GoatCounter did not answer', detail: 'GoatCounter /stats/total responded 401: unknown token' }, 502);
     renderPage();
-    await screen.findByText(/Couldn’t load GoatCounter/);
+    await screen.findByText(/Couldn’t load GoatCounter: GoatCounter \/stats\/total responded 401: unknown token/);
     expect(screen.getByText('Extension · Chrome')).not.toBeNull();
   });
 

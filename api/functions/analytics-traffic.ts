@@ -46,7 +46,12 @@ async function goatcounter<T>(path: string, token: string): Promise<T> {
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
   });
   if (!res.ok) {
-    throw new Error(`GoatCounter ${path.split('?')[0]} responded ${res.status}`);
+    // GoatCounter says why in `error` (a string) or `errors` (field → messages), e.g. "requires
+    // stats permissions" for a token made without "Read statistics". Without it, a 403 and a 400
+    // read the same. It never echoes the token.
+    const body = await res.json().catch(() => null) as { error?: string; errors?: Record<string, string[]> } | null;
+    const reason = body?.error ?? (body?.errors ? JSON.stringify(body.errors) : 'no detail');
+    throw new Error(`GoatCounter ${path.split('?')[0]} responded ${res.status}: ${reason.slice(0, 200)}`);
   }
   return res.json() as Promise<T>;
 }
@@ -125,14 +130,21 @@ async function handleRequest(event: {
     return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(traffic) };
   } catch (err) {
     // Loud, not empty: a GoatCounter failure must read as "couldn't ask", never as zero visitors.
-    const message = err instanceof Error ? err.message : String(err);
+    // A timeout or network failure carries only its name ("TimeoutError") worth showing.
+    const message = err instanceof Error ? (err.message.startsWith('GoatCounter') ? err.message : `${err.name}: ${err.message}`) : String(err);
     console.error('[Analytics Traffic] GoatCounter failed:', message);
     Sentry.captureMessage('GoatCounter traffic fetch failed', {
       level: 'warning',
       extra: { message },
       tags: { context: 'analytics.traffic' },
     });
-    return { statusCode: 502, headers: CORS_HEADERS, body: JSON.stringify({ error: 'GoatCounter did not answer' }) };
+    // The reason goes back to the page: this endpoint is admin-only, and "502" alone sends the
+    // admin to Sentry to find out which setting is wrong.
+    return {
+      statusCode: 502,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ error: 'GoatCounter did not answer', detail: message }),
+    };
   }
 }
 
