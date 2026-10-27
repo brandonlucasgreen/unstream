@@ -9,6 +9,7 @@
 // handle, payout or link that arrived from a browser.
 
 import { PLATFORMS } from '../shared/platform-registry';
+import { isSearchUrl } from '../shared/social-card';
 
 export const UNSTREAM_BASE = 'https://unstream.stream';
 
@@ -284,3 +285,51 @@ export const DEFAULT_TEMPLATE: CuratorTemplate = {
   lineText: '{artist} – {release}',
   hashtags: [],
 };
+
+// ---------------------------------------------------------------------------------------------
+// Picking where to buy
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Platforms that sell music, so a post can say "buy it there".
+ *
+ * Patronage platforms (Patreon, Ko-fi, Buy Me a Coffee) can't headline a post for that reason.
+ * `scripts/generate-social-posts.ts` keeps its own copy of this list for the weekly spotlights;
+ * the two are allowed to differ, since the posts differ, but a platform added to one is usually
+ * wanted in the other.
+ */
+export const SELLING_PLATFORMS = new Set([
+  'bandcamp', 'faircamp', 'mirlo', 'qobuz', 'ampwall', 'bandwagon', 'jamcoop',
+]);
+
+/** The shape of a stored artist link, as `getArtistsBySlugs` returns it. */
+export interface ArtistLinkLike {
+  sourceId: string;
+  url: string;
+  latestRelease?: { title: string };
+}
+
+/**
+ * The artist's first selling link in display order, with the release that link knows about.
+ *
+ * Display order is the artist's own ordering, so the first selling link is the one they lead
+ * with. A search link is skipped: it proves nothing about the artist being on that platform
+ * (`isSearchUrl`), and a card or caption may not say their music is somewhere it might not be.
+ */
+export function sellingPlatformFrom(links: ArtistLinkLike[]): {
+  platform: CuratorArtist['platform'];
+  release: CuratorArtist['release'];
+} {
+  const link = links.find(l => SELLING_PLATFORMS.has(l.sourceId) && !isSearchUrl(l.url));
+  if (!link) return { platform: null, release: null };
+  const meta = PLATFORMS[link.sourceId];
+  return {
+    platform: { id: link.sourceId, name: meta?.name ?? link.sourceId },
+    release: link.latestRelease?.title ? { title: link.latestRelease.title } : null,
+  };
+}
+
+/** The artist's own profile URL for a network, from their stored links. */
+export function linkUrlFor(links: ArtistLinkLike[], network: CuratorNetwork): string | null {
+  return links.find(l => l.sourceId === network)?.url ?? null;
+}

@@ -156,7 +156,7 @@ The functions:
 **R2 by scoped S3 token.** Netlify has no R2 binding, so the function signs its own request, reusing `publishCard` (`scripts/social-cards.ts`, `aws4fetch`) and the same scoped token the weekly generator uses. Two things that needs:
 
 - **`aws4fetch` moves from `devDependencies` to `dependencies`,** or it isn't bundled into the function.
-- **Its four variables are set in Netlify:** `SOCIAL_CARDS_PUBLIC_BASE_URL`, `R2_ACCOUNT_ID`, `SOCIAL_CARDS_R2_ACCESS_KEY_ID`, `SOCIAL_CARDS_R2_SECRET_ACCESS_KEY`. Today they exist only as GitHub Actions secrets. Set them secret-flagged, which makes them write-only — `netlify env:get` returns asterisks, so keep the values wherever they came from.
+- **Its five variables are set in Netlify:** `SOCIAL_CARDS_BUCKET`, `SOCIAL_CARDS_PUBLIC_BASE_URL`, `R2_ACCOUNT_ID`, `SOCIAL_CARDS_R2_ACCESS_KEY_ID`, `SOCIAL_CARDS_R2_SECRET_ACCESS_KEY`. Today they exist only as GitHub Actions secrets. Set them secret-flagged, which makes them write-only — `netlify env:get` returns asterisks, so keep the values wherever they came from.
 
 A deploy preview shares production's environment and would write to the same bucket; the user-hash prefix in the key keeps that out of the generator's objects.
 
