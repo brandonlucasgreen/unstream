@@ -158,6 +158,19 @@ describe('GET /api/artist-page', () => {
       expect(social.links.map((l: { platform: string }) => l.platform)).toEqual(['instagram']);
     });
 
+    it('keeps legacy dividers indexed into the social-free `links` list', async () => {
+      // Stored positions count the full list (Instagram included): a rule before faircamp
+      // (stored index 3) is above `links[2]` once Instagram is left out.
+      mocks.getArtistProfileBySlug.mockResolvedValue({
+        failed: false,
+        bundle: { artist: claimedRow, profile: { ...claimedProfile, link_dividers: [3] }, links: sectionLinks },
+      });
+
+      const body = JSON.parse((await call('funkadelic')).body);
+      expect(body.links[2].platform).toBe('faircamp');
+      expect(body.linkDividers).toEqual([2]);
+    });
+
     it('resolves the artist section-order into the payload', async () => {
       mocks.getArtistProfileBySlug.mockResolvedValue({
         failed: false,
@@ -180,9 +193,12 @@ describe('GET /api/artist-page', () => {
 
       const body = JSON.parse((await call('funkadelic')).body);
       expect(body.sectionOrder).toEqual(['bio', 'featured', 'patronage', 'marketplaces', 'social']);
-      // Legacy flat fields still render the same links for pre-UNS-221 clients (the Mac app):
-      // every sectioned link appears in `links`.
-      expect(body.links).toHaveLength(5);
+      // Legacy flat fields carry every link exactly once between them: socials only in
+      // `socialLinks`, everything else in `links`. A client renders both lists, so a social
+      // link in `links` shows twice on the page (it did, from UNS-221 until this was pinned).
+      expect(body.links.map((l: { platform: string }) => l.platform)).toEqual([
+        'bandcamp', 'patreon', 'faircamp', 'newsletter',
+      ]);
       expect(body.socialLinks.map((l: { platform: string }) => l.platform)).toEqual(['instagram']);
     });
 
@@ -199,7 +215,7 @@ describe('GET /api/artist-page', () => {
       const body = JSON.parse((await call('funkadelic')).body);
       const marketplaces = body.linkGroups.find((g: { section: string }) => g.section === 'marketplaces');
       expect(marketplaces.links.map((l: { platform: string }) => l.platform)).toContain('something_new');
-      expect(body.links).toHaveLength(6);
+      expect(body.links.map((l: { platform: string }) => l.platform)).toContain('something_new');
     });
   });
 

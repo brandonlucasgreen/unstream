@@ -5,7 +5,6 @@ import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { SOCIAL_ICON_PATHS } from "../shared/social-icon-paths.ts";
 import { platformLogoSvg } from "../shared/platform-logos.ts";
-import { mainLinkDividerIndexes } from "../shared/link-dividers.ts";
 import {
   groupLinksIntoSections,
   resolveSectionOrder,
@@ -183,12 +182,14 @@ const SECTION_HEADINGS: Record<PageSectionKey, string> = {
 };
 
 /**
- * Claimed-page sections, in the artist's saved order (UNS-221). The crawler's view of the same
+ * Artist-page sections, in the artist's saved order (UNS-221). The crawler's view of the same
  * arrangement RichArtistProfile renders: patronage (with the Tip block first inside it, using
  * the shared renderTipSection), bio, featured release, marketplaces (+ the pinned Official
- * section), Follow — skipping sections with nothing to show.
+ * section), Follow — skipping sections with nothing to show. An unclaimed artist gets the same
+ * link sections in the default order, as UnclaimedQuietCard renders them, with no profile,
+ * tips, bio or featured release.
  */
-function renderClaimedSections({
+function renderArtistSections({
   profile,
   platformsFiltered,
   tipSectionHtml,
@@ -197,7 +198,6 @@ function renderClaimedSections({
 }: {
   profile: { section_order?: unknown } | null;
   platformsFiltered: { platform: string; url: string; display_name?: string }[];
-  isMainPlatform: (p: { platform: string }) => boolean;
   tipSectionHtml: string;
   featuredEmbedHtml: string;
   bioHtml: string;
@@ -634,24 +634,6 @@ export default async function handler(request: Request, context: Context) {
     const artistName = escapeHtml(artist.name);
     const pageUrl = `https://unstream.stream/a/${slug}`;
 
-    // Separate main platforms from social
-    const isMainPlatform = (p: { platform: string }) => {
-      const info = PLATFORM_INFO[p.platform];
-      return !info || info.category !== 'social';
-    };
-    const mainPlatforms = platforms.filter(isMainPlatform);
-    const socialPlatforms = platforms.filter((p: { platform: string }) => {
-      const info = PLATFORM_INFO[p.platform];
-      return info?.category === 'social';
-    });
-
-    // Artist-placed dividers, translated into indexes in mainPlatforms
-    const dividerIndexes = new Set(
-      isClaimed ? mainLinkDividerIndexes(platforms, isMainPlatform, profile?.link_dividers) : []
-    );
-
-    const bcFriday = isBandcampFriday();
-
     // Releases, shared by the claimed and unclaimed templates below.
     //
     // Rendered for every artist that has a catalogue, not only verified ones. The releases come
@@ -674,41 +656,6 @@ export default async function handler(request: Request, context: Context) {
           : ''}
       </div>
     `;
-
-    // Build platform links HTML (shared by both claimed and unclaimed)
-    const platformLinksHtml = mainPlatforms.map((p: { platform: string; url: string; display_name?: string }, index: number) => {
-      const divider = dividerIndexes.has(index)
-        ? '<hr style="border:0;border-top:1px solid var(--border);margin:4px 0">'
-        : '';
-      const info = PLATFORM_INFO[p.platform];
-      const isOther = p.platform === 'other' || p.platform.startsWith('other_');
-      const linkName = isOther ? escapeHtml(p.display_name || 'Link') : (info?.name || escapeHtml(p.display_name || p.platform));
-      const linkColor = info?.color || '#71717a';
-      const linkIcon = info ? (SOCIAL_ICONS[p.platform] ? `<span style="font-size:16px">${SOCIAL_ICONS[p.platform]}</span>` : platformLogoSvg(p.platform, 18) ?? info.icon) : '🔗';
-      const isBCFriday = p.platform === 'bandcamp' && bcFriday;
-      const payout = isBCFriday ? '~97%' : info?.payoutPercent;
-      const payoutLabel = payout ? `<span style="font-size:12px;color:var(--muted)">${payout} to artist</span>` : '';
-      const bcFridayLabel = isBCFriday ? '<span style="font-size:12px;font-weight:700;color:#1da0c3;animation:bc-pulse 2s ease-in-out infinite">Bandcamp Friday!</span>' : '';
-      return `${divider}<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid ${isBCFriday ? '#1da0c340' : 'var(--border)'};background:${isBCFriday ? '#1da0c310' : linkColor + '08'};text-decoration:none;color:var(--text);transition:background 0.15s">
-        <span style="font-size:20px;display:inline-flex;align-items:center;justify-content:center">${linkIcon}</span>
-        <span style="flex:1;font-weight:500">${linkName}</span>
-        ${payoutLabel}${bcFridayLabel}
-      </a>`;
-    }).join('');
-
-    const socialLinksHtml = socialPlatforms.length > 0 ? `
-      <div style="margin-top:24px">
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Follow</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${socialPlatforms.map((p: { platform: string; url: string }) => {
-            const info = PLATFORM_INFO[p.platform];
-            if (!info) return '';
-            const icon = SOCIAL_ICONS[p.platform] || info.icon;
-            return `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text);font-size:16px">${icon} ${info.name}</a>`;
-          }).join('')}
-        </div>
-      </div>
-    ` : '';
 
     // Location
     const locationRegion = artist.country || artist.country_code;
@@ -750,10 +697,9 @@ export default async function handler(request: Request, context: Context) {
       // crawler's view of the same page, so it must agree with RichArtistProfile. Official
       // pages are not artist-orderable and follow marketplaces wherever that lands; links
       // keep their own stored order and divider rules inside each section.
-      const sectionHtml = renderClaimedSections({
+      const sectionHtml = renderArtistSections({
         profile,
         platformsFiltered: platforms,
-        isMainPlatform,
         tipSectionHtml,
         featuredEmbedHtml,
         bioHtml: bio ? `<p style="color:var(--muted);font-size:16px;margin-bottom:24px;text-align:left">${bio}</p>` : '',
@@ -862,6 +808,16 @@ export default async function handler(request: Request, context: Context) {
     // --- Unclaimed artist: simpler card ---
     const description = `Find ${artist.name} on platforms that pay artists fairly.`;
 
+    // The same link sections a claimed page shows (Patronage, Marketplaces, Official, Follow),
+    // in the default order.
+    const unclaimedSectionHtml = renderArtistSections({
+      profile: null,
+      platformsFiltered: platforms,
+      tipSectionHtml: '',
+      featuredEmbedHtml: '',
+      bioHtml: '',
+    });
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -909,11 +865,7 @@ export default async function handler(request: Request, context: Context) {
     </div>
 
     <div class="container" style="padding-bottom:32px">
-      ${mainPlatforms.length > 0 ? `
-        <h2 style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:12px">Support directly</h2>
-        <div style="display:grid;gap:8px">${platformLinksHtml}</div>
-      ` : ''}
-      ${socialLinksHtml}
+      ${unclaimedSectionHtml}
       ${releasesHtml}
       <div style="margin-top:24px;padding:16px;border-radius:12px;border:1px solid var(--border);text-align:center">
         <p style="font-size:16px;color:var(--muted)">Are you ${artistName}?</p>

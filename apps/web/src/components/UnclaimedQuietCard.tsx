@@ -1,12 +1,9 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
-import { sources } from '../services/sources';
 import { analytics } from '../services/analytics';
+import { resolveSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
+import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } from './ArtistLinkSections';
 import { ReleasesSection } from './ReleasesSection';
-import { SocialIcon } from './SocialIcon';
-import { SourceBadge } from './SourceBadge';
-import { getSource } from './ResultCardUtils';
-import type { SourceId } from '../types';
 
 interface UnclaimedQuietCardProps {
   payload: ArtistPagePayload;
@@ -27,7 +24,13 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 }
 
 export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: UnclaimedQuietCardProps) {
-  const { artist, links, socialLinks } = payload;
+  const { artist } = payload;
+  const groupBySection = resolveLinkGroups(payload);
+  // Link sections in the default order a claimed page starts from (an unclaimed artist has no
+  // saved order, bio or featured release): Patronage, Marketplaces, Official, Follow.
+  // `official` isn't in the order; it renders directly after marketplaces, as on a claimed page.
+  const linkSections = resolveSectionOrder(null).flatMap((key): PageSectionKey[] =>
+    key === 'marketplaces' ? ['marketplaces', 'official'] : [key]);
   const imageUrl = artist.imageUrl;
   const locationText = getLocationText(artist);
   const [bannerDismissed, setBannerDismissed] = useState(false);
@@ -101,74 +104,30 @@ export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsav
         )}
       </div>
 
-      {/* Platform Links */}
-      {links.length > 0 && (
-        <div className="pb-8">
-          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
-            Support directly
-          </h2>
-          {/* Same platform pills as the search results and claimed artist pages. */}
-          <div className="platform-pill-row">
-            {links.map((link) => {
-              const badge = (
-                <SourceBadge
-                  source={getSource(link.platform as SourceId)}
-                  url={link.url}
-                  isDirectLink
-                  displayName={link.displayName ?? undefined}
-                  onClick={() => handleLinkClick(link.platform)}
-                />
-              );
-              const key = link.platform + link.url;
+      {/* The same link sections as a claimed artist's page, so every artist page groups its
+          links one way. */}
+      <div className="pb-8">
+        {linkSections.map(sectionKey => {
+          const group = groupBySection.get(sectionKey);
+          if (!group || group.links.length === 0) return null;
+          return (
+            <div key={sectionKey} className="mb-6">
+              <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+                {SECTION_HEADINGS[sectionKey]}
+              </h2>
+              {sectionKey === 'social'
+                ? <FollowLinks group={group} handleLinkClick={handleLinkClick} />
+                : <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />}
+            </div>
+          );
+        })}
 
-              // The Bandcamp Friday label rides along in the same cell, so the
-              // pill row stays one grid cell per platform on a phone.
-              if (!link.bandcampFriday) return <Fragment key={key}>{badge}</Fragment>;
-              return (
-                <span key={key} className="flex items-center gap-2">
-                  {badge}
-                  <span className="bandcamp-friday-label">Bandcamp Friday!</span>
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Social Links */}
-      {socialLinks.length > 0 && (
-        <div className="pb-8">
-          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
-            Follow
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {socialLinks.map((link) => {
-              const source = sources[link.platform as SourceId];
-              const linkName = link.displayName || source?.name || link.platform;
-              return (
-                <a
-                  key={link.platform + link.url}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-track-platform={link.platform}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-sm text-text-primary hover:bg-bg-hover transition-colors"
-                  onClick={() => handleLinkClick(link.platform)}
-                >
-                  <SocialIcon platform={link.platform} className="w-4 h-4" />
-                  {linkName}
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <ReleasesSection
-        releases={payload.releases ?? []}
-        total={payload.releaseCount ?? 0}
-        artistSlug={slug}
-      />
+        <ReleasesSection
+          releases={payload.releases ?? []}
+          total={payload.releaseCount ?? 0}
+          artistSlug={slug}
+        />
+      </div>
     </div>
   );
 }
