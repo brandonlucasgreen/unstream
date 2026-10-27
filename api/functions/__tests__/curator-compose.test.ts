@@ -33,7 +33,13 @@ vi.mock('../buffer-client', () => ({
   addPostToContentItem: (...a: unknown[]) => addPostToContentItem(...a),
 }));
 
-vi.mock('../../../scripts/social-card-render', () => ({ renderCuratorCard: (...a: unknown[]) => renderCuratorCard(...a) }));
+vi.mock('../../../scripts/social-card-render', () => ({
+  renderCuratorCard: (...a: unknown[]) => renderCuratorCard(...a),
+  // The module registers its CommonJS asset loader at import time, so the mock has to carry
+  // both of these even though the drawing itself is stubbed.
+  loadCardAssetsWith: () => {},
+  CARD_FONT_FILES: ['a.ttf', 'b.ttf', 'c.ttf'],
+}));
 
 vi.mock('../../../scripts/social-cards', () => ({
   cardBucketFromEnv: () => ({
