@@ -17,8 +17,9 @@ const VALID_SOURCE_IDS = new Set<string>([
   'patreon', 'officialsite', 'discogs', 'musicbrainz',
   // Profile-link-only patronage options (UNS-217): a fan clicking a claimed artist's Venmo or
   // PayPal link fires click:<platform> for the artist dashboard; without it here the event is
-  // dropped silently at this whitelist.
-  'venmo', 'paypal',
+  // dropped silently at this whitelist. The same goes for the profile-link-only platforms added
+  // after them.
+  'venmo', 'paypal', 'cashapp', 'steady', 'tipeee', 'bigcartel',
   'spotify', 'apple-music', 'youtube', 'instagram', 'facebook', 'tiktok',
   'threads', 'bluesky', 'mastodon', 'funkwhale',
   'listenbrainz', 'librefm', 'internetarchive',

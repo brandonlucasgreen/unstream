@@ -33,7 +33,7 @@ describe('supportPlatformGroups', () => {
   });
 
   it('includes the profile-only patronage options an artist can paste a link for (UNS-217)', () => {
-    for (const id of ['venmo', 'paypal'] as const) {
+    for (const id of ['venmo', 'paypal', 'cashapp', 'steady', 'tipeee'] as const) {
       const p = platforms.find((pl) => pl.id === id);
       expect(p, id).toBeDefined();
       expect(p!.category).toBe('patronage');
@@ -41,6 +41,13 @@ describe('supportPlatformGroups', () => {
       // must show nothing rather than a guess.
       expect(p!.artistPayoutPercent).toBeUndefined();
     }
+  });
+
+  it('lists Big Cartel with the places to buy, since it is the artist\'s own shop', () => {
+    const p = platforms.find((pl) => pl.id === 'bigcartel');
+    expect(p).toBeDefined();
+    expect(p!.category).toBe('marketplace');
+    expect(p!.artistPayoutPercent).toBeUndefined();
   });
 
   it('gives every platform a name, description and homepage to link to', () => {

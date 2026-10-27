@@ -77,6 +77,10 @@ private let allPlatformMeta: [String: PlatformMeta] = [
     // Profile-link-only patronage options (UNS-217): no payout figure — see platform-registry.ts.
     "venmo":        .init(name: "Venmo",           icon: "💵", payoutPercent: nil,       isSocial: false),
     "paypal":       .init(name: "PayPal",          icon: "🅿️", payoutPercent: nil,       isSocial: false),
+    "cashapp":      .init(name: "Cash App",        icon: "💲", payoutPercent: nil,       isSocial: false),
+    "steady":       .init(name: "Steady",          icon: "💜", payoutPercent: nil,       isSocial: false),
+    "tipeee":       .init(name: "Tipeee",          icon: "🎁", payoutPercent: nil,       isSocial: false),
+    "bigcartel":    .init(name: "Big Cartel",      icon: "🛒", payoutPercent: nil,       isSocial: false),
 ]
 
 // MARK: - View Model

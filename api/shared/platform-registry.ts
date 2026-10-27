@@ -152,6 +152,16 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     aiPolicy: 'formal',
     aiPolicyUrl: 'https://bandwagon.fm/acceptable-use',
   },
+  // The artist's own shop for records and merch (<shop>.bigcartel.com). Big Cartel charges a
+  // monthly plan rather than a cut of each sale, but its pricing page doesn't say so outright,
+  // so no payout figure. A profile link only: there's no search.
+  bigcartel: {
+    name: 'Big Cartel',
+    color: '#222222',
+    icon: '🛒',
+    category: 'marketplace',
+    homepageUrl: 'https://www.bigcartel.com',
+  },
   faircamp: {
     name: 'Faircamp',
     color: '#22c55e',
@@ -227,6 +237,34 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
     category: 'patronage',
     sectionCategory: 'patronage',
     homepageUrl: 'https://www.paypal.com',
+  },
+  cashapp: {
+    name: 'Cash App',
+    color: '#00C244',
+    icon: '💲',
+    category: 'patronage',
+    sectionCategory: 'patronage',
+    homepageUrl: 'https://cash.app',
+  },
+  // Steady (Germany) and Tipeee (France): membership and tip platforms with no public search,
+  // so they're profile links too. No payout figure yet. Steady's own pricing page says 10% plus
+  // a variable payment-provider fee, so there's no single number to show; Tipeee's help centre
+  // refuses non-browser requests and third-party sources disagree (5% vs 8%).
+  steady: {
+    name: 'Steady',
+    color: '#954FCF',
+    icon: '💜',
+    category: 'patronage',
+    sectionCategory: 'patronage',
+    homepageUrl: 'https://steady.page',
+  },
+  tipeee: {
+    name: 'Tipeee',
+    color: '#D84556',
+    icon: '🎁',
+    category: 'patronage',
+    sectionCategory: 'patronage',
+    homepageUrl: 'https://tipeee.com',
   },
 
   // Library

@@ -117,7 +117,7 @@ describe('the single-event shape (extension and Mac app)', () => {
     });
   });
 
-  it.each(['venmo', 'paypal'])('takes a click-out on the profile-only %s link (UNS-217)', async (platform) => {
+  it.each(['venmo', 'paypal', 'cashapp', 'steady', 'tipeee', 'bigcartel'])('takes a click-out on the profile-only %s link (UNS-217)', async (platform) => {
     // Same silent-drop hazard as click:tip: the new patronage options have no search surface, so
     // their only events are a fan clicking a claimed artist's Venmo/PayPal link.
     await post({ slug: 'artist-a', metric: `click:${platform}` });

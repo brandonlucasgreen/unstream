@@ -44,6 +44,11 @@ let platformCatalog: [String: PlatformConfig] = [
     // Profile-link-only patronage options (UNS-217): no payout figure — see platform-registry.ts.
     "venmo": PlatformConfig(name: "Venmo", icon: "dollarsign", color: "#3D95CE", searchOnly: false),
     "paypal": PlatformConfig(name: "PayPal", icon: "p.circle", color: "#0070BA", searchOnly: false),
+    "cashapp": PlatformConfig(name: "Cash App", icon: "dollarsign.circle", color: "#00C244", searchOnly: false),
+    "steady": PlatformConfig(name: "Steady", icon: "heart.circle", color: "#954FCF", searchOnly: false),
+    "tipeee": PlatformConfig(name: "Tipeee", icon: "gift", color: "#D84556", searchOnly: false),
+    // The artist's own shop, also a profile link only.
+    "bigcartel": PlatformConfig(name: "Big Cartel", icon: "cart", color: "#222222", searchOnly: false),
     // Search-only platforms
     "ampwall": PlatformConfig(name: "Ampwall", icon: "waveform", color: "#1E1E24", searchOnly: true, artistPayoutPercent: "92-95%"),
     "subvert": PlatformConfig(name: "Subvert", icon: "globe", color: "#D9DBDD", searchOnly: true, artistPayoutPercent: "97%"),
@@ -72,4 +77,4 @@ let platformCatalog: [String: PlatformConfig] = [
 let socialPlatformIds: Set<String> = ["instagram", "facebook", "tiktok", "youtube", "threads", "bluesky", "mastodon", "peertube"]
 
 /// Marketplace platform IDs — storefronts where fans can directly buy/support
-let marketplacePlatformIds: Set<String> = ["bandcamp", "mirlo", "ampwall", "subvert", "qobuz", "beatport", "even", "jamcoop", "discogs", "bandwagon"]
+let marketplacePlatformIds: Set<String> = ["bandcamp", "mirlo", "ampwall", "subvert", "qobuz", "beatport", "even", "jamcoop", "discogs", "bandwagon", "bigcartel"]
