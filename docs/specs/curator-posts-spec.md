@@ -196,10 +196,7 @@ For a local Claude Code session. Read `CLAUDE.md` first, especially "Local dev: 
 
 **If you work in a git worktree,** pass the worktree's own functions folder: `npm run dev -- --functions "$PWD/api/functions"`. Otherwise netlify-cli finds the main checkout's root and serves *its* `api/functions/`, so a new function answers `Function not found` and an edited one silently runs the old code.
 
-**0. Before writing code: check the unknowns with Buffer drafts.** These decide parts of steps 4–5.
-- Instagram: create a draft carousel on the `kidlightbulbs` channel (Cult of Lightbulbs org) with `userTags` for two real handles and one that doesn't exist. Note whether Buffer accepts it and what it does with the bad handle.
-- Facebook: create a draft on the Kid Lightbulbs page with `metadata.facebook.annotations` for a Page mention. Note whether it tags.
-- Delete both drafts afterwards. Record what you found in "Open questions".
+**0. Check the unknowns with Buffer drafts. — DONE 2026-10-27.** Two drafts were created on the real Cult of Lightbulbs channels and deleted. Findings are in "Open questions" 2 and 3, and they carry one rule into step 4: **Buffer validates nothing, so `curator-compose` must validate handles itself.**
 
 **1. Buffer client: `api/functions/buffer-client.ts`.**
 - A small GraphQL `fetch` wrapper for `https://api.buffer.com`, modelled on `bufferGraphQL` in `scripts/generate-social-posts.ts`. Add `api.buffer.com` to `ALLOWED_OUTBOUND_HOSTNAMES`.
@@ -259,7 +256,19 @@ Saved templates and the address book; paste a list; a list page per post; OAuth;
 ## Open questions
 
 1. **OAuth for third-party apps.** Buffer's docs describe authorization code flow with PKCE and client registration under Settings → API. Two outside reviews in 2026 (Zernio, PostProxy) say third-party clients can't be registered yet. Check internally.
-2. **Facebook Page mentions through `annotations`.** Test with a draft post on the Kid Lightbulbs page.
-3. **Instagram `userTags` through Buffer:** the most tags one cover card takes, and what happens when a handle doesn't exist. Rejected post, dropped tag, or silent failure? Test with a draft carousel on `kidlightbulbs`.
+2. **Facebook Page mentions through `annotations` — the mechanism is right; rendering is still unproven.** (Draft `6ae0e17e…` on the Kid Lightbulbs page, 2026-10-27, since deleted.) Buffer accepts `metadata.facebook.annotations` and stores it. Three things learned:
+   - All four fields are required: `{ content, indices, text, url }`.
+   - **`content` is the Page's *Facebook* id, not its Buffer channel id** — Buffer calls it `serviceId`, read with `channel(input: { id: $id }) { serviceId }` (note the id's type is `ChannelId!`, not `String!`). Kid Lightbulbs is Buffer `672d115fda2e3cb64c165cb5` → Facebook `123813724362975`.
+   - On read-back Buffer **adds `"type": "mention"`**, a field we never sent. It models these as mentions explicitly, which is the strongest evidence short of publishing that this is the Page-mention mechanism.
+   - `indices` are `[start, end)` character offsets into the post text, end-exclusive.
+   
+   **Still open:** whether Facebook actually renders the tag. That can only be seen by publishing, which wasn't done. The spec's fallback — names and links, no tags — stays until a real post proves otherwise.
+3. **Instagram `userTags`: Buffer validates nothing at creation, so we must.** (Draft `6ae0e14d…` on `kidlightbulbs`, 2026-10-27, since deleted.) A carousel carrying three `userTags` on the cover — two real (`kidlightbulbs`, `unstream.stream`) and one invented (`zzq-not-a-real-handle-9f3a`) — was accepted with `error: null`, and **all three were stored verbatim**. Re-read a minute later, the draft was unchanged (`updatedAt` still equalled `createdAt`): there is no async handle check either.
+   
+   **So a bad handle is not caught by Buffer at any point we can observe before publish.** `curator-compose` has to check handles itself — which matters more here than elsewhere, because a typo would surface inside a content item that is all-or-nothing, taking the Facebook post down with the Instagram one.
+   
+   **Still open:** the ceiling on tags per image. Three were accepted; nothing here probed the limit, and no number should be assumed.
+   
+   Incidental, and consistent with what the generator already sees: Buffer records `mimeType: "image/jpeg"` for a PNG source while keeping our URL as `source`, and read back `width`/`height` as 1080×1350.
 4. **Production handle coverage.** Run the query above.
 5. **Demand.** Ask two or three curators (a college radio show, a small label, a zine) how they post today and whether they'd use this. Brandon's view is that Instagram and Facebook are their main networks.
