@@ -1,13 +1,15 @@
 # Curator posts: tag the artists you champion
 
-**Status:** proposed 2026-10-21, as Brandon's Buffer Commit hackathon entry. Nothing is built. "Build plan" lists the order to build it in, starting with checking the open questions. The UI mockup is the "Unstream curator posts" design canvas (see "UI").
+**Status:** proposed 2026-10-21, as Brandon's Buffer Commit hackathon entry; rewritten for Netlify on 2026-10-27, after the Cloudflare Worker port was removed. Nothing is built. "Build plan" lists the order to build it in, starting with checking the open questions. The UI mockup is the "Unstream curator posts" design canvas (see "UI").
 
-**Written for the Cloudflare Worker.** This spec assumes Phase 1 of `docs/specs/infrastructure-independence-plan.md` (PR #653) has shipped, so the site runs on one Worker:
-- routes live in `workers/routes.ts`, not `netlify.toml`
-- secrets are Worker secrets, set with `wrangler secret put`, and `.dev.vars` locally
-- local full-stack development is `npm run dev:worker`
+**Written for Netlify.** The first draft assumed the Cloudflare Worker port (#653, #663). That port was **removed on 2026-10-23**, because Bandcamp challenges every page request from a Worker and takes discovery, card data and the catalogue with it (`docs/specs/bandcamp-from-workers.md`). Unstream stays on Netlify's legacy plan. So:
 
-Handlers are still Lambda-style modules in `api/functions/` behind `workers/function-adapter.ts`, so everything said here about functions holds.
+- routes are `[[redirects]]` entries in `netlify.toml`, one per path — there's no catch-all for functions
+- secrets are Netlify environment variables, and `.env` locally
+- local full-stack development is `npm run dev` (port 8888)
+- a new function in `api/functions/` is typechecked just by being there: `api/tsconfig.json` includes `functions/*.ts`. Its **test** file still needs listing by name.
+
+The one place this costs something is R2 (no binding — see "Backend"). The one place it saves a lot is the cards, which a Lambda can draw itself (see "What goes to Buffer").
 
 ## Who it's for
 
@@ -99,7 +101,7 @@ Rules:
 
 **Instagram**
 - A carousel: a cover card, then one card per artist, up to Instagram's 10 through Buffer. A post with more than nine artists offers to split.
-- Cards are drawn by the existing renderer (`scripts/social-card-render.ts`, run in the browser; see below): dark ground, accent kicker, display name, payout panel. The kicker is the curator's (`TONIGHT ON NIGHT SHIFT`) and the footer reads `via @curator · unstream.stream`. Cards Unstream draws count as original content to Instagram; press photos alone don't.
+- Cards are drawn by the existing renderer (`scripts/social-card-render.ts`, in the function; see below): dark ground, accent kicker, display name, payout panel. The kicker is the curator's (`TONIGHT ON NIGHT SHIFT`) and the footer reads `via @curator · unstream.stream`. Cards Unstream draws count as original content to Instagram; press photos alone don't.
 - Tagging: `assets[].image.metadata.userTags`. On a carousel, **the first image's tags apply to every slide** (checked 2026-10-01), so all known artist handles go on the cover card, each at its own position. Caption `@handles` notify too.
 - No clickable links on Instagram, so `{link}` becomes "link in bio" or "search them on unstream.stream".
 
@@ -107,18 +109,20 @@ Rules:
 - The same cards with the caption, and a clickable `{link}`.
 - Tagging is unverified. An `@handle` typed in a Facebook caption tags nobody. Buffer's `metadata.facebook.annotations` (text, indices, url) look like how Page mentions work. If they don't, Facebook gets names and links, with no tags.
 
-**Cards are drawn in the curator's browser, with the generator's own renderer.** Phase 0.3 of the infrastructure plan took card drawing out of the app on purpose: ~130ms of CPU a card, plus fonts and resvg's wasm, which a Worker can't read off disk. Putting it back on the server would undo that. Instead:
+**Cards are drawn in the function, with the generator's own renderer.** An earlier draft drew them in the browser, because a Worker can't read fonts off disk. A Netlify Lambda can, and one already does: `api/functions/social-card.ts` renders these same cards on request, from the same `scripts/social-card-render.ts`. The curator endpoint does the same thing, which means no renderer split, no wasm in the web bundle and no second asset loader.
 
-- **One renderer, two hosts.** `scripts/social-card-render.ts` already draws through `@resvg/resvg-wasm`, which runs in a browser, and already takes its fonts and wasm from a swappable loader. Split it into a platform-neutral core and two asset loaders: the existing Node one (`readFileSync`, for the generator) and a browser one (`fetch` of the same three fonts and the wasm, served as static assets). The generator's cards and the curator's cards then come from the same code.
-- **The preview is the real card.** The compose page draws the PNG and shows it, so what the curator sees is exactly what Buffer gets.
-- **Loading cost:** the wasm (~2.5 MB) and fonts load only on the compose page, which is lazy-loaded and admin-only during the hackathon.
-- **Upload goes through the Worker to R2 by binding.** The page POSTs each PNG to `/api/curator/cards`, which:
-  1. checks it is a PNG (magic bytes) of exactly 1080×1350 (IHDR) and under 2 MB;
-  2. writes it with an `r2_buckets` binding to the `unstream-social-cards` bucket, under `curator/{user-hash}/{sha256}.png`;
-  3. fetches the public URL back, as the generator does, before returning it.
-  
-  The binding means there are no S3 keys to hold. The server doesn't redraw or vouch for the card's content, which is the curator's own post, but it never accepts anything that isn't a correctly sized PNG.
-- **No photos on curator cards for now.** Artist photos and covers live on CDNs (`bcbits.com` and others) that don't send CORS headers, so a browser can't draw them onto a card. The hackathon cards are text-only, matching the mockup. Adding covers later means proxying them through the Worker with the existing `isCardImageHost` check.
+- **The two lines of config that make it work.** `social-card` declares them in `netlify.toml`, and the curator function needs its own copy:
+
+  ```toml
+  [functions."curator-compose"]
+    included_files = ["scripts/social-card-fonts/*.ttf"]
+    external_node_modules = ["@resvg/resvg-wasm"]
+  ```
+
+  The bundler can't see either kind of file through an import: the fonts are read at runtime by path, and bundling resvg into JS leaves it unable to find its `.wasm`.
+- **The preview is the real card, one round trip away.** The compose page asks `/api/curator/cards` for each PNG and shows what comes back, so what the curator sees is exactly what Buffer gets. A card is ~130ms of CPU, so the page debounces and draws the cover first.
+- **Storage is R2 over its S3 API,** reusing `publishCard` from `scripts/social-cards.ts`. The function draws the PNG, writes it to the `unstream-social-cards` bucket under `curator/{user-hash}/{sha256}.png`, fetches the public URL back as the generator does, and returns it. The key's user hash keeps one curator's cards out of another's prefix and away from the generator's.
+- **No photos on curator cards for now — a scope choice, not a limit.** Drawing server-side there's no CORS problem: the function can fetch artist photos the way `social-card.ts` does, through `isCardImageHost` and the outbound allowlist. The hackathon cards stay text-only to match the mockup. Photos are the obvious first addition, and `livePhotoUrl`'s rule (only a 404 or 410 drops a photo) applies when they land.
 - **A card that won't draw blocks sending** with a visible error. It's never sent blank.
 
 ## Links
@@ -136,10 +140,7 @@ Rules:
 - `curator_handles`: `user_id`, `artist_id`, `network`, `handle`, unique on (`user_id`, `artist_id`, `network`).
 - `curator_profile` fields (`show_name`, `label_name`) as columns on the existing per-user settings, not a new table, if they fit there.
 
-**Functions.** Each goes through `resolveAccountRequest`, exports through `withSentry`, and has a test in `__tests__/`. Each also needs:
-- a route in `workers/routes.ts`, which is also what gets it typechecked through `workers/tsconfig.json`;
-- an entry in `workers/function-handlers.ts`;
-- a line in `api/tsconfig.json`'s include list, for the editor and `typecheck:api`.
+**Functions.** Each goes through `resolveAccountRequest`, exports through `withSentry`, and has a test in `__tests__/`. Each also needs a `[[redirects]]` entry in `netlify.toml`. The function itself is typechecked by living in `api/functions/`; its **test** file needs a line in `api/tsconfig.json`'s include list.
 
 The functions:
 - `me-buffer.ts`: connect, disconnect, list channels.
@@ -150,7 +151,12 @@ The functions:
 
 **Outbound:** add `api.buffer.com` to `ALLOWED_OUTBOUND_HOSTNAMES`. Every Buffer call goes to that fixed host, so no `safeFetch` is needed. Card images still go through `isCardImageHost` as they do now.
 
-**R2 by binding.** Add the `unstream-social-cards` bucket to `wrangler.jsonc` as an `r2_buckets` binding, plus a `staging` one (a separate bucket, or none, so staging can't write production's cards). Then re-run `npx wrangler types --path workers/worker-configuration.d.ts`. The weekly generator keeps its own scoped S3 token; it runs in GitHub Actions, not the Worker.
+**R2 by scoped S3 token.** Netlify has no R2 binding, so the function signs its own request, reusing `publishCard` (`scripts/social-cards.ts`, `aws4fetch`) and the same scoped token the weekly generator uses. Two things that needs:
+
+- **`aws4fetch` moves from `devDependencies` to `dependencies`,** or it isn't bundled into the function.
+- **Its four variables are set in Netlify:** `SOCIAL_CARDS_PUBLIC_BASE_URL`, `R2_ACCOUNT_ID`, `SOCIAL_CARDS_R2_ACCESS_KEY_ID`, `SOCIAL_CARDS_R2_SECRET_ACCESS_KEY`. Today they exist only as GitHub Actions secrets. Set them secret-flagged, which makes them write-only — `netlify env:get` returns asterisks, so keep the values wherever they came from.
+
+A deploy preview shares production's environment and would write to the same bucket; the user-hash prefix in the key keeps that out of the generator's objects.
 
 **Budgets.**
 - Mentions search stored artists first. A full search spends the `strict` rate limit (10 a minute, 500 a day), which paces a 20-line paste.
@@ -173,9 +179,9 @@ Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/V
 
 ## Hackathon cut
 
-**No migrations.** `npm run dev:worker` runs against production Supabase, and a migration applied from an unmerged branch blocks every later migration on `main` (see "Database / migrations" in `CLAUDE.md`). So the hackathon build stores nothing new:
+**No migrations.** `npm run dev` runs against production Supabase, and a migration applied from an unmerged branch blocks every later migration on `main` (see "Database / migrations" in `CLAUDE.md`). So the hackathon build stores nothing new:
 
-1. **Buffer access from Worker secrets, admin only.** `BUFFER_CURATOR_ACCESS_TOKEN` and `BUFFER_CURATOR_ORG_ID` (`wrangler secret put` in production, `.dev.vars` locally), gated to `ADMIN_EMAIL` the way tips are (`canSetUpTips`). No connect screen yet: channels come from Buffer's `channels` query.
+1. **Buffer access from Netlify environment variables, admin only.** `BUFFER_CURATOR_ACCESS_TOKEN` and `BUFFER_CURATOR_ORG_ID`, set in Netlify and in `.env` locally, gated to `ADMIN_EMAIL` the way tips are (`canSetUpTips`). Set them secret-flagged; Netlify then keeps them write-only. **Don't leave either key blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line. No connect screen yet: channels come from Buffer's `channels` query.
 2. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
 3. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
 4. **Instagram and Facebook previews,** cards drawn, tags on the cover card.
@@ -186,7 +192,9 @@ Demo: pick "Tonight's show", mention five artists, add one missing Instagram han
 
 ## Build plan
 
-For a local Claude Code session. Read `CLAUDE.md` first, especially "The Cloudflare Worker". Develop against `npm run dev:worker` (port 8787). Like the old `npm run dev`, it reads and writes **production** Supabase, so a Share Now from it is a real post and a save is a real row.
+For a local Claude Code session. Read `CLAUDE.md` first, especially "Local dev: the full stack, and the fast shim". Develop against `npm run dev` (port 8888) — `dev:fast` runs no functions at all. It reads and writes **production** Supabase, so a Share Now from it is a real post and a save is a real row.
+
+**If you work in a git worktree,** pass the worktree's own functions folder: `npm run dev -- --functions "$PWD/api/functions"`. Otherwise netlify-cli finds the main checkout's root and serves *its* `api/functions/`, so a new function answers `Function not found` and an edited one silently runs the old code.
 
 **0. Before writing code: check the unknowns with Buffer drafts.** These decide parts of steps 4–5.
 - Instagram: create a draft carousel on the `kidlightbulbs` channel (Cult of Lightbulbs org) with `userTags` for two real handles and one that doesn't exist. Note whether Buffer accepts it and what it does with the bad handle.
@@ -205,24 +213,21 @@ For a local Claude Code session. Read `CLAUDE.md` first, especially "The Cloudfl
 - `handleFor(artist, network, addressBook)`: only the artist's own link for that network, then the curator's entry, then null.
 - This is where most tests go. Cover every missing-value case, every network, and the `#newmusic`/`#newrelease` block.
 
-**3. Cards in the browser.**
-- Split `scripts/social-card-render.ts` into a platform-neutral core (the SVG builders and `renderSocialCard`) and asset loaders:
-  - **Node:** today's `readFileSync` + `createRequire`, for the generator.
-  - **Browser:** `fetch` the three fonts in `scripts/social-card-fonts/` and resvg's wasm, copied into the web build as static assets.
-  
-  The core must not import `fs` or `module`, or Vite can't bundle it. Make the loader async (`fetch` is), replacing today's synchronous `loadCardAssetsWith`.
-- The generator's tests must still pass unchanged, which proves the split didn't change its cards.
-- Add two slides: `cover` (kicker from the curator's show name, one row per artist, footer `via @handle · unstream.stream`) and `curator-artist` (kicker, name, location, payout panel, release; no photo).
-- `api/functions/social-card.ts` and its Netlify proxy are being deleted separately (Phase 0.3's follow-up). Nothing here depends on them.
+**3. Cards, drawn in the function.**
+- **Reuse the renderer unchanged.** `scripts/social-card-render.ts` already draws through `@resvg/resvg-wasm` and takes its fonts from `loadCardAssetsWith`; `renderSocialCard` is already async. `api/functions/social-card.ts` is the worked example of calling it from a Lambda — read it first. No split, no browser build, no loader rewrite: those were only needed because a Worker can't read fonts off disk.
+- **Add the `[functions."curator-compose"]` block** to `netlify.toml` (see "What goes to Buffer"). Without it the fonts aren't in the bundle and resvg can't find its `.wasm`, and both failures appear only at runtime in production.
+- **Add two slides** alongside the existing ones: `cover` (kicker from the curator's show name, one row per artist with tag bubbles, footer `via @handle · unstream.stream`) and `curator-artist` (kicker, name, location, payout panel, release; no photo).
+- The generator's existing card tests must still pass, which proves the new slides left the old ones alone.
+- `api/functions/social-card.ts` stays for now — it's kept for Buffer posts scheduled before the generator started uploading its own cards, and its header says when it can go. Nothing here depends on it, and nothing here should extend it.
 
 **4. Endpoint: `api/functions/curator-compose.ts`.**
-- `POST /api/curator/preview`, `POST /api/curator/cards` and `POST /api/curator/send`, each a route in `workers/routes.ts` and registered in `workers/function-handlers.ts`.
-- **Card storage:** add the `unstream-social-cards` R2 binding to `wrangler.jsonc` (production only; staging gets its own bucket or none) and regenerate `workers/worker-configuration.d.ts`.
-- Admin-gated through `authenticateAdmin` for the hackathon. Export through `withSentry`, list the file in `api/tsconfig.json`'s include, and add tests in `__tests__/`.
+- `POST /api/curator/preview`, `POST /api/curator/cards` and `POST /api/curator/send`, each a `[[redirects]]` entry in `netlify.toml` pointing at the function.
+- **Card storage:** `publishCard` and the scoped S3 token (see "Backend"), which also means moving `aws4fetch` into `dependencies` and setting its four variables in Netlify.
+- Admin-gated through `authenticateAdmin` for the hackathon. Export through `withSentry` and add tests in `__tests__/`, listing the **test** file in `api/tsconfig.json`'s include — the function itself is already covered by `functions/*.ts`.
 - The body carries artist ids, an optional release per artist, the post's template text, typed-in handles and the send mode.
 - **Everything else is looked up on the server:** artist rows and links through `db.ts`, payouts from `platform-registry.ts`, and handles from the artist's links plus the typed-in ones. Check typed-in handles against Instagram's username format.
 - `preview` returns each network's caption, its tags and what's missing, without drawing any cards.
-- `cards` checks and stores one PNG and returns its public URL (see "What goes to Buffer").
+- `cards` draws one slide, stores it and returns its public URL (see "What goes to Buffer").
 - `send` takes the card URLs `cards` returned, accepting only URLs on the cards bucket's public host under this user's prefix. Then it:
   1. Checks each card URL still answers.
   2. Creates the Instagram post on its own, with tags on the first image.
@@ -237,14 +242,15 @@ For a local Claude Code session. Read `CLAUDE.md` first, especially "The Cloudfl
 - Lazy-loaded in `main.tsx`, shown only to admins (`AuthContext`'s admin check).
 - Build it to the mockup's revised compose screen: the artist rows, the network circles, the preview tabs, the collapsed caption and the split send button.
 - The search reuses the header's suggestion component if it fits.
-- Caption previews run on a short debounce. The cards are drawn in the page with the real renderer (step 3) and shown as the PNGs that will be sent. They're uploaded only when the curator hits send.
+- Caption previews come from `preview`, on a short debounce, and cost nothing but a round trip.
+- **Cards come from `cards`,** already drawn and stored, and the page shows those PNGs — so the preview is the artifact, not a likeness of it. Draw the cover first and the artist cards behind it; at ~130ms of CPU each, a five-artist post is six draws. Redraw only what changed: the key is the slide's own inputs, so editing the caption alone redraws nothing.
 
 **6. Check.**
-- `npm run verify` passes, including the Worker's typecheck and tests.
-- `npx wrangler deploy --dry-run` still bundles.
-- Using `npm run dev:worker`, send to the Cult of Lightbulbs Instagram and Facebook. They're real channels, so use the draft mode until the tagging behaviour has been seen once.
+- `npm run verify` passes.
+- **The function really bundles its fonts.** The `included_files` and `external_node_modules` block is in no test, and a missing font only shows up as a failed draw in production. Draw a card through `npm run dev` and check `.netlify/functions-serve/curator-compose/` holds the three `.ttf`s and resvg's `.wasm`.
+- Using `npm run dev`, send to the Cult of Lightbulbs Instagram and Facebook. They're real channels, so use the draft mode until the tagging behaviour has been seen once.
 
-**After the hackathon:** move the Buffer token, templates and address book into tables (the "Backend" section above), in a migration merged to `main` before any branch depends on it. Then OAuth, paste a list, and results.
+**After the hackathon:** move the Buffer token, templates and address book into tables (the "Backend" section above), in a migration merged to `main` before any branch depends on it — `supabase db push` aborts outright when production holds a version the branch doesn't, so one migration left unmerged blocks everybody's. Then OAuth, paste a list, and results.
 
 ## Later
 
