@@ -25,6 +25,7 @@ import {
   type CardData,
   type CardSlide,
 } from '../api/shared/social-card';
+import type { CuratorCardArtist, CuratorCardData, CuratorCardFrame } from '../api/shared/curator-card';
 
 export interface CardImage {
   mimeType: 'image/jpeg' | 'image/png';
@@ -338,4 +339,122 @@ function socialCardSvg(slide: CardSlide, data: CardData, image: CardImage | null
 export async function renderSocialCard(slide: CardSlide, data: CardData, image: CardImage | null): Promise<Uint8Array> {
   await ensureWasm();
   return resvg(socialCardSvg(slide, data, image)).render().asPng();
+}
+
+// --- Curator slides (api/shared/curator-card.ts) ---
+//
+// A second family, drawn with the same primitives. They differ from the spotlight slides above in
+// one way that matters: the kicker and the footer are the *curator's* words, not Unstream's, so
+// the card says who is recommending the music as well as who made it.
+
+/** "@handle" in a pill, drawn right-aligned so the bubbles line up into a column. */
+function tagBubble(handle: string, rightEdge: number, centreY: number, size: number): string {
+  const label = `@${handle}`;
+  const padding = size * 0.7;
+  const width = textWidth(label, BODY, size) + padding * 2;
+  const height = size * 2;
+  const x = rightEdge - width;
+  return `<rect x="${Math.round(x)}" y="${Math.round(centreY - height / 2)}" width="${Math.round(width)}" height="${Math.round(height)}" rx="${Math.round(height / 2)}" fill="${COLORS.card}" stroke="${COLORS.accent}" stroke-width="2"/>`
+    + text(label, { x: Math.round(x + padding), y: centreY + size * 0.36, face: BODY, size, fill: COLORS.accent });
+}
+
+function curatorFooter(frame: CuratorCardFrame): string {
+  const via = frame.viaHandle && cardFontsCanDraw(frame.viaHandle)
+    ? `via @${frame.viaHandle} · unstream.stream`
+    : 'unstream.stream';
+  return text(via, { x: MARGIN, y: CARD_HEIGHT - 76, face: BODY, size: 32, fill: COLORS.secondary });
+}
+
+function curatorKicker(frame: CuratorCardFrame): string {
+  if (!frame.kicker || !cardFontsCanDraw(frame.kicker)) return '';
+  const fitted = fitText(frame.kicker.toUpperCase(), BODY_BOLD, { maxWidth: CONTENT_WIDTH, maxLines: 1, maxSize: 32, minSize: 20 });
+  return text(fitted.lines[0], { x: MARGIN, y: 290, face: BODY_BOLD, size: fitted.size, fill: COLORS.accent, letterSpacing: 5 });
+}
+
+/** The set's first card: who is being played, and which of them the post will tag. */
+function coverSlide(frame: CuratorCardFrame, artists: CuratorCardArtist[]): string {
+  const top = 420;
+  const bottom = 1150;
+  const rowHeight = Math.min(112, (bottom - top) / Math.max(artists.length, 1));
+  const bubbleSize = Math.min(30, rowHeight * 0.26);
+
+  // One size for every name, so the rows read as a list rather than a ransom note. The widest
+  // name decides it, and the bubble column is reserved out of the width first.
+  const widestBubble = Math.max(0, ...artists.map(a =>
+    a.handle ? textWidth(`@${a.handle}`, BODY, bubbleSize) + bubbleSize * 1.4 : 0));
+  const nameWidth = CONTENT_WIDTH - (widestBubble ? widestBubble + 32 : 0);
+  const nameSize = Math.min(
+    rowHeight * 0.62,
+    ...artists.map(a => fitText(a.name, DISPLAY, { maxWidth: nameWidth, maxLines: 1, maxSize: 84, minSize: 30 }).size),
+  );
+
+  // Centred in the space between the kicker and the footer. Anchored to the top instead, a
+  // three-artist cover hangs its rows above a third of a card of nothing.
+  const blockTop = top + ((bottom - top) - rowHeight * artists.length) / 2;
+
+  const rows = artists.map((artist, i) => {
+    const centreY = blockTop + rowHeight * i + rowHeight / 2;
+    const name = cardFontsCanDraw(artist.name) ? artist.name : '';
+    const drawn = name
+      ? text(name, { x: MARGIN, y: centreY + nameSize * DISPLAY_CAP_HEIGHT / 2, face: DISPLAY, size: nameSize, fill: COLORS.text })
+      : '';
+    const bubble = artist.handle && cardFontsCanDraw(artist.handle)
+      ? tagBubble(artist.handle, CARD_WIDTH - MARGIN, centreY, bubbleSize)
+      : '';
+    return drawn + bubble;
+  }).join('');
+
+  return brand(80) + curatorKicker(frame) + rows + curatorFooter(frame);
+}
+
+/** One artist's card: their name, where they're from, and what buying from them pays them. */
+function curatorArtistSlide(frame: CuratorCardFrame, artist: CuratorCardArtist): string {
+  // Centred on ARTIST_TAG_POSITION like the spotlight's buy slide, so a tag sits over the name.
+  const name = fitText(artist.name, DISPLAY, { maxWidth: CONTENT_WIDTH, maxLines: 3, maxSize: 210, minSize: 72, maxHeight: 300 });
+  const lineHeight = name.size * DISPLAY_LINE_HEIGHT;
+  const firstBaseline = 520 - displayBlockHeight(name.size, name.lines.length) / 2 + name.size * DISPLAY_CAP_HEIGHT;
+  const nameBlock = textBlock(name.lines, { x: MARGIN, y: firstBaseline, face: DISPLAY, size: name.size, fill: COLORS.text, lineHeight });
+
+  let below = nameBlock.lastBaseline + name.size * 0.28 + 52;
+  const location = artist.location && cardFontsCanDraw(artist.location)
+    ? text(`from ${artist.location}`, { x: MARGIN, y: below, face: BODY, size: 42, fill: COLORS.secondary })
+    : '';
+  if (location) below += 62;
+  const release = artist.release && cardFontsCanDraw(artist.release)
+    ? text(fitText(artist.release, BODY_BOLD, { maxWidth: CONTENT_WIDTH, maxLines: 1, maxSize: 46, minSize: 30 }).lines[0],
+        { x: MARGIN, y: below, face: BODY_BOLD, size: 46, fill: COLORS.text })
+    : '';
+
+  const panelY = 880;
+  const panel = `<rect x="${MARGIN}" y="${panelY}" width="${CONTENT_WIDTH}" height="300" rx="32" fill="${COLORS.card}" stroke="${COLORS.border}" stroke-width="2"/>`;
+  let panelText = '';
+  if (artist.payout && artist.platformName) {
+    const where = fitText(`of what you pay on ${artist.platformName}`, BODY, { maxWidth: CONTENT_WIDTH - 112, maxLines: 1, maxSize: 40, minSize: 28 });
+    panelText = text(artist.payout, { x: MARGIN + 56, y: panelY + 176, face: DISPLAY, size: 190, fill: COLORS.accent })
+      + text(where.lines[0], { x: MARGIN + 56, y: panelY + 228, face: BODY, size: where.size, fill: COLORS.text })
+      + text('goes to the artist', { x: MARGIN + 56, y: panelY + 276, face: BODY, size: where.size, fill: COLORS.text });
+  } else if (artist.platformName) {
+    const where = fitText(`Buy their music on ${artist.platformName}`, DISPLAY, { maxWidth: CONTENT_WIDTH - 112, maxLines: 2, maxSize: 104, minSize: 60 });
+    panelText = textBlock(where.lines, { x: MARGIN + 56, y: panelY + 130, face: DISPLAY, size: where.size, fill: COLORS.text, lineHeight: where.size * DISPLAY_LINE_HEIGHT }).svg;
+  } else {
+    // No platform the registry knows, so the panel can't make a claim about where to buy.
+    const where = fitText('Find where to buy their music', DISPLAY, { maxWidth: CONTENT_WIDTH - 112, maxLines: 2, maxSize: 104, minSize: 60 });
+    panelText = textBlock(where.lines, { x: MARGIN + 56, y: panelY + 130, face: DISPLAY, size: where.size, fill: COLORS.text, lineHeight: where.size * DISPLAY_LINE_HEIGHT }).svg;
+  }
+
+  return brand(80) + curatorKicker(frame) + nameBlock.svg + location + release + panel + panelText + curatorFooter(frame);
+}
+
+function curatorCardSvg(data: CuratorCardData): string {
+  const body = data.slide === 'cover'
+    ? coverSlide(data.frame, data.artists)
+    : curatorArtistSlide(data.frame, data.artist);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}">`
+    + `<rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" fill="${COLORS.background}"/>${body}</svg>`;
+}
+
+/** One curator slide as a 1080×1350 PNG. No photos: these are text-only (see the spec). */
+export async function renderCuratorCard(data: CuratorCardData): Promise<Uint8Array> {
+  await ensureWasm();
+  return resvg(curatorCardSvg(data)).render().asPng();
 }
