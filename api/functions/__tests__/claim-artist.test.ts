@@ -73,7 +73,7 @@ vi.mock('../notifications', () => ({
   sendNotificationOnce: mocks.sendNotificationOnce,
   notifySavedArtistsOfNewLinks: mocks.notifySavedArtistsOfNewLinks,
 }));
-vi.mock('../../lib/ntfy', () => ({ sendAdminPush: mocks.sendAdminPush }));
+vi.mock('../admin-push', () => ({ sendAdminPush: mocks.sendAdminPush }));
 vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureMessage: mocks.captureMessage, captureException: vi.fn() } }));
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
@@ -160,7 +160,7 @@ describe('claim-artist verify', () => {
     expect(mocks.sendAdminPush).toHaveBeenCalledTimes(1);
     expect(mocks.sendAdminPush.mock.calls[0][0]).toMatchObject({
       title: 'Claim to review: Kid Lightbulbs',
-      click: 'https://unstream.stream/admin/verify',
+      url: 'https://unstream.stream/admin/verify',
     });
     expect(mocks.sendAdminPush.mock.calls[0][0].message).toContain('kid-lightbulbs.pages.dev');
   });
@@ -186,7 +186,7 @@ describe('claim-artist request-manual-review', () => {
     expect(mocks.sendAdminPush).toHaveBeenCalledTimes(1);
     expect(mocks.sendAdminPush.mock.calls[0][0]).toMatchObject({
       title: 'Claim to review: Kid Lightbulbs',
-      click: 'https://unstream.stream/admin/verify',
+      url: 'https://unstream.stream/admin/verify',
     });
     // The claimant's note and email stay in /admin/verify, not in the push.
     expect(JSON.stringify(mocks.sendAdminPush.mock.calls[0][0])).not.toMatch(/I run this band|claimant@/);

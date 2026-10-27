@@ -399,6 +399,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   // constant-URL fetches here do (stripe.ts) and because this set is the
   // inventory of every host this backend talks to.
   'api.netlify.com',
+  // Pushover, for admin push notifications (api/functions/admin-push.ts). Constant URL, checked
+  // like the two above.
+  'api.pushover.net',
 ]);
 
 /**

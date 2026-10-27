@@ -11,7 +11,7 @@ import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notificati
 import { escapeHtml } from '../lib/html';
 import { safeFetch } from './safe-fetch';
 import { websiteMatchesKnownLink } from './claim-verification';
-import { sendAdminPush } from '../lib/ntfy';
+import { sendAdminPush } from './admin-push';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -317,8 +317,7 @@ async function alertClaimAwaitingReview(artistName: string, slug: string, reason
   const pushed = await sendAdminPush({
     title: `Claim to review: ${artistName}`,
     message: `${reason} Artist page: https://unstream.stream/a/${slug}`,
-    tags: ['artist', 'claim'],
-    click: 'https://unstream.stream/admin/verify',
+    url: 'https://unstream.stream/admin/verify',
   });
   if (!pushed) {
     Sentry.captureMessage('Claim review push failed', { level: 'warning', extra: { artistSlug: slug } });
