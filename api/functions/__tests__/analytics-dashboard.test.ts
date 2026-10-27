@@ -6,21 +6,17 @@
 //
 // These tests pin the two properties that fix depends on: the counts come from the analytics_*
 // SQL functions (so no row cap is in the path), and the per-group counts are *summed* rather than
-// incremented by one per row.
+// incremented by one per row. They also pin the date range and the client and search-kind splits
+// added on 2026-10-27.
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockRpc: vi.fn(),
-  mockSelect: vi.fn(),
 }));
 
 vi.mock('../db', () => ({
-  getClient: () => ({
-    // Every count query is .from().select().eq().gte()
-    from: () => ({ select: mocks.mockSelect }),
-    rpc: mocks.mockRpc,
-  }),
+  getClient: () => ({ rpc: mocks.mockRpc }),
 }));
 // buildCorsHeaders is not stubbed to a constant: this endpoint used to hand back a wildcard
 // origin from a hand-rolled const, and the point of routing it through the shared helper is that
@@ -46,6 +42,8 @@ import { handler } from '../analytics-dashboard';
 
 const today = new Date().toISOString().split('T')[0];
 
+type ContextArgs = { p_key: string };
+
 // Deliberately far above 1,000 per group: any code path that counted rows one at a time under
 // the PostgREST cap could not produce these totals.
 const RPC_DATA: Record<string, unknown[]> = {
@@ -59,81 +57,167 @@ const RPC_DATA: Record<string, unknown[]> = {
     { app: 'web', event_type: 'search', events: 5000 },
     { app: 'web', event_type: 'platform_click', events: 2100 },
     { app: 'extension', event_type: 'search', events: 2400 },
-  ],
-  analytics_platform_clicks: [
-    { platform: 'bandcamp', clicks: 1800 },
-    { platform: 'mirlo', clicks: 300 },
-  ],
-  analytics_streaming_services: [
-    { service: 'youtube', activations: 1200 },
-    { service: 'spotify', activations: 300 },
+    { app: 'extension', event_type: 'platform_click', events: 300 },
   ],
 };
 
-function get(headers: Record<string, string | undefined> = {}) {
-  return handler({ httpMethod: 'GET', headers: { authorization: 'Bearer t', ...headers } });
+const CONTEXT_DATA: Record<string, unknown[]> = {
+  platform: [
+    { event_type: 'platform_click', app: 'web', value: 'bandcamp', events: 1500 },
+    { event_type: 'platform_click', app: 'extension', value: 'bandcamp', events: 300 },
+    { event_type: 'platform_click', app: 'web', value: 'mirlo', events: 300 },
+  ],
+  streaming_service: [
+    { event_type: 'extension_activated', app: 'extension', value: 'youtube', events: 1200 },
+    { event_type: 'extension_activated', app: 'extension', value: 'spotify', events: 300 },
+  ],
+  // 2,400 extension searches: 1,000 from Chrome builds, 400 from Firefox, the other 1,000 from
+  // versions that didn't send a browser.
+  browser: [
+    { event_type: 'search', app: 'extension', value: 'chrome', events: 1000 },
+    { event_type: 'search', app: 'extension', value: 'firefox', events: 400 },
+    { event_type: 'platform_click', app: 'extension', value: 'chrome', events: 300 },
+  ],
+  search_kind: [
+    { event_type: 'search', app: 'web', value: 'typed', events: 4000 },
+    { event_type: 'search', app: 'extension', value: 'now_playing', events: 1200 },
+    { event_type: 'search', app: 'extension', value: 'typed', events: 200 },
+  ],
+};
+
+function rpcResult(fn: string, args: ContextArgs) {
+  const data = fn === 'analytics_context_counts' ? CONTEXT_DATA[args.p_key] : RPC_DATA[fn];
+  return Promise.resolve({ data: data ?? [], error: null });
 }
 
-async function body() {
-  const res = await get();
+function get(headers: Record<string, string | undefined> = {}, query: Record<string, string> = {}) {
+  return handler({
+    httpMethod: 'GET',
+    headers: { authorization: 'Bearer t', ...headers },
+    queryStringParameters: query,
+  });
+}
+
+async function body(query: Record<string, string> = {}) {
+  const res = await get({}, query);
   return JSON.parse(res.body);
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.mockSelect.mockReturnValue({
-    eq: () => ({ gte: () => Promise.resolve({ count: 10380, error: null }) }),
-  });
-  mocks.mockRpc.mockImplementation((fn: string) =>
-    Promise.resolve({ data: RPC_DATA[fn] ?? [], error: null })
-  );
+  mocks.mockRpc.mockImplementation(rpcResult);
 });
 
 describe('aggregation happens in Postgres', () => {
   it('asks the analytics_* functions for every breakdown', async () => {
     await get();
     expect(mocks.mockRpc.mock.calls.map(c => c[0]).sort()).toEqual([
+      'analytics_context_counts',
+      'analytics_context_counts',
+      'analytics_context_counts',
+      'analytics_context_counts',
       'analytics_daily_events',
       'analytics_events_by_app',
-      'analytics_platform_clicks',
       'analytics_search_success',
-      'analytics_streaming_services',
     ]);
   });
 
   it('sums the grouped counts instead of counting rows', async () => {
     const d = await body();
-    const bucket = d.daily.find((r: { date: string }) => r.date === today);
+    const bucket = d.chart.find((r: { date: string }) => r.date === today);
     // A regression to `bucket.searches++` would make these 1, 1 and 1.
     expect(bucket).toMatchObject({ searches: 7400, clicks: 2100, activations: 1500 });
-    expect(d.by_app.find((a: { app: string }) => a.app === 'web'))
+    expect(d.clients.find((c: { app: string }) => c.app === 'web'))
       .toMatchObject({ searches: 5000, clicks: 2100 });
+    // Platform totals are summed across apps.
     expect(d.platforms[0]).toEqual({ platform: 'bandcamp', clicks: 1800 });
     expect(d.streaming_services[0]).toEqual({ service: 'youtube', activations: 1200 });
   });
 
-  it('reports the chart total the exact count already agrees with', async () => {
+  it('reports the search total as the sum of the chart', async () => {
+    // The total used to be a separate count of app_events, which sees only the last 90 days:
+    // older events live in the rollup. Summing the chart makes the two agree by construction.
     const d = await body();
-    const charted = d.daily.reduce((n: number, r: { searches: number }) => n + r.searches, 0);
-    expect(d.summary.searches_30d).toBe(10380);
-    // The production symptom was these two disagreeing by 16x.
-    expect(charted).toBe(7400);
+    expect(d.summary.searches).toBe(7400);
+    expect(d.summary.searches_per_day).toBe(Math.round(7400 / 30));
   });
 
   it('derives the success rate from the function’s two totals', async () => {
     const d = await body();
-    expect(d.summary.success_rate_7d).toBe(75);
+    expect(d.summary.success_rate).toBe(75);
   });
 
   it('reports no success rate rather than a wrong one when nothing completed', async () => {
-    mocks.mockRpc.mockImplementation((fn: string) =>
-      Promise.resolve({
-        data: fn === 'analytics_search_success' ? [{ completed: 0, with_results: 0 }] : RPC_DATA[fn] ?? [],
-        error: null,
-      })
+    mocks.mockRpc.mockImplementation((fn: string, args: ContextArgs) =>
+      fn === 'analytics_search_success'
+        ? Promise.resolve({ data: [{ completed: 0, with_results: 0 }], error: null })
+        : rpcResult(fn, args)
     );
     const d = await body();
-    expect(d.summary.success_rate_7d).toBeNull();
+    expect(d.summary.success_rate).toBeNull();
+  });
+});
+
+describe('clients', () => {
+  it('splits the extension by browser, with older versions on their own row', async () => {
+    const d = await body();
+    const extension = d.clients.filter((c: { app: string }) => c.app === 'extension');
+    expect(extension).toEqual([
+      { app: 'extension', browser: 'chrome', searches: 1000, clicks: 300 },
+      { app: 'extension', browser: 'firefox', searches: 400, clicks: 0 },
+      { app: 'extension', browser: 'unrecorded', searches: 1000, clicks: 0 },
+    ]);
+  });
+
+  it('leaves out the unrecorded row once every event carries a browser', async () => {
+    mocks.mockRpc.mockImplementation((fn: string, args: ContextArgs) =>
+      fn === 'analytics_events_by_app'
+        ? Promise.resolve({
+            data: [
+              { app: 'extension', event_type: 'search', events: 1400 },
+              { app: 'extension', event_type: 'platform_click', events: 300 },
+            ],
+            error: null,
+          })
+        : rpcResult(fn, args)
+    );
+    const d = await body();
+    expect(d.clients.map((c: { browser: string | null }) => c.browser)).not.toContain('unrecorded');
+  });
+
+  it('splits searches into typed, now playing and unlabelled', async () => {
+    const d = await body();
+    expect(d.search_kinds).toEqual([
+      { app: 'web', typed: 4000, now_playing: 0, unlabelled: 1000 },
+      { app: 'extension', typed: 200, now_playing: 1200, unlabelled: 1000 },
+      { app: 'mac', typed: 0, now_playing: 0, unlabelled: 0 },
+    ]);
+  });
+});
+
+describe('date range', () => {
+  it('passes the range to every function as UTC midnights', async () => {
+    await get({}, { from: '2026-09-01', to: '2026-09-30' });
+    for (const [, args] of mocks.mockRpc.mock.calls) {
+      expect(args).toMatchObject({
+        p_since: '2026-09-01T00:00:00.000Z',
+        p_until: '2026-10-01T00:00:00.000Z',
+      });
+    }
+  });
+
+  it('charts a long range by week', async () => {
+    const d = await body({ from: '2026-05-04', to: '2026-10-04' });
+    expect(d.range.granularity).toBe('week');
+    // 2026-05-04 is a Monday; 2026-10-04 a Sunday — 22 whole weeks.
+    expect(d.chart).toHaveLength(22);
+    expect(d.chart[0].date).toBe('2026-05-04');
+  });
+
+  it('refuses a malformed range', async () => {
+    const res = await get({}, { from: 'last tuesday' });
+    expect(res.statusCode).toBe(400);
+    expect(mocks.mockRpc).not.toHaveBeenCalled();
   });
 });
 
@@ -157,12 +241,10 @@ describe('CORS', () => {
 
 describe('a failed query fails the response', () => {
   it('500s instead of rendering zeros when one aggregate errors', async () => {
-    mocks.mockRpc.mockImplementation((fn: string) =>
-      Promise.resolve(
-        fn === 'analytics_daily_events'
-          ? { data: null, error: { message: 'function analytics_daily_events does not exist' } }
-          : { data: RPC_DATA[fn] ?? [], error: null }
-      )
+    mocks.mockRpc.mockImplementation((fn: string, args: ContextArgs) =>
+      fn === 'analytics_daily_events'
+        ? Promise.resolve({ data: null, error: { message: 'function analytics_daily_events does not exist' } })
+        : rpcResult(fn, args)
     );
     const res = await get();
     // The old code logged a partial failure and returned 200 with a chart full of zeros.
@@ -170,10 +252,12 @@ describe('a failed query fails the response', () => {
     expect(JSON.parse(res.body)).toEqual({ error: 'Failed to fetch analytics' });
   });
 
-  it('500s when a count query errors', async () => {
-    mocks.mockSelect.mockReturnValue({
-      eq: () => ({ gte: () => Promise.resolve({ count: null, error: { message: 'timeout' } }) }),
-    });
+  it('500s when one breakdown errors', async () => {
+    mocks.mockRpc.mockImplementation((fn: string, args: ContextArgs) =>
+      fn === 'analytics_context_counts' && args.p_key === 'browser'
+        ? Promise.resolve({ data: null, error: { message: 'timeout' } })
+        : rpcResult(fn, args)
+    );
     const res = await get();
     expect(res.statusCode).toBe(500);
   });

@@ -112,7 +112,8 @@ class AppState: ObservableObject {
             // outcome. There used to be a second, context-free one fired before the request —
             // the same double-write the web app removed on 2026-08-19 — which doubled the Mac
             // app's search counts in /admin/analytics and doubled the database writes for it.
-            api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
+            // search_kind tells /admin/analytics a typed search from a now-playing one.
+            api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count, "search_kind": "typed"])
             trackSearchAppearances(results)
 
             // Phase 2: Enrich with MusicBrainz data in the background. Its failure keeps the
@@ -211,7 +212,7 @@ class AppState: ObservableObject {
             lastFetchedArtist = artist
             lastFetchTime = Date()
             nowPlayingLookup = .loaded
-            api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count])
+            api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count, "search_kind": "now_playing"])
             trackSearchAppearances(results)
             print("[AppState] Got \(results.count) results for \(artist)")
             if let callback = onArtistResultsReady {

@@ -116,7 +116,9 @@ export const analytics = {
 
   // Search completed (product analytics — the one 'search' event per query)
   trackSearchResults: (hasResults: boolean, resultCount: number) => {
-    trackAppEvent('search', { has_results: hasResults, result_count: resultCount });
+    // Every web search is typed; search_kind says so explicitly, as the Mac app and extension
+    // do, so /admin/analytics can split typed searches from now-playing ones across clients.
+    trackAppEvent('search', { has_results: hasResults, result_count: resultCount, search_kind: 'typed' });
   },
 
   // Platform click (GoatCounter + product analytics)

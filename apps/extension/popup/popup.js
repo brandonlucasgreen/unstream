@@ -791,7 +791,8 @@ function hideNowPlaying() {
 
 // Load results for artist. mode defaults to 'exact' because most lookups here are
 // for the detected now-playing artist; the manual search box passes 'fuzzy' so a
-// partial name can still find the artist.
+// partial name can still find the artist. Returns the results, or undefined when the
+// lookup failed.
 async function loadResults(artist, mode = 'exact') {
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'loading';
@@ -816,6 +817,7 @@ async function loadResults(artist, mode = 'exact') {
 
     currentResults = response.results || [];
     renderResults(currentResults);
+    return currentResults;
   } catch (error) {
     console.error('loadResults error:', error);
     const errorDiv = document.createElement('div');
@@ -1597,7 +1599,16 @@ async function searchArtist(artist) {
 
   try {
     showNowPlaying({ artist, title: '', source: 'search' });
-    await loadResults(artist, 'fuzzy');
+    const results = await loadResults(artist, 'fuzzy');
+    // A typed search: counted here, once, when it completes. The service worker counts
+    // now-playing searches itself.
+    if (results) {
+      chrome.runtime.sendMessage({
+        type: 'TRACK_APP_EVENT',
+        event_type: 'search',
+        context: { has_results: results.length > 0, result_count: results.length, search_kind: 'typed' },
+      });
+    }
     await loadEnrichment(artist);
   } finally {
     searchInFlight = false;
