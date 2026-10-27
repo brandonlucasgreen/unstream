@@ -27,7 +27,6 @@ export const SOURCE_CONFIG = {
   mirlo: { icon: '🪺', name: 'Mirlo' },
   faircamp: { icon: '🏕️', name: 'Faircamp' },
   bandwagon: { icon: '🚐', name: 'Bandwagon' },
-  nina: { icon: '🎵', name: 'Nina Protocol' },
   patreon: { icon: '🎨', name: 'Patreon' },
   kofi: { icon: '☕', name: 'Ko-fi' },
   buymeacoffee: { icon: '☕', name: 'Buy Me a Coffee' },

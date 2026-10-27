@@ -9,7 +9,6 @@ import type { CommonsPhoto } from '../search/commons-photo';
 export type SourceId =
   | 'bandcamp'
   | 'mirlo'
-  | 'nina'
   | 'ampwall'
   | 'artcore'
   | 'bandwagon'
@@ -185,7 +184,6 @@ export function sourceIdFromUrl(url: string): SourceId | null {
     if (host.endsWith('bandcamp.com')) return 'bandcamp';
     if (host.endsWith('qobuz.com')) return 'qobuz';
     if (host.endsWith('mirlo.space')) return 'mirlo';
-    if (host.endsWith('ninaprotocol.com')) return 'nina';
     if (host.endsWith('ampwall.com')) return 'ampwall';
     if (host.endsWith('discogs.com')) return 'discogs';
     if (host.endsWith('patreon.com')) return 'patreon';
