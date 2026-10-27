@@ -5,9 +5,13 @@
 // real, so a change to the rendering rules shows up here too.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { BufferNotConnectedError } from '../buffer-db';
 
-const authenticateAdmin = vi.fn();
 const getArtistsBySlugs = vi.fn();
+const getFeatureFlag = vi.fn();
+const resolveAccountRequest = vi.fn();
+const getBufferConnection = vi.fn();
+const usableAccessToken = vi.fn();
 const listChannels = vi.fn();
 const ensureTag = vi.fn();
 const createPost = vi.fn();
@@ -19,13 +23,21 @@ const captureException = vi.fn();
 
 vi.mock('../db', () => ({ getArtistsBySlugs: (...a: unknown[]) => getArtistsBySlugs(...a) }));
 
-vi.mock('../middleware', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../middleware')>()),
-  authenticateAdmin: (...a: unknown[]) => authenticateAdmin(...a),
+vi.mock('../feature-flags', () => ({ getFeatureFlag: (...a: unknown[]) => getFeatureFlag(...a) }));
+
+vi.mock('../ratelimit', () => ({
+  resolveAccountRequest: (...a: unknown[]) => resolveAccountRequest(...a),
+  checkRateLimit: async () => ({ limited: false }),
+  getClientIp: () => '127.0.0.1',
+}));
+
+vi.mock('../buffer-db', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../buffer-db')>()),
+  getBufferConnection: (...a: unknown[]) => getBufferConnection(...a),
+  usableAccessToken: (...a: unknown[]) => usableAccessToken(...a),
 }));
 
 vi.mock('../buffer-client', () => ({
-  bufferOrgId: () => process.env.BUFFER_CURATOR_ORG_ID ?? null,
   listChannels: (...a: unknown[]) => listChannels(...a),
   ensureTag: (...a: unknown[]) => ensureTag(...a),
   createPost: (...a: unknown[]) => createPost(...a),
@@ -83,30 +95,43 @@ const baseBody = { artists: [{ slug: 'honeycrush' }], template, curator };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  process.env.BUFFER_CURATOR_ORG_ID = 'org_1';
-  process.env.BUFFER_CURATOR_ACCESS_TOKEN = 'tok';
-  authenticateAdmin.mockResolvedValue({ userId: 'user-1', email: 'brandon@buffer.com' });
+  getFeatureFlag.mockResolvedValue(true);
+  resolveAccountRequest.mockResolvedValue({ key: 'user:user-1', user: { userId: 'user-1', email: 'curator@example.com' } });
+  getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: [], refreshCounter: 0 });
+  usableAccessToken.mockResolvedValue('curator-token');
   getArtistsBySlugs.mockResolvedValue(new Map([['honeycrush', artistRow('honeycrush', 'Honeycrush')]]));
 });
 
-afterEach(() => {
-  delete process.env.BUFFER_CURATOR_ORG_ID;
-  delete process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-});
+afterEach(() => { vi.clearAllMocks(); });
 
 describe('the gate', () => {
-  it('refuses anyone who is not the admin', async () => {
-    authenticateAdmin.mockResolvedValue(null);
+  it('refuses anyone not signed in', async () => {
+    resolveAccountRequest.mockResolvedValue({ key: 'ip:127.0.0.1', user: null });
     const res = await call('preview', baseBody);
     expect(res.statusCode).toBe(401);
     expect(getArtistsBySlugs).not.toHaveBeenCalled();
   });
 
-  // Tips ship dark the same way: with no key configured, the feature reports itself absent
-  // rather than erroring, so the page can simply not appear.
-  it('reports itself unavailable when Buffer is not configured', async () => {
-    delete process.env.BUFFER_CURATOR_ORG_ID;
+  // Fails closed, like the store it reads: an unset flag hides the feature rather than
+  // half-opening it.
+  it('reports itself unavailable when the flag is off, before touching anything', async () => {
+    getFeatureFlag.mockResolvedValue(false);
     expect(json(await call('preview', baseBody))).toEqual({ available: false });
+    expect(resolveAccountRequest).not.toHaveBeenCalled();
+    expect(getArtistsBySlugs).not.toHaveBeenCalled();
+  });
+
+  // Not an error: the page offers to connect. Every curator posts from their own account.
+  it('reports not-connected when this curator has no Buffer connection', async () => {
+    getBufferConnection.mockResolvedValue(null);
+    expect(json(await call('preview', baseBody))).toEqual({ available: true, connected: false });
+  });
+
+  it('asks them to reconnect when Buffer has revoked the grant', async () => {
+    usableAccessToken.mockRejectedValue(new BufferNotConnectedError('Buffer refused the connection. Reconnect to continue.'));
+    const data = json(await call('send', { ...baseBody, cardUrls: ['https://cards.unstream.stream/curator/abc/def.png'] }));
+    expect(data).toMatchObject({ connected: false });
+    expect(data.reason).toContain('Reconnect');
   });
 
   it('refuses a method other than POST', async () => {
@@ -234,21 +259,21 @@ describe('send', () => {
     expect(data.draft).toBe(true);
     expect(data.results.instagram.postId).toBe('post_ig');
     expect(data.results.facebook.postId).toBe('post_fb');
-    expect(addPostToContentItem).toHaveBeenCalledWith('item_1', 'post_ig');
+    expect(addPostToContentItem).toHaveBeenCalledWith('curator-token', 'item_1', 'post_ig');
 
-    expect(createPost.mock.calls[0][0]).toMatchObject({ channelId: 'chan_ig', saveToDraft: true });
+    expect(createPost.mock.calls[0][1]).toMatchObject({ channelId: 'chan_ig', saveToDraft: true });
   });
 
   it('puts the Instagram tags on the first image only', async () => {
     await call('send', { ...baseBody, cardUrls: [ours, ours] });
-    const assets = (createPost.mock.calls[0][0] as { assets: { image: { metadata: Record<string, unknown> } }[] }).assets;
+    const assets = (createPost.mock.calls[0][1] as { assets: { image: { metadata: Record<string, unknown> } }[] }).assets;
     expect(assets[0].image.metadata.userTags).toEqual([{ handle: 'honeycrush', x: 0.25, y: 0.3 }]);
     expect(assets[1].image.metadata.userTags).toBeUndefined();
   });
 
   it('shares now when asked', async () => {
     await call('send', { ...baseBody, cardUrls: [ours], mode: 'now' });
-    expect(createPost.mock.calls[0][0]).toMatchObject({ saveToDraft: false, mode: 'shareNow' });
+    expect(createPost.mock.calls[0][1]).toMatchObject({ saveToDraft: false, mode: 'shareNow' });
   });
 
   // A content item is all-or-nothing, so Instagram goes on its own afterwards. A rejected

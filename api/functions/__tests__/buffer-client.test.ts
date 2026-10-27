@@ -10,12 +10,14 @@ import {
   BufferError,
   addPostToContentItem,
   bufferGraphQL,
-  bufferOrgId,
   createContentItem,
   createPost,
   ensureTag,
   listChannels,
 } from '../buffer-client';
+
+/** Each curator posts from their own token, so every call carries one explicitly. */
+const TOKEN = 'buffer-token';
 
 const fetchMock = vi.fn();
 
@@ -25,33 +27,16 @@ const ok = (data: unknown) => new Response(JSON.stringify({ data }), { status: 2
 beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
-  process.env.BUFFER_CURATOR_ACCESS_TOKEN = 'buffer-token';
-  process.env.BUFFER_CURATOR_ORG_ID = 'org_1';
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  delete process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-  delete process.env.BUFFER_CURATOR_ORG_ID;
-});
-
-describe('bufferOrgId', () => {
-  it('is null unless both the token and the organization are set', () => {
-    expect(bufferOrgId()).toBe('org_1');
-
-    delete process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-    expect(bufferOrgId()).toBeNull();
-
-    process.env.BUFFER_CURATOR_ACCESS_TOKEN = 'buffer-token';
-    delete process.env.BUFFER_CURATOR_ORG_ID;
-    expect(bufferOrgId()).toBeNull();
-  });
 });
 
 describe('bufferGraphQL', () => {
   it('sends the token and the query to Buffer', async () => {
     fetchMock.mockResolvedValue(ok({ hello: 'world' }));
-    const data = await bufferGraphQL<{ hello: string }>('query { hello }', { a: 1 });
+    const data = await bufferGraphQL<{ hello: string }>(TOKEN, 'query { hello }', { a: 1 });
 
     expect(data).toEqual({ hello: 'world' });
     const [url, init] = fetchMock.mock.calls[0];
@@ -68,7 +53,7 @@ describe('bufferGraphQL', () => {
       JSON.stringify({ errors: [{ message: 'Variable "$orgId" of type "ID!" used in position expecting type "OrganizationId!".' }] }),
       { status: 200 },
     ));
-    await expect(bufferGraphQL('query { x }')).rejects.toMatchObject({
+    await expect(bufferGraphQL(TOKEN, 'query { x }')).rejects.toMatchObject({
       name: 'BufferError',
       message: expect.stringContaining('OrganizationId!'),
     });
@@ -79,30 +64,39 @@ describe('bufferGraphQL', () => {
       JSON.stringify({ errors: [{ message: 'first' }, { message: 'second' }] }),
       { status: 200 },
     ));
-    await expect(bufferGraphQL('query { x }')).rejects.toThrow('first; second');
+    await expect(bufferGraphQL(TOKEN, 'query { x }')).rejects.toThrow('first; second');
   });
 
   it('throws on a non-2xx even when the body is not JSON', async () => {
     fetchMock.mockResolvedValue(new Response('<html>gateway</html>', { status: 502 }));
-    await expect(bufferGraphQL('query { x }')).rejects.toMatchObject({ status: 502 });
+    await expect(bufferGraphQL(TOKEN, 'query { x }')).rejects.toMatchObject({ status: 502 });
   });
 
   it('treats a 200 with neither data nor errors as a failure', async () => {
     fetchMock.mockResolvedValue(new Response('{}', { status: 200 }));
-    await expect(bufferGraphQL('query { x }')).rejects.toBeInstanceOf(BufferError);
+    await expect(bufferGraphQL(TOKEN, 'query { x }')).rejects.toBeInstanceOf(BufferError);
   });
 
   it('refuses to call Buffer with no token, without reaching the network', async () => {
-    delete process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-    await expect(bufferGraphQL('query { x }')).rejects.toBeInstanceOf(BufferError);
+    await expect(bufferGraphQL('', 'query { x }')).rejects.toBeInstanceOf(BufferError);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // One Lambda process serves concurrent requests from different curators, so a token must
+  // never be ambient.
+  it('uses the token it was given, never one lying around in the environment', async () => {
+    process.env.BUFFER_CURATOR_ACCESS_TOKEN = 'someone-elses-token';
+    fetchMock.mockResolvedValue(ok({ x: 1 }));
+    await bufferGraphQL('this-curators-token', 'query { x }');
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer this-curators-token');
+    delete process.env.BUFFER_CURATOR_ACCESS_TOKEN;
   });
 });
 
 describe('listChannels', () => {
   it('asks for the organization as OrganizationId, not ID', async () => {
     fetchMock.mockResolvedValue(ok({ channels: [] }));
-    await listChannels('org_1');
+    await listChannels(TOKEN, 'org_1');
 
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     // Buffer refuses $orgId: ID! outright with a 400; the generator's older spelling is dead.
@@ -112,7 +106,7 @@ describe('listChannels', () => {
 
   it('returns an empty list rather than undefined when there are no channels', async () => {
     fetchMock.mockResolvedValue(ok({}));
-    await expect(listChannels('org_1')).resolves.toEqual([]);
+    await expect(listChannels(TOKEN, 'org_1')).resolves.toEqual([]);
   });
 });
 
@@ -122,7 +116,7 @@ describe('ensureTag', () => {
 
   it('returns the id of an existing tag without creating one', async () => {
     fetchMock.mockResolvedValueOnce(page([{ id: 'tag_1', name: 'unstream: curator' }]));
-    await expect(ensureTag('org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_1');
+    await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_1');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -131,7 +125,7 @@ describe('ensureTag', () => {
       .mockResolvedValueOnce(page([{ id: 'tag_a', name: 'something else' }], true, 'cursor_1'))
       .mockResolvedValueOnce(page([{ id: 'tag_b', name: 'unstream: curator' }]));
 
-    await expect(ensureTag('org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_b');
+    await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_b');
     expect(JSON.parse(fetchMock.mock.calls[1][1].body).variables.after).toBe('cursor_1');
   });
 
@@ -142,7 +136,7 @@ describe('ensureTag', () => {
       .mockResolvedValueOnce(page([{ id: 'tag_x', name: 'unstream: curator posts' }]))
       .mockResolvedValueOnce(ok({ createTag: { tag: { id: 'tag_new' } } }));
 
-    await expect(ensureTag('org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_new');
+    await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_new');
   });
 
   it('creates the tag when the organization has none by that name', async () => {
@@ -150,7 +144,7 @@ describe('ensureTag', () => {
       .mockResolvedValueOnce(page([]))
       .mockResolvedValueOnce(ok({ createTag: { tag: { id: 'tag_new' } } }));
 
-    await expect(ensureTag('org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_new');
+    await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).resolves.toBe('tag_new');
     expect(JSON.parse(fetchMock.mock.calls[1][1].body).variables.input).toEqual({
       organizationId: 'org_1',
       tag: { name: 'unstream: curator', color: '#FF702C' },
@@ -162,7 +156,7 @@ describe('ensureTag', () => {
       .mockResolvedValueOnce(page([]))
       .mockResolvedValueOnce(ok({ createTag: { message: 'Tag limit reached' } }));
 
-    await expect(ensureTag('org_1', 'unstream: curator', '#FF702C')).rejects.toThrow('Tag limit reached');
+    await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).rejects.toThrow('Tag limit reached');
   });
 });
 
@@ -170,7 +164,7 @@ describe('createPost', () => {
   it('reports the created post against its channel', async () => {
     fetchMock.mockResolvedValue(ok({ createPost: { post: { id: 'post_1', status: 'draft' } } }));
 
-    await expect(createPost({ channelId: 'chan_ig', text: 'hi' })).resolves.toEqual({
+    await expect(createPost(TOKEN, { channelId: 'chan_ig', text: 'hi' })).resolves.toEqual({
       created: [{ id: 'post_1', status: 'draft', channelId: 'chan_ig' }],
       errors: [],
     });
@@ -180,7 +174,7 @@ describe('createPost', () => {
   it('turns a MutationError into an error against that channel, not a throw', async () => {
     fetchMock.mockResolvedValue(ok({ createPost: { message: 'Invalid user tag' } }));
 
-    await expect(createPost({ channelId: 'chan_ig' })).resolves.toEqual({
+    await expect(createPost(TOKEN, { channelId: 'chan_ig' })).resolves.toEqual({
       created: [],
       errors: [{ channelId: 'chan_ig', message: 'Invalid user tag' }],
     });
@@ -195,7 +189,7 @@ describe('createContentItem', () => {
       },
     }));
 
-    await expect(createContentItem('org_1', 'Tonight', ['tag_1'], [{ channelId: 'chan_fb' }])).resolves.toEqual({
+    await expect(createContentItem(TOKEN, 'org_1', 'Tonight', ['tag_1'], [{ channelId: 'chan_fb' }])).resolves.toEqual({
       created: [{ id: 'post_fb', status: 'draft', channelId: 'chan_fb' }],
       errors: [],
       contentItemId: 'item_1',
@@ -207,7 +201,7 @@ describe('createContentItem', () => {
       createContentItem: { message: 'Could not create', errors: [{ channelId: 'chan_ig', message: 'Caption too long' }] },
     }));
 
-    const result = await createContentItem('org_1', 'Tonight', ['tag_1'], []);
+    const result = await createContentItem(TOKEN, 'org_1', 'Tonight', ['tag_1'], []);
     expect(result.contentItemId).toBeUndefined();
     expect(result.errors).toEqual([{ channelId: 'chan_ig', message: 'Caption too long' }]);
   });
@@ -215,7 +209,7 @@ describe('createContentItem', () => {
   it('falls back to the top-level message when no per-variant error is given', async () => {
     fetchMock.mockResolvedValue(ok({ createContentItem: { message: 'Could not create', errors: [] } }));
 
-    const result = await createContentItem('org_1', 'Tonight', ['tag_1'], []);
+    const result = await createContentItem(TOKEN, 'org_1', 'Tonight', ['tag_1'], []);
     expect(result.errors).toEqual([{ message: 'Could not create' }]);
   });
 });
@@ -223,18 +217,18 @@ describe('createContentItem', () => {
 describe('addPostToContentItem', () => {
   it('returns null when the post joins the item', async () => {
     fetchMock.mockResolvedValue(ok({ addPostToContentItem: { post: { id: 'post_ig' } } }));
-    await expect(addPostToContentItem('item_1', 'post_ig')).resolves.toBeNull();
+    await expect(addPostToContentItem(TOKEN, 'item_1', 'post_ig')).resolves.toBeNull();
   });
 
   it('returns the message when Buffer refuses', async () => {
     fetchMock.mockResolvedValue(ok({ addPostToContentItem: { message: 'Item is full' } }));
-    await expect(addPostToContentItem('item_1', 'post_ig')).resolves.toBe('Item is full');
+    await expect(addPostToContentItem(TOKEN, 'item_1', 'post_ig')).resolves.toBe('Item is full');
   });
 
   // Only the grouping is at stake, so a network failure here must not reject and take down a
   // send whose posts already exist.
   it('swallows a thrown error into a message', async () => {
     fetchMock.mockRejectedValue(new Error('socket hang up'));
-    await expect(addPostToContentItem('item_1', 'post_ig')).resolves.toBe('socket hang up');
+    await expect(addPostToContentItem(TOKEN, 'item_1', 'post_ig')).resolves.toBe('socket hang up');
   });
 });

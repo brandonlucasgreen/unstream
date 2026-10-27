@@ -8,6 +8,10 @@
 // This is transport only. Captions, handles, tags and length rules belong to curator-posts.ts,
 // so this file never has an opinion about what a post says.
 //
+// **Every call takes the access token explicitly.** Each curator posts from their own Buffer
+// account, so there is no ambient "the" token to read from the environment — and a Lambda serves
+// concurrent requests from one process, where anything ambient would leak between curators.
+//
 // Modelled on bufferGraphQL in scripts/generate-social-posts.ts, which talks to the same API for
 // the weekly schedule. The two deliberately stay separate: the generator runs in GitHub Actions
 // with its own BUFFER_ACCESS_TOKEN and the whole week in hand, while this runs in a Lambda, per
@@ -31,28 +35,13 @@ export class BufferError extends Error {
 }
 
 /**
- * The organization to post to, or null when curator posts are switched off.
- *
- * Both halves have to be present: a token with no organization can't create a content item, and
- * the page uses this single answer to decide whether to appear at all. Keeping it in one function
- * means "is this configured?" has exactly one definition, the way stripeMode() does for tips.
- */
-export function bufferOrgId(): string | null {
-  const token = process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-  const orgId = process.env.BUFFER_CURATOR_ORG_ID;
-  if (!token || !orgId) return null;
-  return orgId;
-}
-
-/**
  * One GraphQL round trip.
  *
  * Buffer answers 200 with an `errors` array as readily as it answers a 4xx, so both are raised
  * the same way — a caller that only checked res.ok would read a failed mutation as a success.
  */
-export async function bufferGraphQL<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const token = process.env.BUFFER_CURATOR_ACCESS_TOKEN;
-  if (!token) throw new BufferError(500, 'Buffer is not configured');
+export async function bufferGraphQL<T>(token: string, query: string, variables?: Record<string, unknown>): Promise<T> {
+  if (!token) throw new BufferError(401, 'No Buffer access token');
   if (!isUrlHostnameAllowed(BUFFER_API)) throw new BufferError(500, 'Buffer host not allowed');
 
   const res = await fetch(BUFFER_API, {
@@ -96,8 +85,8 @@ export interface BufferChannel {
  * The variable is `OrganizationId!`, not `ID!`. Buffer tightened this: the generator's older
  * `ID!` spelling is now refused outright with a 400, so don't "simplify" it back.
  */
-export async function listChannels(orgId: string): Promise<BufferChannel[]> {
-  const data = await bufferGraphQL<{ channels: BufferChannel[] }>(`
+export async function listChannels(token: string, orgId: string): Promise<BufferChannel[]> {
+  const data = await bufferGraphQL<{ channels: BufferChannel[] }>(token, `
     query GetChannels($orgId: OrganizationId!) {
       channels(input: { organizationId: $orgId }) {
         id
@@ -123,13 +112,13 @@ export async function listChannels(orgId: string): Promise<BufferChannel[]> {
  * exactly, so renaming it here starts a new tag rather than renaming the old one — which is what
  * we want, since Buffer's analytics are grouped by tag and a rename would merge two populations.
  */
-export async function ensureTag(orgId: string, name: string, color: string): Promise<string> {
+export async function ensureTag(token: string, orgId: string, name: string, color: string): Promise<string> {
   let after: string | null = null;
   do {
     const data: { tagsV2: {
       pageInfo: { hasNextPage: boolean; endCursor: string | null };
       edges: { node: { id: string; name: string } }[];
-    } } = await bufferGraphQL(`
+    } } = await bufferGraphQL(token, `
       query Tags($organizationId: OrganizationId!, $after: String) {
         tagsV2(input: { organizationId: $organizationId }, first: 100, after: $after) {
           pageInfo { hasNextPage endCursor }
@@ -145,7 +134,7 @@ export async function ensureTag(orgId: string, name: string, color: string): Pro
     after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
   } while (after);
 
-  const created = await bufferGraphQL<{ createTag: { tag?: { id: string }; message?: string } }>(`
+  const created = await bufferGraphQL<{ createTag: { tag?: { id: string }; message?: string } }>(token, `
     mutation CreateTag($input: CreateTagInput!) {
       createTag(input: $input) {
         ... on TagActionSuccess { tag { id } }
@@ -178,8 +167,8 @@ export interface BufferWriteResult {
 }
 
 /** One post on one channel. */
-export async function createPost(input: Record<string, unknown>): Promise<BufferWriteResult> {
-  const data = await bufferGraphQL<{ createPost: { post?: BufferCreatedPost; message?: string } }>(`
+export async function createPost(token: string, input: Record<string, unknown>): Promise<BufferWriteResult> {
+  const data = await bufferGraphQL<{ createPost: { post?: BufferCreatedPost; message?: string } }>(token, `
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
         ... on PostActionSuccess { post { id status } }
@@ -203,6 +192,7 @@ export async function createPost(input: Record<string, unknown>): Promise<Buffer
  * a caption length — before calling it.
  */
 export async function createContentItem(
+  token: string,
   orgId: string,
   title: string,
   tagIds: string[],
@@ -212,7 +202,7 @@ export async function createContentItem(
     content?: { id: string; body?: { posts?: BufferCreatedPost[] } };
     message?: string;
     errors?: { channelId?: string; message: string }[];
-  } }>(`
+  } }>(token, `
     mutation CreateContentItem($input: CreateContentItemInput!) {
       createContentItem(input: $input) {
         ... on CreateContentItemSuccess {
@@ -251,9 +241,9 @@ export async function createContentItem(
  * created and tagged either way — so a caller should report this and carry on rather than treat
  * it as a failed send.
  */
-export async function addPostToContentItem(contentItemId: string, postId: string): Promise<string | null> {
+export async function addPostToContentItem(token: string, contentItemId: string, postId: string): Promise<string | null> {
   try {
-    const data = await bufferGraphQL<{ addPostToContentItem: { post?: { id: string }; message?: string } }>(`
+    const data = await bufferGraphQL<{ addPostToContentItem: { post?: { id: string }; message?: string } }>(token, `
       mutation AddPostToContentItem($input: AddPostToContentItemInput!) {
         addPostToContentItem(input: $input) {
           ... on AddPostToContentItemSuccess { post { id } }

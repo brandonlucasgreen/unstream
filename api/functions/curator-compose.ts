@@ -1,5 +1,9 @@
 // API endpoint: POST /api/curator/{preview,cards,send} — composing a curator's post
-// (docs/specs/curator-posts-spec.md). Admin only for the hackathon cut, the way tips were.
+// (docs/specs/curator-posts-spec.md).
+//
+// Open to any signed-in curator who has connected their own Buffer account, behind the
+// `curatorPosts` flag, which fails closed. Each curator posts from their own tokens: there is no
+// shared account, and nothing here reads a token from the environment.
 //
 //   POST /api/curator/preview   each network's caption, its tags and what's missing. No Buffer
 //                               call, no cards drawn — this runs on every keystroke's debounce.
@@ -12,10 +16,12 @@
 // Unstream's logo.
 
 import { getArtistsBySlugs } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { buildCorsHeaders } from './middleware';
+import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { getFeatureFlag } from './feature-flags';
+import { BufferNotConnectedError, getBufferConnection, usableAccessToken } from './buffer-db';
 import {
   addPostToContentItem,
-  bufferOrgId,
   createContentItem,
   createPost,
   ensureTag,
@@ -233,17 +239,28 @@ function previewFor(
 }
 
 async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
+  const CORS_HEADERS: Record<string, string> = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
   const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
 
-  // Admin only while this is unreleased, the same gate tips shipped behind.
-  const admin = await authenticateAdmin(event.headers.authorization || event.headers.Authorization || undefined);
-  if (!admin) return respond(401, { error: 'Unauthorized' });
+  // The flag gates the whole feature and fails closed, so an unset flag hides it rather than
+  // half-opening it.
+  if (!(await getFeatureFlag('curatorPosts'))) return respond(200, { available: false });
 
-  const orgId = bufferOrgId();
-  if (!orgId) return respond(200, { available: false });
+  const { key, user } = await resolveAccountRequest(
+    event.headers.authorization || event.headers.Authorization || undefined,
+    getClientIp(event.headers),
+  );
+  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
+  if (!user) return respond(401, { error: 'Not signed in' });
+
+  // The curator's own connection. No connection means the page should offer to make one, which
+  // is a normal state rather than an error.
+  const connection = await getBufferConnection(user.userId);
+  if (!connection?.organizationId) return respond(200, { available: true, connected: false });
+  const orgId = connection.organizationId;
 
   let body: ComposeBody;
   try {
@@ -305,16 +322,21 @@ async function handleRequest(event: HandlerEvent) {
       const bucket = cardBucketFromEnv();
       // The curator's own prefix, so one curator's cards can't land among another's or among
       // the weekly generator's.
-      const who = createHash('sha256').update(admin.userId).digest('hex').slice(0, 16);
+      const who = createHash('sha256').update(user.userId).digest('hex').slice(0, 16);
       const digest = createHash('sha256').update(png).digest('hex').slice(0, 32);
       const url = await publishCard(bucket, `curator/${who}/${digest}.png`, png);
       return respond(200, { url, altText: curatorCardAltText(data) });
     }
 
-    if (action === 'send') return await send(body, { orgId, artists, template, curator, book, respond });
+    if (action === 'send') return await send(body, { orgId, userId: user.userId, artists, template, curator, book, respond });
 
     return respond(404, { error: 'Unknown action' });
   } catch (error) {
+    // Buffer revoked us, or the grant expired. The page asks them to reconnect; this is not a
+    // server error and must not be retried.
+    if (error instanceof BufferNotConnectedError) {
+      return respond(200, { available: true, connected: false, reason: error.message });
+    }
     Sentry.captureException(error, { tags: { curator_action: action } });
     return respond(500, { error: error instanceof Error ? error.message : 'Something went wrong' });
   }
@@ -322,6 +344,7 @@ async function handleRequest(event: HandlerEvent) {
 
 interface SendContext {
   orgId: string;
+  userId: string;
   artists: CuratorArtist[];
   template: CuratorTemplate;
   curator: CuratorProfile;
@@ -338,7 +361,11 @@ interface SendContext {
  * with it** — the two are reported separately and the grouping is best-effort.
  */
 async function send(body: ComposeBody, ctx: SendContext) {
-  const { orgId, artists, template, curator, book, respond } = ctx;
+  const { orgId, userId, artists, template, curator, book, respond } = ctx;
+
+  // Refreshed if need be, and never read straight from storage: Buffer's access tokens last an
+  // hour and its refresh tokens are single-use (see buffer-db.ts).
+  const token = await usableAccessToken(userId);
 
   const cardUrls = Array.isArray(body.cardUrls) ? body.cardUrls.filter((u): u is string => typeof u === 'string') : [];
   const bucket = cardBucketFromEnv();
@@ -348,7 +375,7 @@ async function send(body: ComposeBody, ctx: SendContext) {
   if (cardUrls.some(u => !u.startsWith(prefix))) return respond(400, { error: 'A card URL is not one of ours' });
   if (cardUrls.length === 0) return respond(400, { error: 'No cards to send' });
 
-  const channels = await listChannels(orgId);
+  const channels = await listChannels(token, orgId);
   const pick = (network: CuratorNetwork): BufferChannel | null => {
     const wanted = str(body.channels?.[network]);
     const usable = channels.filter(c => c.service === network && !c.isDisconnected);
@@ -356,7 +383,7 @@ async function send(body: ComposeBody, ctx: SendContext) {
   };
 
   const saveToDraft = str(body.mode) !== 'now';
-  const tagId = await ensureTag(orgId, CURATOR_TAG.name, CURATOR_TAG.color);
+  const tagId = await ensureTag(token, orgId, CURATOR_TAG.name, CURATOR_TAG.color);
   const title = curator.showName ?? `${artists.length} artists on Unstream`;
 
   const results: Record<string, { postId?: string; status?: string; error?: string }> = {};
@@ -370,7 +397,7 @@ async function send(body: ComposeBody, ctx: SendContext) {
     if (problem) {
       results.facebook = { error: problem };
     } else {
-      const item = await createContentItem(orgId, title, [tagId], [{
+      const item = await createContentItem(token, orgId, title, [tagId], [{
         channelId: facebook.id,
         text: caption,
         schedulingType: 'automatic',
@@ -393,7 +420,7 @@ async function send(body: ComposeBody, ctx: SendContext) {
     if (preview.problem) {
       results.instagram = { error: preview.problem };
     } else {
-      const post = await createPost({
+      const post = await createPost(token, {
         channelId: instagram.id,
         text: preview.caption,
         schedulingType: 'automatic',
@@ -422,7 +449,7 @@ async function send(body: ComposeBody, ctx: SendContext) {
   // but doesn't fail the send.
   let grouping: string | null = null;
   if (contentItemId && results.instagram?.postId) {
-    grouping = await addPostToContentItem(contentItemId, results.instagram.postId);
+    grouping = await addPostToContentItem(token, contentItemId, results.instagram.postId);
   }
 
   const sent = Object.values(results).filter(r => r.postId).length;

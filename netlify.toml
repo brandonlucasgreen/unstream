@@ -330,6 +330,20 @@
   to = "/.netlify/functions/me-bandcamp"
   status = 200
 
+# The curator's own Buffer connection (api/functions/me-buffer.ts). Two entries, because a splat
+# does not match the bare path: /api/me/buffer is the status and disconnect, and the sub-paths are
+# /start, /callback and /channels. The callback is where Buffer redirects the curator back to, so
+# its URL has to stay exactly this — it is registered with the OAuth client.
+[[redirects]]
+  from = "/api/me/buffer"
+  to = "/.netlify/functions/me-buffer"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/buffer/*"
+  to = "/.netlify/functions/me-buffer"
+  status = 200
+
 [[redirects]]
   from = "/api/me/collection"
   to = "/.netlify/functions/me-collection"
