@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 import { CuratorComposePage } from 'src/pages/CuratorComposePage';
 
-const auth = { isAdmin: true, session: { access_token: 'admin-token' } as { access_token: string } | null };
+const auth = { session: { access_token: 'curator-token' } as { access_token: string } | null };
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => auth }));
 vi.mock('src/components/Header', () => ({ Header: () => null }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -40,9 +40,20 @@ const honeycrush = {
   handles: { instagram: 'honeycrush', facebook: 'honeycrush' },
 };
 
+const CONNECTED = {
+  available: true,
+  connected: true,
+  channels: [
+    { id: 'chan_ig', name: 'nightshift', service: 'instagram', supported: true },
+    { id: 'chan_fb', name: 'Night Shift', service: 'facebook', supported: true },
+  ],
+  selectedChannelIds: [],
+};
+
 /** Route each call by URL, so a test doesn't depend on the order the page fires them in. */
-function routeFetch(handlers: { suggest?: unknown; preview?: unknown; cards?: unknown; send?: unknown }) {
+function routeFetch(handlers: { suggest?: unknown; preview?: unknown; cards?: unknown; send?: unknown; connection?: unknown }) {
   mockFetch.mockImplementation((url: string) => {
+    if (url === '/api/me/buffer') return ok(handlers.connection ?? CONNECTED);
     if (url.startsWith('/api/suggest')) return ok(handlers.suggest ?? { artists: [] });
     if (url.endsWith('/preview')) return ok(handlers.preview ?? previewFor([honeycrush]));
     if (url.endsWith('/cards')) return ok(handlers.cards ?? { url: 'https://cards.unstream.stream/curator/a/b.png', altText: 'x' });
@@ -52,29 +63,92 @@ function routeFetch(handlers: { suggest?: unknown; preview?: unknown; cards?: un
 }
 
 async function addHoneycrush() {
+  // The composer only renders once the connection has loaded.
+  await screen.findByPlaceholderText('Add an artist…');
   fireEvent.change(screen.getByPlaceholderText('Add an artist…'), { target: { value: 'honey' } });
   await act(async () => { await vi.advanceTimersByTimeAsync(250); });
   fireEvent.click(await screen.findByRole('button', { name: 'Honeycrush' }));
   await act(async () => { await vi.advanceTimersByTimeAsync(400); });
 }
 
+/** jsdom won't navigate, so a test that needs assign() swaps location in — and must put it back. */
+const realLocation = Object.getOwnPropertyDescriptor(window, 'location')!;
+const stubLocation = (assign: () => void) =>
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { href: 'http://localhost/curator/new', pathname: '/curator/new', search: '', assign },
+  });
+
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
+  Object.defineProperty(window, 'location', realLocation);
   mockFetch.mockReset();
-  auth.isAdmin = true;
-  auth.session = { access_token: 'admin-token' };
+  auth.session = { access_token: 'curator-token' };
+  window.history.replaceState({}, '', '/curator/new');
   routeFetch({ suggest: { artists: [{ slug: 'honeycrush', name: 'Honeycrush', imageUrl: null }] } });
 });
 
-afterEach(() => { cleanup(); vi.useRealTimers(); });
+afterEach(() => { cleanup(); vi.useRealTimers(); Object.defineProperty(window, 'location', realLocation); });
 
 describe('the gate', () => {
-  it('shows nothing of the tool to a non-admin', () => {
-    auth.isAdmin = false;
+  it('asks a signed-out visitor to sign in, and fetches nothing', () => {
+    auth.session = null;
     render(<CuratorComposePage />);
-    expect(screen.getByText('Not authorized.')).toBeTruthy();
+    expect(screen.getByText(/Sign in to post about the artists/)).toBeTruthy();
     expect(screen.queryByPlaceholderText('Add an artist…')).toBeNull();
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  // The flag fails closed, so this is the normal state until it is switched on.
+  it('says the feature is off when the flag is off', async () => {
+    routeFetch({ connection: { available: false } });
+    render(<CuratorComposePage />);
+    expect(await screen.findByText(/aren’t switched on yet/)).toBeTruthy();
+    expect(screen.queryByPlaceholderText('Add an artist…')).toBeNull();
+  });
+});
+
+describe('connecting Buffer', () => {
+  // Every curator posts from their own account, so the tool is unreachable until they connect.
+  it('offers to connect, and shows no composer until they have', async () => {
+    routeFetch({ connection: { available: true, connected: false } });
+    render(<CuratorComposePage />);
+
+    expect(await screen.findByRole('button', { name: 'Connect Buffer' })).toBeTruthy();
+    expect(screen.queryByPlaceholderText('Add an artist…')).toBeNull();
+  });
+
+  it('sends them to the authorize URL Buffer gave us', async () => {
+    const assign = vi.fn();
+    stubLocation(assign);
+    mockFetch.mockImplementation((url: string) => {
+      if (url === '/api/me/buffer') return ok({ available: true, connected: false });
+      if (url === '/api/me/buffer/start') return ok({ authorizeUrl: 'https://auth.buffer.com/auth?client_id=x' });
+      return ok({});
+    });
+
+    render(<CuratorComposePage />);
+    // The connect panel only appears once /api/me/buffer has answered.
+    await act(async () => { await vi.advanceTimersByTimeAsync(50); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Connect Buffer' })); });
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('https://auth.buffer.com/auth?client_id=x'));
+  });
+
+  it('reports what the callback said when it did not work', async () => {
+    window.history.replaceState({}, '', '/curator/new?buffer=cancelled');
+    routeFetch({ connection: { available: true, connected: false } });
+    render(<CuratorComposePage />);
+
+    expect(await screen.findByText('Buffer connection cancelled.')).toBeTruthy();
+    // And takes it out of the URL, so a reload doesn't repeat it.
+    expect(window.location.search).toBe('');
+  });
+
+  it('warns when the connected account has no Instagram or Facebook channel', async () => {
+    routeFetch({ connection: { available: true, connected: true, channels: [{ id: 'c', name: 'x', service: 'linkedin', supported: false }] } });
+    render(<CuratorComposePage />);
+    expect(await screen.findByText(/no Instagram or Facebook channel/)).toBeTruthy();
   });
 });
 

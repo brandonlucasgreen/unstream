@@ -39,10 +39,10 @@ Buffer's free plan allows three channels, which covers one Instagram and one Fac
 ## The flow
 
 1. **Connect Buffer** (once). Unstream lists the account's Instagram and Facebook channels and the curator ticks the ones it may post to.
-2. **Pick a template.** One of the defaults, or one the curator saved (see "Templates").
-3. **Add artists as mentions.** Typing `@` searches Unstream's stored artists (the `/api/suggest` typeahead) and falls back to a full search when nothing stored matches. Picking a result inserts a chip tied to that artist's id, optionally with a release. The curator confirms every match, so nothing is guessed. **Paste a list** turns each pasted line into a mention waiting for confirmation, for the 20-artist radio show.
-4. **Preview each channel.** One tab per channel, rendered from the template exactly as it will post: caption, cards, tags, character count. Each chip shows its handle on that network, or a "no handle" warning with an "add one" field (see "Handles").
-5. **Send.** Share now, add to queue, a set time, or save as a draft in Buffer. The confirmation links to the posts in Buffer.
+3. **Pick a template.** One of the defaults, or one the curator saved (see "Templates").
+4. **Add artists as mentions.** Typing `@` searches Unstream's stored artists (the `/api/suggest` typeahead) and falls back to a full search when nothing stored matches. Picking a result inserts a chip tied to that artist's id, optionally with a release. The curator confirms every match, so nothing is guessed. **Paste a list** turns each pasted line into a mention waiting for confirmation, for the 20-artist radio show.
+5. **Preview each channel.** One tab per channel, rendered from the template exactly as it will post: caption, cards, tags, character count. Each chip shows its handle on that network, or a "no handle" warning with an "add one" field (see "Handles").
+6. **Send.** Share now, add to queue, a set time, or save as a draft in Buffer. The confirmation links to the posts in Buffer.
 
 Unstream creates the posts, so Share Now works the same as scheduling. Nothing listens for posts or polls a queue.
 
@@ -192,14 +192,15 @@ Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/V
 
 ## Hackathon cut
 
-**No migrations.** `npm run dev` runs against production Supabase, and a migration applied from an unmerged branch blocks every later migration on `main` (see "Database / migrations" in `CLAUDE.md`). So the hackathon build stores nothing new:
+**Built for curators, not demoed on one account** (decided 2026-10-27, superseding the admin-token cut this section first described). The scope that ships:
 
-1. **Buffer access from Netlify environment variables, admin only.** `BUFFER_CURATOR_ACCESS_TOKEN` and `BUFFER_CURATOR_ORG_ID`, set in Netlify and in `.env` locally, gated to `ADMIN_EMAIL` the way tips are (`canSetUpTips`). Set them secret-flagged; Netlify then keeps them write-only. **Don't leave either key blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line. No connect screen yet: channels come from Buffer's `channels` query.
-2. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
-3. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
-4. **Instagram and Facebook previews,** cards drawn, tags on the cover card.
-5. **Share now, or save as a Buffer draft.**
-6. **Missing handles** can be typed in for this post only.
+1. **Each curator connects their own Buffer account** over OAuth, and posts from their own tokens. `BUFFER_CLIENT_ID` and `BUFFER_CLIENT_SECRET` are the only new Netlify variables; the connection lives in `buffer_connections`. **Don't leave either blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line.
+2. **Gated by the `curatorPosts` feature flag**, in the existing store and failing closed, so it is invisible until switched on at `/admin/flags`. Nothing is admin-only any more; the flag is what holds it back.
+3. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
+4. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
+5. **Instagram and Facebook previews,** cards drawn, tags on the cover card.
+6. **Share now, or save as a Buffer draft.**
+7. **Missing handles** can be typed in for this post only.
 
 Demo: pick "Tonight's show", mention five artists, add one missing Instagram handle, watch both previews fill, Share Now, then open the posts in Buffer.
 
