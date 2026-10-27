@@ -67,6 +67,7 @@ const TipThanksPage = lazyWithRetry(() => import('./pages/TipThanksPage.tsx').th
 const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedArtistsPage.tsx').then(m => ({ default: m.PublicSavedArtistsPage })))
 const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 const AdminFlagsPage = lazyWithRetry(() => import('./pages/AdminFlagsPage.tsx').then(m => ({ default: m.AdminFlagsPage })))
+const CuratorComposePage = lazyWithRetry(() => import('./pages/CuratorComposePage.tsx').then(m => ({ default: m.CuratorComposePage })))
 
 // Redirect components for old routes
 function ArtistLoginRedirect() {
@@ -150,6 +151,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="/admin/flags" element={<AdminFlagsPage />} />
+              <Route path="/curator/new" element={<CuratorComposePage />} />
               <Route path="/developers" element={<DevelopersPage />} />
               <Route path="/press" element={<PressPage />} />
               <Route path="/contact" element={<ContactPage />} />
