@@ -954,7 +954,7 @@ function isSearchUrl(url) {
 
 // Check if source is search-only
 function isSearchOnlySource(id, url) {
-  const searchOnlyIds = ['ampwall', 'nina', 'kofi', 'buymeacoffee'];
+  const searchOnlyIds = ['ampwall', 'kofi', 'buymeacoffee'];
   if (!searchOnlyIds.includes(id)) return false;
   return isSearchUrl(url);
 }

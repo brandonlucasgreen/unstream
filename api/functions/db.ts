@@ -4136,14 +4136,19 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
  *     `Creepy Nuts`/`Creepynuts`, `Cry Wolf`/`Crywolf`, `I.O.I`/`Ioi`, `Rue Oberkampf`/`Rueoberkampf`
  *     all via a shared Discogs artist id or Bandcamp subdomain.
  *
- * **Keep this list identical to the predicate of `idx_artist_links_identity_url_trgm`**
+ * **Every platform here must be inside the predicate of `idx_artist_links_identity_url_trgm`**
  * (migration 20261018120000). That partial index is what keeps the `url ILIKE '%…%'` lookup below
  * off a sequential scan of `artist_links`, and Postgres uses it only while every platform queried
  * here is inside its predicate. Add a platform here without a migration and the lookup still
  * works, just as a full scan again.
+ *
+ * The predicate may name more platforms than this list, and does: `nina` stayed in it when Nina
+ * Protocol shut down (July 2026). Postgres still uses the index for a subset (checked on PGlite
+ * with the real migration), and no stored link carried `nina`, so rebuilding the index to drop it
+ * would have bought nothing.
  */
 const IDENTITY_PLATFORMS = new Set([
-  'bandcamp', 'mirlo', 'jamcoop', 'faircamp', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even', 'nina',
+  'bandcamp', 'mirlo', 'jamcoop', 'faircamp', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even',
 ]);
 
 /** At most this many URLs are checked per artist, to bound the query. Ordered by trustworthiness. */

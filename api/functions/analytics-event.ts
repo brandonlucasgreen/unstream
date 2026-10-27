@@ -13,7 +13,7 @@ const VALID_SOURCE_IDS = new Set<string>([
   ...CURATED_PLATFORMS,
   ...SEARCH_ONLY_PLATFORMS,
   // Additional valid click sources not in the curated/search-only sets
-  'bandcamp', 'qobuz', 'beatport', 'even', 'nina', 'artcore', 'ampwall',
+  'bandcamp', 'qobuz', 'beatport', 'even', 'artcore', 'ampwall',
   'patreon', 'officialsite', 'discogs', 'musicbrainz',
   // Profile-link-only patronage options (UNS-217): a fan clicking a claimed artist's Venmo or
   // PayPal link fires click:<platform> for the artist dashboard; without it here the event is
