@@ -443,6 +443,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/analytics/traffic"
+  to = "/.netlify/functions/analytics-traffic"
+  status = 200
+
+[[redirects]]
   from = "/api/admin/merge-override"
   to = "/.netlify/functions/admin-merge-override"
   status = 200
