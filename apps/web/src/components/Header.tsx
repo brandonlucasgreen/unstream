@@ -123,6 +123,9 @@ export function Header() {
     items: [
       { to: '/my-artists', label: t('nav.account.myArtists') },
       { to: '/my-collection', label: t('nav.account.collection') },
+      // Admin-only because the server only lets the admin in while the curatorPosts flag is off
+      // (canUseCuratorPosts). Switching the flag on for everyone has to show this to everyone too.
+      ...(isAdmin ? [{ to: '/curator/new', label: t('nav.account.curatorPosts') }] : []),
       { to: '/settings', label: t('nav.account.settings') },
     ],
   };
