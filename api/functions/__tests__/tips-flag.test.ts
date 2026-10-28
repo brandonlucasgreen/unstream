@@ -56,9 +56,14 @@ describe('the shared key names', () => {
     expect(nodeKey).toBe(FLAGS_HASH_KEY);
   });
 
-  it('names the two fields the registry registers', async () => {
+  // What must not drift is that *these* two field names are registered and spelled the way the
+  // edge side spells them. The registry itself is free to grow — `curatorPosts` joined it in
+  // 2026-10 — so this asserts membership rather than the whole list, which would fail for every
+  // unrelated flag. The whole list is pinned, exhaustively, in feature-flags.test.ts.
+  it('registers the fields the edge side reads, spelled identically', async () => {
     const { FEATURE_FLAGS } = await import('../feature-flags');
-    expect([...FEATURE_FLAGS]).toEqual([TIPS_ARTISTS_FLAG_FIELD, TIPS_FANS_FLAG_FIELD]);
+    expect([...FEATURE_FLAGS]).toContain(TIPS_ARTISTS_FLAG_FIELD);
+    expect([...FEATURE_FLAGS]).toContain(TIPS_FANS_FLAG_FIELD);
     expect(TIPS_ARTISTS_FLAG_FIELD).toBe('tipsArtists');
     expect(TIPS_FANS_FLAG_FIELD).toBe('tipsFans');
   });

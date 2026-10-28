@@ -30,8 +30,12 @@ import { FLAGS_HASH_KEY as SHARED_FLAGS_HASH_KEY, flagIsOn } from '../shared/tip
  * UNS-215: `tipsArtists` gates the artist side (starting Stripe onboarding, switching tips on)
  * and `tipsFans` gates every fan-facing surface. They are independent on purpose; the thing that
  * limits who can actually be paid is the admin approval gate, not either flag.
+ *
+ * `curatorPosts` gates the curator compose tool end to end: connecting a Buffer account, the
+ * compose page, and the endpoints behind it. Off, a curator can neither connect nor post, and
+ * the page is not reachable — which is the state it ships in.
  */
-export const FEATURE_FLAGS = ['tipsArtists', 'tipsFans'] as const;
+export const FEATURE_FLAGS = ['tipsArtists', 'tipsFans', 'curatorPosts'] as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 

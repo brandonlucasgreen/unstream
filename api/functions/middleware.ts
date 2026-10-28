@@ -390,6 +390,13 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
   'images.subvert.fm',
   'cdn.jam.coop',
+  // Buffer's GraphQL API, for curator posts (api/functions/buffer-client.ts). One fixed host, so
+  // no safeFetch; listed here because this set is the inventory of every host the backend talks
+  // to. The weekly social generator reaches the same API from GitHub Actions, where this
+  // allowlist doesn't apply.
+  'api.buffer.com',
+  // Buffer's OAuth endpoints live on a different host from its API (api/functions/buffer-oauth.ts).
+  'auth.buffer.com',
   // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.

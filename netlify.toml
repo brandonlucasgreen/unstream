@@ -65,6 +65,14 @@
   included_files = ["scripts/social-card-fonts/*.ttf"]
   external_node_modules = ["@resvg/resvg-wasm"]
 
+# Curator posts draw their own cards too (api/functions/curator-compose.ts), through the same
+# renderer, so they need the same two settings for the same two reasons: the fonts are read at
+# runtime by path and the bundler can't see them, and resvg bundled into JS can't find its .wasm.
+# Neither failure shows up until a card is drawn in production.
+[functions."curator-compose"]
+  included_files = ["scripts/social-card-fonts/*.ttf"]
+  external_node_modules = ["@resvg/resvg-wasm"]
+
 # The staleness probe in buildFreshness.ts compares this file's id against the one baked into
 # the running bundle. A cached response would echo the tab's own build back to it forever, so
 # the banner would never appear. `no-store` on the request isn't enough on its own — the CDN
@@ -200,6 +208,13 @@
   to = "/.netlify/functions/search-suggest"
   status = 200
 
+# Curator posts: /preview, /cards and /send all land on the one function, which reads the action
+# from the path. Admin-only for now (docs/specs/curator-posts-spec.md).
+[[redirects]]
+  from = "/api/curator/*"
+  to = "/.netlify/functions/curator-compose"
+  status = 200
+
 [[redirects]]
   from = "/api/search/musicbrainz"
   to = "/.netlify/functions/search-musicbrainz"
@@ -313,6 +328,20 @@
 [[redirects]]
   from = "/api/me/bandcamp"
   to = "/.netlify/functions/me-bandcamp"
+  status = 200
+
+# The curator's own Buffer connection (api/functions/me-buffer.ts). Two entries, because a splat
+# does not match the bare path: /api/me/buffer is the status and disconnect, and the sub-paths are
+# /start, /callback and /channels. The callback is where Buffer redirects the curator back to, so
+# its URL has to stay exactly this — it is registered with the OAuth client.
+[[redirects]]
+  from = "/api/me/buffer"
+  to = "/.netlify/functions/me-buffer"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/buffer/*"
+  to = "/.netlify/functions/me-buffer"
   status = 200
 
 [[redirects]]

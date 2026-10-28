@@ -54,6 +54,17 @@ jobs:
       - name: Detect changed migrations
         id: changes
         run: |
+          # A manual run is already a deliberate "apply what's missing": the commit that added the
+          # migration is usually several back on the branch, not HEAD~1, so the diff below would
+          # find nothing and this workflow would skip while reporting success — the exact silent
+          # no-op it exists to avoid. `db push` only applies versions the remote lacks, so running
+          # it unconditionally on dispatch is safe and idempotent.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Manual run — pushing whatever versions the remote is missing."
+            exit 0
+          fi
+
           changed=$(git diff --name-only HEAD~1 HEAD -- supabase/migrations/ 2>/dev/null || true)
           if [ -z "$changed" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"

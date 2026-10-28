@@ -52,11 +52,12 @@ describe('the registry', () => {
   it('knows exactly the two tips flags UNS-215 ships, and nothing else', () => {
     // UNS-215 split the single `tips` flag into these two orthogonal ones and dropped the dead
     // `emailChange` entry. Neither of those names is a flag any more.
-    expect([...FEATURE_FLAGS]).toEqual(['tipsArtists', 'tipsFans']);
+    expect([...FEATURE_FLAGS]).toEqual(['tipsArtists', 'tipsFans', 'curatorPosts']);
   });
 
   it('recognises known names and rejects everything else', () => {
     expect(isFeatureFlag('tipsArtists')).toBe(true);
+    expect(isFeatureFlag('curatorPosts')).toBe(true);
     expect(isFeatureFlag('tipsFans')).toBe(true);
     expect(isFeatureFlag('tips')).toBe(false);
     expect(isFeatureFlag('emailChange')).toBe(false);
@@ -67,24 +68,24 @@ describe('the registry', () => {
 
 describe('getFeatureFlags', () => {
   it('returns every known flag, all off, when the hash is empty', async () => {
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
   });
 
   it('turns on only the field holding exactly "on"', async () => {
     mocks.stored.set('tipsArtists', 'on');
     mocks.stored.set('tipsFans', 'off');
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
   });
 
   it('reads the two flags independently of each other', async () => {
     mocks.stored.set('tipsFans', 'on');
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: true });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: true, curatorPosts: false });
   });
 
   it('ignores a field whose name is not a known flag', async () => {
     mocks.stored.set('tipsArtists', 'on');
     mocks.stored.set('removedFeature', 'on');
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
   });
 
   it('leaves the retired "tips" and "emailChange" fields inert', async () => {
@@ -92,20 +93,20 @@ describe('getFeatureFlags', () => {
     // and the two new flags start off until an admin turns them on.
     mocks.stored.set('tips', 'on');
     mocks.stored.set('emailChange', 'on');
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
   });
 
   it.each([['ON'], ['true'], ['1'], [true], [null]])(
     'treats a stored value of %j as off',
     async (value) => {
       mocks.stored.set('tipsArtists', value);
-      expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+      expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
     },
   );
 
   it('is all off, with no throw, when Redis is unconfigured', async () => {
     mocks.getRedis.mockReturnValue(null);
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
     expect(mocks.hgetall).not.toHaveBeenCalled();
     expect(mocks.reportRedisFailure).not.toHaveBeenCalled();
   });
@@ -114,13 +115,13 @@ describe('getFeatureFlags', () => {
     const boom = new Error('WRONGTYPE, command was: ["HGETALL","feature-flags"]');
     mocks.hgetall.mockRejectedValue(boom);
 
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
     expect(mocks.reportRedisFailure).toHaveBeenCalledWith(`${FLAGS_HASH_KEY}.getFeatureFlags`, boom);
   });
 
   it('is all off when the hash itself is missing rather than empty', async () => {
     mocks.hgetall.mockResolvedValue(null);
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
   });
 });
 
@@ -155,7 +156,7 @@ describe('setFeatureFlag', () => {
 
   it('reads back what it wrote', async () => {
     await setFeatureFlag('tipsArtists', true);
-    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false });
+    expect(await getFeatureFlags()).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
   });
 
   it('throws, writing nothing, when Redis is unconfigured', async () => {
