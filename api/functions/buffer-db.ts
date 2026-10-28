@@ -96,6 +96,22 @@ export async function clearBufferConnection(userId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Switch the connection to another of the curator's Buffer organizations.
+ *
+ * The ticked channels belong to the old organization, so they go with it: a channel id from one
+ * organization means nothing in another, and keeping it would leave a selection nobody can see.
+ */
+export async function setOrganization(userId: string, organizationId: string): Promise<void> {
+  const client = getClient();
+  if (!client) throw new BufferError(500, 'Database not configured');
+  const { error } = await client
+    .from('buffer_connections')
+    .update({ organization_id: organizationId, selected_channel_ids: [], updated_at: new Date().toISOString() })
+    .eq('user_id', userId);
+  if (error) throw new Error(error.message);
+}
+
 export async function setSelectedChannels(userId: string, channelIds: string[]): Promise<void> {
   const client = getClient();
   if (!client) throw new BufferError(500, 'Database not configured');

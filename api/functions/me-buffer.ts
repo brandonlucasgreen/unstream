@@ -1,11 +1,17 @@
 // API endpoint: /api/me/buffer — the curator's own Buffer connection
 // (docs/specs/curator-posts-spec.md, "Buffer auth").
 //
-//   GET    /api/me/buffer            is this account connected, and which channels does it have
-//   POST   /api/me/buffer/start      begin the OAuth flow; returns the URL to send them to
-//   GET    /api/me/buffer/callback   Buffer redirects here; exchanges the code and stores tokens
-//   POST   /api/me/buffer/channels   which channels Unstream may post to
-//   DELETE /api/me/buffer            disconnect
+//   GET    /api/me/buffer               is this account connected; its organizations and channels
+//   POST   /api/me/buffer/start         begin the OAuth flow; returns the URL to send them to
+//   GET    /api/me/buffer/callback      Buffer redirects here; exchanges the code and stores tokens
+//   POST   /api/me/buffer/organization  which of their Buffer organizations to post from
+//   POST   /api/me/buffer/channels      which channels Unstream may post to
+//   DELETE /api/me/buffer               disconnect
+//
+// **The organization is chosen, never guessed.** A Buffer account can belong to several (its own
+// and any it was invited to), and taking the first posted from the wrong one. Connecting keeps it
+// only when there is exactly one; otherwise the connection waits with no organization until the
+// curator picks, and nothing can post until they do.
 //
 // **The callback carries no Authorization header** — it's a top-level redirect from Buffer, not
 // a fetch from our page. So who it belongs to is held server-side against the opaque `state`,
@@ -14,7 +20,7 @@
 import { getRedis } from './redis';
 import { buildCorsHeaders, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
-import { bufferGraphQL, listChannels } from './buffer-client';
+import { listChannels, listOrganizations, type BufferChannel } from './buffer-client';
 import {
   buildAuthorizeUrl,
   bufferOAuthConfigured,
@@ -27,6 +33,7 @@ import {
   clearBufferConnection,
   getBufferConnection,
   saveBufferConnection,
+  setOrganization,
   setSelectedChannels,
   usableAccessToken,
 } from './buffer-db';
@@ -100,8 +107,9 @@ async function handleRequest(event: HandlerEvent) {
 
     try {
       const tokens = await exchangeCode(code, pending.verifier);
-      // Which organization these tokens belong to, read once so posting doesn't have to ask.
-      await saveBufferConnection(pending.userId, tokens, await organizationFor(tokens.accessToken));
+      // Kept only when there's no choice to make; otherwise the page asks.
+      const organizations = await listOrganizations(tokens.accessToken);
+      await saveBufferConnection(pending.userId, tokens, organizations.length === 1 ? organizations[0].id : null);
       return redirectBack('connected');
     } catch (error) {
       Sentry.captureException(error, { tags: { buffer: 'oauth-callback' } });
@@ -128,26 +136,43 @@ async function handleRequest(event: HandlerEvent) {
       const connection = await getBufferConnection(userId);
       if (!connection) return respond(200, { available: true, connected: false });
 
-      // Channels come from Buffer rather than from us, so a channel they removed there
-      // disappears here too.
+      // Organizations and channels come from Buffer rather than from us, so one they removed
+      // there disappears here too.
       const token = await usableAccessToken(userId);
-      const channels = await listChannels(token, connection.organizationId ?? '');
+      const organizations = await listOrganizations(token);
+      // An organization they've since left reads as none chosen, so the page asks again, and
+      // its channels aren't asked for: Buffer would refuse.
+      const orgId = organizations.some(o => o.id === connection.organizationId) ? connection.organizationId : null;
+      const channels = orgId ? await listChannels(token, orgId) : [];
+      const live = channels.filter(c => !c.isDisconnected);
+      const liveIds = new Set(live.map(c => c.id));
       return respond(200, {
         available: true,
         connected: true,
-        organizationId: connection.organizationId,
-        selectedChannelIds: connection.selectedChannelIds,
-        channels: channels
-          .filter(c => !c.isDisconnected)
-          .map(c => ({
-            id: c.id,
-            name: c.name,
-            service: c.service,
-            // Instagram and Facebook are all this posts to; everything else is listed as
-            // unsupported rather than hidden, so a curator can see we know it's there.
-            supported: c.service === 'instagram' || c.service === 'facebook',
-          })),
+        organizations,
+        organizationId: orgId,
+        // Only ticked channels that still exist: one removed in Buffer can't stay ticked here.
+        selectedChannelIds: connection.selectedChannelIds.filter(id => liveIds.has(id)),
+        channels: live.map(c => ({
+          id: c.id,
+          name: c.name,
+          service: c.service,
+          // Instagram and Facebook are all this posts to; everything else is listed as
+          // unsupported rather than hidden, so a curator can see we know it's there.
+          supported: isSupportedChannel(c),
+        })),
       });
+    }
+
+    if (event.httpMethod === 'POST' && action === 'organization') {
+      const body = JSON.parse(event.body || '{}') as { organizationId?: unknown };
+      const wanted = typeof body.organizationId === 'string' ? body.organizationId : '';
+      // Only one of their own: an id from the browser is checked against what Buffer says
+      // this account belongs to.
+      const organizations = await listOrganizations(await usableAccessToken(userId));
+      if (!organizations.some(o => o.id === wanted)) return respond(400, { error: 'That isn’t one of your Buffer organizations' });
+      await setOrganization(userId, wanted);
+      return respond(200, { organizationId: wanted, selectedChannelIds: [] });
     }
 
     if (event.httpMethod === 'POST' && action === 'start') {
@@ -164,8 +189,15 @@ async function handleRequest(event: HandlerEvent) {
     }
 
     if (event.httpMethod === 'POST' && action === 'channels') {
+      const connection = await getBufferConnection(userId);
+      if (!connection?.organizationId) return respond(409, { error: 'Choose a Buffer organization first' });
       const body = JSON.parse(event.body || '{}') as { channelIds?: unknown };
-      const ids = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
+      const wanted = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
+      // Only channels this organization has and this feature can post to, so what's stored is
+      // always something send can act on.
+      const channels = await listChannels(await usableAccessToken(userId), connection.organizationId);
+      const allowed = new Set(channels.filter(c => !c.isDisconnected && isSupportedChannel(c)).map(c => c.id));
+      const ids = [...new Set(wanted)].filter(id => allowed.has(id));
       await setSelectedChannels(userId, ids);
       return respond(200, { selectedChannelIds: ids });
     }
@@ -187,19 +219,9 @@ async function handleRequest(event: HandlerEvent) {
   }
 }
 
-/**
- * The organization a freshly issued token belongs to.
- *
- * Read once at connect time and stored, because every later call needs it and asking each time
- * would be a round trip per post. The first organization: Buffer's own UI treats one account as
- * one workspace, and a curator with several can reconnect to change it.
- */
-async function organizationFor(accessToken: string): Promise<string | null> {
-  const data = await bufferGraphQL<{ account?: { organizations?: { id: string }[] } }>(
-    accessToken,
-    'query { account { organizations { id } } }',
-  );
-  return data.account?.organizations?.[0]?.id ?? null;
+/** Instagram and Facebook are the networks curator posts are written for (see the spec). */
+function isSupportedChannel(channel: BufferChannel): boolean {
+  return channel.service === 'instagram' || channel.service === 'facebook';
 }
 
 export const handler = withSentry(handleRequest);

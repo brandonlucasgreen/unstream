@@ -34,6 +34,7 @@ const curator: CuratorProfile = {
   showName: 'Night Shift',
   labelName: null,
   handles: { instagram: 'nightshift', facebook: 'nightshift' },
+  unstreamHandle: 'nightshift-radio',
 };
 
 const template: CuratorTemplate = {
@@ -177,7 +178,7 @@ describe('renderCaption — missing values', () => {
       template: everything,
       artists: [artist({ release: null, location: null, platform: null, links: {} })],
       network: 'instagram',
-      curator: { showName: null, labelName: null, handles: {} },
+      curator: { showName: null, labelName: null, handles: {}, unstreamHandle: null },
     });
     expect(caption).not.toMatch(/\{[a-z]+\}/);
   });
@@ -198,12 +199,20 @@ describe('renderCaption — {link} per network', () => {
     expect(caption).toContain('Adventsong: https://unstream.stream/a/adventsong');
   });
 
-  it('points Instagram at the curator’s page, or the bio when they have no handle', () => {
+  it('points Instagram at the curator’s Unstream page, or the bio when they have none', () => {
     const two = [artist(), artist({ id: 'a2', name: 'Adventsong', slug: 'adventsong' })];
     expect(renderCaption({ template, artists: two, network: 'instagram', curator }))
-      .toContain('unstream.stream/u/nightshift');
-    expect(renderCaption({ template, artists: two, network: 'instagram', curator: { ...curator, handles: {} } }))
+      .toContain('unstream.stream/u/nightshift-radio');
+    expect(renderCaption({ template, artists: two, network: 'instagram', curator: { ...curator, unstreamHandle: null } }))
       .toContain('link in bio');
+  });
+
+  // The two names used to be one field, so a curator whose Instagram is @nightshift linked to
+  // whoever owns unstream.stream/u/nightshift.
+  it('never builds the page link from the Instagram handle', () => {
+    const two = [artist(), artist({ id: 'a2', name: 'Adventsong', slug: 'adventsong' })];
+    const caption = renderCaption({ template, artists: two, network: 'instagram', curator: { ...curator, unstreamHandle: null } });
+    expect(caption).not.toContain('/u/nightshift');
   });
 
   // Unstream writes no copy: the wording around a link is the curator's, so the variable is
@@ -211,7 +220,7 @@ describe('renderCaption — {link} per network', () => {
   it('puts no label of its own in front of the curator’s page', () => {
     const two = [artist(), artist({ id: 'a2', name: 'Adventsong', slug: 'adventsong' })];
     const caption = renderCaption({ template, artists: two, network: 'instagram', curator });
-    expect(caption).toContain('Buy direct: unstream.stream/u/nightshift');
+    expect(caption).toContain('Buy direct: unstream.stream/u/nightshift-radio');
   });
 });
 

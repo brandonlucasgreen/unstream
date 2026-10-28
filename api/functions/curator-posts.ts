@@ -58,8 +58,14 @@ export interface CuratorArtist {
 export interface CuratorProfile {
   showName: string | null;
   labelName: string | null;
-  /** The curator's own handle per network, for {link} and the card footer. */
+  /** The curator's own handle per network: the Instagram one signs the cards ("via @…"). */
   handles: Partial<Record<CuratorNetwork, string | null>>;
+  /**
+   * Their Unstream username, for Instagram's several-artist {link} to unstream.stream/u/{it}.
+   * Not their Instagram handle: the two are different names on different sites, and conflating
+   * them sent captions to someone else's page, or to none.
+   */
+  unstreamHandle: string | null;
 }
 
 export interface CuratorTemplate {
@@ -176,10 +182,10 @@ function linkValue(artists: CuratorArtist[], network: CuratorNetwork, curator: C
     // Its own block: a run of links reads badly trailing off the end of the curator's sentence.
     return `\n${artists.map(a => `${a.name}: ${UNSTREAM_BASE}/a/${a.slug}`).join('\n')}`;
   }
-  const handle = curator.handles.instagram;
+  const handle = curator.unstreamHandle;
   // No label of our own in front of it — the curator's template supplies the wording, and
   // Unstream writes no copy. "link in bio" is the one exception, because there is no address to
-  // give when the curator hasn't claimed a handle.
+  // give when the curator has no public Unstream page.
   return handle ? `unstream.stream/u/${handle}` : 'link in bio';
 }
 

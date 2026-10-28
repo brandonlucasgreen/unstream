@@ -38,7 +38,7 @@ Buffer's free plan allows three channels, which covers one Instagram and one Fac
 
 ## The flow
 
-1. **Connect Buffer** (once). Unstream lists the account's Instagram and Facebook channels and the curator ticks the ones it may post to.
+1. **Connect Buffer** (once). If the Buffer account belongs to more than one organization, the curator picks which one Unstream posts through. **It is never guessed** (2026-10-28): taking the account's first organization posted from someone else's workspace, since an account belongs to every organization it was invited to. With exactly one it's kept without asking. Then Unstream lists that organization's Instagram and Facebook channels and the curator ticks the ones it may post to. Sending posts to the ticked channels only, read from storage rather than from the page, and the first ticked Instagram account signs the cards, so the curator never types their own handle.
 3. **Pick a template.** One of the defaults, or one the curator saved (see "Templates").
 4. **Add artists as mentions.** Typing `@` searches Unstream's stored artists (the `/api/suggest` typeahead) and falls back to a full search when nothing stored matches. Picking a result inserts a chip tied to that artist's id, optionally with a release. The curator confirms every match, so nothing is guessed. **Paste a list** turns each pasted line into a mention waiting for confirmation, for the 20-artist radio show.
 5. **Preview each channel.** One tab per channel, rendered from the template exactly as it will post: caption, cards, tags, character count. Each chip shows its handle on that network, or a "no handle" warning with an "add one" field (see "Handles").
@@ -130,7 +130,7 @@ Rules:
 ## Links
 
 - **One artist:** `unstream.stream/a/{slug}`. It lists every place to buy with its payout, which is the point.
-- **Several artists, for the hackathon:** Facebook gets one link per artist in the caption. Instagram says "every artist's links: unstream.stream/u/{curator}". The curator's `/u/` page already exists.
+- **Several artists, for the hackathon:** Facebook gets one link per artist in the caption. Instagram says "every artist's links: unstream.stream/u/{curator}". The curator's `/u/` page already exists. `{curator}` is their **Unstream username**, read on the server and only while their list is public (`getPublicUsername`), else "link in bio". It is not their Instagram handle: the two were one field until 2026-10-28, which pointed captions at whoever owned that name on Unstream.
 - **Later:** a page for each post at `/u/{handle}/l/{slug}`, listing the artists with their buy links. It follows the existing `u-handle` split: crawlers get the server-rendered page, browsers get the SPA.
 
 ## Backend
@@ -156,7 +156,7 @@ Rules:
 **Functions.** Each goes through `resolveAccountRequest`, exports through `withSentry`, and has a test in `__tests__/`. Each also needs a `[[redirects]]` entry in `netlify.toml`. The function itself is typechecked by living in `api/functions/`; its **test** file needs a line in `api/tsconfig.json`'s include list.
 
 The functions:
-- `me-buffer.ts`: connect, disconnect, list channels.
+- `me-buffer.ts`: connect, disconnect, choose the organization, list and tick channels.
 - `me-curator-templates.ts`: CRUD on templates and the address book.
 - `curator-compose.ts`: `preview` (renders every variant's caption and tags, with no Buffer call), `cards` (the upload above) and `send`.
 
@@ -186,7 +186,7 @@ Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/V
   - **Right column:** Instagram/Facebook tabs; the cover card large, with its tags drawn on; the caption collapsed to one line; and a split send button (share now, queue, schedule, draft).
   - No status sentences and no checklist. The circles already say who gets tagged.
 - **Template editor:** name, Post, Each artist, Hashtags (up to 3), with clickable variable chips under the Post field and a filled-in sample beside it.
-- **Connect:** "Buffer connected" plus a checklist of the account's channels. Instagram and Facebook can be ticked; every other network shows "Not supported yet".
+- **Connect:** "Buffer connected" plus a checklist of the account's channels. Instagram and Facebook can be ticked; every other network is counted, not listed. An account in several organizations is asked which first, and can change it later from the compose page.
 - **Sent:** one row per channel with a "View post" link, and three result tiles (reach, artist page visits, clicks to buy) left empty until there's data.
 - **Cards:** the existing card style (`scripts/social-card-render.ts`). The cover card has kicker, title, and one row per artist with tag bubbles; each artist card has kicker, name, location, payout panel and the release.
 

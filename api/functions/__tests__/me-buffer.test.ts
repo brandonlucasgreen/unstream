@@ -1,8 +1,11 @@
-// The curator's Buffer connection endpoint: its gate.
+// The curator's Buffer connection endpoint: its gate, and the organization and channels it keeps.
 //
 // The `curatorPosts` flag fails closed for everyone but the admin account, which is let through
 // so the feature can be tested before it is switched on. The OAuth callback carries no user to
 // check, and relies on only ever redeeming a state that the gated /start minted.
+//
+// The organization is chosen, never guessed: taking the account's first one posted from the
+// wrong workspace for anyone who belongs to more than one.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -10,8 +13,11 @@ const getFeatureFlag = vi.fn();
 const resolveAccountRequest = vi.fn();
 const getBufferConnection = vi.fn();
 const saveBufferConnection = vi.fn();
+const setOrganization = vi.fn();
+const setSelectedChannels = vi.fn();
 const exchangeCode = vi.fn();
-const bufferGraphQL = vi.fn();
+const listOrganizations = vi.fn();
+const listChannels = vi.fn();
 const redisGet = vi.fn();
 const redisSet = vi.fn();
 const redisDel = vi.fn();
@@ -36,6 +42,9 @@ vi.mock('../buffer-db', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../buffer-db')>()),
   getBufferConnection: (...a: unknown[]) => getBufferConnection(...a),
   saveBufferConnection: (...a: unknown[]) => saveBufferConnection(...a),
+  setOrganization: (...a: unknown[]) => setOrganization(...a),
+  setSelectedChannels: (...a: unknown[]) => setSelectedChannels(...a),
+  usableAccessToken: async () => 'token',
 }));
 
 vi.mock('../buffer-oauth', async (importOriginal) => ({
@@ -45,7 +54,8 @@ vi.mock('../buffer-oauth', async (importOriginal) => ({
 
 vi.mock('../buffer-client', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../buffer-client')>()),
-  bufferGraphQL: (...a: unknown[]) => bufferGraphQL(...a),
+  listOrganizations: (...a: unknown[]) => listOrganizations(...a),
+  listChannels: (...a: unknown[]) => listChannels(...a),
 }));
 
 vi.mock('../../lib/sentry', () => ({
@@ -57,11 +67,12 @@ const { handler } = await import('../me-buffer');
 
 type Res = { statusCode: number; headers: Record<string, string>; body: string };
 
-const call = (method: string, path: string, query = '') =>
+const call = (method: string, path: string, query = '', body?: unknown) =>
   handler({
     httpMethod: method,
     headers: { authorization: 'Bearer t' },
     rawUrl: `https://unstream.stream/api/me/buffer${path}${query}`,
+    body: body === undefined ? null : JSON.stringify(body),
   } as never) as Promise<Res>;
 
 const asUser = (email: string) =>
@@ -73,6 +84,13 @@ beforeEach(() => {
   vi.stubEnv('BUFFER_CLIENT_SECRET', 'secret');
   getFeatureFlag.mockResolvedValue(false);
   getBufferConnection.mockResolvedValue(null);
+  listOrganizations.mockResolvedValue([{ id: 'org_mine', name: 'Cult of Lightbulbs' }, { id: 'org_work', name: 'Buffer' }]);
+  listChannels.mockResolvedValue([
+    { id: 'ig_1', name: 'kidlightbulbs', service: 'instagram', type: 'business', serviceId: '1', isDisconnected: false },
+    { id: 'ig_2', name: 'unstream.stream', service: 'instagram', type: 'business', serviceId: '2', isDisconnected: false },
+    { id: 'th_1', name: 'kidlightbulbs', service: 'threads', type: 'profile', serviceId: '3', isDisconnected: false },
+    { id: 'fb_old', name: 'Old page', service: 'facebook', type: 'page', serviceId: '4', isDisconnected: true },
+  ]);
 });
 
 afterEach(() => {
@@ -112,7 +130,7 @@ describe('the gate', () => {
   it('redeems a state /start minted, whatever the flag says', async () => {
     redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v' });
     exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
-    bufferGraphQL.mockResolvedValue({ account: { organizations: [{ id: 'org_1' }] } });
+    listOrganizations.mockResolvedValue([{ id: 'org_1', name: 'Mine' }]);
 
     const res = await call('GET', '/callback', '?state=s&code=c');
     expect(res.statusCode).toBe(302);
@@ -125,5 +143,84 @@ describe('the gate', () => {
     const res = await call('GET', '/callback', '?state=forged&code=c');
     expect(res.headers.Location).toMatch(/buffer=expired$/);
     expect(exchangeCode).not.toHaveBeenCalled();
+  });
+});
+
+describe('the organization', () => {
+  const connected = (organizationId: string | null, selectedChannelIds: string[] = []) =>
+    getBufferConnection.mockResolvedValue({ organizationId, selectedChannelIds, refreshCounter: 0 });
+
+  beforeEach(() => {
+    getFeatureFlag.mockResolvedValue(true);
+    asUser('curator@example.com');
+  });
+
+  it('leaves it unchosen at connect when the account has several', async () => {
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v' });
+    exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
+
+    await call('GET', '/callback', '?state=s&code=c');
+    expect(saveBufferConnection).toHaveBeenCalledWith('u1', expect.anything(), null);
+  });
+
+  it('offers the organizations, and no channels, until one is chosen', async () => {
+    connected(null);
+    const data = JSON.parse((await call('GET', '')).body);
+    expect(data).toMatchObject({ connected: true, organizationId: null, channels: [] });
+    expect(data.organizations.map((o: { name: string }) => o.name)).toEqual(['Cult of Lightbulbs', 'Buffer']);
+    expect(listChannels).not.toHaveBeenCalled();
+  });
+
+  it('treats an organization they have since left as unchosen', async () => {
+    connected('org_gone');
+    const data = JSON.parse((await call('GET', '')).body);
+    expect(data.organizationId).toBeNull();
+    expect(listChannels).not.toHaveBeenCalled();
+  });
+
+  it('switches to one of their own organizations', async () => {
+    connected('org_work');
+    const res = await call('POST', '/organization', '', { organizationId: 'org_mine' });
+    expect(res.statusCode).toBe(200);
+    expect(setOrganization).toHaveBeenCalledWith('u1', 'org_mine');
+  });
+
+  it('refuses an organization the account does not belong to', async () => {
+    connected('org_work');
+    const res = await call('POST', '/organization', '', { organizationId: 'org_someone_else' });
+    expect(res.statusCode).toBe(400);
+    expect(setOrganization).not.toHaveBeenCalled();
+  });
+});
+
+describe('the channels', () => {
+  beforeEach(() => {
+    getFeatureFlag.mockResolvedValue(true);
+    asUser('curator@example.com');
+    getBufferConnection.mockResolvedValue({ organizationId: 'org_mine', selectedChannelIds: ['ig_2', 'fb_old'], refreshCounter: 0 });
+  });
+
+  it('lists the live channels, marks which can be posted to, and drops stale ticks', async () => {
+    const data = JSON.parse((await call('GET', '')).body);
+    expect(data.organizationId).toBe('org_mine');
+    expect(data.channels).toEqual([
+      { id: 'ig_1', name: 'kidlightbulbs', service: 'instagram', supported: true },
+      { id: 'ig_2', name: 'unstream.stream', service: 'instagram', supported: true },
+      { id: 'th_1', name: 'kidlightbulbs', service: 'threads', supported: false },
+    ]);
+    expect(data.selectedChannelIds).toEqual(['ig_2']);
+  });
+
+  it('stores only channels this organization has and curator posts can use', async () => {
+    const res = await call('POST', '/channels', '', { channelIds: ['ig_1', 'th_1', 'fb_old', 'nope', 'ig_1'] });
+    expect(JSON.parse(res.body).selectedChannelIds).toEqual(['ig_1']);
+    expect(setSelectedChannels).toHaveBeenCalledWith('u1', ['ig_1']);
+  });
+
+  it('refuses to store channels before an organization is chosen', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: null, selectedChannelIds: [], refreshCounter: 0 });
+    const res = await call('POST', '/channels', '', { channelIds: ['ig_1'] });
+    expect(res.statusCode).toBe(409);
+    expect(setSelectedChannels).not.toHaveBeenCalled();
   });
 });

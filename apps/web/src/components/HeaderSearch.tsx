@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useArtistSuggestions } from '../hooks/useArtistSuggestions';
+import { useArtistSuggestions, type ArtistSuggestion } from '../hooks/useArtistSuggestions';
 import { SuggestionList } from './SuggestionList';
 
 /**
@@ -45,7 +45,7 @@ export function HeaderSearch({
     onClose?.();
   }, [navigate, onClose]);
 
-  const handlePick = useCallback((name: string) => {
+  const handlePick = useCallback(({ name }: ArtistSuggestion) => {
     setQuery(name);
     runSearch(name);
   }, [runSearch]);

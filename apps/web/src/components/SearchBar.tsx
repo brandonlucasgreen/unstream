@@ -24,7 +24,7 @@ export function SearchBar({ onSearch, isLoading, initialQuery, onReset }: Search
     }
   }, [onSearch]);
 
-  const handlePick = useCallback((name: string) => {
+  const handlePick = useCallback(({ name }: ArtistSuggestion) => {
     setQuery(name);
     submitSearch(name);
   }, [submitSearch]);

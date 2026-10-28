@@ -65,6 +65,28 @@ export async function bufferGraphQL<T>(token: string, query: string, variables?:
 }
 
 // ---------------------------------------------------------------------------------------------
+// Organizations
+// ---------------------------------------------------------------------------------------------
+
+export interface BufferOrganization {
+  id: string;
+  name: string;
+}
+
+/**
+ * Every organization the account belongs to. One person can belong to several — their own, and
+ * any they were invited to — and the first is not reliably theirs, so a curator with more than
+ * one has to choose.
+ */
+export async function listOrganizations(token: string): Promise<BufferOrganization[]> {
+  const data = await bufferGraphQL<{ account?: { organizations?: BufferOrganization[] } }>(
+    token,
+    'query { account { organizations { id name } } }',
+  );
+  return data.account?.organizations ?? [];
+}
+
+// ---------------------------------------------------------------------------------------------
 // Channels
 // ---------------------------------------------------------------------------------------------
 

@@ -9,14 +9,15 @@
 //   POST /api/curator/preview   each network's caption, its tags and what's missing. No Buffer
 //                               call, no cards drawn — this runs on every keystroke's debounce.
 //   POST /api/curator/cards     draw one slide, store it in R2, return its public URL.
-//   POST /api/curator/send      create the posts in Buffer from card URLs already stored.
+//   POST /api/curator/send      create the posts in Buffer from card URLs already stored, on the
+//                               channels the curator ticked (/api/me/buffer/channels).
 //
 // **Everything is rebuilt here from artist slugs.** Handles, payouts, links and card contents
 // never come from the browser: the page can say *which* artists and *what the curator wrote*,
 // and nothing else. A browser that could name a payout could put a false one on a card carrying
 // Unstream's logo.
 
-import { getArtistsBySlugs } from './db';
+import { getArtistsBySlugs, getPublicUsername } from './db';
 import { buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
 import { BufferNotConnectedError, canUseCuratorPosts, getBufferConnection, usableAccessToken } from './buffer-db';
@@ -26,7 +27,6 @@ import {
   createPost,
   ensureTag,
   listChannels,
-  type BufferChannel,
 } from './buffer-client';
 import {
   captionProblem,
@@ -95,7 +95,6 @@ interface ComposeBody {
   artistSlug?: unknown;
   cardUrls?: unknown;
   mode?: unknown;
-  channels?: Record<string, unknown>;
 }
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -112,8 +111,13 @@ function actionFrom(event: HandlerEvent): string {
   return raw.replace(/\/+$/, '').split('/').pop() ?? '';
 }
 
-/** The curator's own framing, as typed. Unstream supplies no default show name. */
-function profileFrom(body: ComposeBody): CuratorProfile {
+/**
+ * The curator's own framing. The show name is as typed, and Unstream supplies no default. Their
+ * Instagram handle is the name of the Instagram channel the page has ticked, which only signs
+ * their own cards. Their Unstream username is read here, never taken from the page, because it
+ * becomes a link in the caption.
+ */
+function profileFrom(body: ComposeBody, unstreamHandle: string | null): CuratorProfile {
   return {
     showName: str(body.curator?.showName),
     labelName: str(body.curator?.labelName),
@@ -121,6 +125,7 @@ function profileFrom(body: ComposeBody): CuratorProfile {
       instagram: str(body.curator?.handles?.instagram),
       facebook: str(body.curator?.handles?.facebook),
     },
+    unstreamHandle,
   };
 }
 
@@ -257,9 +262,11 @@ async function handleRequest(event: HandlerEvent) {
   if (!(await canUseCuratorPosts(user.email))) return respond(200, { available: false });
 
   // The curator's own connection. No connection means the page should offer to make one, which
-  // is a normal state rather than an error.
+  // is a normal state rather than an error. Connected with no organization chosen means the page
+  // is asking which; nothing posts until it has an answer.
   const connection = await getBufferConnection(user.userId);
-  if (!connection?.organizationId) return respond(200, { available: true, connected: false });
+  if (!connection) return respond(200, { available: true, connected: false });
+  if (!connection.organizationId) return respond(409, { error: 'Choose a Buffer organization first' });
   const orgId = connection.organizationId;
 
   let body: ComposeBody;
@@ -271,10 +278,11 @@ async function handleRequest(event: HandlerEvent) {
 
   const action = actionFrom(event);
   const template = templateFrom(body);
-  const curator = profileFrom(body);
   const book = addressBookFrom(body);
 
   try {
+    // Only captions use it, and a card is drawn ten times a send, so cards don't read it.
+    const curator = profileFrom(body, action === 'cards' ? null : await getPublicUsername(user.userId));
     const { artists, missing } = await loadArtists(body);
     if (artists.length === 0) return respond(400, { error: 'No artists we hold were named', missing });
 
@@ -328,7 +336,11 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { url, altText: curatorCardAltText(data) });
     }
 
-    if (action === 'send') return await send(body, { orgId, userId: user.userId, artists, template, curator, book, respond });
+    if (action === 'send') {
+      return await send(body, {
+        orgId, userId: user.userId, selectedChannelIds: connection.selectedChannelIds, artists, template, curator, book, respond,
+      });
+    }
 
     return respond(404, { error: 'Unknown action' });
   } catch (error) {
@@ -345,6 +357,8 @@ async function handleRequest(event: HandlerEvent) {
 interface SendContext {
   orgId: string;
   userId: string;
+  /** What the curator ticked, as stored — the page doesn't get to name channels at send time. */
+  selectedChannelIds: string[];
   artists: CuratorArtist[];
   template: CuratorTemplate;
   curator: CuratorProfile;
@@ -352,16 +366,25 @@ interface SendContext {
   respond: (statusCode: number, body: unknown) => { statusCode: number; headers: Record<string, string>; body: string };
 }
 
+interface ChannelResult {
+  service: string;
+  name: string;
+  postId?: string;
+  status?: string;
+  error?: string;
+}
+
 /**
- * Create the posts in Buffer.
+ * Create the posts in Buffer, one per ticked channel.
  *
- * Instagram is created on its own and then added to Facebook's content item, as the weekly
- * generator does: a content item is all-or-nothing, and a rejected Instagram variant inside one
- * would cost the Facebook post too. So **a failed Instagram post must not take Facebook down
- * with it** — the two are reported separately and the grouping is best-effort.
+ * Facebook Pages go in one content item; each Instagram post is created on its own and then
+ * added to it, as the weekly generator does. A content item is all-or-nothing, and a rejected
+ * Instagram variant inside one would cost the Facebook posts too. So **a failed Instagram post
+ * must not take Facebook down with it** — every channel is reported separately and the grouping
+ * is best-effort.
  */
 async function send(body: ComposeBody, ctx: SendContext) {
-  const { orgId, userId, artists, template, curator, book, respond } = ctx;
+  const { orgId, userId, selectedChannelIds, artists, template, curator, book, respond } = ctx;
 
   // Refreshed if need be, and never read straight from storage: Buffer's access tokens last an
   // hour and its refresh tokens are single-use (see buffer-db.ts).
@@ -375,57 +398,62 @@ async function send(body: ComposeBody, ctx: SendContext) {
   if (cardUrls.some(u => !u.startsWith(prefix))) return respond(400, { error: 'A card URL is not one of ours' });
   if (cardUrls.length === 0) return respond(400, { error: 'No cards to send' });
 
-  const channels = await listChannels(token, orgId);
-  const pick = (network: CuratorNetwork): BufferChannel | null => {
-    const wanted = str(body.channels?.[network]);
-    const usable = channels.filter(c => c.service === network && !c.isDisconnected);
-    return (wanted ? usable.find(c => c.id === wanted) : usable[0]) ?? null;
-  };
+  // Read from Buffer again rather than trusted from storage: a channel disconnected since it was
+  // ticked is skipped, not posted to.
+  const ticked = new Set(selectedChannelIds);
+  const channels = (await listChannels(token, orgId))
+    .filter(c => ticked.has(c.id) && !c.isDisconnected && (c.service === 'instagram' || c.service === 'facebook'));
+  if (channels.length === 0) return respond(400, { error: 'Choose at least one channel to post to' });
 
   const saveToDraft = str(body.mode) !== 'now';
   const tagId = await ensureTag(token, orgId, CURATOR_TAG.name, CURATOR_TAG.color);
   const title = curator.showName ?? `${artists.length} artists on Unstream`;
+  const shareMode = saveToDraft ? {} : { mode: 'shareNow' };
 
-  const results: Record<string, { postId?: string; status?: string; error?: string }> = {};
+  const results: Record<string, ChannelResult> = {};
+  for (const c of channels) results[c.id] = { service: c.service, name: c.name };
   let contentItemId: string | undefined;
 
   // Facebook first, as the content item: if Instagram fails, Facebook has already gone.
-  const facebook = pick('facebook');
-  if (facebook) {
+  const facebook = channels.filter(c => c.service === 'facebook');
+  if (facebook.length > 0) {
     const caption = renderCaption({ template, artists, network: 'facebook', curator, addressBook: book });
     const problem = captionProblem('facebook', caption);
     if (problem) {
-      results.facebook = { error: problem };
+      for (const c of facebook) results[c.id].error = problem;
     } else {
-      const item = await createContentItem(token, orgId, title, [tagId], [{
-        channelId: facebook.id,
+      const item = await createContentItem(token, orgId, title, [tagId], facebook.map(c => ({
+        channelId: c.id,
         text: caption,
         schedulingType: 'automatic',
         saveToDraft,
-        ...(saveToDraft ? {} : { mode: 'shareNow' }),
+        ...shareMode,
         tagIds: [tagId],
         assets: cardUrls.map(url => ({ image: { url, metadata: { altText: 'Card from Unstream' } } })),
         metadata: { facebook: { type: 'post' } },
-      }]);
+      })));
       contentItemId = item.contentItemId;
-      results.facebook = item.created[0]
-        ? { postId: item.created[0].id, status: item.created[0].status }
-        : { error: item.errors.map(e => e.message).join('; ') };
+      const general = item.errors.filter(e => !e.channelId).map(e => e.message).join('; ');
+      for (const c of facebook) {
+        const created = item.created.find(p => p.channelId === c.id);
+        const own = item.errors.filter(e => e.channelId === c.id).map(e => e.message).join('; ');
+        if (created) Object.assign(results[c.id], { postId: created.id, status: created.status });
+        else results[c.id].error = own || general || 'Not created';
+      }
     }
   }
 
-  const instagram = pick('instagram');
-  if (instagram) {
+  const instagram = channels.filter(c => c.service === 'instagram');
+  if (instagram.length > 0) {
     const preview = previewFor('instagram', artists, template, curator, book);
-    if (preview.problem) {
-      results.instagram = { error: preview.problem };
-    } else {
+    for (const c of instagram) {
+      if (preview.problem) { results[c.id].error = preview.problem; continue; }
       const post = await createPost(token, {
-        channelId: instagram.id,
+        channelId: c.id,
         text: preview.caption,
         schedulingType: 'automatic',
         saveToDraft,
-        ...(saveToDraft ? {} : { mode: 'shareNow' }),
+        ...shareMode,
         tagIds: [tagId],
         assets: cardUrls.map((url, i) => ({
           image: {
@@ -439,21 +467,28 @@ async function send(body: ComposeBody, ctx: SendContext) {
         })),
         metadata: { instagram: { type: 'post', shouldShareToFeed: true } },
       });
-      results.instagram = post.created[0]
-        ? { postId: post.created[0].id, status: post.created[0].status }
-        : { error: post.errors.map(e => e.message).join('; ') };
+      if (post.created[0]) Object.assign(results[c.id], { postId: post.created[0].id, status: post.created[0].status });
+      else results[c.id].error = post.errors.map(e => e.message).join('; ') || 'Not created';
     }
   }
 
   // Grouping only — the posts are created and tagged either way, so a failure here is reported
   // but doesn't fail the send.
-  let grouping: string | null = null;
-  if (contentItemId && results.instagram?.postId) {
-    grouping = await addPostToContentItem(token, contentItemId, results.instagram.postId);
+  const groupingErrors: string[] = [];
+  for (const c of instagram) {
+    const postId = results[c.id].postId;
+    if (!contentItemId || !postId) continue;
+    const problem = await addPostToContentItem(token, contentItemId, postId);
+    if (problem) groupingErrors.push(problem);
   }
 
   const sent = Object.values(results).filter(r => r.postId).length;
-  return respond(sent > 0 ? 200 : 502, { results, grouping, draft: saveToDraft, contentItemId: contentItemId ?? null });
+  return respond(sent > 0 ? 200 : 502, {
+    results,
+    grouping: groupingErrors.length ? groupingErrors.join('; ') : null,
+    draft: saveToDraft,
+    contentItemId: contentItemId ?? null,
+  });
 }
 
 export const handler = withSentry(handleRequest);
