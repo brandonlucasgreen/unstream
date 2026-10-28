@@ -34,14 +34,14 @@ export interface MacRelease {
 }
 
 export const MAC_RELEASE: MacRelease = {
-  shortVersion: '3.8.2',
-  build: '22',
-  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.8.2/Unstream-3.8.2.dmg',
-  lengthBytes: 4357254,
-  edSignature: '5Ac+4EXHILwqWn2WHDdF7yRxgGibZmRpqlgTZk4WHbcIo8aH2YsTTBeEDNdMolWRkwkvqLfCSDsYLw6GU7rEAg==',
-  publishedAt: '2026-10-27T00:00:00Z',
+  shortVersion: '3.8.3',
+  build: '23',
+  url: 'https://github.com/brandonlucasgreen/unstream/releases/download/v3.8.3/Unstream-3.8.3.dmg',
+  lengthBytes: 4358065,
+  edSignature: 'QupOvHN0+ZBMYgPS23QbfCeuaFkEpYie8q+FweYMq6q7VH5vQjssQ7hTnyqHAhlzyfEmeH9q5JdvtwSt6d86Cg==',
+  publishedAt: '2026-10-28T00:00:00Z',
   minimumSystemVersion: '13.0',
-  releaseNotes: 'When an artist has added a Cash App, Steady, Tipeee or Big Cartel link, it now shows with its proper name, and Cash App and Big Cartel with their own logos.',
+  releaseNotes: "Artists who share a name stay apart, so one artist's links and details no longer turn up on another's card.",
   releasesPageUrl: 'https://github.com/brandonlucasgreen/unstream/releases',
 };
 
