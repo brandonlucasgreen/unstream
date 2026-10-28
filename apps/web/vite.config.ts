@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { handleApiRequest } from './server/api'
+import { navigateFallbackDenylist } from './pwa-navigate-denylist'
 import { cpSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -113,36 +114,8 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,
         clientsClaim: true,
-        navigateFallbackDenylist: [
-          // Edge function routes that serve static HTML — don't let SW intercept them.
-          // Must stay in sync with the [[edge_functions]] list in netlify.toml: anything
-          // missing here gets served the cached SPA shell for returning visitors, so the
-          // edge function silently never runs and the SPA re-fetches the data client-side.
-          // That is invisible to curl and to a fresh browser, which is what made it hard
-          // to spot — /u/* was missing and cost the page ~5s for anyone with the SW installed.
-          /^\/a\//,
-          /^\/artist\//,
-          /^\/u\//,
-          // Not an edge function any more: /guides and /guides/* are 301s in netlify.toml since the
-          // section was retired (2026-09-27). They stay here so a returning visitor's worker lets
-          // the request through to the redirect instead of serving the cached shell, which would
-          // render a blank page because no SPA route matches.
-          /^\/guides(\/|$)/,
-          /^\/search/,
-          // Release feeds (.ics/.xml) are served by a Netlify function, not the SPA. Calendar
-          // clients never touch the SW, but a user clicking their own feed link in the browser
-          // is a navigation, and the cached shell would hand them an HTML page instead of the
-          // calendar. /a/ and /u/ above already cover the two public feed shapes.
-          /^\/feed\//,
-          // Static RSS feeds copied straight from apps/web/public/ (generate-changelog-feed.ts, and
-          // guides.xml, frozen since the guides were retired) — not edge functions, but the same
-          // navigateFallback trap: NavigationRoute's default allowlist (`[/./]`) matches every
-          // browser navigation regardless of file extension, so a returning visitor clicking these
-          // RSS links got the cached SPA shell instead of the feed — a blank page, since no route
-          // renders for /guides.xml. /^\/guides(\/|$)/ above doesn't match this sibling file.
-          /^\/guides\.xml$/,
-          /^\/changelog\.xml$/,
-        ],
+        // What each entry is for, and why missing one fails silently: pwa-navigate-denylist.ts.
+        navigateFallbackDenylist,
         // No runtimeCaching, deliberately. A NetworkFirst rule used to match every
         // /api/ GET with a 5-minute `api-cache` bucket. It earned nothing, and it
         // stored other people's account data on disk to do it:
