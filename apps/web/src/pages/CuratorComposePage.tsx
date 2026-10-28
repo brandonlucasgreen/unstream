@@ -303,7 +303,7 @@ export function CuratorComposePage() {
           {connection.reason && <p className="text-text-muted text-sm">{connection.reason}</p>}
           {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-error text-sm">{error}</div>}
           <button onClick={handleConnect} disabled={connecting}
-            className="px-4 py-2 rounded-lg bg-accent text-black font-medium text-sm disabled:opacity-50">
+            className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium text-sm hover:bg-accent-primary/90 transition-colors disabled:opacity-50">
             {connecting ? 'Opening Buffer…' : 'Connect Buffer'}
           </button>
         </div>
@@ -393,7 +393,7 @@ export function CuratorComposePage() {
                       {/* Instagram is the only network that tags, so it is the only circle that
                           promises one. Facebook just says whether we hold their page. */}
                       <span title={igHandle ? `Tagged as @${igHandle}` : 'No Instagram handle'}
-                        className={`text-xs px-2 py-1 rounded-full border ${igHandle ? 'border-accent text-accent' : 'border-dashed border-amber-500/60 text-amber-500'}`}>
+                        className={`text-xs px-2 py-1 rounded-full border ${igHandle ? 'border-accent-primary text-link' : 'border-dashed border-warning/60 text-warning'}`}>
                         IG
                       </span>
                       <span title={info?.handles.facebook ? 'We have their Facebook page (not a tag)' : 'No Facebook page'}
@@ -434,7 +434,7 @@ export function CuratorComposePage() {
             <div className="flex gap-2">
               {NETWORKS.map(n => (
                 <button key={n} onClick={() => setNetwork(n)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border ${network === n ? 'border-accent text-accent' : 'border-border text-text-secondary'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm border ${network === n ? 'border-accent-primary text-link' : 'border-border text-text-secondary'}`}>
                   {NETWORK_LABEL[n]}
                 </button>
               ))}
@@ -478,7 +478,7 @@ export function CuratorComposePage() {
 
             <div className="flex gap-2">
               <button onClick={() => handleSend('draft')} disabled={!!busy || mentions.length === 0 || !!current?.problem}
-                className="px-4 py-2 rounded-lg bg-accent text-black font-medium text-sm disabled:opacity-50">
+                className="px-4 py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium text-sm hover:bg-accent-primary/90 transition-colors disabled:opacity-50">
                 {busy ?? 'Save as Buffer draft'}
               </button>
               <button onClick={() => handleSend('now')} disabled={!!busy || mentions.length === 0 || !!current?.problem}
