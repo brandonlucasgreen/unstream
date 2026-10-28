@@ -325,9 +325,14 @@ async function lookupHomonyms(hits: MusicBrainzSearchHit[]): Promise<{ homonyms:
       const relations = readArtistRelations(data.relations || []);
 
       homonym.officialUrl = relations.officialUrl;
-      homonym.socialLinks = relations.socialLinks;
       homonym.platformUrls = relations.platformUrls;
       homonym.bandcampSubdomain = bandcampSubdomainOf(relations.bandcampUrl);
+
+      // Their own site's socials, as the matched artist gets: MusicBrainz often lists fewer than
+      // the artist does (the Los Angeles Paracosm's entry has no YouTube or TikTok; paracosm.cc
+      // links both). Started now so it runs alongside the Bandcamp checks below.
+      const sitePromise = relations.officialUrl ? fetchOfficialSiteSocialLinks(relations.officialUrl) : Promise.resolve(null);
+
       // A retired account is dropped as it is for the matched artist, but its claim stays.
       if (relations.bandcampUrl && (await checkBandcampSubdomain(relations.bandcampUrl)) === 'dead') {
         homonym.platformUrls = relations.platformUrls.filter(u => u !== relations.bandcampUrl);
@@ -339,6 +344,13 @@ async function lookupHomonyms(hits: MusicBrainzSearchHit[]): Promise<{ homonyms:
         if (page === null) complete = false;
         homonym.imageUrl = page?.imageUrl ?? null;
       }
+
+      // And their Linktree, from MusicBrainz or their site, also as the matched artist gets.
+      const site = await sitePromise;
+      const linktreeUrl = relations.linktreeUrl ?? site?.linktreeUrl ?? null;
+      const linktree = linktreeUrl ? await fetchLinktreeLinks(linktreeUrl) : null;
+      // MusicBrainz first: an editor chose those, so they win a platform both sources name.
+      homonym.socialLinks = mergeSocialLinks(relations.socialLinks, site?.socialLinks ?? [], linktree?.socialLinks ?? []);
     } catch (error) {
       console.log(`[MusicBrainz] Homonym lookup error for ${hit.id}:`, (error as Error)?.message);
       complete = false;

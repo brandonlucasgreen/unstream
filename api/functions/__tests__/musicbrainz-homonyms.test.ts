@@ -87,6 +87,15 @@ function mockMusicBrainz({ failLookupOf }: { failLookupOf?: string } = {}) {
     if (init?.method === 'HEAD' && url.startsWith('https://xparacosm.bandcamp.com')) {
       return new Response(null, { status: 200 });
     }
+    if (url === 'https://www.paracosm.cc/') {
+      // Their own site links more than their MusicBrainz entry does.
+      return new Response(`
+        <a href="https://www.youtube.com/@paracosm-cc">YouTube</a>
+        <a href="https://www.tiktok.com/@paracosm.cc">TikTok</a>
+        <a href="https://x.com/xparacosm">X</a>
+        <a href="https://www.instagram.com/someone-else/">a friend</a>
+      `, { status: 200, headers: { 'Content-Type': 'text/html' } });
+    }
     if (url === 'https://xparacosm.bandcamp.com/music') {
       return new Response('<meta property="og:image" content="https://f4.bcbits.com/img/0040943917_23.jpg">', { status: 200 });
     }
@@ -125,7 +134,13 @@ describe('getMusicBrainzEnrichment: same-name artists', () => {
     expect(la.bandcampUrl).toBe('https://xparacosm.bandcamp.com/');
     expect(la.bandcampSubdomain).toBe('xparacosm');
     expect(la.officialUrl).toBe('https://www.paracosm.cc/');
-    expect(la.socialLinks.map(s => s.url)).toEqual(['https://www.instagram.com/paracosm.cc/']);
+    // MusicBrainz's Instagram, then what their own site adds (YouTube, TikTok). X isn't a platform
+    // we show, and MusicBrainz's Instagram wins over the site's second one.
+    expect(la.socialLinks.map(s => s.url)).toEqual([
+      'https://www.instagram.com/paracosm.cc/',
+      'https://www.youtube.com/@paracosm-cc',
+      'https://www.tiktok.com/@paracosm.cc',
+    ]);
     expect(la.disambiguation).toBe('hyperpop artist from LA');
     // Read from their /music page, whose og:image is the artist photo (the bare address can
     // redirect to a release, whose og:image is cover art).
