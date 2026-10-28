@@ -102,7 +102,7 @@ beforeEach(() => {
   getArtistsBySlugs.mockResolvedValue(new Map([['honeycrush', artistRow('honeycrush', 'Honeycrush')]]));
 });
 
-afterEach(() => { vi.clearAllMocks(); });
+afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); });
 
 describe('the gate', () => {
   it('refuses anyone not signed in', async () => {
@@ -117,8 +117,17 @@ describe('the gate', () => {
   it('reports itself unavailable when the flag is off, before touching anything', async () => {
     getFeatureFlag.mockResolvedValue(false);
     expect(json(await call('preview', baseBody))).toEqual({ available: false });
-    expect(resolveAccountRequest).not.toHaveBeenCalled();
+    expect(getBufferConnection).not.toHaveBeenCalled();
     expect(getArtistsBySlugs).not.toHaveBeenCalled();
+  });
+
+  // The admin tests it before it is switched on, the way tips were tested.
+  it('lets the admin account through while the flag is off', async () => {
+    vi.stubEnv('ADMIN_EMAIL', 'Admin@Example.com');
+    getFeatureFlag.mockResolvedValue(false);
+    resolveAccountRequest.mockResolvedValue({ key: 'user:admin', user: { userId: 'admin', email: 'admin@example.com' } });
+    expect(json(await call('preview', baseBody))).toMatchObject({ available: true });
+    expect(getArtistsBySlugs).toHaveBeenCalled();
   });
 
   // Not an error: the page offers to connect. Every curator posts from their own account.

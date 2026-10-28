@@ -2,8 +2,9 @@
 // (docs/specs/curator-posts-spec.md).
 //
 // Open to any signed-in curator who has connected their own Buffer account, behind the
-// `curatorPosts` flag, which fails closed. Each curator posts from their own tokens: there is no
-// shared account, and nothing here reads a token from the environment.
+// `curatorPosts` flag, which fails closed (the admin account is let through regardless, to test
+// it). Each curator posts from their own tokens: there is no shared account, and nothing here
+// reads a token from the environment.
 //
 //   POST /api/curator/preview   each network's caption, its tags and what's missing. No Buffer
 //                               call, no cards drawn — this runs on every keystroke's debounce.
@@ -18,8 +19,7 @@
 import { getArtistsBySlugs } from './db';
 import { buildCorsHeaders } from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
-import { getFeatureFlag } from './feature-flags';
-import { BufferNotConnectedError, getBufferConnection, usableAccessToken } from './buffer-db';
+import { BufferNotConnectedError, canUseCuratorPosts, getBufferConnection, usableAccessToken } from './buffer-db';
 import {
   addPostToContentItem,
   createContentItem,
@@ -244,10 +244,6 @@ async function handleRequest(event: HandlerEvent) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
 
-  // The flag gates the whole feature and fails closed, so an unset flag hides it rather than
-  // half-opening it.
-  if (!(await getFeatureFlag('curatorPosts'))) return respond(200, { available: false });
-
   const { key, user } = await resolveAccountRequest(
     event.headers.authorization || event.headers.Authorization || undefined,
     getClientIp(event.headers),
@@ -255,6 +251,10 @@ async function handleRequest(event: HandlerEvent) {
   const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
   if (!user) return respond(401, { error: 'Not signed in' });
+
+  // The flag gates the whole feature and fails closed, so an unset flag hides it rather than
+  // half-opening it. The admin is let through regardless, to test it before it is switched on.
+  if (!(await canUseCuratorPosts(user.email))) return respond(200, { available: false });
 
   // The curator's own connection. No connection means the page should offer to make one, which
   // is a normal state rather than an error.

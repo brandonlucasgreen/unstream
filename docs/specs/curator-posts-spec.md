@@ -195,7 +195,7 @@ Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/V
 **Built for curators, not demoed on one account** (decided 2026-10-27, superseding the admin-token cut this section first described). The scope that ships:
 
 1. **Each curator connects their own Buffer account** over OAuth, and posts from their own tokens. `BUFFER_CLIENT_ID` and `BUFFER_CLIENT_SECRET` are the only new Netlify variables; the connection lives in `buffer_connections`. **Don't leave either blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line.
-2. **Gated by the `curatorPosts` feature flag**, in the existing store and failing closed, so it is invisible until switched on at `/admin/flags`. Nothing is admin-only any more; the flag is what holds it back.
+2. **Gated by the `curatorPosts` feature flag**, in the existing store and failing closed, so it is invisible until switched on at `/admin/flags`. The flag is what holds it back, with one exception: the admin account (`ADMIN_EMAIL`) is always let through (`canUseCuratorPosts` in `buffer-db.ts`), so it can be tested end to end before it is switched on — the tips precedent.
 3. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
 4. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
 5. **Instagram and Facebook previews,** cards drawn, tags on the cover card.

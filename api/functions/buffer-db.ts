@@ -9,7 +9,20 @@ import { getClient } from './db';
 import { decryptCredential, encryptCredential, isCredentialKeyConfigured } from './credential-crypto';
 import { BufferError } from './buffer-client';
 import { needsRefresh, refreshTokens, type BufferTokens } from './buffer-oauth';
+import { getFeatureFlag } from './feature-flags';
 import { Sentry } from '../lib/sentry';
+
+/**
+ * Whether this signed-in account may use curator posts: everyone once `curatorPosts` is on, and
+ * the admin account (ADMIN_EMAIL) always, so the feature can be tested end to end before it is
+ * switched on — the tips precedent (`canSetUpTips`). The flag still fails closed for everyone
+ * else.
+ */
+export async function canUseCuratorPosts(email: string): Promise<boolean> {
+  const admin = process.env.ADMIN_EMAIL;
+  if (admin && email.toLowerCase() === admin.toLowerCase()) return true;
+  return getFeatureFlag('curatorPosts');
+}
 
 export interface BufferConnection {
   accessToken: string;
