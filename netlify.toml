@@ -209,7 +209,8 @@
   status = 200
 
 # Curator posts: /preview, /cards and /send all land on the one function, which reads the action
-# from the path. Admin-only for now (docs/specs/curator-posts-spec.md).
+# from the path. Behind the curatorPosts flag, which the admin account bypasses
+# (docs/specs/curator-posts-spec.md).
 [[redirects]]
   from = "/api/curator/*"
   to = "/.netlify/functions/curator-compose"

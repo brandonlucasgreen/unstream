@@ -14,7 +14,6 @@
 import { getRedis } from './redis';
 import { buildCorsHeaders, isUrlHostnameAllowed } from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
-import { getFeatureFlag } from './feature-flags';
 import { bufferGraphQL, listChannels } from './buffer-client';
 import {
   buildAuthorizeUrl,
@@ -24,6 +23,7 @@ import {
 } from './buffer-oauth';
 import {
   BufferNotConnectedError,
+  canUseCuratorPosts,
   clearBufferConnection,
   getBufferConnection,
   saveBufferConnection,
@@ -75,15 +75,13 @@ async function handleRequest(event: HandlerEvent) {
 
   const action = actionFrom(event);
 
-  // The flag gates the whole feature, connecting included, and fails closed.
-  if (!(await getFeatureFlag('curatorPosts'))) {
-    return action === 'callback' ? redirectBack('unavailable') : respond(200, { available: false });
-  }
   if (!bufferOAuthConfigured()) {
     return action === 'callback' ? redirectBack('unavailable') : respond(200, { available: false });
   }
 
   // --- The callback is the one leg without a bearer token ---------------------------------
+  // It has no user to check the gate against, and needs none: it only redeems a `state` that
+  // /start minted, and /start is behind the gate below.
   if (action === 'callback') {
     const url = (() => { try { return new URL(event.rawUrl ?? ''); } catch { return null; } })();
     const state = url?.searchParams.get('state') ?? '';
@@ -120,6 +118,10 @@ async function handleRequest(event: HandlerEvent) {
   if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
   if (!user) return respond(401, { error: 'Not signed in' });
   const userId = user.userId;
+
+  // The flag gates the whole feature, connecting included, and fails closed; the admin is let
+  // through regardless, to test it before it is switched on.
+  if (!(await canUseCuratorPosts(user.email))) return respond(200, { available: false });
 
   try {
     if (event.httpMethod === 'GET' && action === '') {
