@@ -6,7 +6,7 @@
 // Both read through findStoredArtists, so the early cards are the same cards — same
 // ids — that the full results hold.
 
-import { getArtistBySlug, getArtistsBySlugs, artistSlug, findKnownArtistSlugsByName } from './db';
+import { getArtistBySlug, getArtistsBySlugs, artistSlug, findKnownArtistSlugsByName, findClaimedArtistSlugsByExactName } from './db';
 import { makeBio } from '../shared/artist-bio';
 import type { AggregatedResult, SearchMode, SourceId } from './search-utils';
 
@@ -29,13 +29,14 @@ export async function findStoredArtists(normalizedQuery: string, mode: SearchMod
       return null;
     });
   // Name-contains is a fuzzy-only channel: a detection query IS the artist's
-  // exact name, so a known artist merely containing it is someone else.
+  // exact name, so a known artist merely containing it is someone else. Exact
+  // mode asks only for claimed profiles with exactly that name — the ones stored
+  // away from the name's slug because others share it (`xparacosm`).
   // Resolved as ONE batched lookup: per-slug getArtistBySlug calls cost 2-3
   // queries each, which made this channel 12-18 reads per fuzzy search. The
   // slugs stay in ranked order — the map lookup preserves it.
-  const knownByNamePromise: Promise<AggregatedResult[]> = mode === 'exact'
-    ? Promise.resolve([])
-    : findKnownArtistSlugsByName(normalizedQuery)
+  const knownByNamePromise: Promise<AggregatedResult[]> =
+    (mode === 'exact' ? findClaimedArtistSlugsByExactName(normalizedQuery) : findKnownArtistSlugsByName(normalizedQuery))
       .then(async slugs => {
         const bySlug = await getArtistsBySlugs(slugs);
         return slugs.map(s => toStoredResult(bySlug.get(s) ?? null));

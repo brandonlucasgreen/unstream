@@ -4080,6 +4080,36 @@ export async function suggestArtists(term: string, limit = 8): Promise<ArtistSug
  * verified rows. 'unverified' rows are deliberately excluded — that's where
  * junk from name-only matches accumulates.
  */
+/**
+ * Slugs of claimed artists whose name is exactly the term, ignoring case.
+ *
+ * A claimed profile is usually found at the slug of its name, but artists who share a name are
+ * stored at addresses that tell them apart (`xparacosm`, `paracosm-orlando`; see recordSlugs), so a
+ * detection of "Paracosm" playing must look them up by name too. Exact, not contains: a detection
+ * query IS the artist's name.
+ */
+export async function findClaimedArtistSlugsByExactName(name: string): Promise<string[]> {
+  const client = getClient();
+  if (!client) return [];
+
+  // Escape ILIKE's wildcards so the match is equality, ignoring case.
+  const cleaned = name.trim().replace(/[\\%_]/g, m => `\\${m}`);
+  if (cleaned.length < 2) return [];
+
+  const { data, error } = await client
+    .from('artists')
+    .select('slug')
+    .ilike('name', cleaned)
+    .eq('match_confidence', 'claimed')
+    .limit(10);
+
+  if (error) {
+    console.error('[DB] findClaimedArtistSlugsByExactName error:', error);
+    return [];
+  }
+  return (data ?? []).map(row => row.slug as string);
+}
+
 export async function findKnownArtistSlugsByName(term: string, limit = 6): Promise<string[]> {
   const client = getClient();
   if (!client) return [];
