@@ -12,15 +12,17 @@ const SUGGEST_DEBOUNCE_MS = 250;
 const SUGGEST_MIN_CHARS = 3;
 
 /**
- * Typeahead against /api/suggest, shared by the header search and the larger
- * SearchBar. It owns the debounce, the in-flight abort, and the keyboard
- * highlight so the two inputs can't drift apart on behaviour or accessibility.
+ * Typeahead against /api/suggest, shared by the header search, the larger
+ * SearchBar and the curator page. It owns the debounce, the in-flight abort,
+ * and the keyboard highlight so the inputs can't drift apart on behaviour or
+ * accessibility.
  *
  * The caller keeps its own input value and decides what picking a suggestion
- * means (searching in place vs navigating), which is the only thing that
- * actually differs between the two.
+ * means (searching in place, navigating, or adding the artist to a curator
+ * post), which is the only thing that actually differs between them. It gets
+ * the whole suggestion, since the curator page needs the slug, not the name.
  */
-export function useArtistSuggestions(onPick: (name: string) => void) {
+export function useArtistSuggestions(onPick: (suggestion: ArtistSuggestion) => void) {
   const [suggestions, setSuggestions] = useState<ArtistSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
@@ -81,7 +83,7 @@ export function useArtistSuggestions(onPick: (name: string) => void) {
   const pick = useCallback((suggestion: ArtistSuggestion) => {
     cancel();
     close();
-    onPick(suggestion.name);
+    onPick(suggestion);
   }, [cancel, close, onPick]);
 
   /** Reopen the list on focus, if there's still something worth showing. */

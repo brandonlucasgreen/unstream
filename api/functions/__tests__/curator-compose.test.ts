@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { BufferNotConnectedError } from '../buffer-db';
 
 const getArtistsBySlugs = vi.fn();
+const getPublicUsername = vi.fn();
 const getFeatureFlag = vi.fn();
 const resolveAccountRequest = vi.fn();
 const getBufferConnection = vi.fn();
@@ -21,7 +22,10 @@ const renderCuratorCard = vi.fn();
 const publishCard = vi.fn();
 const captureException = vi.fn();
 
-vi.mock('../db', () => ({ getArtistsBySlugs: (...a: unknown[]) => getArtistsBySlugs(...a) }));
+vi.mock('../db', () => ({
+  getArtistsBySlugs: (...a: unknown[]) => getArtistsBySlugs(...a),
+  getPublicUsername: (...a: unknown[]) => getPublicUsername(...a),
+}));
 
 vi.mock('../feature-flags', () => ({ getFeatureFlag: (...a: unknown[]) => getFeatureFlag(...a) }));
 
@@ -97,7 +101,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   getFeatureFlag.mockResolvedValue(true);
   resolveAccountRequest.mockResolvedValue({ key: 'user:user-1', user: { userId: 'user-1', email: 'curator@example.com' } });
-  getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: [], refreshCounter: 0 });
+  getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: ['chan_ig', 'chan_fb'], refreshCounter: 0 });
+  getPublicUsername.mockResolvedValue(null);
   usableAccessToken.mockResolvedValue('curator-token');
   getArtistsBySlugs.mockResolvedValue(new Map([['honeycrush', artistRow('honeycrush', 'Honeycrush')]]));
 });
@@ -237,14 +242,14 @@ describe('cards', () => {
 
 describe('send', () => {
   const ours = 'https://cards.unstream.stream/curator/abc/def.png';
+  const channel = (id: string, service: string, over: Record<string, unknown> = {}) =>
+    ({ id, name: id, service, type: service === 'facebook' ? 'page' : 'business', serviceId: '1', isDisconnected: false, ...over });
 
   beforeEach(() => {
-    listChannels.mockResolvedValue([
-      { id: 'chan_ig', name: 'nightshift', service: 'instagram', type: 'business', serviceId: '1', isDisconnected: false },
-      { id: 'chan_fb', name: 'Night Shift', service: 'facebook', type: 'page', serviceId: '2', isDisconnected: false },
-    ]);
+    listChannels.mockResolvedValue([channel('chan_ig', 'instagram'), channel('chan_fb', 'facebook'), channel('chan_ig2', 'instagram')]);
     ensureTag.mockResolvedValue('tag_1');
-    createPost.mockResolvedValue({ created: [{ id: 'post_ig', status: 'draft', channelId: 'chan_ig' }], errors: [] });
+    createPost.mockImplementation(async (_t: string, input: { channelId: string }) =>
+      ({ created: [{ id: `post_${input.channelId}`, status: 'draft', channelId: input.channelId }], errors: [] }));
     createContentItem.mockResolvedValue({ created: [{ id: 'post_fb', status: 'draft', channelId: 'chan_fb' }], errors: [], contentItemId: 'item_1' });
     addPostToContentItem.mockResolvedValue(null);
   });
@@ -263,14 +268,44 @@ describe('send', () => {
     expect((await call('send', { ...baseBody, cardUrls: [] })).statusCode).toBe(400);
   });
 
-  it('creates both posts as drafts by default and groups them', async () => {
+  it('creates a draft on each ticked channel by default and groups them', async () => {
     const data = json(await call('send', { ...baseBody, cardUrls: [ours] }));
     expect(data.draft).toBe(true);
-    expect(data.results.instagram.postId).toBe('post_ig');
-    expect(data.results.facebook.postId).toBe('post_fb');
-    expect(addPostToContentItem).toHaveBeenCalledWith('curator-token', 'item_1', 'post_ig');
-
+    expect(data.results.chan_ig).toMatchObject({ service: 'instagram', postId: 'post_chan_ig' });
+    expect(data.results.chan_fb).toMatchObject({ service: 'facebook', postId: 'post_fb' });
+    expect(addPostToContentItem).toHaveBeenCalledWith('curator-token', 'item_1', 'post_chan_ig');
     expect(createPost.mock.calls[0][1]).toMatchObject({ channelId: 'chan_ig', saveToDraft: true });
+  });
+
+  // The bug this replaced: the first Instagram channel in the organization was used, whichever
+  // account the curator meant.
+  it('posts only to the channels the curator ticked', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: ['chan_ig2'], refreshCounter: 0 });
+    const data = json(await call('send', { ...baseBody, cardUrls: [ours] }));
+    expect(createPost).toHaveBeenCalledOnce();
+    expect(createPost.mock.calls[0][1]).toMatchObject({ channelId: 'chan_ig2' });
+    expect(createContentItem).not.toHaveBeenCalled();
+    expect(Object.keys(data.results)).toEqual(['chan_ig2']);
+  });
+
+  it('posts to two Instagram accounts when both are ticked', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: ['chan_ig', 'chan_ig2', 'chan_fb'], refreshCounter: 0 });
+    await call('send', { ...baseBody, cardUrls: [ours] });
+    expect(createPost.mock.calls.map(c => (c[1] as { channelId: string }).channelId)).toEqual(['chan_ig', 'chan_ig2']);
+    expect(addPostToContentItem).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores channel ids the page sends, using only the stored choice', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: ['chan_fb'], refreshCounter: 0 });
+    await call('send', { ...baseBody, cardUrls: [ours], channels: { instagram: 'chan_ig' } });
+    expect(createPost).not.toHaveBeenCalled();
+  });
+
+  it('refuses to send when nothing is ticked', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: 'org_1', selectedChannelIds: [], refreshCounter: 0 });
+    const res = await call('send', { ...baseBody, cardUrls: [ours] });
+    expect(res.statusCode).toBe(400);
+    expect(json(res).error).toMatch(/channel/);
   });
 
   it('puts the Instagram tags on the first image only', async () => {
@@ -293,22 +328,67 @@ describe('send', () => {
     const res = await call('send', { ...baseBody, cardUrls: [ours] });
     expect(res.statusCode).toBe(200);
     const data = json(res);
-    expect(data.results.facebook.postId).toBe('post_fb');
-    expect(data.results.instagram.error).toBe('Invalid user tag');
+    expect(data.results.chan_fb.postId).toBe('post_fb');
+    expect(data.results.chan_ig.error).toBe('Invalid user tag');
   });
 
-  it('reports a failure when neither network was created', async () => {
+  it('reports a failure when no channel was posted to', async () => {
     createPost.mockResolvedValue({ created: [], errors: [{ message: 'nope' }] });
     createContentItem.mockResolvedValue({ created: [], errors: [{ message: 'nope' }] });
-    expect((await call('send', { ...baseBody, cardUrls: [ours] })).statusCode).toBe(502);
+    const res = await call('send', { ...baseBody, cardUrls: [ours] });
+    expect(res.statusCode).toBe(502);
+    expect(json(res).results.chan_fb.error).toBe('nope');
   });
 
-  it('skips a disconnected channel', async () => {
-    listChannels.mockResolvedValue([
-      { id: 'chan_ig', name: 'x', service: 'instagram', type: 'business', serviceId: '1', isDisconnected: true },
-    ]);
+  it('skips a ticked channel that has since been disconnected', async () => {
+    listChannels.mockResolvedValue([channel('chan_ig', 'instagram', { isDisconnected: true }), channel('chan_fb', 'facebook')]);
     const data = json(await call('send', { ...baseBody, cardUrls: [ours] }));
     expect(createPost).not.toHaveBeenCalled();
-    expect(data.results.instagram).toBeUndefined();
+    expect(data.results.chan_ig).toBeUndefined();
+  });
+});
+
+describe('the curator’s two names', () => {
+  const twoArtists = {
+    ...baseBody,
+    artists: [{ slug: 'honeycrush' }, { slug: 'adventsong' }],
+    curator: { showName: 'Night Shift', handles: { instagram: 'nightshift' } },
+  };
+
+  beforeEach(() => {
+    getArtistsBySlugs.mockResolvedValue(new Map([
+      ['honeycrush', artistRow('honeycrush', 'Honeycrush')],
+      ['adventsong', artistRow('adventsong', 'Adventsong')],
+    ]));
+  });
+
+  it('links Instagram to the curator’s own Unstream page, read on the server', async () => {
+    getPublicUsername.mockResolvedValue('nightshift-radio');
+    const data = json(await call('preview', twoArtists));
+    expect(getPublicUsername).toHaveBeenCalledWith('user-1');
+    expect(data.networks.instagram.caption).toContain('unstream.stream/u/nightshift-radio');
+  });
+
+  it('says "link in bio" when they have no public page, whatever Instagram handle the page sent', async () => {
+    const data = json(await call('preview', twoArtists));
+    expect(data.networks.instagram.caption).toContain('link in bio');
+    expect(data.networks.instagram.caption).not.toContain('/u/nightshift');
+  });
+
+  it('signs the cards with the Instagram handle, and reads no username to do it', async () => {
+    renderCuratorCard.mockResolvedValue(new Uint8Array([1]));
+    publishCard.mockResolvedValue('https://cards.unstream.stream/curator/x/y.png');
+    await call('cards', { ...twoArtists, slide: 'cover' });
+    expect(renderCuratorCard.mock.calls[0][0].frame.viaHandle).toBe('nightshift');
+    expect(getPublicUsername).not.toHaveBeenCalled();
+  });
+});
+
+describe('the organization', () => {
+  it('posts nothing until the curator has chosen one', async () => {
+    getBufferConnection.mockResolvedValue({ organizationId: null, selectedChannelIds: [], refreshCounter: 0 });
+    const res = await call('preview', baseBody);
+    expect(res.statusCode).toBe(409);
+    expect(getArtistsBySlugs).not.toHaveBeenCalled();
   });
 });

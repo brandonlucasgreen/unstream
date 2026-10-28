@@ -5712,6 +5712,27 @@ export async function getFeedReleasesForArtist(
 }
 
 /**
+ * This account's username, only while their list at /u/{handle} is public — otherwise null.
+ *
+ * For curator posts, whose Instagram caption points at that page. Gated on the same opt-in as the
+ * page itself, so a caption never sends people to a 404.
+ */
+export async function getPublicUsername(userId: string): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from('usernames')
+    .select('username, saved_artists_public')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  const row = data as { username: string; saved_artists_public: boolean } | null;
+  return row?.saved_artists_public ? row.username : null;
+}
+
+/**
  * The public feed for a shared list at /u/{handle}.
  *
  * Gated on the same opt-in the HTML page uses (`usernames.saved_artists_public`) — a handle
