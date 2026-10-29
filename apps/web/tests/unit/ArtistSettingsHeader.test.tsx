@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// The artist settings tabs (/artist-edit/:slug, /tips, /releases, /promote).
+// The artist settings tabs (/artist-edit/:slug, /tips, /releases).
 //
 // What's worth locking: tips ship dark, so the Manage Tips tab appears only when the server says it
 // has a Stripe key — and a failed check hides it rather than breaking the page. It asks once per
@@ -10,9 +10,8 @@ import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ArtistSettingsHeader, type ArtistSettingsTab } from 'src/components/ArtistSettingsHeader';
 
-let isAdmin = false;
 vi.mock('src/contexts/AuthContext', () => ({
-  useAuth: () => ({ session: { access_token: 'user-token' }, isAdmin }),
+  useAuth: () => ({ session: { access_token: 'user-token' } }),
 }));
 
 const captureException = vi.fn();
@@ -32,7 +31,6 @@ function renderHeader(active: ArtistSettingsTab) {
 const tabNames = () => screen.getAllByRole('link').map(a => a.textContent).filter(t => t?.startsWith('Edit') || t?.startsWith('Manage'));
 
 beforeEach(() => {
-  isAdmin = false;
   mockFetch.mockReset();
   captureException.mockReset();
 });
@@ -70,20 +68,6 @@ describe('ArtistSettingsHeader', () => {
     await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
     expect(screen.getByRole('link', { name: 'Manage Tips' }).getAttribute('aria-current')).toBe('page');
     expect(screen.getByRole('link', { name: 'Edit Profile' }).getAttribute('aria-current')).toBeNull();
-  });
-
-  // Release autopost is admin-only while its flag is off (canUseReleaseAutopost on the server).
-  it('shows Promote to the admin only', async () => {
-    mockFetch.mockResolvedValue(new Response(JSON.stringify({ available: false })));
-    renderHeader('profile');
-    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    expect(screen.queryByRole('link', { name: 'Promote' })).toBeNull();
-    cleanup();
-
-    isAdmin = true;
-    renderHeader('profile');
-    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
-    expect(screen.getByRole('link', { name: 'Promote' }).getAttribute('href')).toBe('/artist-edit/kid-lightbulbs/promote');
   });
 
   it('asks once, not again on every tab switch', async () => {

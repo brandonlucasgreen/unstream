@@ -16,7 +16,6 @@
 
 import { PLATFORMS } from './platform-registry';
 import {
-  formatReleaseDate,
   leadingOfferSummary,
   orderedSourcePlatforms,
   type ReleaseSourceSummary,
@@ -201,6 +200,21 @@ const TYPE_WORDS: Record<string, string> = {
 
 const SMALL_NUMBERS = ['', 'a', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
+/**
+ * A release date as it reads in an American post: "September 3, 2026", "September 2026" or
+ * "2026", only as precisely as the source gave it. Not `formatReleaseDate`, which is the release
+ * page's British "3 September 2026".
+ */
+export function postDate(date: string | null, precision: string | null): string | null {
+  if (!date || precision === 'unknown') return null;
+  const [year, month, day] = date.split('-').map(Number);
+  if (!Number.isFinite(year)) return null;
+  if (precision === 'year') return String(year);
+  const monthName = new Date(Date.UTC(year, (month || 1) - 1, 1)).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+  if (precision === 'month') return `${monthName} ${year}`;
+  return `${monthName} ${day}, ${year}`;
+}
+
 /** "a year ago", "five years ago", "12 years ago"; null under a year or without a date. */
 export function ageInWords(releaseDate: string | null, datePrecision: string | null, postDate: string): string | null {
   if (!releaseDate || datePrecision === 'unknown') return null;
@@ -239,7 +253,7 @@ export function releaseTemplateVars(release: TemplateRelease, artist: TemplateAr
     name: artist.name,
     title: release.title,
     type: release.releaseType ? TYPE_WORDS[release.releaseType] ?? null : null,
-    date: formatReleaseDate(release.releaseDate, precision) || null,
+    date: postDate(release.releaseDate, precision),
     year: release.releaseDate && precision !== 'unknown' ? release.releaseDate.slice(0, 4) : null,
     age: ageInWords(release.releaseDate, precision, options.postDate),
     where: whereToBuy(release.sources),
@@ -260,41 +274,42 @@ export function supportTemplateVars(artist: TemplateArtist, options: { takesTips
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Unstream's defaults: plain notices, not the artist pretending to talk. The spec's option 1;
- * Brandon tests these against writing his own before artists see either (Build plan step 2).
+ * Unstream's defaults. **In the artist's own voice, first person** (Brandon, 2026-10-29): the
+ * posts go out from their account, so "reaches me", not "reaches {name}". In American English,
+ * avoiding words spelled differently by region ("archives", not "catalogue").
  *
- * Every kind's **last** variant needs nothing but {name}, {title}, {link} and {where}, so a
- * release with no date, type or price can still be posted about. Never put an article before
- * {type}: "a EP" and "a album" are both wrong.
+ * Every kind's **last** variant needs nothing but {title}, {link} and {where}, so a release with
+ * no date, type or price can still be posted about. Never put an article before {type}: "a EP"
+ * and "a album" are both wrong.
  */
 export const DEFAULT_TEMPLATES: Record<AutopostKind, string[]> = {
   bandcamp_friday: [
-    'It’s Bandcamp Friday: Bandcamp waives its revenue share today, so more of what you pay reaches {name}. {title}[ ({type})] is there: {link}',
-    'Bandcamp Friday today. Buy {title} on Bandcamp and more of it goes to {name}: {link}',
+    'It’s Bandcamp Friday: Bandcamp waives its revenue share today, so more of what you pay comes to me. {title}[ ({type})] is there: {link}',
+    'Bandcamp Friday today. If you’ve been meaning to pick up {title}, today more of it comes to me: {link}',
   ],
   release_day: [
-    'Out today: {title}[ ({type})]. [{note} ]On {where}: {link}',
-    '{title} is out today on {where}. {link}',
+    '{title}[, my new {type},] is out today! [{note} ]Find it on {where}: {link}',
+    'My new release {title} is out today on {where}. {link}',
   ],
   preorder: [
-    '{title}[ ({type})] comes out {date}. [{note} ]Pre-order on {where}: {link}',
-    'Coming soon: {title}. Pre-order on {where}: {link}',
+    '{title}[, my new {type},] comes out {date}. [{note} ]Pre-order it on {where}: {link}',
+    'Coming soon: {title}. You can pre-order it now on {where}: {link}',
   ],
   out_now: [
-    'New: {title}[ ({type})] is out now. [{note} ]On {where}: {link}',
-    '{title} is out now on {where}. {link}',
+    '{title}[, my new {type},] is out now. [{note} ]Find it on {where}: {link}',
+    'New from me: {title}, out now on {where}. {link}',
   ],
   still_new: [
-    '{title} came out {date}. [{note} ]It’s on {where}: {link}',
-    'In case you missed it: {title}, on {where}. {link}',
+    '{title} came out {date}. [{note} ]If you haven’t heard it yet, it’s on {where}: {link}',
+    'In case you missed it: my new release {title} is on {where}. {link}',
   ],
   catalogue: [
-    'From the catalogue: {title}[ ({year})]. [{note} ]On {where}: {link}',
-    '{title}[, released {age}]. [{note} ]Listen and buy on {where}: {link}',
-    '{title}, on {where}. {link}',
+    'From the archives: {title}[ ({year})]. [{note} ]It’s on {where}: {link}',
+    '{title}[ came out {age}]. [{note} ]Listen and buy it on {where}: {link}',
+    'From the archives: {title}, on {where}. {link}',
   ],
   support: [
-    'Want to support {name} directly? Here’s how, and what reaches them: {link}',
-    'The best ways to support {name}: {link}',
+    'If you want to support me directly, here’s how, and how much reaches me each way: {link}',
+    'The best ways to support my music: {link}',
   ],
 };

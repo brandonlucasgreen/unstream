@@ -82,7 +82,8 @@ More than three a week is allowed but never recommended. A release that needs mo
 
 - **"Recommended" is a setting of its own, and the default.** An artist who keeps it gets a rhythm that steps up as their catalogue grows. An artist who picks a number keeps that number.
 - **The setup screen explains the choice in their terms:** "You have 4 releases. At once a week, each comes round about once a month."
-- **Days are fixed by the number,** so the artist doesn't have to choose them: 1 → Fri · 2 → Tue, Fri · 3 → Mon, Wed, Fri · 4 → Mon, Wed, Fri, Sun · 5 → Mon–Fri · 6 → Mon–Sat · 7 → every day. Friday is in every pattern because it's release day and Bandcamp Friday. Posting time and timezone are set once (the timezone comes from the browser).
+- **Days are fixed by the number,** so the artist doesn't have to choose them: 1 → Fri · 2 → Tue, Fri · 3 → Mon, Wed, Fri · 4 → Mon, Wed, Fri, Sun · 5 → Mon–Fri · 6 → Mon–Sat · 7 → every day. Friday is in every pattern because it's release day and Bandcamp Friday. The timezone comes from the browser.
+- **Posting time: "Recommended" is the artist's Buffer queue** (Brandon, 2026-10-29), and it's the default. Buffer's API has no "recommended time" mode, but a channel's queue slots are set by default from Buffer's own recommended posting times, so `addToQueue` is the recommendation. A queued post is handed to Buffer **on its planned day**, not 72 hours ahead, or the queue would place it days early. The trade: it shows in Buffer only on the day. The artist can choose a set time instead, which schedules exactly then and arrives in Buffer three days ahead.
 
 ## Filling each slot
 
@@ -118,7 +119,7 @@ Some days have nothing that qualifies, such as a one-release catalogue whose onl
 
 **How it behaves:**
 
-- **Starting one:** the Promote tab offers "Start a campaign" for any release that's `announced` or out within the last 14 days. When Unstream first catalogues such a release for an artist with autopost on, the tab shows a banner and sends **one** email offering a campaign. That email is an offer, not an approval: ignoring it changes nothing, and the automatic release moments still run. An artist can turn the email off.
+- **Starting one:** the Promote page offers "Start a campaign" for any release that's `announced` or out within the last 14 days. When Unstream first catalogues such a release for an artist with autopost on, the page shows a banner and sends **one** email offering a campaign. That email is an offer, not an approval: ignoring it changes nothing, and the automatic release moments still run. An artist can turn the email off.
 - **Posts are the artist's text,** with an image per post: the cover art, the artist's photo, one of their uploads, or a new upload. Uploads matter most here: a launch is when artists have new photos, a poster or a teaser they want to use, so the campaign editor puts the upload button on each step. Instagram's image rule applies as in autopost, except that a campaign post with no image is flagged when it's written, not skipped silently.
 - **It runs on top of the rhythm.** Campaign posts don't count against the weekly number, which is how a release week gets more posts. Autopost steps aside for that release and on campaign days (see "Filling each slot").
 - **The same pipeline posts it.** Campaign posts are rows in the same posts table, pushed to Buffer 72 hours ahead with the same rechecks and the tag `unstream: release campaign`. No second scheduler.
@@ -138,11 +139,13 @@ The template language is deliberately small:
 
 **What artists start from is still open, and Brandon tests it before deciding (Build plan step 2).** There are three options, and the template system supports all of them, so the choice is about defaults, not code:
 
-1. **Unstream's defaults, editable.** Two or three hand-written variants per kind, plain notices that don't pretend to be the artist talking ("New on Bandcamp: {title}, out {date}"). Least effort. The risk is that every artist using it sounds alike.
+1. **Unstream's defaults, editable.** Two or three hand-written variants per kind, **in the artist's own voice, first person** ("{title}, my new {type}, is out today!"), since the posts go out from their account (Brandon, 2026-10-29). Least effort. The risk is that every artist using it sounds alike.
 2. **Their own, from blank.** The artist writes one line per kind. It's entirely their voice, but it takes more effort and some will never finish setup.
 3. **Rules and fields.** The artist fills a few fields once (how they refer to themselves, a sign-off, a `{note}` per release), and fixed sentence patterns assemble them. It's deterministic and personal, but the patterns are the hardest thing here to write well.
 
 My recommendation is option 1, with the `{note}` prompt doing the work of making it personal. That's why it's a test, not a decision.
+
+**American English, avoiding words spelled differently by region** (Brandon, 2026-10-29): "From the archives", not "From the catalogue". Dates read "September 3, 2026".
 
 **Hashtags:** none in the defaults, at most three if the artist adds them, and never `#newmusic` or `#newrelease`: the same rules as Unstream's own posts. **Lengths** (Bluesky 300 characters, Threads and Mastodon 500) are checked when a template is saved, against the longest title in their catalogue, not discovered at send time.
 
@@ -295,19 +298,21 @@ Already built and merged (#697–#708):
 
 **What changes:** the OAuth scopes gain Buffer's post-reading scope (presumably `posts:read`; check the name), so analytics can read metrics later without every artist reconnecting. The organization and ticked channels move from the user's `buffer_connections` row to each artist's `release_autopost_settings`, since two bands under one login post to different places. `me-buffer`'s callback always returns to `/curator/new`; it needs a return path held with the OAuth state (same-origin paths only) so the settings page can start the flow too.
 
-## UI: a Promote tab
+## UI: the Promote page
 
-A fourth tab in the artist settings, `/artist-edit/:slug/promote`, beside Edit Profile, Manage Tips and Manage Releases. Setup is one page, top to bottom. **Built in step 2b** (`ArtistPromotePage.tsx`, behind `/api/artist-promote`), shown only to the admin while the flag is off. Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked (it says what it uses instead), campaigns, and the `/my-artists` line.
+**Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
 
+1. **Where it posts:** connect Buffer, choose the organization (already chosen when there's only one), tick channels. Ticking Instagram explains its image rule.
+   - **New to Buffer:** before connecting, the page says an account can be made on Buffer's own screen, and that social accounts have to be connected in Buffer.
+   - **No accounts to post to:** signing up through Buffer's screen makes an account with no social accounts connected. When Buffer has none (or none autopost writes for), the page says so and links to [Buffer's channel settings](https://publish.buffer.com/settings/channels), with a "Check again" button.
+2. **How often:** a slider from 1 to 7 a week, starting on the recommendation and marked as recommended there. Landing back on it stores "Recommended", which grows with the catalog. **Posting time:** "Recommended: your Buffer queue" (the default) or a set time.
+3. **What to say:** each kind with a switch, and its wording folded away until opened: editable variants, each with a live preview against the newest release, and mistakes flagged as they're typed.
+4. **Coming up:** the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it.
+5. **Sent to Buffer:** the latest posts handed over, with anything a channel refused.
 
+Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked, campaigns, and a one-line summary on the `/my-artists` card.
 
-1. **Connect Buffer,** choose the organization, tick channels. Ticking Instagram shows the images Unstream already has for them, with an optional upload.
-2. **How often:** "Recommended (1 a week)" selected, with the one-line explanation, and 1–7 to choose instead. Posting time.
-3. **What to say:** each kind with its variants in editable boxes, a switch to turn it off, and a live preview against a real release. The `{note}` prompt for their three newest releases sits here too.
-4. **Coming up:** the next four weeks: date, kind, release, the image, and which channels get it. Campaign posts appear in the same list, marked as such.
-5. **Campaigns:** "Start a campaign" for any qualifying new or upcoming release. It opens the timeline: one card per step, each with its date, its prompt, a text box with the `{variables}` and a live preview, the image, and the channels. Steps can be added, dropped or moved.
-
-On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week · next Friday", linking to the tab.
+**Campaigns**, when built, add "Start a campaign" for any qualifying new or upcoming release. It opens the timeline: one card per step, each with its date, its prompt, a text box with the `{variables}` and a live preview, the image, and the channels. Steps can be added, dropped or moved.
 
 ## Measuring it
 
@@ -319,7 +324,7 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 ## Build plan
 
 1. **The rotation, on paper.** `planSlots` (`api/functions/autopost-plan.ts`) and `renderTemplate` (`api/shared/autopost-templates.ts`) with their tests, plus `npm run preview:autopost -- <artist-slug>`, which prints the next 12 weeks from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
-2. **Brandon only.** In two parts: **2a, the engine** (the tables, the sweep that plans and pushes, image copies to R2; `api/functions/release-autopost-sweep.ts`), then **2b, the Promote tab** (connecting Buffer with `posts:read` and a return path, the settings, "Coming up"). Then on Kid Lightbulbs' channels for a few weeks. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
+2. **Brandon only.** In two parts: **2a, the engine** (the tables, the sweep that plans and pushes, image copies to R2; `api/functions/release-autopost-sweep.ts`), then **2b, the Promote page** (connecting Buffer with `posts:read` and a return path, the settings, "Coming up"). Then on Kid Lightbulbs' channels for a few weeks. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
 4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.

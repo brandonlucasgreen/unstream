@@ -121,7 +121,7 @@ describe('GET', () => {
     expect(page).toMatchObject({
       available: true,
       saved: false,
-      settings: { enabled: false, postsPerWeek: null, kindsOff: [], templates: null },
+      settings: { enabled: false, postsPerWeek: null, postTime: null, kindsOff: [], templates: null },
       releaseCount: 1,
       recommendedPerWeek: 1,
       buffer: { connected: true, organizations: [{ id: 'org_mine', name: 'Cult of Lightbulbs' }] },
@@ -163,6 +163,11 @@ describe('PUT', () => {
       artistId: 'a1', userId: 'u1', enabled: true, organizationId: 'org_mine',
       channelIds: ['bsky'], kindsOff: ['support'], enabledAt: '2026-11-11T12:00:00.000Z', pausedReason: null,
     }));
+  });
+
+  it('accepts the Recommended posting time, which is Buffer’s queue', async () => {
+    expect((await call('PUT', { ...validBody, postTime: null })).statusCode).toBe(200);
+    expect(mocks.saveAutopostSettings).toHaveBeenCalledWith(expect.objectContaining({ postTime: null }));
   });
 
   it('keeps the original switch-on time when saving while on', async () => {

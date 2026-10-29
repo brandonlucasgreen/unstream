@@ -1,5 +1,5 @@
 // API endpoint: /api/artist-promote — release autopost settings for one artist, behind the
-// Promote tab (/artist-edit/:slug/promote). docs/specs/release-autopost-spec.md, "UI: a Promote tab".
+// Promote page (/artist-edit/:slug/promote). docs/specs/release-autopost-spec.md, "UI: a Promote page".
 //
 //   GET /api/artist-promote?artist={slug}   settings, the Buffer channels to choose from,
 //                                            "Coming up" and the latest posts handed to Buffer
@@ -63,7 +63,8 @@ function defaultSettings(artistId: string, userId: string): AutopostSettings {
     enabledAt: null,
     postsPerWeek: null,
     timezone: 'America/New_York',
-    postTime: '10:00',
+    // "Recommended": the channel's Buffer queue picks the time.
+    postTime: null,
     organizationId: null,
     channelIds: [],
     kindsOff: [],
@@ -134,11 +135,12 @@ async function validatedSettings(body: Record<string, unknown>, current: Autopos
   else if (Number.isInteger(body.postsPerWeek) && (body.postsPerWeek as number) >= 1 && (body.postsPerWeek as number) <= 7) next.postsPerWeek = body.postsPerWeek as number;
   else return { error: 'Posts a week must be 1 to 7, or Recommended' };
 
-  if (typeof body.timezone !== 'string' || !isValidTimezone(body.timezone)) return { error: 'That isn’t a timezone we recognise' };
+  if (typeof body.timezone !== 'string' || !isValidTimezone(body.timezone)) return { error: 'That timezone isn’t valid' };
   next.timezone = body.timezone;
 
-  if (typeof body.postTime !== 'string' || !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(body.postTime)) return { error: 'Posting time must be HH:MM' };
-  next.postTime = body.postTime;
+  if (body.postTime === null) next.postTime = null;
+  else if (typeof body.postTime === 'string' && /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(body.postTime)) next.postTime = body.postTime;
+  else return { error: 'Posting time must be HH:MM, or Recommended' };
 
   const kindsOff = Array.isArray(body.kindsOff) ? body.kindsOff : [];
   if (!kindsOff.every(k => (AUTOPOST_KINDS as readonly unknown[]).includes(k))) return { error: 'Unknown kind of post' };
@@ -199,7 +201,7 @@ async function validatedSettings(body: Record<string, unknown>, current: Autopos
   return { settings: next };
 }
 
-/** Everything the Promote tab shows. */
+/** Everything the Promote page shows. */
 async function pageState(artist: AutopostArtist, settings: AutopostSettings, saved: boolean) {
   const now = new Date();
   const [releases, history, recent, tips, buffer] = await Promise.all([

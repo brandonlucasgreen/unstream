@@ -10,7 +10,7 @@ Unstream knows which release every autopost and campaign post is about. So it ca
 
 ## What artists see
 
-A **"How it's going"** section on the Promote tab, under "Coming up", headed **"Last 30 days"**. An info tooltip beside it reads: "These numbers come from each network through Buffer, and can be up to a day behind."
+A **"How it's going"** section on the Promote page, under "Coming up", headed **"Last 30 days"**. An info tooltip beside it reads: "These numbers come from each network through Buffer, and can be up to a day behind."
 
 **One row per release,** with the most engaged first:
 

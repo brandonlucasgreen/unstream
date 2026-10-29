@@ -138,26 +138,26 @@ describe('the gate', () => {
     expect(saveBufferConnection).toHaveBeenCalledWith('u1', expect.anything(), 'org_1');
   });
 
-  it('returns to the Promote tab that started the flow', async () => {
+  it('returns to the Promote page that started the flow', async () => {
     asUser('admin@example.com');
-    await call('POST', '/start', '', { returnTo: '/artist-edit/kid-lightbulbs/promote' });
-    expect(redisSet.mock.calls[0][1]).toMatchObject({ returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    await call('POST', '/start', '', { returnTo: '/promote/kid-lightbulbs' });
+    expect(redisSet.mock.calls[0][1]).toMatchObject({ returnTo: '/promote/kid-lightbulbs' });
 
-    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/promote/kid-lightbulbs' });
     exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
     const res = await call('GET', '/callback', '?state=s&code=c');
-    expect(res.headers.Location).toBe('https://unstream.stream/artist-edit/kid-lightbulbs/promote?buffer=connected');
+    expect(res.headers.Location).toBe('https://unstream.stream/promote/kid-lightbulbs?buffer=connected');
   });
 
   it('sends a declined connection back to the page that started it too', async () => {
-    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/promote/kid-lightbulbs' });
     const res = await call('GET', '/callback', '?state=s&error=access_denied');
-    expect(res.headers.Location).toBe('https://unstream.stream/artist-edit/kid-lightbulbs/promote?buffer=cancelled');
+    expect(res.headers.Location).toBe('https://unstream.stream/promote/kid-lightbulbs?buffer=cancelled');
   });
 
   it('refuses to return anywhere but the pages that connect Buffer', async () => {
     asUser('admin@example.com');
-    for (const returnTo of ['https://evil.example', '//evil.example', '/settings', '/artist-edit/x/../../admin/promote']) {
+    for (const returnTo of ['https://evil.example', '//evil.example', '/settings', '/promote/x/../../admin', '/artist-edit/x/promote']) {
       expect((await call('POST', '/start', '', { returnTo })).statusCode).toBe(400);
     }
     expect(redisSet).not.toHaveBeenCalled();

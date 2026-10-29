@@ -9,6 +9,7 @@ import {
   AUTOPOST_KINDS,
   DEFAULT_TEMPLATES,
   ageInWords,
+  postDate,
   releaseTemplateVars,
   renderTemplate,
   renderVariant,
@@ -128,6 +129,15 @@ describe('the facts', () => {
   });
 });
 
+describe('postDate', () => {
+  it('reads as American English, only as precisely as the source gave it', () => {
+    expect(postDate('2026-09-03', 'day')).toBe('September 3, 2026');
+    expect(postDate('2026-09-01', 'month')).toBe('September 2026');
+    expect(postDate('2026-01-01', 'year')).toBe('2026');
+    expect(postDate('2026-01-01', 'unknown')).toBeNull();
+  });
+});
+
 describe('ageInWords', () => {
   it('counts whole years up to the post date', () => {
     expect(ageInWords('2021-11-01', 'day', '2026-11-01')).toBe('five years ago');
@@ -169,6 +179,17 @@ describe('DEFAULT_TEMPLATES', () => {
     for (const kind of AUTOPOST_KINDS) {
       const last = DEFAULT_TEMPLATES[kind][DEFAULT_TEMPLATES[kind].length - 1];
       expect(renderTemplate(last, bare), `${kind}: ${last}`).not.toBeNull();
+    }
+  });
+
+  // The posts go out from the artist's own account (Brandon, 2026-10-29).
+  it('speaks as the artist: never names them in the third person', () => {
+    for (const t of Object.values(DEFAULT_TEMPLATES).flat()) expect(t).not.toContain('{name}');
+  });
+
+  it('avoids words spelled differently by region', () => {
+    for (const t of Object.values(DEFAULT_TEMPLATES).flat()) {
+      expect(t).not.toMatch(/catalog|colou?r|favou?r|cancell?ed|organi[sz]|recogni[sz]/i);
     }
   });
 

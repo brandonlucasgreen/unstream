@@ -32,7 +32,8 @@ export interface AutopostSettings {
   enabledAt: string | null;
   postsPerWeek: number | null;
   timezone: string;
-  postTime: string;
+  /** HH:MM, or null for "Recommended": the channel's Buffer queue picks the time. */
+  postTime: string | null;
   organizationId: string | null;
   channelIds: string[];
   kindsOff: AutopostKind[];
@@ -47,7 +48,7 @@ interface SettingsRow {
   enabled_at: string | null;
   posts_per_week: number | null;
   timezone: string;
-  post_time: string;
+  post_time: string | null;
   organization_id: string | null;
   channel_ids: string[] | null;
   kinds_off: string[] | null;
@@ -141,7 +142,7 @@ export interface AutopostArtist {
   verifiedOwnerId: string | null;
 }
 
-/** By id (the sweep) or by slug (the Promote tab). */
+/** By id (the sweep) or by slug (the Promote page). */
 export async function getAutopostArtist(artistId: string): Promise<AutopostArtist | null>;
 export async function getAutopostArtist(by: { slug: string }): Promise<AutopostArtist | null>;
 export async function getAutopostArtist(by: string | { slug: string }): Promise<AutopostArtist | null> {
@@ -342,7 +343,7 @@ export interface RecentPost {
   channels: number;
 }
 
-/** The latest slots handed to Buffer, newest first, for the Promote tab. */
+/** The latest slots handed to Buffer, newest first, for the Promote page. */
 export async function getRecentAutopostPosts(artistId: string, limit: number): Promise<RecentPost[]> {
   const { data, error } = await client()
     .from('release_autopost_posts')
