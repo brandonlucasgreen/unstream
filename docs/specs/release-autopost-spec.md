@@ -1,6 +1,6 @@
 # Release autopost: a steady drumbeat for your music, without living on social media
 
-**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first.
+**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused indefinitely; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first.
 
 ## The goal
 
@@ -55,7 +55,7 @@ The curator posts spec listed "auto-announce an artist's own releases" under *Co
 | "Unstream finds releases only after they're live" | That matters less now that release announcements aren't the point. Pre-orders still come through as `announced` releases, and a release found late gets an "out now" post (see "Catching releases in time"). |
 | "Lead gen for Buffer more than value for artists" | Buffer is the means. Its free plan covers three channels. The rotation and templates live in Unstream, so another poster could replace Buffer if it ever became the barrier. |
 
-**Curator posts are paused (Brandon, 2026-10-28).** There was no clear reason a promoter would switch to it, and venues have brand and artwork rules that Unstream-drawn cards can't follow without uploads. Its code is merged and stays off behind the `curatorPosts` flag. Its Buffer connection is reused here (see "Reused from curator posts").
+**Curator posts are paused indefinitely (Brandon, 2026-10-28; confirmed 2026-10-29), and no more of it will be built.** There was no clear reason a promoter would switch to it, and venues have brand and artwork rules that Unstream-drawn cards can't follow without uploads. Its code is merged and stays live behind the `curatorPosts` flag. Its Buffer connection is reused here (see "Reused from curator posts").
 
 ## Who can use it
 
