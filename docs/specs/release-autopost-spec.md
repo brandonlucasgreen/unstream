@@ -41,7 +41,7 @@ The test curator posts failed: why would someone stop what they're doing and com
 
 - **It's set up once and then it runs.** Connect Buffer, tick channels, accept the recommended rhythm, look over the templates: about five minutes. There's no approval step afterwards (see "The artist stays in charge").
 - **Nothing else knows the catalogue.** Buffer can schedule posts but has nothing to put in them. It doesn't know when a Bandcamp release went up, which record hasn't been mentioned in two months, or that today is Bandcamp Friday.
-- **It uses their own images.** Release art and photos they upload, never a look Unstream designed. That avoids the brand problem that sank curator posts with venues.
+- **It uses their own images.** Their release covers and their own photo, which Unstream already has, plus anything they choose to upload. Never a look Unstream designed. That avoids the brand problem that sank curator posts with venues.
 
 **What would show it's wrong:** artists switch it off within a few weeks, or delete the posts in Buffer, or the posts reach nobody. All three can be measured (see "Measuring it"). The first test is Brandon's own catalogue, then a handful of verified artists asked personally, before anything is announced.
 
@@ -117,7 +117,7 @@ Some days have nothing that qualifies, such as a one-release catalogue whose onl
 **How it behaves:**
 
 - **Starting one:** the Promote tab offers "Start a campaign" for any release that's `announced` or out within the last 14 days. When Unstream first catalogues such a release for an artist with autopost on, the tab shows a banner and sends **one** email offering a campaign. That email is an offer, not an approval: ignoring it changes nothing, and the automatic release moments still run. An artist can turn the email off.
-- **Posts are the artist's text,** with an image per post: the cover art, one of their uploaded photos, or a new upload. Instagram's image rule applies as in autopost, except that a campaign post with no image is flagged when it's written, not skipped silently.
+- **Posts are the artist's text,** with an image per post: the cover art, the artist's photo, one of their uploads, or a new upload. Uploads matter most here: a launch is when artists have new photos, a poster or a teaser they want to use, so the campaign editor puts the upload button on each step. Instagram's image rule applies as in autopost, except that a campaign post with no image is flagged when it's written, not skipped silently.
 - **It runs on top of the rhythm.** Campaign posts don't count against the weekly number, which is how a release week gets more posts. Autopost steps aside for that release and on campaign days (see "Filling each slot").
 - **The same pipeline posts it.** Campaign posts are rows in the same posts table, pushed to Buffer 72 hours ahead with the same rechecks and the tag `unstream: release campaign`. No second scheduler.
 - **No approvals here either.** The artist wrote every word, and scheduling a campaign is the consent.
@@ -146,27 +146,37 @@ My recommendation is option 1, with the `{note}` prompt doing the work of making
 
 ## Pictures, and Instagram
 
-Every post that's about a release carries its **cover art**. The other source is **photos the artist uploads**. Unstream draws nothing.
+**Images come first from what Unstream already holds, so most artists never upload anything** (Brandon, 2026-10-29). Unstream draws nothing. There are three sources, used in this order:
 
-**Instagram needs an image on every post, so it's flagged during setup.** Ticking an Instagram channel says so, and asks for a few photos (up to 12; band photos, live shots, anything of theirs). Then:
+1. **Release covers.** Every catalogued release already carries `releases.artwork_url`, from its Bandcamp, Mirlo, Faircamp or Discogs listing. Covers are square, so every network takes them.
+2. **The artist's photo:** their own `custom_image_url` if they set one on their claimed profile, else `artists.image_url` from their Bandcamp page. That address is already repaired when Bandcamp deletes the old file (`refreshDeadArtistPhoto`). Photos come in any shape, so one outside Instagram's 4:5 to 1.91:1 range is skipped for Instagram.
+3. **Photos the artist uploads.** Optional for autopost, there for variety. Campaigns are where they'll really be used (see "Release campaigns").
+
+**Deliberately not sources:**
+- **Wikimedia Commons photos,** which MusicBrainz reaches through Wikidata. They usually need a photographer credit to be used, they're mostly of well-known artists, and they can picture a namesake.
+- **YouTube channel avatars.** They're small, they'd need a YouTube API key, and the Bandcamp photo is already there.
+
+At one to three posts a week, a handful of covers plus one photo is enough. An artist with four releases and a photo, posting weekly, shows each image about every five weeks.
+
+**Instagram needs an image on every post.** Ticking an Instagram channel during setup says so, shows the images Unstream already has for them, and offers uploads, without requiring them. Then:
 
 - Release-moment and Bandcamp Friday posts use the cover art.
-- Catalogue and support posts on Instagram use the cover art unless that same cover went to Instagram in the last 4 weeks. If it did, they use the least recently used uploaded photo, so the grid doesn't fill up with one cover.
+- Catalogue and support posts on Instagram rotate through covers, the artist's photo and any uploads, never repeating an image used on Instagram in the last 4 weeks, so the grid doesn't fill up with one picture.
 - **With nothing usable, that Instagram post is skipped** and the other channels go out as normal. The settings page says so: "3 Instagram posts skipped this month: add a photo."
 
 The other networks show a link preview when there's no image, so they're never skipped.
 
-**Uploads, kept small.**
-- Up to 12 images per artist profile. JPEG or PNG.
+**Uploads, kept small.** Offered in v1 for autopost and needed by campaigns:
+- Up to 12 images per artist profile, JPEG or PNG, shared between autopost and campaigns.
 - Resized in the browser to 2,048px on the long side before upload, which keeps every request under a Netlify function's 6 MB body limit.
-- Rejected with a plain message if they're outside Instagram's 4:5 to 1.91:1 range. Instagram would refuse them anyway, and cropping someone's photo automatically can cut through a face.
-- Stored in the `unstream-social-cards` R2 bucket under `autopost/{artist-hash}/`, and deletable from the settings page.
+- Rejected with a plain message if they're outside Instagram's shape range. Instagram would refuse them anyway, and cropping someone's photo automatically can cut through a face.
+- Stored in R2 (below), and deletable from the settings page.
 
-Cover art is copied to the same place when a post is pushed, because Buffer fetches images on publish day and Bandcamp deletes old image files. A copy made at push can't disappear under a scheduled post.
+**Covers and the artist photo are handed to Buffer by their source address, if Buffer keeps its own copy.** Buffer fetches an image on publish day, and Bandcamp deletes old files. If Buffer copies the image when the post is created, nothing can go missing, and Unstream stores none of these images. **To check before building (Build plan step 2).** Until it's confirmed, they're copied to R2 when the post is pushed. Either way, the source is checked to still load before the post is handed over, with the weekly social posts' rule (`livePhotoUrl`: only a 404 or 410 drops it). And since posts go to Buffer only 72 hours ahead, the window for a file to disappear is small.
 
-### Storage: R2 for now, Buffer's media library later
+### Storage: R2 for uploads, Buffer's media library later
 
-**R2, in the bucket the social cards already use.** It has no egress fees, which matters most here because Buffer and the networks fetch every image, and it's already set up with credentials, the upload helper and the fetch-back check.
+**R2 holds what artists upload, plus copied covers only if Buffer turns out not to keep its own copy.** It's in the bucket the social cards already use. It has no egress fees, which matters most here because Buffer and the networks fetch every image, and it's already set up with credentials, the upload helper and the fetch-back check.
 
 **What it costs: in practice, nothing for a long time.** Cloudflare's published R2 prices for Standard storage (recheck before launch):
 
@@ -179,16 +189,16 @@ Cover art is copied to the same place when a post is pushed, because Buffer fetc
 
 Estimates:
 
-- **Storage.** A 2,048px JPEG is roughly 0.5 MB, so 12 photos plus copied covers come to about 10 MB per artist at most. 100 artists is about 1 GB, and 1,000 is about 10 GB, roughly where the free storage ends.
-- **Writes.** Covers are keyed by their hash, so each cover is stored once however often it's posted. Writes and reads are thousands a month, far inside the free tier.
+- **Storage.** A 2,048px JPEG is roughly 0.5 MB, so a full 12 uploads plus copied covers come to about 10 MB per artist at most. Most autopost artists will upload nothing, and campaign uploads will be a few images per release, so real use should be far below that. Even at the maximum, 100 artists is about 1 GB and 1,000 is about 10 GB, roughly where the free storage ends.
+- **Writes.** Images are keyed by their hash, so each one is stored once however often it's posted. Writes and reads are thousands a month, far inside the free tier.
 
-**The first real bill comes at about 1,000 active artists, and it's under $1 a month for every 10 GB after that.** That's the arithmetic; the risks are elsewhere:
+**At the maximum, the first real bill comes at about 1,000 active artists, and it's under $1 a month for every 10 GB after that.** That's the arithmetic; the risks are elsewhere:
 
 - **Public, unguessable URLs.** The bucket is public, so an uploaded photo can be fetched by anyone who has its URL, including before it's ever posted. The keys are content hashes, impossible to guess, and the photos exist to be posted publicly, so that's acceptable. It's still said here so nobody is surprised.
-- **Deleting has to be real.** Removing a photo, switching autopost off for good, or deleting the account deletes the R2 objects, not just the database rows. A cover copied for a post that's already in Buffer stays until that post has gone out.
+- **Deleting has to be real.** Removing a photo, switching autopost off for good, or deleting the account deletes the R2 objects, not just the database rows. An image for a post that's already in Buffer stays until that post has gone out.
 - **Check the bucket's public address before launch.** Cloudflare rate-limits `r2.dev` addresses and doesn't support them for production. If `SOCIAL_CARDS_PUBLIC_BASE_URL` is an `r2.dev` address, give the bucket a custom domain first.
 
-**Later: Buffer's media library** (Brandon, 2026-10-29). Buffer is building one, with uploads through the API. Once it's available, images move there:
+**Later: Buffer's media library** (Brandon, 2026-10-29). Buffer is building one, with uploads through the API. Once it's available, uploads move there:
 
 - the artist's photos then live in their own Buffer, where they can see and reuse them;
 - Unstream stops holding files for them at all, which leaves less to secure and delete.
@@ -277,7 +287,7 @@ Already built and merged (#697–#708):
 
 A fourth tab in the artist settings, `/artist-edit/:slug/promote`, beside Edit Profile, Manage Tips and Manage Releases. Setup is one page, top to bottom:
 
-1. **Connect Buffer,** choose the organization, tick channels. Ticking Instagram opens the photo upload.
+1. **Connect Buffer,** choose the organization, tick channels. Ticking Instagram shows the images Unstream already has for them, with an optional upload.
 2. **How often:** "Recommended (1 a week)" selected, with the one-line explanation, and 1–7 to choose instead. Posting time.
 3. **What to say:** each kind with its variants in editable boxes, a switch to turn it off, and a live preview against a real release. The `{note}` prompt for their three newest releases sits here too.
 4. **Coming up:** the next four weeks: date, kind, release, the image, and which channels get it. Campaign posts appear in the same list, marked as such.
@@ -295,9 +305,9 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 ## Build plan
 
 1. **The rotation, on paper.** `planSlots` and `renderTemplate` with their tests, plus a script that prints the next 12 weeks for any artist slug from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
-2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
+2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
-4. **Instagram photos,** shared by autopost and campaigns, and needed by campaigns from the start.
+4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.
 6. **Decide.** Turn the flag on for every verified artist, change it, or stop. The recommendation formula and the 2-day cooldown are settled here, with real numbers.
 
