@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
@@ -30,7 +30,7 @@ const PRIMARY_BUTTON = 'px-3 py-2 text-sm rounded-lg bg-accent-primary text-acce
 const SECONDARY_BUTTON = 'px-3 py-2 text-sm rounded-lg border border-border hover:bg-bg-secondary disabled:opacity-50';
 
 const BUFFER_OUTCOMES: Record<string, string> = {
-  connected: 'Buffer is connected.',
+  // Nothing for 'connected': the channels appearing says it (Brandon, 2026-10-29).
   cancelled: 'Buffer wasn’t connected: the connection was stopped before it finished.',
   expired: 'That took too long and the connection expired. Try again.',
   failed: 'Buffer couldn’t be connected. Try again.',
@@ -96,15 +96,23 @@ export function ArtistPromotePage() {
     setSearchParams(rest, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  // Loaded once per signed-in user, not again whenever the sign-in token refreshes. A refreshed
+  // token is a new session object, and reloading on it sent two requests at once on a hard
+  // refresh. Both could refresh the Buffer token together, and Buffer revokes a connection whose
+  // refresh token is sent twice (see usableAccessToken in api/functions/buffer-db.ts).
+  const tokenRef = useRef(session?.access_token);
+  tokenRef.current = session?.access_token;
+  const userId = session?.user?.id;
+
   useEffect(() => {
     if (authLoading) return;
-    if (!session) {
+    if (!userId || !tokenRef.current) {
       if (slug) navigate(`/login?next=${encodeURIComponent(`/promote/${encodeURIComponent(slug)}`)}`, { replace: true });
       return;
     }
     if (!slug) return;
     let cancelled = false;
-    getPromotePage(session.access_token, slug)
+    getPromotePage(tokenRef.current, slug)
       .then(p => {
         if (cancelled) return;
         apply(p);
@@ -115,7 +123,7 @@ export function ArtistPromotePage() {
         setLoadError(err instanceof Error ? err.message : 'Couldn’t load this right now. Try refreshing.');
       });
     return () => { cancelled = true; };
-  }, [authLoading, session, slug, navigate]);
+  }, [authLoading, userId, slug, navigate]);
 
   function apply(p: PromotePage) {
     setPage(p);

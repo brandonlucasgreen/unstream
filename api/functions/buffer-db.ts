@@ -130,17 +130,27 @@ export class BufferNotConnectedError extends Error {
   }
 }
 
+/** How long a request waits for another one's refresh to land before giving up for now. */
+const REFRESH_WAIT_MS = 8_000;
+const REFRESH_POLL_MS = 250;
+
 /**
- * A usable access token for this curator, refreshing first if the stored one is spent.
+ * A usable access token for this user, refreshing first if the stored one is spent.
  *
- * **This is the only way anything should read a token.** Buffer's access tokens last an hour,
- * so a stored one is usually stale, and its refresh tokens are single-use — replaying one
- * revokes the entire grant and silently disconnects the curator.
+ * **This is the only way anything should read a token.** Buffer's access tokens last an hour, so
+ * a stored one is usually stale, and its refresh tokens are single-use: **"Reusing an old refresh
+ * token revokes all tokens for that grant"** (Buffer's authentication guide). Two requests that
+ * both send the same refresh token don't just race; the second one makes Buffer cancel the
+ * connection, and the user has to reconnect.
  *
- * So the refresh is a compare-and-set on `refresh_counter`: the caller spends the token it read,
- * and writes back only if nobody else has refreshed since. The loser of a race affects no rows,
- * and **re-reads instead of calling Buffer**, because its own refresh token is now spent. It
- * never retries the refresh.
+ * So the refresh is **claimed in the database before Buffer is called**: a compare-and-set that
+ * bumps `refresh_counter`. Only the request that wins the claim ever sends the refresh token.
+ * Anyone else waits for the winner's new token to land, and never calls Buffer itself.
+ *
+ * Until 2026-10-29 the compare-and-set came after the call to Buffer, so both requests had
+ * already spent the token by the time one lost. A page that loaded its data twice on a hard
+ * refresh (the browser's own sign-in token refreshing at the same moment) did exactly that, and
+ * the Promote page asked Brandon to reconnect after every deploy.
  */
 export async function usableAccessToken(userId: string): Promise<string> {
   const connection = await getBufferConnection(userId);
@@ -149,25 +159,50 @@ export async function usableAccessToken(userId: string): Promise<string> {
 
   if (!connection.refreshToken) {
     // No refresh token means offline_access was never granted; nothing can revive this.
+    reportLostConnection(userId, 'no refresh token stored');
     await clearBufferConnection(userId);
     throw new BufferNotConnectedError('That Buffer connection expired and cannot be refreshed. Reconnect to continue.');
   }
+
+  const client = getClient();
+  if (!client) throw new BufferError(500, 'Database not configured');
+
+  // The claim. Whoever moves the counter on owns this refresh; anyone else waits for it.
+  const claim = connection.refreshCounter + 1;
+  const { data: claimed, error: claimError } = await client
+    .from('buffer_connections')
+    .update({ refresh_counter: claim, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('refresh_counter', connection.refreshCounter)
+    .select('refresh_counter');
+  if (claimError) throw new Error(claimError.message);
+  if (!claimed || claimed.length === 0) return waitForRefresh(userId);
 
   let tokens: BufferTokens;
   try {
     tokens = await refreshTokens(connection.refreshToken);
   } catch (error) {
-    // invalid_grant: already spent, or the curator revoked us in Buffer's settings. Either way
-    // the grant is gone — clear it so the page asks them to reconnect rather than looping.
+    // invalid_grant: already spent, or revoked by the user in Buffer's settings. Either way the
+    // grant is gone, so clear it and ask them to reconnect rather than looping. Reported, so a
+    // connection that keeps dying is seen instead of looking like a user who never connected.
     if (error instanceof BufferError && (error.status === 400 || error.status === 401)) {
+      reportLostConnection(userId, `refresh refused: ${error.message}`);
       await clearBufferConnection(userId);
       throw new BufferNotConnectedError('Buffer refused the connection. Reconnect to continue.');
     }
+    // Anything else (a timeout, a 5xx) may or may not have reached Buffer. Leave the claim where
+    // it is: the next request claims again from the counter as it now stands.
     throw error;
   }
 
-  const client = getClient();
-  if (!client) throw new BufferError(500, 'Database not configured');
+  if (!tokens.refreshToken) {
+    // Buffer says every refresh returns a new one. Without it this connection dies at the next
+    // expiry, an hour from now, so say so now rather than then.
+    Sentry.captureMessage('[buffer] a refresh returned no new refresh token', {
+      level: 'error',
+      tags: { buffer: 'refresh-without-token' },
+    });
+  }
 
   const { data, error } = await client
     .from('buffer_connections')
@@ -175,26 +210,41 @@ export async function usableAccessToken(userId: string): Promise<string> {
       access_token_encrypted: encryptCredential(tokens.accessToken),
       refresh_token_encrypted: tokens.refreshToken ? encryptCredential(tokens.refreshToken) : null,
       expires_at: tokens.expiresAt.toISOString(),
-      refresh_counter: connection.refreshCounter + 1,
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
-    .eq('refresh_counter', connection.refreshCounter)
+    .eq('refresh_counter', claim)
     .select('access_token_encrypted');
-
   if (error) throw new Error(error.message);
-
   if (!data || data.length === 0) {
-    // Someone else refreshed between our read and our write. Their tokens are the live ones and
-    // ours are already retired, so take theirs rather than refreshing again.
-    const winner = await getBufferConnection(userId);
-    if (!winner) throw new BufferNotConnectedError();
-    Sentry.captureMessage('[buffer] concurrent refresh; used the winning token', {
-      level: 'info',
-      tags: { buffer: 'refresh-race' },
-    });
-    return winner.accessToken;
+    // The row changed under our claim: the user reconnected (which resets the counter) or
+    // disconnected while we refreshed. Their current connection stands; this token is good for now.
+    Sentry.captureMessage('[buffer] connection changed during a refresh', { level: 'info', tags: { buffer: 'refresh-superseded' } });
   }
-
   return tokens.accessToken;
+}
+
+/**
+ * Another request holds the refresh: wait for its new token instead of sending the refresh token
+ * a second time. If it doesn't land in time, fail this request only. The connection is untouched,
+ * and the next request tries again.
+ */
+async function waitForRefresh(userId: string): Promise<string> {
+  const deadline = Date.now() + REFRESH_WAIT_MS;
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, REFRESH_POLL_MS));
+    const current = await getBufferConnection(userId);
+    if (!current) throw new BufferNotConnectedError();
+    if (!needsRefresh(current.expiresAt)) return current.accessToken;
+  }
+  throw new BufferError(503, 'Buffer is reconnecting. Try again in a moment.');
+}
+
+/** A connection is about to be dropped and the user asked to reconnect: never silently. */
+function reportLostConnection(userId: string, reason: string): void {
+  Sentry.captureMessage('[buffer] connection dropped; the user has to reconnect', {
+    level: 'warning',
+    tags: { buffer: 'connection-dropped' },
+    extra: { userId, reason },
+  });
 }
