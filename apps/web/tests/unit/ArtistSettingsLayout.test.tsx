@@ -36,8 +36,7 @@ describe('ArtistSettingsLayout', () => {
         </Routes>
       </MemoryRouter>
     );
-    expect(await screen.findByRole('heading', { name: 'Kid Lightbulbs' })).toBeTruthy();
-    expect(screen.getByText('Manage releases')).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Manage Releases: Kid Lightbulbs' })).toBeTruthy();
     expect(screen.getByText('releases content')).toBeTruthy();
   });
 });

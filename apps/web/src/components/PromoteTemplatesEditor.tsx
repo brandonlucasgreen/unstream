@@ -86,9 +86,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
               // Folded away until wanted: most artists keep the defaults, and seven kinds of post with
               // every variant open is a wall. Opens by itself when something needs fixing.
               <details className="pl-6" open={Boolean(problems?.[kind]) || variants.some(v => templateProblems(v).length > 0) || undefined}>
-                <summary className="cursor-pointer text-xs text-link hover:underline">
-                  {edited ? 'Your wording' : 'Unstream’s wording'} · {variants.length} variant{variants.length === 1 ? '' : 's'}
-                </summary>
+                <summary className="cursor-pointer text-xs text-link hover:underline">Edit templates</summary>
                 <div className="space-y-2 pt-2">
                   {variants.map((variant, i) => {
                     const found = templateProblems(variant);

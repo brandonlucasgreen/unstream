@@ -160,6 +160,25 @@ describe('ArtistPromotePage', () => {
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postTime: null })));
   });
 
+  it('explains Post automatically on a tap: off means nothing goes to Buffer, and no drafts', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
+    renderTab();
+    const tip = await screen.findByRole('button', { name: 'What does Post automatically do?' });
+    expect(screen.queryByRole('note')).toBeNull();
+    fireEvent.click(tip);
+    expect(tip.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('note').textContent).toMatch(/Off: nothing more goes to Buffer, and nothing is saved as a draft/);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('note')).toBeNull();
+  });
+
+  it('labels each kind’s wording “Edit templates”', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded());
+    renderTab();
+    await screen.findByRole('textbox', { name: 'From the archives, variant 1' });
+    expect(screen.getAllByText('Edit templates')).toHaveLength(7);
+  });
+
   it('shows the server’s plan under Coming up', async () => {
     promote.getPromotePage.mockResolvedValue(loaded());
     renderTab();
