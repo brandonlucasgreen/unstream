@@ -14,7 +14,7 @@ import {
   type TemplateArtist,
   type TemplateRelease,
 } from '../shared/autopost-templates';
-import { AUTOPOST_NETWORK_LIMITS, isAutopostNetwork, networkName } from '../shared/autopost-networks';
+import { AUTOPOST_NETWORK_LIMITS, isAutopostNetwork, isImageFirstNetwork, networkName } from '../shared/autopost-networks';
 
 export { isAutopostNetwork };
 
@@ -50,20 +50,25 @@ export function buildChannelPost(input: ChannelPostInput): ChannelPost {
   const service = channel.service;
   if (!isAutopostNetwork(service)) return { ok: false, reason: `${networkName(service)} isn’t a network autopost writes for` };
   const instagram = service === 'instagram';
+  // Instagram and TikTok: an image on every post, and no clickable links.
+  const imageFirst = isImageFirstNetwork(service);
+  const name = networkName(service);
 
   if (slot.kind !== 'support' && !release) return { ok: false, reason: 'The release no longer qualifies' };
 
-  // Instagram needs an image on every post, and one it accepts the shape of.
   const image = input.image;
-  if (instagram) {
-    if (!slot.imageOnInstagram) return { ok: false, reason: 'No fresh image for Instagram' };
-    if (!image) return { ok: false, reason: 'The image couldn’t be copied, and Instagram needs one' };
-    if (!input.imageFitsInstagram) return { ok: false, reason: 'The image is outside Instagram’s shape range' };
+  if (imageFirst) {
+    // `imageOnInstagram` is the planner's "fresh image" flag, which covers TikTok the same way.
+    if (!slot.imageOnInstagram) return { ok: false, reason: `No fresh image for ${name}` };
+    if (!image) return { ok: false, reason: `The image couldn’t be copied, and ${name} needs one` };
   }
+  // Only Instagram refuses images outside its shape range; TikTok takes them as they are.
+  if (instagram && !input.imageFitsInstagram) return { ok: false, reason: 'The image is outside Instagram’s shape range' };
 
+  // The template functions' `instagram` option means "no clickable links": "link in bio".
   const vars = release
-    ? releaseTemplateVars(release, artist, { postDate: slot.date, instagram })
-    : supportTemplateVars(artist, { takesTips: input.takesTips, instagram });
+    ? releaseTemplateVars(release, artist, { postDate: slot.date, instagram: imageFirst })
+    : supportTemplateVars(artist, { takesTips: input.takesTips, instagram: imageFirst });
   const rendered = renderVariant(variantsFor(slot.kind, input.templates), slot.templateIndex, vars);
   if (!rendered) return { ok: false, reason: 'No template could be filled for this release' };
 

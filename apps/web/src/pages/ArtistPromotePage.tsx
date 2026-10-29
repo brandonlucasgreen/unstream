@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
-import { networkName } from '../../../../api/shared/autopost-networks';
+import { isImageFirstNetwork, networkName } from '../../../../api/shared/autopost-networks';
 import {
   getPromotePage,
   PromoteApiError,
@@ -36,6 +36,9 @@ const BUFFER_OUTCOMES: Record<string, string> = {
   failed: 'Buffer couldn’t be connected. Try again.',
   unavailable: 'Buffer isn’t available right now.',
 };
+
+/** Where a Buffer user sees what's scheduled, and can change or delete it. */
+const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
 
 /** Where a Buffer user connects their social accounts. */
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
@@ -184,6 +187,8 @@ export function ArtistPromotePage() {
   const perWeek = form.postsPerWeek ?? recommended;
   const ticked = new Set(form.channelIds);
   const tickedServices = buffer.connected ? buffer.channels.filter(c => ticked.has(c.id)).map(c => c.service) : [];
+  /** Instagram and TikTok, if ticked: they need an image on every post. */
+  const imageFirstTicked = [...new Set(tickedServices.filter(isImageFirstNetwork))].map(networkName);
   const canSwitchOn = Boolean(form.organizationId) && form.channelIds.length > 0;
   // Everything past "Where it posts" is about posting, which needs somewhere to post. Until Buffer
   // is connected with a channel autopost can use, it stays hidden (Brandon, 2026-10-29).
@@ -198,11 +203,10 @@ export function ArtistPromotePage() {
     <div className="space-y-6">
       <div className="space-y-1">
         <p className="text-sm text-text-secondary">
-          Posts about your releases, on a gentle weekly rhythm, scheduled to your own Buffer. Unstream writes nothing with AI: each
-          post is one of the templates below, filled with facts about the release.{' '}
-          {form.postTime === null
-            ? 'Each post joins your Buffer queue on its day, where you can change or delete it before it goes out.'
-            : 'Every post lands in Buffer three days before it goes out, where you can change or delete it.'}
+          Posts about your releases, on a gentle weekly rhythm, scheduled to your social profiles. Unstream writes nothing with AI:
+          each post comes from a template you can edit, filled with info about the release. Scheduling, publishing and analytics
+          on your posts are powered by{' '}
+          <a href="https://buffer.com" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>.
         </p>
       </div>
 
@@ -215,7 +219,10 @@ export function ArtistPromotePage() {
 
       {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
 
-      <section className={SECTION} aria-labelledby="promote-buffer">
+      <section
+        className={SECTION}
+        {...(buffer.connected ? { 'aria-labelledby': 'promote-buffer' } : { 'aria-label': 'Connect Buffer' })}
+      >
         {ready && (
           <AutopostSwitch
             on={form.enabled}
@@ -226,12 +233,10 @@ export function ArtistPromotePage() {
             onToggle={toggle}
           />
         )}
-        <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>
+        {/* Nothing to say where it posts until there's a Buffer to post through. */}
+        {buffer.connected && <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>}
         {!buffer.connected ? (
           <div className="space-y-2">
-            <p className="text-sm text-text-secondary">
-              Unstream posts through Buffer, to the social accounts you connect there. Buffer’s free plan is enough.
-            </p>
             <p className="text-sm text-text-secondary">
               <span className="font-medium text-text-primary">New to Buffer?</span> You can make a free account on the next
               screen. Then connect your social accounts in Buffer, since Unstream can only post to accounts connected there.
@@ -289,11 +294,12 @@ export function ArtistPromotePage() {
                 </fieldset>
               )
             )}
-            {tickedServices.includes('instagram') && (
+            {imageFirstTicked.length > 0 && (
               <p className="text-xs text-text-secondary">
-                Instagram needs an image on every post. Autopost uses your release covers and your artist photo, and won’t show
-                the same one on Instagram twice in four weeks. When nothing fresh is left, that post skips Instagram and goes to
-                your other channels.
+                {imageFirstTicked.join(' and ')} {imageFirstTicked.length === 1 ? 'needs' : 'need'} an image on every post, and
+                captions there can’t hold a clickable link, so those posts say “link in bio”. Autopost uses your release covers and
+                your artist photo, and won’t show the same one there twice in four weeks. When nothing fresh is left, that post skips{' '}
+                {imageFirstTicked.join(' and ')} and goes to your other channels.
               </p>
             )}
           </div>
@@ -346,11 +352,9 @@ export function ArtistPromotePage() {
             <label className="flex items-start gap-2 text-sm">
               <input type="radio" name="post-time" checked={form.postTime === null} onChange={() => update({ postTime: null })} className="mt-1" />
               <span>
-                Recommended: your Buffer queue
+                Pick days &amp; times for me
                 <span className="block text-xs text-text-muted">
-                  Each post joins that channel’s queue in Buffer on its day and goes out at the next time in your posting
-                  schedule. Buffer sets those times from when your audience is most likely to see a post, and you can change them
-                  in Buffer.
+                  Rely on Buffer’s posting schedule and recommended times algorithm to publish each post.
                 </span>
               </span>
             </label>
@@ -413,7 +417,7 @@ export function ArtistPromotePage() {
                     <p className="text-xs text-text-muted">
                       {formatDay(post.date)} · {KIND_COPY[post.kind].label}
                       {post.release ? ` · ${post.release.title}` : ''}
-                      {tickedServices.includes('instagram') && !post.imageOnInstagram ? ' · skips Instagram' : ''}
+                      {imageFirstTicked.length > 0 && !post.imageOnInstagram ? ` · skips ${imageFirstTicked.join(' and ')}` : ''}
                     </p>
                     <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
                   </div>
@@ -471,9 +475,16 @@ function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
         <p id="autopost-switch-label" className="text-lg font-semibold text-text-primary">Autopost is {on ? 'on' : 'off'}</p>
         <p className="text-sm text-text-secondary">
           {on
-            ? `Posting to ${channels} channel${channels === 1 ? '' : 's'}. ${queued
-              ? 'Each post joins your Buffer queue on its day'
-              : 'Each post lands in Buffer three days before it goes out'}, where you can change or delete it.`
+            ? (
+              <>
+                Posting to {channels} channel{channels === 1 ? '' : 's'}.{' '}
+                {queued ? 'Each post joins your ' : 'Each post lands in '}
+                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
+                  {queued ? 'Buffer queue' : 'Buffer'}
+                </a>
+                {queued ? ' on its day' : ' three days before it goes out'}, where you can change or delete it.
+              </>
+            )
             : canSwitchOn
               ? 'Nothing goes to Buffer while it’s off, and nothing is saved as a draft. Your settings are kept.'
               : 'Tick at least one channel below, then switch it on.'}
@@ -510,8 +521,8 @@ function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; 
           : 'Your Buffer doesn’t have any social accounts connected yet.'}
       </p>
       <p className="text-sm text-text-secondary">
-        Connect your Instagram, Facebook, Threads, Bluesky, Mastodon, LinkedIn or Substack in Buffer first, then come back
-        here and check again.
+        Connect your Instagram, TikTok, Facebook, Threads, Bluesky, Mastodon, LinkedIn or Substack in Buffer first, then come
+        back here and check again.
       </p>
       <div className="flex flex-wrap gap-2">
         <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className={PRIMARY_BUTTON}>

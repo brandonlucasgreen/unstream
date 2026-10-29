@@ -54,6 +54,7 @@ const connected = {
   organizationId: 'org1',
   channels: [
     { id: 'ig', name: 'kidlightbulbs', service: 'instagram', supported: true },
+    { id: 'tt', name: 'kidlightbulbs', service: 'tiktok', supported: true },
     { id: 'yt', name: 'kid lightbulbs', service: 'youtube', supported: false },
     { id: 'pin', name: 'sphmrs', service: 'pinterest', supported: false },
   ],
@@ -92,6 +93,7 @@ describe('ArtistPromotePage', () => {
     expect(screen.queryByRole('slider')).toBeNull();
     expect(screen.queryByRole('region', { name: 'Coming up' })).toBeNull();
     expect(screen.getByText(/Once Buffer is connected with at least one channel/)).toBeTruthy();
+    expect(screen.queryByText('Where it posts')).toBeNull();
     fireEvent.click(connect);
     expect(promote.startBufferConnection).toHaveBeenCalledWith('tok', 'kid-lightbulbs');
   });
@@ -99,7 +101,7 @@ describe('ArtistPromotePage', () => {
   it('previews each template against the newest release as it’s edited', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
-    const box = await screen.findByRole('textbox', { name: 'From the archives, variant 3' });
+    const box = await screen.findByRole('textbox', { name: 'From the archives, template 3' });
     fireEvent.change(box, { target: { value: 'Still great: {title}' } });
     expect(screen.getByText('Still great: Ruined Castle')).toBeTruthy();
     fireEvent.change(box, { target: { value: '{titel}' } });
@@ -119,13 +121,15 @@ describe('ArtistPromotePage', () => {
     expect(toggle.disabled).toBe(true);
     expect(screen.getByText('Tick at least one channel below, then switch it on.')).toBeTruthy();
     fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · Instagram/ }));
-    expect(screen.getByText(/Instagram needs an image on every post/)).toBeTruthy();
+    expect(screen.getByText(/^Instagram needs an image on every post/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · TikTok/ }));
+    expect(screen.getByText(/^Instagram and TikTok need an image on every post.*“link in bio”/)).toBeTruthy();
     expect(screen.getByText(/nothing is saved as a draft/)).toBeTruthy();
     // The switch saves by itself; no separate Save.
     fireEvent.click(toggle);
 
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({
-      enabled: true, organizationId: 'org1', channelIds: ['ig'], postsPerWeek: null,
+      enabled: true, organizationId: 'org1', channelIds: ['ig', 'tt'], postsPerWeek: null,
     })));
   });
 
@@ -140,7 +144,7 @@ describe('ArtistPromotePage', () => {
   });
 
   it('says the same when the only accounts are ones autopost can’t post to', async () => {
-    promote.getPromotePage.mockResolvedValue(loaded({ buffer: { ...connected, channels: [connected.channels[1]] } }));
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: { ...connected, channels: connected.channels.filter(c => c.service === 'youtube') } }));
     renderTab();
     expect(await screen.findByText(/None of the accounts connected in Buffer/)).toBeTruthy();
   });
@@ -159,11 +163,11 @@ describe('ArtistPromotePage', () => {
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postsPerWeek: null })));
   });
 
-  it('offers Buffer’s queue as the recommended posting time, or a set time', async () => {
+  it('offers Buffer’s queue (“Pick days & times for me”) as the posting time, or a set time', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
-    fireEvent.click(await screen.findByRole('radio', { name: /Recommended: your Buffer queue/ }));
+    fireEvent.click(await screen.findByRole('radio', { name: /Pick days & times for me/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postTime: null })));
   });
@@ -171,7 +175,7 @@ describe('ArtistPromotePage', () => {
   it('labels each kind’s wording “Edit templates”', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
-    await screen.findByRole('textbox', { name: 'From the archives, variant 1' });
+    await screen.findByRole('textbox', { name: 'From the archives, template 1' });
     expect(screen.getAllByText('Edit templates')).toHaveLength(7);
   });
 
@@ -183,7 +187,9 @@ describe('ArtistPromotePage', () => {
     }));
     renderTab();
     expect(await screen.findByRole('switch', { name: 'Autopost is on' })).toBeTruthy();
-    expect(screen.getByText(/Posting to 1 channel\. Each post joins your Buffer queue on its day/)).toBeTruthy();
+    const status = screen.getByRole('switch', { name: 'Autopost is on' }).parentElement!;
+    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post joins your Buffer queue on its day, where you can change or delete it\./);
+    expect(screen.getByRole('link', { name: 'Buffer queue' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
   });
 
   it('shows the server’s plan under Coming up', async () => {

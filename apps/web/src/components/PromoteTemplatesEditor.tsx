@@ -65,7 +65,8 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
         Facts in curly brackets are filled in for each post: <code>{'{title}'}</code>, <code>{'{type}'}</code>, <code>{'{date}'}</code>,{' '}
         <code>{'{year}'}</code>, <code>{'{age}'}</code>, <code>{'{where}'}</code>, <code>{'{price}'}</code>, <code>{'{link}'}</code>,{' '}
         <code>{'{name}'}</code> and <code>{'{note}'}</code>. Anything in square brackets is left out when a fact inside it is missing,
-        so <code>{'{title}[, from {year}]'}</code> works for undated releases too. Variants are used in turn.
+        so <code>{'{title}[, from {year}]'}</code> works for undated releases too. When a kind of post has more than one
+        template, autopost takes turns with them, so two posts in a row don’t read the same.
       </p>
       {AUTOPOST_KINDS.map(kind => {
         const on = !kindsOff.includes(kind);
@@ -96,7 +97,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
                         <div className="flex gap-2">
                           <textarea
                             value={variant}
-                            aria-label={`${KIND_COPY[kind].label}, variant ${i + 1}`}
+                            aria-label={`${KIND_COPY[kind].label}, template ${i + 1}`}
                             rows={2}
                             onChange={e => setVariants(kind, variants.map((v, j) => (j === i ? e.target.value : v)))}
                             className="flex-1 px-2 py-1 text-sm bg-bg-primary border border-border rounded-lg"
@@ -106,7 +107,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
                               type="button"
                               onClick={() => setVariants(kind, variants.filter((_, j) => j !== i))}
                               className="self-start text-xs text-text-muted hover:text-text-primary px-1"
-                              aria-label={`Remove ${KIND_COPY[kind].label} variant ${i + 1}`}
+                              aria-label={`Remove ${KIND_COPY[kind].label} template ${i + 1}`}
                             >
                               Remove
                             </button>
@@ -116,7 +117,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
                           <p className="text-xs text-error">{found.join(' · ')}</p>
                         ) : vars ? (
                           <p className="text-xs text-text-secondary whitespace-pre-line">
-                            {preview ?? 'Can’t be filled for your newest release; the next variant would be used.'}
+                            {preview ?? 'Can’t be filled for your newest release, so the next template would be used.'}
                           </p>
                         ) : null}
                       </div>
@@ -126,7 +127,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
                   <div className="flex gap-3 text-xs">
                     {variants.length < MAX_VARIANTS && (
                       <button type="button" onClick={() => setVariants(kind, [...variants, ''])} className="text-link hover:underline">
-                        Add a variant
+                        Add a template
                       </button>
                     )}
                     {edited && (
