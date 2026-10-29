@@ -137,7 +137,7 @@ describe('ArtistPromotePage', () => {
     const empty = { ...connected, channels: [] };
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: empty }));
     renderTab();
-    const link = await screen.findByRole('link', { name: /Connect accounts in Buffer/ });
+    const link = await screen.findByRole('link', { name: /Connect social channels in Buffer/ });
     expect(link.getAttribute('href')).toBe('https://publish.buffer.com/settings/channels');
     fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
     await waitFor(() => expect(promote.getPromotePage).toHaveBeenCalledTimes(2));
@@ -146,7 +146,7 @@ describe('ArtistPromotePage', () => {
   it('says the same when the only accounts are ones autopost can’t post to', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: { ...connected, channels: connected.channels.filter(c => c.service === 'youtube') } }));
     renderTab();
-    expect(await screen.findByText(/None of the accounts connected in Buffer/)).toBeTruthy();
+    expect(await screen.findByText(/None of the channels connected in Buffer/)).toBeTruthy();
   });
 
   it('sets posts a week with a slider that starts on the recommendation, and stores Recommended there', async () => {

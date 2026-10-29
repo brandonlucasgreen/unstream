@@ -40,7 +40,7 @@ const BUFFER_OUTCOMES: Record<string, string> = {
 /** Where a Buffer user sees what's scheduled, and can change or delete it. */
 const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
 
-/** Where a Buffer user connects their social accounts. */
+/** Where a Buffer user connects their social channels. */
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
 
 const PAUSED: Record<string, string> = {
@@ -239,7 +239,7 @@ export function ArtistPromotePage() {
           <div className="space-y-2">
             <p className="text-sm text-text-secondary">
               <span className="font-medium text-text-primary">New to Buffer?</span> You can make a free account on the next
-              screen. Then connect your social accounts in Buffer, since Unstream can only post to accounts connected there.
+              screen. Then connect your social channels in Buffer, since Unstream can only post to channels connected there.
             </p>
             <button type="button" disabled={busy} onClick={connect} className={PRIMARY_BUTTON}>Connect Buffer</button>
           </div>
@@ -289,7 +289,7 @@ export function ArtistPromotePage() {
                     </p>
                   )}
                   <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className="inline-block pt-1 text-xs text-link hover:underline">
-                    Connect another account in Buffer ↗
+                    Connect another social channel ↗
                   </a>
                 </fieldset>
               )
@@ -517,8 +517,8 @@ function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; 
     <div className="space-y-2 rounded-lg border border-border bg-bg-primary p-3">
       <p className="text-sm text-text-primary">
         {hasOthers
-          ? 'None of the accounts connected in Buffer are ones autopost can post to.'
-          : 'Your Buffer doesn’t have any social accounts connected yet.'}
+          ? 'None of the channels connected in Buffer are ones autopost can post to.'
+          : 'Your Buffer doesn’t have any social channels connected yet.'}
       </p>
       <p className="text-sm text-text-secondary">
         Connect your Instagram, TikTok, Facebook, Threads, Bluesky, Mastodon, LinkedIn or Substack in Buffer first, then come
@@ -526,7 +526,7 @@ function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; 
       </p>
       <div className="flex flex-wrap gap-2">
         <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className={PRIMARY_BUTTON}>
-          Connect accounts in Buffer ↗
+          Connect social channels in Buffer ↗
         </a>
         <button type="button" disabled={busy} onClick={onCheckAgain} className={SECONDARY_BUTTON}>Check again</button>
       </div>
