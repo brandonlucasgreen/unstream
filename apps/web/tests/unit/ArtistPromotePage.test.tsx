@@ -82,16 +82,22 @@ describe('ArtistPromotePage', () => {
     expect(await screen.findByText(/isn’t available on Unstream yet/)).toBeTruthy();
   });
 
-  it('offers to connect Buffer, coming back to this tab', async () => {
+  it('offers to connect Buffer, coming back to this page, and keeps the rest hidden until then', async () => {
     promote.getPromotePage.mockResolvedValue(loaded());
     promote.startBufferConnection.mockReturnValue(new Promise(() => {}));
     renderTab();
-    fireEvent.click(await screen.findByRole('button', { name: 'Connect Buffer' }));
+    const connect = await screen.findByRole('button', { name: 'Connect Buffer' });
+    // Nothing about posting until there's somewhere to post.
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.queryByRole('slider')).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Coming up' })).toBeNull();
+    expect(screen.getByText(/Once Buffer is connected with at least one channel/)).toBeTruthy();
+    fireEvent.click(connect);
     expect(promote.startBufferConnection).toHaveBeenCalledWith('tok', 'kid-lightbulbs');
   });
 
   it('previews each template against the newest release as it’s edited', async () => {
-    promote.getPromotePage.mockResolvedValue(loaded());
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
     const box = await screen.findByRole('textbox', { name: 'From the archives, variant 3' });
     fireEvent.change(box, { target: { value: 'Still great: {title}' } });
@@ -100,7 +106,7 @@ describe('ArtistPromotePage', () => {
     expect(screen.getByText('Unknown variable {titel}')).toBeTruthy();
   });
 
-  it('offers only the channels autopost can write for, by their networks’ proper names, and switches on with one ticked', async () => {
+  it('offers only the channels autopost can write for, by their networks’ proper names, and switches on straight away once one is ticked', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
@@ -109,12 +115,14 @@ describe('ArtistPromotePage', () => {
     expect(screen.queryByRole('checkbox', { name: /YouTube/ })).toBeNull();
     expect(screen.getByText(/Not available for autopost: kid lightbulbs \(YouTube\), sphmrs \(Pinterest\)\./)).toBeTruthy();
 
-    const toggle = screen.getByRole('checkbox', { name: 'Post automatically' }) as HTMLInputElement;
+    const toggle = screen.getByRole('switch', { name: 'Autopost is off' }) as HTMLButtonElement;
     expect(toggle.disabled).toBe(true);
+    expect(screen.getByText('Tick at least one channel below, then switch it on.')).toBeTruthy();
     fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · Instagram/ }));
     expect(screen.getByText(/Instagram needs an image on every post/)).toBeTruthy();
+    expect(screen.getByText(/nothing is saved as a draft/)).toBeTruthy();
+    // The switch saves by itself; no separate Save.
     fireEvent.click(toggle);
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({
       enabled: true, organizationId: 'org1', channelIds: ['ig'], postsPerWeek: null,
@@ -144,10 +152,10 @@ describe('ArtistPromotePage', () => {
     const slider = await screen.findByRole('slider', { name: /Posts a week/ }) as HTMLInputElement;
     expect(slider.value).toBe('3');
     fireEvent.change(slider, { target: { value: '5' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postsPerWeek: 5 })));
     fireEvent.change(slider, { target: { value: '3' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postsPerWeek: null })));
   });
 
@@ -156,31 +164,30 @@ describe('ArtistPromotePage', () => {
     promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
     fireEvent.click(await screen.findByRole('radio', { name: /Recommended: your Buffer queue/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postTime: null })));
   });
 
-  it('explains Post automatically on a tap: off means nothing goes to Buffer, and no drafts', async () => {
-    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
-    renderTab();
-    const tip = await screen.findByRole('button', { name: 'What does Post automatically do?' });
-    expect(screen.queryByRole('note')).toBeNull();
-    fireEvent.click(tip);
-    expect(tip.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByRole('note').textContent).toMatch(/Off: nothing more goes to Buffer, and nothing is saved as a draft/);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('note')).toBeNull();
-  });
-
   it('labels each kind’s wording “Edit templates”', async () => {
-    promote.getPromotePage.mockResolvedValue(loaded());
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
     await screen.findByRole('textbox', { name: 'From the archives, variant 1' });
     expect(screen.getAllByText('Edit templates')).toHaveLength(7);
   });
 
+  it('says what the switch does when it’s on', async () => {
+    const base = loaded() as Extract<PromotePage, { available: true }>;
+    promote.getPromotePage.mockResolvedValue(loaded({
+      buffer: connected,
+      settings: { ...base.settings, enabled: true, postTime: null, organizationId: 'org1', channelIds: ['ig'] },
+    }));
+    renderTab();
+    expect(await screen.findByRole('switch', { name: 'Autopost is on' })).toBeTruthy();
+    expect(screen.getByText(/Posting to 1 channel\. Each post joins your Buffer queue on its day/)).toBeTruthy();
+  });
+
   it('shows the server’s plan under Coming up', async () => {
-    promote.getPromotePage.mockResolvedValue(loaded());
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
     const comingUp = await screen.findByRole('region', { name: 'Coming up' });
     expect(within(comingUp).getByText(/From the archives: Ruined Castle \(2024\)\. It’s on Bandcamp/)).toBeTruthy();
