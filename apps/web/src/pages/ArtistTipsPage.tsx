@@ -7,7 +7,7 @@ import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { connectStripe, getTipSettings, TipsApiError, type TipSettings } from '../services/tips';
 import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
 
-// /artist-edit/:slug/tips — the Manage Tips tab, rendered inside ArtistSettingsLayout. Stripe onboarding
+// /tips/:slug — Manage Tips, rendered inside ArtistSettingsLayout. Stripe onboarding
 // returns here (tips-connect.ts sets the return URL), and loading the settings is what syncs the
 // account's state on the way back.
 //
@@ -43,7 +43,7 @@ export function ArtistTipsPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!session) {
-      if (slug) navigate(`/login?next=${encodeURIComponent(`/artist-edit/${encodeURIComponent(slug)}/tips`)}`, { replace: true });
+      if (slug) navigate(`/login?next=${encodeURIComponent(`/tips/${encodeURIComponent(slug)}`)}`, { replace: true });
       return;
     }
     if (!slug) return;

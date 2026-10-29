@@ -95,7 +95,7 @@ describe('route titles', () => {
   it('names routes that never set a title themselves', () => {
     expect(titleForPath('/privacy-policy')).toBe('Privacy policy | Unstream');
     expect(titleForPath('/u/fan')).toBe('Collection | Unstream');
-    expect(titleForPath('/artist-edit/kid-lightbulbs/releases')).toBe('Manage releases | Unstream');
+    expect(titleForPath('/releases/kid-lightbulbs')).toBe('Manage releases | Unstream');
     expect(titleForPath('/artist-edit/kid-lightbulbs')).toBe('Edit profile | Unstream');
   });
 

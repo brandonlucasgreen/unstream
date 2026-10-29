@@ -147,7 +147,7 @@ export async function sendTipsApprovedEmail(params: TipsApprovedParams): Promise
       });
       return;
     }
-    const tipsUrl = `https://unstream.stream/artist-edit/${encodeURIComponent(slug)}/tips`;
+    const tipsUrl = `https://unstream.stream/tips/${encodeURIComponent(slug)}`;
     await sendNotificationOnce({
       client,
       notificationType: 'tips_approved',

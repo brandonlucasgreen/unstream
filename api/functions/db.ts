@@ -4801,7 +4801,7 @@ export interface ArtistPageRelease {
  * between requests.
  *
  * `display_order` leads, NULLS LAST: it's null for every release until a claimed artist arranges
- * their catalogue on /artist-edit/:slug/releases, so this is unchanged behaviour for everyone
+ * their catalogue on /releases/:slug, so this is unchanged behaviour for everyone
  * else. Sorted in SQL rather than after the fetch on purpose — re-sorting a date-limited page in
  * JS would drop a release the artist had pinned to the top out of the query entirely.
  *

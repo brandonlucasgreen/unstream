@@ -40,7 +40,7 @@ function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/artist-edit/:slug/tips" element={<ArtistTipsPage />} />
+        <Route path="/tips/:slug" element={<ArtistTipsPage />} />
         <Route path="/login" element={<p>login page</p>} />
       </Routes>
       <LocationProbe />
@@ -59,16 +59,16 @@ afterEach(cleanup);
 describe('ArtistTipsPage', () => {
   it('sends a signed-out visitor to sign in, coming back to this tab', async () => {
     auth.value = { session: null, isLoading: false };
-    renderAt('/artist-edit/kid-lightbulbs/tips');
+    renderAt('/tips/kid-lightbulbs');
     await screen.findByText('login page');
     expect(location!.pathname).toBe('/login');
-    expect(new URLSearchParams(location!.search).get('next')).toBe('/artist-edit/kid-lightbulbs/tips');
+    expect(new URLSearchParams(location!.search).get('next')).toBe('/tips/kid-lightbulbs');
   });
 
   it('after an expired Stripe link, fetches a fresh one and goes back to Stripe, once', async () => {
     tips.getTipSettings.mockResolvedValue(settings('onboarding'));
     tips.connectStripe.mockReturnValue(new Promise(() => {}));
-    renderAt('/artist-edit/kid-lightbulbs/tips?stripe=refresh');
+    renderAt('/tips/kid-lightbulbs?stripe=refresh');
     expect(await screen.findByText('Taking you back to Stripe…')).toBeTruthy();
     // "Taking you back…" renders in the same commit that queues the connectStripe passive
     // effect, so the call can lag the text under CI load — wait for it instead of asserting
@@ -82,7 +82,7 @@ describe('ArtistTipsPage', () => {
   it('shows the panel and an error when a fresh link can’t be had', async () => {
     tips.getTipSettings.mockResolvedValue(settings('onboarding'));
     tips.connectStripe.mockRejectedValue(new TypeError('Failed to fetch'));
-    renderAt('/artist-edit/kid-lightbulbs/tips?stripe=refresh');
+    renderAt('/tips/kid-lightbulbs?stripe=refresh');
     expect(await screen.findByText(/Stripe's link had expired and we couldn't get a new one/)).toBeTruthy();
     expect(screen.getByTestId('panel')).toBeTruthy();
     expect(screen.queryByText('Taking you back to Stripe…')).toBeNull();
@@ -91,14 +91,14 @@ describe('ArtistTipsPage', () => {
 
   it("doesn't go back to Stripe for an artist past onboarding", async () => {
     tips.getTipSettings.mockResolvedValue(settings('stripe_review'));
-    renderAt('/artist-edit/kid-lightbulbs/tips?stripe=refresh');
+    renderAt('/tips/kid-lightbulbs?stripe=refresh');
     expect(await screen.findByTestId('panel')).toBeTruthy();
     expect(tips.connectStripe).not.toHaveBeenCalled();
   });
 
   it('confirms the return from Stripe and cleans up the address', async () => {
     tips.getTipSettings.mockResolvedValue(settings('stripe_review'));
-    renderAt('/artist-edit/kid-lightbulbs/tips?stripe=return');
+    renderAt('/tips/kid-lightbulbs?stripe=return');
     expect(await screen.findByText('Stripe Connect awaiting verification')).toBeTruthy();
     expect(screen.getByTestId('panel')).toBeTruthy();
     expect(location!.search).toBe('');
@@ -107,7 +107,7 @@ describe('ArtistTipsPage', () => {
 
   it('shows the disconnected state as not connected, with no Stripe banner', async () => {
     tips.getTipSettings.mockResolvedValue(settings('not_connected'));
-    renderAt('/artist-edit/kid-lightbulbs/tips');
+    renderAt('/tips/kid-lightbulbs');
     expect((await screen.findByTestId('panel')).textContent).toBe('not_connected');
     expect(screen.queryByText(/Back from Stripe/)).toBeNull();
   });

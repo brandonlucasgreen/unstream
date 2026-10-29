@@ -7,7 +7,7 @@
 // An account is created the first time, and again after the artist disconnected Unstream from
 // their Stripe dashboard (deauthorized_at): that row is then reused in place for the new account.
 // Returns { url } — a Stripe-hosted Account Link. The artist completes onboarding on Stripe and
-// comes back to the Manage Tips tab (/artist-edit/:slug/tips); account.updated (tips-webhook) and
+// comes back to the Manage Tips page (/tips/:slug); account.updated (tips-webhook) and
 // tips-settings GET both sync the account's state.
 //
 // Errors: Stripe refusing the request (a 4xx) is permanent and answers code 'stripe_rejected' —
@@ -116,8 +116,8 @@ async function handleRequest(event: HandlerEvent) {
     const link = await stripeRequest<StripeAccountLink>('POST', '/v1/account_links', {
       account: account.stripe_account_id,
       type: 'account_onboarding',
-      refresh_url: `${siteUrl()}/artist-edit/${encodeURIComponent(slug)}/tips?stripe=refresh`,
-      return_url: `${siteUrl()}/artist-edit/${encodeURIComponent(slug)}/tips?stripe=return`,
+      refresh_url: `${siteUrl()}/tips/${encodeURIComponent(slug)}?stripe=refresh`,
+      return_url: `${siteUrl()}/tips/${encodeURIComponent(slug)}?stripe=return`,
     });
     return respond(200, { url: link.url });
   } catch (err) {

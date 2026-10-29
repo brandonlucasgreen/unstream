@@ -1,10 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { TabSkeleton } from './ArtistSettingsLayout';
+import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
 import {
   getPromotePage,
@@ -16,9 +14,10 @@ import {
 } from '../services/promote';
 
 // /promote/:slug — release autopost (docs/specs/release-autopost-spec.md, "UI: the Promote
-// page"), reached from the Promote button on /my-artists. Its own page rather than a tab under
-// Edit, because it isn't about the artist's profile (Brandon, 2026-10-29). Admin-only while the
-// releaseAutopost flag is off: the server answers { available: false } to anyone else.
+// page"), reached from the Promote button on /my-artists and rendered inside ArtistSettingsLayout.
+// Its own page rather than a tab under Edit, because it isn't about the artist's profile (Brandon,
+// 2026-10-29). Admin-only while the releaseAutopost flag is off: the server answers
+// { available: false } to anyone else.
 //
 // The settings are edited here and saved together; "Coming up" is the server's plan from the
 // saved settings, so it's exactly what will post, and it refreshes on every save.
@@ -84,6 +83,7 @@ export function ArtistPromotePage() {
   const [saved, setSaved] = useState(false);
   // Read once: the address loses the parameter straight after.
   const [bufferOutcome] = useState(() => searchParams.get('buffer'));
+  useReportArtistName(page?.available ? page.artist.name : undefined);
 
   useEffect(() => {
     if (!searchParams.has('buffer')) return;
@@ -119,11 +119,9 @@ export function ArtistPromotePage() {
   }
 
   if (!slug) return null;
-  if (loadError) return <Frame slug={slug}><p className="text-sm text-error">{loadError}</p></Frame>;
-  if (!page || !session) return <Frame slug={slug}><TabSkeleton label="Loading" /></Frame>;
-  if (!page.available || !form) {
-    return <Frame slug={slug}><p className="text-sm text-text-muted">Release autopost isn’t available on Unstream yet.</p></Frame>;
-  }
+  if (loadError) return <p className="text-sm text-error">{loadError}</p>;
+  if (!page || !session) return <TabSkeleton label="Loading" />;
+  if (!page.available || !form) return <p className="text-sm text-text-muted">Release autopost isn’t available on Unstream yet.</p>;
 
   const token = session.access_token;
   const update = (patch: Partial<PromoteSettingsInput>) => {
@@ -188,7 +186,7 @@ export function ArtistPromotePage() {
   const canSwitchOn = Boolean(form.organizationId) && form.channelIds.length > 0;
 
   return (
-    <Frame slug={slug} artistName={page.artist.name}>
+    <div className="space-y-6">
       <div className="space-y-1">
         <p className="text-sm text-text-secondary">
           Posts about your releases, on a gentle weekly rhythm, scheduled to your own Buffer. Unstream writes nothing with AI: each
@@ -421,7 +419,7 @@ export function ArtistPromotePage() {
           </ul>
         </section>
       )}
-    </Frame>
+    </div>
   );
 }
 
@@ -447,34 +445,6 @@ function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; 
         </a>
         <button type="button" disabled={busy} onClick={onCheckAgain} className={SECONDARY_BUTTON}>Check again</button>
       </div>
-    </div>
-  );
-}
-
-/** The page around the content: site header, the way back to My Artists, the artist's name. */
-function Frame({ slug, artistName, children }: { slug: string; artistName?: string; children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
-      <Header />
-      <main className="flex-1 p-6">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div className="space-y-4">
-            <Link to="/my-artists" className="text-sm text-text-muted hover:text-text-primary transition-colors">
-              &larr; My Artists
-            </Link>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              {artistName ? (
-                <h1 className="font-display text-3xl font-extrabold text-text-primary">Promote {artistName}</h1>
-              ) : (
-                <div className="h-9 w-48 rounded bg-bg-secondary animate-pulse" aria-hidden="true" />
-              )}
-              <Link to={`/a/${slug}`} className="text-sm text-link hover:underline">View live profile</Link>
-            </div>
-          </div>
-          {children}
-        </div>
-      </main>
-      <Footer />
     </div>
   );
 }

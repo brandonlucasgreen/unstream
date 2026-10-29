@@ -1,5 +1,5 @@
 /**
- * The release list as the artist has rearranged it on /artist-edit/:slug/releases but not yet
+ * The release list as the artist has rearranged it on /releases/:slug but not yet
  * saved.
  *
  * An arrangement in progress is held as ids rather than a reordered copy of the list, so the

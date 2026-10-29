@@ -4,8 +4,11 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAnalytics } from './ArtistAnalytics';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
+import { getTipsAvailable } from '../services/tips';
 
-// The body of /my-artists: the profiles this user has claimed, with their stats.
+// The body of /my-artists: the profiles this user has claimed, with their stats, and a button for
+// each page the artist manages: Edit (the profile), Releases, Tips and Promote. Those were tabs
+// under Edit until 2026-10-29; only Edit is about the profile.
 //
 // It carries no heading of its own — the page is dedicated to it, so the h1 there is the
 // only one needed. It fetches and skeletons on its own rather than being handed data by
@@ -22,11 +25,26 @@ interface ClaimedProfile {
   claimedAt: string;
 }
 
+const SECONDARY_LINK =
+  'px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors';
+
 export function ClaimedArtistsSection() {
   const { session, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ClaimedProfile[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Tips ship dark: the button appears only once the server has a Stripe key. A failed check hides
+  // it rather than breaking the page, and is reported.
+  const [tipsAvailable, setTipsAvailable] = useState(false);
+
+  useEffect(() => {
+    if (!session) return;
+    let cancelled = false;
+    getTipsAvailable(session.access_token)
+      .then(available => { if (!cancelled) setTipsAvailable(available === true); })
+      .catch(err => Sentry.captureException(err, { extra: { context: 'myArtists.tipsAvailable' } }));
+    return () => { cancelled = true; };
+  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -108,30 +126,22 @@ export function ClaimedArtistsSection() {
                   <p className="text-sm text-text-muted truncate">
                     unstream.stream/a/{profile.slug}
                   </p>
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
                     <Link
                       to={`/artist-edit/${profile.slug}`}
                       className="px-3 py-1.5 rounded-lg bg-accent-primary text-accent-foreground text-sm font-medium hover:bg-accent-primary/90 transition-colors"
                     >
                       Edit
                     </Link>
+                    <Link to={`/releases/${profile.slug}`} className={SECONDARY_LINK}>Releases</Link>
+                    {tipsAvailable && <Link to={`/tips/${profile.slug}`} className={SECONDARY_LINK}>Tips</Link>}
                     {/* Admin-only because the server only lets the admin in while the releaseAutopost
                         flag is off (canUseReleaseAutopost). Switching the flag on for everyone has to
                         show this to everyone too. */}
                     {isAdmin && (
-                      <Link
-                        to={`/promote/${profile.slug}`}
-                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                      >
-                        Promote
-                      </Link>
+                      <Link to={`/promote/${profile.slug}`} className={SECONDARY_LINK}>Promote</Link>
                     )}
-                    <Link
-                      to={`/a/${profile.slug}`}
-                      className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
-                    >
-                      View
-                    </Link>
+                    <Link to={`/a/${profile.slug}`} className={SECONDARY_LINK}>View</Link>
                   </div>
                 </div>
               </div>

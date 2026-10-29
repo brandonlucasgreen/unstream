@@ -47,9 +47,9 @@ function releaseItem(overrides: Record<string, unknown> = {}) {
 
 function renderPage() {
   return render(
-    <MemoryRouter initialEntries={['/artist-edit/kid-lightbulbs/releases']}>
+    <MemoryRouter initialEntries={['/releases/kid-lightbulbs']}>
       <Routes>
-        <Route path="/artist-edit/:slug/releases" element={<ArtistReleasesPage />} />
+        <Route path="/releases/:slug" element={<ArtistReleasesPage />} />
       </Routes>
     </MemoryRouter>
   );

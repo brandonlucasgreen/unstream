@@ -1,5 +1,5 @@
 // API endpoint: /api/artist-promote — release autopost settings for one artist, behind the
-// Promote page (/artist-edit/:slug/promote). docs/specs/release-autopost-spec.md, "UI: a Promote page".
+// Promote page (/promote/:slug). docs/specs/release-autopost-spec.md, "UI: a Promote page".
 //
 //   GET /api/artist-promote?artist={slug}   settings, the Buffer channels to choose from,
 //                                            "Coming up" and the latest posts handed to Buffer
