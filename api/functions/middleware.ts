@@ -383,8 +383,9 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'archive.org',
   // No discord.com: the Discord bot was its only caller and was removed (2026-10-04) — it had
   // no users and its background function was an open path to the bot token.
-  // Image CDNs, fetched only to draw Instagram cards (social-card.ts): artist photos and release
-  // covers as the platforms store them. Faircamp covers already pass the faircamp rule below,
+  // Image CDNs, fetched to draw Instagram cards (social-card.ts) and to copy covers and artist
+  // photos for release autopost (autopost-media.ts): artist photos and release covers as the
+  // platforms store them. Faircamp covers already pass the faircamp rule below,
   // and Mirlo's are on cdn.mirlo.space, covered above.
   '*.bcbits.com',              // Bandcamp's image host
   'yt3.googleusercontent.com', // YouTube channel avatars, which some artist photos are
@@ -397,6 +398,11 @@ export const ALLOWED_OUTBOUND_HOSTNAMES = new Set([
   'api.buffer.com',
   // Buffer's OAuth endpoints live on a different host from its API (api/functions/buffer-oauth.ts).
   'auth.buffer.com',
+  // The public R2 bucket release autopost copies images into (api/functions/autopost-media.ts):
+  // R2's S3 API for the upload, and the bucket's public domain, fetched back the way Buffer will.
+  // Both come from configuration, never from a request.
+  '*.r2.cloudflarestorage.com',
+  'cards.unstream.stream',
   // Stripe, for artist tips (api/functions/stripe.ts). Only the API host: Checkout, onboarding and
   // the dashboard are hosted pages the fan or artist's browser opens, never fetched server-side,
   // and there is no Stripe.js — see docs/specs/artist-patronage-spec.md §4.

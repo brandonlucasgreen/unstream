@@ -1,0 +1,75 @@
+name: Release autopost sweep
+
+# Hands each artist's next release autopost posts to their own Buffer
+# (docs/specs/release-autopost-spec.md, "How it runs"; api/functions/release-autopost-sweep.ts).
+#
+# A GitHub Actions cron rather than a scheduled Netlify function, as recatalog-sweep.yml: there
+# are no scheduled Netlify functions in this repo.
+#
+# ## Cadence: every 6 hours
+#
+# Posts go to Buffer 72 hours before they publish, so a run that fails, or an artist deferred
+# because a run ran out of time, has eleven more chances before the post is due. Each run costs a
+# few database reads per artist with autopost on, and Buffer calls only when a post is due.
+#
+# ## Safe to re-run
+#
+# Every slot is claimed in the database before Buffer is called, so a duplicate run finds the
+# claims and posts nothing twice. Re-running by hand is free.
+#
+# ## Who it posts for
+#
+# Only artists whose owner passes the releaseAutopost feature gate. While that flag is off, it's
+# the admin's own artists only, whatever settings rows exist.
+#
+# Calls unstream.netlify.app, not unstream.stream: Cloudflare's Bot Fight Mode challenges a
+# runner's POST to the proxied domain (see recatalog-sweep.yml). The function is still
+# secret-gated.
+
+on:
+  schedule:
+    - cron: '20 2,8,14,20 * * *' # Every 6 hours, off the top of the hour and off recatalog-sweep's 1 and 13
+  workflow_dispatch:
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push the next posts to Buffer
+        env:
+          INTERNAL_FUNCTION_SECRET: ${{ secrets.INTERNAL_FUNCTION_SECRET }}
+        run: |
+          if [ -z "$INTERNAL_FUNCTION_SECRET" ]; then
+            echo "::error::INTERNAL_FUNCTION_SECRET secret is not set"
+            exit 1
+          fi
+
+          response=$(curl -sS -X POST -w '\n%{http_code}' \
+            -H "Authorization: Bearer $INTERNAL_FUNCTION_SECRET" \
+            https://unstream.netlify.app/.netlify/functions/release-autopost-sweep)
+
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          # Anything but 200 fails the run: a missing media bucket or an unreadable database must
+          # not look like "nothing was due".
+          if [ "$status" != "200" ]; then
+            echo "::error::Sweep failed with HTTP $status: $body"
+            exit 1
+          fi
+
+          # `errors` above 0 means an artist's run threw (it's in Sentry); `deferred` above 0 means
+          # the run ran out of time and those artists wait for the next one.
+          echo "Sweep OK: $body"
+
+      - name: Alert on failure (ntfy push)
+        if: failure()
+        env:
+          NTFY_CI_TOPIC: ${{ secrets.NTFY_CI_TOPIC }}
+        run: |
+          curl -sS -X POST -o /dev/null -w 'ntfy alert: %{http_code}\n' \
+            -H "Title: Release autopost sweep FAILED" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            -d "Release autopost sweep failed ($(date -u +%FT%TZ)). gh run view ${GITHUB_RUN_ID:-unknown}" \
+            "https://ntfy.sh/$NTFY_CI_TOPIC"

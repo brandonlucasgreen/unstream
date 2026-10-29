@@ -174,11 +174,11 @@ The other networks show a link preview when there's no image, so they're never s
 - Rejected with a plain message if they're outside Instagram's shape range. Instagram would refuse them anyway, and cropping someone's photo automatically can cut through a face.
 - Stored in R2 (below), and deletable from the settings page.
 
-**Covers and the artist photo are handed to Buffer by their source address, if Buffer keeps its own copy.** Buffer fetches an image on publish day, and Bandcamp deletes old files. If Buffer copies the image when the post is created, nothing can go missing, and Unstream stores none of these images. **To check before building (Build plan step 2).** Until it's confirmed, they're copied to R2 when the post is pushed. Either way, the source is checked to still load before the post is handed over, with the weekly social posts' rule (`livePhotoUrl`: only a 404 or 410 drops it). And since posts go to Buffer only 72 hours ahead, the window for a file to disappear is small.
+**Every image is copied to R2 when its post is pushed, and Buffer gets the copy** (settled 2026-10-29). Buffer fetches an image on the day the post publishes, not when it's created: the weekly social posts found that out when a deleted artist photo failed a post (CLAUDE.md, "Social posts"). Bandcamp deletes old files, so the source address can't be trusted to still be there three days later. The copy is keyed by the image's hash, so a cover posted every month is stored once, and it's fetched back from the bucket's public address before Buffer gets it. A source that won't load (a 404) means the post goes without it, and Instagram skips it.
 
 ### Storage: R2 for uploads, Buffer's media library later
 
-**R2 holds what artists upload, plus copied covers only if Buffer turns out not to keep its own copy.** It's in the bucket the social cards already use. It has no egress fees, which matters most here because Buffer and the networks fetch every image, and it's already set up with credentials, the upload helper and the fetch-back check.
+**R2 holds the copied covers and photos, and what artists upload.** It's in the bucket the social cards already use. It has no egress fees, which matters most here because Buffer and the networks fetch every image, and it's already set up with credentials, the upload helper and the fetch-back check.
 
 **What it costs: in practice, nothing for a long time.** Cloudflare's published R2 prices for Standard storage (recheck before launch):
 
@@ -253,13 +253,16 @@ Verified artists are refreshed by the sweep on a 7-day cooldown (`RECATALOG_COOL
 
 **One scheduled function, `release-autopost-sweep`,** run every 6 hours by a GitHub Action carrying `INTERNAL_FUNCTION_SECRET`, like `recatalog-sweep`. Each run is idempotent:
 
-1. **Plan.** For each artist with it on, fill every slot in the next 14 days that isn't filled yet, using the rules in "Filling each slot". Plans are cheap and easy to throw away: a slot not yet pushed is re-planned whenever the catalogue, settings or templates change, so "Coming up" always matches the current rules.
-2. **Push.** For every planned slot due in the next 72 hours: recheck the release, render the caption for each network, copy the image to R2, and create one Buffer post per ticked channel with its due time, tagged `unstream: release autopost`. Then mark it `pushed` with the Buffer post ids.
-3. **Tidy.** Release slots whose release no longer qualifies, and move a release-day post whose `release_date` changed.
+1. **Plan.** For each artist with it on, whose owner still holds the verified claim and passes the feature gate, plan the next 28 days (`PLAN_HORIZON_DAYS`, the same window "Coming up" shows) from the current catalogue, settings and history. **Upcoming posts aren't stored**: the planner is deterministic, so they're recomputed each time, and a changed catalogue, setting or template simply changes the next plan. Nothing needs re-planning or tidying.
+2. **Push.** For every slot due in the next 72 hours: **claim it first** (a row with status `pushing`, unique on `(artist_id, slot_at)`, so a second run finds it taken), copy the image to R2, render the caption for each channel, and create one scheduled Buffer post per ticked channel, tagged `unstream: release autopost`. Then mark it `pushed` with the Buffer post ids, or `failed`.
+
+The release is read fresh on every run, so one hidden, merged or sent to review since it was planned simply isn't in the next plan. A run that dies between the claim and Buffer leaves the slot claimed: a missed post rather than a doubled one.
 
 **Why 72 hours ahead:** it stays far inside the free plan's queue limit, a change in the meantime is caught before posting, and the artist still sees each post in Buffer before it goes.
 
-**Failures:** a dead Buffer grant (`BufferNotConnectedError`) pauses that artist and sends the one reconnect email. Any other Buffer error goes to Sentry and is retried next run, three times at most. No Redis anywhere.
+**Failures:** a dead Buffer grant (`BufferNotConnectedError`) pauses that artist (`paused_reason`); the reconnect email comes before the feature opens to other artists. A slot no channel accepted is `failed` and retried by later runs, three attempts at most. A slot that reached some channels but not others is `pushed`, with the refusals in `error`, and isn't retried, since that would post again to the channels that took it. Everything that didn't go reaches Sentry. No Redis anywhere.
+
+**Time:** an ordinary function has about ten seconds, so a run starts no new artist after five. Artists not reached wait six hours for the next run, well inside the 72 hours.
 
 ### The rotation is pure code
 
@@ -269,12 +272,18 @@ The slot filler is a pure function: `planSlots(settings, releases, history, temp
 
 All are server-only: RLS on, no policies, read and written by the functions after an ownership check (the claim's `user_id`), with a comment saying the missing policies are deliberate.
 
-- **`release_autopost_settings`**, one row per artist profile: `artist_id` (PK), `user_id`, `enabled`, `enabled_at`, `posts_per_week` (null = recommended), `timezone`, `post_time`, `organization_id`, `channel_ids text[]`, `kinds_off text[]`, `templates jsonb`.
-- **`release_autopost_posts`**, one row per slot: `id`, `artist_id`, `slot_at`, `kind`, `release_id` (null for support posts), `template_index` (autopost) or `text` (campaign), `campaign_id` (null for autopost), `image_key`, `status` (`planned` | `pushed` | `cancelled` | `failed`), `buffer_post_ids jsonb` (which analytics uses to tell which release a Buffer post was about), `captions jsonb` (exactly what was sent, written at push), `error`, `attempts`, timestamps. Autopost rows are unique on `(artist_id, slot_at)`, so a retried run can't double-post. Campaign rows are unique by id, since they're created by the artist. Pushed rows are the history that spacing is measured from.
+Built in `20261029120000_release-autopost.sql`:
+
+- **`release_autopost_settings`**, one row per artist profile: `artist_id` (PK), `user_id`, `enabled`, `enabled_at`, `posts_per_week` (null = recommended), `timezone`, `post_time`, `organization_id`, `channel_ids text[]`, `kinds_off text[]`, `templates jsonb`, `paused_reason`.
+- **`release_autopost_posts`**, one row per slot handed to Buffer (upcoming slots aren't stored): `id`, `artist_id`, `slot_at`, `slot_date`, `kind`, `release_id` (null for support posts), `template_index`, `image_key`, `image_on_instagram`, `status` (`pushing` | `pushed` | `failed`), `attempts`, `buffer_post_ids jsonb` (which analytics uses to tell which release a Buffer post was about), `captions jsonb` (exactly what was sent, per channel), `error`, timestamps. Unique on `(artist_id, slot_at)`: that's the claim. Pushing and pushed rows are the history spacing is measured from.
+- **`releases.note`**: a new nullable column (280 characters at most) for the per-release `{note}`, added to `curated_fields` when an artist writes it, so a re-crawl never touches it.
+
+Still to come, with campaigns and uploads:
+
+- **Campaign posts** in the same `release_autopost_posts` table, adding `text` (the artist's own words) and `campaign_id`. They're created by the artist ahead of time, so unlike autopost slots they are stored before they're pushed.
 - **`release_autopost_campaigns`**: `id`, `artist_id`, `release_id`, `status` (`active` | `ended` | `cancelled`), `created_at`. A campaign's steps are its posts' rows. Each row's position relative to the release date is stored too, so a moved date can move the posts not yet pushed.
 - **`release_autopost_images`**: `id`, `artist_id`, `r2_key`, `width`, `height`, `last_used_at`, `created_at`.
 - **`release_autopost_settings.campaign_emails`** (default on): the one offer email per new release.
-- **`releases.note`**: a new nullable column for the per-release `{note}`, added to `curated_fields` when an artist writes it, so a re-crawl never touches it.
 
 ## Reused from curator posts
 
@@ -308,7 +317,7 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 ## Build plan
 
 1. **The rotation, on paper.** `planSlots` (`api/functions/autopost-plan.ts`) and `renderTemplate` (`api/shared/autopost-templates.ts`) with their tests, plus `npm run preview:autopost -- <artist-slug>`, which prints the next 12 weeks from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
-2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
+2. **Brandon only.** In two parts: **2a, the engine** (the tables, the sweep that plans and pushes, image copies to R2; `api/functions/release-autopost-sweep.ts`), then **2b, the Promote tab** (connecting Buffer with `posts:read` and a return path, the settings, "Coming up"). Then on Kid Lightbulbs' channels for a few weeks. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
 4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.
