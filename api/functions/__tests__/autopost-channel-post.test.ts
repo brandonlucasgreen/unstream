@@ -67,12 +67,23 @@ describe('buildChannelPost', () => {
 
   it('refuses a post over the network’s length', () => {
     const long = input({ templates: { catalogue: [`{title} ${'x'.repeat(300)}`] } });
-    expect(buildChannelPost(long)).toEqual({ ok: false, reason: expect.stringContaining('over bluesky’s 300') });
+    expect(buildChannelPost(long)).toEqual({ ok: false, reason: expect.stringContaining('over Bluesky’s 300') });
     expect(buildChannelPost({ ...long, channel: { id: 't', service: 'threads' } }).ok).toBe(true);
   });
 
-  it('refuses a network autopost doesn’t write for', () => {
-    expect(buildChannelPost(input({ channel: { id: 'li', service: 'linkedin' } })).ok).toBe(false);
+  it('refuses a network autopost doesn’t write for, by its proper name', () => {
+    expect(buildChannelPost(input({ channel: { id: 'yt', service: 'youtube' } })))
+      .toEqual({ ok: false, reason: 'YouTube isn’t a network autopost writes for' });
+  });
+
+  it('writes for LinkedIn and Substack with text and the image, and no extra settings', () => {
+    for (const service of ['linkedin', 'substack']) {
+      const post = buildChannelPost(input({ channel: { id: service, service } }));
+      expect(post.ok, service).toBe(true);
+      expect(post.ok && post.input.metadata, service).toBeUndefined();
+      expect(post.ok && post.input.assets, service).toHaveLength(1);
+      expect(post.ok && post.text, service).toContain('https://unstream.stream/a/kid-lightbulbs/ruined-castle');
+    }
   });
 
   it('refuses a release post whose release no longer qualifies', () => {

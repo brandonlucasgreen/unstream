@@ -54,7 +54,8 @@ const connected = {
   organizationId: 'org1',
   channels: [
     { id: 'ig', name: 'kidlightbulbs', service: 'instagram', supported: true },
-    { id: 'li', name: 'Kid Lightbulbs', service: 'linkedin', supported: false },
+    { id: 'yt', name: 'kid lightbulbs', service: 'youtube', supported: false },
+    { id: 'pin', name: 'sphmrs', service: 'pinterest', supported: false },
   ],
 };
 
@@ -99,16 +100,18 @@ describe('ArtistPromotePage', () => {
     expect(screen.getByText('Unknown variable {titel}')).toBeTruthy();
   });
 
-  it('lists only the channels autopost can write for as choosable, and switches on with one ticked', async () => {
+  it('offers only the channels autopost can write for, by their networks’ proper names, and switches on with one ticked', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();
-    const linkedin = await screen.findByRole('checkbox', { name: /Kid Lightbulbs \(linkedin, not supported\)/ });
-    expect((linkedin as HTMLInputElement).disabled).toBe(true);
+    await screen.findByRole('checkbox', { name: /kidlightbulbs · Instagram/ });
+    // Networks autopost can't use aren't checkboxes at all, just named once, out of the way.
+    expect(screen.queryByRole('checkbox', { name: /YouTube/ })).toBeNull();
+    expect(screen.getByText(/Not available for autopost: kid lightbulbs \(YouTube\), sphmrs \(Pinterest\)\./)).toBeTruthy();
 
     const toggle = screen.getByRole('checkbox', { name: 'Post automatically' }) as HTMLInputElement;
     expect(toggle.disabled).toBe(true);
-    fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs \(instagram\)/ }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · Instagram/ }));
     expect(screen.getByText(/Instagram needs an image on every post/)).toBeTruthy();
     fireEvent.click(toggle);
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));

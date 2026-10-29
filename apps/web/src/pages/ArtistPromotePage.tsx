@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
+import { networkName } from '../../../../api/shared/autopost-networks';
 import {
   getPromotePage,
   PromoteApiError,
@@ -243,17 +244,25 @@ export function ArtistPromotePage() {
               ) : (
                 <fieldset className="space-y-1">
                   <legend className="text-sm text-text-secondary mb-1">Channels</legend>
-                  {buffer.channels.map(c => (
-                    <label key={c.id} className={`flex items-center gap-2 text-sm ${c.supported ? '' : 'text-text-muted'}`}>
+                  {buffer.channels.filter(c => c.supported).map(c => (
+                    <label key={c.id} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        disabled={!c.supported}
                         checked={ticked.has(c.id)}
                         onChange={e => update({ channelIds: e.target.checked ? [...form.channelIds, c.id] : form.channelIds.filter(id => id !== c.id) })}
                       />
-                      {c.name} <span className="text-text-muted">({c.service}{c.supported ? '' : ', not supported'})</span>
+                      {c.name} <span className="text-text-muted">· {networkName(c.service)}</span>
                     </label>
                   ))}
+                  {/* Unstream's choice, not Buffer's: autopost posts text with an image, so networks that
+                      need a video or extra setup aren't offered. Named once, out of the way. */}
+                  {buffer.channels.some(c => !c.supported) && (
+                    <p className="pt-1 text-xs text-text-muted">
+                      Not available for autopost:{' '}
+                      {buffer.channels.filter(c => !c.supported).map(c => `${c.name} (${networkName(c.service)})`).join(', ')}.
+                      {' '}Autopost posts text with an image, so it leaves out networks that need a video or extra setup.
+                    </p>
+                  )}
                   <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className="inline-block pt-1 text-xs text-link hover:underline">
                     Connect another account in Buffer ↗
                   </a>
@@ -437,7 +446,8 @@ function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; 
           : 'Your Buffer doesn’t have any social accounts connected yet.'}
       </p>
       <p className="text-sm text-text-secondary">
-        Connect your Instagram, Facebook, Threads, Bluesky or Mastodon in Buffer first, then come back here and check again.
+        Connect your Instagram, Facebook, Threads, Bluesky, Mastodon, LinkedIn or Substack in Buffer first, then come back
+        here and check again.
       </p>
       <div className="flex flex-wrap gap-2">
         <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className={PRIMARY_BUTTON}>

@@ -68,7 +68,7 @@ const validBody = {
   timezone: 'America/New_York',
   postTime: '10:00',
   organizationId: 'org_mine',
-  channelIds: ['bsky', 'li'],
+  channelIds: ['bsky', 'yt'],
   kindsOff: ['support'],
   templates: null,
 };
@@ -88,7 +88,7 @@ beforeEach(() => {
   mocks.listOrganizations.mockResolvedValue([{ id: 'org_mine', name: 'Cult of Lightbulbs' }]);
   mocks.listChannels.mockResolvedValue([
     { id: 'bsky', name: 'kid', service: 'bluesky', type: 'profile', serviceId: '1', isDisconnected: false },
-    { id: 'li', name: 'kid', service: 'linkedin', type: 'profile', serviceId: '2', isDisconnected: false },
+    { id: 'yt', name: 'kid', service: 'youtube', type: 'channel', serviceId: '2', isDisconnected: false },
   ]);
   mocks.getFeatureFlag.mockResolvedValue(false);
 });
@@ -140,7 +140,7 @@ describe('GET', () => {
     const page = json(await call('GET'));
     expect(page.buffer.channels).toEqual([
       { id: 'bsky', name: 'kid', service: 'bluesky', supported: true },
-      { id: 'li', name: 'kid', service: 'linkedin', supported: false },
+      { id: 'yt', name: 'kid', service: 'youtube', supported: false },
     ]);
   });
 
