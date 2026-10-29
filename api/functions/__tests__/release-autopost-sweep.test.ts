@@ -142,6 +142,14 @@ describe('release-autopost-sweep', () => {
     expect(mocks.createPost).not.toHaveBeenCalled();
   });
 
+  it('is a quiet no-op with nobody to post for, bucket or not', async () => {
+    delete process.env.SOCIAL_CARDS_BUCKET;
+    mocks.getActiveAutopostSettings.mockResolvedValue([]);
+    const res = await run();
+    expect(res.statusCode).toBe(200);
+    expect(JSON.parse(res.body)).toMatchObject({ artists: 0, pushed: 0 });
+  });
+
   it('pushes a due slot to every ticked channel, scheduled, tagged and with its cover', async () => {
     const res = await run();
     expect(res.statusCode).toBe(200);

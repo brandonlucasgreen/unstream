@@ -278,18 +278,6 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
     return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
-  // Every post may carry an image, and Buffer can only fetch it from the bucket. Refuse the whole
-  // run rather than post without images for a configuration problem.
-  const bucket = mediaBucketFromEnv();
-  if ('missing' in bucket) {
-    Sentry.captureMessage('[release-autopost] refused: the media bucket is not configured', {
-      level: 'error',
-      tags: { area: 'release-autopost', kind: 'bucket-missing' },
-      extra: { missing: bucket.missing },
-    });
-    return { statusCode: 503, body: JSON.stringify({ error: `Media bucket not configured: ${bucket.missing.join(', ')}` }) };
-  }
-
   const started = Date.now();
   const now = new Date();
   let settingsList: AutopostSettings[];
@@ -298,6 +286,19 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
   } catch (error) {
     Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'settings-read' } });
     return { statusCode: 503, body: JSON.stringify({ error: 'Could not read autopost settings' }) };
+  }
+
+  // Every post may carry an image, and Buffer can only fetch it from the bucket. With anyone to
+  // post for, refuse the whole run rather than post without images for a configuration problem.
+  // With nobody, there's nothing to refuse: the run is a no-op, not a failure.
+  const bucket = mediaBucketFromEnv();
+  if ('missing' in bucket && settingsList.length > 0) {
+    Sentry.captureMessage('[release-autopost] refused: the media bucket is not configured', {
+      level: 'error',
+      tags: { area: 'release-autopost', kind: 'bucket-missing' },
+      extra: { missing: bucket.missing },
+    });
+    return { statusCode: 503, body: JSON.stringify({ error: `Media bucket not configured: ${bucket.missing.join(', ')}` }) };
   }
 
   const summary = { artists: settingsList.length, reached: 0, deferred: 0, pushed: 0, failed: 0, errors: 0, skipped: [] as { artistId: string; reason: string }[] };
@@ -309,7 +310,8 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
     }
     summary.reached++;
     try {
-      const r = await sweepArtist(settings, bucket, now);
+      // Narrowed above: with any settings to sweep, a bucket without every setting has returned.
+      const r = await sweepArtist(settings, bucket as MediaBucket, now);
       summary.pushed += r.pushed;
       summary.failed += r.failed;
       if (r.skipped) summary.skipped.push({ artistId: r.artistId, reason: r.skipped });
