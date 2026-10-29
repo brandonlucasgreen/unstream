@@ -60,6 +60,18 @@ describe('buildChannelPost', () => {
     expect(buildChannelPost(input({ ...ig, imageFitsInstagram: false })).ok).toBe(false);
   });
 
+  it('treats TikTok like Instagram: an image on every post, and “link in bio”', () => {
+    const tiktok = { channel: { id: 'tt', service: 'tiktok' } };
+    const post = buildChannelPost(input(tiktok));
+    expect(post.ok && post.text).toContain('link in bio');
+    expect(post.ok && post.input.assets).toHaveLength(1);
+    expect(buildChannelPost(input({ ...tiktok, image: null }))).toEqual({ ok: false, reason: 'The image couldn’t be copied, and TikTok needs one' });
+    expect(buildChannelPost(input({ ...tiktok, slot: { ...input().slot, imageOnInstagram: false } })))
+      .toEqual({ ok: false, reason: 'No fresh image for TikTok' });
+    // Instagram's shape range is Instagram's alone.
+    expect(buildChannelPost(input({ ...tiktok, imageFitsInstagram: false })).ok).toBe(true);
+  });
+
   it('posts to the other networks without an image', () => {
     const post = buildChannelPost(input({ image: null }));
     expect(post.ok && post.input.assets).toBeUndefined();

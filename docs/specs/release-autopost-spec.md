@@ -220,11 +220,11 @@ To make that a one-file change, **all media goes through one small module**, `au
 
 ## Networks
 
-**Instagram, Facebook, Threads, Bluesky, Mastodon, LinkedIn and Substack** (Notes), which all take text and an image through Buffer with no further setup. LinkedIn and Substack joined on 2026-10-29 (Brandon). The list and each network's length limit live in `api/shared/autopost-networks.ts`, from Buffer's developer guide.
+**Instagram, TikTok, Facebook, Threads, Bluesky, Mastodon, LinkedIn and Substack** (Notes), which all take text and an image through Buffer with no further setup. LinkedIn, Substack and TikTok joined on 2026-10-29 (Brandon). **Instagram and TikTok are image-first** (`IMAGE_FIRST_NETWORKS`): every post needs an image, no image repeats there within four weeks, and with no clickable links in captions `{link}` reads "link in bio". Only Instagram's 4:5 to 1.91:1 shape range is enforced; TikTok photo posts take images as they are (check this against the first real TikTok post). The list and each network's length limit live in `api/shared/autopost-networks.ts`, from Buffer's developer guide.
 
 **Which networks is Unstream's choice, not Buffer's.** Buffer can post to all of them. Left out:
 
-- **YouTube and TikTok** need a video, and autopost has covers and photos.
+- **YouTube** needs a video, and autopost has covers and photos. (TikTok takes photo posts, so it's in.)
 - **Pinterest** needs a board chosen for each pin. It suits covers and release links well, so it's the likeliest next addition, with a board picker in setup.
 - **Start Page and Google Business**: little reason for an artist to post releases there.
 
@@ -315,7 +315,7 @@ Already built and merged (#697–#708):
    - **No accounts to post to:** signing up through Buffer's screen makes an account with no social accounts connected. When Buffer has none (or none autopost writes for), the page says so and links to [Buffer's channel settings](https://publish.buffer.com/settings/channels), with a "Check again" button.
 **Everything below is hidden until Buffer is connected with a channel autopost can use** (Brandon, 2026-10-29): without somewhere to post it does nothing. A short note says what comes next instead. The trade: an artist can't preview their posts before connecting.
 
-2. **How often:** a slider from 1 to 7 a week, starting on the recommendation and marked as recommended there. Landing back on it stores "Recommended", which grows with the catalog. **Posting time:** "Recommended: your Buffer queue" (the default) or a set time.
+2. **How often:** a slider from 1 to 7 a week, starting on the recommendation and marked as recommended there. Landing back on it stores "Recommended", which grows with the catalog. **Posting time:** "Pick days & times for me", which is Buffer's queue (the default), or a set time.
 3. **What to say:** each kind with a switch, and its wording folded away until opened: editable variants, each with a live preview against the newest release, and mistakes flagged as they're typed.
 4. **Coming up:** the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it.
 5. **Sent to Buffer:** the latest posts handed over, with anything a channel refused.
