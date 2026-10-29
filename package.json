@@ -21,6 +21,7 @@
     "ingest:try": "npx tsx scripts/ingest-releases.ts",
     "ingest:mirlo": "npx tsx scripts/ingest-mirlo.ts",
     "preview:release": "npx tsx scripts/preview-release-page.ts",
+    "preview:autopost": "npx tsx scripts/preview-autopost.ts",
     "catalog:artist": "npx tsx scripts/catalog-artist.ts",
     "test:web": "cd apps/web && npx vitest run",
     "test:api": "npx vitest run api/functions/",

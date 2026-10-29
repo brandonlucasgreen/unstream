@@ -60,7 +60,7 @@ The curator posts spec listed "auto-announce an artist's own releases" under *Co
 ## Who can use it
 
 - **Verified artists only:** a claim with `verified_at` set, managed from `/artist-edit/:slug`. These posts are in the artist's own name.
-- **Behind a new flag, `releaseAutopost`,** which fails closed, with the admin account let through, as `canUseCuratorPosts` does.
+- **Behind the `releaseAutopost` flag,** which fails closed, with the admin account let through (`canUseReleaseAutopost`, `api/functions/release-autopost-access.ts`). **Every endpoint, page and scheduled run checks it first**, so while the flag is off the whole feature is Brandon's alone (2026-10-29). The flag is on `/admin/flags`.
 - **Off until the artist switches it on,** for each artist profile separately. A manager running two bands sets up each.
 
 ## How often: the weekly rhythm
@@ -99,6 +99,8 @@ Each week has as many slots as the artist chose. Slots are filled in priority or
 4. **A call for support** replaces a catalogue post at most once every 4 posts, and only at 3 or more posts a week. Below that every slot belongs to the music. It links to their Tip page if they take tips, otherwise their artist page (`unstream.stream/a/{artist}`).
 
 **A release with a campaign is left to the campaign.** Autopost writes no release-moment or catalogue posts about it while the campaign runs, and leaves any day the campaign posts on empty. That way no day gets two posts and nothing is said twice. Releases without a campaign still get the automatic moments above, inside the weekly number.
+
+**Fixed-date posts are placed first, for the whole period,** so the slots filled after them can see them coming, and **no release is named twice within 3 days** for any reason. Without that, the catalogue would happily post a release on Friday that Bandcamp Friday names the next week.
 
 Some days have nothing that qualifies, such as a one-release catalogue whose only release is still inside its spacing. On those days **the slot is left empty rather than filled with a repeat.** A week with fewer posts is better than an obvious rerun.
 
@@ -161,7 +163,7 @@ At one to three posts a week, a handful of covers plus one photo is enough. An a
 **Instagram needs an image on every post.** Ticking an Instagram channel during setup says so, shows the images Unstream already has for them, and offers uploads, without requiring them. Then:
 
 - Release-moment and Bandcamp Friday posts use the cover art.
-- Catalogue and support posts on Instagram rotate through covers, the artist's photo and any uploads, never repeating an image used on Instagram in the last 4 weeks, so the grid doesn't fill up with one picture.
+- Catalogue posts on Instagram rotate through their release's cover, the artist's photo and any uploads; support posts through the photo and uploads only, since covers belong to their releases' own posts. Neither repeats an image used on Instagram in the last 4 weeks, so the grid doesn't fill up with one picture.
 - **With nothing usable, that Instagram post is skipped** and the other channels go out as normal. The settings page says so: "3 Instagram posts skipped this month: add a photo."
 
 The other networks show a link preview when there's no image, so they're never skipped.
@@ -305,7 +307,7 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 
 ## Build plan
 
-1. **The rotation, on paper.** `planSlots` and `renderTemplate` with their tests, plus a script that prints the next 12 weeks for any artist slug from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
+1. **The rotation, on paper.** `planSlots` (`api/functions/autopost-plan.ts`) and `renderTemplate` (`api/shared/autopost-templates.ts`) with their tests, plus `npm run preview:autopost -- <artist-slug>`, which prints the next 12 weeks from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
 2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
 4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.

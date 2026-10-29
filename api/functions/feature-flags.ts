@@ -34,8 +34,12 @@ import { FLAGS_HASH_KEY as SHARED_FLAGS_HASH_KEY, flagIsOn } from '../shared/tip
  * `curatorPosts` gates the curator compose tool end to end: connecting a Buffer account, the
  * compose page, and the endpoints behind it. Off, a curator can neither connect nor post, and
  * the page is not reachable — which is the state it ships in.
+ *
+ * `releaseAutopost` gates release autopost and release campaigns end to end
+ * (docs/specs/release-autopost-spec.md): every endpoint, the Promote tab, and the sweep that
+ * posts. Off, only the admin account can reach any of it (`canUseReleaseAutopost`).
  */
-export const FEATURE_FLAGS = ['tipsArtists', 'tipsFans', 'curatorPosts'] as const;
+export const FEATURE_FLAGS = ['tipsArtists', 'tipsFans', 'curatorPosts', 'releaseAutopost'] as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 
