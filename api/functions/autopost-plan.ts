@@ -3,7 +3,7 @@
 //
 // **This is a pure function, and has to stay one.** It takes everything as arguments and reads
 // no clock, database or randomness; ties are broken by release id. That's what makes the
-// Promote tab's "Coming up" honest: what it shows is exactly what will post. Tests fail if this
+// Promote page's "Coming up" honest: what it shows is exactly what will post. Tests fail if this
 // file reaches for the current time or Math.random.
 //
 // Dates come in two kinds and are kept apart by name: an *instant* is an ISO timestamp, a *date*
@@ -35,8 +35,11 @@ export interface PlanSettings {
   /** null means "Recommended", which grows with the catalogue. */
   postsPerWeek: number | null;
   timezone: string;
-  /** Local time of day, HH:MM. */
-  postTime: string;
+  /**
+   * Local time of day, HH:MM, or null for "Recommended": the post goes to the channel's Buffer
+   * queue on its day and Buffer picks the time. A queued slot is placed at the day's start.
+   */
+  postTime: string | null;
   /** When autopost was switched on, an instant. Only releases catalogued after it get release moments. */
   enabledAt: string;
   kindsOff: AutopostKind[];
@@ -105,7 +108,7 @@ export const SLOT_DAYS: Record<number, number[]> = {
 };
 
 /**
- * How far ahead the sweep plans, and the Promote tab's "Coming up" shows. **Both must plan the
+ * How far ahead the sweep plans, and the Promote page's "Coming up" shows. **Both must plan the
  * same window:** fixed-date posts are placed across the whole window first, and the catalogue
  * steers around them, so a shorter window could choose differently for the same day.
  */
@@ -252,7 +255,7 @@ export function planSlots(input: PlanInput): PlannedPost[] {
   }));
   const planned: PlannedPost[] = [];
 
-  const instantOf = (date: string) => localInstant(date, settings.postTime, tz);
+  const instantOf = (date: string) => localInstant(date, settings.postTime ?? '00:00', tz);
   const isOpen = (date: string) => {
     const ms = new Date(instantOf(date)).getTime();
     return ms >= startMs && ms < endMs && !campaignDays.has(date);

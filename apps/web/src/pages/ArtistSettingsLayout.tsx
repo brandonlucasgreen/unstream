@@ -6,7 +6,7 @@ import { ArtistSettingsHeader, type ArtistSettingsTab } from '../components/Arti
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 
-// The frame around the artist settings tabs (/artist-edit/:slug, /tips, /releases, /promote). It stays mounted
+// The frame around the artist settings tabs (/artist-edit/:slug, /tips, /releases). It stays mounted
 // while the artist switches tabs, so the site header, the artist's name and the tabs don't redraw:
 // only the content underneath changes, and only that area shows a skeleton while a tab loads.
 
@@ -28,7 +28,6 @@ export function useReportArtistName(name: string | undefined) {
 function activeTab(pathname: string): ArtistSettingsTab {
   if (pathname.endsWith('/tips')) return 'tips';
   if (pathname.endsWith('/releases')) return 'releases';
-  if (pathname.endsWith('/promote')) return 'promote';
   return 'profile';
 }
 

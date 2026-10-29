@@ -171,6 +171,21 @@ describe('release-autopost-sweep', () => {
     }));
   });
 
+  it('with the Recommended time, adds a post to the Buffer queue on its own day, not three days ahead', async () => {
+    mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, postTime: null }]);
+    await run(); // Wednesday: Friday's post isn't handed over yet.
+    expect(mocks.createPost).not.toHaveBeenCalled();
+
+    vi.setSystemTime(new Date('2026-11-13T09:00:00Z')); // Friday, 4am in New York
+    await run();
+    expect(mocks.claimSlot).toHaveBeenCalledWith(expect.objectContaining({ slotDate: '2026-11-13', slotAt: '2026-11-13T05:00:00.000Z' }));
+    for (const [, input] of mocks.createPost.mock.calls) {
+      expect(input.mode).toBe('addToQueue');
+      expect(input).not.toHaveProperty('dueAt');
+    }
+    expect(mocks.createPost).toHaveBeenCalled();
+  });
+
   it('pushes nothing for a slot another run has already claimed', async () => {
     mocks.claimSlot.mockResolvedValue(null);
     await run();

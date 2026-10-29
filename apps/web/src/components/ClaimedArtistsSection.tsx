@@ -23,7 +23,7 @@ interface ClaimedProfile {
 }
 
 export function ClaimedArtistsSection() {
-  const { session } = useAuth();
+  const { session, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ClaimedProfile[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +115,17 @@ export function ClaimedArtistsSection() {
                     >
                       Edit
                     </Link>
+                    {/* Admin-only because the server only lets the admin in while the releaseAutopost
+                        flag is off (canUseReleaseAutopost). Switching the flag on for everyone has to
+                        show this to everyone too. */}
+                    {isAdmin && (
+                      <Link
+                        to={`/promote/${profile.slug}`}
+                        className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"
+                      >
+                        Promote
+                      </Link>
+                    )}
                     <Link
                       to={`/a/${profile.slug}`}
                       className="px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors"

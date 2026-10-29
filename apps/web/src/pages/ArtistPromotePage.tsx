@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import { TabSkeleton } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
 import {
   getPromotePage,
@@ -13,9 +15,10 @@ import {
   type PromoteSettingsInput,
 } from '../services/promote';
 
-// /artist-edit/:slug/promote — release autopost (docs/specs/release-autopost-spec.md, "UI: a
-// Promote tab"), rendered inside ArtistSettingsLayout. Admin-only while the releaseAutopost flag
-// is off: the server answers { available: false } to anyone else.
+// /promote/:slug — release autopost (docs/specs/release-autopost-spec.md, "UI: the Promote
+// page"), reached from the Promote button on /my-artists. Its own page rather than a tab under
+// Edit, because it isn't about the artist's profile (Brandon, 2026-10-29). Admin-only while the
+// releaseAutopost flag is off: the server answers { available: false } to anyone else.
 //
 // The settings are edited here and saved together; "Coming up" is the server's plan from the
 // saved settings, so it's exactly what will post, and it refreshes on every save.
@@ -28,11 +31,14 @@ const SECONDARY_BUTTON = 'px-3 py-2 text-sm rounded-lg border border-border hove
 
 const BUFFER_OUTCOMES: Record<string, string> = {
   connected: 'Buffer is connected.',
-  cancelled: 'Buffer wasn’t connected: the connection was cancelled.',
+  cancelled: 'Buffer wasn’t connected: the connection was stopped before it finished.',
   expired: 'That took too long and the connection expired. Try again.',
   failed: 'Buffer couldn’t be connected. Try again.',
   unavailable: 'Buffer isn’t available right now.',
 };
+
+/** Where a Buffer user connects their social accounts. */
+const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
 
 const PAUSED: Record<string, string> = {
   buffer_disconnected: 'Posting has stopped because Buffer was disconnected. Reconnect it, then save to start again.',
@@ -58,10 +64,10 @@ function formatDay(date: string) {
 }
 
 function cadenceLine(releases: number, perWeek: number): string {
-  if (releases === 0) return 'Unstream hasn’t catalogued any releases it can post about yet.';
+  if (releases === 0) return 'Unstream hasn’t found any releases it can post about yet.';
   const weeks = Math.max(2, Math.round(releases / perWeek));
   const plural = releases === 1 ? 'release' : 'releases';
-  return `You have ${releases} ${plural}. At ${perWeek} a week, each comes round about every ${weeks} weeks.`;
+  return `You have ${releases} ${plural}. At ${perWeek} a week, each comes up about every ${weeks} weeks.`;
 }
 
 export function ArtistPromotePage() {
@@ -78,7 +84,6 @@ export function ArtistPromotePage() {
   const [saved, setSaved] = useState(false);
   // Read once: the address loses the parameter straight after.
   const [bufferOutcome] = useState(() => searchParams.get('buffer'));
-  useReportArtistName(page?.available ? page.artist.name : undefined);
 
   useEffect(() => {
     if (!searchParams.has('buffer')) return;
@@ -90,7 +95,7 @@ export function ArtistPromotePage() {
   useEffect(() => {
     if (authLoading) return;
     if (!session) {
-      if (slug) navigate(`/login?next=${encodeURIComponent(`/artist-edit/${encodeURIComponent(slug)}/promote`)}`, { replace: true });
+      if (slug) navigate(`/login?next=${encodeURIComponent(`/promote/${encodeURIComponent(slug)}`)}`, { replace: true });
       return;
     }
     if (!slug) return;
@@ -98,8 +103,7 @@ export function ArtistPromotePage() {
     getPromotePage(session.access_token, slug)
       .then(p => {
         if (cancelled) return;
-        setPage(p);
-        if (p.available) setForm(inputFrom(p));
+        apply(p);
       })
       .catch(err => {
         if (cancelled) return;
@@ -109,10 +113,17 @@ export function ArtistPromotePage() {
     return () => { cancelled = true; };
   }, [authLoading, session, slug, navigate]);
 
+  function apply(p: PromotePage) {
+    setPage(p);
+    if (p.available) setForm(inputFrom(p));
+  }
+
   if (!slug) return null;
-  if (loadError) return <p className="text-sm text-error">{loadError}</p>;
-  if (!page || !session) return <TabSkeleton label="Loading" />;
-  if (!page.available || !form) return <p className="text-sm text-text-muted">Release autopost isn’t available on Unstream yet.</p>;
+  if (loadError) return <Frame slug={slug}><p className="text-sm text-error">{loadError}</p></Frame>;
+  if (!page || !session) return <Frame slug={slug}><TabSkeleton label="Loading" /></Frame>;
+  if (!page.available || !form) {
+    return <Frame slug={slug}><p className="text-sm text-text-muted">Release autopost isn’t available on Unstream yet.</p></Frame>;
+  }
 
   const token = session.access_token;
   const update = (patch: Partial<PromoteSettingsInput>) => {
@@ -143,6 +154,21 @@ export function ArtistPromotePage() {
     }
   };
 
+  // After connecting accounts in Buffer: read the channels again, keeping any unsaved edits.
+  const refresh = async () => {
+    setBusy(true);
+    try {
+      const fresh = await getPromotePage(token, slug);
+      setPage(fresh);
+      if (fresh.available && fresh.buffer.connected && !form.organizationId) setForm({ ...form, organizationId: fresh.buffer.organizationId });
+    } catch (err) {
+      Sentry.captureException(err, { extra: { context: 'ArtistPromotePage.refresh', slug } });
+      setSaveError('Couldn’t check Buffer just now. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const connect = async () => {
     setBusy(true);
     try {
@@ -155,19 +181,21 @@ export function ArtistPromotePage() {
   };
 
   const buffer = page.buffer;
-  const perWeek = form.postsPerWeek ?? page.recommendedPerWeek;
+  const recommended = Math.max(1, page.recommendedPerWeek);
+  const perWeek = form.postsPerWeek ?? recommended;
   const ticked = new Set(form.channelIds);
   const tickedServices = buffer.connected ? buffer.channels.filter(c => ticked.has(c.id)).map(c => c.service) : [];
   const canSwitchOn = Boolean(form.organizationId) && form.channelIds.length > 0;
 
   return (
-    <div className="space-y-6">
+    <Frame slug={slug} artistName={page.artist.name}>
       <div className="space-y-1">
-        <h2 className="text-xl font-bold text-text-primary">Promote</h2>
         <p className="text-sm text-text-secondary">
           Posts about your releases, on a gentle weekly rhythm, scheduled to your own Buffer. Unstream writes nothing with AI: each
-          post is one of the templates below, filled with facts about the release. Every post lands in Buffer three days before it
-          goes out, where you can change or delete it.
+          post is one of the templates below, filled with facts about the release.{' '}
+          {form.postTime === null
+            ? 'Each post joins your Buffer queue on its day, where you can change or delete it before it goes out.'
+            : 'Every post lands in Buffer three days before it goes out, where you can change or delete it.'}
         </p>
       </div>
 
@@ -182,9 +210,17 @@ export function ArtistPromotePage() {
         <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>
         {!buffer.connected ? (
           <div className="space-y-2">
-            <p className="text-sm text-text-secondary">Connect the Buffer account that holds your band’s channels. Buffer’s free plan is enough.</p>
+            <p className="text-sm text-text-secondary">
+              Unstream posts through Buffer, to the social accounts you connect there. Buffer’s free plan is enough.
+            </p>
+            <p className="text-sm text-text-secondary">
+              <span className="font-medium text-text-primary">New to Buffer?</span> You can make a free account on the next
+              screen. Then connect your social accounts in Buffer, since Unstream can only post to accounts connected there.
+            </p>
             <button type="button" disabled={busy} onClick={connect} className={PRIMARY_BUTTON}>Connect Buffer</button>
           </div>
+        ) : buffer.organizations.length === 0 ? (
+          <NoChannels busy={busy} onCheckAgain={refresh} />
         ) : (
           <div className="space-y-3">
             {buffer.organizations.length > 1 && (
@@ -200,17 +236,12 @@ export function ArtistPromotePage() {
                 </select>
               </label>
             )}
-            {buffer.organizations.length === 1 && !form.organizationId && (
-              <button type="button" onClick={() => update({ organizationId: buffer.organizations[0].id })} className={SECONDARY_BUTTON}>
-                Use {buffer.organizations[0].name}
-              </button>
-            )}
             {form.organizationId && form.organizationId !== buffer.organizationId && (
               <p className="text-xs text-text-muted">Save to see this organization’s channels.</p>
             )}
             {form.organizationId && form.organizationId === buffer.organizationId && (
-              buffer.channels.length === 0 ? (
-                <p className="text-sm text-text-secondary">This organization has no channels in Buffer yet.</p>
+              buffer.channels.filter(c => c.supported).length === 0 ? (
+                <NoChannels busy={busy} onCheckAgain={refresh} hasOthers={buffer.channels.length > 0} />
               ) : (
                 <fieldset className="space-y-1">
                   <legend className="text-sm text-text-secondary mb-1">Channels</legend>
@@ -225,6 +256,9 @@ export function ArtistPromotePage() {
                       {c.name} <span className="text-text-muted">({c.service}{c.supported ? '' : ', not supported'})</span>
                     </label>
                   ))}
+                  <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className="inline-block pt-1 text-xs text-link hover:underline">
+                    Connect another account in Buffer ↗
+                  </a>
                 </fieldset>
               )
             )}
@@ -241,23 +275,73 @@ export function ArtistPromotePage() {
 
       <section className={SECTION} aria-labelledby="promote-rhythm">
         <h3 id="promote-rhythm" className="font-medium text-text-primary">How often</h3>
-        <label className="flex flex-wrap items-center gap-2 text-sm">
-          Posts a week
-          <select
-            value={form.postsPerWeek ?? ''}
-            onChange={e => update({ postsPerWeek: e.target.value ? Number(e.target.value) : null })}
-            className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
-          >
-            <option value="">Recommended ({page.recommendedPerWeek || 1} a week)</option>
-            {[1, 2, 3, 4, 5, 6, 7].map(n => <option key={n} value={n}>{n} a week</option>)}
-          </select>
-        </label>
-        <p className="text-xs text-text-muted">{cadenceLine(page.releaseCount, perWeek || 1)} Fridays always post; more a week adds Monday to Thursday first.</p>
-        <label className="flex flex-wrap items-center gap-2 text-sm">
-          Posting time
-          <input type="time" value={form.postTime} onChange={e => update({ postTime: e.target.value })} className="px-2 py-1 bg-bg-primary border border-border rounded-lg" />
-          <span className="text-xs text-text-muted">{form.timezone}</span>
-        </label>
+        <div className="space-y-1">
+          <label htmlFor="promote-per-week" className="flex items-baseline justify-between text-sm">
+            <span>Posts a week</span>
+            <span>
+              <span className="font-medium text-text-primary">{perWeek}</span>
+              {perWeek === recommended && <span className="text-text-muted"> (recommended)</span>}
+            </span>
+          </label>
+          <input
+            id="promote-per-week"
+            type="range"
+            min={1}
+            max={7}
+            step={1}
+            value={perWeek}
+            aria-valuetext={`${perWeek} a week${perWeek === recommended ? ', recommended' : ''}`}
+            // Landing back on the recommendation stores "Recommended", which grows with the catalog.
+            onChange={e => update({ postsPerWeek: Number(e.target.value) === recommended ? null : Number(e.target.value) })}
+            className="w-full accent-[var(--color-accent-primary)]"
+          />
+          <div className="flex justify-between text-xs text-text-muted" aria-hidden="true">
+            {[1, 2, 3, 4, 5, 6, 7].map(n => (
+              <span key={n} className={n === recommended ? 'font-medium text-text-primary' : ''}>{n}</span>
+            ))}
+          </div>
+        </div>
+        <p className="text-xs text-text-muted">
+          {cadenceLine(page.releaseCount, perWeek)} Fridays always post; more a week adds Monday to Thursday first.
+          {perWeek !== recommended && (
+            <>
+              {' '}
+              <button type="button" onClick={() => update({ postsPerWeek: null })} className="text-link hover:underline">
+                Back to {recommended} (recommended)
+              </button>
+            </>
+          )}
+        </p>
+        <fieldset className="space-y-2">
+          <legend className="text-sm mb-1">Posting time</legend>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="radio" name="post-time" checked={form.postTime === null} onChange={() => update({ postTime: null })} className="mt-1" />
+            <span>
+              Recommended: your Buffer queue
+              <span className="block text-xs text-text-muted">
+                Each post joins that channel’s queue in Buffer on its day and goes out at the next time in your posting
+                schedule. Buffer sets those times from when your audience is most likely to see a post, and you can change them
+                in Buffer.
+              </span>
+            </span>
+          </label>
+          <label className="flex flex-wrap items-center gap-2 text-sm">
+            <input type="radio" name="post-time" checked={form.postTime !== null} onChange={() => update({ postTime: form.postTime ?? '10:00' })} />
+            At a set time
+            {form.postTime !== null && (
+              <>
+                <input
+                  type="time"
+                  aria-label="Time"
+                  value={form.postTime}
+                  onChange={e => update({ postTime: e.target.value || '10:00' })}
+                  className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
+                />
+                <span className="text-xs text-text-muted">{form.timezone}</span>
+              </>
+            )}
+          </label>
+        </fieldset>
       </section>
 
       <section className={SECTION} aria-labelledby="promote-words">
@@ -337,6 +421,60 @@ export function ArtistPromotePage() {
           </ul>
         </section>
       )}
+    </Frame>
+  );
+}
+
+/**
+ * A connected Buffer with no social accounts autopost can post to. Signing up through Buffer's
+ * own screen during the connection makes an account with none, so this is where a new Buffer
+ * user lands: send them to connect one there, then check again.
+ */
+function NoChannels({ busy, onCheckAgain, hasOthers = false }: { busy: boolean; onCheckAgain: () => void; hasOthers?: boolean }) {
+  return (
+    <div className="space-y-2 rounded-lg border border-border bg-bg-primary p-3">
+      <p className="text-sm text-text-primary">
+        {hasOthers
+          ? 'None of the accounts connected in Buffer are ones autopost can post to.'
+          : 'Your Buffer doesn’t have any social accounts connected yet.'}
+      </p>
+      <p className="text-sm text-text-secondary">
+        Connect your Instagram, Facebook, Threads, Bluesky or Mastodon in Buffer first, then come back here and check again.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className={PRIMARY_BUTTON}>
+          Connect accounts in Buffer ↗
+        </a>
+        <button type="button" disabled={busy} onClick={onCheckAgain} className={SECONDARY_BUTTON}>Check again</button>
+      </div>
+    </div>
+  );
+}
+
+/** The page around the content: site header, the way back to My Artists, the artist's name. */
+function Frame({ slug, artistName, children }: { slug: string; artistName?: string; children: ReactNode }) {
+  return (
+    <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col">
+      <Header />
+      <main className="flex-1 p-6">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="space-y-4">
+            <Link to="/my-artists" className="text-sm text-text-muted hover:text-text-primary transition-colors">
+              &larr; My Artists
+            </Link>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              {artistName ? (
+                <h1 className="font-display text-3xl font-extrabold text-text-primary">Promote {artistName}</h1>
+              ) : (
+                <div className="h-9 w-48 rounded bg-bg-secondary animate-pulse" aria-hidden="true" />
+              )}
+              <Link to={`/a/${slug}`} className="text-sm text-link hover:underline">View live profile</Link>
+            </div>
+          </div>
+          {children}
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

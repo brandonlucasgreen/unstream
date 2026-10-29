@@ -1,5 +1,5 @@
-// Client for release autopost: the Promote tab's settings (/api/artist-promote) and starting a
-// Buffer connection that comes back to the tab (/api/me/buffer/start).
+// Client for release autopost: the Promote page's settings (/api/artist-promote) and starting a
+// Buffer connection that comes back to it (/api/me/buffer/start).
 
 import type { AutopostKind, TemplateRelease } from '../../../../api/shared/autopost-templates';
 
@@ -9,7 +9,8 @@ export interface PromoteSettings {
   /** null means Recommended. */
   postsPerWeek: number | null;
   timezone: string;
-  postTime: string;
+  /** HH:MM, or null for Recommended: the channel's Buffer queue picks the time. */
+  postTime: string | null;
   organizationId: string | null;
   channelIds: string[];
   kindsOff: AutopostKind[];
@@ -102,11 +103,11 @@ export function savePromoteSettings(token: string, slug: string, settings: Promo
   return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`, { method: 'PUT', body: JSON.stringify(settings) });
 }
 
-/** Where to send the artist to connect Buffer; Buffer sends them back to this tab. */
+/** Where to send the artist to connect Buffer; Buffer sends them back to the Promote page. */
 export async function startBufferConnection(token: string, slug: string): Promise<string> {
   const { authorizeUrl } = await call<{ authorizeUrl?: string; available?: boolean }>(token, '/api/me/buffer/start', {
     method: 'POST',
-    body: JSON.stringify({ returnTo: `/artist-edit/${slug}/promote` }),
+    body: JSON.stringify({ returnTo: `/promote/${slug}` }),
   });
   if (!authorizeUrl) throw new PromoteApiError('Buffer isn’t available right now', 503);
   return authorizeUrl;

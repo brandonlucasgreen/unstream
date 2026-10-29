@@ -52,13 +52,13 @@ const flowKey = (state: string) => `buffer-oauth:${state}`;
 const DEFAULT_RETURN_PATH = '/curator/new';
 
 /**
- * The pages that may start a connection and be returned to: release autopost's Promote tab, and
+ * The pages that may start a connection and be returned to: release autopost's Promote page, and
  * curator posts. An allowlist rather than "any path", so a crafted /start can't send someone
  * back to an arbitrary page. Same origin either way, so there is no open redirect.
  */
 export function isAllowedReturnPath(path: unknown): path is string {
   return typeof path === 'string'
-    && (path === DEFAULT_RETURN_PATH || /^\/artist-edit\/[A-Za-z0-9_-]+\/promote$/.test(path));
+    && (path === DEFAULT_RETURN_PATH || /^\/promote\/[A-Za-z0-9_-]+$/.test(path));
 }
 
 interface HandlerEvent {

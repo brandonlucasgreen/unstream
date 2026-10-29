@@ -30,7 +30,7 @@ describe('buildChannelPost', () => {
     const post = buildChannelPost(input());
     expect(post.ok).toBe(true);
     if (!post.ok) return;
-    expect(post.text).toBe('Ruined Castle, on Bandcamp. https://unstream.stream/a/kid-lightbulbs/ruined-castle');
+    expect(post.text).toBe('From the archives: Ruined Castle, on Bandcamp. https://unstream.stream/a/kid-lightbulbs/ruined-castle');
     expect(post.input).toMatchObject({
       channelId: 'ch1',
       dueAt: '2026-11-13T15:00:00.000Z',
@@ -38,6 +38,12 @@ describe('buildChannelPost', () => {
       tagIds: ['tag1'],
       assets: [{ image: { url: 'https://cards.unstream.stream/autopost/abc.jpg', metadata: { altText: 'Cover art for Ruined Castle by Kid Lightbulbs' } } }],
     });
+  });
+
+  it('adds a "Recommended"-time post to the channel’s Buffer queue instead of scheduling it', () => {
+    const post = buildChannelPost(input({ slot: { ...input().slot, queued: true } }));
+    expect(post.ok && post.input.mode).toBe('addToQueue');
+    expect(post.ok && post.input).not.toHaveProperty('dueAt');
   });
 
   it('says "link in bio" on Instagram and marks it a feed post', () => {
@@ -75,7 +81,7 @@ describe('buildChannelPost', () => {
 
   it('writes a call for support with the Tip page when they take tips', () => {
     const post = buildChannelPost(input({ slot: { ...input().slot, kind: 'support', templateIndex: 1 }, release: null, takesTips: true }));
-    expect(post.ok && post.text).toBe('The best ways to support Kid Lightbulbs: https://unstream.stream/tip/kid-lightbulbs');
+    expect(post.ok && post.text).toBe('The best ways to support my music: https://unstream.stream/tip/kid-lightbulbs');
   });
 
   it('uses the artist’s own variants, falling back to the defaults for kinds they left empty', () => {

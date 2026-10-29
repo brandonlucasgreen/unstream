@@ -138,8 +138,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<ArtistEditPage />} />
                 <Route path="tips" element={<ArtistTipsPage />} />
                 <Route path="releases" element={<ArtistReleasesPage />} />
-                <Route path="promote" element={<ArtistPromotePage />} />
               </Route>
+              <Route path="/promote/:slug" element={<ArtistPromotePage />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/known-artists" element={<KnownArtistsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />

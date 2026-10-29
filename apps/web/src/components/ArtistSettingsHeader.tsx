@@ -8,13 +8,12 @@ import { getTipsAvailable } from '../services/tips';
 // their live page, and the three tabs. Each tab is its own route, so a tab can be linked to directly —
 // Stripe sends an artist back to /artist-edit/:slug/tips after onboarding.
 
-export type ArtistSettingsTab = 'profile' | 'tips' | 'releases' | 'promote';
+export type ArtistSettingsTab = 'profile' | 'tips' | 'releases';
 
 const TABS: Array<{ id: ArtistSettingsTab; label: string; path: string }> = [
   { id: 'profile', label: 'Edit Profile', path: '' },
   { id: 'tips', label: 'Manage Tips', path: '/tips' },
   { id: 'releases', label: 'Manage Releases', path: '/releases' },
-  { id: 'promote', label: 'Promote', path: '/promote' },
 ];
 
 export function ArtistSettingsHeader({ slug, artistName, active }: {
@@ -23,8 +22,7 @@ export function ArtistSettingsHeader({ slug, artistName, active }: {
   artistName?: string;
   active: ArtistSettingsTab;
 }) {
-  const { session, isAdmin } = useAuth();
-  const token = session?.access_token;
+  const token = useAuth().session?.access_token;
   // Tips ship dark: the tab appears only once the server has a Stripe key. Asked once per visit —
   // this header stays mounted across tab switches. On the tips tab itself the tab always shows; the
   // page has its own "not available" state.
@@ -40,12 +38,7 @@ export function ArtistSettingsHeader({ slug, artistName, active }: {
     return () => { cancelled = true; };
   }, [token]);
 
-  // Release autopost is admin-only while the releaseAutopost flag is off: the server lets only the
-  // admin in (canUseReleaseAutopost). Switching the flag on for everyone has to show this to
-  // everyone too. The tab itself always shows when it's open; the page has its own "not available".
-  const tabs = TABS.filter(tab =>
-    (tab.id !== 'tips' || tipsAvailable || active === 'tips')
-    && (tab.id !== 'promote' || isAdmin || active === 'promote'));
+  const tabs = TABS.filter(tab => tab.id !== 'tips' || tipsAvailable || active === 'tips');
 
   return (
     <div className="space-y-4">

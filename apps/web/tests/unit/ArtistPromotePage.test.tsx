@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// The Promote tab (release autopost): what someone the server turns away sees, connecting Buffer
+// The Promote page (release autopost): what someone the server turns away sees, connecting Buffer
 // from here, the live template preview, switching on, and "Coming up" from the server's plan.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-library/react';
@@ -11,6 +11,9 @@ const promote = vi.hoisted(() => ({ getPromotePage: vi.fn(), savePromoteSettings
 
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => auth.value }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
+// The site header and footer have their own tests and their own data.
+vi.mock('src/components/Header', () => ({ Header: () => null }));
+vi.mock('src/components/Footer', () => ({ Footer: () => null }));
 vi.mock('src/services/promote', async (importOriginal) => ({
   ...(await importOriginal<typeof import('src/services/promote')>()),
   getPromotePage: promote.getPromotePage,
@@ -39,7 +42,7 @@ const loaded = (over: Partial<Extract<PromotePage, { available: true }>> = {}): 
   comingUp: [{
     at: '2026-11-13T15:00:00.000Z', date: '2026-11-13', kind: 'catalogue',
     release: { title: 'Ruined Castle', slug: 'ruined-castle' }, imageUrl: null, imageOnInstagram: true,
-    text: 'From the catalogue: Ruined Castle (2024). On Bandcamp: https://unstream.stream/a/kid-lightbulbs/ruined-castle',
+    text: 'From the archives: Ruined Castle (2024). It’s on Bandcamp: https://unstream.stream/a/kid-lightbulbs/ruined-castle',
   }],
   recent: [],
   ...over,
@@ -57,9 +60,9 @@ const connected = {
 
 function renderTab() {
   return render(
-    <MemoryRouter initialEntries={['/artist-edit/kid-lightbulbs/promote']}>
+    <MemoryRouter initialEntries={['/promote/kid-lightbulbs']}>
       <Routes>
-        <Route path="/artist-edit/:slug/promote" element={<ArtistPromotePage />} />
+        <Route path="/promote/:slug" element={<ArtistPromotePage />} />
       </Routes>
     </MemoryRouter>
   );
@@ -89,7 +92,7 @@ describe('ArtistPromotePage', () => {
   it('previews each template against the newest release as it’s edited', async () => {
     promote.getPromotePage.mockResolvedValue(loaded());
     renderTab();
-    const box = await screen.findByRole('textbox', { name: 'From your catalogue, variant 3' });
+    const box = await screen.findByRole('textbox', { name: 'From the archives, variant 3' });
     fireEvent.change(box, { target: { value: 'Still great: {title}' } });
     expect(screen.getByText('Still great: Ruined Castle')).toBeTruthy();
     fireEvent.change(box, { target: { value: '{titel}' } });
@@ -115,12 +118,51 @@ describe('ArtistPromotePage', () => {
     })));
   });
 
+  it('tells a new Buffer user with no accounts connected where to connect them, and checks again', async () => {
+    const empty = { ...connected, channels: [] };
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: empty }));
+    renderTab();
+    const link = await screen.findByRole('link', { name: /Connect accounts in Buffer/ });
+    expect(link.getAttribute('href')).toBe('https://publish.buffer.com/settings/channels');
+    fireEvent.click(screen.getByRole('button', { name: 'Check again' }));
+    await waitFor(() => expect(promote.getPromotePage).toHaveBeenCalledTimes(2));
+  });
+
+  it('says the same when the only accounts are ones autopost can’t post to', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: { ...connected, channels: [connected.channels[1]] } }));
+    renderTab();
+    expect(await screen.findByText(/None of the accounts connected in Buffer/)).toBeTruthy();
+  });
+
+  it('sets posts a week with a slider that starts on the recommendation, and stores Recommended there', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
+    promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
+    renderTab();
+    const slider = await screen.findByRole('slider', { name: /Posts a week/ }) as HTMLInputElement;
+    expect(slider.value).toBe('3');
+    fireEvent.change(slider, { target: { value: '5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postsPerWeek: 5 })));
+    fireEvent.change(slider, { target: { value: '3' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postsPerWeek: null })));
+  });
+
+  it('offers Buffer’s queue as the recommended posting time, or a set time', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
+    promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: connected }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('radio', { name: /Recommended: your Buffer queue/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({ postTime: null })));
+  });
+
   it('shows the server’s plan under Coming up', async () => {
     promote.getPromotePage.mockResolvedValue(loaded());
     renderTab();
     const comingUp = await screen.findByRole('region', { name: 'Coming up' });
-    expect(within(comingUp).getByText(/From the catalogue: Ruined Castle \(2024\)\. On Bandcamp/)).toBeTruthy();
+    expect(within(comingUp).getByText(/From the archives: Ruined Castle \(2024\)\. It’s on Bandcamp/)).toBeTruthy();
     // The date is in the browser's own format, so only the rest of the line is checked.
-    expect(within(comingUp).getByText((_, el) => el?.tagName === 'P' && /· From your catalogue · Ruined Castle$/.test(el.textContent ?? ''))).toBeTruthy();
+    expect(within(comingUp).getByText((_, el) => el?.tagName === 'P' && /· From the archives · Ruined Castle$/.test(el.textContent ?? ''))).toBeTruthy();
   });
 });

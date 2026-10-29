@@ -3,8 +3,9 @@
 //
 // Invoked every 6 hours by .github/workflows/release-autopost-sweep.yml, the recatalog-sweep
 // precedent: there are no scheduled Netlify functions in this repo. For each artist with
-// autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote tab's "Coming up" does
-// (`planForArtist`), and pushes every slot due in the next PUSH_AHEAD_HOURS to Buffer as a scheduled post.
+// autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote page's "Coming up" does
+// (`planForArtist`), and hands Buffer every slot due in the next PUSH_AHEAD_HOURS as a scheduled post,
+// or, with the "Recommended" time, adds it to the channel's Buffer queue on its own day.
 //
 // ## Who it posts for
 //
@@ -31,7 +32,7 @@
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
 import type { PlannedPost } from './autopost-plan';
-import { planForArtist } from './release-autopost-schedule';
+import { isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
 import {
@@ -142,7 +143,7 @@ async function pushSlot(
 
   for (const channel of ctx.channels) {
     const post = buildChannelPost({
-      slot,
+      slot: { ...slot, queued: settings.postTime === null },
       channel,
       artist: { name: artist.name, slug: artist.slug },
       release,
@@ -202,8 +203,7 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   const history = await getAutopostHistory(artist.id, now);
   const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, now);
 
-  const pushBefore = now.getTime() + PUSH_AHEAD_HOURS * 3_600_000;
-  const due = plan.filter(p => new Date(p.at).getTime() < pushBefore);
+  const due = plan.filter(p => isDueToPush(p, settings, now, PUSH_AHEAD_HOURS));
   if (due.length === 0) return result;
 
   let token: string;
