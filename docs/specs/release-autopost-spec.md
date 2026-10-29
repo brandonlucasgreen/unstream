@@ -220,7 +220,15 @@ To make that a one-file change, **all media goes through one small module**, `au
 
 ## Networks
 
-**Instagram, Facebook, Threads, Bluesky and Mastodon**, which all take an image and text through Buffer and are where indie artists post. `generate-social-posts.ts` already posts to Threads and Bluesky through the same API. TikTok and YouTube (video) are out, as are Pinterest and LinkedIn (wrong audience).
+**Instagram, Facebook, Threads, Bluesky, Mastodon, LinkedIn and Substack** (Notes), which all take text and an image through Buffer with no further setup. LinkedIn and Substack joined on 2026-10-29 (Brandon). The list and each network's length limit live in `api/shared/autopost-networks.ts`, from Buffer's developer guide.
+
+**Which networks is Unstream's choice, not Buffer's.** Buffer can post to all of them. Left out:
+
+- **YouTube and TikTok** need a video, and autopost has covers and photos.
+- **Pinterest** needs a board chosen for each pin. It suits covers and release links well, so it's the likeliest next addition, with a board picker in setup.
+- **Start Page and Google Business**: little reason for an artist to post releases there.
+
+The Promote page lists the networks it leaves out in one muted line ("Not available for autopost: …") rather than as disabled checkboxes, so it doesn't read as a Buffer limitation.
 
 Buffer's free plan allows **3 channels and 10 scheduled posts per channel**. Posts go to Buffer only a few days ahead, which stays well inside that at any rhythm.
 

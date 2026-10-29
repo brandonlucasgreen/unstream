@@ -14,19 +14,9 @@ import {
   type TemplateArtist,
   type TemplateRelease,
 } from '../shared/autopost-templates';
+import { AUTOPOST_NETWORK_LIMITS, isAutopostNetwork, networkName } from '../shared/autopost-networks';
 
-/** The networks autopost writes for, and the longest post each takes. */
-export const AUTOPOST_NETWORK_LIMITS: Record<string, number> = {
-  instagram: 2200,
-  facebook: 63206,
-  threads: 500,
-  bluesky: 300,
-  mastodon: 500,
-};
-
-export function isAutopostNetwork(service: string): boolean {
-  return Object.prototype.hasOwnProperty.call(AUTOPOST_NETWORK_LIMITS, service);
-}
+export { isAutopostNetwork };
 
 export interface ChannelPostInput {
   /** queued: add to the channel's Buffer queue rather than scheduling for `at` ("Recommended" time). */
@@ -58,7 +48,7 @@ export function variantsFor(kind: AutopostKind, templates: ChannelPostInput['tem
 export function buildChannelPost(input: ChannelPostInput): ChannelPost {
   const { slot, channel, artist, release } = input;
   const service = channel.service;
-  if (!isAutopostNetwork(service)) return { ok: false, reason: `${service} isn't a network autopost writes for` };
+  if (!isAutopostNetwork(service)) return { ok: false, reason: `${networkName(service)} isn’t a network autopost writes for` };
   const instagram = service === 'instagram';
 
   if (slot.kind !== 'support' && !release) return { ok: false, reason: 'The release no longer qualifies' };
@@ -79,7 +69,7 @@ export function buildChannelPost(input: ChannelPostInput): ChannelPost {
 
   const limit = AUTOPOST_NETWORK_LIMITS[service];
   if (rendered.text.length > limit) {
-    return { ok: false, reason: `${rendered.text.length} characters is over ${service}’s ${limit}` };
+    return { ok: false, reason: `${rendered.text.length} characters is over ${networkName(service)}’s ${limit}` };
   }
 
   const post: Record<string, unknown> = {
