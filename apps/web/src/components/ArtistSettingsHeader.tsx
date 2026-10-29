@@ -1,18 +1,19 @@
 import { Link } from 'react-router-dom';
 
 // The top of each page an artist manages from /my-artists (Edit, Releases, Tips, Promote): the way
-// back, which page this is, the artist's name, and a link to their live page.
+// back, one heading saying which page and which artist ("Manage Tips: Kid Lightbulbs", Brandon,
+// 2026-10-29), and a link to their live page.
 //
 // These were tabs under one Edit page until 2026-10-29, when Brandon split them into pages of
 // their own, each with its own button on the My Artists card: only Edit is about the profile.
 
 export type ArtistSettingsSection = 'profile' | 'releases' | 'tips' | 'promote';
 
-/** What each page is, above the artist's name. */
+/** What each page is, before the artist's name in its heading. */
 export const SECTION_LABELS: Record<ArtistSettingsSection, string> = {
-  profile: 'Edit profile',
-  releases: 'Manage releases',
-  tips: 'Manage tips',
+  profile: 'Edit Profile',
+  releases: 'Manage Releases',
+  tips: 'Manage Tips',
   promote: 'Promote',
 };
 
@@ -28,14 +29,13 @@ export function ArtistSettingsHeader({ slug, artistName, section }: {
         &larr; My Artists
       </Link>
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-        <div>
-          <p className="text-sm font-medium text-text-muted">{SECTION_LABELS[section]}</p>
-          {artistName ? (
-            <h1 className="font-display text-3xl font-extrabold text-text-primary">{artistName}</h1>
-          ) : (
-            <div className="h-9 w-48 rounded bg-bg-secondary animate-pulse" aria-hidden="true" />
+        <h1 className="font-display text-3xl font-extrabold text-text-primary">
+          {SECTION_LABELS[section]}:{' '}
+          {artistName ?? (
+            // The name arrives with the page's own data; hold its place until then.
+            <span className="inline-block h-7 w-40 align-middle rounded bg-bg-secondary animate-pulse" aria-hidden="true" />
           )}
-        </div>
+        </h1>
         <Link to={`/a/${slug}`} className="text-sm text-link hover:underline">
           View live profile
         </Link>

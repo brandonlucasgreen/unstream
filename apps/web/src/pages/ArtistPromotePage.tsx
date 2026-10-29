@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
 import { networkName } from '../../../../api/shared/autopost-networks';
+import { InfoTip } from '../components/InfoTip';
 import {
   getPromotePage,
   PromoteApiError,
@@ -374,6 +375,17 @@ export function ArtistPromotePage() {
           />
           Post automatically
         </label>
+        <InfoTip label="What does Post automatically do?">
+          <span className="block">
+            <strong className="text-text-primary">On:</strong> Unstream adds each planned post to your Buffer{' '}
+            {form.postTime === null ? 'on its day, in your queue' : 'three days before it goes out, at your set time'}.
+          </span>
+          <span className="mt-2 block">
+            <strong className="text-text-primary">Off:</strong> nothing more goes to Buffer, and nothing is saved as a draft.
+            Your settings stay, and Coming up still shows what would post. Posts already in Buffer stay there, where you can
+            edit or delete them.
+          </span>
+        </InfoTip>
         <button type="button" disabled={busy} onClick={() => save()} className={PRIMARY_BUTTON}>{busy ? 'Saving…' : 'Save'}</button>
         {saved && <span className="text-xs text-text-muted" role="status">Saved</span>}
         {!canSwitchOn && !form.enabled && <span className="text-xs text-text-muted">Choose at least one channel to switch it on.</span>}
