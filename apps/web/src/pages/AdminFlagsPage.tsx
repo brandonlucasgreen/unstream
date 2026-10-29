@@ -24,6 +24,10 @@ const FLAG_COPY: Record<string, { title: string; caption: string }> = {
     title: 'Tips — fans',
     caption: 'tip buttons on search results, artist pages, SEO pages, and checkout',
   },
+  releaseAutopost: {
+    title: 'Release autopost',
+    caption: 'verified artists can schedule posts about their releases to Buffer; off, only the admin can',
+  },
 };
 
 export function AdminFlagsPage() {

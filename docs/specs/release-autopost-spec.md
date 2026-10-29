@@ -60,7 +60,7 @@ The curator posts spec listed "auto-announce an artist's own releases" under *Co
 ## Who can use it
 
 - **Verified artists only:** a claim with `verified_at` set, managed from `/artist-edit/:slug`. These posts are in the artist's own name.
-- **Behind a new flag, `releaseAutopost`,** which fails closed, with the admin account let through, as `canUseCuratorPosts` does.
+- **Behind the `releaseAutopost` flag,** which fails closed, with the admin account let through (`canUseReleaseAutopost`, `api/functions/release-autopost-access.ts`). **Every endpoint, page and scheduled run checks it first**, so while the flag is off the whole feature is Brandon's alone (2026-10-29). The flag is on `/admin/flags`.
 - **Off until the artist switches it on,** for each artist profile separately. A manager running two bands sets up each.
 
 ## How often: the weekly rhythm

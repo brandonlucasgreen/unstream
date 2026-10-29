@@ -74,12 +74,12 @@ describe('admin-flags', () => {
   it('GET on an empty hash reports both flags off', async () => {
     const response = await get();
     expect(response.statusCode).toBe(200);
-    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false, releaseAutopost: false });
   });
 
   it('GET reports only the flag whose field is "on"', async () => {
     mocks.hash.set('tipsArtists', 'on');
-    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false, releaseAutopost: false });
   });
 
   it('GET ignores a hash field that is not a known flag, including the retired "tips" one', async () => {
@@ -89,14 +89,14 @@ describe('admin-flags', () => {
     // stay in Redis and no reader knows them: nothing in the response comes from either.
     mocks.hash.set('tips', 'on');
     mocks.hash.set('emailChange', 'on');
-    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(await get())).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false, releaseAutopost: false });
   });
 
   it('GET still succeeds, all off, when Redis throws', async () => {
     mocks.hgetall.mockRejectedValue(new Error('WRONGTYPE, command was: ["HGETALL","feature-flags"]'));
     const response = await get();
     expect(response.statusCode).toBe(200);
-    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false, releaseAutopost: false });
     expect(mocks.reportRedisFailure).toHaveBeenCalled();
   });
 
@@ -128,14 +128,14 @@ describe('admin-flags', () => {
     expect(response.statusCode).toBe(200);
     expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { tipsArtists: 'on' });
     expect([...mocks.hash.entries()]).toEqual([['tipsArtists', 'on']]);
-    expect(flagsOf(response)).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: true, tipsFans: false, curatorPosts: false, releaseAutopost: false });
   });
 
   it('POST switching a flag off writes "off" and returns it off', async () => {
     mocks.hash.set('tipsFans', 'on');
     const response = await post({ flag: 'tipsFans', enabled: false });
     expect(mocks.hset).toHaveBeenCalledWith('feature-flags', { tipsFans: 'off' });
-    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false });
+    expect(flagsOf(response)).toEqual({ tipsArtists: false, tipsFans: false, curatorPosts: false, releaseAutopost: false });
   });
 
   it('POST returns 503, changing nothing, when Redis is unavailable', async () => {
