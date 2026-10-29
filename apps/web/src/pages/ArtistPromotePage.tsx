@@ -229,9 +229,6 @@ export function ArtistPromotePage() {
         {!buffer.connected ? (
           <div className="space-y-2">
             <p className="text-sm text-text-secondary">
-              Unstream posts through Buffer, to the social accounts you connect there. Buffer’s free plan is enough.
-            </p>
-            <p className="text-sm text-text-secondary">
               <span className="font-medium text-text-primary">New to Buffer?</span> You can make a free account on the next
               screen. Then connect your social accounts in Buffer, since Unstream can only post to accounts connected there.
             </p>
