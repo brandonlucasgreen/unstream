@@ -104,6 +104,13 @@ export const SLOT_DAYS: Record<number, number[]> = {
   7: [0, 1, 2, 3, 4, 5, 6],
 };
 
+/**
+ * How far ahead the sweep plans, and the Promote tab's "Coming up" shows. **Both must plan the
+ * same window:** fixed-date posts are placed across the whole window first, and the catalogue
+ * steers around them, so a shorter window could choose differently for the same day.
+ */
+export const PLAN_HORIZON_DAYS = 28;
+
 const PREORDER_MIN_DAYS_OUT = 3;
 const OUT_NOW_WINDOW_DAYS = 14;
 const STILL_NEW_WINDOW_DAYS = 42;
@@ -268,9 +275,11 @@ export function planSlots(input: PlanInput): PlannedPost[] {
     return last ? (last.templateIndex! + 1) % count : 0;
   };
 
+  // Looking back only. Fixed-date posts are placed before the rest, so looking forward too would
+  // let a Bandcamp Friday three weeks out take Instagram away from today's post.
   const usedOnInstagramRecently = (key: string, date: string) =>
     timeline.some(m => m.imageOnInstagram && m.imageKey === key
-      && Math.abs(daysBetween(m.date, date)) < INSTAGRAM_IMAGE_REPEAT_DAYS);
+      && m.date <= date && daysBetween(m.date, date) < INSTAGRAM_IMAGE_REPEAT_DAYS);
 
   const coverKey = (releaseId: string | null) => {
     const r = releaseId ? byId.get(releaseId) : undefined;

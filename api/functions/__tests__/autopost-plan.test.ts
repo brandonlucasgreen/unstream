@@ -230,6 +230,12 @@ describe('pictures', () => {
     expect(posts.map(p => [p.imageKey, p.imageOnInstagram])).toEqual([['cover:a', true], ['photo', true]]);
   });
 
+  it('only looks back: a Bandcamp Friday later on doesn’t take Instagram away from an earlier post', () => {
+    const posts = plan({ releases: [rel('a', '2024-03-01')], bandcampFridays: ['2026-12-04'] });
+    expect(summary(posts)[0]).toBe('2026-11-13 catalogue a');
+    expect(posts[0]).toMatchObject({ imageKey: 'cover:a', imageOnInstagram: true });
+  });
+
   it('skips Instagram when nothing fresh is left, but the other networks still get the cover', () => {
     const posts = plan({ releases: [rel('a', '2024-03-01')] });
     expect(posts.map(p => [p.imageKey, p.imageOnInstagram])).toEqual([['cover:a', true], ['cover:a', false]]);
