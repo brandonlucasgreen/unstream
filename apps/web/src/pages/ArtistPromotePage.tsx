@@ -214,7 +214,10 @@ export function ArtistPromotePage() {
 
       {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
 
-      <section className={SECTION} aria-labelledby="promote-buffer">
+      <section
+        className={SECTION}
+        {...(buffer.connected ? { 'aria-labelledby': 'promote-buffer' } : { 'aria-label': 'Connect Buffer' })}
+      >
         {ready && (
           <AutopostSwitch
             on={form.enabled}
@@ -225,7 +228,8 @@ export function ArtistPromotePage() {
             onToggle={toggle}
           />
         )}
-        <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>
+        {/* Nothing to say where it posts until there's a Buffer to post through. */}
+        {buffer.connected && <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>}
         {!buffer.connected ? (
           <div className="space-y-2">
             <p className="text-sm text-text-secondary">

@@ -92,6 +92,7 @@ describe('ArtistPromotePage', () => {
     expect(screen.queryByRole('slider')).toBeNull();
     expect(screen.queryByRole('region', { name: 'Coming up' })).toBeNull();
     expect(screen.getByText(/Once Buffer is connected with at least one channel/)).toBeTruthy();
+    expect(screen.queryByText('Where it posts')).toBeNull();
     fireEvent.click(connect);
     expect(promote.startBufferConnection).toHaveBeenCalledWith('tok', 'kid-lightbulbs');
   });
