@@ -410,6 +410,13 @@
   to = "/.netlify/functions/artist-releases"
   status = 200
 
+# Release autopost settings behind the Promote tab (api/functions/artist-promote.ts). Behind the
+# releaseAutopost flag, which the admin account bypasses (docs/specs/release-autopost-spec.md).
+[[redirects]]
+  from = "/api/artist-promote"
+  to = "/.netlify/functions/artist-promote"
+  status = 200
+
 [[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"

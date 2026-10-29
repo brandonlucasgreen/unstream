@@ -78,13 +78,13 @@ describe('buildAuthorizeUrl', () => {
   });
 
   // Without offline_access Buffer issues no refresh token at all, and the connection would die
-  // an hour after it was made.
+  // an hour after it was made. posts:read is for release autopost's analytics, asked for up front
+  // so connected artists don't have to consent again when that ships.
   it('asks for offline_access, and nothing beyond what it uses', () => {
     const scope = new URL(buildAuthorizeUrl('s', 'c')).searchParams.get('scope')!.split(' ');
     expect(scope).toContain('offline_access');
     expect(scope).toEqual(BUFFER_SCOPES);
-    expect(scope).not.toContain('account:write');
-    expect(scope).not.toContain('posts:read');
+    expect([...scope].sort()).toEqual(['account:read', 'offline_access', 'posts:read', 'posts:write']);
   });
 
   // The secret is what makes us a confidential client; it belongs nowhere near the browser.

@@ -85,6 +85,39 @@ export async function getActiveAutopostSettings(): Promise<AutopostSettings[]> {
   return (data as SettingsRow[]).map(toSettings);
 }
 
+/** One artist's settings, or null before they've saved any. */
+export async function getAutopostSettings(artistId: string): Promise<AutopostSettings | null> {
+  const { data, error } = await client()
+    .from('release_autopost_settings')
+    .select(SETTINGS_COLUMNS)
+    .eq('artist_id', artistId)
+    .maybeSingle();
+  if (error) throw new Error(`release_autopost_settings read failed: ${error.message}`);
+  return data ? toSettings(data as SettingsRow) : null;
+}
+
+/** Save an artist's settings whole. The caller has validated every field and checked ownership. */
+export async function saveAutopostSettings(settings: AutopostSettings): Promise<void> {
+  const { error } = await client()
+    .from('release_autopost_settings')
+    .upsert({
+      artist_id: settings.artistId,
+      user_id: settings.userId,
+      enabled: settings.enabled,
+      enabled_at: settings.enabledAt,
+      posts_per_week: settings.postsPerWeek,
+      timezone: settings.timezone,
+      post_time: settings.postTime,
+      organization_id: settings.organizationId,
+      channel_ids: settings.channelIds,
+      kinds_off: settings.kindsOff,
+      templates: settings.templates,
+      paused_reason: settings.pausedReason,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'artist_id' });
+  if (error) throw new Error(`saving autopost settings failed: ${error.message}`);
+}
+
 /** Stops posting for an artist until they fix what's wrong (e.g. reconnect Buffer). */
 export async function pauseAutopost(artistId: string, reason: string): Promise<void> {
   const { error } = await client()
@@ -108,12 +141,14 @@ export interface AutopostArtist {
   verifiedOwnerId: string | null;
 }
 
-export async function getAutopostArtist(artistId: string): Promise<AutopostArtist | null> {
-  const { data, error } = await client()
+/** By id (the sweep) or by slug (the Promote tab). */
+export async function getAutopostArtist(artistId: string): Promise<AutopostArtist | null>;
+export async function getAutopostArtist(by: { slug: string }): Promise<AutopostArtist | null>;
+export async function getAutopostArtist(by: string | { slug: string }): Promise<AutopostArtist | null> {
+  const query = client()
     .from('artists')
-    .select('id, slug, name, image_url, artist_profiles ( user_id, verified_at, custom_image_url )')
-    .eq('id', artistId)
-    .maybeSingle();
+    .select('id, slug, name, image_url, artist_profiles ( user_id, verified_at, custom_image_url )');
+  const { data, error } = await (typeof by === 'string' ? query.eq('id', by) : query.eq('slug', by.slug)).maybeSingle();
   if (error) throw new Error(`artist read failed: ${error.message}`);
   if (!data) return null;
 
@@ -296,6 +331,35 @@ export async function claimSlot(claim: SlotClaim): Promise<string | null> {
     .select('id');
   if (retaken.error) throw new Error(`retrying a slot failed: ${retaken.error.message}`);
   return retaken.data && retaken.data.length > 0 ? row.id : null;
+}
+
+export interface RecentPost {
+  slotAt: string;
+  kind: AutopostKind;
+  releaseId: string | null;
+  status: 'pushing' | 'pushed' | 'failed';
+  error: string | null;
+  channels: number;
+}
+
+/** The latest slots handed to Buffer, newest first, for the Promote tab. */
+export async function getRecentAutopostPosts(artistId: string, limit: number): Promise<RecentPost[]> {
+  const { data, error } = await client()
+    .from('release_autopost_posts')
+    .select('slot_at, kind, release_id, status, error, buffer_post_ids')
+    .eq('artist_id', artistId)
+    .order('slot_at', { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`release_autopost_posts read failed: ${error.message}`);
+  type Row = { slot_at: string; kind: AutopostKind; release_id: string | null; status: RecentPost['status']; error: string | null; buffer_post_ids: unknown[] | null };
+  return (data as Row[]).map(r => ({
+    slotAt: r.slot_at,
+    kind: r.kind,
+    releaseId: r.release_id,
+    status: r.status,
+    error: r.error,
+    channels: r.buffer_post_ids?.length ?? 0,
+  }));
 }
 
 export interface SlotOutcome {

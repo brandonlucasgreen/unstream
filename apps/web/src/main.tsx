@@ -41,6 +41,7 @@ const MyCollectionPage = lazyWithRetry(() => import('./pages/MyCollectionPage.ts
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
+const ArtistPromotePage = lazyWithRetry(() => import('./pages/ArtistPromotePage.tsx').then(m => ({ default: m.ArtistPromotePage })))
 const ArtistSettingsLayout = lazyWithRetry(() => import('./pages/ArtistSettingsLayout.tsx').then(m => ({ default: m.ArtistSettingsLayout })))
 const ArtistDirectoryPage = lazyWithRetry(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
@@ -132,11 +133,12 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/my-artists" element={<MyArtistsPage />} />
               <Route path="/my-collection" element={<MyCollectionPage />} />
-              {/* One frame for the three artist settings tabs, so switching tabs swaps only the content. */}
+              {/* One frame for the artist settings tabs, so switching tabs swaps only the content. */}
               <Route path="/artist-edit/:slug" element={<ArtistSettingsLayout />}>
                 <Route index element={<ArtistEditPage />} />
                 <Route path="tips" element={<ArtistTipsPage />} />
                 <Route path="releases" element={<ArtistReleasesPage />} />
+                <Route path="promote" element={<ArtistPromotePage />} />
               </Route>
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/known-artists" element={<KnownArtistsPage />} />
