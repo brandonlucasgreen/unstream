@@ -1,8 +1,10 @@
-// API endpoint: /api/me/buffer — the curator's own Buffer connection
-// (docs/specs/curator-posts-spec.md, "Buffer auth").
+// API endpoint: /api/me/buffer — the user's own Buffer connection, shared by release autopost
+// (docs/specs/release-autopost-spec.md) and the paused curator posts (docs/specs/curator-posts-spec.md,
+// "Buffer auth").
 //
 //   GET    /api/me/buffer               is this account connected; its organizations and channels
-//   POST   /api/me/buffer/start         begin the OAuth flow; returns the URL to send them to
+//   POST   /api/me/buffer/start         begin the OAuth flow; returns the URL to send them to.
+//                                        Optional body { returnTo }: the page to come back to
 //   GET    /api/me/buffer/callback      Buffer redirects here; exchanges the code and stores tokens
 //   POST   /api/me/buffer/organization  which of their Buffer organizations to post from
 //   POST   /api/me/buffer/channels      which channels Unstream may post to
@@ -37,6 +39,7 @@ import {
   setSelectedChannels,
   usableAccessToken,
 } from './buffer-db';
+import { canUseReleaseAutopost } from './release-autopost-access';
 import { Sentry, withSentry } from '../lib/sentry';
 import { randomBytes } from 'node:crypto';
 
@@ -45,8 +48,18 @@ const FLOW_TTL_SECONDS = 600;
 
 const flowKey = (state: string) => `buffer-oauth:${state}`;
 
-/** Where the curator lands after connecting. Same origin, so no open redirect to worry about. */
-const RETURN_PATH = '/curator/new';
+/** Where they land after connecting when the page that started it didn't say. */
+const DEFAULT_RETURN_PATH = '/curator/new';
+
+/**
+ * The pages that may start a connection and be returned to: release autopost's Promote tab, and
+ * curator posts. An allowlist rather than "any path", so a crafted /start can't send someone
+ * back to an arbitrary page. Same origin either way, so there is no open redirect.
+ */
+export function isAllowedReturnPath(path: unknown): path is string {
+  return typeof path === 'string'
+    && (path === DEFAULT_RETURN_PATH || /^\/artist-edit\/[A-Za-z0-9_-]+\/promote$/.test(path));
+}
 
 interface HandlerEvent {
   httpMethod: string;
@@ -56,7 +69,7 @@ interface HandlerEvent {
   rawUrl?: string;
 }
 
-interface PendingFlow { userId: string; verifier: string }
+interface PendingFlow { userId: string; verifier: string; returnTo?: string }
 
 function actionFrom(event: HandlerEvent): string {
   const raw = event.rawUrl
@@ -70,9 +83,10 @@ function siteOrigin(): string {
   return (process.env.URL ?? 'https://unstream.stream').replace(/\/+$/, '');
 }
 
-/** Send the curator back to the compose page with a word about how it went. */
-function redirectBack(outcome: string) {
-  return { statusCode: 302, headers: { Location: `${siteOrigin()}${RETURN_PATH}?buffer=${outcome}` }, body: '' };
+/** Send them back to the page that started it, with a word about how it went. */
+function redirectBack(outcome: string, returnTo: string = DEFAULT_RETURN_PATH) {
+  const path = isAllowedReturnPath(returnTo) ? returnTo : DEFAULT_RETURN_PATH;
+  return { statusCode: 302, headers: { Location: `${siteOrigin()}${path}?buffer=${outcome}` }, body: '' };
 }
 
 async function handleRequest(event: HandlerEvent) {
@@ -94,15 +108,18 @@ async function handleRequest(event: HandlerEvent) {
     const state = url?.searchParams.get('state') ?? '';
     const code = url?.searchParams.get('code') ?? '';
     const denied = url?.searchParams.get('error');
-    if (denied) return redirectBack(denied === 'access_denied' ? 'cancelled' : 'failed');
-    if (!state || !code) return redirectBack('failed');
+    if (!state) return redirectBack('failed');
 
     const redis = getRedis();
     if (!redis) return redirectBack('failed');
 
-    // Consume the flow: read and delete together, so a replayed callback finds nothing.
+    // Consume the flow: read and delete together, so a replayed callback finds nothing. Read even
+    // when they declined, to know which page to send them back to.
     const pending = await redis.get<PendingFlow>(flowKey(state));
     await redis.del(flowKey(state));
+    const returnTo = pending?.returnTo;
+    if (denied) return redirectBack(denied === 'access_denied' ? 'cancelled' : 'failed', returnTo);
+    if (!code) return redirectBack('failed', returnTo);
     if (!pending?.userId || !pending.verifier) return redirectBack('expired');
 
     try {
@@ -110,10 +127,10 @@ async function handleRequest(event: HandlerEvent) {
       // Kept only when there's no choice to make; otherwise the page asks.
       const organizations = await listOrganizations(tokens.accessToken);
       await saveBufferConnection(pending.userId, tokens, organizations.length === 1 ? organizations[0].id : null);
-      return redirectBack('connected');
+      return redirectBack('connected', returnTo);
     } catch (error) {
       Sentry.captureException(error, { tags: { buffer: 'oauth-callback' } });
-      return redirectBack('failed');
+      return redirectBack('failed', returnTo);
     }
   }
 
@@ -127,9 +144,10 @@ async function handleRequest(event: HandlerEvent) {
   if (!user) return respond(401, { error: 'Not signed in' });
   const userId = user.userId;
 
-  // The flag gates the whole feature, connecting included, and fails closed; the admin is let
-  // through regardless, to test it before it is switched on.
-  if (!(await canUseCuratorPosts(user.email))) return respond(200, { available: false });
+  // Connecting is open to anyone either feature lets in. Each flag fails closed, and the admin is
+  // let through regardless, to test before it is switched on.
+  const allowed = (await canUseReleaseAutopost(user.email)) || (await canUseCuratorPosts(user.email));
+  if (!allowed) return respond(200, { available: false });
 
   try {
     if (event.httpMethod === 'GET' && action === '') {
@@ -179,9 +197,15 @@ async function handleRequest(event: HandlerEvent) {
       const redis = getRedis();
       if (!redis) return respond(503, { error: 'Cannot start the connection right now' });
 
+      const body = JSON.parse(event.body || '{}') as { returnTo?: unknown };
+      if (body.returnTo !== undefined && !isAllowedReturnPath(body.returnTo)) {
+        return respond(400, { error: 'That page can’t start a Buffer connection' });
+      }
+
       const state = randomBytes(32).toString('base64url');
       const { verifier, challenge } = createPkcePair();
-      await redis.set(flowKey(state), { userId, verifier } satisfies PendingFlow, { ex: FLOW_TTL_SECONDS });
+      const flow: PendingFlow = { userId, verifier, ...(body.returnTo ? { returnTo: body.returnTo as string } : {}) };
+      await redis.set(flowKey(state), flow, { ex: FLOW_TTL_SECONDS });
 
       const authorizeUrl = buildAuthorizeUrl(state, challenge);
       if (!isUrlHostnameAllowed(authorizeUrl)) return respond(500, { error: 'Buffer auth host not allowed' });

@@ -26,11 +26,16 @@ const TOKEN_URL = 'https://auth.buffer.com/token';
 /**
  * What Unstream asks for, and no more.
  *
- * `posts:write` creates the posts, `account:read` lists the curator's channels, and
- * `offline_access` is the only reason Buffer issues a refresh token at all — without it a
- * connection stops working an hour after it's made.
+ * `posts:write` creates the posts, `account:read` lists the channels, and `offline_access` is
+ * the only reason Buffer issues a refresh token at all — without it a connection stops working
+ * an hour after it's made.
+ *
+ * `posts:read` is for release autopost's analytics (docs/specs/release-autopost-analytics-spec.md),
+ * which reads the artist's posts and their numbers. It's asked for now, before that's built,
+ * because adding a scope later would send every connected artist back through Buffer's consent
+ * screen.
  */
-export const BUFFER_SCOPES = ['posts:write', 'account:read', 'offline_access'];
+export const BUFFER_SCOPES = ['posts:write', 'posts:read', 'account:read', 'offline_access'];
 
 /** Refresh this far before expiry, so a token can't lapse between the check and the call. */
 const REFRESH_SKEW_MS = 60_000;

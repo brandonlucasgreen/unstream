@@ -3,8 +3,8 @@
 //
 // Invoked every 6 hours by .github/workflows/release-autopost-sweep.yml, the recatalog-sweep
 // precedent: there are no scheduled Netlify functions in this repo. For each artist with
-// autopost on, it plans the next PLAN_HORIZON_DAYS with the same pure planner the Promote tab
-// shows, and pushes every slot due in the next PUSH_AHEAD_HOURS to Buffer as a scheduled post.
+// autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote tab's "Coming up" does
+// (`planForArtist`), and pushes every slot due in the next PUSH_AHEAD_HOURS to Buffer as a scheduled post.
 //
 // ## Who it posts for
 //
@@ -30,10 +30,9 @@
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import { BANDCAMP_FRIDAY_DATES } from '../shared/bandcamp-friday';
-import { AUTOPOST_KINDS, type AutopostKind } from '../shared/autopost-templates';
-import { PLAN_HORIZON_DAYS, planSlots, type PlannedPost } from './autopost-plan';
-import { buildChannelPost, imageAltText, isAutopostNetwork, variantsFor } from './autopost-channel-post';
+import type { PlannedPost } from './autopost-plan';
+import { planForArtist } from './release-autopost-schedule';
+import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
 import {
   claimSlot,
@@ -201,33 +200,7 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
 
   const releases = await getAutopostReleases(artist.id);
   const history = await getAutopostHistory(artist.id, now);
-  const plan = planSlots({
-    settings: {
-      postsPerWeek: settings.postsPerWeek,
-      timezone: settings.timezone,
-      postTime: settings.postTime,
-      enabledAt: settings.enabledAt,
-      kindsOff: settings.kindsOff,
-      variantCounts: Object.fromEntries(AUTOPOST_KINDS.map(k => [k, variantsFor(k, settings.templates).length])) as Record<AutopostKind, number>,
-      // Its shape is checked when it's copied; one outside Instagram's range skips Instagram then.
-      artistPhoto: artist.photoUrl ? { instagramOk: true } : null,
-      uploadIds: [],
-    },
-    releases: releases.map(r => ({
-      id: r.id,
-      releaseDate: r.releaseDate,
-      datePrecision: r.datePrecision,
-      status: r.status,
-      cataloguedAt: r.createdAt,
-      onBandcamp: r.sources.some(s => s.platform === 'bandcamp'),
-      hasCover: Boolean(r.artworkUrl),
-    })),
-    history,
-    campaigns: [],
-    bandcampFridays: BANDCAMP_FRIDAY_DATES,
-    from: now.toISOString(),
-    to: new Date(now.getTime() + PLAN_HORIZON_DAYS * 86_400_000).toISOString(),
-  });
+  const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, now);
 
   const pushBefore = now.getTime() + PUSH_AHEAD_HOURS * 3_600_000;
   const due = plan.filter(p => new Date(p.at).getTime() < pushBefore);

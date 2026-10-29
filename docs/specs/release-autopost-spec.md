@@ -297,7 +297,9 @@ Already built and merged (#697–#708):
 
 ## UI: a Promote tab
 
-A fourth tab in the artist settings, `/artist-edit/:slug/promote`, beside Edit Profile, Manage Tips and Manage Releases. Setup is one page, top to bottom:
+A fourth tab in the artist settings, `/artist-edit/:slug/promote`, beside Edit Profile, Manage Tips and Manage Releases. Setup is one page, top to bottom. **Built in step 2b** (`ArtistPromotePage.tsx`, behind `/api/artist-promote`), shown only to the admin while the flag is off. Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked (it says what it uses instead), campaigns, and the `/my-artists` line.
+
+
 
 1. **Connect Buffer,** choose the organization, tick channels. Ticking Instagram shows the images Unstream already has for them, with an optional upload.
 2. **How often:** "Recommended (1 a week)" selected, with the one-line explanation, and 1–7 to choose instead. Posting time.

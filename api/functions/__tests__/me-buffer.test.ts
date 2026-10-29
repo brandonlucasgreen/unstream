@@ -138,6 +138,37 @@ describe('the gate', () => {
     expect(saveBufferConnection).toHaveBeenCalledWith('u1', expect.anything(), 'org_1');
   });
 
+  it('returns to the Promote tab that started the flow', async () => {
+    asUser('admin@example.com');
+    await call('POST', '/start', '', { returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    expect(redisSet.mock.calls[0][1]).toMatchObject({ returnTo: '/artist-edit/kid-lightbulbs/promote' });
+
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
+    const res = await call('GET', '/callback', '?state=s&code=c');
+    expect(res.headers.Location).toBe('https://unstream.stream/artist-edit/kid-lightbulbs/promote?buffer=connected');
+  });
+
+  it('sends a declined connection back to the page that started it too', async () => {
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/artist-edit/kid-lightbulbs/promote' });
+    const res = await call('GET', '/callback', '?state=s&error=access_denied');
+    expect(res.headers.Location).toBe('https://unstream.stream/artist-edit/kid-lightbulbs/promote?buffer=cancelled');
+  });
+
+  it('refuses to return anywhere but the pages that connect Buffer', async () => {
+    asUser('admin@example.com');
+    for (const returnTo of ['https://evil.example', '//evil.example', '/settings', '/artist-edit/x/../../admin/promote']) {
+      expect((await call('POST', '/start', '', { returnTo })).statusCode).toBe(400);
+    }
+    expect(redisSet).not.toHaveBeenCalled();
+  });
+
+  it('lets in an account that release autopost allows, even with curator posts off', async () => {
+    getFeatureFlag.mockImplementation(async (flag: string) => flag === 'releaseAutopost');
+    asUser('artist@example.com');
+    expect(JSON.parse((await call('GET', '')).body)).toEqual({ available: true, connected: false });
+  });
+
   it('turns away a callback whose state nobody minted', async () => {
     redisGet.mockResolvedValue(null);
     const res = await call('GET', '/callback', '?state=forged&code=c');
