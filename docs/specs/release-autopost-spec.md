@@ -1,6 +1,6 @@
 # Release autopost: a steady drumbeat for your music, without living on social media
 
-**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused indefinitely; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first.
+**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused indefinitely; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first. Analytics per release is the second milestone, in `release-autopost-analytics-spec.md`; three small parts of it are built here (see "Links" and "Reused from curator posts").
 
 ## The goal
 
@@ -210,7 +210,7 @@ To make that a one-file change, **all media goes through one small module**, `au
 - **On one platform:** straight to it, e.g. the Bandcamp album page. Artists first: one tap fewer to buy.
 - **On several:** the release page, `unstream.stream/a/{artist}/{release}`, which lists every place to buy with what the artist keeps. The artist can choose "always link to Bandcamp" instead.
 - **Instagram:** no clickable links, so `{link}` becomes "link in bio".
-- **No tracking parameters.** The release page is cached at the edge by URL (`cache = "manual"`), and a `?ref=` would split that cache. Counting comes from Buffer instead.
+- **Every link is a short link,** `unstream.stream/r/{code}`, one per post per channel, redirecting to the destination above and counting the click. No network gives Buffer link clicks, so this is the only way to know a post sent anyone toward Bandcamp. It also keeps parameters off the release page, which is cached at the edge by URL (`cache = "manual"`). Details, and the trade (fans see an Unstream link, not the Bandcamp one), are in `release-autopost-analytics-spec.md`. **Brandon to confirm before the first post**, since the first posts carry whichever it is.
 
 ## Networks
 
@@ -267,7 +267,7 @@ The slot filler is a pure function: `planSlots(settings, releases, history, temp
 All are server-only: RLS on, no policies, read and written by the functions after an ownership check (the claim's `user_id`), with a comment saying the missing policies are deliberate.
 
 - **`release_autopost_settings`**, one row per artist profile: `artist_id` (PK), `user_id`, `enabled`, `enabled_at`, `posts_per_week` (null = recommended), `timezone`, `post_time`, `organization_id`, `channel_ids text[]`, `kinds_off text[]`, `templates jsonb`, `link_preference`.
-- **`release_autopost_posts`**, one row per slot: `id`, `artist_id`, `slot_at`, `kind`, `release_id` (null for support posts), `template_index` (autopost) or `text` (campaign), `campaign_id` (null for autopost), `image_key`, `status` (`planned` | `pushed` | `cancelled` | `failed`), `buffer_post_ids jsonb`, `captions jsonb` (exactly what was sent, written at push), `error`, `attempts`, timestamps. Autopost rows are unique on `(artist_id, slot_at)`, so a retried run can't double-post. Campaign rows are unique by id, since they're created by the artist. Pushed rows are the history that spacing is measured from.
+- **`release_autopost_posts`**, one row per slot: `id`, `artist_id`, `slot_at`, `kind`, `release_id` (null for support posts), `template_index` (autopost) or `text` (campaign), `campaign_id` (null for autopost), `image_key`, `status` (`planned` | `pushed` | `cancelled` | `failed`), `buffer_post_ids jsonb` (`[{ channelId, service, postId }]`, so analytics can tell the networks apart), `captions jsonb` (exactly what was sent, written at push), `error`, `attempts`, timestamps. Autopost rows are unique on `(artist_id, slot_at)`, so a retried run can't double-post. Campaign rows are unique by id, since they're created by the artist. Pushed rows are the history that spacing is measured from.
 - **`release_autopost_campaigns`**: `id`, `artist_id`, `release_id`, `status` (`active` | `ended` | `cancelled`), `created_at`. A campaign's steps are its posts' rows. Each row's position relative to the release date is stored too, so a moved date can move the posts not yet pushed.
 - **`release_autopost_images`**: `id`, `artist_id`, `r2_key`, `width`, `height`, `last_used_at`, `created_at`.
 - **`release_autopost_settings.campaign_emails`** (default on): the one offer email per new release.
@@ -281,7 +281,7 @@ Already built and merged (#697–#708):
 - **Choosing the organization, never guessing it,** and listing its live channels (`me-buffer.ts`, `buffer-client.ts`).
 - **`createPost`, `ensureTag`,** and the R2 bucket and its upload helper.
 
-**What changes:** the organization and ticked channels move from the user's `buffer_connections` row to each artist's `release_autopost_settings`, since two bands under one login post to different places. `me-buffer`'s callback always returns to `/curator/new`; it needs a return path held with the OAuth state (same-origin paths only) so the settings page can start the flow too.
+**What changes:** the OAuth scopes gain Buffer's post-reading scope (presumably `posts:read`; check the name), so analytics can read metrics later without every artist reconnecting. The organization and ticked channels move from the user's `buffer_connections` row to each artist's `release_autopost_settings`, since two bands under one login post to different places. `me-buffer`'s callback always returns to `/curator/new`; it needs a return path held with the OAuth state (same-origin paths only) so the settings page can start the flow too.
 
 ## UI: a Promote tab
 
@@ -299,13 +299,13 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 
 - **Does it stay on:** artists who switch it on, and how many still have it on after 4 and 12 weeks.
 - **Do the posts survive:** posts pushed compared with posts the artist deleted in Buffer. The `unstream: release autopost` tag makes this a Buffer query.
-- **Do they reach anyone:** Buffer's engagement numbers by tag and by kind, which also tells us whether catalogue posts earn their place next to release moments. Release-page views on post days come from GoatCounter.
+- **Do they reach anyone:** Buffer's engagement numbers by tag and by kind, which also tells us whether catalogue posts earn their place next to release moments, and the short links' clicks. (Not GoatCounter: the release page loads no script, so GoatCounter never sees it.)
 - **Do campaigns get used:** of the new releases offered a campaign, how many got one, and how many of its steps were written. A campaign started and left half-written means the timeline asks for too much.
 
 ## Build plan
 
 1. **The rotation, on paper.** `planSlots` and `renderTemplate` with their tests, plus a script that prints the next 12 weeks for any artist slug from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
-2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
+2. **Brandon only.** Settings, the Promote tab, Buffer push, short links, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
 4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.
