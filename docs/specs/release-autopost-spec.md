@@ -1,6 +1,6 @@
 # Release autopost: a steady drumbeat for your music, without living on social media
 
-**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused indefinitely; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first. Analytics per release is the second milestone, in `release-autopost-analytics-spec.md`; three small parts of it are built here (see "Links" and "Reused from curator posts").
+**Status:** proposed 2026-10-28, reframed 2026-10-29 around a steady weekly rhythm rather than release announcements, with release campaigns as a manual companion feature built alongside it (Brandon). Nothing is built. It replaces curator posts as the Buffer feature being worked on (that one is paused indefinitely; see "Where this came from"). "Build plan" lists the order, and Brandon's own catalogue as Kid Lightbulbs comes first. Analytics per release is the second milestone, in `release-autopost-analytics-spec.md`; the one part of it built here is Buffer's read scope (see "Reused from curator posts").
 
 ## The goal
 
@@ -11,7 +11,7 @@ A verified artist connects their Buffer account, picks channels and says how man
 1. **A campaign:** Bandcamp Friday.
 2. **A release moment:** a pre-order, release day, or a new release's first weeks.
 3. **The catalogue:** an older release, chosen so nothing repeats too soon.
-4. **A call for support:** occasionally, linking to where the artist keeps the most.
+4. **A call for support:** occasionally, linking to the artist's Unstream page.
 
 Most weeks most artists have nothing new, and that's the case this is built for. The rhythm is deliberately gentle, one to three posts a week, so it leaves room for whatever the artist posts themselves.
 
@@ -21,7 +21,7 @@ What it solves:
 
 - **Artists don't want to live on social media.** Staying visible means being online, so most indie artists post on release day and then go quiet. This keeps their catalogue in front of people without them opening an app.
 - **The platforms that pay artists best have no social tools.** Bandcamp, Mirlo, Faircamp and Jam.coop give you a release page, with no scheduling, no reminders and no Bandcamp Friday nudge. Unstream already knows every release on all of them.
-- **It sends fans to the places that pay.** Every post links to where the artist keeps the most.
+- **It sends fans to the places that pay.** Every post links to the release's Unstream page, which lists every place to buy it and what the artist keeps at each.
 
 ## No LLM writes the posts
 
@@ -96,7 +96,7 @@ Each week has as many slots as the artist chose. Slots are filled in priority or
    - **Out now:** a release found already out, within 14 days of release, that missed its release-day post.
    - **Still new:** a release in its first 6 weeks, at most one slot in two.
 3. **The catalogue** fills what's left. It picks the qualifying release mentioned longest ago (never mentioned counts as longest), with ties going to the newest. A release is never mentioned twice inside its spacing, which is `max(14 days, the catalogue's natural gap)`.
-4. **A call for support** replaces a catalogue post at most once every 4 posts, and only at 3 or more posts a week. Below that every slot belongs to the music. It links to where the artist keeps the most: their Tip page if they take tips, otherwise their best-paying store.
+4. **A call for support** replaces a catalogue post at most once every 4 posts, and only at 3 or more posts a week. Below that every slot belongs to the music. It links to their Tip page if they take tips, otherwise their artist page (`unstream.stream/a/{artist}`).
 
 **A release with a campaign is left to the campaign.** Autopost writes no release-moment or catalogue posts about it while the campaign runs, and leaves any day the campaign posts on empty. That way no day gets two posts and nothing is said twice. Releases without a campaign still get the automatic moments above, inside the weekly number.
 
@@ -207,10 +207,11 @@ To make that a one-file change, **all media goes through one small module**, `au
 
 ## Links
 
-- **On one platform:** straight to it, e.g. the Bandcamp album page. Artists first: one tap fewer to buy.
-- **On several:** the release page, `unstream.stream/a/{artist}/{release}`, which lists every place to buy with what the artist keeps. The artist can choose "always link to Bandcamp" instead.
+**Every post links to an Unstream page** (Brandon, 2026-10-29): a release post to its release page, `unstream.stream/a/{artist}/{release}`, which lists every place to buy it with what the artist keeps at each, artist-paying first. That is the reason to post through Unstream rather than paste a Bandcamp link, and it's the same page for every network, campaign and artist.
+
 - **Instagram:** no clickable links, so `{link}` becomes "link in bio".
-- **Every link is a short link,** `unstream.stream/r/{code}`, one per post per channel, redirecting to the destination above and counting the click. No network gives Buffer link clicks, so this is the only way to know a post sent anyone toward Bandcamp. It also keeps parameters off the release page, which is cached at the edge by URL (`cache = "manual"`). Details, and the trade (fans see an Unstream link, not the Bandcamp one), are in `release-autopost-analytics-spec.md`. **Brandon to confirm before the first post**, since the first posts carry whichever it is.
+- **No tracking parameters.** The release page is cached at the edge by URL (`cache = "manual"`), and a `?ref=` would split that cache.
+- **Clicks aren't counted,** a known limitation for now. No network reports link clicks to Buffer, and the release page loads no script. `release-autopost-analytics-spec.md` lists what counting them would take.
 
 ## Networks
 
@@ -266,8 +267,8 @@ The slot filler is a pure function: `planSlots(settings, releases, history, temp
 
 All are server-only: RLS on, no policies, read and written by the functions after an ownership check (the claim's `user_id`), with a comment saying the missing policies are deliberate.
 
-- **`release_autopost_settings`**, one row per artist profile: `artist_id` (PK), `user_id`, `enabled`, `enabled_at`, `posts_per_week` (null = recommended), `timezone`, `post_time`, `organization_id`, `channel_ids text[]`, `kinds_off text[]`, `templates jsonb`, `link_preference`.
-- **`release_autopost_posts`**, one row per slot: `id`, `artist_id`, `slot_at`, `kind`, `release_id` (null for support posts), `template_index` (autopost) or `text` (campaign), `campaign_id` (null for autopost), `image_key`, `status` (`planned` | `pushed` | `cancelled` | `failed`), `buffer_post_ids jsonb` (`[{ channelId, service, postId }]`, so analytics can tell the networks apart), `captions jsonb` (exactly what was sent, written at push), `error`, `attempts`, timestamps. Autopost rows are unique on `(artist_id, slot_at)`, so a retried run can't double-post. Campaign rows are unique by id, since they're created by the artist. Pushed rows are the history that spacing is measured from.
+- **`release_autopost_settings`**, one row per artist profile: `artist_id` (PK), `user_id`, `enabled`, `enabled_at`, `posts_per_week` (null = recommended), `timezone`, `post_time`, `organization_id`, `channel_ids text[]`, `kinds_off text[]`, `templates jsonb`.
+- **`release_autopost_posts`**, one row per slot: `id`, `artist_id`, `slot_at`, `kind`, `release_id` (null for support posts), `template_index` (autopost) or `text` (campaign), `campaign_id` (null for autopost), `image_key`, `status` (`planned` | `pushed` | `cancelled` | `failed`), `buffer_post_ids jsonb` (which analytics uses to tell which release a Buffer post was about), `captions jsonb` (exactly what was sent, written at push), `error`, `attempts`, timestamps. Autopost rows are unique on `(artist_id, slot_at)`, so a retried run can't double-post. Campaign rows are unique by id, since they're created by the artist. Pushed rows are the history that spacing is measured from.
 - **`release_autopost_campaigns`**: `id`, `artist_id`, `release_id`, `status` (`active` | `ended` | `cancelled`), `created_at`. A campaign's steps are its posts' rows. Each row's position relative to the release date is stored too, so a moved date can move the posts not yet pushed.
 - **`release_autopost_images`**: `id`, `artist_id`, `r2_key`, `width`, `height`, `last_used_at`, `created_at`.
 - **`release_autopost_settings.campaign_emails`** (default on): the one offer email per new release.
@@ -299,13 +300,13 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 
 - **Does it stay on:** artists who switch it on, and how many still have it on after 4 and 12 weeks.
 - **Do the posts survive:** posts pushed compared with posts the artist deleted in Buffer. The `unstream: release autopost` tag makes this a Buffer query.
-- **Do they reach anyone:** Buffer's engagement numbers by tag and by kind, which also tells us whether catalogue posts earn their place next to release moments, and the short links' clicks. (Not GoatCounter: the release page loads no script, so GoatCounter never sees it.)
+- **Do they reach anyone:** Buffer's engagement numbers by tag and by kind, which also tells us whether catalogue posts earn their place next to release moments. (Not release-page views from GoatCounter: the release page loads no script, so GoatCounter never sees it.)
 - **Do campaigns get used:** of the new releases offered a campaign, how many got one, and how many of its steps were written. A campaign started and left half-written means the timeline asks for too much.
 
 ## Build plan
 
 1. **The rotation, on paper.** `planSlots` and `renderTemplate` with their tests, plus a script that prints the next 12 weeks for any artist slug from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
-2. **Brandon only.** Settings, the Promote tab, Buffer push, short links, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
+2. **Brandon only.** Settings, the Promote tab, Buffer push, on Kid Lightbulbs' channels for a few weeks. First, check whether Buffer keeps its own copy of an image at post creation. That decides whether covers need copying to R2. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
 3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
 4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.
@@ -324,4 +325,3 @@ On `/my-artists`, a verified artist's card gets one line, "Autopost: 2 a week ·
 2. **Support posts start at 3 a week, the top of the recommended range,** so most artists will never get one. Should one or two a week get an occasional one too, say one a month?
 3. **A campaign's suggested timeline:** six steps from three weeks out to a week after. Is that the right shape, or too much to ask an artist to write?
 4. **Bandcamp Friday copy.** Bandcamp waives its share that day, but payment processing fees still apply. Is "Bandcamp waives its fee today" accurate enough on its own?
-5. **The direct link versus the release page.** Linking straight to a release's only platform is best for the artist, but fans never see Unstream. Is that the right trade?
