@@ -6,7 +6,8 @@ import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-li
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { PromotePage } from 'src/services/promote';
 
-const auth = vi.hoisted(() => ({ value: { session: { access_token: 'tok' } as null | { access_token: string }, isLoading: false } }));
+type FakeSession = null | { access_token: string; user: { id: string } };
+const auth = vi.hoisted(() => ({ value: { session: { access_token: 'tok', user: { id: 'u1' } } as FakeSession, isLoading: false } }));
 const promote = vi.hoisted(() => ({ getPromotePage: vi.fn(), savePromoteSettings: vi.fn(), startBufferConnection: vi.fn() }));
 
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => auth.value }));
@@ -71,12 +72,30 @@ function renderTab() {
 }
 
 beforeEach(() => {
-  auth.value = { session: { access_token: 'tok' }, isLoading: false };
+  auth.value = { session: { access_token: 'tok', user: { id: 'u1' } }, isLoading: false };
   for (const fn of Object.values(promote)) fn.mockReset();
 });
 afterEach(cleanup);
 
 describe('ArtistPromotePage', () => {
+  // A refreshed sign-in token is a new session object for the same person. Reloading on it sent two
+  // requests at once, which could refresh the Buffer token twice and get the connection revoked.
+  it('loads once per signed-in person, not again when their sign-in token refreshes', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded());
+    const { rerender } = renderTab();
+    await screen.findByRole('button', { name: 'Connect Buffer' });
+    auth.value = { session: { access_token: 'tok-refreshed', user: { id: 'u1' } }, isLoading: false };
+    rerender(
+      <MemoryRouter initialEntries={['/promote/kid-lightbulbs']}>
+        <Routes>
+          <Route path="/promote/:slug" element={<ArtistPromotePage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await screen.findByRole('button', { name: 'Connect Buffer' });
+    expect(promote.getPromotePage).toHaveBeenCalledTimes(1);
+  });
+
   it('says it isn’t available to someone the server turns away', async () => {
     promote.getPromotePage.mockResolvedValue({ available: false });
     renderTab();

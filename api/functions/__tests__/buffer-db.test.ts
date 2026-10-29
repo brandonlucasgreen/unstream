@@ -1,10 +1,10 @@
 // The stored Buffer connection, and above all usableAccessToken.
 //
-// Buffer's access tokens last an hour and its refresh tokens are SINGLE-USE: replaying one
-// revokes the whole grant and silently disconnects the curator. So the rules worth locking are
-// that a token is never used past its life, that a refresh writes the replacement back under a
-// compare-and-set, and that the loser of a race takes the winner's token instead of refreshing
-// again with one Buffer has already retired.
+// Buffer's access tokens last an hour and its refresh tokens are SINGLE-USE: "Reusing an old
+// refresh token revokes all tokens for that grant." So the rules worth locking are that a token is
+// never used past its life, that only ONE request ever sends a given refresh token (the refresh
+// is claimed in the database first), that everyone else waits for the new one, and that a
+// connection is never dropped silently.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
@@ -55,26 +55,7 @@ function stubSelect(data: unknown) {
   });
 }
 
-function stubSelectThenUpdate(data: unknown, updated: unknown[], afterUpdate?: unknown) {
-  let selects = 0;
-  from.mockImplementation(() => ({
-    select: () => ({
-      eq: () => ({
-        maybeSingle: async () => ({ data: selects++ === 0 ? data : (afterUpdate ?? data), error: null }),
-      }),
-    }),
-    update: (patch: Record<string, unknown>) => ({
-      eq: () => ({
-        eq: () => ({ select: async () => { lastPatch = patch; return { data: updated, error: null }; } }),
-      }),
-    }),
-    delete: () => ({ eq: async () => ({ error: null }) }),
-  }));
-}
-
-let lastPatch: Record<string, unknown> = {};
-
-beforeEach(() => { from.mockReset(); refreshTokens.mockReset(); captureMessage.mockReset(); lastPatch = {}; });
+beforeEach(() => { from.mockReset(); refreshTokens.mockReset(); captureMessage.mockReset(); });
 afterEach(() => { vi.clearAllMocks(); });
 
 describe('getBufferConnection', () => {
@@ -102,72 +83,130 @@ describe('getBufferConnection', () => {
 });
 
 describe('usableAccessToken', () => {
+  // An in-memory buffer_connections row, with just enough of Supabase's query builder: select by
+  // user, conditional update (every .eq() must match), delete. Enough to race two requests.
+  let table: Record<string, unknown> | null;
+  let blockClaims = false;
+
+  function fakeTable(initial: Record<string, unknown> | null) {
+    table = initial;
+    from.mockImplementation(() => ({
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: table ? { ...table } : null, error: null }) }) }),
+      update: (patch: Record<string, unknown>) => {
+        const filters: Record<string, unknown> = {};
+        const chain = {
+          eq: (column: string, value: unknown) => { filters[column] = value; return chain; },
+          select: async () => {
+            if (!table) return { data: [], error: null };
+            if (blockClaims && 'refresh_counter' in patch) return { data: [], error: null };
+            const matches = Object.entries(filters).every(([c, v]) => c === 'user_id' || table![c] === v);
+            if (!matches) return { data: [], error: null };
+            table = { ...table, ...patch };
+            return { data: [table], error: null };
+          },
+        };
+        return chain;
+      },
+      delete: () => ({ eq: async () => { table = null; return { error: null }; } }),
+    }));
+  }
+
+  const expired = () => row({ expires_at: new Date(Date.now() - 1).toISOString() });
+  const fresh = (access = 'new-access', refresh: string | null = 'new-refresh') =>
+    ({ accessToken: access, refreshToken: refresh, expiresAt: new Date(Date.now() + hour) });
+
+  afterEach(() => { blockClaims = false; vi.useRealTimers(); });
+
   it('uses a stored token that is still good, without calling Buffer', async () => {
-    stubSelect(row());
+    fakeTable(row());
     expect(await usableAccessToken('user-1')).toBe('stored-access');
     expect(refreshTokens).not.toHaveBeenCalled();
   });
 
-  it('refuses when the curator has no connection', async () => {
-    stubSelect(null);
+  it('refuses when the user has no connection', async () => {
+    fakeTable(null);
     await expect(usableAccessToken('user-1')).rejects.toBeInstanceOf(BufferNotConnectedError);
   });
 
-  it('refreshes an expired token and stores the replacement before returning it', async () => {
-    refreshTokens.mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh', expiresAt: new Date(Date.now() + hour) });
-    stubSelectThenUpdate(row({ expires_at: new Date(Date.now() - 1).toISOString() }), [{ access_token_encrypted: 'enc(new-access)' }]);
+  it('claims the refresh, then stores the replacement before returning it', async () => {
+    refreshTokens.mockResolvedValue(fresh());
+    fakeTable(expired());
 
     expect(await usableAccessToken('user-1')).toBe('new-access');
     expect(refreshTokens).toHaveBeenCalledWith('stored-refresh');
     // The replacement refresh token is written back; losing it would cost the connection.
-    expect(lastPatch.refresh_token_encrypted).toBe('enc(new-refresh)');
-    expect(lastPatch.refresh_counter).toBe(4);
+    expect(table).toMatchObject({ refresh_token_encrypted: 'enc(new-refresh)', access_token_encrypted: 'enc(new-access)', refresh_counter: 4 });
   });
 
   // The skew: a token minutes from expiry is refreshed now rather than lapsing mid-call.
   it('refreshes one that is about to expire', async () => {
-    refreshTokens.mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh', expiresAt: new Date(Date.now() + hour) });
-    stubSelectThenUpdate(row({ expires_at: new Date(Date.now() + 10_000).toISOString() }), [{}]);
+    refreshTokens.mockResolvedValue(fresh());
+    fakeTable(row({ expires_at: new Date(Date.now() + 10_000).toISOString() }));
     await usableAccessToken('user-1');
     expect(refreshTokens).toHaveBeenCalled();
   });
 
-  // The hazard this whole design exists for. Our refresh token is spent the moment Buffer
-  // answers, so the loser must NOT refresh again — it takes the winner's token.
-  it('takes the winner’s token when another request refreshed first', async () => {
-    refreshTokens.mockResolvedValue({ accessToken: 'ours', refreshToken: 'ours-refresh', expiresAt: new Date(Date.now() + hour) });
-    stubSelectThenUpdate(
-      row({ expires_at: new Date(Date.now() - 1).toISOString() }),
-      [],                                                   // compare-and-set matched nothing
-      row({ access_token_encrypted: 'enc(winners-access)' }),
-    );
+  // The bug behind "reconnect Buffer after every deploy" (2026-10-29): a page loading its data
+  // twice at once sent the same refresh token twice, and Buffer revoked the whole grant.
+  it('sends a refresh token to Buffer once, however many requests need a token at the same time', async () => {
+    refreshTokens.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(fresh()), 50)));
+    fakeTable(expired());
 
-    expect(await usableAccessToken('user-1')).toBe('winners-access');
-    expect(refreshTokens).toHaveBeenCalledTimes(1);          // never a second attempt
-    expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('concurrent refresh'), expect.anything());
+    const tokens = await Promise.all([usableAccessToken('user-1'), usableAccessToken('user-1'), usableAccessToken('user-1')]);
+
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+    expect(tokens).toEqual(['new-access', 'new-access', 'new-access']);
+    expect(table).not.toBeNull();
   });
 
-  it('clears the connection and asks for a reconnect when Buffer rejects the grant', async () => {
+  it('gives up waiting for someone else’s refresh without touching the connection', async () => {
+    vi.useFakeTimers();
+    blockClaims = true;
+    fakeTable(expired());
+
+    const attempt = usableAccessToken('user-1');
+    const settled = attempt.catch(error => error);
+    await vi.advanceTimersByTimeAsync(9_000);
+
+    expect(await settled).toMatchObject({ name: 'BufferError', status: 503 });
+    expect(refreshTokens).not.toHaveBeenCalled();
+    expect(table).not.toBeNull();
+  });
+
+  it('clears the connection, says why in Sentry, and asks for a reconnect when Buffer rejects the grant', async () => {
     refreshTokens.mockRejectedValue(new BufferError(400, 'invalid_grant'));
-    stubSelectThenUpdate(row({ expires_at: new Date(Date.now() - 1).toISOString() }), []);
+    fakeTable(expired());
 
     await expect(usableAccessToken('user-1')).rejects.toMatchObject({
       name: 'BufferNotConnectedError',
       message: expect.stringContaining('Reconnect'),
     });
+    expect(table).toBeNull();
+    expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('connection dropped'), expect.objectContaining({
+      extra: expect.objectContaining({ reason: expect.stringContaining('invalid_grant') }),
+    }));
   });
 
   // Without offline_access there is no refresh token, so nothing can revive this connection.
-  it('clears a connection that has no refresh token to use', async () => {
-    stubSelectThenUpdate(row({ expires_at: new Date(Date.now() - 1).toISOString(), refresh_token_encrypted: null }), []);
+  it('clears a connection that has no refresh token to use, and says so', async () => {
+    fakeTable(row({ expires_at: new Date(Date.now() - 1).toISOString(), refresh_token_encrypted: null }));
     await expect(usableAccessToken('user-1')).rejects.toMatchObject({ name: 'BufferNotConnectedError' });
     expect(refreshTokens).not.toHaveBeenCalled();
+    expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('connection dropped'), expect.anything());
   });
 
-  // A network blip is not a dead grant; clearing the connection would log the curator out for it.
-  it('lets a transport failure through rather than disconnecting the curator', async () => {
+  // A network blip is not a dead grant; clearing the connection would sign the user out for it.
+  it('lets a transport failure through rather than disconnecting the user', async () => {
     refreshTokens.mockRejectedValue(new BufferError(503, 'Service unavailable'));
-    stubSelectThenUpdate(row({ expires_at: new Date(Date.now() - 1).toISOString() }), []);
+    fakeTable(expired());
     await expect(usableAccessToken('user-1')).rejects.toMatchObject({ name: 'BufferError', status: 503 });
+    expect(table).not.toBeNull();
+  });
+
+  it('reports a refresh that came back without a new refresh token, before it costs the connection', async () => {
+    refreshTokens.mockResolvedValue(fresh('new-access', null));
+    fakeTable(expired());
+    expect(await usableAccessToken('user-1')).toBe('new-access');
+    expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('no new refresh token'), expect.anything());
   });
 });
