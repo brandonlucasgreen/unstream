@@ -585,9 +585,9 @@ describe('sendTipsApprovedEmail', () => {
     const [[sent]] = mocks.sendTransactionalEmail.mock.calls;
     expect(sent.to).toBe('artist@example.com');
     expect(sent.subject).toBe('Tips are on for Kid <Lightbulbs>');
-    expect(sent.html).toContain('https://unstream.stream/artist-edit/kid-lightbulbs/tips');
+    expect(sent.html).toContain('https://unstream.stream/tips/kid-lightbulbs');
     expect(sent.html).toContain('Kid &lt;Lightbulbs&gt;');
-    expect(sent.text).toContain('https://unstream.stream/artist-edit/kid-lightbulbs/tips');
+    expect(sent.text).toContain('https://unstream.stream/tips/kid-lightbulbs');
   });
 
   it('never throws, and reports a missing address without logging it', async () => {

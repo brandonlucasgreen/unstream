@@ -6,7 +6,7 @@ import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
 import { connectStripe, TipsApiError, updateTipSettings, type TipSettings } from '../services/tips';
 import { formatUsd, tipBreakdown } from '../../../../api/shared/tips';
 
-// The Manage Tips tab's content (docs/specs/artist-patronage-spec.md §8, states 2–5). ArtistTipsPage
+// The Manage Tips page's content (docs/specs/artist-patronage-spec.md §8, states 2–5). ArtistTipsPage
 // loads the settings and hands them in; this renders them and saves changes.
 
 const FEE_OPTIONS = [0, 100, 200, 300, 400, 500];

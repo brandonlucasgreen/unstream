@@ -188,8 +188,8 @@ describe('tips-connect', () => {
       delete process.env.URL;
     }
     const form = new URLSearchParams(fetchMock.mock.calls[0][1].body);
-    expect(form.get('return_url')).toBe('http://localhost:8888/artist-edit/kid-lightbulbs/tips?stripe=return');
-    expect(form.get('refresh_url')).toBe('http://localhost:8888/artist-edit/kid-lightbulbs/tips?stripe=refresh');
+    expect(form.get('return_url')).toBe('http://localhost:8888/tips/kid-lightbulbs?stripe=return');
+    expect(form.get('refresh_url')).toBe('http://localhost:8888/tips/kid-lightbulbs?stripe=refresh');
   });
 
   it('reuses an existing account: a fresh link, no second account', async () => {

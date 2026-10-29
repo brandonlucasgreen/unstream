@@ -42,7 +42,15 @@ const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
 const ArtistPromotePage = lazyWithRetry(() => import('./pages/ArtistPromotePage.tsx').then(m => ({ default: m.ArtistPromotePage })))
-const ArtistSettingsLayout = lazyWithRetry(() => import('./pages/ArtistSettingsLayout.tsx').then(m => ({ default: m.ArtistSettingsLayout })))
+// One frame per page an artist manages from /my-artists, each knowing which page it is.
+const loadSettingsLayout = () => import('./pages/ArtistSettingsLayout.tsx')
+const EditProfileLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="profile" /> })))
+const ReleasesLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="releases" /> })))
+const TipsLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="tips" /> })))
+const PromoteLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="promote" /> })))
+const RedirectToReleases = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.RedirectToSection to="releases" /> })))
+const RedirectToTips = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.RedirectToSection to="tips" /> })))
+const RedirectToPromote = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.RedirectToSection to="promote" /> })))
 const ArtistDirectoryPage = lazyWithRetry(() => import('./pages/ArtistDirectoryPage.tsx').then(m => ({ default: m.ArtistDirectoryPage })))
 const KnownArtistsPage = lazyWithRetry(() => import('./pages/KnownArtistsPage.tsx').then(m => ({ default: m.KnownArtistsPage })))
 const RoadmapPage = lazyWithRetry(() => import('./pages/RoadmapPage.tsx').then(m => ({ default: m.RoadmapPage })))
@@ -133,13 +141,24 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/my-artists" element={<MyArtistsPage />} />
               <Route path="/my-collection" element={<MyCollectionPage />} />
-              {/* One frame for the artist settings tabs, so switching tabs swaps only the content. */}
-              <Route path="/artist-edit/:slug" element={<ArtistSettingsLayout />}>
+              {/* What an artist manages from /my-artists, each its own page with its own button there.
+                  They were tabs under Edit until 2026-10-29; the old tab addresses redirect, since
+                  Stripe's onboarding links and tip emails point at /artist-edit/:slug/tips. */}
+              <Route path="/artist-edit/:slug" element={<EditProfileLayout />}>
                 <Route index element={<ArtistEditPage />} />
-                <Route path="tips" element={<ArtistTipsPage />} />
-                <Route path="releases" element={<ArtistReleasesPage />} />
               </Route>
-              <Route path="/promote/:slug" element={<ArtistPromotePage />} />
+              <Route path="/releases/:slug" element={<ReleasesLayout />}>
+                <Route index element={<ArtistReleasesPage />} />
+              </Route>
+              <Route path="/tips/:slug" element={<TipsLayout />}>
+                <Route index element={<ArtistTipsPage />} />
+              </Route>
+              <Route path="/promote/:slug" element={<PromoteLayout />}>
+                <Route index element={<ArtistPromotePage />} />
+              </Route>
+              <Route path="/artist-edit/:slug/releases" element={<RedirectToReleases />} />
+              <Route path="/artist-edit/:slug/tips" element={<RedirectToTips />} />
+              <Route path="/artist-edit/:slug/promote" element={<RedirectToPromote />} />
               <Route path="/artists" element={<ArtistDirectoryPage />} />
               <Route path="/known-artists" element={<KnownArtistsPage />} />
               <Route path="/roadmap" element={<RoadmapPage />} />
