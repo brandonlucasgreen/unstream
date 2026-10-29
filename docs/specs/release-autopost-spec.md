@@ -310,9 +310,11 @@ Already built and merged (#697–#708):
 
 **Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
 
-1. **Where it posts:** connect Buffer, choose the organization (already chosen when there's only one), tick channels. Ticking Instagram explains its image rule.
+1. **Where it posts:** connect Buffer, choose the organization (already chosen when there's only one), tick channels. Ticking Instagram explains its image rule. **The on/off switch sits at the top of this section** (Brandon, 2026-10-29), shown once Buffer has a channel autopost can use. It saves the moment it's flipped and says in words what each position means: on, posts go to Buffer; off, nothing more does, **nothing is saved as a draft**, and the settings are kept.
    - **New to Buffer:** before connecting, the page says an account can be made on Buffer's own screen, and that social accounts have to be connected in Buffer.
    - **No accounts to post to:** signing up through Buffer's screen makes an account with no social accounts connected. When Buffer has none (or none autopost writes for), the page says so and links to [Buffer's channel settings](https://publish.buffer.com/settings/channels), with a "Check again" button.
+**Everything below is hidden until Buffer is connected with a channel autopost can use** (Brandon, 2026-10-29): without somewhere to post it does nothing. A short note says what comes next instead. The trade: an artist can't preview their posts before connecting.
+
 2. **How often:** a slider from 1 to 7 a week, starting on the recommendation and marked as recommended there. Landing back on it stores "Recommended", which grows with the catalog. **Posting time:** "Recommended: your Buffer queue" (the default) or a set time.
 3. **What to say:** each kind with a switch, and its wording folded away until opened: editable variants, each with a live preview against the newest release, and mistakes flagged as they're typed.
 4. **Coming up:** the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it.

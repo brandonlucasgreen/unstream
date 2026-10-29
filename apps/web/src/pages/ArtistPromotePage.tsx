@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
 import { networkName } from '../../../../api/shared/autopost-networks';
-import { InfoTip } from '../components/InfoTip';
 import {
   getPromotePage,
   PromoteApiError,
@@ -186,6 +185,14 @@ export function ArtistPromotePage() {
   const ticked = new Set(form.channelIds);
   const tickedServices = buffer.connected ? buffer.channels.filter(c => ticked.has(c.id)).map(c => c.service) : [];
   const canSwitchOn = Boolean(form.organizationId) && form.channelIds.length > 0;
+  // Everything past "Where it posts" is about posting, which needs somewhere to post. Until Buffer
+  // is connected with a channel autopost can use, it stays hidden (Brandon, 2026-10-29).
+  const ready = buffer.connected && Boolean(form.organizationId) && form.organizationId === buffer.organizationId
+    && buffer.channels.some(c => c.supported);
+
+  // The switch saves straight away, with whatever else is on the page: a switch that needed a
+  // separate Save would look on while doing nothing.
+  const toggle = () => save({ ...form, enabled: !form.enabled });
 
   return (
     <div className="space-y-6">
@@ -206,7 +213,19 @@ export function ArtistPromotePage() {
         <p className="text-sm text-error" role="alert">{PAUSED[page.settings.pausedReason] ?? 'Posting has stopped. Save to start again.'}</p>
       )}
 
+      {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
+
       <section className={SECTION} aria-labelledby="promote-buffer">
+        {ready && (
+          <AutopostSwitch
+            on={form.enabled}
+            busy={busy}
+            canSwitchOn={canSwitchOn}
+            channels={form.channelIds.length}
+            queued={form.postTime === null}
+            onToggle={toggle}
+          />
+        )}
         <h3 id="promote-buffer" className="font-medium text-text-primary">Where it posts</h3>
         {!buffer.connected ? (
           <div className="space-y-2">
@@ -281,147 +300,135 @@ export function ArtistPromotePage() {
         )}
       </section>
 
-      <section className={SECTION} aria-labelledby="promote-rhythm">
-        <h3 id="promote-rhythm" className="font-medium text-text-primary">How often</h3>
-        <div className="space-y-1">
-          <label htmlFor="promote-per-week" className="flex items-baseline justify-between text-sm">
-            <span>Posts a week</span>
-            <span>
-              <span className="font-medium text-text-primary">{perWeek}</span>
-              {perWeek === recommended && <span className="text-text-muted"> (recommended)</span>}
-            </span>
-          </label>
-          <input
-            id="promote-per-week"
-            type="range"
-            min={1}
-            max={7}
-            step={1}
-            value={perWeek}
-            aria-valuetext={`${perWeek} a week${perWeek === recommended ? ', recommended' : ''}`}
-            // Landing back on the recommendation stores "Recommended", which grows with the catalog.
-            onChange={e => update({ postsPerWeek: Number(e.target.value) === recommended ? null : Number(e.target.value) })}
-            className="w-full accent-[var(--color-accent-primary)]"
-          />
-          <div className="flex justify-between text-xs text-text-muted" aria-hidden="true">
-            {[1, 2, 3, 4, 5, 6, 7].map(n => (
-              <span key={n} className={n === recommended ? 'font-medium text-text-primary' : ''}>{n}</span>
-            ))}
-          </div>
-        </div>
-        <p className="text-xs text-text-muted">
-          {cadenceLine(page.releaseCount, perWeek)} Fridays always post; more a week adds Monday to Thursday first.
-          {perWeek !== recommended && (
-            <>
-              {' '}
-              <button type="button" onClick={() => update({ postsPerWeek: null })} className="text-link hover:underline">
-                Back to {recommended} (recommended)
-              </button>
-            </>
-          )}
-        </p>
-        <fieldset className="space-y-2">
-          <legend className="text-sm mb-1">Posting time</legend>
-          <label className="flex items-start gap-2 text-sm">
-            <input type="radio" name="post-time" checked={form.postTime === null} onChange={() => update({ postTime: null })} className="mt-1" />
-            <span>
-              Recommended: your Buffer queue
-              <span className="block text-xs text-text-muted">
-                Each post joins that channel’s queue in Buffer on its day and goes out at the next time in your posting
-                schedule. Buffer sets those times from when your audience is most likely to see a post, and you can change them
-                in Buffer.
+      {ready ? (
+        <>
+        <section className={SECTION} aria-labelledby="promote-rhythm">
+          <h3 id="promote-rhythm" className="font-medium text-text-primary">How often</h3>
+          <div className="space-y-1">
+            <label htmlFor="promote-per-week" className="flex items-baseline justify-between text-sm">
+              <span>Posts a week</span>
+              <span>
+                <span className="font-medium text-text-primary">{perWeek}</span>
+                {perWeek === recommended && <span className="text-text-muted"> (recommended)</span>}
               </span>
-            </span>
-          </label>
-          <label className="flex flex-wrap items-center gap-2 text-sm">
-            <input type="radio" name="post-time" checked={form.postTime !== null} onChange={() => update({ postTime: form.postTime ?? '10:00' })} />
-            At a set time
-            {form.postTime !== null && (
+            </label>
+            <input
+              id="promote-per-week"
+              type="range"
+              min={1}
+              max={7}
+              step={1}
+              value={perWeek}
+              aria-valuetext={`${perWeek} a week${perWeek === recommended ? ', recommended' : ''}`}
+              // Landing back on the recommendation stores "Recommended", which grows with the catalog.
+              onChange={e => update({ postsPerWeek: Number(e.target.value) === recommended ? null : Number(e.target.value) })}
+              className="w-full accent-[var(--color-accent-primary)]"
+            />
+            <div className="flex justify-between text-xs text-text-muted" aria-hidden="true">
+              {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                <span key={n} className={n === recommended ? 'font-medium text-text-primary' : ''}>{n}</span>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-text-muted">
+            {cadenceLine(page.releaseCount, perWeek)} Fridays always post; more a week adds Monday to Thursday first.
+            {perWeek !== recommended && (
               <>
-                <input
-                  type="time"
-                  aria-label="Time"
-                  value={form.postTime}
-                  onChange={e => update({ postTime: e.target.value || '10:00' })}
-                  className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
-                />
-                <span className="text-xs text-text-muted">{form.timezone}</span>
+                {' '}
+                <button type="button" onClick={() => update({ postsPerWeek: null })} className="text-link hover:underline">
+                  Back to {recommended} (recommended)
+                </button>
               </>
             )}
-          </label>
-        </fieldset>
-      </section>
+          </p>
+          <fieldset className="space-y-2">
+            <legend className="text-sm mb-1">Posting time</legend>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="radio" name="post-time" checked={form.postTime === null} onChange={() => update({ postTime: null })} className="mt-1" />
+              <span>
+                Recommended: your Buffer queue
+                <span className="block text-xs text-text-muted">
+                  Each post joins that channel’s queue in Buffer on its day and goes out at the next time in your posting
+                  schedule. Buffer sets those times from when your audience is most likely to see a post, and you can change them
+                  in Buffer.
+                </span>
+              </span>
+            </label>
+            <label className="flex flex-wrap items-center gap-2 text-sm">
+              <input type="radio" name="post-time" checked={form.postTime !== null} onChange={() => update({ postTime: form.postTime ?? '10:00' })} />
+              At a set time
+              {form.postTime !== null && (
+                <>
+                  <input
+                    type="time"
+                    aria-label="Time"
+                    value={form.postTime}
+                    onChange={e => update({ postTime: e.target.value || '10:00' })}
+                    className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
+                  />
+                  <span className="text-xs text-text-muted">{form.timezone}</span>
+                </>
+              )}
+            </label>
+          </fieldset>
+        </section>
 
-      <section className={SECTION} aria-labelledby="promote-words">
-        <h3 id="promote-words" className="font-medium text-text-primary">What to say</h3>
-        <PromoteTemplatesEditor
-          templates={form.templates ?? {}}
-          kindsOff={form.kindsOff}
-          previewRelease={page.previewRelease}
-          artist={page.artist}
-          takesTips={page.takesTips}
-          problems={problems}
-          onChange={({ templates, kindsOff }) => update({ templates: Object.keys(templates).length ? templates : null, kindsOff })}
-        />
-      </section>
-
-      <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-3 border-t border-border bg-bg-primary px-1 py-3">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={form.enabled}
-            disabled={!canSwitchOn && !form.enabled}
-            onChange={e => update({ enabled: e.target.checked })}
+        <section className={SECTION} aria-labelledby="promote-words">
+          <h3 id="promote-words" className="font-medium text-text-primary">What to say</h3>
+          <PromoteTemplatesEditor
+            templates={form.templates ?? {}}
+            kindsOff={form.kindsOff}
+            previewRelease={page.previewRelease}
+            artist={page.artist}
+            takesTips={page.takesTips}
+            problems={problems}
+            onChange={({ templates, kindsOff }) => update({ templates: Object.keys(templates).length ? templates : null, kindsOff })}
           />
-          Post automatically
-        </label>
-        <InfoTip label="What does Post automatically do?">
-          <span className="block">
-            <strong className="text-text-primary">On:</strong> Unstream adds each planned post to your Buffer{' '}
-            {form.postTime === null ? 'on its day, in your queue' : 'three days before it goes out, at your set time'}.
-          </span>
-          <span className="mt-2 block">
-            <strong className="text-text-primary">Off:</strong> nothing more goes to Buffer, and nothing is saved as a draft.
-            Your settings stay, and Coming up still shows what would post. Posts already in Buffer stay there, where you can
-            edit or delete them.
-          </span>
-        </InfoTip>
-        <button type="button" disabled={busy} onClick={() => save()} className={PRIMARY_BUTTON}>{busy ? 'Saving…' : 'Save'}</button>
-        {saved && <span className="text-xs text-text-muted" role="status">Saved</span>}
-        {!canSwitchOn && !form.enabled && <span className="text-xs text-text-muted">Choose at least one channel to switch it on.</span>}
-        {saveError && <span className="text-xs text-error" role="alert">{saveError}</span>}
-      </div>
+        </section>
 
-      <section className={SECTION} aria-labelledby="promote-coming-up">
-        <h3 id="promote-coming-up" className="font-medium text-text-primary">Coming up</h3>
-        <p className="text-xs text-text-muted">
-          {page.settings.enabled ? 'The next four weeks, exactly as they’ll post.' : 'What the next four weeks would look like if you switched it on now.'}
-          {' '}From your saved settings.
-        </p>
-        {page.comingUp.length === 0 ? (
-          <p className="text-sm text-text-secondary">Nothing to post in the next four weeks.</p>
-        ) : (
-          <ol className="space-y-3">
-            {page.comingUp.map(post => (
-              <li key={post.at} className="flex gap-3">
-                {post.imageUrl ? (
-                  <img src={post.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover bg-bg-secondary" />
-                ) : (
-                  <div className="h-14 w-14 shrink-0 rounded bg-bg-secondary" aria-hidden="true" />
-                )}
-                <div className="min-w-0 space-y-0.5">
-                  <p className="text-xs text-text-muted">
-                    {formatDay(post.date)} · {KIND_COPY[post.kind].label}
-                    {post.release ? ` · ${post.release.title}` : ''}
-                    {tickedServices.includes('instagram') && !post.imageOnInstagram ? ' · skips Instagram' : ''}
-                  </p>
-                  <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+        <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-3 border-t border-border bg-bg-primary px-1 py-3">
+          <button type="button" disabled={busy} onClick={() => save()} className={PRIMARY_BUTTON}>{busy ? 'Saving…' : 'Save changes'}</button>
+          {saved && <span className="text-xs text-text-muted" role="status">Saved</span>}
+          {saveError && <span className="text-xs text-error" role="alert">{saveError}</span>}
+        </div>
+
+        <section className={SECTION} aria-labelledby="promote-coming-up">
+          <h3 id="promote-coming-up" className="font-medium text-text-primary">Coming up</h3>
+          <p className="text-xs text-text-muted">
+            {page.settings.enabled ? 'The next four weeks, exactly as they’ll post.' : 'What the next four weeks would look like if you switched it on now.'}
+            {' '}From your saved settings.
+          </p>
+          {page.comingUp.length === 0 ? (
+            <p className="text-sm text-text-secondary">Nothing to post in the next four weeks.</p>
+          ) : (
+            <ol className="space-y-3">
+              {page.comingUp.map(post => (
+                <li key={post.at} className="flex gap-3">
+                  {post.imageUrl ? (
+                    <img src={post.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover bg-bg-secondary" />
+                  ) : (
+                    <div className="h-14 w-14 shrink-0 rounded bg-bg-secondary" aria-hidden="true" />
+                  )}
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="text-xs text-text-muted">
+                      {formatDay(post.date)} · {KIND_COPY[post.kind].label}
+                      {post.release ? ` · ${post.release.title}` : ''}
+                      {tickedServices.includes('instagram') && !post.imageOnInstagram ? ' · skips Instagram' : ''}
+                    </p>
+                    <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+        </>
+      ) : (
+        <section className={`${SECTION} text-sm text-text-secondary`} aria-label="What comes next">
+          Once Buffer is connected with at least one channel, you’ll choose how often to post and what the posts say, and see
+          the next four weeks exactly as they’ll go out, before anything is posted.
+        </section>
+      )}
 
       {page.recent.length > 0 && (
         <section className={SECTION} aria-labelledby="promote-recent">
@@ -440,6 +447,51 @@ export function ArtistPromotePage() {
           </ul>
         </section>
       )}
+    </div>
+  );
+}
+
+/**
+ * The on/off switch for autopost, at the top with the channels it posts to (Brandon, 2026-10-29).
+ * It says in plain words what each position means, so nobody has to guess whether "off" leaves
+ * drafts behind: it doesn't.
+ */
+function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
+  on: boolean;
+  busy: boolean;
+  canSwitchOn: boolean;
+  channels: number;
+  queued: boolean;
+  onToggle: () => void;
+}) {
+  const disabled = busy || (!on && !canSwitchOn);
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+      <div className="space-y-1">
+        <p id="autopost-switch-label" className="text-lg font-semibold text-text-primary">Autopost is {on ? 'on' : 'off'}</p>
+        <p className="text-sm text-text-secondary">
+          {on
+            ? `Posting to ${channels} channel${channels === 1 ? '' : 's'}. ${queued
+              ? 'Each post joins your Buffer queue on its day'
+              : 'Each post lands in Buffer three days before it goes out'}, where you can change or delete it.`
+            : canSwitchOn
+              ? 'Nothing goes to Buffer while it’s off, and nothing is saved as a draft. Your settings are kept.'
+              : 'Tick at least one channel below, then switch it on.'}
+        </p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-labelledby="autopost-switch-label"
+        disabled={disabled}
+        onClick={onToggle}
+        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+          on ? 'bg-accent-primary' : 'bg-bg-secondary border border-border'
+        }`}
+      >
+        <span className={`inline-block h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-7' : 'translate-x-1'}`} />
+      </button>
     </div>
   );
 }
