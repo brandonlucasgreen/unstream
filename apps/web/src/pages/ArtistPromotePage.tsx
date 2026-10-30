@@ -278,9 +278,8 @@ export function ArtistPromotePage() {
     <div className="space-y-6">
       <div className="space-y-1">
         <p className="text-sm text-text-secondary">
-          Posts about your releases, on a gentle weekly rhythm, scheduled to your social profiles. Unstream writes nothing with AI:
-          each post comes from a template you can edit, filled with info about the release. Scheduling, publishing and analytics
-          on your posts are powered by{' '}
+          Set up an automatic, AI-free weekly schedule of posts about your releases for any of your social profiles. Scheduling,
+          publishing and analytics on your posts are powered by{' '}
           <a href="https://buffer.com" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>.
         </p>
       </div>
