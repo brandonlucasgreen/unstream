@@ -10,6 +10,15 @@ import { PLAN_HORIZON_DAYS, localDate, localInstant, planSlots, type PastPost, t
 import { variantsFor } from './autopost-channel-post';
 import type { AutopostArtist, AutopostRelease, AutopostSettings } from './release-autopost-db';
 
+/** How far ahead of its time the sweep hands a post to Buffer (release-autopost-sweep.ts, "Why 72 hours ahead"). */
+export const PUSH_AHEAD_HOURS = 72;
+
+/**
+ * The Buffer tag on every autopost, so Buffer's analytics can tell them apart, and the Promote
+ * page can read back where each one stands.
+ */
+export const AUTOPOST_TAG = { name: 'unstream: release autopost', color: '#2F9E6E' };
+
 export function planForArtist(
   settings: Pick<AutopostSettings, 'postsPerWeek' | 'timezone' | 'postTime' | 'kindsOff' | 'templates'> & { enabledAt: string },
   artist: Pick<AutopostArtist, 'photoUrl'>,

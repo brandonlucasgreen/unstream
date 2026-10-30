@@ -351,32 +351,51 @@ export async function claimSlot(claim: SlotClaim): Promise<string | null> {
   return retaken.data && retaken.data.length > 0 ? row.id : null;
 }
 
-export interface RecentPost {
+export interface StoredSlot {
   slotAt: string;
+  slotDate: string;
   kind: AutopostKind;
   releaseId: string | null;
+  templateIndex: number;
+  imageKey: string | null;
+  imageOnInstagram: boolean;
   status: 'pushing' | 'pushed' | 'failed';
+  attempts: number;
   error: string | null;
-  channels: number;
+  bufferPostIds: { channelId: string; postId: string }[];
+  /** Exactly what each channel was sent, by channel id. */
+  captions: Record<string, { service: string; text: string; imageUrl: string | null }>;
 }
 
-/** The latest slots handed to Buffer, newest first, for the Promote page. */
-export async function getRecentAutopostPosts(artistId: string, limit: number): Promise<RecentPost[]> {
+/** Every slot claimed for this artist from `sinceDate` (their local date) on, oldest first, for the Promote page. */
+export async function getAutopostSlotsSince(artistId: string, sinceDate: string): Promise<StoredSlot[]> {
   const { data, error } = await client()
     .from('release_autopost_posts')
-    .select('slot_at, kind, release_id, status, error, buffer_post_ids')
+    .select('slot_at, slot_date, kind, release_id, template_index, image_key, image_on_instagram, status, attempts, error, buffer_post_ids, captions')
     .eq('artist_id', artistId)
-    .order('slot_at', { ascending: false })
-    .limit(limit);
+    .gte('slot_date', sinceDate)
+    .order('slot_at', { ascending: true })
+    // A few weeks of one artist's posts: well under PostgREST's 1,000-row ceiling.
+    .limit(200);
   if (error) throw new Error(`release_autopost_posts read failed: ${error.message}`);
-  type Row = { slot_at: string; kind: AutopostKind; release_id: string | null; status: RecentPost['status']; error: string | null; buffer_post_ids: unknown[] | null };
+  type Row = {
+    slot_at: string; slot_date: string; kind: AutopostKind; release_id: string | null; template_index: number;
+    image_key: string | null; image_on_instagram: boolean; status: StoredSlot['status']; attempts: number;
+    error: string | null; buffer_post_ids: StoredSlot['bufferPostIds'] | null; captions: StoredSlot['captions'] | null;
+  };
   return (data as Row[]).map(r => ({
     slotAt: r.slot_at,
+    slotDate: r.slot_date,
     kind: r.kind,
     releaseId: r.release_id,
+    templateIndex: r.template_index,
+    imageKey: r.image_key,
+    imageOnInstagram: r.image_on_instagram,
     status: r.status,
+    attempts: r.attempts,
     error: r.error,
-    channels: r.buffer_post_ids?.length ?? 0,
+    bufferPostIds: r.buffer_post_ids ?? [],
+    captions: r.captions ?? {},
   }));
 }
 

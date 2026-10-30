@@ -35,7 +35,7 @@
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
 import { queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
-import { isDueToPush, planForArtist } from './release-autopost-schedule';
+import { AUTOPOST_TAG, PUSH_AHEAD_HOURS, isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
 import {
@@ -59,11 +59,6 @@ import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import { isInternalRequest } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
-
-export const PUSH_AHEAD_HOURS = 72;
-
-/** The Buffer tag on every autopost, so Buffer's analytics can tell them apart. */
-export const AUTOPOST_TAG = { name: 'unstream: release autopost', color: '#2F9E6E' };
 
 /**
  * Start no new artist after this long. An ordinary function has about ten seconds, and one

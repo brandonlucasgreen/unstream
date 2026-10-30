@@ -169,6 +169,25 @@ export async function listChannelSchedules(token: string, orgId: string): Promis
  * we want, since Buffer's analytics are grouped by tag and a rename would merge two populations.
  */
 export async function ensureTag(token: string, orgId: string, name: string, color: string): Promise<string> {
+  const existing = await findTagId(token, orgId, name);
+  if (existing) return existing;
+
+  const created = await bufferGraphQL<{ createTag: { tag?: { id: string }; message?: string } }>(token, `
+    mutation CreateTag($input: CreateTagInput!) {
+      createTag(input: $input) {
+        ... on TagActionSuccess { tag { id } }
+        ... on MutationError { message }
+      }
+    }
+  `, { input: { organizationId: orgId, tag: { name, color } } });
+
+  const tag = created.createTag?.tag;
+  if (!tag) throw new BufferError(502, `Couldn't create the Buffer tag "${name}": ${created.createTag?.message ?? 'unknown error'}`);
+  return tag.id;
+}
+
+/** The id of the organization's tag with exactly this name, or null when it has none. */
+export async function findTagId(token: string, orgId: string, name: string): Promise<string | null> {
   let after: string | null = null;
   do {
     const data: { tagsV2: {
@@ -189,19 +208,7 @@ export async function ensureTag(token: string, orgId: string, name: string, colo
     }
     after = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
   } while (after);
-
-  const created = await bufferGraphQL<{ createTag: { tag?: { id: string }; message?: string } }>(token, `
-    mutation CreateTag($input: CreateTagInput!) {
-      createTag(input: $input) {
-        ... on TagActionSuccess { tag { id } }
-        ... on MutationError { message }
-      }
-    }
-  `, { input: { organizationId: orgId, tag: { name, color } } });
-
-  const tag = created.createTag?.tag;
-  if (!tag) throw new BufferError(502, `Couldn't create the Buffer tag "${name}": ${created.createTag?.message ?? 'unknown error'}`);
-  return tag.id;
+  return null;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -311,4 +318,47 @@ export async function addPostToContentItem(token: string, contentItemId: string,
   } catch (error) {
     return error instanceof Error ? error.message : String(error);
   }
+}
+
+/** Where one post stands in Buffer, as its `posts` query reports it. */
+export interface BufferPostState {
+  id: string;
+  channelId: string;
+  /** draft, needs_approval, scheduled, sending, sent or error. */
+  status: string;
+  dueAt: string | null;
+  sentAt: string | null;
+  /** The published post on the network, once it's sent. */
+  externalLink: string | null;
+  /** Why publishing failed, in Buffer's words. */
+  error: string | null;
+}
+
+/** Pages read at most: a hundred posts each, far more than one artist's autopost makes in weeks. */
+const TAGGED_POST_PAGES = 3;
+
+/**
+ * The organization's posts carrying this tag, created or due since `since`: where release
+ * autopost's posts stand (scheduled, sent, failed). Read by tag, so the artist's own posts on the
+ * same channels never come back.
+ */
+export async function listTaggedPosts(token: string, orgId: string, tagId: string, since: string): Promise<BufferPostState[]> {
+  type Node = Omit<BufferPostState, 'error'> & { error: { message: string } | null };
+  const posts: BufferPostState[] = [];
+  let after: string | null = null;
+  for (let page = 0; page < TAGGED_POST_PAGES; page++) {
+    const data: { posts: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; edges: { node: Node }[] } } =
+      await bufferGraphQL(token, `
+        query TaggedPosts($input: PostsInput!, $after: String) {
+          posts(input: $input, first: 100, after: $after) {
+            pageInfo { hasNextPage endCursor }
+            edges { node { id channelId status dueAt sentAt externalLink error { message } } }
+          }
+        }
+      `, { input: { organizationId: orgId, filter: { tagIds: [tagId], startDate: since } }, after });
+    for (const { node } of data.posts.edges) posts.push({ ...node, error: node.error?.message ?? null });
+    if (!data.posts.pageInfo.hasNextPage) break;
+    after = data.posts.pageInfo.endCursor;
+  }
+  return posts;
 }
