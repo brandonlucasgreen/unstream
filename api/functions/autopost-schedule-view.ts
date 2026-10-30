@@ -35,6 +35,11 @@ export type PostState =
   /** `skipped` says which channels it didn't go to, and why. */
   | { is: 'in_buffer'; channels: ChannelState[]; skipped: string | null };
 
+export interface LivePosts {
+  posts: Map<string, BufferPostState>;
+  complete: boolean;
+}
+
 export interface ViewSlot {
   at: string;
   date: string;
@@ -54,8 +59,11 @@ export const RECENT_LIMIT = 10;
 export function buildScheduleView(input: {
   plan: PlannedPost[];
   stored: StoredSlot[];
-  /** Buffer's posts by id, or null when Buffer couldn't be asked. */
-  live: Map<string, BufferPostState> | null;
+  /**
+   * Buffer's posts by id, and whether that's all of them (so a post not there is gone), or null
+   * when Buffer couldn't be asked.
+   */
+  live: LivePosts | null;
   /** The artist's local date today: earlier posts are "Recent", the rest "Coming up". */
   today: string;
   pushAheadHours: number;
@@ -111,7 +119,7 @@ function fromPlan(p: PlannedPost, pushAheadHours: number, lastError: string | nu
   };
 }
 
-function storedState(row: StoredSlot, live: Map<string, BufferPostState> | null): PostState {
+function storedState(row: StoredSlot, live: LivePosts | null): PostState {
   if (row.status === 'pushing') return { is: 'sending' };
   if (row.status === 'failed') return { is: 'failed', error: row.error };
   return {
@@ -120,8 +128,9 @@ function storedState(row: StoredSlot, live: Map<string, BufferPostState> | null)
     channels: row.bufferPostIds.map(({ channelId, postId }) => {
       const service = row.captions[channelId]?.service ?? '';
       if (!live) return { channelId, service, status: 'unknown', dueAt: null, link: null, error: null };
-      const post = live.get(postId);
-      if (!post) return { channelId, service, status: 'missing', dueAt: null, link: null, error: null };
+      const post = live.posts.get(postId);
+      // Gone only if Buffer listed everything; otherwise it may simply not have been reached.
+      if (!post) return { channelId, service, status: live.complete ? 'missing' : 'unknown', dueAt: null, link: null, error: null };
       return { channelId, service, status: post.status, dueAt: post.dueAt, link: post.externalLink, error: post.error };
     }),
   };

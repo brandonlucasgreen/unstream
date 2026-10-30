@@ -41,6 +41,7 @@ const loaded = (over: Partial<Extract<PromotePage, { available: true }>> = {}): 
     sources: [{ platform: 'bandcamp', offers: [] }],
   },
   buffer: { connected: false },
+  today: '2026-11-11',
   comingUp: [{
     at: '2026-11-13T15:00:00.000Z', date: '2026-11-13', kind: 'catalogue',
     release: { title: 'Ruined Castle', slug: 'ruined-castle' }, imageUrl: null, imageOnInstagram: true,
@@ -238,16 +239,21 @@ describe('ArtistPromotePage', () => {
   });
 
   describe('where each post stands', () => {
-    const on = { ...loaded().settings as Extract<PromotePage, { available: true }>['settings'], enabled: true, organizationId: 'org1', channelIds: ['ig'] };
+    const on = { ...(loaded() as Extract<PromotePage, { available: true }>).settings, enabled: true, organizationId: 'org1', channelIds: ['ig'] };
     const post = (over: Partial<ScheduledPost>): ScheduledPost => ({
       at: '2026-10-30T04:00:00.000Z', date: '2026-10-30', kind: 'catalogue', release: { title: 'fruit is year 3 (honeycrush)', slug: 'fruit' },
       imageUrl: null, imageOnInstagram: true, text: 'From the archives', state: { is: 'sending' }, ...over,
     });
+    /** The status chips under the posts in a region, by what each reads (its reason left off). */
+    const chips = (region: HTMLElement) =>
+      within(region).queryAllByRole('list', { name: 'Status' }).flatMap(list => within(list).getAllByRole('listitem'))
+        .map(li => (li.textContent ?? '').split(':')[0].trim());
 
-    it('says, channel by channel, whether a post is scheduled, posted or failed in Buffer, and what it skipped', async () => {
+    it('shows each channel’s state in Buffer as a short chip, with the reason kept for the tooltip', async () => {
       promote.getPromotePage.mockResolvedValue(loaded({
         buffer: connected,
         settings: on,
+        today: '2026-10-30',
         comingUp: [post({
           state: {
             is: 'in_buffer',
@@ -265,19 +271,21 @@ describe('ArtistPromotePage', () => {
       }));
       renderTab();
       const comingUp = await screen.findByRole('region', { name: 'Coming up' });
-      expect(within(comingUp).getByText(/^Instagram: Scheduled for /)).toBeTruthy();
-      expect(within(comingUp).getByText('TikTok: Failed to post: Video required')).toBeTruthy();
-      expect(within(comingUp).getByText(/^Not sent everywhere: Threads: every posting time/)).toBeTruthy();
+      const shown = chips(comingUp);
+      expect(shown[0]).toMatch(/^Instagram · \d/);
+      expect(shown.slice(1)).toEqual(['TikTok · Failed', 'Threads · Skipped']);
+      expect(within(comingUp).getByTitle('Video required')).toBeTruthy();
+      expect(within(comingUp).getByTitle('every posting time in its Buffer schedule on 2026-10-30 has passed')).toBeTruthy();
 
       const recent = screen.getByRole('region', { name: 'Recent' });
-      expect(within(recent).getByText(/^Instagram: Posted/)).toBeTruthy();
-      expect(within(recent).getByRole('link', { name: 'View ↗' }).getAttribute('href')).toBe('https://instagram.com/p/x');
+      expect(within(recent).getByRole('link', { name: 'Instagram · Posted' }).getAttribute('href')).toBe('https://instagram.com/p/x');
     });
 
-    it('says when a post not yet in Buffer goes there, why the last try failed, and that one out of tries didn’t reach it', async () => {
+    it('says when a post not yet in Buffer goes there, that a failed one is being retried, and that one out of tries failed', async () => {
       promote.getPromotePage.mockResolvedValue(loaded({
         buffer: connected,
         settings: on,
+        today: '2026-10-30',
         comingUp: [
           post({ at: 'a', state: { is: 'planned', toBufferAt: '2099-11-10T15:00:00.000Z', lastError: null } }),
           post({ at: 'b', state: { is: 'planned', toBufferAt: '2020-01-01T00:00:00.000Z', lastError: 'Buffer 503' } }),
@@ -285,37 +293,95 @@ describe('ArtistPromotePage', () => {
         ],
       }));
       renderTab();
-      const comingUp = await screen.findByRole('region', { name: 'Coming up' });
-      expect(within(comingUp).getByText(/^Not in Buffer yet · goes to Buffer (?!within)/)).toBeTruthy();
-      expect(within(comingUp).getByText('Not in Buffer yet · goes to Buffer within the next six hours')).toBeTruthy();
-      expect(within(comingUp).getByText('The last try didn’t reach Buffer, so it will try again: Buffer 503')).toBeTruthy();
-      expect(within(comingUp).getByText('Didn’t reach Buffer: Buffer refused the post')).toBeTruthy();
+      const shown = chips(await screen.findByRole('region', { name: 'Coming up' }));
+      expect(shown[0]).toMatch(/^To Buffer \S/);
+      expect(shown.slice(1)).toEqual(['To Buffer soon', 'Retrying', 'Failed']);
     });
 
     it('promises nothing about Buffer while autopost is off', async () => {
       promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
       renderTab();
       const comingUp = await screen.findByRole('region', { name: 'Coming up' });
-      expect(within(comingUp).queryByText(/Not in Buffer yet/)).toBeNull();
+      expect(within(comingUp).queryByRole('list', { name: 'Status' })).toBeNull();
     });
 
-    it('reads the schedule again every two minutes while the page is in view, keeping unsaved edits', async () => {
+    it('splits the four weeks into tabs with how many posts each holds, flagging one that needs a look', async () => {
+      promote.getPromotePage.mockResolvedValue(loaded({
+        buffer: connected,
+        settings: on,
+        today: '2026-10-30',
+        comingUp: [
+          post({ at: '1', date: '2026-10-30', text: 'Today’s post' }),
+          post({ at: '2', date: '2026-11-02', text: 'Monday’s post' }),
+          post({ at: '3', date: '2026-11-09', text: 'Second week', state: { is: 'failed', error: 'Buffer refused the post' } }),
+          // The plan reaches 28 days out: its last day joins week four.
+          post({ at: '4', date: '2026-11-27', text: 'Last day' }),
+        ],
+      }));
+      renderTab();
+      const comingUp = await screen.findByRole('region', { name: 'Coming up' });
+      const tabs = within(comingUp).getAllByRole('tab');
+      expect(tabs.map(t => t.getAttribute('aria-label'))).toEqual([
+        'This week, 2 posts',
+        expect.stringMatching(/^Week of .+, 1 post, needs a look$/),
+        expect.stringMatching(/^Week of .+, 0 posts$/),
+        expect.stringMatching(/^Week of .+, 1 post$/),
+      ]);
+      expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+      expect(within(comingUp).getByText('Today’s post')).toBeTruthy();
+      expect(within(comingUp).queryByText('Second week')).toBeNull();
+
+      fireEvent.click(tabs[1]);
+      expect(within(comingUp).getByText('Second week')).toBeTruthy();
+      expect(within(comingUp).queryByText('Today’s post')).toBeNull();
+
+      fireEvent.click(tabs[2]);
+      expect(within(comingUp).getByText('Nothing posts this week.')).toBeTruthy();
+      fireEvent.click(tabs[3]);
+      expect(within(comingUp).getByText('Last day')).toBeTruthy();
+    });
+
+    it('marks the days of the open week that post', async () => {
+      promote.getPromotePage.mockResolvedValue(loaded({
+        buffer: connected,
+        settings: on,
+        today: '2026-10-30',
+        comingUp: [post({ at: '1', date: '2026-10-30' }), post({ at: '2', date: '2026-11-02' })],
+      }));
+      renderTab();
+      const days = within(await screen.findByRole('list', { name: 'Days' })).getAllByRole('listitem');
+      expect(days).toHaveLength(7);
+      expect(days.map(d => d.getAttribute('aria-label')!.split(': ')[1])).toEqual(['1 post', 'nothing', 'nothing', '1 post', 'nothing', 'nothing', 'nothing']);
+    });
+
+    it('reads the schedule again every two minutes while the page is in view, keeping unsaved edits and the open week', async () => {
       vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
       try {
-        promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected, settings: on }));
+        promote.getPromotePage.mockResolvedValue(loaded({
+          buffer: connected,
+          settings: on,
+          today: '2026-10-30',
+          comingUp: [post({ at: '1', date: '2026-10-30' }), post({ at: '2', date: '2026-11-09', text: 'Second week' })],
+        }));
         promote.getPromoteSchedule.mockResolvedValue({
           pausedReason: null,
-          comingUp: [post({ state: { is: 'in_buffer', skipped: null, channels: [{ channelId: 'ig', service: 'instagram', status: 'sent', dueAt: null, link: null, error: null }] } })],
+          today: '2026-10-30',
+          comingUp: [post({
+            at: '2', date: '2026-11-09', text: 'Second week',
+            state: { is: 'in_buffer', skipped: null, channels: [{ channelId: 'ig', service: 'instagram', status: 'sent', dueAt: null, link: null, error: null }] },
+          })],
           recent: [],
         });
         renderTab();
         const slider = await screen.findByRole('slider');
         fireEvent.change(slider, { target: { value: '5' } });
+        const comingUp = screen.getByRole('region', { name: 'Coming up' });
+        fireEvent.click(within(comingUp).getAllByRole('tab')[1]);
 
         vi.advanceTimersByTime(2 * 60_000);
-        const comingUp = screen.getByRole('region', { name: 'Coming up' });
-        await waitFor(() => expect(within(comingUp).getByText('Instagram: Posted')).toBeTruthy());
+        await waitFor(() => expect(chips(comingUp)).toEqual(['Instagram · Posted']));
         expect(promote.getPromoteSchedule).toHaveBeenCalledWith('tok', 'kid-lightbulbs');
+        expect(within(comingUp).getAllByRole('tab')[1].getAttribute('aria-selected')).toBe('true');
         expect((screen.getByRole('slider') as HTMLInputElement).value).toBe('5');
       } finally {
         vi.useRealTimers();

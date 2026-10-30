@@ -23,8 +23,10 @@ const stored = (date: string, extra: Partial<StoredSlot> = {}): StoredSlot => ({
   ...extra,
 });
 
-const live = (posts: Partial<BufferPostState>[]) =>
-  new Map(posts.map(p => [p.id!, { channelId: '', status: 'scheduled', dueAt: null, sentAt: null, externalLink: null, error: null, ...p } as BufferPostState]));
+const live = (posts: Partial<BufferPostState>[], complete = true) => ({
+  posts: new Map(posts.map(p => [p.id!, { channelId: '', status: 'scheduled', dueAt: null, sentAt: null, externalLink: null, error: null, ...p } as BufferPostState])),
+  complete,
+});
 
 const base = { today: '2026-10-30', pushAheadHours: 72, maxAttempts: 3 };
 
@@ -59,8 +61,11 @@ describe('buildScheduleView', () => {
   it('tells a post Buffer no longer has from one Buffer couldn’t be asked about', () => {
     const missing = buildScheduleView({ ...base, plan: [], stored: [stored('2026-10-30')], live: live([]) });
     const unknown = buildScheduleView({ ...base, plan: [], stored: [stored('2026-10-30')], live: null });
+    // Buffer had more posts than were read, so one not among them may still be there.
+    const partial = buildScheduleView({ ...base, plan: [], stored: [stored('2026-10-30')], live: live([], false) });
     expect(missing.upcoming[0].state).toMatchObject({ channels: [{ status: 'missing' }, { status: 'missing' }] });
     expect(unknown.upcoming[0].state).toMatchObject({ channels: [{ status: 'unknown' }, { status: 'unknown' }] });
+    expect(partial.upcoming[0].state).toMatchObject({ channels: [{ status: 'unknown' }, { status: 'unknown' }] });
   });
 
   it('shows a failed slot the sweep will retry as planned, with why the last try failed', () => {

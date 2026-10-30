@@ -187,7 +187,7 @@ export async function ensureTag(token: string, orgId: string, name: string, colo
 }
 
 /** The id of the organization's tag with exactly this name, or null when it has none. */
-export async function findTagId(token: string, orgId: string, name: string): Promise<string | null> {
+async function findTagId(token: string, orgId: string, name: string): Promise<string | null> {
   let after: string | null = null;
   do {
     const data: { tagsV2: {
@@ -334,31 +334,40 @@ export interface BufferPostState {
   error: string | null;
 }
 
-/** Pages read at most: a hundred posts each, far more than one artist's autopost makes in weeks. */
-const TAGGED_POST_PAGES = 3;
+/** Pages read at most, a hundred posts each. */
+const CHANNEL_POST_PAGES = 3;
 
 /**
- * The organization's posts carrying this tag, created or due since `since`: where release
- * autopost's posts stand (scheduled, sent, failed). Read by tag, so the artist's own posts on the
- * same channels never come back.
+ * Every post on these channels created since `createdSince`, the artist's own included: where
+ * release autopost's posts stand (scheduled, sent, failed). `complete` is false when there were
+ * more than CHANNEL_POST_PAGES pages, so a post not in `posts` may still exist.
+ *
+ * Filtered by channel and creation date, the two filters seen to work against the live API
+ * (2026-10-30). A first version filtered by the autopost tag and `startDate`, and found none of
+ * the posts that were plainly there, so every one read as "no longer in Buffer".
  */
-export async function listTaggedPosts(token: string, orgId: string, tagId: string, since: string): Promise<BufferPostState[]> {
+export async function listChannelPosts(
+  token: string,
+  orgId: string,
+  channelIds: string[],
+  createdSince: string,
+): Promise<{ posts: BufferPostState[]; complete: boolean }> {
   type Node = Omit<BufferPostState, 'error'> & { error: { message: string } | null };
   const posts: BufferPostState[] = [];
   let after: string | null = null;
-  for (let page = 0; page < TAGGED_POST_PAGES; page++) {
+  for (let page = 0; page < CHANNEL_POST_PAGES; page++) {
     const data: { posts: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; edges: { node: Node }[] } } =
       await bufferGraphQL(token, `
-        query TaggedPosts($input: PostsInput!, $after: String) {
+        query ChannelPosts($input: PostsInput!, $after: String) {
           posts(input: $input, first: 100, after: $after) {
             pageInfo { hasNextPage endCursor }
             edges { node { id channelId status dueAt sentAt externalLink error { message } } }
           }
         }
-      `, { input: { organizationId: orgId, filter: { tagIds: [tagId], startDate: since } }, after });
+      `, { input: { organizationId: orgId, filter: { channelIds, createdAt: { start: createdSince } } }, after });
     for (const { node } of data.posts.edges) posts.push({ ...node, error: node.error?.message ?? null });
-    if (!data.posts.pageInfo.hasNextPage) break;
+    if (!data.posts.pageInfo.hasNextPage) return { posts, complete: true };
     after = data.posts.pageInfo.endCursor;
   }
-  return posts;
+  return { posts, complete: false };
 }

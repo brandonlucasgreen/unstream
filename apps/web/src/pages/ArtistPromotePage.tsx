@@ -3,8 +3,8 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
-import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
-import { PromotePostStatus } from '../components/PromotePostStatus';
+import { PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
+import { PromoteComingUp, ScheduledPostItem } from '../components/PromoteComingUp';
 import { isImageFirstNetwork, networkName } from '../../../../api/shared/autopost-networks';
 import {
   getPromotePage,
@@ -14,7 +14,6 @@ import {
   startBufferConnection,
   type PromotePage,
   type PromoteSettingsInput,
-  type ScheduledPost,
 } from '../services/promote';
 
 // /promote/:slug — release autopost (docs/specs/release-autopost-spec.md, "UI: the Promote
@@ -82,10 +81,6 @@ function inputFrom(page: Loaded): PromoteSettingsInput {
     kindsOff: s.kindsOff,
     templates: s.templates,
   };
-}
-
-function formatDay(date: string) {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
 }
 
 function cadenceLine(releases: number, perWeek: number): string {
@@ -170,7 +165,7 @@ export function ArtistPromotePage() {
         const s = await getPromoteSchedule(token, slug);
         if (writes.current !== seen) return;
         setPage(p => (p?.available
-          ? { ...p, comingUp: s.comingUp, recent: s.recent, settings: { ...p.settings, pausedReason: s.pausedReason } }
+          ? { ...p, today: s.today, comingUp: s.comingUp, recent: s.recent, settings: { ...p.settings, pausedReason: s.pausedReason } }
           : p));
       } catch (err) {
         // The next poll tries again; reported once per visit, so a page left open on a bad day
@@ -478,9 +473,7 @@ export function ArtistPromotePage() {
           {page.comingUp.length === 0 ? (
             <p className="text-sm text-text-secondary">Nothing to post in the next four weeks.</p>
           ) : (
-            <ol className="space-y-3">
-              {page.comingUp.map(post => <ScheduledPostItem key={post.at} post={post} imageFirstTicked={imageFirstTicked} posting={posting} />)}
-            </ol>
+            <PromoteComingUp today={page.today} posts={page.comingUp} imageFirstTicked={imageFirstTicked} posting={posting} />
           )}
         </section>
         </>
@@ -500,34 +493,6 @@ export function ArtistPromotePage() {
         </section>
       )}
     </div>
-  );
-}
-
-/** One post in "Coming up" or "Recent": what it says, and where it stands. */
-function ScheduledPostItem({ post, imageFirstTicked, posting }: {
-  post: ScheduledPost;
-  imageFirstTicked: string[];
-  posting: 'on' | 'off' | 'paused';
-}) {
-  // Once it's in Buffer, which channels it went to is in its status instead.
-  const skips = post.state.is !== 'in_buffer' && imageFirstTicked.length > 0 && !post.imageOnInstagram;
-  return (
-    <li className="flex gap-3">
-      {post.imageUrl ? (
-        <img src={post.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover bg-bg-secondary" />
-      ) : (
-        <div className="h-14 w-14 shrink-0 rounded bg-bg-secondary" aria-hidden="true" />
-      )}
-      <div className="min-w-0 space-y-1">
-        <p className="text-xs text-text-muted">
-          {formatDay(post.date)} · {KIND_COPY[post.kind].label}
-          {post.release ? ` · ${post.release.title}` : ''}
-          {skips ? ` · skips ${imageFirstTicked.join(' and ')}` : ''}
-        </p>
-        <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
-        <PromotePostStatus state={post.state} posting={posting} />
-      </div>
-    </li>
   );
 }
 

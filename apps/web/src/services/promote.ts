@@ -68,6 +68,8 @@ export interface ScheduledPost {
 /** What the page polls: the parts that change without the artist doing anything. */
 export interface PromoteSchedule {
   pausedReason: string | null;
+  /** The artist's own date today, YYYY-MM-DD: where "Coming up"'s weeks start. */
+  today: string;
   comingUp: ScheduledPost[];
   recent: ScheduledPost[];
 }
@@ -84,6 +86,7 @@ export type PromotePage =
     takesTips: boolean;
     previewRelease: TemplateRelease | null;
     buffer: PromoteBuffer;
+    today: string;
     comingUp: ScheduledPost[];
     recent: ScheduledPost[];
   };
