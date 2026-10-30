@@ -33,7 +33,7 @@ const PAGES: Record<string, PageMeta> = {
   "/for-artists": {
     title: "Unstream for artists",
     description:
-      "The best free promo & patronage toolkit for indie artists. Claim your page, take tips, and send fans to wherever you earn the most.",
+      "The best free promo & patronage toolkit for independent musicians. Claim your page, take tips, and send fans to wherever you earn the most.",
   },
   "/contact": {
     title: "Contact — Unstream",
