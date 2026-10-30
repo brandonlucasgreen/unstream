@@ -65,8 +65,7 @@ export function PromoteTemplatesEditor({ templates, kindsOff, previewRelease, ar
         Facts in curly brackets are filled in for each post: <code>{'{title}'}</code>, <code>{'{type}'}</code>, <code>{'{date}'}</code>,{' '}
         <code>{'{year}'}</code>, <code>{'{age}'}</code>, <code>{'{where}'}</code>, <code>{'{price}'}</code>, <code>{'{link}'}</code>,{' '}
         <code>{'{name}'}</code> and <code>{'{note}'}</code>. Anything in square brackets is left out when a fact inside it is missing,
-        so <code>{'{title}[, from {year}]'}</code> works for undated releases too. When a kind of post has more than one
-        template, autopost takes turns with them, so two posts in a row don’t read the same.
+        so <code>{'{title}[, from {year}]'}</code> works for undated releases too.
       </p>
       {AUTOPOST_KINDS.map(kind => {
         const on = !kindsOff.includes(kind);
