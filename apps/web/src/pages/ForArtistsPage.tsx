@@ -65,31 +65,32 @@ const ICONS = {
   pen: <path d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" />,
 };
 
+// Promote comes last while it is still "Coming soon": what an artist can use today goes first.
 const REACH_FEATURES: Feature[] = [
+  {
+    title: 'Every place to buy, with what you keep',
+    body: 'Your page lists Bandcamp, Mirlo, Subvert and everywhere else that sells your music, plus patronage like Patreon, with how much of each payment reaches you, so fans can pick the one that pays you best.',
+    accent: 'primary',
+    icon: ICONS.store,
+  },
+  {
+    title: 'Release alerts',
+    body: 'Fans who save you get an email when you put something out, and can follow your releases by calendar or RSS.',
+    accent: 'secondary',
+    icon: ICONS.bell,
+  },
+  {
+    title: 'See where your patrons come from',
+    body: 'Your dashboard shows how often you’re searched for, how often your page is viewed, and which stores fans click through to. It counts visits, not people: Unstream doesn’t track who your listeners are.',
+    accent: 'tertiary',
+    icon: ICONS.chart,
+  },
   {
     title: 'Promote',
     body: 'Connect your Buffer account and pick how often to post. Unstream fills your queue with your releases, Bandcamp Friday and your back catalog. Your words on a schedule, never written by AI.',
     accent: 'primary',
     icon: ICONS.megaphone,
     comingSoon: true,
-  },
-  {
-    title: 'Every place to buy, with what you keep',
-    body: 'Your page lists Bandcamp, Mirlo, Ampwall and everywhere else that sells your music, with how much of each sale reaches you, so fans can pick the one that pays you best.',
-    accent: 'secondary',
-    icon: ICONS.store,
-  },
-  {
-    title: 'Release alerts',
-    body: 'Fans who save you get an email when you put something out, and can follow your releases by calendar or RSS.',
-    accent: 'tertiary',
-    icon: ICONS.bell,
-  },
-  {
-    title: 'See what’s working',
-    body: 'Your dashboard shows how often you’re searched for, how often your page is viewed, and how many fans click through to a store.',
-    accent: 'primary',
-    icon: ICONS.chart,
   },
 ];
 
@@ -165,7 +166,7 @@ export function ForArtistsPage() {
             <div className="max-w-2xl">
               <ClaimSearch />
               <p className="text-xs text-text-muted mt-3">
-                You’re probably already here. Claiming is free, and you prove it’s you with a link from your own website.
+                Claiming is free, and you prove it’s you with a link from your own website.
               </p>
             </div>
           </section>
