@@ -15,8 +15,7 @@ const mocks = vi.hoisted(() => {
     getAutopostReleases: vi.fn(),
     getAutopostHistory: vi.fn(),
     getAutopostSlotsSince: vi.fn(),
-    findTagId: vi.fn(),
-    listTaggedPosts: vi.fn(),
+    listChannelPosts: vi.fn(),
     usableAccessToken: vi.fn(),
     listOrganizations: vi.fn(),
     listChannels: vi.fn(),
@@ -44,8 +43,7 @@ vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnect
 vi.mock('../buffer-client', () => ({
   listOrganizations: mocks.listOrganizations,
   listChannels: mocks.listChannels,
-  findTagId: mocks.findTagId,
-  listTaggedPosts: mocks.listTaggedPosts,
+  listChannelPosts: mocks.listChannelPosts,
 }));
 vi.mock('../feature-flags', () => ({ getFeatureFlag: mocks.getFeatureFlag }));
 vi.mock('../tips-db', () => ({ getTipsLiveSlugs: mocks.getTipsLiveSlugs }));
@@ -92,8 +90,7 @@ beforeEach(() => {
   mocks.getAutopostReleases.mockResolvedValue([release]);
   mocks.getAutopostHistory.mockResolvedValue([]);
   mocks.getAutopostSlotsSince.mockResolvedValue([]);
-  mocks.findTagId.mockResolvedValue('tag_auto');
-  mocks.listTaggedPosts.mockResolvedValue([]);
+  mocks.listChannelPosts.mockResolvedValue({ posts: [], complete: true });
   mocks.usableAccessToken.mockResolvedValue('token');
   mocks.listOrganizations.mockResolvedValue([{ id: 'org_mine', name: 'Cult of Lightbulbs' }]);
   mocks.listChannels.mockResolvedValue([
@@ -179,9 +176,10 @@ describe('where each post stands', () => {
 
   it('shows a post in Buffer with what was sent and Buffer’s own status for each channel', async () => {
     mocks.getAutopostSlotsSince.mockResolvedValue([pushed]);
-    mocks.listTaggedPosts.mockResolvedValue([
-      { id: 'p1', channelId: 'bsky', status: 'scheduled', dueAt: '2026-11-12T15:00:00.000Z', sentAt: null, externalLink: null, error: null },
-    ]);
+    mocks.listChannelPosts.mockResolvedValue({
+      posts: [{ id: 'p1', channelId: 'bsky', status: 'scheduled', dueAt: '2026-11-12T15:00:00.000Z', sentAt: null, externalLink: null, error: null }],
+      complete: true,
+    });
     const page = json(await call('GET'));
     expect(page.comingUp[0]).toMatchObject({
       date: '2026-11-12',
@@ -193,9 +191,9 @@ describe('where each post stands', () => {
         channels: [{ channelId: 'bsky', service: 'bluesky', status: 'scheduled', dueAt: '2026-11-12T15:00:00.000Z' }],
       },
     });
-    expect(mocks.findTagId).toHaveBeenCalledWith('token', 'org_mine', 'unstream: release autopost');
-    // Since the start of "Recent", in the artist's timezone.
-    expect(mocks.listTaggedPosts).toHaveBeenCalledWith('token', 'org_mine', 'tag_auto', '2026-10-28T04:00:00.000Z');
+    // The channels the posts went to, created since three days before "Recent" begins (its
+    // first day's midnight in the artist's timezone).
+    expect(mocks.listChannelPosts).toHaveBeenCalledWith('token', 'org_mine', ['bsky'], '2026-10-25T04:00:00.000Z');
   });
 
   it('reads the Buffer token once, however many Buffer reads the page makes', async () => {
@@ -206,12 +204,12 @@ describe('where each post stands', () => {
 
   it('doesn’t ask Buffer about posts when none are in it', async () => {
     await call('GET');
-    expect(mocks.findTagId).not.toHaveBeenCalled();
+    expect(mocks.listChannelPosts).not.toHaveBeenCalled();
   });
 
   it('still shows the page when Buffer can’t say where posts stand', async () => {
     mocks.getAutopostSlotsSince.mockResolvedValue([pushed]);
-    mocks.listTaggedPosts.mockRejectedValue(new Error('Buffer 503'));
+    mocks.listChannelPosts.mockRejectedValue(new Error('Buffer 503'));
     const page = json(await call('GET'));
     expect(page.comingUp[0].state.channels[0].status).toBe('unknown');
   });
@@ -225,7 +223,7 @@ describe('where each post stands', () => {
       body: null,
     } as never) as Res;
     const body = json(res);
-    expect(Object.keys(body).sort()).toEqual(['comingUp', 'pausedReason', 'recent']);
+    expect(Object.keys(body).sort()).toEqual(['comingUp', 'pausedReason', 'recent', 'today']);
     expect(body.recent[0]).toMatchObject({ date: '2026-11-05', state: { is: 'in_buffer' } });
     expect(mocks.listOrganizations).not.toHaveBeenCalled();
     expect(mocks.listChannels).not.toHaveBeenCalled();

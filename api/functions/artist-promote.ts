@@ -27,13 +27,14 @@ import {
   type AutopostArtist,
   type AutopostRelease,
   type AutopostSettings,
+  type StoredSlot,
 } from './release-autopost-db';
-import { AUTOPOST_TAG, PUSH_AHEAD_HOURS, planForArtist } from './release-autopost-schedule';
+import { PUSH_AHEAD_HOURS, planForArtist } from './release-autopost-schedule';
 import { isAutopostNetwork, variantsFor } from './autopost-channel-post';
 import { addDays, localDate, localInstant, recommendedPostsPerWeek } from './autopost-plan';
-import { buildScheduleView, type ViewSlot } from './autopost-schedule-view';
+import { buildScheduleView, type LivePosts, type ViewSlot } from './autopost-schedule-view';
 import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { findTagId, listChannels, listOrganizations, listTaggedPosts, type BufferPostState } from './buffer-client';
+import { listChannelPosts, listChannels, listOrganizations } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import {
@@ -142,17 +143,18 @@ async function bufferState(token: string | null, organizationId: string | null) 
 }
 
 /**
- * Where each post handed to Buffer stands there now, by Buffer post id, or null when Buffer can't
- * be asked. Null shows as "in Buffer" without a live status rather than failing the page: the
- * schedule itself doesn't depend on it.
+ * Where each post handed to Buffer stands there now, or null when Buffer can't be asked. Null shows
+ * as "in Buffer" without a live status rather than failing the page: the schedule itself doesn't
+ * depend on it.
  */
-async function livePostStates(token: string | null, organizationId: string | null, since: string): Promise<Map<string, BufferPostState> | null> {
-  if (!token || !organizationId) return null;
+async function livePostStates(token: string | null, organizationId: string | null, stored: StoredSlot[], since: string): Promise<LivePosts | null> {
+  const channelIds = [...new Set(stored.flatMap(s => s.bufferPostIds.map(p => p.channelId)))];
+  if (!token || !organizationId || channelIds.length === 0) return null;
   try {
-    const tagId = await findTagId(token, organizationId, AUTOPOST_TAG.name);
-    // No tag yet means nothing was ever posted from this organization.
-    const posts = tagId ? await listTaggedPosts(token, organizationId, tagId, since) : [];
-    return new Map(posts.map(p => [p.id, p]));
+    // A post is created in Buffer up to PUSH_AHEAD_HOURS before its slot, so from that far before.
+    const createdSince = new Date(new Date(since).getTime() - PUSH_AHEAD_HOURS * 3_600_000).toISOString();
+    const { posts, complete } = await listChannelPosts(token, organizationId, channelIds, createdSince);
+    return { posts: new Map(posts.map(p => [p.id, p])), complete };
   } catch (error) {
     if (!(error instanceof BufferNotConnectedError)) {
       Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'live-post-states' } });
@@ -258,7 +260,7 @@ async function scheduleState(
   ]);
   // Only asked when something is in Buffer to ask about.
   const live = stored.some(s => s.status === 'pushed')
-    ? await livePostStates(token, settings.organizationId, localInstant(since, '00:00', settings.timezone))
+    ? await livePostStates(token, settings.organizationId, stored, localInstant(since, '00:00', settings.timezone))
     : null;
 
   // Before it's switched on, "Coming up" shows what switching on now would post.
@@ -294,7 +296,8 @@ async function scheduleState(
     };
   };
 
-  return { comingUp: view.upcoming.map(describe), recent: view.recent.map(describe) };
+  // `today` is the artist's own date, so the page splits "Coming up" into weeks from their today.
+  return { today, comingUp: view.upcoming.map(describe), recent: view.recent.map(describe) };
 }
 
 /** Everything the Promote page shows. */
