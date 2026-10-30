@@ -9,6 +9,8 @@ export function Footer() {
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3 text-text-secondary text-sm">
         <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">{t('footer.madeWithLove')}</a>
         <nav className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+          <Link to="/for-artists" className="hover:text-text-primary transition-colors">{t('footer.forArtists')}</Link>
+          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/artists" className="hover:text-text-primary transition-colors">{t('footer.indieArtistIndex')}</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/known-artists" className="hover:text-text-primary transition-colors">{t('footer.artistsYouKnow')}</Link>

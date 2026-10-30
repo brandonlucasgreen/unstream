@@ -188,6 +188,10 @@
   path = "/platforms"
   function = "static-page-meta"
 
+[[edge_functions]]
+  path = "/for-artists"
+  function = "static-page-meta"
+
 [[redirects]]
   from = "/api/artist-directory"
   to = "/.netlify/functions/artist-directory"

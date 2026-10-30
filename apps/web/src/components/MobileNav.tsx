@@ -74,7 +74,7 @@ export function MobileNav({
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors sm:hidden"
+        className="-mr-2 p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors md:hidden"
         aria-label={t('nav.openMenu')}
         aria-expanded={open}
         aria-controls={open ? 'mobile-nav' : undefined}

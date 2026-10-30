@@ -757,6 +757,16 @@ export async function searchPlatforms(query: string): Promise<SearchResponse> {
   return responses.length < settled.length ? { ...merged, partial: true } : merged;
 }
 
+/**
+ * An artist looking for their own page to claim (/for-artists). Never split like a fan's
+ * multi-artist query, since a band called "Hall & Oates" is one name, and not deferred: Phase 1
+ * waits for MusicBrainz, whose homonyms are what give same-name artists separate cards and
+ * slugs. Claiming the wrong one of two same-name artists is the mistake this page can't make.
+ */
+export function searchArtistsToClaim(query: string): Promise<SearchResponse> {
+  return searchSingle(query);
+}
+
 // Resolve artist name from a Spotify or Apple Music URL
 export interface ResolveResult {
   artistName: string;
