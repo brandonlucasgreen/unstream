@@ -96,21 +96,28 @@ describe('how often', () => {
   // "Pick days & times for me" posts at a time from the channel's Buffer posting schedule.
   it('takes a queued post’s time from the channel’s posting schedule that day', () => {
     const schedule = [
+      { day: 'mon', times: ['8:05', '07:00:00', 'noon'], paused: false },
+      { day: 'tue', times: ['later'], paused: false },
       { day: 'fri', times: ['17:30', '09:15'], paused: false },
       { day: 'sat', times: ['11:00'], paused: true },
       { day: 'sun', times: [], paused: false },
     ];
     const wednesday = new Date('2026-11-11T12:00:00Z');
     // The earliest that day, in the channel's own timezone.
-    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', wednesday)).toBe('2026-11-13T14:15:00.000Z');
-    expect(queueTimeOn('2026-11-13', schedule, 'Europe/London', wednesday)).toBe('2026-11-13T09:15:00.000Z');
-    // A paused day, an empty one, and a day the schedule doesn't list: no time.
-    expect(queueTimeOn('2026-11-14', schedule, 'America/New_York', wednesday)).toBeNull();
-    expect(queueTimeOn('2026-11-15', schedule, 'America/New_York', wednesday)).toBeNull();
-    expect(queueTimeOn('2026-11-12', schedule, 'America/New_York', wednesday)).toBeNull();
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', wednesday)).toEqual({ at: '2026-11-13T14:15:00.000Z' });
+    expect(queueTimeOn('2026-11-13', schedule, 'Europe/London', wednesday)).toEqual({ at: '2026-11-13T09:15:00.000Z' });
+    // "8:05" and "07:00:00" are read too; "noon" is passed over.
+    expect(queueTimeOn('2026-11-16', schedule, 'Europe/London', wednesday)).toEqual({ at: '2026-11-16T07:00:00.000Z' });
+    // A paused day, an empty one, a day the schedule doesn't list, and one it can't read: no
+    // time, each with its own reason.
+    expect(queueTimeOn('2026-11-14', schedule, 'America/New_York', wednesday)).toEqual({ none: 'its Buffer schedule is paused on sat' });
+    expect(queueTimeOn('2026-11-15', schedule, 'America/New_York', wednesday)).toEqual({ none: 'no posting times in its Buffer schedule on sun' });
+    expect(queueTimeOn('2026-11-12', schedule, 'America/New_York', wednesday)).toEqual({ none: 'no posting times in its Buffer schedule on thu' });
+    expect(queueTimeOn('2026-11-17', schedule, 'America/New_York', wednesday)).toEqual({ none: 'couldn’t read its Buffer posting times (later)' });
     // On the day itself, only a time still ahead, with ten minutes for Buffer to take it.
-    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T14:10:00Z'))).toBe('2026-11-13T22:30:00.000Z');
-    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T22:25:00Z'))).toBeNull();
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T14:10:00Z'))).toEqual({ at: '2026-11-13T22:30:00.000Z' });
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T22:25:00Z')))
+      .toEqual({ none: 'every posting time in its Buffer schedule on 2026-11-13 has passed' });
   });
 
   it('posts nothing before it was switched on, and nothing for an empty catalogue', () => {

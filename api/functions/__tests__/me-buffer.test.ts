@@ -148,7 +148,7 @@ describe('the gate', () => {
     listOrganizations.mockResolvedValue([{ id: 'org_1', name: 'Mine' }]);
 
     await call('GET', '/callback', '?state=s&code=c');
-    expect(resumeAfterReconnect).toHaveBeenCalledWith('u1');
+    expect(resumeAfterReconnect).toHaveBeenCalledWith('u1', ['org_1']);
 
     resumeAfterReconnect.mockRejectedValueOnce(new Error('database down'));
     const res = await call('GET', '/callback', '?state=s&code=c');

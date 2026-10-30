@@ -18,7 +18,6 @@
 // request, under the curator feature's admin gate and its own token.
 
 import { isUrlHostnameAllowed } from './middleware';
-import type { PostingDay } from './autopost-plan';
 
 const BUFFER_API = 'https://api.buffer.com';
 
@@ -122,6 +121,15 @@ export async function listChannels(token: string, orgId: string): Promise<Buffer
     }
   `, { orgId });
   return data.channels ?? [];
+}
+
+/** One day of a channel's Buffer posting schedule, as Buffer's API gives it (`ScheduleV2`). */
+export interface PostingDay {
+  /** mon, tue, … sun */
+  day: string;
+  /** Times of day, in the channel's own timezone: "09:15". */
+  times: string[];
+  paused: boolean;
 }
 
 export interface ChannelSchedule {

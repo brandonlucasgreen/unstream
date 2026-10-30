@@ -202,7 +202,26 @@ describe('release-autopost-sweep', () => {
     ]);
     await run();
     expect(mocks.createPost.mock.calls.map(c => c[1].channelId)).toEqual(['bsky']);
-    expect(mocks.finishSlot.mock.calls[0][1].error).toContain('instagram: no posting time left in its Buffer schedule on 2026-11-13');
+    expect(mocks.finishSlot.mock.calls[0][1].error).toContain('instagram: its Buffer schedule is paused on fri');
+  });
+
+  it('leaves a slot no channel has a time for unclaimed, rather than failing it', async () => {
+    mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, postTime: null }]);
+    mocks.listChannelSchedules.mockResolvedValue([
+      { id: 'bsky', timezone: 'America/New_York', postingSchedule: [{ day: 'fri', times: ['09:15'], paused: true }] },
+    ]);
+    const summary = JSON.parse((await run()).body);
+
+    // Nothing claimed, copied or sent, and nothing to retry or report.
+    expect(mocks.claimSlot).not.toHaveBeenCalled();
+    expect(mocks.storeImageFromUrl).not.toHaveBeenCalled();
+    expect(mocks.createPost).not.toHaveBeenCalled();
+    expect(summary).toMatchObject({ pushed: 0, failed: 0 });
+    expect(summary.unscheduled).toEqual([{
+      artistId: 'artist-1',
+      date: '2026-11-13',
+      reasons: ['bluesky: its Buffer schedule is paused on fri', 'instagram: Buffer sent no posting schedule for it'],
+    }]);
   });
 
   it('reads no posting schedules with a set time', async () => {

@@ -43,9 +43,18 @@ const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
 /** Where a Buffer user connects their social channels. */
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
 
-const PAUSED: Record<string, string> = {
-  buffer_disconnected: 'Posting has stopped because Buffer was disconnected. Reconnect it to start again.',
-};
+/**
+ * Why posting stopped, and what starts it again. A reconnect resumes it by itself, but not for
+ * someone already connected again (or connected to a different Buffer login): for them it's Save.
+ */
+function pausedMessage(reason: string, bufferConnected: boolean): string {
+  if (reason === 'buffer_disconnected') {
+    return bufferConnected
+      ? 'Posting stopped while Buffer was disconnected. Check where it posts, then save changes to start again.'
+      : 'Posting has stopped because Buffer was disconnected. Reconnect it to start again.';
+  }
+  return 'Posting has stopped. Save changes to start again.';
+}
 
 function inputFrom(page: Loaded): PromoteSettingsInput {
   const s = page.settings;
@@ -222,7 +231,7 @@ export function ArtistPromotePage() {
         <p className="text-sm text-text-secondary" role="status">{BUFFER_OUTCOMES[bufferOutcome]}</p>
       )}
       {page.settings.pausedReason && (
-        <p className="text-sm text-error" role="alert">{PAUSED[page.settings.pausedReason] ?? 'Posting has stopped. Save to start again.'}</p>
+        <p className="text-sm text-error" role="alert">{pausedMessage(page.settings.pausedReason, buffer.connected)}</p>
       )}
 
       {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}

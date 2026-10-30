@@ -211,6 +211,21 @@ describe('ArtistPromotePage', () => {
     expect(within(status).getByRole('link', { name: 'Buffer' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
   });
 
+  // A reconnect resumes posting by itself, so someone already connected again needs Save instead.
+  it('says what starts posting again after Buffer was disconnected', async () => {
+    const base = loaded() as Extract<PromotePage, { available: true }>;
+    const paused = { ...base.settings, enabled: true, organizationId: 'org1', channelIds: ['ig'], pausedReason: 'buffer_disconnected' };
+    promote.getPromotePage.mockResolvedValue(loaded({ settings: paused }));
+    renderTab();
+    expect((await screen.findByRole('alert')).textContent).toBe('Posting has stopped because Buffer was disconnected. Reconnect it to start again.');
+    cleanup();
+
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected, settings: paused }));
+    renderTab();
+    expect((await screen.findByRole('alert')).textContent)
+      .toBe('Posting stopped while Buffer was disconnected. Check where it posts, then save changes to start again.');
+  });
+
   it('shows the server’s plan under Coming up', async () => {
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
     renderTab();

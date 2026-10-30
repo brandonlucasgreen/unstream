@@ -6,7 +6,9 @@
 // autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote page's "Coming up" does
 // (`planForArtist`), and hands Buffer every slot due in the next PUSH_AHEAD_HOURS as a scheduled post:
 // at the artist's set time, or with "Pick days & times for me", at a time from each channel's
-// own Buffer posting schedule that day (`queueTimeOn`).
+// own Buffer posting schedule that day (`queueTimeOn`). A slot no channel has a time for (a day
+// the artist paused in Buffer, say) is left unclaimed and listed in the summary as `unscheduled`,
+// not failed: it isn't retried, and nothing is reported to Sentry.
 //
 // ## Who it posts for
 //
@@ -32,7 +34,7 @@
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import { queueTimeOn, type PlannedPost } from './autopost-plan';
+import { queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
 import { isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
@@ -77,6 +79,20 @@ interface ArtistResult {
   skipped?: string;
   pushed: number;
   failed: number;
+  /** Slots no channel had a posting time for, with why: left unclaimed, never failed. */
+  unscheduled: { date: string; reasons: string[] }[];
+}
+
+type SweepChannel = { id: string; service: string; schedule: ChannelSchedule | null };
+
+/**
+ * When this slot goes out on one channel: the artist's set time, or with "Pick days & times
+ * for me", a time from that channel's Buffer posting schedule that day.
+ */
+function channelTime(slot: PlannedPost, channel: SweepChannel, settings: AutopostSettings, now: Date): QueueTime {
+  if (settings.postTime !== null) return { at: slot.at };
+  if (!channel.schedule) return { none: 'Buffer sent no posting schedule for it' };
+  return queueTimeOn(slot.date, channel.schedule.postingSchedule, channel.schedule.timezone || settings.timezone, now);
 }
 
 /** The URL behind an image key, from what the artist and release rows hold. */
@@ -99,15 +115,23 @@ async function pushSlot(
     artist: AutopostArtist;
     releases: Map<string, AutopostRelease>;
     /** `schedule` is read only for "Pick days & times for me", and null otherwise. */
-    channels: { id: string; service: string; schedule: ChannelSchedule | null }[];
+    channels: SweepChannel[];
     token: string;
     tagId: string;
     tips: boolean;
     bucket: MediaBucket;
     now: Date;
   },
-): Promise<'pushed' | 'failed' | 'taken'> {
+): Promise<'pushed' | 'failed' | 'taken' | { unscheduled: string[] }> {
   const { settings, artist, releases } = ctx;
+
+  // Each channel's time first, before anything is claimed or copied. A day with no time on any
+  // channel (one the artist paused in Buffer, say) isn't a failure to retry and report: the slot
+  // is left unclaimed, and its post comes round again on a later day.
+  const timed = ctx.channels.map(channel => ({ channel, time: channelTime(slot, channel, settings, ctx.now) }));
+  const untimed = timed.flatMap(t => 'none' in t.time ? [`${t.channel.service}: ${t.time.none}`] : []);
+  if (untimed.length === timed.length) return { unscheduled: untimed };
+
   const id = await claimSlot({
     artistId: artist.id,
     slotAt: slot.at,
@@ -142,19 +166,12 @@ async function pushSlot(
   }
 
   const outcome: SlotOutcome = { status: 'failed', bufferPostIds: [], captions: {}, error: null };
-  const errors: string[] = [...imageErrors];
+  const errors: string[] = [...imageErrors, ...untimed];
 
-  for (const channel of ctx.channels) {
-    // "Pick days & times for me": this channel's own posting time that day, in its timezone.
-    const at = settings.postTime === null
-      ? queueTimeOn(slot.date, channel.schedule?.postingSchedule ?? [], channel.schedule?.timezone || settings.timezone, ctx.now)
-      : slot.at;
-    if (!at) {
-      errors.push(`${channel.service}: no posting time left in its Buffer schedule on ${slot.date}`);
-      continue;
-    }
+  for (const { channel, time } of timed) {
+    if ('none' in time) continue;
     const post = buildChannelPost({
-      slot: { ...slot, at },
+      slot: { ...slot, at: time.at },
       channel,
       artist: { name: artist.name, slug: artist.slug },
       release,
@@ -200,7 +217,7 @@ async function pushSlot(
 }
 
 async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now: Date): Promise<ArtistResult> {
-  const result: ArtistResult = { artistId: settings.artistId, pushed: 0, failed: 0 };
+  const result: ArtistResult = { artistId: settings.artistId, pushed: 0, failed: 0, unscheduled: [] };
 
   // The claim, then the gate: both rechecked every run, never trusted from when it was set up.
   const artist = await getAutopostArtist(settings.artistId);
@@ -230,12 +247,15 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   // Read from Buffer, not trusted from storage: a channel removed or disconnected there since it
   // was ticked is skipped, never posted to.
   const ticked = new Set(settings.channelIds);
-  const schedules = settings.postTime === null
-    ? new Map((await listChannelSchedules(token, settings.organizationId)).map(c => [c.id, c]))
-    : null;
-  const channels = (await listChannels(token, settings.organizationId))
+  const orgId = settings.organizationId;
+  const [bufferChannels, schedules] = await Promise.all([
+    listChannels(token, orgId),
+    settings.postTime === null ? listChannelSchedules(token, orgId) : Promise.resolve([]),
+  ]);
+  const scheduleById = new Map(schedules.map(c => [c.id, c]));
+  const channels = bufferChannels
     .filter(c => ticked.has(c.id) && !c.isDisconnected && isAutopostNetwork(c.service))
-    .map(c => ({ id: c.id, service: c.service, schedule: schedules?.get(c.id) ?? null }));
+    .map(c => ({ id: c.id, service: c.service, schedule: scheduleById.get(c.id) ?? null }));
   if (channels.length === 0) return { ...result, skipped: 'none of the ticked channels is available in Buffer' };
 
   const tagId = await ensureTag(token, settings.organizationId, AUTOPOST_TAG.name, AUTOPOST_TAG.color);
@@ -246,7 +266,8 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
     try {
       const status = await pushSlot(slot, { settings, artist, releases: byId, channels, token, tagId, tips, bucket, now });
       if (status === 'pushed') result.pushed++;
-      if (status === 'failed') result.failed++;
+      else if (status === 'failed') result.failed++;
+      else if (typeof status === 'object') result.unscheduled.push({ date: slot.date, reasons: status.unscheduled });
     } catch (error) {
       if (error instanceof BufferNotConnectedError) {
         await pauseAutopost(artist.id, 'buffer_disconnected');
@@ -289,7 +310,11 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
     return { statusCode: 503, body: JSON.stringify({ error: `Media bucket not configured: ${bucket.missing.join(', ')}` }) };
   }
 
-  const summary = { artists: settingsList.length, reached: 0, deferred: 0, pushed: 0, failed: 0, errors: 0, skipped: [] as { artistId: string; reason: string }[] };
+  const summary = {
+    artists: settingsList.length, reached: 0, deferred: 0, pushed: 0, failed: 0, errors: 0,
+    skipped: [] as { artistId: string; reason: string }[],
+    unscheduled: [] as { artistId: string; date: string; reasons: string[] }[],
+  };
 
   for (const settings of settingsList) {
     if (Date.now() - started > START_BUDGET_MS) {
@@ -303,6 +328,7 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
       summary.pushed += r.pushed;
       summary.failed += r.failed;
       if (r.skipped) summary.skipped.push({ artistId: r.artistId, reason: r.skipped });
+      for (const u of r.unscheduled) summary.unscheduled.push({ artistId: r.artistId, ...u });
     } catch (error) {
       summary.errors++;
       Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'artist-failed' }, extra: { artistId: settings.artistId } });
