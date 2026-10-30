@@ -18,6 +18,7 @@
 // request, under the curator feature's admin gate and its own token.
 
 import { isUrlHostnameAllowed } from './middleware';
+import type { PostingDay } from './autopost-plan';
 
 const BUFFER_API = 'https://api.buffer.com';
 
@@ -117,6 +118,31 @@ export async function listChannels(token: string, orgId: string): Promise<Buffer
         type
         serviceId
         isDisconnected
+      }
+    }
+  `, { orgId });
+  return data.channels ?? [];
+}
+
+export interface ChannelSchedule {
+  id: string;
+  /** Buffer's default when the channel never set one is Europe/London. */
+  timezone: string;
+  postingSchedule: PostingDay[];
+}
+
+/**
+ * Each channel's posting schedule and timezone, for release autopost's "Pick days & times for me"
+ * (`queueTimeOn`). A query of its own rather than more fields on `listChannels`, so the pages that
+ * list channels don't depend on fields only the sweep needs.
+ */
+export async function listChannelSchedules(token: string, orgId: string): Promise<ChannelSchedule[]> {
+  const data = await bufferGraphQL<{ channels: ChannelSchedule[] }>(token, `
+    query GetChannelSchedules($orgId: OrganizationId!) {
+      channels(input: { organizationId: $orgId }) {
+        id
+        timezone
+        postingSchedule { day times paused }
       }
     }
   `, { orgId });

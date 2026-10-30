@@ -36,8 +36,9 @@ export interface PlanSettings {
   postsPerWeek: number | null;
   timezone: string;
   /**
-   * Local time of day, HH:MM, or null for "Recommended": the post goes to the channel's Buffer
-   * queue on its day and Buffer picks the time. A queued slot is placed at the day's start.
+   * Local time of day, HH:MM, or null for "Recommended": the post goes out at a time from the
+   * channel's Buffer posting schedule that day (`queueTimeOn`). A queued slot is placed at the
+   * day's start.
    */
   postTime: string | null;
   /** When autopost was switched on, an instant. Only releases catalogued after it get release moments. */
@@ -187,6 +188,40 @@ export function localInstant(date: string, time: string, timezone: string): stri
   // Twice, because the offset at the first guess can be the other side of a clock change.
   const guess = wall - offsetAt(wall);
   return new Date(wall - offsetAt(guess)).toISOString();
+}
+
+/** One day of a channel's Buffer posting schedule, as Buffer's API gives it (`ScheduleV2`). */
+export interface PostingDay {
+  /** mon, tue, … sun */
+  day: string;
+  /** HH:MM, in the channel's own timezone. */
+  times: string[];
+  paused: boolean;
+}
+
+/** Leave Buffer this long to take a post before its time. */
+const QUEUE_LEAD_MS = 10 * 60_000;
+
+/**
+ * When a "Pick days & times for me" post goes out on one channel: the earliest time in that
+ * channel's Buffer posting schedule on the post's day, in the channel's timezone, that's still
+ * ahead of `now`. null when that day has none: paused, empty, or every time already past.
+ *
+ * Read from the schedule rather than handed to Buffer's queue (`addToQueue`), because the queue
+ * places a post in the next open slot from *now*: a post handed over three days early would go
+ * out within hours. Scheduling it at its own day's slot lets it reach Buffer early, where the
+ * artist can see it.
+ */
+export function queueTimeOn(date: string, schedule: PostingDay[], timezone: string, now: Date): string | null {
+  const weekday = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayOfWeek(date)];
+  const day = schedule.find(d => d.day === weekday);
+  if (!day || day.paused) return null;
+  const earliest = now.getTime() + QUEUE_LEAD_MS;
+  const instants = day.times
+    .filter(t => /^\d{2}:\d{2}$/.test(t))
+    .map(t => localInstant(date, t, timezone))
+    .sort();
+  return instants.find(i => new Date(i).getTime() >= earliest) ?? null;
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -4,8 +4,9 @@
 // Invoked every 6 hours by .github/workflows/release-autopost-sweep.yml, the recatalog-sweep
 // precedent: there are no scheduled Netlify functions in this repo. For each artist with
 // autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote page's "Coming up" does
-// (`planForArtist`), and hands Buffer every slot due in the next PUSH_AHEAD_HOURS as a scheduled post,
-// or, with the "Recommended" time, adds it to the channel's Buffer queue on its own day.
+// (`planForArtist`), and hands Buffer every slot due in the next PUSH_AHEAD_HOURS as a scheduled post:
+// at the artist's set time, or with "Pick days & times for me", at a time from each channel's
+// own Buffer posting schedule that day (`queueTimeOn`).
 //
 // ## Who it posts for
 //
@@ -31,7 +32,7 @@
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import type { PlannedPost } from './autopost-plan';
+import { queueTimeOn, type PlannedPost } from './autopost-plan';
 import { isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
@@ -51,7 +52,7 @@ import {
 } from './release-autopost-db';
 import { canUseReleaseAutopost } from './release-autopost-access';
 import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { createPost, ensureTag, listChannels } from './buffer-client';
+import { createPost, ensureTag, listChannelSchedules, listChannels, type ChannelSchedule } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import { isInternalRequest } from './middleware';
@@ -97,11 +98,13 @@ async function pushSlot(
     settings: AutopostSettings;
     artist: AutopostArtist;
     releases: Map<string, AutopostRelease>;
-    channels: { id: string; service: string }[];
+    /** `schedule` is read only for "Pick days & times for me", and null otherwise. */
+    channels: { id: string; service: string; schedule: ChannelSchedule | null }[];
     token: string;
     tagId: string;
     tips: boolean;
     bucket: MediaBucket;
+    now: Date;
   },
 ): Promise<'pushed' | 'failed' | 'taken'> {
   const { settings, artist, releases } = ctx;
@@ -142,8 +145,16 @@ async function pushSlot(
   const errors: string[] = [...imageErrors];
 
   for (const channel of ctx.channels) {
+    // "Pick days & times for me": this channel's own posting time that day, in its timezone.
+    const at = settings.postTime === null
+      ? queueTimeOn(slot.date, channel.schedule?.postingSchedule ?? [], channel.schedule?.timezone || settings.timezone, ctx.now)
+      : slot.at;
+    if (!at) {
+      errors.push(`${channel.service}: no posting time left in its Buffer schedule on ${slot.date}`);
+      continue;
+    }
     const post = buildChannelPost({
-      slot: { ...slot, queued: settings.postTime === null },
+      slot: { ...slot, at },
       channel,
       artist: { name: artist.name, slug: artist.slug },
       release,
@@ -203,7 +214,7 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   const history = await getAutopostHistory(artist.id, now);
   const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, now);
 
-  const due = plan.filter(p => isDueToPush(p, settings, now, PUSH_AHEAD_HOURS));
+  const due = plan.filter(p => isDueToPush(p, now, PUSH_AHEAD_HOURS));
   if (due.length === 0) return result;
 
   let token: string;
@@ -212,15 +223,19 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   } catch (error) {
     if (!(error instanceof BufferNotConnectedError)) throw error;
     await pauseAutopost(artist.id, 'buffer_disconnected');
-    return { ...result, skipped: 'Buffer disconnected; paused' };
+    // With why, so the workflow's log tells a missing connection from one Buffer refused.
+    return { ...result, skipped: `Buffer disconnected (${error.message}); paused` };
   }
 
   // Read from Buffer, not trusted from storage: a channel removed or disconnected there since it
   // was ticked is skipped, never posted to.
   const ticked = new Set(settings.channelIds);
+  const schedules = settings.postTime === null
+    ? new Map((await listChannelSchedules(token, settings.organizationId)).map(c => [c.id, c]))
+    : null;
   const channels = (await listChannels(token, settings.organizationId))
     .filter(c => ticked.has(c.id) && !c.isDisconnected && isAutopostNetwork(c.service))
-    .map(c => ({ id: c.id, service: c.service }));
+    .map(c => ({ id: c.id, service: c.service, schedule: schedules?.get(c.id) ?? null }));
   if (channels.length === 0) return { ...result, skipped: 'none of the ticked channels is available in Buffer' };
 
   const tagId = await ensureTag(token, settings.organizationId, AUTOPOST_TAG.name, AUTOPOST_TAG.color);
@@ -229,13 +244,13 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
 
   for (const slot of due) {
     try {
-      const status = await pushSlot(slot, { settings, artist, releases: byId, channels, token, tagId, tips, bucket });
+      const status = await pushSlot(slot, { settings, artist, releases: byId, channels, token, tagId, tips, bucket, now });
       if (status === 'pushed') result.pushed++;
       if (status === 'failed') result.failed++;
     } catch (error) {
       if (error instanceof BufferNotConnectedError) {
         await pauseAutopost(artist.id, 'buffer_disconnected');
-        return { ...result, skipped: 'Buffer disconnected mid-run; paused' };
+        return { ...result, skipped: `Buffer disconnected mid-run (${error.message}); paused` };
       }
       throw error;
     }

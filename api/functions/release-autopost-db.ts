@@ -128,6 +128,19 @@ export async function pauseAutopost(artistId: string, reason: string): Promise<v
   if (error) throw new Error(`pausing autopost failed: ${error.message}`);
 }
 
+/**
+ * A reconnect undoes the pause a lost Buffer connection caused, for every artist this user posts
+ * for, so reconnecting is all it takes to start again. Other pauses stay.
+ */
+export async function resumeAfterReconnect(userId: string): Promise<void> {
+  const { error } = await client()
+    .from('release_autopost_settings')
+    .update({ paused_reason: null, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('paused_reason', 'buffer_disconnected');
+  if (error) throw new Error(`resuming autopost failed: ${error.message}`);
+}
+
 // ---------------------------------------------------------------------------------------------
 // The artist and their owner
 // ---------------------------------------------------------------------------------------------

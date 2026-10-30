@@ -44,7 +44,7 @@ const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
 
 const PAUSED: Record<string, string> = {
-  buffer_disconnected: 'Posting has stopped because Buffer was disconnected. Reconnect it, then save to start again.',
+  buffer_disconnected: 'Posting has stopped because Buffer was disconnected. Reconnect it to start again.',
 };
 
 function inputFrom(page: Loaded): PromoteSettingsInput {
@@ -237,7 +237,6 @@ export function ArtistPromotePage() {
             busy={busy}
             canSwitchOn={canSwitchOn}
             channels={form.channelIds.length}
-            queued={form.postTime === null}
             onToggle={toggle}
           />
         )}
@@ -468,12 +467,11 @@ export function ArtistPromotePage() {
  * It says in plain words what each position means, so nobody has to guess whether "off" leaves
  * drafts behind: it doesn't.
  */
-function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
+function AutopostSwitch({ on, busy, canSwitchOn, channels, onToggle }: {
   on: boolean;
   busy: boolean;
   canSwitchOn: boolean;
   channels: number;
-  queued: boolean;
   onToggle: () => void;
 }) {
   const disabled = busy || (!on && !canSwitchOn);
@@ -486,11 +484,9 @@ function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
             ? (
               <>
                 Posting to {channels} channel{channels === 1 ? '' : 's'}.{' '}
-                {queued ? 'Each post joins your ' : 'Each post lands in '}
-                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
-                  {queued ? 'Buffer queue' : 'Buffer'}
-                </a>
-                {queued ? ' on its day' : ' three days before it goes out'}, where you can change or delete it.
+                Each post lands in{' '}
+                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>
+                {' '}three days before it goes out, where you can change or delete it.
               </>
             )
             : canSwitchOn

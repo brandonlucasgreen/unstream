@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => {
     canUseReleaseAutopost: vi.fn(),
     usableAccessToken: vi.fn(),
     listChannels: vi.fn(),
+    listChannelSchedules: vi.fn(),
     ensureTag: vi.fn(),
     createPost: vi.fn(),
     getFeatureFlag: vi.fn(),
@@ -39,7 +40,12 @@ vi.mock('../release-autopost-db', () => ({
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
-vi.mock('../buffer-client', () => ({ listChannels: mocks.listChannels, ensureTag: mocks.ensureTag, createPost: mocks.createPost }));
+vi.mock('../buffer-client', () => ({
+  listChannels: mocks.listChannels,
+  listChannelSchedules: mocks.listChannelSchedules,
+  ensureTag: mocks.ensureTag,
+  createPost: mocks.createPost,
+}));
 vi.mock('../feature-flags', () => ({ getFeatureFlag: mocks.getFeatureFlag }));
 vi.mock('../tips-db', () => ({ getTipsLiveSlugs: mocks.getTipsLiveSlugs }));
 vi.mock('../autopost-media', async importOriginal => ({
@@ -171,19 +177,37 @@ describe('release-autopost-sweep', () => {
     }));
   });
 
-  it('with the Recommended time, adds a post to the Buffer queue on its own day, not three days ahead', async () => {
+  // "Pick days & times for me": three days ahead like a set time, so the artist sees it in Buffer,
+  // at each channel's own posting time that day. Never Buffer's queue, which fills the next open
+  // slot from now and would post it days early.
+  it('with "Pick days & times for me", schedules each channel at its own Buffer posting time that day', async () => {
     mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, postTime: null }]);
-    await run(); // Wednesday: Friday's post isn't handed over yet.
-    expect(mocks.createPost).not.toHaveBeenCalled();
+    mocks.listChannelSchedules.mockResolvedValue([
+      { id: 'bsky', timezone: 'America/New_York', postingSchedule: [{ day: 'fri', times: ['17:30', '09:15'], paused: false }] },
+      { id: 'ig', timezone: 'Europe/London', postingSchedule: [{ day: 'fri', times: ['12:00'], paused: false }] },
+    ]);
+    await run(); // Wednesday noon UTC: Friday's post is due.
 
-    vi.setSystemTime(new Date('2026-11-13T09:00:00Z')); // Friday, 4am in New York
-    await run();
     expect(mocks.claimSlot).toHaveBeenCalledWith(expect.objectContaining({ slotDate: '2026-11-13', slotAt: '2026-11-13T05:00:00.000Z' }));
-    for (const [, input] of mocks.createPost.mock.calls) {
-      expect(input.mode).toBe('addToQueue');
-      expect(input).not.toHaveProperty('dueAt');
-    }
-    expect(mocks.createPost).toHaveBeenCalled();
+    const byChannel = Object.fromEntries(mocks.createPost.mock.calls.map(([, input]) => [input.channelId, input]));
+    expect(byChannel.bsky).toMatchObject({ dueAt: '2026-11-13T14:15:00.000Z', mode: 'customScheduled' });
+    expect(byChannel.ig).toMatchObject({ dueAt: '2026-11-13T12:00:00.000Z', mode: 'customScheduled' });
+  });
+
+  it('skips a channel whose Buffer schedule has no time that day, and says so', async () => {
+    mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, postTime: null }]);
+    mocks.listChannelSchedules.mockResolvedValue([
+      { id: 'bsky', timezone: 'America/New_York', postingSchedule: [{ day: 'fri', times: ['09:15'], paused: false }] },
+      { id: 'ig', timezone: 'America/New_York', postingSchedule: [{ day: 'fri', times: ['09:15'], paused: true }] },
+    ]);
+    await run();
+    expect(mocks.createPost.mock.calls.map(c => c[1].channelId)).toEqual(['bsky']);
+    expect(mocks.finishSlot.mock.calls[0][1].error).toContain('instagram: no posting time left in its Buffer schedule on 2026-11-13');
+  });
+
+  it('reads no posting schedules with a set time', async () => {
+    await run();
+    expect(mocks.listChannelSchedules).not.toHaveBeenCalled();
   });
 
   it('pushes nothing for a slot another run has already claimed', async () => {
@@ -214,9 +238,10 @@ describe('release-autopost-sweep', () => {
     expect(mocks.claimSlot).not.toHaveBeenCalled();
   });
 
-  it('pauses an artist whose Buffer is disconnected', async () => {
-    mocks.usableAccessToken.mockRejectedValue(new mocks.BufferNotConnectedError('gone'));
-    await run();
+  it('pauses an artist whose Buffer is disconnected, and says why', async () => {
+    mocks.usableAccessToken.mockRejectedValue(new mocks.BufferNotConnectedError('Buffer refused the connection.'));
+    const summary = JSON.parse((await run()).body);
+    expect(summary.skipped[0].reason).toBe('Buffer disconnected (Buffer refused the connection.); paused');
     expect(mocks.pauseAutopost).toHaveBeenCalledWith('artist-1', 'buffer_disconnected');
     expect(mocks.createPost).not.toHaveBeenCalled();
   });

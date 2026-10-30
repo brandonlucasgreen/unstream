@@ -207,8 +207,8 @@ describe('ArtistPromotePage', () => {
     renderTab();
     expect(await screen.findByRole('switch', { name: 'Autopost is on' })).toBeTruthy();
     const status = screen.getByRole('switch', { name: 'Autopost is on' }).parentElement!;
-    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post joins your Buffer queue on its day, where you can change or delete it\./);
-    expect(screen.getByRole('link', { name: 'Buffer queue' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
+    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post lands in Buffer three days before it goes out, where you can change or delete it\./);
+    expect(within(status).getByRole('link', { name: 'Buffer' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
   });
 
   it('shows the server’s plan under Coming up', async () => {

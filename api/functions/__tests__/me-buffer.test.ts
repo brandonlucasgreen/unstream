@@ -18,6 +18,7 @@ const setSelectedChannels = vi.fn();
 const exchangeCode = vi.fn();
 const listOrganizations = vi.fn();
 const listChannels = vi.fn();
+const resumeAfterReconnect = vi.fn();
 const redisGet = vi.fn();
 const redisSet = vi.fn();
 const redisDel = vi.fn();
@@ -46,6 +47,8 @@ vi.mock('../buffer-db', async (importOriginal) => ({
   setSelectedChannels: (...a: unknown[]) => setSelectedChannels(...a),
   usableAccessToken: async () => 'token',
 }));
+
+vi.mock('../release-autopost-db', () => ({ resumeAfterReconnect: (...a: unknown[]) => resumeAfterReconnect(...a) }));
 
 vi.mock('../buffer-oauth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../buffer-oauth')>()),
@@ -136,6 +139,20 @@ describe('the gate', () => {
     expect(res.statusCode).toBe(302);
     expect(res.headers.Location).toMatch(/\/curator\/new\?buffer=connected$/);
     expect(saveBufferConnection).toHaveBeenCalledWith('u1', expect.anything(), 'org_1');
+  });
+
+  // Release autopost pauses when the connection is lost; reconnecting is all it should take.
+  it('starts paused release autopost again on reconnect, and still connects if that fails', async () => {
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v' });
+    exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
+    listOrganizations.mockResolvedValue([{ id: 'org_1', name: 'Mine' }]);
+
+    await call('GET', '/callback', '?state=s&code=c');
+    expect(resumeAfterReconnect).toHaveBeenCalledWith('u1');
+
+    resumeAfterReconnect.mockRejectedValueOnce(new Error('database down'));
+    const res = await call('GET', '/callback', '?state=s&code=c');
+    expect(res.headers.Location).toMatch(/buffer=connected$/);
   });
 
   it('returns to the Promote page that started the flow', async () => {

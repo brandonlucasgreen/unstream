@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import {
   localInstant,
   planSlots,
+  queueTimeOn,
   recommendedPostsPerWeek,
   type PastPost,
   type PlanInput,
@@ -90,6 +91,26 @@ describe('how often', () => {
   it('follows daylight saving', () => {
     expect(localInstant('2026-10-30', '10:00', 'America/New_York')).toBe('2026-10-30T14:00:00.000Z');
     expect(localInstant('2026-11-06', '10:00', 'America/New_York')).toBe('2026-11-06T15:00:00.000Z');
+  });
+
+  // "Pick days & times for me" posts at a time from the channel's Buffer posting schedule.
+  it('takes a queued post’s time from the channel’s posting schedule that day', () => {
+    const schedule = [
+      { day: 'fri', times: ['17:30', '09:15'], paused: false },
+      { day: 'sat', times: ['11:00'], paused: true },
+      { day: 'sun', times: [], paused: false },
+    ];
+    const wednesday = new Date('2026-11-11T12:00:00Z');
+    // The earliest that day, in the channel's own timezone.
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', wednesday)).toBe('2026-11-13T14:15:00.000Z');
+    expect(queueTimeOn('2026-11-13', schedule, 'Europe/London', wednesday)).toBe('2026-11-13T09:15:00.000Z');
+    // A paused day, an empty one, and a day the schedule doesn't list: no time.
+    expect(queueTimeOn('2026-11-14', schedule, 'America/New_York', wednesday)).toBeNull();
+    expect(queueTimeOn('2026-11-15', schedule, 'America/New_York', wednesday)).toBeNull();
+    expect(queueTimeOn('2026-11-12', schedule, 'America/New_York', wednesday)).toBeNull();
+    // On the day itself, only a time still ahead, with ten minutes for Buffer to take it.
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T14:10:00Z'))).toBe('2026-11-13T22:30:00.000Z');
+    expect(queueTimeOn('2026-11-13', schedule, 'America/New_York', new Date('2026-11-13T22:25:00Z'))).toBeNull();
   });
 
   it('posts nothing before it was switched on, and nothing for an empty catalogue', () => {
