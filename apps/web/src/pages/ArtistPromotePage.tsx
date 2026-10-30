@@ -49,8 +49,8 @@ const BUFFER_OUTCOMES: Record<string, string> = {
   unavailable: 'Buffer isn’t available right now.',
 };
 
-/** Where a Buffer user sees what's scheduled, and can change or delete it. */
-const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
+/** Buffer's app, where the artist sees what's scheduled and can change or delete it. */
+const BUFFER_URL = 'https://publish.buffer.com';
 
 /** Where a Buffer user connects their social channels. */
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
@@ -348,12 +348,12 @@ export function ArtistPromotePage() {
                     </label>
                   ))}
                   {/* Unstream's choice, not Buffer's: autopost posts text with an image, so networks that
-                      need a video or extra setup aren't offered. Named once, out of the way. */}
+                      need a video or extra setup aren't offered. Named once, out of the way, by network only
+                      (Brandon, 2026-10-30: the longer line was too much). */}
                   {buffer.channels.some(c => !c.supported) && (
                     <p className="pt-1 text-xs text-text-muted">
                       Not available for autopost:{' '}
-                      {buffer.channels.filter(c => !c.supported).map(c => `${c.name} (${networkName(c.service)})`).join(', ')}.
-                      {' '}Autopost posts text with an image, so it leaves out networks that need a video or extra setup.
+                      {[...new Set(buffer.channels.filter(c => !c.supported).map(c => networkName(c.service)))].join(', ')}
                     </p>
                   )}
                   <a href={BUFFER_CHANNELS_URL} target="_blank" rel="noopener noreferrer" className="inline-block pt-1 text-xs text-link hover:underline">
@@ -361,14 +361,6 @@ export function ArtistPromotePage() {
                   </a>
                 </fieldset>
               )
-            )}
-            {imageFirstTicked.length > 0 && (
-              <p className="text-xs text-text-secondary">
-                {imageFirstTicked.join(' and ')} {imageFirstTicked.length === 1 ? 'needs' : 'need'} an image on every post, and
-                captions there can’t hold a clickable link, so those posts say “link in bio”. Autopost uses your release covers and
-                your artist photo, and won’t show the same one there twice in four weeks. When nothing fresh is left, that post skips{' '}
-                {imageFirstTicked.join(' and ')} and goes to your other channels.
-              </p>
             )}
           </div>
         )}
@@ -466,10 +458,6 @@ export function ArtistPromotePage() {
 
         <section className={SECTION} aria-labelledby="promote-coming-up">
           <h3 id="promote-coming-up" className="font-medium text-text-primary">Coming up</h3>
-          <p className="text-xs text-text-muted">
-            {page.settings.enabled ? 'The next four weeks, exactly as they’ll post.' : 'What the next four weeks would look like if you switched it on now.'}
-            {' '}From your saved settings.
-          </p>
           {page.comingUp.length === 0 ? (
             <p className="text-sm text-text-secondary">Nothing to post in the next four weeks.</p>
           ) : (
@@ -518,9 +506,8 @@ function AutopostSwitch({ on, busy, canSwitchOn, channels, onToggle }: {
             ? (
               <>
                 Posting to {channels} channel{channels === 1 ? '' : 's'}.{' '}
-                Each post lands in{' '}
-                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>
-                {' '}three days before it goes out, where you can change or delete it.
+                Each post lands in Buffer three days before it goes out, where you can change or delete it.{' '}
+                <a href={BUFFER_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Open Buffer ↗</a>
               </>
             )
             : canSwitchOn

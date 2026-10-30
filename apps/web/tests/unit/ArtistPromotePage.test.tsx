@@ -137,15 +137,13 @@ describe('ArtistPromotePage', () => {
     await screen.findByRole('checkbox', { name: /kidlightbulbs · Instagram/ });
     // Networks autopost can't use aren't checkboxes at all, just named once, out of the way.
     expect(screen.queryByRole('checkbox', { name: /YouTube/ })).toBeNull();
-    expect(screen.getByText(/Not available for autopost: kid lightbulbs \(YouTube\), sphmrs \(Pinterest\)\./)).toBeTruthy();
+    expect(screen.getByText('Not available for autopost: YouTube, Pinterest')).toBeTruthy();
 
     const toggle = screen.getByRole('switch', { name: 'Autopost is off' }) as HTMLButtonElement;
     expect(toggle.disabled).toBe(true);
     expect(screen.getByText('Tick at least one channel below, then switch it on.')).toBeTruthy();
     fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · Instagram/ }));
-    expect(screen.getByText(/^Instagram needs an image on every post/)).toBeTruthy();
     fireEvent.click(screen.getByRole('checkbox', { name: /kidlightbulbs · TikTok/ }));
-    expect(screen.getByText(/^Instagram and TikTok need an image on every post.*“link in bio”/)).toBeTruthy();
     expect(screen.getByText(/nothing is saved as a draft/)).toBeTruthy();
     // The switch saves by itself; no separate Save.
     fireEvent.click(toggle);
@@ -210,8 +208,10 @@ describe('ArtistPromotePage', () => {
     renderTab();
     expect(await screen.findByRole('switch', { name: 'Autopost is on' })).toBeTruthy();
     const status = screen.getByRole('switch', { name: 'Autopost is on' }).parentElement!;
-    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post lands in Buffer three days before it goes out, where you can change or delete it\./);
-    expect(within(status).getByRole('link', { name: 'Buffer' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
+    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post lands in Buffer three days before it goes out, where you can change or delete it\. Open Buffer ↗$/);
+    const open = within(status).getByRole('link', { name: 'Open Buffer ↗' });
+    expect(open.getAttribute('href')).toBe('https://publish.buffer.com');
+    expect(open.getAttribute('target')).toBe('_blank');
   });
 
   // A reconnect resumes posting by itself, so someone already connected again needs Save instead.
