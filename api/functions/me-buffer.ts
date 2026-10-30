@@ -125,6 +125,16 @@ async function handleRequest(event: HandlerEvent) {
 
     try {
       const tokens = await exchangeCode(code, pending.verifier);
+      // Without a refresh token the connection can't outlive this access token: it ends in an
+      // hour, whatever happens meanwhile. Said now, with what Buffer granted, rather than only
+      // when it dies.
+      if (!tokens.refreshToken) {
+        Sentry.captureMessage('[buffer] connected without a refresh token: this connection will end within the hour', {
+          level: 'error',
+          tags: { buffer: 'connect-without-refresh-token' },
+          extra: { userId: pending.userId, scope: tokens.scope },
+        });
+      }
       // Kept only when there's no choice to make; otherwise the page asks.
       const organizations = await listOrganizations(tokens.accessToken);
       await saveBufferConnection(pending.userId, tokens, organizations.length === 1 ? organizations[0].id : null);

@@ -211,7 +211,7 @@ export async function usableAccessToken(userId: string): Promise<string> {
     // grant is gone, so clear it and ask them to reconnect rather than looping. Reported, so a
     // connection that keeps dying is seen instead of looking like a user who never connected.
     if (error instanceof BufferError && (error.status === 400 || error.status === 401)) {
-      reportLostConnection(userId, `refresh refused: ${error.message}`);
+      reportLostConnection(userId, `refresh refused (HTTP ${error.status}): ${error.message}`);
       await clearBufferConnection(userId);
       throw new BufferNotConnectedError('Buffer refused the connection. Reconnect to continue.');
     }
@@ -227,8 +227,9 @@ export async function usableAccessToken(userId: string): Promise<string> {
   }
 
   if (!tokens.refreshToken) {
-    // Buffer says every refresh returns a new one. Without it this connection dies at the next
-    // expiry, an hour from now, so say so now rather than then.
+    // Buffer says every refresh returns a new one. When it doesn't, the one we sent is kept
+    // rather than overwritten with nothing: nothing guarantees the connection dies at the next
+    // expiry, an hour later, while the old token may well still work. Reported either way.
     Sentry.captureMessage('[buffer] a refresh returned no new refresh token', {
       level: 'error',
       tags: { buffer: 'refresh-without-token' },
@@ -239,7 +240,7 @@ export async function usableAccessToken(userId: string): Promise<string> {
     .from('buffer_connections')
     .update({
       access_token_encrypted: encryptCredential(tokens.accessToken),
-      refresh_token_encrypted: tokens.refreshToken ? encryptCredential(tokens.refreshToken) : null,
+      refresh_token_encrypted: encryptCredential(tokens.refreshToken ?? connection.refreshToken),
       expires_at: tokens.expiresAt.toISOString(),
       refresh_claimed_at: null,
       updated_at: new Date().toISOString(),

@@ -219,7 +219,7 @@ describe('usableAccessToken', () => {
     });
     expect(table).toBeNull();
     expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('connection dropped'), expect.objectContaining({
-      extra: expect.objectContaining({ reason: expect.stringContaining('invalid_grant') }),
+      extra: expect.objectContaining({ reason: 'refresh refused (HTTP 400): invalid_grant' }),
     }));
   });
 
@@ -239,10 +239,13 @@ describe('usableAccessToken', () => {
     expect(table).not.toBeNull();
   });
 
-  it('reports a refresh that came back without a new refresh token, before it costs the connection', async () => {
+  // Overwriting the stored refresh token with nothing would end the connection at the next expiry,
+  // an hour later, for certain. Keeping the one sent at least gives it a chance.
+  it('keeps the refresh token it sent when Buffer returns no new one, and reports it', async () => {
     refreshTokens.mockResolvedValue(fresh('new-access', null));
     fakeTable(expired());
     expect(await usableAccessToken('user-1')).toBe('new-access');
+    expect(table).toMatchObject({ access_token_encrypted: 'enc(new-access)', refresh_token_encrypted: 'enc(stored-refresh)' });
     expect(captureMessage).toHaveBeenCalledWith(expect.stringContaining('no new refresh token'), expect.anything());
   });
 });
