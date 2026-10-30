@@ -159,6 +159,42 @@ describe('usableAccessToken', () => {
     expect(table).not.toBeNull();
   });
 
+  // The same bug, one step later (2026-10-30): a request that read the row AFTER the first one's
+  // claim saw the counter already moved and the token still stale, won a claim of its own, and
+  // sent the old refresh token again. A deploy's slow first request widens that window.
+  it('makes a request that arrives during someone else’s refresh wait for it, not refresh again', async () => {
+    let finish!: (tokens: ReturnType<typeof fresh>) => void;
+    refreshTokens.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    fakeTable(expired());
+
+    const first = usableAccessToken('user-1');
+    await vi.waitFor(() => expect(refreshTokens).toHaveBeenCalledTimes(1));
+    // The first request has claimed and is waiting on Buffer. The second reads the row only now.
+    const second = usableAccessToken('user-1');
+    await new Promise(resolve => setTimeout(resolve, 20));
+    finish(fresh());
+
+    expect(await Promise.all([first, second])).toEqual(['new-access', 'new-access']);
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+    expect(table).toMatchObject({ refresh_token_encrypted: 'enc(new-refresh)', refresh_claimed_at: null });
+  });
+
+  // A request that claimed and then died (a function killed mid-refresh) mustn't block the
+  // connection for good: once its claim is old, the next request may claim again.
+  it('lets a request claim again once an earlier claim is long past', async () => {
+    refreshTokens.mockResolvedValue(fresh());
+    fakeTable(row({ expires_at: new Date(Date.now() - 1).toISOString(), refresh_claimed_at: new Date(Date.now() - 5 * 60_000).toISOString() }));
+    expect(await usableAccessToken('user-1')).toBe('new-access');
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases its claim when Buffer couldn’t be reached, so the next request can try', async () => {
+    refreshTokens.mockRejectedValue(new BufferError(503, 'Service unavailable'));
+    fakeTable(expired());
+    await expect(usableAccessToken('user-1')).rejects.toMatchObject({ status: 503 });
+    expect(table).toMatchObject({ refresh_claimed_at: null });
+  });
+
   it('gives up waiting for someone else’s refresh without touching the connection', async () => {
     vi.useFakeTimers();
     blockClaims = true;
