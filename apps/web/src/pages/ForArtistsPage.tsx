@@ -18,7 +18,7 @@ import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 const PAGE_TITLE = 'Unstream for artists';
 const PAGE_DESCRIPTION =
-  'The best free promo & patronage toolkit for indie artists. Claim your page, take tips, and send fans to wherever you earn the most.';
+  'The best free promo & patronage toolkit for independent musicians. Claim your page, take tips, and send fans to wherever you earn the most.';
 
 type Accent = 'primary' | 'secondary' | 'tertiary';
 
@@ -156,8 +156,8 @@ export function ForArtistsPage() {
         <div className="max-w-4xl mx-auto">
           <section className="pt-10 pb-12 md:pt-14" aria-labelledby="for-artists-heading">
             <p className="text-link font-bold text-xs uppercase tracking-widest mb-3">Unstream for artists</p>
-            <h1 id="for-artists-heading" className="font-display text-4xl md:text-6xl font-extrabold text-text-primary leading-none mb-4 max-w-3xl">
-              The best free promo &amp; patronage toolkit for indie artists
+            <h1 id="for-artists-heading" className="font-display text-4xl md:text-6xl font-extrabold text-text-primary leading-none mb-4">
+              The best free promo &amp; patronage toolkit for independent musicians
             </h1>
             <p className="text-text-secondary text-lg max-w-2xl mb-6">
               Send fans to wherever you earn the most, take tips, and keep your music in front of people, so you can
