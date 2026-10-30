@@ -45,6 +45,8 @@ export interface BufferTokens {
   /** Absent only if Buffer declined offline_access, which would be a misconfiguration. */
   refreshToken: string | null;
   expiresAt: Date;
+  /** The scopes Buffer granted, space-separated, when it says: what to check when no refresh token came. */
+  scope: string | null;
 }
 
 export function bufferOAuthConfigured(): boolean {
@@ -102,6 +104,7 @@ interface TokenResponse {
   access_token?: string;
   refresh_token?: string;
   expires_in?: number;
+  scope?: string;
   error?: string;
   error_description?: string;
 }
@@ -133,6 +136,7 @@ async function tokenRequest(params: Record<string, string>): Promise<BufferToken
     // Buffer gives a lifetime, not a deadline. Treat a missing one as already expired rather
     // than guessing an hour: an over-long guess means calls that fail at Buffer instead of here.
     expiresAt: new Date(Date.now() + (json.expires_in ?? 0) * 1000),
+    scope: json.scope ?? null,
   };
 }
 

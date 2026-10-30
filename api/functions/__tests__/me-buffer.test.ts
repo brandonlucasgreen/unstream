@@ -67,6 +67,7 @@ vi.mock('../../lib/sentry', () => ({
 }));
 
 const { handler } = await import('../me-buffer');
+const { Sentry } = await import('../../lib/sentry');
 
 type Res = { statusCode: number; headers: Record<string, string>; body: string };
 
@@ -139,6 +140,20 @@ describe('the gate', () => {
     expect(res.statusCode).toBe(302);
     expect(res.headers.Location).toMatch(/\/curator\/new\?buffer=connected$/);
     expect(saveBufferConnection).toHaveBeenCalledWith('u1', expect.anything(), 'org_1');
+  });
+
+  // A connection without a refresh token ends when its first access token does, an hour later.
+  it('connects, but reports at once when Buffer granted no refresh token, with the scopes it did grant', async () => {
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v' });
+    exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: null, expiresAt: new Date(), scope: 'posts:write account:read' });
+    listOrganizations.mockResolvedValue([{ id: 'org_1', name: 'Mine' }]);
+
+    const res = await call('GET', '/callback', '?state=s&code=c');
+    expect(res.headers.Location).toMatch(/buffer=connected$/);
+    expect(Sentry.captureMessage).toHaveBeenCalledWith(
+      expect.stringContaining('without a refresh token'),
+      expect.objectContaining({ extra: { userId: 'u1', scope: 'posts:write account:read' } }),
+    );
   });
 
   // Release autopost pauses when the connection is lost; reconnecting is all it should take.
