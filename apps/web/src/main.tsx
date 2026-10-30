@@ -42,6 +42,7 @@ const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
 const ArtistPromotePage = lazyWithRetry(() => import('./pages/ArtistPromotePage.tsx').then(m => ({ default: m.ArtistPromotePage })))
+const PromoteTabsLayout = lazyWithRetry(() => import('./components/PromoteTabs.tsx').then(m => ({ default: m.PromoteTabsLayout })))
 // One frame per page an artist manages from /my-artists, each knowing which page it is.
 const loadSettingsLayout = () => import('./pages/ArtistSettingsLayout.tsx')
 const EditProfileLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="profile" /> })))
@@ -155,7 +156,10 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<ArtistTipsPage />} />
               </Route>
               <Route path="/promote/:slug" element={<PromoteLayout />}>
-                <Route index element={<ArtistPromotePage />} />
+                {/* One tab per promotion tool; Autopost is the page itself (PromoteTabs.tsx). */}
+                <Route element={<PromoteTabsLayout />}>
+                  <Route index element={<ArtistPromotePage />} />
+                </Route>
               </Route>
               <Route path="/artist-edit/:slug/releases" element={<RedirectToReleases />} />
               <Route path="/artist-edit/:slug/tips" element={<RedirectToTips />} />

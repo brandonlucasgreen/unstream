@@ -308,7 +308,7 @@ Already built and merged (#697–#708):
 
 ## UI: the Promote page
 
-**Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
+**Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. **Tabs along its top, one per promotion tool** (Brandon, 2026-10-30; `PromoteTabs.tsx`): Autopost, at `/promote/:slug` itself, is the only one so far. Custom images for autopost, on-demand social cards and the embeddable widget are expected as tabs of their own, each at a path below it. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
 
 1. **Where it posts:** connect Buffer, choose the organization (already chosen when there's only one), tick channels. Ticking Instagram explains its image rule. **The on/off switch sits at the top of this section** (Brandon, 2026-10-29), shown once Buffer has a channel autopost can use. It saves the moment it's flipped and says in words what each position means: on, posts go to Buffer; off, nothing more does, **nothing is saved as a draft**, and the settings are kept.
    - **New to Buffer:** before connecting, the page says an account can be made on Buffer's own screen, and that social accounts have to be connected in Buffer.

@@ -18,7 +18,8 @@ import {
 } from '../services/promote';
 
 // /promote/:slug — release autopost (docs/specs/release-autopost-spec.md, "UI: the Promote
-// page"), reached from the Promote button on /my-artists and rendered inside ArtistSettingsLayout.
+// page"), reached from the Promote button on /my-artists and rendered inside ArtistSettingsLayout,
+// as the Autopost tab of the Promote page's tools (components/PromoteTabs.tsx).
 // Its own page rather than a tab under Edit, because it isn't about the artist's profile (Brandon,
 // 2026-10-29). Admin-only while the releaseAutopost flag is off: the server answers
 // { available: false } to anyone else.
