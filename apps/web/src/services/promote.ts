@@ -32,7 +32,28 @@ export type PromoteBuffer =
   | { connected: false }
   | { connected: true; organizations: { id: string; name: string }[]; organizationId: string | null; channels: PromoteChannel[] };
 
-export interface ComingUpPost {
+/** One channel's copy of a post in Buffer. */
+export interface PromoteChannelState {
+  channelId: string;
+  service: string;
+  /**
+   * Buffer's own status (scheduled, sending, sent, error, draft, needs_approval), 'missing' when
+   * Buffer no longer has it, or 'unknown' when Buffer couldn't be asked just now.
+   */
+  status: string;
+  dueAt: string | null;
+  link: string | null;
+  error: string | null;
+}
+
+/** Where a post stands: see api/functions/autopost-schedule-view.ts. */
+export type PromotePostState =
+  | { is: 'planned'; toBufferAt: string; lastError: string | null }
+  | { is: 'sending' }
+  | { is: 'failed'; error: string | null }
+  | { is: 'in_buffer'; channels: PromoteChannelState[]; skipped: string | null };
+
+export interface ScheduledPost {
   at: string;
   date: string;
   kind: AutopostKind;
@@ -41,15 +62,14 @@ export interface ComingUpPost {
   imageOnInstagram: boolean;
   /** As it reads on the networks other than Instagram; null when no template could be filled. */
   text: string | null;
+  state: PromotePostState;
 }
 
-export interface RecentPost {
-  slotAt: string;
-  kind: AutopostKind;
-  releaseTitle: string | null;
-  status: 'pushing' | 'pushed' | 'failed';
-  error: string | null;
-  channels: number;
+/** What the page polls: the parts that change without the artist doing anything. */
+export interface PromoteSchedule {
+  pausedReason: string | null;
+  comingUp: ScheduledPost[];
+  recent: ScheduledPost[];
 }
 
 export type PromotePage =
@@ -64,8 +84,8 @@ export type PromotePage =
     takesTips: boolean;
     previewRelease: TemplateRelease | null;
     buffer: PromoteBuffer;
-    comingUp: ComingUpPost[];
-    recent: RecentPost[];
+    comingUp: ScheduledPost[];
+    recent: ScheduledPost[];
   };
 
 export class PromoteApiError extends Error {
@@ -95,6 +115,10 @@ async function call<T>(token: string, url: string, init: RequestInit = {}): Prom
 
 export function getPromotePage(token: string, slug: string): Promise<PromotePage> {
   return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`);
+}
+
+export function getPromoteSchedule(token: string, slug: string): Promise<PromoteSchedule> {
+  return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}&part=schedule`);
 }
 
 export type PromoteSettingsInput = Omit<PromoteSettings, 'enabledAt' | 'pausedReason'>;

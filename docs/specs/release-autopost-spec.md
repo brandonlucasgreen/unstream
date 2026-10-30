@@ -317,8 +317,8 @@ Already built and merged (#697–#708):
 
 2. **How often:** a slider from 1 to 7 a week, starting on the recommendation and marked as recommended there. Landing back on it stores "Recommended", which grows with the catalog. **Posting time:** "Pick days & times for me", which is Buffer's queue (the default), or a set time.
 3. **What to say:** each kind with a switch, and its wording folded away until opened: editable variants, each with a live preview against the newest release, and mistakes flagged as they're typed.
-4. **Coming up:** the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it.
-5. **Sent to Buffer:** the latest posts handed over, with anything a channel refused.
+4. **Coming up:** today and the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it. Each post says where it stands: not in Buffer yet (and when it goes there), sending, never reached Buffer, or in Buffer with each channel's own status read back from Buffer by the autopost tag (scheduled for when, posted with a link, failed and why, a draft, waiting for approval, no longer there), plus any channel it skipped. Built by `autopost-schedule-view.ts`; while the page is in view it reads `?part=schedule` again every two minutes and on returning to the tab.
+5. **Recent:** the last two weeks of posts, newest first, with the same status.
 
 Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked, campaigns, and a one-line summary on the `/my-artists` card.
 

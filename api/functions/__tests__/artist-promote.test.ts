@@ -14,7 +14,9 @@ const mocks = vi.hoisted(() => {
     saveAutopostSettings: vi.fn(),
     getAutopostReleases: vi.fn(),
     getAutopostHistory: vi.fn(),
-    getRecentAutopostPosts: vi.fn(),
+    getAutopostSlotsSince: vi.fn(),
+    findTagId: vi.fn(),
+    listTaggedPosts: vi.fn(),
     usableAccessToken: vi.fn(),
     listOrganizations: vi.fn(),
     listChannels: vi.fn(),
@@ -35,10 +37,16 @@ vi.mock('../release-autopost-db', () => ({
   saveAutopostSettings: mocks.saveAutopostSettings,
   getAutopostReleases: mocks.getAutopostReleases,
   getAutopostHistory: mocks.getAutopostHistory,
-  getRecentAutopostPosts: mocks.getRecentAutopostPosts,
+  getAutopostSlotsSince: mocks.getAutopostSlotsSince,
+  MAX_ATTEMPTS: 3,
 }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
-vi.mock('../buffer-client', () => ({ listOrganizations: mocks.listOrganizations, listChannels: mocks.listChannels }));
+vi.mock('../buffer-client', () => ({
+  listOrganizations: mocks.listOrganizations,
+  listChannels: mocks.listChannels,
+  findTagId: mocks.findTagId,
+  listTaggedPosts: mocks.listTaggedPosts,
+}));
 vi.mock('../feature-flags', () => ({ getFeatureFlag: mocks.getFeatureFlag }));
 vi.mock('../tips-db', () => ({ getTipsLiveSlugs: mocks.getTipsLiveSlugs }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: vi.fn(), captureMessage: vi.fn() }, withSentry: (h: unknown) => h }));
@@ -83,7 +91,9 @@ beforeEach(() => {
   mocks.getAutopostSettings.mockResolvedValue(null);
   mocks.getAutopostReleases.mockResolvedValue([release]);
   mocks.getAutopostHistory.mockResolvedValue([]);
-  mocks.getRecentAutopostPosts.mockResolvedValue([]);
+  mocks.getAutopostSlotsSince.mockResolvedValue([]);
+  mocks.findTagId.mockResolvedValue('tag_auto');
+  mocks.listTaggedPosts.mockResolvedValue([]);
   mocks.usableAccessToken.mockResolvedValue('token');
   mocks.listOrganizations.mockResolvedValue([{ id: 'org_mine', name: 'Cult of Lightbulbs' }]);
   mocks.listChannels.mockResolvedValue([
@@ -152,6 +162,73 @@ describe('GET', () => {
   it('doesn’t hand a new owner the previous owner’s settings', async () => {
     mocks.getAutopostSettings.mockResolvedValue({ ...validBody, artistId: 'a1', userId: 'old-owner', enabledAt: '2026-11-01T00:00:00Z', kindsOff: [], pausedReason: null });
     expect(json(await call('GET')).settings).toMatchObject({ enabled: false, organizationId: null });
+  });
+});
+
+describe('where each post stands', () => {
+  const settings = { ...validBody, artistId: 'a1', userId: 'u1', enabledAt: '2026-11-01T00:00:00Z', kindsOff: [], pausedReason: null };
+  const pushed = {
+    slotAt: '2026-11-12T15:00:00.000Z', slotDate: '2026-11-12', kind: 'catalogue', releaseId: 'r1', templateIndex: 0,
+    imageKey: 'cover:r1', imageOnInstagram: true, status: 'pushed', attempts: 1,
+    error: 'threads: every posting time in its Buffer schedule on 2026-11-12 has passed',
+    bufferPostIds: [{ channelId: 'bsky', postId: 'p1' }],
+    captions: { bsky: { service: 'bluesky', text: 'What was actually sent', imageUrl: 'https://cards.unstream.stream/autopost/x.jpg' } },
+  };
+
+  beforeEach(() => mocks.getAutopostSettings.mockResolvedValue(settings));
+
+  it('shows a post in Buffer with what was sent and Buffer’s own status for each channel', async () => {
+    mocks.getAutopostSlotsSince.mockResolvedValue([pushed]);
+    mocks.listTaggedPosts.mockResolvedValue([
+      { id: 'p1', channelId: 'bsky', status: 'scheduled', dueAt: '2026-11-12T15:00:00.000Z', sentAt: null, externalLink: null, error: null },
+    ]);
+    const page = json(await call('GET'));
+    expect(page.comingUp[0]).toMatchObject({
+      date: '2026-11-12',
+      text: 'What was actually sent',
+      imageUrl: 'https://cards.unstream.stream/autopost/x.jpg',
+      state: {
+        is: 'in_buffer',
+        skipped: pushed.error,
+        channels: [{ channelId: 'bsky', service: 'bluesky', status: 'scheduled', dueAt: '2026-11-12T15:00:00.000Z' }],
+      },
+    });
+    expect(mocks.findTagId).toHaveBeenCalledWith('token', 'org_mine', 'unstream: release autopost');
+    // Since the start of "Recent", in the artist's timezone.
+    expect(mocks.listTaggedPosts).toHaveBeenCalledWith('token', 'org_mine', 'tag_auto', '2026-10-28T04:00:00.000Z');
+  });
+
+  it('reads the Buffer token once, however many Buffer reads the page makes', async () => {
+    mocks.getAutopostSlotsSince.mockResolvedValue([pushed]);
+    await call('GET');
+    expect(mocks.usableAccessToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('doesn’t ask Buffer about posts when none are in it', async () => {
+    await call('GET');
+    expect(mocks.findTagId).not.toHaveBeenCalled();
+  });
+
+  it('still shows the page when Buffer can’t say where posts stand', async () => {
+    mocks.getAutopostSlotsSince.mockResolvedValue([pushed]);
+    mocks.listTaggedPosts.mockRejectedValue(new Error('Buffer 503'));
+    const page = json(await call('GET'));
+    expect(page.comingUp[0].state.channels[0].status).toBe('unknown');
+  });
+
+  it('answers the poll with only the schedule, without asking Buffer for organizations or channels', async () => {
+    mocks.getAutopostSlotsSince.mockResolvedValue([{ ...pushed, slotAt: '2026-11-05T15:00:00.000Z', slotDate: '2026-11-05' }]);
+    const res = await handler({
+      httpMethod: 'GET',
+      headers: { authorization: 'Bearer t' },
+      queryStringParameters: { artist: 'kid-lightbulbs', part: 'schedule' },
+      body: null,
+    } as never) as Res;
+    const body = json(res);
+    expect(Object.keys(body).sort()).toEqual(['comingUp', 'pausedReason', 'recent']);
+    expect(body.recent[0]).toMatchObject({ date: '2026-11-05', state: { is: 'in_buffer' } });
+    expect(mocks.listOrganizations).not.toHaveBeenCalled();
+    expect(mocks.listChannels).not.toHaveBeenCalled();
   });
 });
 

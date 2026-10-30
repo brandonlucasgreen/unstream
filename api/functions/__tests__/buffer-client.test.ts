@@ -13,7 +13,9 @@ import {
   createContentItem,
   createPost,
   ensureTag,
+  findTagId,
   listChannels,
+  listTaggedPosts,
 } from '../buffer-client';
 
 /** Each curator posts from their own token, so every call carries one explicitly. */
@@ -157,6 +159,46 @@ describe('ensureTag', () => {
       .mockResolvedValueOnce(ok({ createTag: { message: 'Tag limit reached' } }));
 
     await expect(ensureTag(TOKEN, 'org_1', 'unstream: curator', '#FF702C')).rejects.toThrow('Tag limit reached');
+  });
+});
+
+describe('findTagId', () => {
+  it('is null, and creates nothing, when the organization has no tag by that name', async () => {
+    fetchMock.mockResolvedValueOnce(ok({ tagsV2: { pageInfo: { hasNextPage: false, endCursor: null }, edges: [] } }));
+    await expect(findTagId(TOKEN, 'org_1', 'unstream: release autopost')).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('listTaggedPosts', () => {
+  const node = (id: string, error: string | null = null) => ({
+    id, channelId: 'ch_1', status: error ? 'error' : 'sent', dueAt: '2026-10-30T20:00:00Z', sentAt: null,
+    externalLink: error ? null : `https://threads.net/${id}`, error: error ? { message: error } : null,
+  });
+  const page = (ids: string[], hasNextPage = false, endCursor: string | null = null) =>
+    ok({ posts: { pageInfo: { hasNextPage, endCursor }, edges: ids.map(id => ({ node: node(id) })) } });
+
+  it('asks for the tag’s posts since a date, and flattens Buffer’s error to its message', async () => {
+    fetchMock.mockResolvedValueOnce(ok({ posts: { pageInfo: { hasNextPage: false, endCursor: null }, edges: [{ node: node('p1', 'Token expired') }] } }));
+    const posts = await listTaggedPosts(TOKEN, 'org_1', 'tag_1', '2026-10-16T04:00:00.000Z');
+
+    expect(posts).toEqual([{ ...node('p1'), status: 'error', externalLink: null, error: 'Token expired' }]);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).variables.input).toEqual({
+      organizationId: 'org_1',
+      filter: { tagIds: ['tag_1'], startDate: '2026-10-16T04:00:00.000Z' },
+    });
+  });
+
+  it('follows pages, up to a limit', async () => {
+    fetchMock
+      .mockResolvedValueOnce(page(['p1'], true, 'c1'))
+      .mockResolvedValueOnce(page(['p2'], true, 'c2'))
+      .mockResolvedValueOnce(page(['p3'], true, 'c3'));
+    const posts = await listTaggedPosts(TOKEN, 'org_1', 'tag_1', '2026-10-16T04:00:00.000Z');
+
+    expect(posts.map(p => p.id)).toEqual(['p1', 'p2', 'p3']);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body).variables.after).toBe('c2');
   });
 });
 

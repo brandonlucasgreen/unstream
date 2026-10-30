@@ -4,14 +4,17 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { KIND_COPY, PromoteTemplatesEditor } from '../components/PromoteTemplatesEditor';
+import { PromotePostStatus } from '../components/PromotePostStatus';
 import { isImageFirstNetwork, networkName } from '../../../../api/shared/autopost-networks';
 import {
   getPromotePage,
+  getPromoteSchedule,
   PromoteApiError,
   savePromoteSettings,
   startBufferConnection,
   type PromotePage,
   type PromoteSettingsInput,
+  type ScheduledPost,
 } from '../services/promote';
 
 // /promote/:slug — release autopost (docs/specs/release-autopost-spec.md, "UI: the Promote
@@ -21,9 +24,18 @@ import {
 // { available: false } to anyone else.
 //
 // The settings are edited here and saved together; "Coming up" is the server's plan from the
-// saved settings, so it's exactly what will post, and it refreshes on every save.
+// saved settings, so it's exactly what will post, and it refreshes on every save. Each post says
+// where it stands (not in Buffer yet, scheduled there, posted, failed), and since that changes on
+// its own, "Coming up" and "Recent" are polled while the page is in view (SCHEDULE_POLL_MS).
 
 type Loaded = Extract<PromotePage, { available: true }>;
+
+/**
+ * How often "Coming up" and "Recent" are read again while the page is in view, and on coming back
+ * to the tab. Each read is a rate-limit command and two Buffer calls, so not every few seconds:
+ * the sweep only runs every six hours, and Buffer's own statuses change at posting times.
+ */
+const SCHEDULE_POLL_MS = 2 * 60_000;
 
 const SECTION = 'space-y-3 rounded-xl border border-border bg-bg-secondary/40 p-4';
 const PRIMARY_BUTTON = 'px-3 py-2 text-sm rounded-lg bg-accent-primary text-accent-foreground disabled:opacity-50';
@@ -139,6 +151,47 @@ export function ArtistPromotePage() {
     if (p.available) setForm(inputFrom(p));
   }
 
+  // Polling the schedule. A poll never overlaps a save or a refresh, and its answer is dropped if
+  // one happened meanwhile: theirs is newer, from the settings just saved.
+  const busyRef = useRef(false);
+  const writes = useRef(0);
+  const pollReported = useRef(false);
+  const loaded = page?.available === true;
+  useEffect(() => {
+    if (!loaded || !slug) return;
+    let inFlight = false;
+    const poll = async () => {
+      const token = tokenRef.current;
+      if (document.visibilityState !== 'visible' || inFlight || busyRef.current || !token) return;
+      inFlight = true;
+      const seen = writes.current;
+      try {
+        const s = await getPromoteSchedule(token, slug);
+        if (writes.current !== seen) return;
+        setPage(p => (p?.available
+          ? { ...p, comingUp: s.comingUp, recent: s.recent, settings: { ...p.settings, pausedReason: s.pausedReason } }
+          : p));
+      } catch (err) {
+        // The next poll tries again; reported once per visit, so a page left open on a bad day
+        // doesn't send Sentry an event every two minutes.
+        if (!pollReported.current) {
+          pollReported.current = true;
+          Sentry.captureException(err, { extra: { context: 'ArtistPromotePage.poll', slug } });
+        }
+      } finally {
+        inFlight = false;
+      }
+    };
+    const timer = window.setInterval(poll, SCHEDULE_POLL_MS);
+    const onVisible = () => { if (document.visibilityState === 'visible') void poll(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [loaded, slug]);
+  busyRef.current = busy;
+
   if (!slug) return null;
   if (loadError) return <p className="text-sm text-error">{loadError}</p>;
   if (!page || !session) return <TabSkeleton label="Loading" />;
@@ -151,6 +204,7 @@ export function ArtistPromotePage() {
   };
 
   const save = async (next: PromoteSettingsInput = form) => {
+    writes.current++;
     setBusy(true);
     setSaveError(null);
     setProblems(undefined);
@@ -175,6 +229,7 @@ export function ArtistPromotePage() {
 
   // After connecting accounts in Buffer: read the channels again, keeping any unsaved edits.
   const refresh = async () => {
+    writes.current++;
     setBusy(true);
     try {
       const fresh = await getPromotePage(token, slug);
@@ -211,6 +266,8 @@ export function ArtistPromotePage() {
   // is connected with a channel autopost can use, it stays hidden (Brandon, 2026-10-29).
   const ready = buffer.connected && Boolean(form.organizationId) && form.organizationId === buffer.organizationId
     && buffer.channels.some(c => c.supported);
+
+  const posting = !page.settings.enabled ? 'off' : page.settings.pausedReason ? 'paused' : 'on';
 
   // The switch saves straight away, with whatever else is on the page: a switch that needed a
   // separate Save would look on while doing nothing.
@@ -422,23 +479,7 @@ export function ArtistPromotePage() {
             <p className="text-sm text-text-secondary">Nothing to post in the next four weeks.</p>
           ) : (
             <ol className="space-y-3">
-              {page.comingUp.map(post => (
-                <li key={post.at} className="flex gap-3">
-                  {post.imageUrl ? (
-                    <img src={post.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover bg-bg-secondary" />
-                  ) : (
-                    <div className="h-14 w-14 shrink-0 rounded bg-bg-secondary" aria-hidden="true" />
-                  )}
-                  <div className="min-w-0 space-y-0.5">
-                    <p className="text-xs text-text-muted">
-                      {formatDay(post.date)} · {KIND_COPY[post.kind].label}
-                      {post.release ? ` · ${post.release.title}` : ''}
-                      {imageFirstTicked.length > 0 && !post.imageOnInstagram ? ` · skips ${imageFirstTicked.join(' and ')}` : ''}
-                    </p>
-                    <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
-                  </div>
-                </li>
-              ))}
+              {page.comingUp.map(post => <ScheduledPostItem key={post.at} post={post} imageFirstTicked={imageFirstTicked} posting={posting} />)}
             </ol>
           )}
         </section>
@@ -452,22 +493,41 @@ export function ArtistPromotePage() {
 
       {page.recent.length > 0 && (
         <section className={SECTION} aria-labelledby="promote-recent">
-          <h3 id="promote-recent" className="font-medium text-text-primary">Sent to Buffer</h3>
-          <ul className="space-y-2 text-sm">
-            {page.recent.map(post => (
-              <li key={post.slotAt}>
-                <span className="text-text-secondary">{formatDay(post.slotAt.slice(0, 10))} · {KIND_COPY[post.kind].label}{post.releaseTitle ? ` · ${post.releaseTitle}` : ''}</span>
-                {' '}
-                <span className={post.status === 'failed' ? 'text-error' : 'text-text-muted'}>
-                  {post.status === 'pushed' ? `in Buffer on ${post.channels} channel${post.channels === 1 ? '' : 's'}` : post.status === 'failed' ? 'didn’t reach Buffer' : 'sending'}
-                </span>
-                {post.error && <span className="block text-xs text-text-muted">{post.error}</span>}
-              </li>
-            ))}
-          </ul>
+          <h3 id="promote-recent" className="font-medium text-text-primary">Recent</h3>
+          <ol className="space-y-3">
+            {page.recent.map(post => <ScheduledPostItem key={post.at} post={post} imageFirstTicked={[]} posting={posting} />)}
+          </ol>
         </section>
       )}
     </div>
+  );
+}
+
+/** One post in "Coming up" or "Recent": what it says, and where it stands. */
+function ScheduledPostItem({ post, imageFirstTicked, posting }: {
+  post: ScheduledPost;
+  imageFirstTicked: string[];
+  posting: 'on' | 'off' | 'paused';
+}) {
+  // Once it's in Buffer, which channels it went to is in its status instead.
+  const skips = post.state.is !== 'in_buffer' && imageFirstTicked.length > 0 && !post.imageOnInstagram;
+  return (
+    <li className="flex gap-3">
+      {post.imageUrl ? (
+        <img src={post.imageUrl} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded object-cover bg-bg-secondary" />
+      ) : (
+        <div className="h-14 w-14 shrink-0 rounded bg-bg-secondary" aria-hidden="true" />
+      )}
+      <div className="min-w-0 space-y-1">
+        <p className="text-xs text-text-muted">
+          {formatDay(post.date)} · {KIND_COPY[post.kind].label}
+          {post.release ? ` · ${post.release.title}` : ''}
+          {skips ? ` · skips ${imageFirstTicked.join(' and ')}` : ''}
+        </p>
+        <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
+        <PromotePostStatus state={post.state} posting={posting} />
+      </div>
+    </li>
   );
 }
 

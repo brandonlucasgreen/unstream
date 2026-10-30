@@ -4,11 +4,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import type { PromotePage } from 'src/services/promote';
+import type { PromotePage, ScheduledPost } from 'src/services/promote';
 
 type FakeSession = null | { access_token: string; user: { id: string } };
 const auth = vi.hoisted(() => ({ value: { session: { access_token: 'tok', user: { id: 'u1' } } as FakeSession, isLoading: false } }));
-const promote = vi.hoisted(() => ({ getPromotePage: vi.fn(), savePromoteSettings: vi.fn(), startBufferConnection: vi.fn() }));
+const promote = vi.hoisted(() => ({ getPromotePage: vi.fn(), getPromoteSchedule: vi.fn(), savePromoteSettings: vi.fn(), startBufferConnection: vi.fn() }));
 
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => auth.value }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -18,6 +18,7 @@ vi.mock('src/components/Footer', () => ({ Footer: () => null }));
 vi.mock('src/services/promote', async (importOriginal) => ({
   ...(await importOriginal<typeof import('src/services/promote')>()),
   getPromotePage: promote.getPromotePage,
+  getPromoteSchedule: promote.getPromoteSchedule,
   savePromoteSettings: promote.savePromoteSettings,
   startBufferConnection: promote.startBufferConnection,
 }));
@@ -44,6 +45,7 @@ const loaded = (over: Partial<Extract<PromotePage, { available: true }>> = {}): 
     at: '2026-11-13T15:00:00.000Z', date: '2026-11-13', kind: 'catalogue',
     release: { title: 'Ruined Castle', slug: 'ruined-castle' }, imageUrl: null, imageOnInstagram: true,
     text: 'From the archives: Ruined Castle (2024). It’s on Bandcamp: https://unstream.stream/a/kid-lightbulbs/ruined-castle',
+    state: { is: 'planned', toBufferAt: '2026-11-10T15:00:00.000Z', lastError: null },
   }],
   recent: [],
   ...over,
@@ -233,5 +235,91 @@ describe('ArtistPromotePage', () => {
     expect(within(comingUp).getByText(/From the archives: Ruined Castle \(2024\)\. It’s on Bandcamp/)).toBeTruthy();
     // The date is in the browser's own format, so only the rest of the line is checked.
     expect(within(comingUp).getByText((_, el) => el?.tagName === 'P' && /· From the archives · Ruined Castle$/.test(el.textContent ?? ''))).toBeTruthy();
+  });
+
+  describe('where each post stands', () => {
+    const on = { ...loaded().settings as Extract<PromotePage, { available: true }>['settings'], enabled: true, organizationId: 'org1', channelIds: ['ig'] };
+    const post = (over: Partial<ScheduledPost>): ScheduledPost => ({
+      at: '2026-10-30T04:00:00.000Z', date: '2026-10-30', kind: 'catalogue', release: { title: 'fruit is year 3 (honeycrush)', slug: 'fruit' },
+      imageUrl: null, imageOnInstagram: true, text: 'From the archives', state: { is: 'sending' }, ...over,
+    });
+
+    it('says, channel by channel, whether a post is scheduled, posted or failed in Buffer, and what it skipped', async () => {
+      promote.getPromotePage.mockResolvedValue(loaded({
+        buffer: connected,
+        settings: on,
+        comingUp: [post({
+          state: {
+            is: 'in_buffer',
+            skipped: 'threads: every posting time in its Buffer schedule on 2026-10-30 has passed',
+            channels: [
+              { channelId: 'ig', service: 'instagram', status: 'scheduled', dueAt: '2026-10-31T00:03:00.000Z', link: null, error: null },
+              { channelId: 'tt', service: 'tiktok', status: 'error', dueAt: null, link: null, error: 'Video required' },
+            ],
+          },
+        })],
+        recent: [post({
+          at: '2026-10-28T04:00:00.000Z', date: '2026-10-28',
+          state: { is: 'in_buffer', skipped: null, channels: [{ channelId: 'ig', service: 'instagram', status: 'sent', dueAt: null, link: 'https://instagram.com/p/x', error: null }] },
+        })],
+      }));
+      renderTab();
+      const comingUp = await screen.findByRole('region', { name: 'Coming up' });
+      expect(within(comingUp).getByText(/^Instagram: Scheduled for /)).toBeTruthy();
+      expect(within(comingUp).getByText('TikTok: Failed to post: Video required')).toBeTruthy();
+      expect(within(comingUp).getByText(/^Not sent everywhere: Threads: every posting time/)).toBeTruthy();
+
+      const recent = screen.getByRole('region', { name: 'Recent' });
+      expect(within(recent).getByText(/^Instagram: Posted/)).toBeTruthy();
+      expect(within(recent).getByRole('link', { name: 'View ↗' }).getAttribute('href')).toBe('https://instagram.com/p/x');
+    });
+
+    it('says when a post not yet in Buffer goes there, why the last try failed, and that one out of tries didn’t reach it', async () => {
+      promote.getPromotePage.mockResolvedValue(loaded({
+        buffer: connected,
+        settings: on,
+        comingUp: [
+          post({ at: 'a', state: { is: 'planned', toBufferAt: '2099-11-10T15:00:00.000Z', lastError: null } }),
+          post({ at: 'b', state: { is: 'planned', toBufferAt: '2020-01-01T00:00:00.000Z', lastError: 'Buffer 503' } }),
+          post({ at: 'c', state: { is: 'failed', error: 'Buffer refused the post' } }),
+        ],
+      }));
+      renderTab();
+      const comingUp = await screen.findByRole('region', { name: 'Coming up' });
+      expect(within(comingUp).getByText(/^Not in Buffer yet · goes to Buffer (?!within)/)).toBeTruthy();
+      expect(within(comingUp).getByText('Not in Buffer yet · goes to Buffer within the next six hours')).toBeTruthy();
+      expect(within(comingUp).getByText('The last try didn’t reach Buffer, so it will try again: Buffer 503')).toBeTruthy();
+      expect(within(comingUp).getByText('Didn’t reach Buffer: Buffer refused the post')).toBeTruthy();
+    });
+
+    it('promises nothing about Buffer while autopost is off', async () => {
+      promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected }));
+      renderTab();
+      const comingUp = await screen.findByRole('region', { name: 'Coming up' });
+      expect(within(comingUp).queryByText(/Not in Buffer yet/)).toBeNull();
+    });
+
+    it('reads the schedule again every two minutes while the page is in view, keeping unsaved edits', async () => {
+      vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+      try {
+        promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected, settings: on }));
+        promote.getPromoteSchedule.mockResolvedValue({
+          pausedReason: null,
+          comingUp: [post({ state: { is: 'in_buffer', skipped: null, channels: [{ channelId: 'ig', service: 'instagram', status: 'sent', dueAt: null, link: null, error: null }] } })],
+          recent: [],
+        });
+        renderTab();
+        const slider = await screen.findByRole('slider');
+        fireEvent.change(slider, { target: { value: '5' } });
+
+        vi.advanceTimersByTime(2 * 60_000);
+        const comingUp = screen.getByRole('region', { name: 'Coming up' });
+        await waitFor(() => expect(within(comingUp).getByText('Instagram: Posted')).toBeTruthy());
+        expect(promote.getPromoteSchedule).toHaveBeenCalledWith('tok', 'kid-lightbulbs');
+        expect((screen.getByRole('slider') as HTMLInputElement).value).toBe('5');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });

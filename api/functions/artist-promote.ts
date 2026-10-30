@@ -2,7 +2,10 @@
 // Promote page (/promote/:slug). docs/specs/release-autopost-spec.md, "UI: a Promote page".
 //
 //   GET /api/artist-promote?artist={slug}   settings, the Buffer channels to choose from,
-//                                            "Coming up" and the latest posts handed to Buffer
+//                                            "Coming up" and "Recent", each post with where it stands
+//   GET /api/artist-promote?artist={slug}&part=schedule
+//                                            only "Coming up" and "Recent": what the page polls, so
+//                                            it doesn't ask Buffer for organizations and channels
 //   PUT /api/artist-promote?artist={slug}   save the settings, whole
 //
 // Two checks, both on every request: the feature gate (`canUseReleaseAutopost`, admin-only while
@@ -18,17 +21,19 @@ import {
   getAutopostHistory,
   getAutopostReleases,
   getAutopostSettings,
-  getRecentAutopostPosts,
+  getAutopostSlotsSince,
+  MAX_ATTEMPTS,
   saveAutopostSettings,
   type AutopostArtist,
   type AutopostRelease,
   type AutopostSettings,
 } from './release-autopost-db';
-import { planForArtist } from './release-autopost-schedule';
+import { AUTOPOST_TAG, PUSH_AHEAD_HOURS, planForArtist } from './release-autopost-schedule';
 import { isAutopostNetwork, variantsFor } from './autopost-channel-post';
-import { recommendedPostsPerWeek } from './autopost-plan';
+import { addDays, localDate, localInstant, recommendedPostsPerWeek } from './autopost-plan';
+import { buildScheduleView, type ViewSlot } from './autopost-schedule-view';
 import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { listChannels, listOrganizations } from './buffer-client';
+import { findTagId, listChannels, listOrganizations, listTaggedPosts, type BufferPostState } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import {
@@ -45,7 +50,8 @@ import { Sentry, withSentry } from '../lib/sentry';
 /** Variants an artist may keep per kind, and how long each may be. */
 const MAX_VARIANTS = 5;
 const MAX_TEMPLATE_LENGTH = 1000;
-const RECENT_POSTS = 10;
+/** How far back "Recent" looks. */
+const RECENT_DAYS = 14;
 
 interface HandlerEvent {
   httpMethod: string;
@@ -99,10 +105,24 @@ async function takesTips(slug: string): Promise<boolean> {
   return (await getTipsLiveSlugs([slug]))?.has(slug) ?? false;
 }
 
-/** The Buffer side of the page: their organizations, and the chosen one's channels. */
-async function bufferState(userId: string, organizationId: string | null) {
+/**
+ * A usable Buffer token, or null when the account isn't connected. Read once per request and
+ * shared: two reads at once could both refresh it, and Buffer revokes a connection whose refresh
+ * token is spent twice (usableAccessToken in buffer-db.ts).
+ */
+async function bufferToken(userId: string): Promise<string | null> {
   try {
-    const token = await usableAccessToken(userId);
+    return await usableAccessToken(userId);
+  } catch (error) {
+    if (error instanceof BufferNotConnectedError) return null;
+    throw error;
+  }
+}
+
+/** The Buffer side of the page: their organizations, and the chosen one's channels. */
+async function bufferState(token: string | null, organizationId: string | null) {
+  if (!token) return { connected: false as const };
+  try {
     const organizations = await listOrganizations(token);
     // Nothing to choose with a single organization, so it's offered already chosen.
     const orgId = organizations.some(o => o.id === organizationId)
@@ -118,6 +138,26 @@ async function bufferState(userId: string, organizationId: string | null) {
   } catch (error) {
     if (error instanceof BufferNotConnectedError) return { connected: false as const };
     throw error;
+  }
+}
+
+/**
+ * Where each post handed to Buffer stands there now, by Buffer post id, or null when Buffer can't
+ * be asked. Null shows as "in Buffer" without a live status rather than failing the page: the
+ * schedule itself doesn't depend on it.
+ */
+async function livePostStates(token: string | null, organizationId: string | null, since: string): Promise<Map<string, BufferPostState> | null> {
+  if (!token || !organizationId) return null;
+  try {
+    const tagId = await findTagId(token, organizationId, AUTOPOST_TAG.name);
+    // No tag yet means nothing was ever posted from this organization.
+    const posts = tagId ? await listTaggedPosts(token, organizationId, tagId, since) : [];
+    return new Map(posts.map(p => [p.id, p]));
+  } catch (error) {
+    if (!(error instanceof BufferNotConnectedError)) {
+      Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'live-post-states' } });
+    }
+    return null;
   }
 }
 
@@ -201,28 +241,47 @@ async function validatedSettings(body: Record<string, unknown>, current: Autopos
   return { settings: next };
 }
 
-/** Everything the Promote page shows. */
-async function pageState(artist: AutopostArtist, settings: AutopostSettings, saved: boolean) {
-  const now = new Date();
-  const [releases, history, recent, tips, buffer] = await Promise.all([
-    getAutopostReleases(artist.id),
+/** "Coming up" and "Recent": the plan, what the sweep has handed to Buffer, and where each post stands there. */
+async function scheduleState(
+  artist: AutopostArtist,
+  settings: AutopostSettings,
+  token: string | null,
+  releases: AutopostRelease[],
+  tips: boolean,
+  now: Date,
+) {
+  const today = localDate(now.toISOString(), settings.timezone);
+  const since = addDays(today, -RECENT_DAYS);
+  const [history, stored] = await Promise.all([
     getAutopostHistory(artist.id, now),
-    getRecentAutopostPosts(artist.id, RECENT_POSTS),
-    takesTips(artist.slug),
-    bufferState(settings.userId, settings.organizationId),
+    getAutopostSlotsSince(artist.id, since),
   ]);
-  const byId = new Map(releases.map(r => [r.id, r]));
+  // Only asked when something is in Buffer to ask about.
+  const live = stored.some(s => s.status === 'pushed')
+    ? await livePostStates(token, settings.organizationId, localInstant(since, '00:00', settings.timezone))
+    : null;
 
   // Before it's switched on, "Coming up" shows what switching on now would post.
   const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt ?? now.toISOString() }, artist, releases, history, now);
-  const comingUp = plan.map(slot => {
+  const view = buildScheduleView({ plan, stored, live, today, pushAheadHours: PUSH_AHEAD_HOURS, maxAttempts: MAX_ATTEMPTS });
+
+  const byId = new Map(releases.map(r => [r.id, r]));
+  const describe = (slot: ViewSlot) => {
     const release = slot.releaseId ? byId.get(slot.releaseId) ?? null : null;
-    const vars = release
-      ? releaseTemplateVars(toTemplateRelease(release), artist, { postDate: slot.date, instagram: false })
-      : supportTemplateVars(artist, { takesTips: tips, instagram: false });
-    const imageUrl = slot.imageKey === 'photo'
-      ? artist.photoUrl
-      : slot.imageKey?.startsWith('cover:') ? release?.artworkUrl ?? null : null;
+    // What was actually sent, once it's in Buffer: the networks other than Instagram, where there's one.
+    const sent = slot.captions ? Object.values(slot.captions) : [];
+    const shown = sent.find(c => c.service !== 'instagram') ?? sent[0];
+    let text: string | null;
+    if (shown) {
+      text = shown.text;
+    } else {
+      const vars = release
+        ? releaseTemplateVars(toTemplateRelease(release), artist, { postDate: slot.date, instagram: false })
+        : supportTemplateVars(artist, { takesTips: tips, instagram: false });
+      text = renderVariant(variantsFor(slot.kind, settings.templates), slot.templateIndex, vars)?.text ?? null;
+    }
+    const imageUrl = shown?.imageUrl
+      ?? (slot.imageKey === 'photo' ? artist.photoUrl : slot.imageKey?.startsWith('cover:') ? release?.artworkUrl ?? null : null);
     return {
       at: slot.at,
       date: slot.date,
@@ -230,9 +289,24 @@ async function pageState(artist: AutopostArtist, settings: AutopostSettings, sav
       release: release ? { title: release.title, slug: release.slug } : null,
       imageUrl,
       imageOnInstagram: slot.imageOnInstagram,
-      text: renderVariant(variantsFor(slot.kind, settings.templates), slot.templateIndex, vars)?.text ?? null,
+      text,
+      state: slot.state,
     };
-  });
+  };
+
+  return { comingUp: view.upcoming.map(describe), recent: view.recent.map(describe) };
+}
+
+/** Everything the Promote page shows. */
+async function pageState(artist: AutopostArtist, settings: AutopostSettings, saved: boolean) {
+  const now = new Date();
+  const token = await bufferToken(settings.userId);
+  const [releases, tips, buffer] = await Promise.all([
+    getAutopostReleases(artist.id),
+    takesTips(artist.slug),
+    bufferState(token, settings.organizationId),
+  ]);
+  const schedule = await scheduleState(artist, settings, token, releases, tips, now);
 
   // The newest release, for previewing templates as the artist edits them.
   const newest = [...releases].sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''))[0];
@@ -258,9 +332,16 @@ async function pageState(artist: AutopostArtist, settings: AutopostSettings, sav
     takesTips: tips,
     previewRelease: newest ? toTemplateRelease(newest) : null,
     buffer,
-    comingUp,
-    recent: recent.map(p => ({ ...p, releaseTitle: p.releaseId ? byId.get(p.releaseId)?.title ?? null : null })),
+    ...schedule,
   };
+}
+
+/** Only what changes on its own between visits: the schedule, and whether posting stopped. */
+async function schedulePart(artist: AutopostArtist, settings: AutopostSettings) {
+  const now = new Date();
+  const token = await bufferToken(settings.userId);
+  const [releases, tips] = await Promise.all([getAutopostReleases(artist.id), takesTips(artist.slug)]);
+  return { pausedReason: settings.pausedReason, ...(await scheduleState(artist, settings, token, releases, tips, now)) };
 }
 
 async function handleRequest(event: HandlerEvent) {
@@ -292,7 +373,10 @@ async function handleRequest(event: HandlerEvent) {
     // A claim that changed hands: the old owner's settings (and Buffer) are not the new owner's.
     const current = stored && stored.userId === user.userId ? stored : defaultSettings(artist.id, user.userId);
 
-    if (event.httpMethod === 'GET') return respond(200, await pageState(artist, current, Boolean(stored)));
+    if (event.httpMethod === 'GET') {
+      if (event.queryStringParameters?.part === 'schedule') return respond(200, await schedulePart(artist, current));
+      return respond(200, await pageState(artist, current, Boolean(stored)));
+    }
 
     let body: Record<string, unknown>;
     try {
