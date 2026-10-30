@@ -205,7 +205,7 @@ export function ForArtistsPage() {
               <div className="w-full md:w-72 shrink-0">
                 <Screenshot
                   src="/screenshots/web-claimed-artist.webp"
-                  alt="A claimed artist page for Kid Lightbulbs: photo, verified badge, bio, a featured release, and support links with payout percentages."
+                  alt="A claimed artist page for Kid Lightbulbs: photo, verified badge, bio, a Tip button, support links with payout percentages, and a featured release."
                   caption="A claimed page"
                 />
               </div>
@@ -239,8 +239,7 @@ export function ForArtistsPage() {
                 I'm{' '}
                 <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
                   Brandon
-                </a>{' '}
-                — an indie musician and tech worker. I build and run Unstream in my spare time. Unstream is free to use
+                </a>, an indie musician and tech worker. I build and run Unstream in my spare time. Unstream is free to use
                 because its mission is to expand &amp; deepen support for artists.
               </p>
             </div>
