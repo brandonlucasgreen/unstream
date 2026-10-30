@@ -207,8 +207,23 @@ describe('ArtistPromotePage', () => {
     renderTab();
     expect(await screen.findByRole('switch', { name: 'Autopost is on' })).toBeTruthy();
     const status = screen.getByRole('switch', { name: 'Autopost is on' }).parentElement!;
-    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post joins your Buffer queue on its day, where you can change or delete it\./);
-    expect(screen.getByRole('link', { name: 'Buffer queue' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
+    expect(status.textContent).toMatch(/Posting to 1 channel\. Each post lands in Buffer three days before it goes out, where you can change or delete it\./);
+    expect(within(status).getByRole('link', { name: 'Buffer' }).getAttribute('href')).toBe('https://publish.buffer.com/schedule');
+  });
+
+  // A reconnect resumes posting by itself, so someone already connected again needs Save instead.
+  it('says what starts posting again after Buffer was disconnected', async () => {
+    const base = loaded() as Extract<PromotePage, { available: true }>;
+    const paused = { ...base.settings, enabled: true, organizationId: 'org1', channelIds: ['ig'], pausedReason: 'buffer_disconnected' };
+    promote.getPromotePage.mockResolvedValue(loaded({ settings: paused }));
+    renderTab();
+    expect((await screen.findByRole('alert')).textContent).toBe('Posting has stopped because Buffer was disconnected. Reconnect it to start again.');
+    cleanup();
+
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: connected, settings: paused }));
+    renderTab();
+    expect((await screen.findByRole('alert')).textContent)
+      .toBe('Posting stopped while Buffer was disconnected. Check where it posts, then save changes to start again.');
   });
 
   it('shows the server’s plan under Coming up', async () => {

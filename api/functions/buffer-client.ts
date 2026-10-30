@@ -123,6 +123,40 @@ export async function listChannels(token: string, orgId: string): Promise<Buffer
   return data.channels ?? [];
 }
 
+/** One day of a channel's Buffer posting schedule, as Buffer's API gives it (`ScheduleV2`). */
+export interface PostingDay {
+  /** mon, tue, … sun */
+  day: string;
+  /** Times of day, in the channel's own timezone: "09:15". */
+  times: string[];
+  paused: boolean;
+}
+
+export interface ChannelSchedule {
+  id: string;
+  /** Buffer's default when the channel never set one is Europe/London. */
+  timezone: string;
+  postingSchedule: PostingDay[];
+}
+
+/**
+ * Each channel's posting schedule and timezone, for release autopost's "Pick days & times for me"
+ * (`queueTimeOn`). A query of its own rather than more fields on `listChannels`, so the pages that
+ * list channels don't depend on fields only the sweep needs.
+ */
+export async function listChannelSchedules(token: string, orgId: string): Promise<ChannelSchedule[]> {
+  const data = await bufferGraphQL<{ channels: ChannelSchedule[] }>(token, `
+    query GetChannelSchedules($orgId: OrganizationId!) {
+      channels(input: { organizationId: $orgId }) {
+        id
+        timezone
+        postingSchedule { day times paused }
+      }
+    }
+  `, { orgId });
+  return data.channels ?? [];
+}
+
 // ---------------------------------------------------------------------------------------------
 // Tags
 // ---------------------------------------------------------------------------------------------

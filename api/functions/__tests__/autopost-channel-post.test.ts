@@ -40,12 +40,6 @@ describe('buildChannelPost', () => {
     });
   });
 
-  it('adds a "Recommended"-time post to the channel’s Buffer queue instead of scheduling it', () => {
-    const post = buildChannelPost(input({ slot: { ...input().slot, queued: true } }));
-    expect(post.ok && post.input.mode).toBe('addToQueue');
-    expect(post.ok && post.input).not.toHaveProperty('dueAt');
-  });
-
   it('says "link in bio" on Instagram and marks it a feed post', () => {
     const post = buildChannelPost(input({ channel: { id: 'ig', service: 'instagram' } }));
     expect(post.ok && post.text).toContain('link in bio');

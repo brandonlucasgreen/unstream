@@ -50,7 +50,8 @@ export function planForArtist(
 
 /**
  * Where the plan starts. With a set time, now. Queued posts ("Recommended") are placed at the
- * start of their day and handed to Buffer during it, so today's is still to come all day.
+ * start of their day and go out at a time from each channel's posting schedule, so today's is
+ * still to come until that day's last posting time has passed.
  */
 function planFrom(settings: { postTime: string | null; timezone: string }, now: Date): string {
   if (settings.postTime !== null) return now.toISOString();
@@ -58,12 +59,10 @@ function planFrom(settings: { postTime: string | null; timezone: string }, now: 
 }
 
 /**
- * Whether a planned slot is due to go to Buffer now. A scheduled post goes PUSH_AHEAD_HOURS ahead,
- * so the artist sees it in Buffer first. A queued one goes on its own day, or the queue would
- * place it days early.
+ * Whether a planned slot is due to go to Buffer now: pushAheadHours before it, so the artist sees
+ * it in Buffer first. The same for both posting times: a queued slot sits at its day's start, and
+ * the sweep reads its time from the channel's posting schedule when it hands it over.
  */
-export function isDueToPush(slot: PlannedPost, settings: { postTime: string | null }, now: Date, pushAheadHours: number): boolean {
-  const at = new Date(slot.at).getTime();
-  if (settings.postTime === null) return at <= now.getTime();
-  return at < now.getTime() + pushAheadHours * 3_600_000;
+export function isDueToPush(slot: PlannedPost, now: Date, pushAheadHours: number): boolean {
+  return new Date(slot.at).getTime() < now.getTime() + pushAheadHours * 3_600_000;
 }

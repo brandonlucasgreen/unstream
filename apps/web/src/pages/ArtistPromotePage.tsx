@@ -43,9 +43,18 @@ const BUFFER_SCHEDULE_URL = 'https://publish.buffer.com/schedule';
 /** Where a Buffer user connects their social channels. */
 const BUFFER_CHANNELS_URL = 'https://publish.buffer.com/settings/channels';
 
-const PAUSED: Record<string, string> = {
-  buffer_disconnected: 'Posting has stopped because Buffer was disconnected. Reconnect it, then save to start again.',
-};
+/**
+ * Why posting stopped, and what starts it again. A reconnect resumes it by itself, but not for
+ * someone already connected again (or connected to a different Buffer login): for them it's Save.
+ */
+function pausedMessage(reason: string, bufferConnected: boolean): string {
+  if (reason === 'buffer_disconnected') {
+    return bufferConnected
+      ? 'Posting stopped while Buffer was disconnected. Check where it posts, then save changes to start again.'
+      : 'Posting has stopped because Buffer was disconnected. Reconnect it to start again.';
+  }
+  return 'Posting has stopped. Save changes to start again.';
+}
 
 function inputFrom(page: Loaded): PromoteSettingsInput {
   const s = page.settings;
@@ -222,7 +231,7 @@ export function ArtistPromotePage() {
         <p className="text-sm text-text-secondary" role="status">{BUFFER_OUTCOMES[bufferOutcome]}</p>
       )}
       {page.settings.pausedReason && (
-        <p className="text-sm text-error" role="alert">{PAUSED[page.settings.pausedReason] ?? 'Posting has stopped. Save to start again.'}</p>
+        <p className="text-sm text-error" role="alert">{pausedMessage(page.settings.pausedReason, buffer.connected)}</p>
       )}
 
       {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
@@ -237,7 +246,6 @@ export function ArtistPromotePage() {
             busy={busy}
             canSwitchOn={canSwitchOn}
             channels={form.channelIds.length}
-            queued={form.postTime === null}
             onToggle={toggle}
           />
         )}
@@ -468,12 +476,11 @@ export function ArtistPromotePage() {
  * It says in plain words what each position means, so nobody has to guess whether "off" leaves
  * drafts behind: it doesn't.
  */
-function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
+function AutopostSwitch({ on, busy, canSwitchOn, channels, onToggle }: {
   on: boolean;
   busy: boolean;
   canSwitchOn: boolean;
   channels: number;
-  queued: boolean;
   onToggle: () => void;
 }) {
   const disabled = busy || (!on && !canSwitchOn);
@@ -486,11 +493,9 @@ function AutopostSwitch({ on, busy, canSwitchOn, channels, queued, onToggle }: {
             ? (
               <>
                 Posting to {channels} channel{channels === 1 ? '' : 's'}.{' '}
-                {queued ? 'Each post joins your ' : 'Each post lands in '}
-                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">
-                  {queued ? 'Buffer queue' : 'Buffer'}
-                </a>
-                {queued ? ' on its day' : ' three days before it goes out'}, where you can change or delete it.
+                Each post lands in{' '}
+                <a href={BUFFER_SCHEDULE_URL} target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>
+                {' '}three days before it goes out, where you can change or delete it.
               </>
             )
             : canSwitchOn

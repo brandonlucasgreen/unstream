@@ -11,6 +11,7 @@
 // ("Friday", "within 14 days", "the same week") is about local dates.
 
 import type { AutopostKind } from '../shared/autopost-templates';
+import type { PostingDay } from './buffer-client';
 
 export type { AutopostKind };
 
@@ -36,8 +37,9 @@ export interface PlanSettings {
   postsPerWeek: number | null;
   timezone: string;
   /**
-   * Local time of day, HH:MM, or null for "Recommended": the post goes to the channel's Buffer
-   * queue on its day and Buffer picks the time. A queued slot is placed at the day's start.
+   * Local time of day, HH:MM, or null for "Recommended": the post goes out at a time from the
+   * channel's Buffer posting schedule that day (`queueTimeOn`). A queued slot is placed at the
+   * day's start.
    */
   postTime: string | null;
   /** When autopost was switched on, an instant. Only releases catalogued after it get release moments. */
@@ -187,6 +189,46 @@ export function localInstant(date: string, time: string, timezone: string): stri
   // Twice, because the offset at the first guess can be the other side of a clock change.
   const guess = wall - offsetAt(wall);
   return new Date(wall - offsetAt(guess)).toISOString();
+}
+
+/** Leave Buffer this long to take a post before its time. */
+const QUEUE_LEAD_MS = 10 * 60_000;
+
+/** A post's time on one channel, or why that channel has none that day. */
+export type QueueTime = { at: string } | { none: string };
+
+/** "9:15", "09:15" or "09:15:00" as HH:MM; null for anything else. */
+function readClockTime(time: string): string | null {
+  const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(time.trim());
+  if (!match || Number(match[1]) > 23 || Number(match[2]) > 59) return null;
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
+/**
+ * When a "Pick days & times for me" post goes out on one channel: the earliest time in that
+ * channel's Buffer posting schedule on the post's day, in the channel's timezone, that's still
+ * ahead of `now`. When there's none, says why (paused, empty, unreadable, or already past), so
+ * the sweep's log can tell the artist's choice from a format we didn't expect.
+ *
+ * Read from the schedule rather than handed to Buffer's queue (`addToQueue`), because the queue
+ * places a post in the next open slot from *now*: a post handed over three days early would go
+ * out within hours. Scheduling it at its own day's slot lets it reach Buffer early, where the
+ * artist can see it.
+ */
+export function queueTimeOn(date: string, schedule: PostingDay[], timezone: string, now: Date): QueueTime {
+  const weekday = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][dayOfWeek(date)];
+  const day = schedule.find(d => d.day === weekday);
+  if (!day || day.times.length === 0) return { none: `no posting times in its Buffer schedule on ${weekday}` };
+  if (day.paused) return { none: `its Buffer schedule is paused on ${weekday}` };
+  const instants = day.times
+    .map(readClockTime)
+    .filter((t): t is string => t !== null)
+    .map(t => localInstant(date, t, timezone))
+    .sort();
+  if (instants.length === 0) return { none: `couldn’t read its Buffer posting times (${day.times.join(', ')})` };
+  const earliest = now.getTime() + QUEUE_LEAD_MS;
+  const at = instants.find(i => new Date(i).getTime() >= earliest);
+  return at ? { at } : { none: `every posting time in its Buffer schedule on ${date} has passed` };
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -19,8 +19,11 @@ import { AUTOPOST_NETWORK_LIMITS, isAutopostNetwork, isImageFirstNetwork, networ
 export { isAutopostNetwork };
 
 export interface ChannelPostInput {
-  /** queued: add to the channel's Buffer queue rather than scheduling for `at` ("Recommended" time). */
-  slot: { at: string; date: string; kind: AutopostKind; templateIndex: number; imageOnInstagram: boolean; queued?: boolean };
+  /**
+   * `at` is when this channel posts it: the slot's set time, or with "Pick days & times for me",
+   * the time the sweep read from this channel's Buffer posting schedule (`queueTimeOn`).
+   */
+  slot: { at: string; date: string; kind: AutopostKind; templateIndex: number; imageOnInstagram: boolean };
   channel: { id: string; service: string };
   artist: TemplateArtist;
   /** null for a call for support. */
@@ -80,8 +83,8 @@ export function buildChannelPost(input: ChannelPostInput): ChannelPost {
   const post: Record<string, unknown> = {
     channelId: channel.id,
     text: rendered.text,
-    // Queued: Buffer's posting schedule for the channel picks the time. Otherwise, exactly then.
-    ...(slot.queued ? { mode: 'addToQueue' } : { dueAt: slot.at, mode: 'customScheduled' }),
+    dueAt: slot.at,
+    mode: 'customScheduled',
     schedulingType: 'automatic',
     // On the post itself: Buffer's analytics filter on a post's own tags.
     tagIds: [input.tagId],

@@ -128,6 +128,23 @@ export async function pauseAutopost(artistId: string, reason: string): Promise<v
   if (error) throw new Error(`pausing autopost failed: ${error.message}`);
 }
 
+/**
+ * A reconnect undoes the pause a lost Buffer connection caused, so reconnecting is all it takes to
+ * start again — but only for artists set up in an organization the reconnected account belongs
+ * to. Reconnecting a different Buffer login leaves the others paused until the artist picks its
+ * channels and saves, rather than posting to channels that account can't reach. Other pauses stay.
+ */
+export async function resumeAfterReconnect(userId: string, organizationIds: string[]): Promise<void> {
+  if (organizationIds.length === 0) return;
+  const { error } = await client()
+    .from('release_autopost_settings')
+    .update({ paused_reason: null, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('paused_reason', 'buffer_disconnected')
+    .in('organization_id', organizationIds);
+  if (error) throw new Error(`resuming autopost failed: ${error.message}`);
+}
+
 // ---------------------------------------------------------------------------------------------
 // The artist and their owner
 // ---------------------------------------------------------------------------------------------

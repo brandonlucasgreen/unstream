@@ -40,6 +40,7 @@ import {
   usableAccessToken,
 } from './buffer-db';
 import { canUseReleaseAutopost } from './release-autopost-access';
+import { resumeAfterReconnect } from './release-autopost-db';
 import { Sentry, withSentry } from '../lib/sentry';
 import { randomBytes } from 'node:crypto';
 
@@ -127,6 +128,14 @@ async function handleRequest(event: HandlerEvent) {
       // Kept only when there's no choice to make; otherwise the page asks.
       const organizations = await listOrganizations(tokens.accessToken);
       await saveBufferConnection(pending.userId, tokens, organizations.length === 1 ? organizations[0].id : null);
+      // Release autopost paused for the lost connection starts again, where it posts from one of
+      // this account's organizations. Reported rather than failing the connect: the connection
+      // is saved, and the Promote page's Save also resumes.
+      try {
+        await resumeAfterReconnect(pending.userId, organizations.map(o => o.id));
+      } catch (error) {
+        Sentry.captureException(error, { tags: { buffer: 'autopost-resume' } });
+      }
       return redirectBack('connected', returnTo);
     } catch (error) {
       Sentry.captureException(error, { tags: { buffer: 'oauth-callback' } });
