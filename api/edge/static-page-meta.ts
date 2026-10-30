@@ -1,7 +1,8 @@
 import type { Context } from "../shared/edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 
-// Link-preview metadata for the hand-written static pages — currently /press, /contact and /platforms.
+// Link-preview metadata for the hand-written static pages — currently /press, /contact, /platforms
+// and /for-artists.
 //
 // These pages set document.title and the description in a useEffect, which is invisible to anything
 // that doesn't run JS. Without this, every unfurl of unstream.stream/press showed the homepage's
@@ -28,6 +29,11 @@ const PAGES: Record<string, PageMeta> = {
     title: "Platforms — Unstream",
     description:
       "Every platform Unstream searches, from Bandcamp to your local library, with how much of each sale reaches the artist.",
+  },
+  "/for-artists": {
+    title: "Unstream for artists",
+    description:
+      "The best free promo & patronage toolkit for indie artists. Claim your page, take tips, and send fans to wherever you earn the most.",
   },
   "/contact": {
     title: "Contact — Unstream",

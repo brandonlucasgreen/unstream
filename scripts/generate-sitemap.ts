@@ -136,6 +136,7 @@ async function main() {
   const staticPages = [
     { url: '/', changefreq: 'weekly', priority: '1.0' },
     { url: '/platforms', changefreq: 'monthly', priority: '0.8' },
+    { url: '/for-artists', changefreq: 'monthly', priority: '0.8' },
     { url: '/faq', changefreq: 'monthly', priority: '0.6' },
     { url: '/press', changefreq: 'monthly', priority: '0.5' },
     { url: '/contact', changefreq: 'monthly', priority: '0.5' },

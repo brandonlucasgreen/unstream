@@ -138,6 +138,7 @@ export function Header() {
         accountGroup,
       ]
     : [
+        { to: '/for-artists', label: t('nav.forArtists') },
         { to: '/platforms', label: t('nav.platforms') },
         { to: '/faq', label: t('nav.faq') },
         { to: '/press', label: t('nav.pressKit') },
@@ -165,10 +166,11 @@ export function Header() {
             The transform is scoped to this wrapper and must NOT be moved onto
             <header>: a transform there would become the containing block for
             MobileNav's fixed overlay, trapping the drawer inside the header.
-            Inline from lg only — below that the nav takes so much of the row that
-            a centred bar could only be ~140px wide, so the magnifier opens the
-            same component as a full-width second row instead. */}
-        <div className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm xl:max-w-md px-4">
+            Inline from xl only — below that the nav takes so much of the row that
+            a centred bar would run under it (the signed-out nav's six items,
+            "For artists" included, need ~430px), so the magnifier opens the same
+            component as a full-width second row instead. */}
+        <div className="hidden xl:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm 2xl:max-w-md px-4">
           <HeaderSearch />
         </div>
 
@@ -176,7 +178,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileSearchOpen(open => !open)}
-            className="lg:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            className="xl:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
             aria-label={t('search.ariaLabel')}
             aria-expanded={mobileSearchOpen}
             aria-controls="header-search-row"
@@ -189,8 +191,9 @@ export function Header() {
           {/* No email here. It's the widest and least predictable thing on this
               side (an address can be 15 or 40 characters), which is exactly what
               made a centred bar collide at laptop widths. It's still in the
-              mobile drawer and on /settings. */}
-          <nav className="hidden sm:flex items-center gap-3 text-sm">
+              mobile drawer and on /settings. Inline from md: at sm the signed-out
+              nav's six items wrap onto two lines. */}
+          <nav className="hidden md:flex items-center gap-3 text-sm">
             {navItems.map(entry => isNavGroup(entry) ? (
               <NavDropdown key={entry.label} group={entry} />
             ) : entry.external ? (
@@ -237,7 +240,7 @@ export function Header() {
       </div>
 
       {mobileSearchOpen && (
-        <div id="header-search-row" className="lg:hidden px-4 pb-4">
+        <div id="header-search-row" className="xl:hidden px-4 pb-4">
           <HeaderSearch autoFocus onClose={() => setMobileSearchOpen(false)} />
         </div>
       )}
