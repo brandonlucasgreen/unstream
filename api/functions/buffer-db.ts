@@ -31,6 +31,8 @@ export interface BufferConnection {
   organizationId: string | null;
   selectedChannelIds: string[];
   refreshCounter: number;
+  /** When a request claimed a refresh it hasn't finished, or null when none is under way. */
+  refreshClaimedAt: Date | null;
 }
 
 interface ConnectionRow {
@@ -40,6 +42,7 @@ interface ConnectionRow {
   organization_id: string | null;
   selected_channel_ids: string[] | null;
   refresh_counter: number;
+  refresh_claimed_at: string | null;
 }
 
 function toConnection(row: ConnectionRow): BufferConnection {
@@ -50,6 +53,7 @@ function toConnection(row: ConnectionRow): BufferConnection {
     organizationId: row.organization_id,
     selectedChannelIds: row.selected_channel_ids ?? [],
     refreshCounter: Number(row.refresh_counter),
+    refreshClaimedAt: row.refresh_claimed_at ? new Date(row.refresh_claimed_at) : null,
   };
 }
 
@@ -60,7 +64,7 @@ export async function getBufferConnection(userId: string): Promise<BufferConnect
 
   const { data, error } = await client
     .from('buffer_connections')
-    .select('access_token_encrypted, refresh_token_encrypted, expires_at, organization_id, selected_channel_ids, refresh_counter')
+    .select('access_token_encrypted, refresh_token_encrypted, expires_at, organization_id, selected_channel_ids, refresh_counter, refresh_claimed_at')
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -82,6 +86,7 @@ export async function saveBufferConnection(userId: string, tokens: BufferTokens,
     organization_id: organizationId,
     // A reconnect starts the counter again; it only ever guards concurrent refreshes of one grant.
     refresh_counter: 0,
+    refresh_claimed_at: null,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id' });
 
@@ -135,6 +140,13 @@ const REFRESH_WAIT_MS = 8_000;
 const REFRESH_POLL_MS = 250;
 
 /**
+ * How long a claimed refresh holds off everyone else. Longer than any refresh can take inside one
+ * function (Buffer's 15-second timeout, a function's ten), so only a claim whose request has died
+ * runs out; after that, the next request may claim again.
+ */
+const REFRESH_LEASE_MS = 30_000;
+
+/**
  * A usable access token for this user, refreshing first if the stored one is spent.
  *
  * **This is the only way anything should read a token.** Buffer's access tokens last an hour, so
@@ -144,13 +156,21 @@ const REFRESH_POLL_MS = 250;
  * connection, and the user has to reconnect.
  *
  * So the refresh is **claimed in the database before Buffer is called**: a compare-and-set that
- * bumps `refresh_counter`. Only the request that wins the claim ever sends the refresh token.
- * Anyone else waits for the winner's new token to land, and never calls Buffer itself.
+ * bumps `refresh_counter` and stamps `refresh_claimed_at`. Only the request that wins the claim
+ * ever sends the refresh token. Anyone else waits for the winner's new token to land, and never
+ * calls Buffer itself: one that read the row before the claim loses the compare-and-set, and one
+ * that reads it after sees the claim's stamp.
  *
  * Until 2026-10-29 the compare-and-set came after the call to Buffer, so both requests had
  * already spent the token by the time one lost. A page that loaded its data twice on a hard
  * refresh (the browser's own sign-in token refreshing at the same moment) did exactly that, and
  * the Promote page asked Brandon to reconnect after every deploy.
+ *
+ * Until 2026-10-30 the claim was the counter alone, which only stops requests that read the row
+ * before it moved. One that read it during the winner's call to Buffer saw the new counter and
+ * the still-stale token, won a claim of its own, and sent the old refresh token again. A deploy
+ * made that likely: a tab reloading itself onto the new build while another request was in
+ * flight, and a cold function taking seconds over the refresh. The stamp closes it.
  */
 export async function usableAccessToken(userId: string): Promise<string> {
   const connection = await getBufferConnection(userId);
@@ -164,6 +184,11 @@ export async function usableAccessToken(userId: string): Promise<string> {
     throw new BufferNotConnectedError('That Buffer connection expired and cannot be refreshed. Reconnect to continue.');
   }
 
+  // Someone else's refresh is under way: their new token is coming.
+  if (connection.refreshClaimedAt && Date.now() - connection.refreshClaimedAt.getTime() < REFRESH_LEASE_MS) {
+    return waitForRefresh(userId);
+  }
+
   const client = getClient();
   if (!client) throw new BufferError(500, 'Database not configured');
 
@@ -171,7 +196,7 @@ export async function usableAccessToken(userId: string): Promise<string> {
   const claim = connection.refreshCounter + 1;
   const { data: claimed, error: claimError } = await client
     .from('buffer_connections')
-    .update({ refresh_counter: claim, updated_at: new Date().toISOString() })
+    .update({ refresh_counter: claim, refresh_claimed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('refresh_counter', connection.refreshCounter)
     .select('refresh_counter');
@@ -190,8 +215,14 @@ export async function usableAccessToken(userId: string): Promise<string> {
       await clearBufferConnection(userId);
       throw new BufferNotConnectedError('Buffer refused the connection. Reconnect to continue.');
     }
-    // Anything else (a timeout, a 5xx) may or may not have reached Buffer. Leave the claim where
-    // it is: the next request claims again from the counter as it now stands.
+    // Anything else (a timeout, a 5xx) may or may not have reached Buffer. Release the claim so
+    // the next request can try again rather than wait out the lease.
+    await client
+      .from('buffer_connections')
+      .update({ refresh_claimed_at: null })
+      .eq('user_id', userId)
+      .eq('refresh_counter', claim)
+      .select('refresh_counter');
     throw error;
   }
 
@@ -210,6 +241,7 @@ export async function usableAccessToken(userId: string): Promise<string> {
       access_token_encrypted: encryptCredential(tokens.accessToken),
       refresh_token_encrypted: tokens.refreshToken ? encryptCredential(tokens.refreshToken) : null,
       expires_at: tokens.expiresAt.toISOString(),
+      refresh_claimed_at: null,
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
