@@ -477,6 +477,13 @@ function App() {
                       onLinkRemoved={handleLinkRemoved}
                     />
                   ))}
+                  {/* One link under the whole list, not per card: a first-time
+                      searcher meets a dozen platform names at once. */}
+                  <p className="pt-2 text-center text-sm">
+                    <Link to="/platforms" className="text-link hover:underline">
+                      {t('artist:results.platformsLink')}
+                    </Link>
+                  </p>
                 </div>
               ) : outcome === 'failed' && searchFailure ? (
                 <div className="text-center py-16">
