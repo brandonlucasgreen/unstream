@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Netlify held Even's key as ALGOLAI_API_KEY while the code reads ALGOLIA_API_KEY, so for months
-// every search skipped Even and cached the empty answer as "this artist isn't on Even", with
-// nothing reported. A missing key is a deployment fault: it must not be cached as a negative, and
-// it must be reported — once, not once per search.
+// Even's Algolia search key is the public one even.biz ships to browsers, so it is built in: when
+// it lived only in an env var, Netlify held it misspelled and then not at all, and Even search was
+// off in production for months. If Even ever rotates it, Algolia's rejection must not be cached as
+// "this artist isn't on Even", and it must be reported — once, not once per search.
 
 vi.mock('../redis', () => ({
   getRedis: () => null,
@@ -34,10 +34,14 @@ import { handler } from '../search-sources';
 
 const EVEN_KEY = 'artist:even:zzqx_test_artist';
 
-function mockUpstreams() {
+function mockUpstreams(algoliaStatus = 200) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
     const url = String(input);
-    if (url.includes('algolia.net')) return new Response(JSON.stringify({ hits: [] }), { status: 200 });
+    if (url.includes('algolia.net')) {
+      return algoliaStatus === 200
+        ? new Response(JSON.stringify({ hits: [] }), { status: 200 })
+        : new Response('{"message":"Invalid API key"}', { status: algoliaStatus });
+    }
     if (url.startsWith('https://musicbrainz.org/ws/2/artist/?query=')) {
       return new Response(JSON.stringify({ artists: [] }), { status: 200 });
     }
@@ -46,7 +50,7 @@ function mockUpstreams() {
 }
 
 const evenReports = () =>
-  captureMessage.mock.calls.filter(([message]) => String(message).includes('ALGOLIA_API_KEY'));
+  captureMessage.mock.calls.filter(([message]) => String(message).startsWith('[EVEN]'));
 
 beforeEach(() => {
   cacheDecisions.clear();
@@ -63,25 +67,38 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe('Even search without its key', () => {
-  it('does not cache the empty answer as "not on Even", and reports it once', async () => {
+describe('Even search key', () => {
+  it('asks Even with the built-in key when no env var is set, and caches its answer', async () => {
     vi.stubEnv('ALGOLIA_API_KEY', '');
-    mockUpstreams();
+    const fetchSpy = mockUpstreams();
+
+    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+
+    const evenCall = fetchSpy.mock.calls.find(([url]) => String(url).includes('algolia.net'));
+    expect(evenCall).toBeDefined();
+    const headers = evenCall![1]!.headers as Record<string, string>;
+    expect(headers['X-Algolia-API-Key']).toMatch(/^[0-9a-f]{32}$/);
+    expect(cacheDecisions.get(EVEN_KEY)).toBe(true);
+    expect(evenReports()).toHaveLength(0);
+  });
+
+  it('prefers ALGOLIA_API_KEY when it is set', async () => {
+    vi.stubEnv('ALGOLIA_API_KEY', 'override-key');
+    const fetchSpy = mockUpstreams();
+
+    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+
+    const evenCall = fetchSpy.mock.calls.find(([url]) => String(url).includes('algolia.net'));
+    expect((evenCall![1]!.headers as Record<string, string>)['X-Algolia-API-Key']).toBe('override-key');
+  });
+
+  it('a rejected key is not cached as "not on Even", and is reported once', async () => {
+    mockUpstreams(403);
 
     await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
     await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
 
     expect(cacheDecisions.get(EVEN_KEY)).toBe(false);
     expect(evenReports()).toHaveLength(1);
-  });
-
-  it('with the key, asks Even and caches its answer as usual', async () => {
-    vi.stubEnv('ALGOLIA_API_KEY', 'public-search-key');
-    const fetchSpy = mockUpstreams();
-
-    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
-
-    expect(fetchSpy.mock.calls.some(([url]) => String(url).includes('algolia.net'))).toBe(true);
-    expect(cacheDecisions.get(EVEN_KEY)).toBe(true);
   });
 });

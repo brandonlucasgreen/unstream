@@ -4,12 +4,10 @@ import { fetchWithTimeout, normalizeForComparison } from '../shared-utils';
 export async function searchEven(query: string): Promise<Map<string, string>> {
   const results = new Map<string, string>();
 
+  // Even's public search-only key (the one even.biz ships to browsers); see searchEven in
+  // api/functions/search-sources.ts.
   const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
-  const algoliaApiKey = process.env.ALGOLIA_API_KEY;
-  if (!algoliaApiKey) {
-    console.warn('[EVEN] Missing ALGOLIA_API_KEY env var, skipping Even search');
-    return results;
-  }
+  const algoliaApiKey = process.env.ALGOLIA_API_KEY || 'eea52fd4a67d03678477ffdfbad362e2';
 
   try {
     const response = await fetchWithTimeout(`https://${algoliaAppId}-dsn.algolia.net/1/indexes/Artist/query`, {
