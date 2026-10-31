@@ -23,7 +23,6 @@ beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
   process.env.BUFFER_CLIENT_ID = 'client-abc';
-  process.env.BUFFER_CLIENT_SECRET = 'secret-xyz';
   process.env.URL = 'https://unstream.stream';
 });
 
@@ -35,9 +34,10 @@ afterEach(() => {
 });
 
 describe('configuration', () => {
-  it('needs both halves of the client', () => {
+  // Unstream is a public client: the id is all there is.
+  it('needs only the client id', () => {
     expect(bufferOAuthConfigured()).toBe(true);
-    delete process.env.BUFFER_CLIENT_SECRET;
+    delete process.env.BUFFER_CLIENT_ID;
     expect(bufferOAuthConfigured()).toBe(false);
   });
 
@@ -94,7 +94,7 @@ describe('buildAuthorizeUrl', () => {
 });
 
 describe('exchangeCode', () => {
-  it('sends the code, the verifier and the secret to the token endpoint', async () => {
+  it('sends the code and the verifier, and no secret, to the token endpoint', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ access_token: 'at', refresh_token: 'rt', expires_in: 3600 }), { status: 200 }));
 
     const tokens = await exchangeCode('code-1', 'verifier-1');
@@ -105,12 +105,21 @@ describe('exchangeCode', () => {
     expect(body.get('grant_type')).toBe('authorization_code');
     expect(body.get('code')).toBe('code-1');
     expect(body.get('code_verifier')).toBe('verifier-1');
-    expect(body.get('client_secret')).toBe('secret-xyz');
+    expect(body.get('client_id')).toBe('client-abc');
+    expect(body.has('client_secret')).toBe(false);
     expect(body.get('redirect_uri')).toBe('https://unstream.stream/api/me/buffer/callback');
 
     expect(tokens.accessToken).toBe('at');
     expect(tokens.refreshToken).toBe('rt');
     expect(tokens.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  // The old confidential client, while its secret is still set.
+  it('sends the secret when one is configured', async () => {
+    process.env.BUFFER_CLIENT_SECRET = 'secret-xyz';
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ access_token: 'at', refresh_token: 'rt', expires_in: 3600 }), { status: 200 }));
+    await exchangeCode('code-1', 'verifier-1');
+    expect(new URLSearchParams(fetchMock.mock.calls[0][1].body as string).get('client_secret')).toBe('secret-xyz');
   });
 
   it('carries Buffer’s own reason when it refuses', async () => {

@@ -1,9 +1,13 @@
 // Buffer's OAuth 2.0 flow, so each curator posts from their own Buffer account
 // (docs/specs/curator-posts-spec.md, "Buffer auth").
 //
-// Authorization Code **with PKCE**, which Buffer requires of every client — including
-// confidential ones like us, which also send a client secret. The secret never leaves the
-// server; the browser only ever sees the authorize URL.
+// Authorization Code **with PKCE**, which Buffer requires of every client.
+//
+// **Unstream is a public client** (Brandon, 2026-10-30): its source is open, and Buffer asks
+// open-source apps to register as public, which proves itself with PKCE alone and must **not**
+// send a client secret. Whether a secret is sent follows whether BUFFER_CLIENT_SECRET is set, so
+// the switch from the old confidential client was a matter of Netlify variables, not a deploy
+// timed to the minute. Leave it unset: a public client that sends one is refused.
 //
 // Three properties of Buffer's tokens drive everything here:
 //
@@ -49,8 +53,9 @@ export interface BufferTokens {
   scope: string | null;
 }
 
+/** Only the client id is needed: a public client has no secret (see the header). */
 export function bufferOAuthConfigured(): boolean {
-  return !!process.env.BUFFER_CLIENT_ID && !!process.env.BUFFER_CLIENT_SECRET;
+  return !!process.env.BUFFER_CLIENT_ID;
 }
 
 /** Where Buffer sends the curator back. Must match a URI registered with the client. */
@@ -112,13 +117,14 @@ interface TokenResponse {
 async function tokenRequest(params: Record<string, string>): Promise<BufferTokens> {
   const clientId = process.env.BUFFER_CLIENT_ID;
   const clientSecret = process.env.BUFFER_CLIENT_SECRET;
-  if (!clientId || !clientSecret) throw new BufferError(500, 'Buffer OAuth is not configured');
+  if (!clientId) throw new BufferError(500, 'Buffer OAuth is not configured');
   if (!isUrlHostnameAllowed(TOKEN_URL)) throw new BufferError(500, 'Buffer auth host not allowed');
 
   const res = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, ...params }).toString(),
+    // A public client sends no secret; see the header.
+    body: new URLSearchParams({ client_id: clientId, ...(clientSecret ? { client_secret: clientSecret } : {}), ...params }).toString(),
     signal: AbortSignal.timeout(15_000),
   });
 
