@@ -736,8 +736,18 @@ async function searchBeatport(query: string, prefetched?: Promise<PrefetchedCach
   return coerceNameOnlyCache(data);
 }
 
-/** Reported once per isolate, so a missing key is one Sentry event, not one per search. */
-let reportedMissingEvenKey = false;
+/**
+ * Even's own site search runs on Algolia, and this is the search-only key even.biz hands to every
+ * visitor's browser for it, so it isn't a secret and needs no configuration. It was hardcoded when
+ * Even was added (#114) and moved to an env var in a credentials sweep (#130), after which Netlify
+ * held it misspelled (ALGOLAI_API_KEY) and then not at all, so Even search was off in production
+ * for months. ALGOLIA_APP_ID / ALGOLIA_API_KEY still override these if Even ever changes them.
+ */
+const EVEN_ALGOLIA_APP_ID = 'S64VD9CU46';
+const EVEN_ALGOLIA_SEARCH_KEY = 'eea52fd4a67d03678477ffdfbad362e2';
+
+/** Reported once per isolate, so a rejected key is one Sentry event, not one per search. */
+let reportedRejectedEvenKey = false;
 
 /**
  * Shorter than the other platforms' 5 s, on purpose. From Cloudflare Workers, Algolia's DSN host
@@ -760,23 +770,8 @@ async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>):
       const results: [string, NameOnlyEntry][] = [];
 
       try {
-        const algoliaAppId = process.env.ALGOLIA_APP_ID || 'S64VD9CU46';
-        const algoliaApiKey = process.env.ALGOLIA_API_KEY;
-        if (!algoliaApiKey) {
-          // A missing key is a deployment fault, not "this artist isn't on Even": don't cache it,
-          // and say so once. Netlify held this key misspelled (ALGOLAI_API_KEY) for months, so
-          // every search quietly skipped Even and cached the empty answer as true.
-          fetchFailed = true;
-          if (!reportedMissingEvenKey) {
-            reportedMissingEvenKey = true;
-            console.error('[EVEN] ALGOLIA_API_KEY is not set; Even search is off');
-            Sentry.captureMessage('[EVEN] ALGOLIA_API_KEY is not set; Even search is off', {
-              level: 'error',
-              tags: { platform: 'even' },
-            });
-          }
-          return results;
-        }
+        const algoliaAppId = process.env.ALGOLIA_APP_ID || EVEN_ALGOLIA_APP_ID;
+        const algoliaApiKey = process.env.ALGOLIA_API_KEY || EVEN_ALGOLIA_SEARCH_KEY;
 
         const response = await fetchWithTimeout('https://S64VD9CU46-dsn.algolia.net/1/indexes/Artist/query', {
           method: 'POST',
@@ -788,7 +783,18 @@ async function searchEven(query: string, prefetched?: Promise<PrefetchedCache>):
           body: JSON.stringify({ query, hitsPerPage: 10 }),
         }, EVEN_TIMEOUT_MS);
 
-        if (!response.ok) { fetchFailed = true; return results; }
+        if (!response.ok) {
+          fetchFailed = true;
+          // A rejected key means Even rotated it: every search now skips Even, which looks just
+          // like "not on Even", so say so once.
+          if ((response.status === 401 || response.status === 403) && !reportedRejectedEvenKey) {
+            reportedRejectedEvenKey = true;
+            const message = `[EVEN] Algolia rejected the search key (HTTP ${response.status}); Even search is off`;
+            console.error(message);
+            Sentry.captureMessage(message, { level: 'error', tags: { platform: 'even' } });
+          }
+          return results;
+        }
 
         const json = await response.json() as { hits?: { name?: string; slug?: string; username?: string }[] };
         const queryNormalized = normalizeForComparison(query);

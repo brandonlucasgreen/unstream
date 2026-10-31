@@ -420,7 +420,7 @@ way stops the sweep and the tips notifier with no error. If you use the dashboar
 | `INTERNAL_FUNCTION_SECRET`, `SESSION_HASH_SECRET` | Netlify's values | Same |
 | `BANDCAMP_CREDENTIAL_KEY` | Netlify's value | **Same — must be.** It decrypts the stored Bandcamp credentials; a different key can't read them |
 | `SENTRY_DSN`, `ADMIN_EMAIL`, `ALLOWED_API_EMAILS` | Netlify's values | Same |
-| `ALGOLIA_API_KEY` | **Netlify's `ALGOLAI_API_KEY`** — misspelled there, so Netlify has been skipping Even search; the Worker gets the right name (`ALGOLIA_APP_ID` has a default in the code) | Same |
+| `ALGOLIA_API_KEY` | Not needed since 2026-10-31: Even's public search-only key is built into `search-sources.ts` (Netlify had held it misspelled as `ALGOLAI_API_KEY`). Set it only to override | Same |
 | `MIRLO_API_KEY` | From Mirlo's 2026-08-02 email granting it — write-only in Netlify | Omit — only catalogue crawls use it |
 | `RESEND_API_KEY`, `BUTTONDOWN_API_KEY` | Netlify's values | Same — and, like `npm run dev`, staging can then send real email |
 | `PUSHOVER_APP_TOKEN`, `PUSHOVER_USER_KEY` | Netlify's values (write-only there; the originals are in your Pushover account) | Omit — the tips notifier and the claim-review push use them, and staging shouldn't wake the admin's phone |
@@ -538,8 +538,8 @@ hand) and set the secrets straight after — both Workers are on hostnames no fa
 #### After the cutover
 
 - **The two values Netlify had wrong:** search for an artist who is on Even and confirm an Even
-  link appears (Netlify never showed one; Sentry now reports `[EVEN] ALGOLIA_API_KEY is not set`
-  if the key is missing). And send yourself a test push with the Pushover keys you set
+  link appears (Netlify never showed one; Sentry reports `[EVEN] Algolia rejected the search key`
+  if Even rotates it). And send yourself a test push with the Pushover keys you set
   (`curl -F token=<app token> -F user=<user key> -F message=test https://api.pushover.net/1/messages.json`
   in your own terminal) so the tips notifier's next real alert isn't the first test.
 
