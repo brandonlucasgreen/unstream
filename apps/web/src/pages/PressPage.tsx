@@ -219,9 +219,9 @@ const SCREENSHOT_GROUPS: {
       },
       {
         src: '/screenshots/web-claimed-artist.webp',
-        alt: 'A claimed and verified Unstream artist page for Kid Lightbulbs, with a bio, a Tip button, support links grouped by kind with payout percentages and AI policy badges, and an embedded featured release',
+        alt: 'A claimed and verified Unstream artist page for Kid Lightbulbs, with a bio, a Tip button, support links grouped by kind with payout percentages, and an embedded featured release',
         caption:
-          'A claimed artist page — bio, featured release, and the artist’s own choice of links. The AI policy badges flag where a platform has one.',
+          'A claimed artist page — bio, featured release, and the artist’s own choice of links.',
       },
       {
         src: '/screenshots/web-dashboard.webp',

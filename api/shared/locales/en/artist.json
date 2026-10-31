@@ -11,7 +11,8 @@
     "emptyTitle": "No results found",
     "emptyHint": "Try a different search term",
     "foundOne": "Found {{count}} result",
-    "foundMany": "Found {{count}} results"
+    "foundMany": "Found {{count}} results",
+    "platformsLink": "Learn more about each platform and what artists earn →"
   },
   "features": {
     "heading": "Keep track of artists you want to support",
