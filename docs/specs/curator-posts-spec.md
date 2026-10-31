@@ -138,7 +138,7 @@ Rules:
 **Buffer auth: OAuth, one connection per user.** Settled 2026-10-27 — Buffer registers third-party clients at Settings → API, and Brandon can register Unstream's. The 2026 outside reviews that said otherwise (Zernio, PostProxy) are out of date.
 
 - **Authorization Code with PKCE**, which Buffer *requires* of every client, `code_challenge_method=S256`. Authorize at `https://auth.buffer.com/auth`, exchange at `https://auth.buffer.com/token`.
-- Unstream is a **confidential client**: the exchange sends `client_secret` as well as `code_verifier`, and the secret never reaches the browser. `BUFFER_CLIENT_ID` and `BUFFER_CLIENT_SECRET` are Netlify environment variables — the only two this feature needs beyond the card bucket's.
+- Unstream is a **public client** (since 2026-10-30; it began as a confidential one): its source is open, so it proves itself with PKCE alone and sends **no** `client_secret`, which Buffer refuses from a public client. `BUFFER_CLIENT_ID` is the one Netlify variable this feature needs beyond the card bucket's; `BUFFER_CLIENT_SECRET` stays unset (the code sends a secret only when one is set).
 - **Scopes:** `posts:write` to create the posts, `account:read` to list the curator's channels, and `offline_access`, **without which Buffer issues no refresh token at all**.
 - **An access token lasts an hour** (`expires_in: 3600`), so a curator who connected yesterday has an expired token. Every call refreshes first when the stored token is within a minute of expiry; there is no "just use the stored token" path.
 - **Refresh tokens are single-use, and reusing one revokes the whole grant.** Buffer returns a new refresh token on every refresh and invalidates the old one; replaying an old one logs the curator out of Unstream's integration entirely and they must reconnect. Two consequences the code has to honour:
@@ -194,7 +194,7 @@ Mockup: the "Unstream curator posts" design canvas (https://claude.ai/artifact/V
 
 **Built for curators, not demoed on one account** (decided 2026-10-27, superseding the admin-token cut this section first described). The scope that ships:
 
-1. **Each curator connects their own Buffer account** over OAuth, and posts from their own tokens. `BUFFER_CLIENT_ID` and `BUFFER_CLIENT_SECRET` are the only new Netlify variables; the connection lives in `buffer_connections`. **Don't leave either blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line.
+1. **Each curator connects their own Buffer account** over OAuth, and posts from their own tokens. `BUFFER_CLIENT_ID` is the only new Netlify variable (a public client has no secret; see "Backend"); the connection lives in `buffer_connections`. **Don't leave it blank in `.env`** — a blank value shadows the real one from the site settings, and `netlify dev` only says so in an `Ignored project settings env var` line.
 2. **Gated by the `curatorPosts` feature flag**, in the existing store and failing closed, so it is invisible until switched on at `/admin/flags`. The flag is what holds it back, with one exception: the admin account (`ADMIN_EMAIL`) is always let through (`canUseCuratorPosts` in `buffer-db.ts`), so it can be tested end to end before it is switched on — the tips precedent.
 3. **One built-in template** ("Tonight's show"), editable in the page for that post only. Saving templates comes later.
 4. **Mentions** via `/api/suggest`, which only finds stored artists; no paste-a-list.
