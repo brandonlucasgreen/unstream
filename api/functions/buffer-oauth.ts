@@ -13,7 +13,8 @@
 //
 //   1. An access token lasts an hour, so a curator who connected yesterday arrives expired.
 //      Nothing may use a stored token without checking first.
-//   2. A refresh token only exists if `offline_access` was requested. Without it a connection
+//   2. A refresh token only exists if `offline_access` was requested **with `prompt=consent`**
+//      (see buildAuthorizeUrl). Without it a connection
 //      dies after an hour and cannot be revived.
 //   3. **Refresh tokens are single-use, and replaying one revokes the entire grant** — the
 //      curator is silently disconnected and has to reconnect. So a refresh is a compare-and-set
@@ -85,7 +86,20 @@ export function createPkcePair(): PkcePair {
   return { verifier, challenge };
 }
 
-/** The URL to send the curator to. `state` is the caller's CSRF token, checked on return. */
+/**
+ * The URL to send the curator to. `state` is the caller's CSRF token, checked on return.
+ *
+ * **`prompt=consent` is what makes `offline_access` stick.** Buffer's auth server is
+ * node-oidc-provider (its discovery document at auth.buffer.com/.well-known/openid-configuration
+ * has that library's layout), which follows OpenID Connect Core §11: a request for offline access
+ * "MUST ensure that the prompt parameter contains consent". Without it, the library silently
+ * removes `offline_access` from the request (checkScope, lib/actions/authorization/scopes.js) and
+ * grants the rest, so no refresh token is issued and the connection ends in an hour. That is what
+ * happened until 2026-10-30: grants came back as "posts:write posts:read account:read". It also
+ * explains why the app's Permissions list in Buffer's settings has no `offline_access` to tick:
+ * it's one of the server's built-in scopes, not an app permission. The cost is that Buffer always
+ * shows its consent screen, which a connect does anyway.
+ */
 export function buildAuthorizeUrl(state: string, challenge: string): string {
   const clientId = process.env.BUFFER_CLIENT_ID;
   if (!clientId) throw new BufferError(500, 'Buffer OAuth is not configured');
@@ -95,6 +109,7 @@ export function buildAuthorizeUrl(state: string, challenge: string): string {
   url.searchParams.set('redirect_uri', bufferRedirectUri());
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', BUFFER_SCOPES.join(' '));
+  url.searchParams.set('prompt', 'consent');
   url.searchParams.set('state', state);
   url.searchParams.set('code_challenge', challenge);
   url.searchParams.set('code_challenge_method', 'S256');

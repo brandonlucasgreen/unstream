@@ -87,9 +87,18 @@ describe('buildAuthorizeUrl', () => {
     expect([...scope].sort()).toEqual(['account:read', 'offline_access', 'posts:read', 'posts:write']);
   });
 
-  // The secret is what makes us a confidential client; it belongs nowhere near the browser.
-  it('never puts the client secret in the URL', () => {
+  // Buffer's server (node-oidc-provider) drops offline_access from any request without
+  // prompt=consent, per OpenID Connect Core §11, and then issues no refresh token: the cause of
+  // connections ending after an hour until 2026-10-30.
+  it('asks for consent, without which offline_access is silently dropped', () => {
+    expect(new URL(buildAuthorizeUrl('s', 'c')).searchParams.get('prompt')).toBe('consent');
+  });
+
+  // Even from the old confidential client, the secret belonged nowhere near the browser.
+  it('never puts a client secret in the URL', () => {
+    process.env.BUFFER_CLIENT_SECRET = 'secret-xyz';
     expect(buildAuthorizeUrl('s', 'c')).not.toContain('secret-xyz');
+    delete process.env.BUFFER_CLIENT_SECRET;
   });
 });
 
