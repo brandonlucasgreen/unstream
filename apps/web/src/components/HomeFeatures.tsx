@@ -82,10 +82,11 @@ export function HomeFeatures() {
       </div>
 
       {/* The support ask, as a full-width band rather than a line of grey text.
-          White on the green accent, matching the "Search for artists" button. */}
-      <p className="bg-accent-secondary text-white text-center font-medium px-6 py-4">
+          Same colours as the primary feature tiles above (Release alerts et al),
+          so it holds up in both themes. */}
+      <p className="bg-fill-primary/10 text-text-secondary text-center font-medium px-6 py-4">
         {t('artist:features.freeBody')}{' '}
-        <a href="/support" className="underline decoration-2 underline-offset-4 hover:no-underline">
+        <a href="/support" className="text-link underline decoration-2 underline-offset-4 hover:no-underline">
           <strong>{t('artist:features.freeSupportLink')}</strong>
         </a> 🤘
       </p>
