@@ -7,6 +7,7 @@ import { Footer } from '../components/Footer';
 import { UsernameField } from '../components/UsernameField';
 import { LocationField } from '../components/LocationField';
 import { PasswordChangeForm } from '../components/PasswordChangeForm';
+import { TwoFactorSection } from '../components/TwoFactorSection';
 import { EmailChangeForm } from '../components/EmailChangeForm';
 import { refreshSessionAfterEmailChange } from '../services/auth';
 import { SharingControls } from '../components/SharingControls';
@@ -283,6 +284,14 @@ export function SettingsPage() {
             />
           </section>
           )}
+
+          {/* Two-step verification. The id anchors the security nudge banner on
+              /my-collection, which links here to encourage setup (see
+              docs/specs/two-factor-auth-spec.md). */}
+          <section id="two-step" className="scroll-mt-24 p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+            <h2 className="text-lg font-semibold">Two-step verification</h2>
+            <TwoFactorSection />
+          </section>
         </div>
       </main>
 
