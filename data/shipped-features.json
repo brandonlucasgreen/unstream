@@ -138,5 +138,12 @@
     "description": "Artists who've claimed their Unstream page can now add Cash App, Steady, Tipeee and Big Cartel links, alongside Venmo, PayPal, Patreon, Ko-fi and Liberapay, so you can support them wherever they take payments.",
     "date": "2026-10-27",
     "announced": false
+  },
+  {
+    "id": "two-step-verification",
+    "title": "Two-step verification for your account",
+    "description": "Add a second step to signing in — a code from an authenticator app, or a passkey from Touch ID or your phone — so a stolen password isn't enough for someone to take over your account. Set it up in Settings; you'll be asked for it each time you sign in.",
+    "date": "2026-11-01",
+    "announced": false
   }
 ]
