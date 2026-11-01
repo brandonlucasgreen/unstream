@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { signInWithMagicLink, signInWithPassword, resetPasswordForEmail } from '../services/auth';
+import { signInWithPasskey, passkeysSupported, passkeyAutofillSupported } from '../services/passkeys';
 import { useAuth } from '../contexts/AuthContext';
 
 import { Header } from '../components/Header';
@@ -36,6 +37,10 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<ViewMode>('form');
+  const showPasskeyButton = passkeysSupported();
+  // The pending autofill prompt (see startPasskeyAutofill), aborted before the
+  // button's own prompt runs and when the page goes away.
+  const autofillAbort = useRef<AbortController | null>(null);
 
   // A page that sent someone here gets them straight back. Otherwise the destination
   // depends on whether they have a verified artist, which takes a request to answer —
@@ -52,6 +57,55 @@ export function LoginPage() {
     });
     return () => { cancelled = true; };
   }, [session, authLoading, navigate, next]);
+
+  // Offer passkeys in the email field's suggestions (WebAuthn conditional UI),
+  // for as long as the sign-in form is on screen. A passkey picked after its
+  // five-minute challenge expired comes back 'expired'; a fresh one starts so the
+  // next pick works.
+  function startPasskeyAutofill() {
+    autofillAbort.current?.abort();
+    const controller = new AbortController();
+    autofillAbort.current = controller;
+    signInWithPasskey({ autofill: true, signal: controller.signal }).then(result => {
+      if (controller.signal.aborted) return;
+      if (result.status === 'expired') {
+        setError('That took a little too long. Choose your passkey again.');
+        startPasskeyAutofill();
+      } else if (result.status === 'failed') {
+        setError(result.error);
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (authLoading || session || view !== 'form') return;
+    let cancelled = false;
+    passkeyAutofillSupported().then(available => {
+      if (available && !cancelled) startPasskeyAutofill();
+    });
+    return () => {
+      cancelled = true;
+      autofillAbort.current?.abort();
+      autofillAbort.current = null;
+    };
+    // startPasskeyAutofill only touches refs and setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, session, view]);
+
+  async function handlePasskeySignIn() {
+    // The browser runs one WebAuthn prompt at a time: drop the autofill one first.
+    autofillAbort.current?.abort();
+    autofillAbort.current = null;
+    setError(null);
+    setLoading(true);
+    const result = await signInWithPasskey();
+    setLoading(false);
+    // On success the session arrives through AuthContext and the effect above
+    // moves on; an account with an authenticator app meets its code check next.
+    if (result.status === 'failed') setError(result.error);
+    if (result.status === 'expired') setError('That took a little too long. Try your passkey again.');
+    if (result.status !== 'signed-in') startPasskeyAutofill();
+  }
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -181,6 +235,7 @@ export function LoginPage() {
                       <input
                         id="email"
                         type="email"
+                        autoComplete="username webauthn"
                         required
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -238,6 +293,17 @@ export function LoginPage() {
                   >
                     {loading ? 'Sending...' : 'Send sign-in link to email'}
                   </button>
+
+                  {showPasskeyButton && (
+                    <button
+                      type="button"
+                      onClick={handlePasskeySignIn}
+                      disabled={loading}
+                      className="w-full py-2 rounded-lg border border-border text-text-primary font-medium hover:bg-bg-secondary transition-colors disabled:opacity-50"
+                    >
+                      Sign in with a passkey
+                    </button>
+                  )}
 
                   <p className="text-center text-xs text-text-muted">
                     {savingTip ? (

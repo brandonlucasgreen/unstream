@@ -8,6 +8,7 @@ import { UsernameField } from '../components/UsernameField';
 import { LocationField } from '../components/LocationField';
 import { PasswordChangeForm } from '../components/PasswordChangeForm';
 import { TwoFactorSection } from '../components/TwoFactorSection';
+import { PasskeysSection } from '../components/PasskeysSection';
 import { EmailChangeForm } from '../components/EmailChangeForm';
 import { refreshSessionAfterEmailChange } from '../services/auth';
 import { SharingControls } from '../components/SharingControls';
@@ -284,6 +285,13 @@ export function SettingsPage() {
             />
           </section>
           )}
+
+          {/* Passkeys: a way to sign in instead of a password, not a second step
+              (docs/specs/passkey-sign-in-spec.md). */}
+          <section id="passkeys" className="scroll-mt-24 p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
+            <h2 className="text-lg font-semibold">Passkeys</h2>
+            <PasskeysSection />
+          </section>
 
           {/* Two-step verification. The id anchors the security nudge banner on
               /my-collection, which links here to encourage setup (see

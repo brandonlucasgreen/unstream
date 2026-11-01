@@ -39,14 +39,14 @@
     "audit:strings": "tsx scripts/audit-ui-strings.ts"
   },
   "dependencies": {
-    "aws4fetch": "^1.0.20",
     "@resvg/resvg-wasm": "^2.6.2",
     "@sentry/node": "^10.56.0",
     "@sentry/react": "^10.56.0",
-    "@supabase/supabase-js": "^2.99.1",
+    "@supabase/supabase-js": "2.118.0",
     "@tailwindcss/typography": "^0.5.19",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
+    "aws4fetch": "^1.0.20",
     "jose": "^6.2.4",
     "node-html-parser": "^7.0.1",
     "react": "^19.2.0",
