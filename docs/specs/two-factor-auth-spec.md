@@ -134,5 +134,15 @@ stolen password (or inbox) is no longer enough to take an account over.
   verified factor; proceeds at aal1 with none; proceeds at aal2; fails
   closed when the factor lookup errors.
 - Manual E2E: TOTP enroll → sign out → sign in → challenge → aal2, against
-  `npm run dev` (production Supabase). WebAuthn flows are typechecked and
-  unit-tested only until the dashboard toggle is on.
+  `npm run dev` (production Supabase). A scripted pass of that flow was attempted
+  from the worktree but stops at Supabase's email confirmation — creating a
+  smoke account is easy, confirming its email isn't, without an inbox. The
+  auth-layer calls themselves were verified against the installed auth-js
+  source (challenge/enroll/verify request shapes), not from memory.
+  Two-minute manual check for Brandon once merged, with any real account:
+  /settings → Two-step verification → Add authenticator app → scan → enter
+  code → sign out → sign in → the gate asks for the code → done. A smoke
+  account (`unstream-2fa-smoke@kidlightbulbs.com`, unconfirmed, inert) was
+  created in production auth during the attempt and can be deleted in the
+  dashboard. WebAuthn flows are typechecked and unit-tested only until the
+  dashboard toggle is on.
