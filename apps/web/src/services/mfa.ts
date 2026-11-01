@@ -3,6 +3,11 @@
 // of it spends the site's Redis or API rate-limit budget. Setup UI lives in the
 // /settings "Two-step verification" section; the sign-in challenge lives in
 // MfaChallengeGate. See docs/specs/two-factor-auth-spec.md for the model.
+//
+// Authenticator apps (TOTP) only. Passkeys were built and removed on
+// 2026-11-01: Supabase's dashboard offers no way to turn on WebAuthn as a
+// second factor for this project, so enrolling one always failed with "MFA
+// enroll is disabled for WebAuthn". The code is in git history (#738).
 
 import type { Factor, FactorType } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
@@ -29,9 +34,8 @@ export interface TotpEnrollment {
 /**
  * Report an MFA failure Supabase *returned* rather than threw. A wrong code is
  * the user's own doing and constant, so like `reportAuthFailure` in
- * services/auth.ts it's excluded (a cancelled passkey prompt never gets here —
- * see isCancelledPrompt). What's left — rate limits, a misconfigured WebAuthn
- * provider or RP ID, 5xx — is worth waking up to.
+ * services/auth.ts it's excluded. What's left — rate limits, 5xx — is worth
+ * waking up to.
  */
 function reportMfaFailure(operation: string, error: Error): void {
   if (isWrongTotpCode(error.message)) return;
@@ -45,7 +49,7 @@ function reportMfaFailure(operation: string, error: Error): void {
 
 /**
  * Supabase factor names must be unique per account, so a fixed name would make
- * every second authenticator app or passkey fail to enroll. The UI labels
+ * every second authenticator app fail to enroll. The UI labels
  * factors by type and date, so the name only has to be distinct.
  */
 function uniqueFriendlyName(base: string): string {
@@ -147,66 +151,4 @@ export async function unenrollFactor(factorId: string): Promise<{ error: string 
     return { error: error.message };
   }
   return { error: null };
-}
-
-/** Whether this browser can run a WebAuthn ceremony at all. */
-export function passkeysSupported(): boolean {
-  return typeof window !== 'undefined' && 'PublicKeyCredential' in window && window.isSecureContext;
-}
-
-/**
- * Whether a passkey failure is the person backing out of the browser prompt —
- * no error text, no Sentry report, nothing to stop them trying again. Browsers
- * report a dismissed prompt as NotAllowedError, which auth-js passes through as
- * the error's name; an aborted ceremony has its own code.
- */
-function isCancelledPrompt(error: Error): boolean {
-  return error.name === 'NotAllowedError'
-    || (error as Error & { code?: string }).code === 'ERROR_CEREMONY_ABORTED';
-}
-
-/**
- * The rp id and origin describe *this page*, not a constant: a ceremony only
- * succeeds when they match what Supabase was configured with (see the spec —
- * this is why passkeys work on unstream.stream but not on localhost or a
- * deploy preview).
- */
-function currentRelyingParty() {
-  return { rpId: window.location.hostname, rpOrigins: [window.location.origin] };
-}
-
-/**
- * Enroll a passkey: auth-js's register() creates the factor, runs the browser's
- * create ceremony and verifies it. An enrollment that ends without a
- * verification leaves an unverified factor behind, which the next enrollment
- * clears (unenrollUnverifiedFactors) and the settings list never shows.
- */
-export async function enrollPasskey(): Promise<{ error: string | null }> {
-  const supabase = getSupabaseClient();
-  if (!supabase) return { error: 'Auth not configured' };
-
-  await unenrollUnverifiedFactors();
-  const { error } = await supabase.auth.mfa.webauthn.register({
-    friendlyName: uniqueFriendlyName('Passkey'),
-    webauthn: currentRelyingParty(),
-  });
-  if (!error) return { error: null };
-  if (isCancelledPrompt(error)) return { error: null };
-  reportMfaFailure('enrollPasskey', error);
-  return { error: error.message || 'The passkey prompt failed. Try again.' };
-}
-
-/** The sign-in step: prove with a passkey the account has already enrolled. */
-export async function verifyWithPasskey(factorId: string): Promise<{ error: string | null; cancelled: boolean }> {
-  const supabase = getSupabaseClient();
-  if (!supabase) return { error: 'Auth not configured', cancelled: false };
-
-  const { error } = await supabase.auth.mfa.webauthn.authenticate({
-    factorId,
-    webauthn: currentRelyingParty(),
-  });
-  if (!error) return { error: null, cancelled: false };
-  if (isCancelledPrompt(error)) return { error: null, cancelled: true };
-  reportMfaFailure('verifyWithPasskey', error);
-  return { error: error.message || 'The passkey prompt failed. Try again.', cancelled: false };
 }

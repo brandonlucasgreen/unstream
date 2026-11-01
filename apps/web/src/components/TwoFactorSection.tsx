@@ -3,9 +3,7 @@ import {
   listMfaFactors,
   enrollTotp,
   verifyTotp,
-  enrollPasskey,
   unenrollFactor,
-  passkeysSupported,
   type MfaFactor,
   type TotpEnrollment,
 } from '../services/mfa';
@@ -94,21 +92,6 @@ export function TwoFactorSection() {
     setEnrollment(null);
     setCode('');
     setNotice('Two-step verification is on. You will be asked for a code at sign-in.');
-    reload();
-  }
-
-  async function handleAddPasskey() {
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    const { error: enrollError } = await enrollPasskey();
-    setBusy(false);
-    // A cancelled browser prompt is not a failure — nothing to say.
-    if (enrollError) {
-      setError(enrollError);
-      return;
-    }
-    setNotice('Two-step verification is on. You will be asked for your passkey at sign-in.');
     reload();
   }
 
@@ -215,7 +198,7 @@ export function TwoFactorSection() {
       <p className="text-sm text-text-secondary">
         {verified.length > 0
           ? 'On. Your account asks for a second step at sign-in.'
-          : 'Off. Add a second step to sign-in — a code from an authenticator app, or a passkey — so a stolen password alone is not enough to take over your account.'}
+          : 'Off. Add a second step to sign-in — a code from an authenticator app — so a stolen password alone is not enough to take over your account.'}
       </p>
 
       {notice && <p className="text-sm text-success">{notice}</p>}
@@ -227,7 +210,7 @@ export function TwoFactorSection() {
             <li key={factor.id} className="flex items-center justify-between gap-3 px-3 py-2">
               <div>
                 <p className="text-sm font-medium">
-                  {factor.type === 'webauthn' ? 'Passkey' : 'Authenticator app'}
+                  {factor.type === 'totp' ? 'Authenticator app' : 'Other second step'}
                 </p>
                 <p className="text-xs text-text-muted">
                   Added {new Date(factor.createdAt).toLocaleDateString()}
@@ -277,16 +260,6 @@ export function TwoFactorSection() {
         >
           {busy ? 'Adding…' : 'Add authenticator app'}
         </button>
-        {passkeysSupported() && (
-          <button
-            type="button"
-            onClick={handleAddPasskey}
-            disabled={busy}
-            className="px-4 py-2 rounded-lg border border-border text-text-primary text-sm font-medium hover:bg-bg-primary transition-colors disabled:opacity-50"
-          >
-            Add passkey
-          </button>
-        )}
       </div>
     </div>
   );

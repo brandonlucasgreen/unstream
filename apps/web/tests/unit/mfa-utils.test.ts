@@ -3,7 +3,7 @@
 // needsSecondFactor: it decides when the whole app is held behind the sign-in
 // challenge, so its edge cases matter — especially that an unreadable token
 // counts as *needing* the challenge (fail closed) rather than not.
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { Session, User } from '@supabase/supabase-js';
 import {
   decodeAalClaim,
@@ -13,7 +13,7 @@ import {
   normalizeTotpCode,
 } from 'src/utils/mfa';
 import { shouldShowSecurityNudge, SECURITY_NUDGE_DISMISSED_KEY } from 'src/utils/securityNudge';
-import { totpQrDataUri, passkeysSupported } from 'src/services/mfa';
+import { totpQrDataUri } from 'src/services/mfa';
 
 function encode(payload: Record<string, unknown>): string {
   return btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -168,28 +168,6 @@ describe('totpQrDataUri', () => {
 
   it('passes through a value that is already a data URI', () => {
     expect(totpQrDataUri('data:image/svg+xml;utf8,already')).toBe('data:image/svg+xml;utf8,already');
-  });
-});
-
-describe('passkeysSupported', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('is false where the browser has no WebAuthn support', () => {
-    expect(passkeysSupported()).toBe(false);
-  });
-
-  it('is false on an insecure page even with WebAuthn support', () => {
-    vi.stubGlobal('PublicKeyCredential', class {});
-    vi.stubGlobal('isSecureContext', false);
-    expect(passkeysSupported()).toBe(false);
-  });
-
-  it('is true on a secure page with WebAuthn support', () => {
-    vi.stubGlobal('PublicKeyCredential', class {});
-    vi.stubGlobal('isSecureContext', true);
-    expect(passkeysSupported()).toBe(true);
   });
 });
 

@@ -31,7 +31,7 @@ export function SecurityNudgeBanner() {
           Safeguard your account
         </h2>
         <p className="text-sm text-text-secondary">
-          Add a second step to signing in — an authenticator app or a passkey — so a
+          Add a second step to signing in — a code from an authenticator app — so a
           stolen password isn't enough for someone to take over your account.{' '}
           <Link to="/settings#two-step" className="text-link hover:underline">
             Set it up

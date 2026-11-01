@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 // The screen the app is held behind until a two-step session finishes its
 // second factor. What matters: the right prompt appears for the factors the
-// account has, a wrong code is explained in human words, a cancelled passkey
-// prompt lets you try again, and the escape hatch signs you out.
+// account has, a wrong code is explained in human words, and the escape hatch signs
+// you out.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import type { Session, Factor, User } from '@supabase/supabase-js';
@@ -10,14 +10,10 @@ import { MfaChallengeGate } from 'src/components/MfaChallengeGate';
 
 const mocks = vi.hoisted(() => ({
   verifyTotp: vi.fn(),
-  verifyWithPasskey: vi.fn(),
-  passkeysSupported: vi.fn(() => true),
 }));
 
 vi.mock('src/services/mfa', () => ({
   verifyTotp: mocks.verifyTotp,
-  verifyWithPasskey: mocks.verifyWithPasskey,
-  passkeysSupported: mocks.passkeysSupported,
 }));
 
 function encode(payload: Record<string, unknown>): string {
@@ -53,8 +49,6 @@ function renderGate(factors: Factor[], onSignOut = vi.fn()) {
 describe('MfaChallengeGate', () => {
   beforeEach(() => {
     mocks.verifyTotp.mockReset().mockResolvedValue({ error: null });
-    mocks.verifyWithPasskey.mockReset().mockResolvedValue({ error: null, cancelled: false });
-    mocks.passkeysSupported.mockReset().mockReturnValue(true);
   });
 
   afterEach(cleanup);
@@ -63,51 +57,15 @@ describe('MfaChallengeGate', () => {
     renderGate([makeFactor('f-totp', 'totp', '2026-11-01T00:00:00Z')]);
 
     expect(screen.getByLabelText('Code from your authenticator app')).toBeTruthy();
-    expect(screen.queryByText('Use your passkey')).toBeNull();
   });
 
-  it('offers the passkey when the account has a webauthn factor and the browser supports it', () => {
+  it('says where to turn when the only factor is one it cannot ask for', () => {
     renderGate([makeFactor('f-key', 'webauthn', '2026-11-01T00:00:00Z')]);
 
-    expect(screen.getByText('Use your passkey')).toBeTruthy();
+    // No dead input: the sign-out and recovery paths remain, and it says why.
     expect(screen.queryByLabelText('Code from your authenticator app')).toBeNull();
-  });
-
-  it('offers both when the account has one of each', () => {
-    renderGate([
-      makeFactor('f-totp', 'totp', '2026-11-01T00:00:00Z'),
-      makeFactor('f-key', 'webauthn', '2026-11-01T00:00:00Z'),
-    ]);
-
-    expect(screen.getByText('Use your passkey')).toBeTruthy();
-    expect(screen.getByLabelText('Code from your authenticator app')).toBeTruthy();
-  });
-
-  it('hides the passkey option when the browser cannot run a ceremony', () => {
-    mocks.passkeysSupported.mockReturnValue(false);
-    renderGate([makeFactor('f-key', 'webauthn', '2026-11-01T00:00:00Z')]);
-
-    // Nothing to verify with — the gate stays honest rather than offering a
-    // dead button, and the sign-out and recovery paths remain.
-    expect(screen.queryByText('Use your passkey')).toBeNull();
-    expect(screen.getByText('Two-step verification')).toBeTruthy();
     expect(screen.getByText('Sign out instead')).toBeTruthy();
-    // ...and says why there's nothing to press, and where to go instead.
-    expect(screen.getByText(/this browser can't use passkeys/)).toBeTruthy();
-  });
-
-  it('offers every passkey, each challenging its own factor', async () => {
-    renderGate([
-      makeFactor('f-mac', 'webauthn', '2026-10-01T00:00:00Z'),
-      makeFactor('f-phone', 'webauthn', '2026-10-20T00:00:00Z'),
-    ]);
-
-    const buttons = screen.getAllByText(/^Use the passkey added/);
-    expect(buttons).toHaveLength(2);
-    fireEvent.click(buttons[1]);
-    await waitFor(() => {
-      expect(mocks.verifyWithPasskey).toHaveBeenCalledWith('f-phone');
-    });
+    expect(screen.getByText(/isn't one this page can ask for/)).toBeTruthy();
   });
 
   it('accepts a code pasted with the space authenticator apps show', async () => {
@@ -161,28 +119,6 @@ describe('MfaChallengeGate', () => {
     await waitFor(() => {
       expect(screen.getByText("That code didn't match. Codes change every 30 seconds — try the current one.")).toBeTruthy();
     });
-  });
-
-  it('shows the passkey error and lets the person try again', async () => {
-    mocks.verifyWithPasskey.mockResolvedValue({ error: 'The request timed out.', cancelled: false });
-    renderGate([makeFactor('f-key', 'webauthn', '2026-11-01T00:00:00Z')]);
-
-    fireEvent.click(screen.getByText('Use your passkey'));
-    await waitFor(() => {
-      expect(screen.getByText('The request timed out.')).toBeTruthy();
-    });
-    expect(screen.getByText('Use your passkey').closest('button')?.disabled).toBeFalsy();
-  });
-
-  it('re-enables the passkey button when the prompt was dismissed, without an error', async () => {
-    mocks.verifyWithPasskey.mockResolvedValue({ error: null, cancelled: true });
-    renderGate([makeFactor('f-key', 'webauthn', '2026-11-01T00:00:00Z')]);
-
-    fireEvent.click(screen.getByText('Use your passkey'));
-    await waitFor(() => {
-      expect(screen.getByText('Use your passkey').closest('button')?.disabled).toBeFalsy();
-    });
-    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('signs out through the escape hatch', () => {

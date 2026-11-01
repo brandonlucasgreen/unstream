@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Session, Factor } from '@supabase/supabase-js';
-import { verifyTotp, verifyWithPasskey, passkeysSupported } from '../services/mfa';
+import { verifyTotp } from '../services/mfa';
 import {
   TOTP_CODE_FORMAT_ERROR,
   TOTP_INPUT_MAX_LENGTH,
@@ -42,16 +42,10 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
     .filter(f => f.factor_type === 'totp')
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
     .at(-1);
-  // Each passkey is its own factor, and a challenge only accepts that factor's
-  // credential — so every passkey gets a button, or a passkey made on a second
-  // device could never finish a sign-in.
-  const passkeyFactors = factors
-    .filter(f => f.factor_type === 'webauthn')
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
-  const showPasskeys = passkeyFactors.length > 0 && passkeysSupported();
-  // A passkey-only account in a browser that can't run passkeys (an in-app
-  // webview, say) would otherwise see a screen with no way forward.
-  const noUsableStep = !showPasskeys && !totpFactor;
+  // Every enrollable factor is TOTP, so this only fires for a factor added
+  // outside this app (by hand in Supabase, say): say so
+  // rather than show a screen with no way forward.
+  const noUsableStep = !totpFactor;
 
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
@@ -74,22 +68,6 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
     // moment between is the right thing (a second submit can't race it).
   }
 
-  async function handlePasskey(factorId: string) {
-    setBusy(true);
-    setError(null);
-    const { error: passkeyError, cancelled } = await verifyWithPasskey(factorId);
-    if (cancelled) {
-      // The person backed out of the browser prompt; let them try again or
-      // use a code if they have one.
-      setBusy(false);
-      return;
-    }
-    if (passkeyError) {
-      setError(passkeyError);
-      setBusy(false);
-    }
-  }
-
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6">
@@ -110,40 +88,9 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
 
         {noUsableStep && (
           <p className="p-3 rounded-lg bg-bg-secondary border border-border text-sm text-text-secondary">
-            Your second step is a passkey, and this browser can't use passkeys. Open
-            unstream.stream in Safari, Chrome, Firefox or Edge to finish signing in.
+            Your account's second step isn't one this page can ask for. Email
+            support@unstream.stream and we'll get you back in.
           </p>
-        )}
-
-        {showPasskeys && (
-          <>
-            {passkeyFactors.map(factor => (
-              <button
-                key={factor.id}
-                type="button"
-                onClick={() => handlePasskey(factor.id)}
-                disabled={busy}
-                className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
-              >
-                {busy
-                  ? 'Waiting for your passkey…'
-                  : passkeyFactors.length > 1
-                    ? `Use the passkey added ${new Date(factor.created_at).toLocaleDateString()}`
-                    : 'Use your passkey'}
-              </button>
-            ))}
-
-            {totpFactor && (
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-bg-primary px-2 text-text-muted">or</span>
-                </div>
-              </div>
-            )}
-          </>
         )}
 
         {totpFactor && (

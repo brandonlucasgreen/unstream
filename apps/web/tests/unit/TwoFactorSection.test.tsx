@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 // The enrollment half of two-step verification, on /settings. What matters:
 // the status line tells the truth about the account, an abandoned TOTP
-// enrollment doesn't leave a stray factor behind, removal needs two clicks,
-// and a passkey that the browser can't run is never offered.
+// enrollment doesn't leave a stray factor behind, and removal needs two clicks.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { TwoFactorSection } from 'src/components/TwoFactorSection';
@@ -11,18 +10,14 @@ const mocks = vi.hoisted(() => ({
   listMfaFactors: vi.fn(),
   enrollTotp: vi.fn(),
   verifyTotp: vi.fn(),
-  enrollPasskey: vi.fn(),
   unenrollFactor: vi.fn(),
-  passkeysSupported: vi.fn(() => true),
 }));
 
 vi.mock('src/services/mfa', () => ({
   listMfaFactors: mocks.listMfaFactors,
   enrollTotp: mocks.enrollTotp,
   verifyTotp: mocks.verifyTotp,
-  enrollPasskey: mocks.enrollPasskey,
   unenrollFactor: mocks.unenrollFactor,
-  passkeysSupported: mocks.passkeysSupported,
 }));
 
 function factor(id: string, type: 'totp' | 'webauthn', status: 'verified' | 'unverified' = 'verified') {
@@ -47,9 +42,7 @@ describe('TwoFactorSection', () => {
     mocks.listMfaFactors.mockReset().mockResolvedValue(EMPTY);
     mocks.enrollTotp.mockReset().mockResolvedValue({ enrollment: ENROLLMENT, error: null });
     mocks.verifyTotp.mockReset().mockResolvedValue({ error: null });
-    mocks.enrollPasskey.mockReset().mockResolvedValue({ error: null });
     mocks.unenrollFactor.mockReset().mockResolvedValue({ error: null });
-    mocks.passkeysSupported.mockReset().mockReturnValue(true);
   });
 
   afterEach(cleanup);
@@ -60,12 +53,12 @@ describe('TwoFactorSection', () => {
       expect(screen.getByText(/Add a second step to sign-in/)).toBeTruthy();
     });
     expect(screen.getByText('Add authenticator app')).toBeTruthy();
-    expect(screen.getByText('Add passkey')).toBeTruthy();
+    expect(screen.queryByText('Add passkey')).toBeNull();
   });
 
   it('says verification is on and lists the factors the account has', async () => {
     mocks.listMfaFactors.mockResolvedValue({
-      factors: [factor('f-totp', 'totp'), factor('f-key', 'webauthn')],
+      factors: [factor('f-totp', 'totp')],
       error: null,
     });
 
@@ -74,7 +67,6 @@ describe('TwoFactorSection', () => {
       expect(screen.getByText('On. Your account asks for a second step at sign-in.')).toBeTruthy();
     });
     expect(screen.getByText('Authenticator app')).toBeTruthy();
-    expect(screen.getByText('Passkey')).toBeTruthy();
   });
 
   it('lists only verified factors — an abandoned enrollment is not a second step', async () => {
@@ -185,44 +177,6 @@ describe('TwoFactorSection', () => {
     await waitFor(() => {
       expect(screen.getByText('Add authenticator app')).toBeTruthy();
     });
-  });
-
-  it('enrolls a passkey from one click', async () => {
-    render(<TwoFactorSection />);
-    await waitFor(() => {
-      expect(screen.getByText('Add passkey')).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByText('Add passkey'));
-    await waitFor(() => {
-      expect(mocks.enrollPasskey).toHaveBeenCalledTimes(1);
-    });
-    await waitFor(() => {
-      expect(screen.getByText('Two-step verification is on. You will be asked for your passkey at sign-in.')).toBeTruthy();
-    });
-  });
-
-  it('shows the passkey error from Supabase when enrollment fails', async () => {
-    mocks.enrollPasskey.mockResolvedValue({ error: 'Unsupported factor type' });
-
-    render(<TwoFactorSection />);
-    await waitFor(() => {
-      expect(screen.getByText('Add passkey')).toBeTruthy();
-    });
-
-    fireEvent.click(screen.getByText('Add passkey'));
-    await waitFor(() => {
-      expect(screen.getByText('Unsupported factor type')).toBeTruthy();
-    });
-  });
-
-  it('never offers a passkey where the browser cannot run a ceremony', async () => {
-    mocks.passkeysSupported.mockReturnValue(false);
-    render(<TwoFactorSection />);
-    await waitFor(() => {
-      expect(screen.getByText('Add authenticator app')).toBeTruthy();
-    });
-    expect(screen.queryByText('Add passkey')).toBeNull();
   });
 
   it('needs a second click to remove a factor', async () => {

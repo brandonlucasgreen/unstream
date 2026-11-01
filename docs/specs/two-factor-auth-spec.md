@@ -1,5 +1,14 @@
 # Two-step verification (TOTP + passkeys) — spec
 
+> **Passkeys removed, 2026-11-01.** Shipped in #738 and taken out the same
+> day: this Supabase project's dashboard has no WebAuthn row under
+> Authentication → Multi-Factor, so every "Add passkey" failed with "MFA
+> enroll is disabled for WebAuthn", and the passkey-only settings page offers
+> passwordless sign-in, not a second factor. Two-step verification is
+> authenticator apps (TOTP) only. Everything below about passkeys is the
+> original design, kept for when Supabase offers the switch; the code is in
+> #738's history.
+
 Status: implemented November 2026. Scope chosen by Brandon: **TOTP and passkey
 second factors on the current `@supabase/supabase-js@2.99.1`** — no dependency
 upgrade. Passwordless *passkey sign-in* (`signInWithWebAuthn`, which needs a
