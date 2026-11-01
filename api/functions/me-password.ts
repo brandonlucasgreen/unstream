@@ -5,6 +5,7 @@
 
 import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
+import { decodeJwt } from 'jose';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
@@ -81,6 +82,39 @@ async function handleRequest(event: {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'New password must be at least 8 characters' }) };
   }
 
+  // Two-step verification, defense in depth (see docs/specs/two-factor-auth-spec.md).
+  // The web client holds any account that has a verified factor behind
+  // MfaChallengeGate until the session completes it, so honest traffic arrives
+  // here at aal2 — but a stolen aal1 session (a password-only sign-in) must not
+  // be able to rotate the password and take the account over. When the presented
+  // token hasn't completed the second factor, the service role is asked whether
+  // the account has one; the lookup runs only on that path, and fails closed:
+  // if Supabase can't answer, the change is refused rather than guessed at.
+  // decodeJwt only reads the payload — the token itself was already verified
+  // against the auth server by authenticateRequest above.
+  let completedSecondFactor = false;
+  try {
+    completedSecondFactor = decodeJwt(user.accessToken).aal === 'aal2';
+  } catch {
+    completedSecondFactor = false;
+  }
+
+  const serviceClient = getClient() ?? createClient(url, serviceKey);
+
+  if (!completedSecondFactor) {
+    const { data: factorsResult, error: factorsError } = await serviceClient.auth.admin.mfa.listFactors({
+      userId: user.userId,
+    });
+    if (factorsError) {
+      console.error('[me-password] Error listing MFA factors:', factorsError.message);
+      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Could not verify two-step verification status. Please try again.' }) };
+    }
+    const hasVerifiedFactor = (factorsResult?.factors ?? []).some(f => f.status === 'verified');
+    if (hasVerifiedFactor) {
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Your account uses two-step verification. Complete the second step at sign-in before changing your password.' }) };
+    }
+  }
+
   // Verify the current password by attempting a sign-in with the user's email.
   // Supabase's updateUser doesn't require the old password, so we verify it ourselves.
   const anonClient = createClient(url, anonKey);
@@ -95,7 +129,6 @@ async function handleRequest(event: {
 
   // Update the password using the service role (admin API).
   // Use user_metadata (snake_case) — userMetadata is silently ignored by the admin API.
-  const serviceClient = getClient() ?? createClient(url, serviceKey);
   const { error: updateError } = await serviceClient.auth.admin.updateUserById(user.userId, {
     password: newPassword,
     user_metadata: { has_password: true },
