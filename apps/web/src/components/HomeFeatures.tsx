@@ -81,8 +81,9 @@ export function HomeFeatures() {
         </div>
       </div>
 
-      {/* The support ask, as a full-width band rather than a line of grey text. */}
-      <p className="bg-fill-primary text-accent-foreground text-center font-medium px-6 py-4">
+      {/* The support ask, as a full-width band rather than a line of grey text.
+          White on the green accent, matching the "Search for artists" button. */}
+      <p className="bg-accent-secondary text-white text-center font-medium px-6 py-4">
         {t('artist:features.freeBody')}{' '}
         <a href="/support" className="underline decoration-2 underline-offset-4 hover:no-underline">
           <strong>{t('artist:features.freeSupportLink')}</strong>
