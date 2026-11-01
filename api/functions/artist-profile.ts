@@ -5,6 +5,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
+import { isMissingSecondFactor } from './middleware';
 import { cacheDeleteByArtist } from './cache';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
@@ -28,6 +29,9 @@ async function authenticateRequest(authHeader: string | undefined): Promise<stri
   const anonClient = createClient(url, anonKey);
   const { data, error } = await anonClient.auth.getUser(token);
   if (error || !data.user) return null;
+  // Profile edits change an artist's payment links: refuse a session that
+  // hasn't completed the account's second factor (middleware.ts explains).
+  if (isMissingSecondFactor(data.user, token)) return null;
   return data.user.id;
 }
 

@@ -92,6 +92,37 @@ describe('MfaChallengeGate', () => {
     expect(screen.queryByText('Use your passkey')).toBeNull();
     expect(screen.getByText('Two-step verification')).toBeTruthy();
     expect(screen.getByText('Sign out instead')).toBeTruthy();
+    // ...and says why there's nothing to press, and where to go instead.
+    expect(screen.getByText(/this browser can't use passkeys/)).toBeTruthy();
+  });
+
+  it('offers every passkey, each challenging its own factor', async () => {
+    renderGate([
+      makeFactor('f-mac', 'webauthn', '2026-10-01T00:00:00Z'),
+      makeFactor('f-phone', 'webauthn', '2026-10-20T00:00:00Z'),
+    ]);
+
+    const buttons = screen.getAllByText(/^Use the passkey added/);
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
+    await waitFor(() => {
+      expect(mocks.verifyWithPasskey).toHaveBeenCalledWith('f-phone');
+    });
+  });
+
+  it('accepts a code pasted with the space authenticator apps show', async () => {
+    renderGate([makeFactor('f-totp', 'totp', '2026-11-01T00:00:00Z')]);
+    const input = screen.getByLabelText('Code from your authenticator app') as HTMLInputElement;
+
+    // jsdom doesn't enforce maxLength on change events, so pin the attribute too:
+    // at 6 a browser cut "123 456" to "123 45".
+    expect(input.maxLength).toBeGreaterThanOrEqual(7);
+    fireEvent.change(input, { target: { value: '123 456' } });
+    fireEvent.click(screen.getByText('Verify'));
+
+    await waitFor(() => {
+      expect(mocks.verifyTotp).toHaveBeenCalledWith('f-totp', '123456');
+    });
   });
 
   it('rejects a code that is not six digits without calling Supabase', async () => {

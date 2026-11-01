@@ -9,6 +9,13 @@ import {
   type MfaFactor,
   type TotpEnrollment,
 } from '../services/mfa';
+import {
+  TOTP_CODE_FORMAT_ERROR,
+  TOTP_INPUT_MAX_LENGTH,
+  cleanTotpInput,
+  friendlyTotpError,
+  normalizeTotpCode,
+} from '../utils/mfa';
 
 /**
  * The enrollment half of two-step verification, mounted in the "Two-step
@@ -71,21 +78,17 @@ export function TwoFactorSection() {
 
   async function handleVerifyEnrollment() {
     if (!enrollment) return;
-    const trimmed = code.replace(/\s+/g, '');
-    if (!/^\d{6}$/.test(trimmed)) {
-      setError('Enter the 6-digit code from your authenticator app.');
+    const normalized = normalizeTotpCode(code);
+    if (!normalized) {
+      setError(TOTP_CODE_FORMAT_ERROR);
       return;
     }
     setBusy(true);
     setError(null);
-    const { error: verifyError } = await verifyTotp(enrollment.factorId, trimmed);
+    const { error: verifyError } = await verifyTotp(enrollment.factorId, normalized);
     setBusy(false);
     if (verifyError) {
-      setError(
-        /invalid totp code|code is incorrect/i.test(verifyError)
-          ? "That code didn't match. Codes change every 30 seconds — try the current one."
-          : verifyError,
-      );
+      setError(friendlyTotpError(verifyError));
       return;
     }
     setEnrollment(null);
@@ -174,10 +177,10 @@ export function TwoFactorSection() {
             id="totp-code"
             type="text"
             inputMode="numeric"
-            maxLength={6}
+            maxLength={TOTP_INPUT_MAX_LENGTH}
             value={code}
             onChange={e => {
-              setCode(e.target.value.replace(/[^\d\s]/g, ''));
+              setCode(cleanTotpInput(e.target.value));
               setError(null);
             }}
             placeholder="123 456"

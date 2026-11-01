@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => {
     mockCheckRateLimit: vi.fn(),
     mockGetClientIp: vi.fn(() => '127.0.0.1'),
     mockSendEmail: vi.fn(),
+    mockSessionMissingSecondFactor: vi.fn(),
   };
 });
 
@@ -22,6 +23,10 @@ vi.mock('../ratelimit', () => ({
   resolveAccountRequest: mocks.mockResolveAccountRequest,
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
+}));
+vi.mock('../middleware', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
+  sessionMissingSecondFactor: mocks.mockSessionMissingSecondFactor,
 }));
 vi.mock('../../lib/resend', () => ({
   sendTransactionalEmail: mocks.mockSendEmail,
@@ -52,6 +57,17 @@ describe('me-email handler', () => {
     });
     mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
     mocks.mockSendEmail.mockResolvedValue({ ok: true, messageId: 'msg_1' });
+    mocks.mockSessionMissingSecondFactor.mockResolvedValue(false);
+  });
+
+  it('refuses a session that has not completed the account\'s second factor', async () => {
+    // The confirmation goes to the NEW address, so a stolen password alone
+    // must not be able to propose one.
+    mocks.mockSessionMissingSecondFactor.mockResolvedValue(true);
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(403);
+    expect(mocks.mockFrom).not.toHaveBeenCalled();
+    expect(mocks.mockSendEmail).not.toHaveBeenCalled();
   });
 
   afterEach(() => {

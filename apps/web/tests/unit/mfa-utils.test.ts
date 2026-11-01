@@ -5,7 +5,13 @@
 // counts as *needing* the challenge (fail closed) rather than not.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Session, User } from '@supabase/supabase-js';
-import { decodeAalClaim, hasVerifiedSecondFactor, needsSecondFactor } from 'src/utils/mfa';
+import {
+  decodeAalClaim,
+  friendlyTotpError,
+  hasVerifiedSecondFactor,
+  needsSecondFactor,
+  normalizeTotpCode,
+} from 'src/utils/mfa';
 import { shouldShowSecurityNudge, SECURITY_NUDGE_DISMISSED_KEY } from 'src/utils/securityNudge';
 import { totpQrDataUri, passkeysSupported } from 'src/services/mfa';
 
@@ -184,5 +190,29 @@ describe('passkeysSupported', () => {
     vi.stubGlobal('PublicKeyCredential', class {});
     vi.stubGlobal('isSecureContext', true);
     expect(passkeysSupported()).toBe(true);
+  });
+});
+
+describe('normalizeTotpCode', () => {
+  it('keeps six digits, with or without the space apps display', () => {
+    expect(normalizeTotpCode('123456')).toBe('123456');
+    expect(normalizeTotpCode('123 456')).toBe('123456');
+    expect(normalizeTotpCode(' 123456 ')).toBe('123456');
+  });
+
+  it('rejects anything that is not six digits', () => {
+    expect(normalizeTotpCode('12345')).toBeNull();
+    expect(normalizeTotpCode('1234567')).toBeNull();
+    expect(normalizeTotpCode('')).toBeNull();
+  });
+});
+
+describe('friendlyTotpError', () => {
+  it('rewrites Supabase\'s wrong-code message', () => {
+    expect(friendlyTotpError('Invalid TOTP code entered')).toMatch(/didn't match/);
+  });
+
+  it('passes anything else through', () => {
+    expect(friendlyTotpError('Too many requests')).toBe('Too many requests');
   });
 });

@@ -78,6 +78,23 @@ stolen password (or inbox) is no longer enough to take an account over.
    rare, so failing closed costs almost nothing and failing open costs the
    feature's whole point.
 
+7. **Artist, money, email, key and admin endpoints require aal2 too**
+   (added in review, 2026-11-01). The gate is only UI: anyone with a stolen
+   password can sign in from a script and call `/api` directly, so the
+   endpoints a takeover would actually use refuse an aal1 session for an
+   account with a verified factor (`middleware.ts`):
+   - `authenticateBearer` checks the `factors` that its `getUser` call
+     already returns — no extra round trip. That covers `artist-releases`,
+     `tips-connect`, `tips-settings`, `api-key-generate` and every admin
+     endpoint (`authenticateAdmin`).
+   - `artist-profile` (profile and payment links) does the same in its own
+     `getUser`.
+   - `me-email` (the confirmation goes to the *new* address, so it is a
+     takeover path), `artist-promote` and `me-buffer` verify the token
+     locally, so they call `sessionMissingSecondFactor`: an aal2 token
+     answers at once, an aal1 one costs one `getUser` to read the factors,
+     and a failed lookup refuses the request.
+
 ## Dashboard prerequisites (Brandon, manual)
 
 - **WebAuthn as an MFA method must be enabled** in the Supabase dashboard:
@@ -97,13 +114,13 @@ stolen password (or inbox) is no longer enough to take an account over.
 
 ## Limitations, accepted on purpose
 
-- **AAL is enforced only on `me-password`.** Every other `/api` endpoint
-  accepts aal1 sessions for up to the token's remaining life (~1h) — the
-  same tolerance revoked sessions already get (#331). Reason: the Mac app
-  and the browser extension hold Supabase sessions and have no UI to answer
-  an MFA challenge; enforcing aal2 across account endpoints would break
-  them for every MFA-enabled user. The web client itself gates the whole
-  UI, which is where the account-management surface lives.
+- **Fan endpoints still accept aal1.** Saved artists, sync, listening and
+  the other `me-*` settings take an aal1 session. Reason: the Mac app and the
+  browser extension hold Supabase sessions and have no UI to answer an MFA
+  challenge, and those are the endpoints they call; enforcing aal2 there
+  would break them for every MFA-enabled user. What a stolen password can
+  reach through them is a fan's saved list, not an artist's money or the
+  account itself (see 7 above).
 - **No backup codes.** Supabase Auth doesn't issue them. A user who loses
   every factor is locked out; recovery is manual — delete the factor in the
   Supabase dashboard (Authentication → the user → factors, or

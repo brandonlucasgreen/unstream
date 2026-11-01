@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import type { Session, Factor } from '@supabase/supabase-js';
 import { verifyTotp, verifyWithPasskey, passkeysSupported } from '../services/mfa';
+import {
+  TOTP_CODE_FORMAT_ERROR,
+  TOTP_INPUT_MAX_LENGTH,
+  cleanTotpInput,
+  friendlyTotpError,
+  normalizeTotpCode,
+} from '../utils/mfa';
 
 interface MfaChallengeGateProps {
   /** The aal1 session waiting on its second factor. Its user carries the factors. */
@@ -35,27 +42,31 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
     .filter(f => f.factor_type === 'totp')
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
     .at(-1);
-  const passkeyFactor = factors.find(f => f.factor_type === 'webauthn');
-  const showPasskey = !!passkeyFactor && passkeysSupported();
+  // Each passkey is its own factor, and a challenge only accepts that factor's
+  // credential — so every passkey gets a button, or a passkey made on a second
+  // device could never finish a sign-in.
+  const passkeyFactors = factors
+    .filter(f => f.factor_type === 'webauthn')
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const showPasskeys = passkeyFactors.length > 0 && passkeysSupported();
+  // A passkey-only account in a browser that can't run passkeys (an in-app
+  // webview, say) would otherwise see a screen with no way forward.
+  const noUsableStep = !showPasskeys && !totpFactor;
 
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
-    const trimmed = code.replace(/\s+/g, '');
-    if (!/^\d{6}$/.test(trimmed)) {
-      setError('Enter the 6-digit code from your authenticator app.');
+    const normalized = normalizeTotpCode(code);
+    if (!normalized) {
+      setError(TOTP_CODE_FORMAT_ERROR);
       return;
     }
     if (!totpFactor) return;
 
     setBusy(true);
     setError(null);
-    const { error: verifyError } = await verifyTotp(totpFactor.id, trimmed);
+    const { error: verifyError } = await verifyTotp(totpFactor.id, normalized);
     if (verifyError) {
-      setError(
-        /invalid totp code|code is incorrect/i.test(verifyError)
-          ? "That code didn't match. Codes change every 30 seconds — try the current one."
-          : verifyError,
-      );
+      setError(friendlyTotpError(verifyError));
       setBusy(false);
     }
     // On success the fresh aal2 session arrives via onAuthStateChange and the
@@ -63,11 +74,10 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
     // moment between is the right thing (a second submit can't race it).
   }
 
-  async function handlePasskey() {
-    if (!passkeyFactor) return;
+  async function handlePasskey(factorId: string) {
     setBusy(true);
     setError(null);
-    const { error: passkeyError, cancelled } = await verifyWithPasskey(passkeyFactor.id);
+    const { error: passkeyError, cancelled } = await verifyWithPasskey(factorId);
     if (cancelled) {
       // The person backed out of the browser prompt; let them try again or
       // use a code if they have one.
@@ -98,16 +108,30 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
           </div>
         )}
 
-        {showPasskey && (
+        {noUsableStep && (
+          <p className="p-3 rounded-lg bg-bg-secondary border border-border text-sm text-text-secondary">
+            Your second step is a passkey, and this browser can't use passkeys. Open
+            unstream.stream in Safari, Chrome, Firefox or Edge to finish signing in.
+          </p>
+        )}
+
+        {showPasskeys && (
           <>
-            <button
-              type="button"
-              onClick={handlePasskey}
-              disabled={busy}
-              className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
-            >
-              {busy ? 'Waiting for your passkey…' : 'Use your passkey'}
-            </button>
+            {passkeyFactors.map(factor => (
+              <button
+                key={factor.id}
+                type="button"
+                onClick={() => handlePasskey(factor.id)}
+                disabled={busy}
+                className="w-full py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+              >
+                {busy
+                  ? 'Waiting for your passkey…'
+                  : passkeyFactors.length > 1
+                    ? `Use the passkey added ${new Date(factor.created_at).toLocaleDateString()}`
+                    : 'Use your passkey'}
+              </button>
+            ))}
 
             {totpFactor && (
               <div className="relative">
@@ -134,10 +158,10 @@ export function MfaChallengeGate({ session, onSignOut }: MfaChallengeGateProps) 
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 autoFocus
-                maxLength={6}
+                maxLength={TOTP_INPUT_MAX_LENGTH}
                 value={code}
                 onChange={e => {
-                  setCode(e.target.value.replace(/[^\d\s]/g, ''));
+                  setCode(cleanTotpInput(e.target.value));
                   setError(null);
                 }}
                 placeholder="123 456"
