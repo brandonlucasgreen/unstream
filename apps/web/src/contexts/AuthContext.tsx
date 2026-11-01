@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef, ty
 import type { Session, User } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
 import { getSupabaseClient, waitForMagicLinkSession } from '../services/auth';
+import { needsSecondFactor } from '../utils/mfa';
+import { MfaChallengeGate } from '../components/MfaChallengeGate';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 import { readPendingSave, clearPendingSave, type PendingSave } from '../services/pendingSave';
 
@@ -486,9 +488,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!user?.email && user.email.toLowerCase() === ADMIN_EMAIL;
   const hasPassword = !!user?.user_metadata?.has_password;
 
+  // Two-step verification: a session whose account has a verified factor but
+  // that hasn't completed it (aal1) sees only the challenge screen, in place of
+  // the whole app. That covers every way an aal1 session appears — password
+  // sign-in, a magic-link click-through, a session issued before this shipped —
+  // and nothing behind the gate is reachable until it lifts. Verifying reissues
+  // the session at aal2 via onAuthStateChange, which re-runs this check. See
+  // docs/specs/two-factor-auth-spec.md for the aal model.
+  const secondFactorRequired = needsSecondFactor(session);
+
   return (
     <AuthContext.Provider value={{ session, user, isAdmin, isLoading, hasPassword, signOut: handleSignOut, signInWithMagicLink: handleSignInWithMagicLink, signInWithPassword: handleSignInWithPassword, savedArtists, savedArtistIds, isArtistSaved, saveArtist, removeSavedArtist, setArtistSupported, loadSavedArtists, artistsLoaded, savedArtistsError, failedPendingSave, retryPendingSave, dismissPendingSave }}>
-      {children}
+      {secondFactorRequired && session ? (
+        <MfaChallengeGate session={session} onSignOut={handleSignOut} />
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
