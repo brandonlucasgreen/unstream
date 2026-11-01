@@ -20,7 +20,12 @@
 // alongside the PKCE verifier, and both are consumed on first use.
 
 import { getRedis } from './redis';
-import { buildCorsHeaders, isUrlHostnameAllowed } from './middleware';
+import {
+  buildCorsHeaders,
+  isUrlHostnameAllowed,
+  SECOND_FACTOR_REQUIRED_ERROR,
+  sessionMissingSecondFactor,
+} from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
 import { listChannels, listOrganizations, type BufferChannel } from './buffer-client';
 import {
@@ -161,6 +166,7 @@ async function handleRequest(event: HandlerEvent) {
   const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
   if (!user) return respond(401, { error: 'Not signed in' });
+  if (await sessionMissingSecondFactor(event.headers.authorization || event.headers.Authorization || undefined)) return respond(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
   const userId = user.userId;
 
   // Connecting is open to anyone either feature lets in. Each flag fails closed, and the admin is

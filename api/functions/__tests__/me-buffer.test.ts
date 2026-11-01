@@ -11,6 +11,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const getFeatureFlag = vi.fn();
 const resolveAccountRequest = vi.fn();
+const sessionMissingSecondFactor = vi.fn();
 const getBufferConnection = vi.fn();
 const saveBufferConnection = vi.fn();
 const setOrganization = vi.fn();
@@ -29,6 +30,11 @@ vi.mock('../ratelimit', () => ({
   resolveAccountRequest: (...a: unknown[]) => resolveAccountRequest(...a),
   checkRateLimit: async () => ({ limited: false }),
   getClientIp: () => '127.0.0.1',
+}));
+
+vi.mock('../middleware', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
+  sessionMissingSecondFactor: (...a: unknown[]) => sessionMissingSecondFactor(...a),
 }));
 
 vi.mock('../redis', () => ({
@@ -87,6 +93,7 @@ beforeEach(() => {
   vi.stubEnv('BUFFER_CLIENT_ID', 'client');
   vi.stubEnv('BUFFER_CLIENT_SECRET', 'secret');
   getFeatureFlag.mockResolvedValue(false);
+  sessionMissingSecondFactor.mockResolvedValue(false);
   getBufferConnection.mockResolvedValue(null);
   listOrganizations.mockResolvedValue([{ id: 'org_mine', name: 'Cult of Lightbulbs' }, { id: 'org_work', name: 'Buffer' }]);
   listChannels.mockResolvedValue([
@@ -103,6 +110,14 @@ afterEach(() => {
 });
 
 describe('the gate', () => {
+  it('refuses a session that has not completed the account’s second factor', async () => {
+    sessionMissingSecondFactor.mockResolvedValue(true);
+    asUser('Admin@Example.com');
+    expect((await call('GET', '')).statusCode).toBe(403);
+    expect((await call('POST', '/start')).statusCode).toBe(403);
+    expect(redisSet).not.toHaveBeenCalled();
+  });
+
   it('reports itself unavailable to a curator while the flag is off', async () => {
     asUser('curator@example.com');
     expect(JSON.parse((await call('GET', '')).body)).toEqual({ available: false });

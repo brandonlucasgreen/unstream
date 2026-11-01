@@ -3,7 +3,7 @@
 
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
-import { jwtVerify, createRemoteJWKSet, decodeProtectedHeader, errors as joseErrors } from 'jose';
+import { jwtVerify, createRemoteJWKSet, decodeJwt, decodeProtectedHeader, errors as joseErrors } from 'jose';
 import { getClient } from './db';
 
 // ---------------------------------------------------------------------------
@@ -58,7 +58,10 @@ export function buildPublicCorsHeaders(): Record<string, string> {
 
 /**
  * Verify a Supabase JWT Bearer token and return the user ID + email.
- * Returns null if the token is missing, invalid, or expired.
+ * Returns null if the token is missing, invalid, or expired — or if the account
+ * uses two-step verification and this session hasn't completed it. Every caller
+ * acts as an artist, an admin or a key holder, so a stolen password alone must
+ * not get through (see isMissingSecondFactor).
  */
 export async function authenticateBearer(
   authHeader: string | undefined,
@@ -73,8 +76,70 @@ export async function authenticateBearer(
   const anonClient = createClient(url, anonKey);
   const { data, error } = await anonClient.auth.getUser(token);
   if (error || !data.user || !data.user.email) return null;
+  if (isMissingSecondFactor(data.user, token)) return null;
 
   return { userId: data.user.id, email: data.user.email };
+}
+
+// ---------------------------------------------------------------------------
+// Authentication — two-step verification (docs/specs/two-factor-auth-spec.md)
+// ---------------------------------------------------------------------------
+//
+// A password or magic-link sign-in yields an aal1 session; completing a second
+// factor reissues it at aal2. The web app holds an aal1 session for an account
+// with a verified factor behind MfaChallengeGate, but that gate is only the UI —
+// anyone with the stolen password can sign in from a script and call the API
+// directly. So every endpoint that acts as an artist (profile and payment links,
+// releases, promotion), moves money (tips), changes the sign-in email, mints API
+// keys or is admin-only refuses such a session here too. Fan endpoints the Mac
+// app and extension use (saved artists, listening) still accept aal1: neither
+// app can complete a second factor yet.
+
+export const SECOND_FACTOR_REQUIRED_ERROR =
+  'Your account uses two-step verification. Complete the second step at sign-in first.';
+
+/** The `aal` claim of an access token. Not verified here — callers verify the token first. */
+function tokenAal(token: string): string | null {
+  try {
+    const aal = decodeJwt(token).aal;
+    return typeof aal === 'string' ? aal : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether this session still owes its second factor: the account has a verified
+ * factor and the token hasn't completed one. `user` is what Supabase's getUser
+ * returned for this token (it carries `factors`). An unreadable aal claim counts
+ * as not completed.
+ */
+export function isMissingSecondFactor(
+  user: { factors?: { status: string }[] | null },
+  token: string,
+): boolean {
+  if (!(user.factors ?? []).some(f => f.status === 'verified')) return false;
+  return tokenAal(token) !== 'aal2';
+}
+
+/**
+ * The same check for endpoints that verified the token locally
+ * (resolveAccountRequest) and so hold no user record. An aal2 token needs
+ * nothing more; an aal1 one costs a getUser round trip to learn the account's
+ * factors. Fails closed: if Supabase can't answer, the session is refused.
+ */
+export async function sessionMissingSecondFactor(authHeader: string | undefined): Promise<boolean> {
+  if (!authHeader?.startsWith('Bearer ')) return true;
+  const token = authHeader.slice(7);
+  if (tokenAal(token) === 'aal2') return false;
+
+  const url = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return true;
+
+  const { data, error } = await createClient(url, anonKey).auth.getUser(token);
+  if (error || !data.user) return true;
+  return isMissingSecondFactor(data.user, token);
 }
 
 // ---------------------------------------------------------------------------

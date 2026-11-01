@@ -10,6 +10,7 @@ import { CollectionSection } from '../components/CollectionSection';
 import { RecentReleasesSection, type RecentRelease } from '../components/RecentReleasesSection';
 import { ReleaseFeedControls } from '../components/ReleaseFeedControls';
 import { WelcomeBanner } from '../components/WelcomeBanner';
+import { SecurityNudgeBanner } from '../components/SecurityNudgeBanner';
 import { YourTips } from '../components/YourTips';
 
 /**
@@ -68,6 +69,10 @@ export function MyCollectionPage() {
           <h1 className="text-2xl font-bold">My Collection</h1>
 
           <WelcomeBanner />
+
+          {/* The one-time two-step-verification nudge; hidden by its own logic
+              once dismissed or enrolled. */}
+          <SecurityNudgeBanner />
 
           {/*
             Releases — Upcoming, Recent and the calendar — above the collection because they are

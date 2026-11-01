@@ -99,6 +99,21 @@ describe('artist-profile DELETE (remove claim)', () => {
     expect(res!.statusCode).toBe(401);
   });
 
+  it('refuses a session that has not completed the account\'s second factor', async () => {
+    // 'valid-token' carries no aal claim, which reads as aal1.
+    mocks.mockCreateClient.mockReturnValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: 'user-1', email: 'artist@example.com', factors: [{ status: 'verified' }] } },
+          error: null,
+        }),
+      },
+    });
+    const res = await handler(deleteEvent);
+    expect(res!.statusCode).toBe(401);
+    expect(mocks.mockResolveOwnedArtist).not.toHaveBeenCalled();
+  });
+
   it('returns 400 when slug is missing', async () => {
     const res = await handler({ ...deleteEvent, queryStringParameters: {} });
     expect(res!.statusCode).toBe(400);

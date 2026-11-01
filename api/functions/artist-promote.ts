@@ -13,7 +13,7 @@
 // Everything the browser sends is checked against what Buffer and the database say, so what's
 // saved is always something the sweep can act on.
 
-import { buildCorsHeaders } from './middleware';
+import { buildCorsHeaders, SECOND_FACTOR_REQUIRED_ERROR, sessionMissingSecondFactor } from './middleware';
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
 import { canUseReleaseAutopost } from './release-autopost-access';
 import {
@@ -360,6 +360,7 @@ async function handleRequest(event: HandlerEvent) {
   const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
   if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
   if (!user) return respond(401, { error: 'Not signed in' });
+  if (await sessionMissingSecondFactor(event.headers.authorization || event.headers.Authorization || undefined)) return respond(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
 
   // The gate first, so nothing about the feature, or the artist, is said to anyone it excludes.
   if (!(await canUseReleaseAutopost(user.email))) return respond(200, { available: false });

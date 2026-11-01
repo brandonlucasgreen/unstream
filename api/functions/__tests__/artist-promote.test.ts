@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => {
     listChannels: vi.fn(),
     getFeatureFlag: vi.fn(),
     getTipsLiveSlugs: vi.fn(),
+    sessionMissingSecondFactor: vi.fn(),
   };
 });
 
@@ -28,6 +29,10 @@ vi.mock('../ratelimit', () => ({
   resolveAccountRequest: mocks.resolveAccountRequest,
   checkRateLimit: async () => ({ limited: false }),
   getClientIp: () => '127.0.0.1',
+}));
+vi.mock('../middleware', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
+  sessionMissingSecondFactor: mocks.sessionMissingSecondFactor,
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
 vi.mock('../release-autopost-db', () => ({
@@ -98,6 +103,7 @@ beforeEach(() => {
     { id: 'yt', name: 'kid', service: 'youtube', type: 'channel', serviceId: '2', isDisconnected: false },
   ]);
   mocks.getFeatureFlag.mockResolvedValue(false);
+  mocks.sessionMissingSecondFactor.mockResolvedValue(false);
 });
 
 afterEach(() => vi.useRealTimers());
@@ -119,6 +125,13 @@ describe('who gets in', () => {
   it('needs a signed-in account', async () => {
     mocks.resolveAccountRequest.mockResolvedValue({ key: 'ip:x', user: null });
     expect((await call('GET')).statusCode).toBe(401);
+  });
+
+  it('refuses a session that has not completed the account’s second factor', async () => {
+    mocks.sessionMissingSecondFactor.mockResolvedValue(true);
+    expect((await call('GET')).statusCode).toBe(403);
+    expect((await call('PUT', validBody)).statusCode).toBe(403);
+    expect(mocks.saveAutopostSettings).not.toHaveBeenCalled();
   });
 });
 

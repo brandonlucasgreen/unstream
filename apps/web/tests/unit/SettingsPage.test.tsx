@@ -27,6 +27,10 @@ vi.mock('src/components/EmailChangeForm', () => ({ EmailChangeForm: ({ currentEm
 vi.mock('src/components/PasswordChangeForm', () => ({
   PasswordChangeForm: ({ hasPassword }: { hasPassword: boolean }) => <p>{hasPassword ? 'Change password' : 'Set password'}</p>,
 }));
+// Loads its own data straight from Supabase Auth, which isn't configured in
+// tests — its retry button would double the page's own, like the other
+// self-loading sections here, it's stubbed out.
+vi.mock('src/components/TwoFactorSection', () => ({ TwoFactorSection: () => null }));
 
 afterEach(() => {
   cleanup();

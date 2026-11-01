@@ -14,6 +14,7 @@ import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { sendTransactionalEmail } from '../lib/resend';
 import { buildAccountCorsHeaders } from './account-cors';
+import { SECOND_FACTOR_REQUIRED_ERROR, sessionMissingSecondFactor } from './middleware';
 
 // Same shape as LoginPage's EMAIL_PATTERN — string-only early validation so the user gets
 // a specific message instead of a raw database or Supabase error.
@@ -62,6 +63,7 @@ async function handleRequest(event: {
   if (rl.limited) return rl.response;
 
   if (!user) return json(401, { error: 'Not signed in' });
+  if (await sessionMissingSecondFactor(event.headers.authorization)) return json(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
 
   const client = getClient();
   if (!client) {

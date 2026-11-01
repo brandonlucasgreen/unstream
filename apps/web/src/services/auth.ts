@@ -4,6 +4,7 @@
 import { createClient, type SupabaseClient, type Session, type AuthError } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/react';
 import { WELCOME_DISMISSED_KEY } from '../utils/welcome';
+import { SECURITY_NUDGE_DISMISSED_KEY } from '../utils/securityNudge';
 
 let client: SupabaseClient | null = null;
 
@@ -154,6 +155,21 @@ export async function dismissWelcome(): Promise<{ error: string | null }> {
     data: { [WELCOME_DISMISSED_KEY]: new Date().toISOString() },
   });
   if (error) reportAuthFailure('dismissWelcome', error);
+  return { error: error?.message ?? null };
+}
+
+/**
+ * Record on the account that the two-step-verification nudge was dismissed.
+ * Same shape and reasoning as dismissWelcome above.
+ */
+export async function dismissSecurityNudge(): Promise<{ error: string | null }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return { error: 'Auth not configured' };
+
+  const { error } = await supabase.auth.updateUser({
+    data: { [SECURITY_NUDGE_DISMISSED_KEY]: new Date().toISOString() },
+  });
+  if (error) reportAuthFailure('dismissSecurityNudge', error);
   return { error: error?.message ?? null };
 }
 
