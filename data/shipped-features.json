@@ -137,7 +137,7 @@
     "title": "More ways to pay artists directly",
     "description": "Artists who've claimed their Unstream page can now add Cash App, Steady, Tipeee and Big Cartel links, alongside Venmo, PayPal, Patreon, Ko-fi and Liberapay, so you can support them wherever they take payments.",
     "date": "2026-10-27",
-    "announced": false
+    "announced": true
   },
   {
     "id": "two-step-verification",
