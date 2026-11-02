@@ -31,6 +31,7 @@ vi.mock('src/components/PasswordChangeForm', () => ({
 // tests — its retry button would double the page's own, like the other
 // self-loading sections here, it's stubbed out.
 vi.mock('src/components/TwoFactorSection', () => ({ TwoFactorSection: () => null }));
+vi.mock('src/components/PasskeysSection', () => ({ PasskeysSection: () => null }));
 
 afterEach(() => {
   cleanup();

@@ -7,7 +7,8 @@
 > passwordless sign-in, not a second factor. Two-step verification is
 > authenticator apps (TOTP) only. Everything below about passkeys is the
 > original design, kept for when Supabase offers the switch; the code is in
-> #738's history.
+> #738's history. Passkeys as a *sign-in method* shipped instead: see
+> `passkey-sign-in-spec.md`.
 
 Status: implemented November 2026. Scope chosen by Brandon: **TOTP and passkey
 second factors on the current `@supabase/supabase-js@2.99.1`** — no dependency
