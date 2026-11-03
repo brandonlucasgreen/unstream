@@ -119,8 +119,13 @@ export async function storeImageFromUrl(bucket: MediaBucket, sourceUrl: string):
   }
   const bytes = new Uint8Array(await res.arrayBuffer());
   if (bytes.length > MAX_IMAGE_BYTES) throw new Error(`image too large: ${url}`);
-  const stored = await storeImageBytes(bucket, bytes, 'autopost');
-  return { url: stored.url, width: stored.width, height: stored.height };
+  try {
+    const stored = await storeImageBytes(bucket, bytes, 'autopost');
+    return { url: stored.url, width: stored.width, height: stored.height };
+  } catch (error) {
+    // With the source, so Sentry says which cover or photo it was.
+    throw new Error(`${error instanceof Error ? error.message : String(error)}: ${url}`);
+  }
 }
 
 export interface StoredObject extends StoredImage {
