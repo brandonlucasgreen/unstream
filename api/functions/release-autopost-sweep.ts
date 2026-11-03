@@ -1,5 +1,6 @@
 // The release autopost sweep: hand each artist's next posts to their Buffer
-// (docs/specs/release-autopost-spec.md, "How it runs").
+// (docs/specs/release-autopost-spec.md, "How it runs"). It also sends release campaigns' posts,
+// by the same rules and through the same checks: there is no second scheduler.
 //
 // Invoked every 6 hours by .github/workflows/release-autopost-sweep.yml, the recatalog-sweep
 // precedent: there are no scheduled Netlify functions in this repo. For each artist with
@@ -34,18 +35,29 @@
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import { queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
-import { AUTOPOST_TAG, PUSH_AHEAD_HOURS, isDueToPush, planForArtist } from './release-autopost-schedule';
-import { buildChannelPost, imageAltText, isAutopostNetwork } from './autopost-channel-post';
+import { addDays, localDate, localInstant, queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
+import { AUTOPOST_TAG, CAMPAIGN_TAG, PUSH_AHEAD_HOURS, isDueToPush, planForArtist } from './release-autopost-schedule';
+import { buildCampaignChannelPost, buildChannelPost, imageAltText, isAutopostNetwork, type ChannelPost } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
+import { listAssets, purgeRemovedAssets, type PromoteAsset } from './promote-assets-db';
+import {
+  artistsWithCampaignPostsDue,
+  claimCampaignPost,
+  finishCampaignPost,
+  listCampaigns,
+  type Campaign,
+  type CampaignPost,
+} from './release-campaigns-db';
 import {
   claimSlot,
   finishSlot,
   getActiveAutopostSettings,
+  getAutopostSettings,
   getAutopostArtist,
   getAutopostHistory,
   getAutopostReleases,
   getUserEmail,
+  MAX_ATTEMPTS,
   pauseAutopost,
   type AutopostArtist,
   type AutopostRelease,
@@ -84,18 +96,80 @@ type SweepChannel = { id: string; service: string; schedule: ChannelSchedule | n
  * When this slot goes out on one channel: the artist's set time, or with "Pick days & times
  * for me", a time from that channel's Buffer posting schedule that day.
  */
-function channelTime(slot: PlannedPost, channel: SweepChannel, settings: AutopostSettings, now: Date): QueueTime {
+function channelTime(slot: { at: string; date: string }, channel: SweepChannel, settings: AutopostSettings, now: Date): QueueTime {
   if (settings.postTime !== null) return { at: slot.at };
   if (!channel.schedule) return { none: 'Buffer sent no posting schedule for it' };
   return queueTimeOn(slot.date, channel.schedule.postingSchedule, channel.schedule.timezone || settings.timezone, now);
 }
 
-/** The URL behind an image key, from what the artist and release rows hold. */
-function imageSourceUrl(imageKey: string, artist: AutopostArtist, releases: Map<string, AutopostRelease>): string | null {
-  if (imageKey === 'photo') return artist.photoUrl;
-  if (imageKey.startsWith('cover:')) return releases.get(imageKey.slice('cover:'.length))?.artworkUrl ?? null;
-  // Uploads arrive with Build plan step 4.
-  return null;
+interface ImageContext {
+  artist: AutopostArtist;
+  releases: Map<string, AutopostRelease>;
+  uploads: Map<string, PromoteAsset>;
+  bucket: MediaBucket;
+}
+
+/**
+ * The image behind a key, where Buffer can fetch it, with its alt text: an upload is already in
+ * the bucket; a cover or the artist's photo is copied there first. `cover` alone is a campaign's
+ * own release. Null with why when it can't be had, and then the post goes without it.
+ */
+async function resolveImage(imageKey: string | null, releaseId: string | null, ctx: ImageContext): Promise<{ image: (StoredImage & { altText: string }) | null; error: string | null }> {
+  if (!imageKey) return { image: null, error: null };
+  const release = releaseId ? ctx.releases.get(releaseId) ?? null : null;
+  const altText = imageAltText(imageKey, ctx.artist.name, release?.title ?? null);
+  if (imageKey.startsWith('upload:')) {
+    const upload = ctx.uploads.get(imageKey.slice('upload:'.length));
+    return upload
+      ? { image: { url: upload.url, width: upload.width, height: upload.height, altText }, error: null }
+      : { image: null, error: 'Image: the upload was removed' };
+  }
+  const coverOf = imageKey === 'cover' ? releaseId : imageKey.startsWith('cover:') ? imageKey.slice('cover:'.length) : null;
+  const source = imageKey === 'photo' ? ctx.artist.photoUrl : coverOf ? ctx.releases.get(coverOf)?.artworkUrl ?? null : null;
+  if (!source) return { image: null, error: null };
+  try {
+    return { image: { ...(await storeImageFromUrl(ctx.bucket, source)), altText }, error: null };
+  } catch (error) {
+    // Posted without it (Instagram skips); reported, since a cover that won't copy is worth knowing.
+    Sentry.captureMessage('[release-autopost] image could not be copied', {
+      level: 'warning',
+      tags: { area: 'release-autopost', kind: 'image-copy' },
+      extra: { artistId: ctx.artist.id, imageKey, error: String(error) },
+    });
+    return { image: null, error: `Image: ${error instanceof Error ? error.message : String(error)}` };
+  }
+}
+
+/** Hand one post to Buffer on each channel that has a time for it. Throws only BufferNotConnectedError. */
+async function sendToChannels(
+  timed: { channel: SweepChannel; time: QueueTime }[],
+  token: string,
+  build: (channel: SweepChannel, at: string) => ChannelPost,
+  errors: string[],
+): Promise<Pick<SlotOutcome, 'bufferPostIds' | 'captions'>> {
+  const sent: Pick<SlotOutcome, 'bufferPostIds' | 'captions'> = { bufferPostIds: [], captions: {} };
+  for (const { channel, time } of timed) {
+    if ('none' in time) continue;
+    const post = build(channel, time.at);
+    if (!post.ok) {
+      errors.push(`${channel.service}: ${post.reason}`);
+      continue;
+    }
+    try {
+      const result = await createPost(token, post.input);
+      const created = result.created[0];
+      if (created) {
+        sent.bufferPostIds.push({ channelId: channel.id, postId: created.id });
+        sent.captions[channel.id] = { service: channel.service, text: post.text, imageUrl: post.imageUrl };
+      } else {
+        errors.push(`${channel.service}: ${result.errors.map(e => e.message).join('; ') || 'Buffer refused the post'}`);
+      }
+    } catch (error) {
+      if (error instanceof BufferNotConnectedError) throw error;
+      errors.push(`${channel.service}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return sent;
 }
 
 async function takesTips(slug: string): Promise<boolean> {
@@ -105,16 +179,13 @@ async function takesTips(slug: string): Promise<boolean> {
 
 async function pushSlot(
   slot: PlannedPost,
-  ctx: {
+  ctx: ImageContext & {
     settings: AutopostSettings;
-    artist: AutopostArtist;
-    releases: Map<string, AutopostRelease>;
     /** `schedule` is read only for "Pick days & times for me", and null otherwise. */
     channels: SweepChannel[];
     token: string;
     tagId: string;
     tips: boolean;
-    bucket: MediaBucket;
     now: Date;
   },
 ): Promise<'pushed' | 'failed' | 'taken' | { unscheduled: string[] }> {
@@ -142,63 +213,28 @@ async function pushSlot(
   const release = slot.releaseId ? releases.get(slot.releaseId) ?? null : null;
 
   // One copy per slot, shared by every channel.
-  let image: (StoredImage & { altText: string }) | null = null;
-  const imageErrors: string[] = [];
-  const source = slot.imageKey ? imageSourceUrl(slot.imageKey, artist, releases) : null;
-  if (slot.imageKey && source) {
-    try {
-      const stored = await storeImageFromUrl(ctx.bucket, source);
-      image = { ...stored, altText: imageAltText(slot.imageKey, artist.name, release?.title ?? null) };
-    } catch (error) {
-      // Posted without it (Instagram skips); reported, since a cover that won't copy is worth knowing.
-      imageErrors.push(`Image: ${error instanceof Error ? error.message : String(error)}`);
-      Sentry.captureMessage('[release-autopost] image could not be copied', {
-        level: 'warning',
-        tags: { area: 'release-autopost', kind: 'image-copy' },
-        extra: { artistId: artist.id, imageKey: slot.imageKey, error: String(error) },
-      });
-    }
-  }
+  const { image, error: imageError } = await resolveImage(slot.imageKey, slot.releaseId, ctx);
+  const errors: string[] = [...(imageError ? [imageError] : []), ...untimed];
 
-  const outcome: SlotOutcome = { status: 'failed', bufferPostIds: [], captions: {}, error: null };
-  const errors: string[] = [...imageErrors, ...untimed];
-
-  for (const { channel, time } of timed) {
-    if ('none' in time) continue;
-    const post = buildChannelPost({
-      slot: { ...slot, at: time.at },
-      channel,
-      artist: { name: artist.name, slug: artist.slug },
-      release,
-      templates: settings.templates,
-      takesTips: ctx.tips,
-      image,
-      imageFitsInstagram: image ? fitsInstagram(image) : false,
-      tagId: ctx.tagId,
-    });
-    if (!post.ok) {
-      errors.push(`${channel.service}: ${post.reason}`);
-      continue;
-    }
-    try {
-      const result = await createPost(ctx.token, post.input);
-      const created = result.created[0];
-      if (created) {
-        outcome.bufferPostIds.push({ channelId: channel.id, postId: created.id });
-        outcome.captions[channel.id] = { service: channel.service, text: post.text, imageUrl: post.imageUrl };
-      } else {
-        errors.push(`${channel.service}: ${result.errors.map(e => e.message).join('; ') || 'Buffer refused the post'}`);
-      }
-    } catch (error) {
-      if (error instanceof BufferNotConnectedError) throw error;
-      errors.push(`${channel.service}: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+  const sent = await sendToChannels(timed, ctx.token, (channel, at) => buildChannelPost({
+    slot: { ...slot, at },
+    channel,
+    artist: { name: artist.name, slug: artist.slug },
+    release,
+    templates: settings.templates,
+    takesTips: ctx.tips,
+    image,
+    imageFitsInstagram: image ? fitsInstagram(image) : false,
+    tagId: ctx.tagId,
+  }), errors);
 
   // Pushed once Buffer took it on any channel. A channel that refused is recorded, not retried:
   // retrying the slot would post again to the channels that accepted it.
-  outcome.status = outcome.bufferPostIds.length > 0 ? 'pushed' : 'failed';
-  outcome.error = errors.length ? errors.join(' · ') : null;
+  const outcome: SlotOutcome = {
+    ...sent,
+    status: sent.bufferPostIds.length > 0 ? 'pushed' : 'failed',
+    error: errors.length ? errors.join(' · ') : null,
+  };
   await finishSlot(id, outcome);
 
   if (errors.length) {
@@ -211,6 +247,59 @@ async function pushSlot(
   return outcome.status;
 }
 
+/**
+ * Send one campaign post, the way pushSlot sends an autopost: each channel's time first, then the
+ * claim, then the image, then Buffer. The artist's words are filled with the release's facts now,
+ * with the campaign's confirmed release date as {date}.
+ */
+async function pushCampaignPost(
+  post: CampaignPost,
+  campaign: Campaign,
+  ctx: ImageContext & { settings: AutopostSettings; channels: SweepChannel[]; token: string; tagId: string; now: Date },
+): Promise<'pushed' | 'failed' | 'taken' | { unscheduled: string[] }> {
+  const { settings, artist } = ctx;
+  const at = localInstant(post.postDate, settings.postTime ?? '00:00', settings.timezone);
+  const timed = ctx.channels.map(channel => ({ channel, time: channelTime({ at, date: post.postDate }, channel, settings, ctx.now) }));
+  const untimed = timed.flatMap(t => 'none' in t.time ? [`${t.channel.service}: ${t.time.none}`] : []);
+  if (untimed.length === timed.length) return { unscheduled: untimed };
+
+  if (!(await claimCampaignPost(post, at))) return 'taken';
+
+  const release = ctx.releases.get(campaign.releaseId);
+  const errors: string[] = [...untimed];
+  let sent: Pick<SlotOutcome, 'bufferPostIds' | 'captions'> = { bufferPostIds: [], captions: {} };
+  if (!release) {
+    // Hidden, merged away or no longer sold on the artist's own links since the campaign began.
+    errors.push('The release no longer qualifies');
+  } else {
+    const { image, error: imageError } = await resolveImage(post.imageKey, campaign.releaseId, ctx);
+    if (imageError) errors.unshift(imageError);
+    const templateRelease = { ...release, releaseDate: campaign.releaseDate, datePrecision: 'day' };
+    sent = await sendToChannels(timed, ctx.token, (channel, channelAt) => buildCampaignChannelPost({
+      at: channelAt,
+      date: post.postDate,
+      text: post.text,
+      channel,
+      artist: { name: artist.name, slug: artist.slug },
+      release: templateRelease,
+      image,
+      imageFitsInstagram: image ? fitsInstagram(image) : false,
+      tagId: ctx.tagId,
+    }), errors);
+  }
+
+  const status = sent.bufferPostIds.length > 0 ? 'pushed' : 'failed';
+  await finishCampaignPost(post.id, { ...sent, status, error: errors.length ? errors.join(' · ') : null });
+  if (errors.length) {
+    Sentry.captureMessage('[release-autopost] a campaign post did not reach every channel', {
+      level: status === 'failed' ? 'error' : 'warning',
+      tags: { area: 'release-autopost', kind: status === 'failed' ? 'campaign-failed' : 'campaign-channel-skipped' },
+      extra: { artistId: artist.id, campaignId: campaign.id, postDate: post.postDate, errors },
+    });
+  }
+  return status;
+}
+
 async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now: Date): Promise<ArtistResult> {
   const result: ArtistResult = { artistId: settings.artistId, pushed: 0, failed: 0, unscheduled: [] };
 
@@ -218,16 +307,30 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   const artist = await getAutopostArtist(settings.artistId);
   if (!artist || artist.verifiedOwnerId !== settings.userId) return { ...result, skipped: 'owner no longer holds the verified claim' };
   if (!(await canUseReleaseAutopost(await getUserEmail(settings.userId)))) return { ...result, skipped: 'not allowed by the releaseAutopost flag' };
-  if (!settings.enabledAt || !settings.organizationId || settings.channelIds.length === 0) {
+  if (!settings.organizationId || settings.channelIds.length === 0) {
     return { ...result, skipped: 'not set up: no organization or channels' };
   }
 
-  const releases = await getAutopostReleases(artist.id);
-  const history = await getAutopostHistory(artist.id, now);
-  const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, now);
+  const [releases, history, uploads, campaigns] = await Promise.all([
+    getAutopostReleases(artist.id),
+    getAutopostHistory(artist.id, now),
+    listAssets(artist.id),
+    listCampaigns(artist.id),
+  ]);
 
-  const due = plan.filter(p => isDueToPush(p, now, PUSH_AHEAD_HOURS));
-  if (due.length === 0) return result;
+  // Autopost's own posts only while it's switched on; campaign posts whether it is or not.
+  const due = settings.enabled && settings.enabledAt
+    ? planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, { uploads, campaigns }, now)
+      .filter(p => isDueToPush(p, now, PUSH_AHEAD_HOURS))
+    : [];
+  const today = localDate(now.toISOString(), settings.timezone);
+  const campaignDue = campaigns.flatMap(campaign => campaign.posts
+    .filter(p => p.status === 'planned' || (p.status === 'failed' && p.attempts < MAX_ATTEMPTS))
+    // A post whose day has passed unsent stays that way: it isn't sent late.
+    .filter(p => p.postDate >= today)
+    .filter(p => isDueToPush({ at: localInstant(p.postDate, settings.postTime ?? '00:00', settings.timezone) }, now, PUSH_AHEAD_HOURS))
+    .map(post => ({ post, campaign })));
+  if (due.length === 0 && campaignDue.length === 0) return result;
 
   let token: string;
   try {
@@ -253,25 +356,54 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
     .map(c => ({ id: c.id, service: c.service, schedule: scheduleById.get(c.id) ?? null }));
   if (channels.length === 0) return { ...result, skipped: 'none of the ticked channels is available in Buffer' };
 
-  const tagId = await ensureTag(token, settings.organizationId, AUTOPOST_TAG.name, AUTOPOST_TAG.color);
-  const tips = await takesTips(artist.slug);
-  const byId = new Map(releases.map(r => [r.id, r]));
+  const images: ImageContext = {
+    artist,
+    releases: new Map(releases.map(r => [r.id, r])),
+    uploads: new Map(uploads.map(u => [u.id, u])),
+    bucket,
+  };
+  const count = (status: Awaited<ReturnType<typeof pushSlot>>, date: string) => {
+    if (status === 'pushed') result.pushed++;
+    else if (status === 'failed') result.failed++;
+    else if (typeof status === 'object') result.unscheduled.push({ date, reasons: status.unscheduled });
+  };
 
-  for (const slot of due) {
-    try {
-      const status = await pushSlot(slot, { settings, artist, releases: byId, channels, token, tagId, tips, bucket, now });
-      if (status === 'pushed') result.pushed++;
-      else if (status === 'failed') result.failed++;
-      else if (typeof status === 'object') result.unscheduled.push({ date: slot.date, reasons: status.unscheduled });
-    } catch (error) {
-      if (error instanceof BufferNotConnectedError) {
-        await pauseAutopost(artist.id, 'buffer_disconnected');
-        return { ...result, skipped: `Buffer disconnected mid-run (${error.message}); paused` };
+  try {
+    if (due.length > 0) {
+      const tagId = await ensureTag(token, orgId, AUTOPOST_TAG.name, AUTOPOST_TAG.color);
+      const tips = await takesTips(artist.slug);
+      for (const slot of due) {
+        count(await pushSlot(slot, { ...images, settings, channels, token, tagId, tips, now }), slot.date);
       }
-      throw error;
     }
+    if (campaignDue.length > 0) {
+      const tagId = await ensureTag(token, orgId, CAMPAIGN_TAG.name, CAMPAIGN_TAG.color);
+      for (const { post, campaign } of campaignDue) {
+        count(await pushCampaignPost(post, campaign, { ...images, settings, channels, token, tagId, now }), post.postDate);
+      }
+    }
+  } catch (error) {
+    if (error instanceof BufferNotConnectedError) {
+      await pauseAutopost(artist.id, 'buffer_disconnected');
+      return { ...result, skipped: `Buffer disconnected mid-run (${error.message}); paused` };
+    }
+    throw error;
   }
   return result;
+}
+
+/**
+ * Everyone to sweep: artists with autopost on, and artists with a campaign post coming up whether
+ * autopost is on or not. Both not paused: a paused artist's campaign waits for them too.
+ */
+async function settingsToSweep(now: Date): Promise<AutopostSettings[]> {
+  const active = await getActiveAutopostSettings();
+  const seen = new Set(active.map(s => s.artistId));
+  // A generous UTC bound; each artist's own timezone and posting time decide what's really due.
+  const until = addDays(now.toISOString().slice(0, 10), Math.ceil(PUSH_AHEAD_HOURS / 24) + 1);
+  const withCampaigns = (await artistsWithCampaignPostsDue(until)).filter(id => !seen.has(id));
+  const extra = await Promise.all(withCampaigns.map(id => getAutopostSettings(id)));
+  return [...active, ...extra.filter((s): s is AutopostSettings => s !== null && s.pausedReason === null)];
 }
 
 async function handleRequest(event: { httpMethod?: string; headers?: Record<string, string | undefined> }) {
@@ -286,7 +418,7 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
   const now = new Date();
   let settingsList: AutopostSettings[];
   try {
-    settingsList = await getActiveAutopostSettings();
+    settingsList = await settingsToSweep(now);
   } catch (error) {
     Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'settings-read' } });
     return { statusCode: 503, body: JSON.stringify({ error: 'Could not read autopost settings' }) };
@@ -306,7 +438,7 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
   }
 
   const summary = {
-    artists: settingsList.length, reached: 0, deferred: 0, pushed: 0, failed: 0, errors: 0,
+    artists: settingsList.length, reached: 0, deferred: 0, pushed: 0, failed: 0, errors: 0, purgedUploads: 0,
     skipped: [] as { artistId: string; reason: string }[],
     unscheduled: [] as { artistId: string; date: string; reasons: string[] }[],
   };
@@ -327,6 +459,16 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
     } catch (error) {
       summary.errors++;
       Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'artist-failed' }, extra: { artistId: settings.artistId } });
+    }
+  }
+
+  // Files of uploads the artist removed, once no post in Buffer still needs them. Last, and only
+  // with time left: a file waiting another six hours costs nothing.
+  if (!('missing' in bucket) && Date.now() - started <= START_BUDGET_MS) {
+    try {
+      summary.purgedUploads = await purgeRemovedAssets(bucket, now);
+    } catch (error) {
+      Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'purge-uploads' } });
     }
   }
 

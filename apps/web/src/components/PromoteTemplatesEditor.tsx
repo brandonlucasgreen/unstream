@@ -21,7 +21,7 @@ export const KIND_COPY: Record<AutopostKind, { label: string; when: string }> = 
   out_now: { label: 'Out now', when: 'For a new release Unstream only finds after its release day.' },
   still_new: { label: 'Still new', when: 'A release in its first six weeks, at most every other post.' },
   catalogue: { label: 'From the archives', when: 'Everything else: your releases in turn, so nothing repeats too soon.' },
-  support: { label: 'Ways to support you', when: 'Only at three or more posts a week, and at most one post in four.' },
+  support: { label: 'Ways to support you', when: 'About once a month, or one post in four at three or more a week. Uses your asset library’s images.' },
 };
 
 const MAX_VARIANTS = 5;

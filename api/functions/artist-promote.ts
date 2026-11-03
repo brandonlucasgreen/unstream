@@ -27,12 +27,13 @@ import {
   type AutopostArtist,
   type AutopostRelease,
   type AutopostSettings,
-  type StoredSlot,
 } from './release-autopost-db';
-import { PUSH_AHEAD_HOURS, planForArtist } from './release-autopost-schedule';
+import { PUSH_AHEAD_HOURS, planForArtist, toTemplateRelease } from './release-autopost-schedule';
 import { isAutopostNetwork, variantsFor } from './autopost-channel-post';
 import { addDays, localDate, localInstant, recommendedPostsPerWeek } from './autopost-plan';
-import { buildScheduleView, type LivePosts, type ViewSlot } from './autopost-schedule-view';
+import { buildCampaignView, buildScheduleView, type CampaignViewSlot, type LivePosts, type ViewSlot } from './autopost-schedule-view';
+import { listAssets, type PromoteAsset } from './promote-assets-db';
+import { listCampaigns } from './release-campaigns-db';
 import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
 import { listChannelPosts, listChannels, listOrganizations } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
@@ -40,11 +41,11 @@ import { getTipsLiveSlugs } from './tips-db';
 import {
   AUTOPOST_KINDS,
   releaseTemplateVars,
+  renderTemplate,
   renderVariant,
   supportTemplateVars,
   templateProblems,
   type AutopostKind,
-  type TemplateRelease,
 } from '../shared/autopost-templates';
 import { Sentry, withSentry } from '../lib/sentry';
 
@@ -80,17 +81,15 @@ function defaultSettings(artistId: string, userId: string): AutopostSettings {
   };
 }
 
-function toTemplateRelease(r: AutopostRelease): TemplateRelease {
-  return {
-    title: r.title,
-    slug: r.slug,
-    releaseType: r.releaseType,
-    releaseDate: r.releaseDate,
-    datePrecision: r.datePrecision,
-    note: r.note,
-    sources: r.sources,
-  };
+/** The image behind a key, as the page shows it. `cover` alone is a campaign's own release. */
+function imageUrlFor(key: string | null, release: AutopostRelease | null, artist: AutopostArtist, uploads: PromoteAsset[]): string | null {
+  if (!key) return null;
+  if (key === 'photo') return artist.photoUrl;
+  if (key === 'cover' || key.startsWith('cover:')) return release?.artworkUrl ?? null;
+  if (key.startsWith('upload:')) return uploads.find(u => `upload:${u.id}` === key)?.url ?? null;
+  return null;
 }
+
 
 function isValidTimezone(tz: string): boolean {
   try {
@@ -147,7 +146,7 @@ async function bufferState(token: string | null, organizationId: string | null) 
  * as "in Buffer" without a live status rather than failing the page: the schedule itself doesn't
  * depend on it.
  */
-async function livePostStates(token: string | null, organizationId: string | null, stored: StoredSlot[], since: string): Promise<LivePosts | null> {
+async function livePostStates(token: string | null, organizationId: string | null, stored: { bufferPostIds: { channelId: string }[] }[], since: string): Promise<LivePosts | null> {
   const channelIds = [...new Set(stored.flatMap(s => s.bufferPostIds.map(p => p.channelId)))];
   if (!token || !organizationId || channelIds.length === 0) return null;
   try {
@@ -243,7 +242,10 @@ async function validatedSettings(body: Record<string, unknown>, current: Autopos
   return { settings: next };
 }
 
-/** "Coming up" and "Recent": the plan, what the sweep has handed to Buffer, and where each post stands there. */
+/**
+ * "Coming up" and "Recent": the plan, what the sweep has handed to Buffer, and where each post
+ * stands there, with the artist's campaign posts beside autopost's.
+ */
 async function scheduleState(
   artist: AutopostArtist,
   settings: AutopostSettings,
@@ -254,25 +256,51 @@ async function scheduleState(
 ) {
   const today = localDate(now.toISOString(), settings.timezone);
   const since = addDays(today, -RECENT_DAYS);
-  const [history, stored] = await Promise.all([
+  const [history, stored, uploads, campaigns] = await Promise.all([
     getAutopostHistory(artist.id, now),
     getAutopostSlotsSince(artist.id, since),
+    listAssets(artist.id),
+    listCampaigns(artist.id),
   ]);
+  const campaignPosts = campaigns.flatMap(c => c.posts
+    .filter(p => p.postDate >= since)
+    .map(p => ({
+      id: p.id,
+      step: p.step,
+      at: p.slotAt ?? localInstant(p.postDate, settings.postTime ?? '00:00', settings.timezone),
+      date: p.postDate,
+      releaseId: c.releaseId,
+      releaseDate: c.releaseDate,
+      imageKey: p.imageKey,
+      text: p.text,
+      status: p.status,
+      attempts: p.attempts,
+      error: p.error,
+      bufferPostIds: p.bufferPostIds,
+      captions: p.captions,
+    })));
+
   // Only asked when something is in Buffer to ask about.
-  const live = stored.some(s => s.status === 'pushed')
-    ? await livePostStates(token, settings.organizationId, stored, localInstant(since, '00:00', settings.timezone))
+  const inBuffer = [...stored, ...campaignPosts].filter(s => s.status === 'pushed');
+  const live = inBuffer.length > 0
+    ? await livePostStates(token, settings.organizationId, inBuffer, localInstant(since, '00:00', settings.timezone))
     : null;
 
   // Before it's switched on, "Coming up" shows what switching on now would post.
-  const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt ?? now.toISOString() }, artist, releases, history, now);
+  const plan = planForArtist({ ...settings, enabledAt: settings.enabledAt ?? now.toISOString() }, artist, releases, history, { uploads, campaigns }, now);
   const view = buildScheduleView({ plan, stored, live, today, pushAheadHours: PUSH_AHEAD_HOURS, maxAttempts: MAX_ATTEMPTS });
+  const campaignView = buildCampaignView({ posts: campaignPosts, live, today, pushAheadHours: PUSH_AHEAD_HOURS, maxAttempts: MAX_ATTEMPTS });
 
   const byId = new Map(releases.map(r => [r.id, r]));
+  /** What was actually sent, once it's in Buffer: the networks other than Instagram, where there's one. */
+  const sentCaption = (captions: ViewSlot['captions']) => {
+    const sent = captions ? Object.values(captions) : [];
+    return sent.find(c => c.service !== 'instagram') ?? sent[0];
+  };
+
   const describe = (slot: ViewSlot) => {
     const release = slot.releaseId ? byId.get(slot.releaseId) ?? null : null;
-    // What was actually sent, once it's in Buffer: the networks other than Instagram, where there's one.
-    const sent = slot.captions ? Object.values(slot.captions) : [];
-    const shown = sent.find(c => c.service !== 'instagram') ?? sent[0];
+    const shown = sentCaption(slot.captions);
     let text: string | null;
     if (shown) {
       text = shown.text;
@@ -282,22 +310,51 @@ async function scheduleState(
         : supportTemplateVars(artist, { takesTips: tips, instagram: false });
       text = renderVariant(variantsFor(slot.kind, settings.templates), slot.templateIndex, vars)?.text ?? null;
     }
-    const imageUrl = shown?.imageUrl
-      ?? (slot.imageKey === 'photo' ? artist.photoUrl : slot.imageKey?.startsWith('cover:') ? release?.artworkUrl ?? null : null);
     return {
       at: slot.at,
       date: slot.date,
-      kind: slot.kind,
+      kind: slot.kind as AutopostKind | 'campaign',
+      step: null as string | null,
       release: release ? { title: release.title, slug: release.slug } : null,
-      imageUrl,
+      imageUrl: shown?.imageUrl ?? imageUrlFor(slot.imageKey, release, artist, uploads),
       imageOnInstagram: slot.imageOnInstagram,
       text,
       state: slot.state,
     };
   };
 
-  // `today` is the artist's own date, so the page splits "Coming up" into weeks from their today.
-  return { today, comingUp: view.upcoming.map(describe), recent: view.recent.map(describe) };
+  const describeCampaign = (post: CampaignViewSlot & { releaseDate: string }) => {
+    const release = byId.get(post.releaseId) ?? null;
+    const shown = post.status === 'pushed' ? sentCaption(post.captions) : undefined;
+    const text = shown?.text ?? (release
+      ? renderTemplate(post.text, releaseTemplateVars(
+        { ...toTemplateRelease(release), releaseDate: post.releaseDate, datePrecision: 'day' },
+        artist,
+        { postDate: post.date, instagram: false },
+      ))
+      : null);
+    return {
+      at: post.at,
+      date: post.date,
+      kind: 'campaign' as const,
+      step: post.step,
+      release: release ? { title: release.title, slug: release.slug } : null,
+      imageUrl: shown?.imageUrl ?? imageUrlFor(post.imageKey, release, artist, uploads),
+      imageOnInstagram: post.imageKey !== null,
+      text,
+      state: post.state,
+    };
+  };
+
+  const byTime = (a: { at: string }, b: { at: string }) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0);
+  const releaseDates = new Map(campaignPosts.map(p => [p.id, p.releaseDate]));
+  const withDate = (p: CampaignViewSlot) => ({ ...p, releaseDate: releaseDates.get(p.id)! });
+  return {
+    // `today` is the artist's own date, so the page splits "Coming up" into weeks from their today.
+    today,
+    comingUp: [...view.upcoming.map(describe), ...campaignView.upcoming.map(p => describeCampaign(withDate(p)))].sort(byTime),
+    recent: [...view.recent.map(describe), ...campaignView.recent.map(p => describeCampaign(withDate(p)))].sort(byTime).reverse(),
+  };
 }
 
 /** Everything the Promote page shows. */

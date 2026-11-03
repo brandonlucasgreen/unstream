@@ -119,7 +119,59 @@ function fromPlan(p: PlannedPost, pushAheadHours: number, lastError: string | nu
   };
 }
 
-function storedState(row: StoredSlot, live: LivePosts | null): PostState {
+/**
+ * A release campaign's posts, as "Coming up" and "Recent" show them beside autopost's. They're
+ * stored ahead, so there's no plan to reconcile: a post waiting to go is planned, one whose day
+ * passed before it went never will, and a failed one with tries left is retried.
+ */
+export interface CampaignViewInput {
+  id: string;
+  step: string;
+  /** When it goes out: its slot once claimed, else its day at the artist's posting time. */
+  at: string;
+  date: string;
+  releaseId: string;
+  imageKey: string | null;
+  text: string;
+  status: 'planned' | 'pushing' | 'pushed' | 'failed';
+  attempts: number;
+  error: string | null;
+  bufferPostIds: StoredSlot['bufferPostIds'];
+  captions: StoredSlot['captions'];
+}
+
+export interface CampaignViewSlot extends CampaignViewInput {
+  state: PostState;
+}
+
+export function buildCampaignView(input: {
+  posts: CampaignViewInput[];
+  live: LivePosts | null;
+  today: string;
+  pushAheadHours: number;
+  maxAttempts: number;
+}): { upcoming: CampaignViewSlot[]; recent: CampaignViewSlot[] } {
+  const slots = input.posts.map((p): CampaignViewSlot => {
+    const waiting = p.status === 'planned' || (p.status === 'failed' && p.attempts < input.maxAttempts);
+    let state: PostState;
+    if (waiting && p.date < input.today) state = { is: 'failed', error: 'Its day passed before it went to Buffer' };
+    else if (waiting) {
+      state = {
+        is: 'planned',
+        toBufferAt: new Date(new Date(p.at).getTime() - input.pushAheadHours * 3_600_000).toISOString(),
+        lastError: p.status === 'failed' ? p.error : null,
+      };
+    } else state = storedState(p, input.live);
+    return { ...p, state };
+  });
+  slots.sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0));
+  return {
+    upcoming: slots.filter(s => s.date >= input.today),
+    recent: slots.filter(s => s.date < input.today).reverse().slice(0, RECENT_LIMIT),
+  };
+}
+
+function storedState(row: Pick<StoredSlot, 'error' | 'bufferPostIds' | 'captions'> & { status: StoredSlot['status'] | 'planned' }, live: LivePosts | null): PostState {
   if (row.status === 'pushing') return { is: 'sending' };
   if (row.status === 'failed') return { is: 'failed', error: row.error };
   return {

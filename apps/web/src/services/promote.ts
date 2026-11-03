@@ -1,5 +1,6 @@
-// Client for release autopost: the Promote page's settings (/api/artist-promote) and starting a
-// Buffer connection that comes back to it (/api/me/buffer/start).
+// Client for the Promote page: release autopost's settings (/api/artist-promote), starting a
+// Buffer connection that comes back to it (/api/me/buffer/start), the asset library
+// (/api/artist-promote/assets) and release campaigns (/api/artist-campaigns).
 
 import type { AutopostKind, TemplateRelease } from '../../../../api/shared/autopost-templates';
 
@@ -56,7 +57,10 @@ export type PromotePostState =
 export interface ScheduledPost {
   at: string;
   date: string;
-  kind: AutopostKind;
+  /** An autopost's kind, or 'campaign' for a release campaign's post. */
+  kind: AutopostKind | 'campaign';
+  /** A campaign post's step (api/shared/campaign-steps.ts); null for an autopost. */
+  step: string | null;
   release: { title: string; slug: string } | null;
   imageUrl: string | null;
   imageOnInstagram: boolean;
@@ -138,4 +142,128 @@ export async function startBufferConnection(token: string, slug: string): Promis
   });
   if (!authorizeUrl) throw new PromoteApiError('Buffer isn’t available right now', 503);
   return authorizeUrl;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The asset library
+// ---------------------------------------------------------------------------------------------
+
+export interface PromoteAsset {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+  /** Inside Instagram's 4:5 to 1.91:1 shape range. */
+  instagramOk: boolean;
+}
+
+export type PromoteAssets = { available: false } | { available: true; max: number; assets: PromoteAsset[] };
+
+const assetsUrl = (slug: string) => `/api/artist-promote/assets?artist=${encodeURIComponent(slug)}`;
+
+export function getPromoteAssets(token: string, slug: string): Promise<PromoteAssets> {
+  return call(token, assetsUrl(slug));
+}
+
+/** Upload one image, already resized and encoded by the browser, as base64. */
+export function uploadPromoteAsset(token: string, slug: string, base64: string): Promise<PromoteAssets> {
+  return call(token, assetsUrl(slug), { method: 'POST', body: JSON.stringify({ data: base64 }) });
+}
+
+export function removePromoteAsset(token: string, slug: string, id: string): Promise<PromoteAssets> {
+  return call(token, `${assetsUrl(slug)}&id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+// ---------------------------------------------------------------------------------------------
+// Release campaigns
+// ---------------------------------------------------------------------------------------------
+
+export interface CampaignRelease {
+  id: string;
+  title: string;
+  slug: string;
+  releaseType: string | null;
+  releaseDate: string | null;
+  datePrecision: string;
+  status: 'announced' | 'released';
+  artworkUrl: string | null;
+  onBandcamp: boolean;
+  /** The release as the template language reads it, for previews. */
+  template: TemplateRelease;
+}
+
+/** A post as the editor holds it. `id` and `status` only once it's saved. */
+export interface CampaignPostDraft {
+  id?: string;
+  step: string;
+  date: string;
+  /** The artist's words, in the template language. */
+  text: string;
+  /** 'cover', 'photo', 'upload:{id}', or null for none. */
+  imageKey: string | null;
+  status?: 'planned' | 'pushing' | 'pushed' | 'failed';
+  error?: string | null;
+}
+
+/** The days autopost posts on around a campaign. */
+export interface AutopostDay {
+  date: string;
+  kind: string;
+}
+
+export interface SavedCampaign {
+  id: string;
+  releaseId: string;
+  release: { title: string; artworkUrl: string | null } | null;
+  releaseDate: string;
+  posts: CampaignPostDraft[];
+  autopost: AutopostDay[];
+}
+
+export type CampaignsPage =
+  | { available: false }
+  | {
+    available: true;
+    artist: { name: string; slug: string; photoUrl: string | null };
+    /** The artist's own date today, YYYY-MM-DD. */
+    today: string;
+    bufferConnected: boolean;
+    /** The networks of the channels ticked on the Autopost tab, where campaign posts go too. */
+    services: string[];
+    autopostOn: boolean;
+    pausedReason: string | null;
+    releases: CampaignRelease[];
+    uploads: { id: string; url: string; instagramOk: boolean }[];
+    bandcampFridays: string[];
+    campaigns: SavedCampaign[];
+  };
+
+const campaignsUrl = (slug: string, query = '') => `/api/artist-campaigns?artist=${encodeURIComponent(slug)}${query}`;
+
+export function getCampaignsPage(token: string, slug: string): Promise<CampaignsPage> {
+  return call(token, campaignsUrl(slug));
+}
+
+export function proposeCampaign(token: string, slug: string, input: { releaseId: string; releaseDate: string; startDate: string }): Promise<{ posts: CampaignPostDraft[]; autopost: AutopostDay[] }> {
+  return call(token, campaignsUrl(slug, '&action=propose'), { method: 'POST', body: JSON.stringify(input) });
+}
+
+export function campaignOverlay(token: string, slug: string, input: { releaseId: string; dates: string[]; campaignId: string | null }): Promise<{ autopost: AutopostDay[] }> {
+  return call(token, campaignsUrl(slug, '&action=overlay'), { method: 'POST', body: JSON.stringify(input) });
+}
+
+/** Schedule a new campaign (no id) or replace an existing one's unsent posts. */
+export function saveCampaign(token: string, slug: string, campaign: { id: string | null; releaseId: string; releaseDate: string; posts: CampaignPostDraft[] }): Promise<CampaignsPage> {
+  // Only what the artist can change; posts already in Buffer are left as they are by the server.
+  const posts = campaign.posts
+    .filter(p => p.status !== 'pushed' && p.status !== 'pushing')
+    .map(p => ({ step: p.step, date: p.date, text: p.text, imageKey: p.imageKey }));
+  const body = JSON.stringify({ releaseId: campaign.releaseId, releaseDate: campaign.releaseDate, posts });
+  return campaign.id
+    ? call(token, campaignsUrl(slug, `&id=${encodeURIComponent(campaign.id)}`), { method: 'PUT', body })
+    : call(token, campaignsUrl(slug), { method: 'POST', body });
+}
+
+export function cancelCampaign(token: string, slug: string, id: string): Promise<CampaignsPage> {
+  return call(token, campaignsUrl(slug, `&id=${encodeURIComponent(id)}`), { method: 'DELETE' });
 }

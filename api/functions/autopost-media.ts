@@ -119,23 +119,48 @@ export async function storeImageFromUrl(bucket: MediaBucket, sourceUrl: string):
   }
   const bytes = new Uint8Array(await res.arrayBuffer());
   if (bytes.length > MAX_IMAGE_BYTES) throw new Error(`image too large: ${url}`);
-  const mimeType = sniffImage(bytes);
-  if (!mimeType) throw new Error(`image is not a JPEG or PNG: ${url}`);
-  const size = imageSize(bytes);
-  if (!size) throw new Error(`couldn't read the image's size: ${url}`);
+  const stored = await storeImageBytes(bucket, bytes, 'autopost');
+  return { url: stored.url, width: stored.width, height: stored.height };
+}
 
-  // Keyed by content, so an image posted every month is stored once.
-  const hash = createHash('sha256').update(bytes).digest('hex').slice(0, 32);
-  const key = `autopost/${hash}.${mimeType === 'image/png' ? 'png' : 'jpg'}`;
+export interface StoredObject extends StoredImage {
+  key: string;
+  contentType: 'image/jpeg' | 'image/png';
+}
 
+function r2Client(bucket: MediaBucket) {
+  return new AwsClient({ accessKeyId: bucket.accessKeyId, secretAccessKey: bucket.secretAccessKey, service: 's3', region: 'auto' });
+}
+
+function objectUrls(bucket: MediaBucket, key: string) {
   const uploadUrl = `https://${bucket.accountId}.r2.cloudflarestorage.com/${bucket.name}/${key}`;
   const publicUrl = `${bucket.publicBaseUrl}/${key}`;
   if (!isUrlHostnameAllowed(uploadUrl) || !isUrlHostnameAllowed(publicUrl)) {
     throw new Error(`media bucket host not allowed: ${bucket.publicBaseUrl}`);
   }
+  return { uploadUrl, publicUrl };
+}
 
-  const r2 = new AwsClient({ accessKeyId: bucket.accessKeyId, secretAccessKey: bucket.secretAccessKey, service: 's3', region: 'auto' });
-  const upload = await r2.fetch(uploadUrl, {
+/**
+ * Store an image's bytes under `{prefix}/{hash}.{ext}` and return where it is. The bytes are
+ * checked first: a JPEG or PNG whose size can be read, or it throws saying why.
+ *
+ * Copied covers use the prefix `autopost`; an artist's uploads use `promote/{artistId}`, so
+ * removing one artist's upload can never take away a file another artist (or a cover) uses.
+ */
+export async function storeImageBytes(bucket: MediaBucket, bytes: Uint8Array, prefix: string): Promise<StoredObject> {
+  if (bytes.length > MAX_IMAGE_BYTES) throw new Error('image too large');
+  const mimeType = sniffImage(bytes);
+  if (!mimeType) throw new Error('image is not a JPEG or PNG');
+  const size = imageSize(bytes);
+  if (!size) throw new Error('couldn’t read the image’s size');
+
+  // Keyed by content, so an image posted every month is stored once.
+  const hash = createHash('sha256').update(bytes).digest('hex').slice(0, 32);
+  const key = `${prefix}/${hash}.${mimeType === 'image/png' ? 'png' : 'jpg'}`;
+  const { uploadUrl, publicUrl } = objectUrls(bucket, key);
+
+  const upload = await r2Client(bucket).fetch(uploadUrl, {
     method: 'PUT',
     headers: { 'Content-Type': mimeType, 'Cache-Control': CACHE_CONTROL },
     body: bytes,
@@ -152,5 +177,17 @@ export async function storeImageFromUrl(bucket: MediaBucket, sourceUrl: string):
   if (check.status !== 200 || check.headers.get('content-type') !== mimeType) {
     throw new Error(`${publicUrl} answered ${check.status} ${check.headers.get('content-type') ?? 'with no content type'}`);
   }
-  return { url: publicUrl, ...size };
+  return { key, url: publicUrl, contentType: mimeType, ...size };
+}
+
+/**
+ * Delete a stored object for good (spec, "Deleting has to be real"). Only for an artist's own
+ * uploads: copied covers are shared by hash and never deleted one by one. A 404 counts as done.
+ */
+export async function deleteStoredObject(bucket: MediaBucket, key: string): Promise<void> {
+  if (!key.startsWith('promote/')) throw new Error(`refusing to delete ${key}: not an upload`);
+  const { uploadUrl } = objectUrls(bucket, key);
+  const res = await r2Client(bucket).fetch(uploadUrl, { method: 'DELETE' });
+  await res.body?.cancel();
+  if (!res.ok && res.status !== 404) throw new Error(`R2 delete returned ${res.status}`);
 }

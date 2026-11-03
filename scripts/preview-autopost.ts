@@ -106,7 +106,7 @@ async function main() {
       kindsOff: [],
       variantCounts: Object.fromEntries(AUTOPOST_KINDS.map(k => [k, DEFAULT_TEMPLATES[k].length])),
       artistPhoto: hasPhoto ? { instagramOk: true } : null,
-      uploadIds: [],
+      uploads: [],
     },
     releases,
     history: [],
