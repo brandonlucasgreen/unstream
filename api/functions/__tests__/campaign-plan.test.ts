@@ -64,9 +64,31 @@ describe('the timeline', () => {
     expect(posts[0].date >= '2026-11-03').toBe(true);
   });
 
-  it('after release, offers only what comes after', () => {
-    const posts = proposeCampaign(input({ releaseDate: '2026-10-30', startDate: '2026-10-30', preorderOpen: false }));
-    expect(steps(posts)).toEqual(['2026-11-09 icymi', '2026-12-04 bandcamp_friday']);
+  it('once it’s out, runs from tomorrow for the weeks chosen, with no countdown', () => {
+    const posts = proposeCampaign(input({ releaseDate: '2026-10-30', preorderOpen: false }));
+    expect(steps(posts)).toEqual([
+      '2026-11-03 out_now',
+      '2026-11-10 story',
+      '2026-11-17 credits',
+      '2026-11-23 thank_you',
+      '2026-11-30 icymi',
+    ]);
+  });
+
+  it('once it’s out, takes a Bandcamp Friday inside the run in place of a step too close to it', () => {
+    const posts = proposeCampaign(input({
+      releaseDate: '2026-10-30', releaseType: 'single', runWeeks: 2, bandcampFridays: ['2026-11-06'], preorderOpen: false,
+    }));
+    expect(steps(posts)).toEqual([
+      '2026-11-03 out_now',
+      '2026-11-06 bandcamp_friday',
+      '2026-11-12 thank_you',
+      '2026-11-16 icymi',
+    ]);
+  });
+
+  it('treats release day today as already out', () => {
+    expect(proposeCampaign(input({ releaseDate: '2026-11-02' }))[0]).toMatchObject({ step: 'out_now', date: '2026-11-03' });
   });
 
   it('thanks the people on it only for an album or EP', () => {
@@ -89,12 +111,27 @@ describe('the drafts', () => {
 
   it('are valid templates that fill for a release with nothing but a title, date, where and link', () => {
     for (const def of Object.values(CAMPAIGN_STEPS)) {
-      for (const draft of [def.draft.preorder, def.draft.out]) {
+      for (const draft of [def.draft.preorder, def.draft.out, ...(def.draft.older ? [def.draft.older] : [])]) {
         expect(templateProblems(draft)).toEqual([]);
         expect(renderTemplate(draft, { title: 'Luminaires', date: 'December 4, 2026', where: 'Bandcamp', link: 'https://x' })).not.toBeNull();
         expect(draft).not.toMatch(/\ban? \{type\}/);
       }
     }
+  });
+});
+
+describe('the drafts for a release already out', () => {
+  it('never ask for a pre-order, even if the release still reads as announced', () => {
+    const posts = proposeCampaign(input({ releaseDate: '2026-10-30', preorderOpen: true }));
+    for (const p of posts) expect(p.text).not.toMatch(/pre-order/i);
+  });
+
+  it('stop calling it new once it’s more than six weeks old', () => {
+    const recent = proposeCampaign(input({ releaseDate: '2026-10-30', preorderOpen: false }));
+    expect(recent[0].text).toContain('my new');
+    const old = proposeCampaign(input({ releaseDate: '2025-10-23', preorderOpen: false }));
+    for (const p of old) expect(p.text).not.toMatch(/\bnew\b|so far|before it’s out|out now/);
+    expect(old.find(p => p.step === 'thank_you')!.text).toContain('{age}');
   });
 });
 

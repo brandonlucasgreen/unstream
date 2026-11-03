@@ -4,7 +4,8 @@
 //   GET    ?artist={slug}                      the artist's campaigns, the releases they can start
 //                                              one for, their images, and where posts go
 //   POST   ?artist={slug}&action=propose       Unstream's proposed posts for a release, and the
-//          { releaseId, releaseDate, startDate }   autopost days around them. Nothing is saved.
+//          { releaseId, releaseDate,               autopost days around them. Nothing is saved.
+//            startDate | runWeeks }                startDate before release; runWeeks once it's out
 //   POST   ?artist={slug}&action=overlay       the autopost days around an edited set of dates
 //          { releaseId, dates, campaignId? }
 //   POST   ?artist={slug}                      schedule a campaign: { releaseId, releaseDate, posts }
@@ -248,6 +249,7 @@ async function handleRequest(event: PromoteEvent) {
       const posts = proposeCampaign({
         releaseDate,
         startDate,
+        runWeeks: typeof body.runWeeks === 'number' ? body.runWeeks : undefined,
         today,
         releaseType: release.releaseType,
         preorderOpen: release.status === 'announced',

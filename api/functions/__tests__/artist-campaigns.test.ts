@@ -125,6 +125,14 @@ describe('/api/artist-campaigns', () => {
     expect(mocks.createCampaign).not.toHaveBeenCalled();
   });
 
+  it('for a release already out, runs from tomorrow for the weeks chosen', async () => {
+    mocks.getAutopostReleases.mockResolvedValue([{ ...release, releaseDate: '2025-10-23', status: 'released' }]);
+    const res = json(await call('POST', { action: 'propose' }, { releaseId: 'r1', releaseDate: '2025-10-23', runWeeks: 2 }));
+    expect(res.posts[0]).toMatchObject({ step: 'out_now', date: '2026-11-03' });
+    expect(res.posts.at(-1).date <= '2026-11-16').toBe(true);
+    for (const p of res.posts) expect(p.text).not.toMatch(/\bnew\b|pre-order/i);
+  });
+
   it('schedules a campaign of valid posts', async () => {
     const res = await call('POST', {}, { releaseId: 'r1', releaseDate: '2026-12-04', posts: [post(), post({ step: 'release_day', date: '2026-12-04' })] });
     expect(res.statusCode).toBe(200);

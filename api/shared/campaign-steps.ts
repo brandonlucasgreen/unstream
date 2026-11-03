@@ -11,8 +11,13 @@
 // summarised in the spec: announce with the date and where to buy, a story in the middle, a
 // countdown of a week and a day, release day, then a thank-you, an "in case you missed it" and
 // the first Bandcamp Friday after.
+//
+// A release that's already out gets its own shorter set (Brandon, 2026-11-03): no countdown,
+// starting tomorrow with "It's out" and running for as long as the artist chooses. Once a release
+// is more than six weeks old its drafts stop calling it new (`older`).
 
 export type CampaignStep =
+  | 'out_now'
   | 'announce'
   | 'story'
   | 'credits'
@@ -37,15 +42,33 @@ export interface StepDefinition {
    */
   priority: number;
   image: StepImage;
-  /** The draft while pre-orders are open (the release is announced), and once it's out. */
-  draft: { preorder: string; out: string };
+  /**
+   * The draft while pre-orders are open (the release is announced), once it's out, and, for steps
+   * that can come long after release, once it's no longer new (OLDER_AFTER_DAYS).
+   */
+  draft: { preorder: string; out: string; older?: string };
 }
+
+/** From this many days after release, drafts stop calling it new: the autopost's "still new" window. */
+export const OLDER_AFTER_DAYS = 42;
 
 /**
  * Drafts never put an article before {type} ("a EP"), and bracket anything that might be
  * missing, so every step can be filled for a release with no type, price or note.
  */
 export const CAMPAIGN_STEPS: Record<Exclude<CampaignStep, 'custom'>, StepDefinition> = {
+  // Only for a release that's already out: the first post, in place of the announcement.
+  out_now: {
+    label: 'It’s out',
+    offset: null,
+    priority: 1,
+    image: 'cover',
+    draft: {
+      preorder: '{title}[, my new {type},] is out now. [{note} ]Find it on {where}: {link}',
+      out: '{title}[, my new {type},] is out now. [{note} ]Find it on {where}: {link}',
+      older: '{title}[, my {type} from {year},] is on {where}. [{note} ]{link}',
+    },
+  },
   announce: {
     label: 'Announcement',
     offset: null,
@@ -64,6 +87,7 @@ export const CAMPAIGN_STEPS: Record<Exclude<CampaignStep, 'custom'>, StepDefinit
     draft: {
       preorder: 'A little about {title} before it’s out {date}. [{note} ]Pre-order: {link}',
       out: 'A little about {title} before it’s out {date}. [{note} ]{link}',
+      older: 'A little about {title}[, from {year}]. [{note} ]{link}',
     },
   },
   credits: {
@@ -74,6 +98,7 @@ export const CAMPAIGN_STEPS: Record<Exclude<CampaignStep, 'custom'>, StepDefinit
     draft: {
       preorder: '{title} wouldn’t exist without everyone who helped make it. Thank you. It’s out {date}, and up for pre-order on {where}: {link}',
       out: '{title} wouldn’t exist without everyone who helped make it. Thank you. It’s out {date} on {where}: {link}',
+      older: '{title} wouldn’t exist without everyone who helped make it. Thank you. It’s on {where}: {link}',
     },
   },
   week_to_go: {
@@ -114,6 +139,7 @@ export const CAMPAIGN_STEPS: Record<Exclude<CampaignStep, 'custom'>, StepDefinit
     draft: {
       preorder: 'Thank you to everyone who’s picked up {title} so far. It means a lot. {link}',
       out: 'Thank you to everyone who’s picked up {title} so far. It means a lot. {link}',
+      older: 'Thank you to everyone who’s picked up {title}[ since it came out {age}]. It still means a lot. {link}',
     },
   },
   icymi: {
@@ -124,6 +150,7 @@ export const CAMPAIGN_STEPS: Record<Exclude<CampaignStep, 'custom'>, StepDefinit
     draft: {
       preorder: 'In case you missed it: {title} is out now on {where}. {link}',
       out: 'In case you missed it: {title} is out now on {where}. {link}',
+      older: 'In case you missed it: {title}[ ({year})] is on {where}. {link}',
     },
   },
   bandcamp_friday: {
@@ -150,3 +177,12 @@ export function isCampaignStep(step: string): step is CampaignStep {
 export const RUNWAY_WEEKS = [1, 2, 4, 6, 8] as const;
 /** About four weeks is the practical minimum for a full campaign in the advice the spec draws on. */
 export const DEFAULT_RUNWAY_WEEKS = 4;
+
+/** For a release that's already out, how long the campaign runs from tomorrow, in weeks. */
+export const RUN_WEEKS = [2, 4, 6] as const;
+export const DEFAULT_RUN_WEEKS = 4;
+
+/** The steps for a release that's already out, in order. Credits only for an album or EP. */
+export const AFTER_RELEASE_STEPS: Exclude<CampaignStep, 'custom' | 'bandcamp_friday'>[] = [
+  'out_now', 'story', 'credits', 'thank_you', 'icymi',
+];
