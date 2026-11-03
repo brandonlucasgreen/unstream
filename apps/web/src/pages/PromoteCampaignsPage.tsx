@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { CampaignEditor, type ImageChoice } from '../components/CampaignEditor';
-import { DEFAULT_RUNWAY_WEEKS, RUNWAY_WEEKS } from '../../../../api/shared/campaign-steps';
+import { DEFAULT_RUN_WEEKS, DEFAULT_RUNWAY_WEEKS, RUN_WEEKS, RUNWAY_WEEKS } from '../../../../api/shared/campaign-steps';
 import {
   campaignOverlay,
   cancelCampaign,
@@ -20,9 +20,11 @@ import {
 // /promote/:slug/campaigns — release campaigns, a tab of the Promote page
 // (docs/specs/release-autopost-spec.md, "Release campaigns"; Brandon, 2026-11-02).
 //
-// The artist picks a release, confirms its date and how far ahead to start; Unstream proposes a
-// timeline of posts from best-practice steps, written in the artist's voice from templates (no
-// LLM), and shows where autopost's posts fall around them. Autopost steps aside on campaign days
+// The artist picks a release and confirms its date. Before release they choose how far ahead to
+// start; once it's out, how long to keep going from tomorrow (Brandon, 2026-11-03: a countdown
+// made no sense for a release already out). Unstream proposes a timeline of posts from
+// best-practice steps, written in the artist's voice from templates (no LLM), and shows where
+// autopost's posts fall around them. Autopost steps aside on campaign days
 // and the day either side, so no network gets two posts on a day. Nothing is scheduled until the
 // artist presses Schedule; posts then go to Buffer 72 hours ahead, as autopost's do.
 
@@ -64,6 +66,7 @@ export function PromoteCampaignsPage() {
   const [releaseId, setReleaseId] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [runway, setRunway] = useState<number>(DEFAULT_RUNWAY_WEEKS);
+  const [runWeeks, setRunWeeks] = useState<number>(DEFAULT_RUN_WEEKS);
   useReportArtistName(page?.available ? page.artist.name : undefined);
 
   const tokenRef = useRef(session?.access_token);
@@ -117,12 +120,14 @@ export function PromoteCampaignsPage() {
   const withCampaign = new Set(loaded.campaigns.map(c => c.releaseId));
   const choosable = loaded.releases.filter(r => !withCampaign.has(r.id));
   const chosen = loaded.releases.find(r => r.id === releaseId) ?? null;
+  // Out by today means the first post, tomorrow, comes after release: no countdown to plan.
+  const alreadyOut = Boolean(releaseDate) && releaseDate <= loaded.today;
 
   const pickRelease = (id: string) => {
     setReleaseId(id);
     const r = loaded.releases.find(x => x.id === id);
-    // A known future date is offered as is; anything else the artist confirms.
-    setReleaseDate(r?.releaseDate && r.datePrecision === 'day' && r.releaseDate > loaded.today ? r.releaseDate : '');
+    // A known exact date is offered as is; anything less precise the artist confirms.
+    setReleaseDate(r?.releaseDate && r.datePrecision === 'day' ? r.releaseDate : '');
   };
 
   const fail = (err: unknown, context: string, fallback: string) => {
@@ -142,8 +147,9 @@ export function PromoteCampaignsPage() {
     setError(null);
     setProblems(undefined);
     try {
-      const startDate = addDays(releaseDate, -7 * runway);
-      const proposal = await proposeCampaign(token, slug, { releaseId: chosen.id, releaseDate, startDate });
+      const proposal = await proposeCampaign(token, slug, alreadyOut
+        ? { releaseId: chosen.id, releaseDate, runWeeks }
+        : { releaseId: chosen.id, releaseDate, startDate: addDays(releaseDate, -7 * runway) });
       overlayKey.current = `${chosen.id}|${proposal.posts.map(p => p.date).sort().join(',')}`;
       setDraft({ id: null, releaseId: chosen.id, releaseDate, posts: proposal.posts, autopost: proposal.autopost });
     } catch (err) {
@@ -194,8 +200,8 @@ export function PromoteCampaignsPage() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-text-secondary">
-        Plan a run of posts for a new release. Unstream proposes them and you edit before anything is scheduled. Autopost steps
-        aside on campaign days.
+        Plan a run of posts for a release, before it comes out or after. Unstream proposes them and you edit before anything is
+        scheduled. Autopost steps aside on campaign days.
       </p>
 
       {loaded.pausedReason && (
@@ -282,23 +288,37 @@ export function PromoteCampaignsPage() {
                     <input
                       type="date"
                       value={releaseDate}
-                      min={addDays(loaded.today, 1)}
                       onChange={e => setReleaseDate(e.target.value)}
                       className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
                     />
                   </label>
-                  <label className="flex flex-wrap items-center gap-2 text-sm">
-                    Start promoting
-                    <select
-                      value={runway}
-                      onChange={e => setRunway(Number(e.target.value))}
-                      className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
-                    >
-                      {RUNWAY_WEEKS.map(w => (
-                        <option key={w} value={w}>{w} week{w === 1 ? '' : 's'} before{w === DEFAULT_RUNWAY_WEEKS ? ' (recommended)' : ''}</option>
-                      ))}
-                    </select>
-                  </label>
+                  {alreadyOut ? (
+                    <label className="flex flex-wrap items-center gap-2 text-sm">
+                      Promote for
+                      <select
+                        value={runWeeks}
+                        onChange={e => setRunWeeks(Number(e.target.value))}
+                        className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
+                      >
+                        {RUN_WEEKS.map(w => (
+                          <option key={w} value={w}>{w} weeks from tomorrow{w === DEFAULT_RUN_WEEKS ? ' (recommended)' : ''}</option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <label className="flex flex-wrap items-center gap-2 text-sm">
+                      Start promoting
+                      <select
+                        value={runway}
+                        onChange={e => setRunway(Number(e.target.value))}
+                        className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
+                      >
+                        {RUNWAY_WEEKS.map(w => (
+                          <option key={w} value={w}>{w} week{w === 1 ? '' : 's'} before{w === DEFAULT_RUNWAY_WEEKS ? ' (recommended)' : ''}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   <button type="button" disabled={busy || !releaseDate} onClick={propose} className={PRIMARY_BUTTON}>
                     {busy ? 'Planning…' : 'Propose posts'}
                   </button>
@@ -314,7 +334,7 @@ export function PromoteCampaignsPage() {
         <section className={SECTION} aria-labelledby="campaign-editor">
           <h3 id="campaign-editor" className="font-medium text-text-primary">{draftRelease.title}</h3>
           {draft.posts.length === 0 && (
-            <p className="text-sm text-text-secondary">Nothing to propose for these dates. Add a post, or pick an earlier start.</p>
+            <p className="text-sm text-text-secondary">Nothing to propose for these dates. Add a post of your own.</p>
           )}
           <CampaignEditor
             release={draftRelease}

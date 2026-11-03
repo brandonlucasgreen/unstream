@@ -244,7 +244,8 @@ export function getCampaignsPage(token: string, slug: string): Promise<Campaigns
   return call(token, campaignsUrl(slug));
 }
 
-export function proposeCampaign(token: string, slug: string, input: { releaseId: string; releaseDate: string; startDate: string }): Promise<{ posts: CampaignPostDraft[]; autopost: AutopostDay[] }> {
+/** Before release, `startDate` is when to begin; once it's out, `runWeeks` is how long to run from tomorrow. */
+export function proposeCampaign(token: string, slug: string, input: { releaseId: string; releaseDate: string; startDate?: string; runWeeks?: number }): Promise<{ posts: CampaignPostDraft[]; autopost: AutopostDay[] }> {
   return call(token, campaignsUrl(slug, '&action=propose'), { method: 'POST', body: JSON.stringify(input) });
 }
 
