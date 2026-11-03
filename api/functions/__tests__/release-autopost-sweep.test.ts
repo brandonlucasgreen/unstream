@@ -25,6 +25,13 @@ const mocks = vi.hoisted(() => {
     getFeatureFlag: vi.fn(),
     getTipsLiveSlugs: vi.fn(),
     storeImageFromUrl: vi.fn(),
+    getAutopostSettings: vi.fn(),
+    listAssets: vi.fn(),
+    purgeRemovedAssets: vi.fn(),
+    listCampaigns: vi.fn(),
+    artistsWithCampaignPostsDue: vi.fn(),
+    claimCampaignPost: vi.fn(),
+    finishCampaignPost: vi.fn(),
   };
 });
 
@@ -37,6 +44,16 @@ vi.mock('../release-autopost-db', () => ({
   claimSlot: mocks.claimSlot,
   finishSlot: mocks.finishSlot,
   pauseAutopost: mocks.pauseAutopost,
+  getAutopostSettings: mocks.getAutopostSettings,
+  MAX_ATTEMPTS: 3,
+}));
+vi.mock('../promote-assets-db', () => ({ listAssets: mocks.listAssets, purgeRemovedAssets: mocks.purgeRemovedAssets }));
+vi.mock('../release-campaigns-db', async importOriginal => ({
+  ...(await importOriginal<typeof import('../release-campaigns-db')>()),
+  listCampaigns: mocks.listCampaigns,
+  artistsWithCampaignPostsDue: mocks.artistsWithCampaignPostsDue,
+  claimCampaignPost: mocks.claimCampaignPost,
+  finishCampaignPost: mocks.finishCampaignPost,
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
@@ -113,6 +130,10 @@ describe('release-autopost-sweep', () => {
     mocks.canUseReleaseAutopost.mockResolvedValue(true);
     mocks.getAutopostReleases.mockResolvedValue([release]);
     mocks.getAutopostHistory.mockResolvedValue([]);
+    mocks.listAssets.mockResolvedValue([]);
+    mocks.purgeRemovedAssets.mockResolvedValue(0);
+    mocks.listCampaigns.mockResolvedValue([]);
+    mocks.artistsWithCampaignPostsDue.mockResolvedValue([]);
     mocks.claimSlot.mockResolvedValue('slot-row-1');
     mocks.usableAccessToken.mockResolvedValue('token');
     mocks.listChannels.mockResolvedValue([
@@ -154,6 +175,87 @@ describe('release-autopost-sweep', () => {
     const res = await run();
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body)).toMatchObject({ artists: 0, pushed: 0 });
+  });
+
+  describe('release campaigns', () => {
+    const campaignPost = (over: Record<string, unknown> = {}) => ({
+      id: 'cp-1', campaignId: 'c-1', artistId: 'artist-1', step: 'week_to_go', postDate: '2026-11-13',
+      text: 'One week until {title} is out, {date}. {link}', imageKey: 'upload:u1', status: 'planned', attempts: 0,
+      slotAt: null, bufferPostIds: [], captions: {}, error: null, ...over,
+    });
+    const campaign = (posts: unknown[]) => ({
+      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-11-20', createdAt: '2026-11-01T00:00:00Z', posts,
+    });
+    const upload = { id: 'u1', url: 'https://cards.unstream.stream/promote/artist-1/u.jpg', storageKey: 'promote/artist-1/u.jpg', width: 1080, height: 1350, createdAt: '2026-11-01T00:00:00Z' };
+
+    beforeEach(() => {
+      mocks.claimCampaignPost.mockResolvedValue(true);
+      mocks.listAssets.mockResolvedValue([upload]);
+    });
+
+    it('sends a due campaign post even with autopost off, in the artist’s words, with its upload as is', async () => {
+      mocks.getActiveAutopostSettings.mockResolvedValue([]);
+      mocks.artistsWithCampaignPostsDue.mockResolvedValue(['artist-1']);
+      mocks.getAutopostSettings.mockResolvedValue({ ...settings, enabled: false });
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()])]);
+
+      const res = await run();
+      expect(JSON.parse(res.body)).toMatchObject({ artists: 1, pushed: 1, failed: 0 });
+      expect(mocks.claimSlot).not.toHaveBeenCalled();
+      expect(mocks.claimCampaignPost).toHaveBeenCalledWith(expect.objectContaining({ id: 'cp-1' }), '2026-11-13T15:00:00.000Z');
+      expect(mocks.storeImageFromUrl).not.toHaveBeenCalled();
+      expect(mocks.ensureTag).toHaveBeenCalledWith('token', 'org-1', 'unstream: release campaign', expect.any(String));
+
+      const [bsky, ig] = mocks.createPost.mock.calls.map(c => c[1]);
+      // {date} is the campaign's confirmed release date, not the catalogue's.
+      expect(bsky.text).toBe('One week until Ruined Castle is out, November 20, 2026. https://unstream.stream/a/kid-lightbulbs/ruined-castle');
+      expect(ig.text).toContain('link in bio');
+      expect(bsky.assets[0].image.url).toBe(upload.url);
+      expect(mocks.finishCampaignPost).toHaveBeenCalledWith('cp-1', expect.objectContaining({ status: 'pushed', error: null }));
+    });
+
+    it('leaves autopost’s slot empty on the day after a campaign post', async () => {
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost({ postDate: '2026-11-12', imageKey: 'cover' })])]);
+      await run();
+      // Friday the 13th would be autopost's; the campaign posts on Thursday, so autopost steps aside.
+      expect(mocks.claimSlot).not.toHaveBeenCalled();
+      expect(mocks.claimCampaignPost).toHaveBeenCalledTimes(1);
+      expect(mocks.storeImageFromUrl).toHaveBeenCalledWith(expect.anything(), release.artworkUrl);
+    });
+
+    it('doesn’t send a post whose day has passed, or one another run took', async () => {
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost({ id: 'old', postDate: '2026-11-10' })])]);
+      mocks.getAutopostReleases.mockResolvedValue([{ ...release, id: 'other' }]);
+      await run();
+      expect(mocks.claimCampaignPost).not.toHaveBeenCalled();
+
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()])]);
+      mocks.claimCampaignPost.mockResolvedValue(false);
+      await run();
+      expect(mocks.finishCampaignPost).not.toHaveBeenCalled();
+    });
+
+    it('fails a campaign post whose release no longer qualifies, rather than posting it', async () => {
+      mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, enabled: false }]);
+      mocks.getAutopostReleases.mockResolvedValue([]);
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()])]);
+      await run();
+      expect(mocks.createPost).not.toHaveBeenCalled();
+      expect(mocks.finishCampaignPost).toHaveBeenCalledWith('cp-1', expect.objectContaining({ status: 'failed', error: 'The release no longer qualifies' }));
+    });
+  });
+
+  it('puts an upload on a call for support without copying it', async () => {
+    const upload = { id: 'u1', url: 'https://cards.unstream.stream/promote/artist-1/u.jpg', storageKey: 'promote/artist-1/u.jpg', width: 1080, height: 1080, createdAt: '2026-11-01T00:00:00Z' };
+    mocks.listAssets.mockResolvedValue([upload]);
+    // Three posts about the music already, none a call for support: Friday's is one.
+    mocks.getAutopostHistory.mockResolvedValue(['2026-10-16', '2026-10-23', '2026-10-30'].map((d, i) => ({
+      at: `${d}T14:00:00.000Z`, kind: 'catalogue', releaseId: `old-${i}`, templateIndex: 0, imageKey: null, imageOnInstagram: false,
+    })));
+    await run();
+    expect(mocks.claimSlot).toHaveBeenCalledWith(expect.objectContaining({ kind: 'support', imageKey: 'upload:u1', imageOnInstagram: true }));
+    expect(mocks.storeImageFromUrl).not.toHaveBeenCalled();
+    expect(mocks.createPost.mock.calls[0][1].assets[0].image.url).toBe(upload.url);
   });
 
   it('pushes a due slot to every ticked channel, scheduled, tagged and with its cover', async () => {

@@ -45,6 +45,11 @@ vi.mock('../release-autopost-db', () => ({
   MAX_ATTEMPTS: 3,
 }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
+vi.mock('../promote-assets-db', () => ({ listAssets: async () => [] }));
+vi.mock('../release-campaigns-db', async importOriginal => ({
+  ...(await importOriginal<typeof import('../release-campaigns-db')>()),
+  listCampaigns: async () => [],
+}));
 vi.mock('../buffer-client', () => ({
   listOrganizations: mocks.listOrganizations,
   listChannels: mocks.listChannels,

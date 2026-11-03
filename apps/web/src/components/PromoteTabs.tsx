@@ -1,10 +1,10 @@
 import { Link, Outlet, useMatch, useOutletContext, useParams } from 'react-router-dom';
 import type { ArtistSettingsContext } from '../pages/ArtistSettingsLayout';
 
-// The tabs along the top of /promote/:slug: one per promotion tool (Brandon, 2026-10-30). Only
-// Autopost exists so far; custom images for autopost, on-demand social cards and the embeddable
-// widget are expected to join it. Each tab is its own route under /promote/:slug, so it can be
-// linked to directly.
+// The tabs along the top of /promote/:slug: one per promotion tool (Brandon, 2026-10-30).
+// Autopost, release Campaigns and the Asset library (Brandon, 2026-11-02); on-demand social cards
+// and the embeddable widget are expected to join them. Each tab is its own route under
+// /promote/:slug, so it can be linked to directly.
 //
 // **Autopost stays at /promote/:slug itself**, not a path of its own: Buffer's OAuth comes back
 // there (isAllowedReturnPath in api/functions/me-buffer.ts) and the Promote button on /my-artists
@@ -12,6 +12,8 @@ import type { ArtistSettingsContext } from '../pages/ArtistSettingsLayout';
 
 const TABS: { label: string; path: string }[] = [
   { label: 'Autopost', path: '' },
+  { label: 'Campaigns', path: 'campaigns' },
+  { label: 'Asset library', path: 'assets' },
 ];
 
 export function PromoteTabs({ slug }: { slug: string }) {

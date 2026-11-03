@@ -28,7 +28,7 @@ const settings = (over: Partial<PlanSettings> = {}): PlanSettings => ({
   kindsOff: [],
   variantCounts: { bandcamp_friday: 2, release_day: 2, preorder: 2, out_now: 2, still_new: 2, catalogue: 3, support: 2 },
   artistPhoto: null,
-  uploadIds: [],
+  uploads: [],
   ...over,
 });
 
@@ -63,6 +63,9 @@ const plan = (over: Partial<PlanInput> & { settings?: PlanSettings } = {}) => pl
   to: '2026-12-07T00:00:00Z',
   ...over,
 });
+
+/** For tests about the music: the monthly call for support would otherwise take a slot. */
+const noSupport = settings({ kindsOff: ['support'] });
 
 const fourReleases = [rel('a', '2024-03-01'), rel('b', '2025-03-01'), rel('c', '2023-03-01'), rel('d', '2022-03-01')];
 const summary = (posts: ReturnType<typeof plan>) => posts.map(p => `${p.date} ${p.kind} ${p.releaseId ?? '-'}`);
@@ -129,12 +132,12 @@ describe('how often', () => {
 
 describe('the catalogue', () => {
   it('starts with releases never mentioned, newest first', () => {
-    expect(plan({ releases: fourReleases }).map(p => p.releaseId)).toEqual(['b', 'a', 'c', 'd']);
+    expect(plan({ settings: noSupport, releases: fourReleases }).map(p => p.releaseId)).toEqual(['b', 'a', 'c', 'd']);
   });
 
   it('then picks the one mentioned longest ago, and never one inside its spacing', () => {
     // Four releases at one a week: the natural gap is 28 days.
-    const posts = plan({ releases: fourReleases, history: [past('2026-11-02', 'catalogue', 'b')] });
+    const posts = plan({ settings: noSupport, releases: fourReleases, history: [past('2026-11-02', 'catalogue', 'b')] });
     expect(posts.map(p => p.releaseId)).toEqual(['a', 'c', 'd', 'b']);
   });
 
@@ -144,7 +147,7 @@ describe('the catalogue', () => {
   });
 
   it('takes turns through the template variants, carrying on from what was posted', () => {
-    const posts = plan({ releases: fourReleases, history: [past('2026-10-30', 'catalogue', 'x', { templateIndex: 2 })] });
+    const posts = plan({ settings: noSupport, releases: fourReleases, history: [past('2026-10-30', 'catalogue', 'x', { templateIndex: 2 })] });
     expect(posts.map(p => p.templateIndex)).toEqual([0, 1, 2, 0]);
   });
 });
@@ -236,8 +239,27 @@ describe('calls for support', () => {
     }
   });
 
-  it('never below three a week', () => {
-    expect(plan({ settings: settings({ postsPerWeek: 2 }), releases: many }).map(p => p.kind)).not.toContain('support');
+  it('below three a week, about once a month: never within 28 days of the last', () => {
+    const posts = plan({
+      settings: settings({ postsPerWeek: 2 }),
+      releases: many,
+      to: '2027-02-01T00:00:00Z',
+    });
+    const support = posts.filter(p => p.kind === 'support').map(p => p.date);
+    expect(support.length).toBeGreaterThan(1);
+    for (let i = 1; i < support.length; i++) {
+      expect(Date.parse(support[i]) - Date.parse(support[i - 1])).toBeGreaterThanOrEqual(28 * 86_400_000);
+    }
+  });
+
+  it('at one a week, after three posts about the music at least', () => {
+    const kinds = plan({ releases: many }).map(p => p.kind);
+    expect(kinds).toEqual(['catalogue', 'catalogue', 'catalogue', 'support']);
+  });
+
+  it('not at all when switched off', () => {
+    const kinds = plan({ settings: settings({ kindsOff: ['support'] }), releases: many, to: '2027-02-01T00:00:00Z' }).map(p => p.kind);
+    expect(kinds).not.toContain('support');
   });
 });
 
@@ -247,12 +269,25 @@ describe('campaigns', () => {
     expect(posts.map(p => p.releaseId)).not.toContain('b');
     expect(posts.map(p => p.date)).not.toContain('2026-11-13');
   });
+
+  it('leave the day either side of each campaign post empty too', () => {
+    const posts = plan({
+      settings: settings({ postsPerWeek: 7, kindsOff: ['support'] }),
+      releases: Array.from({ length: 40 }, (_, i) => rel(`r${i}`, `19${60 + i}-01-01`)),
+      campaigns: [{ releaseId: 'r1', dates: ['2026-11-13', '2026-11-20'] }],
+    });
+    const dates = posts.map(p => p.date);
+    for (const d of ['2026-11-12', '2026-11-13', '2026-11-14', '2026-11-19', '2026-11-20', '2026-11-21']) {
+      expect(dates).not.toContain(d);
+    }
+    expect(dates).toContain('2026-11-16');
+  });
 });
 
 describe('pictures', () => {
   it('rotates away from an image Instagram showed in the last four weeks', () => {
     const posts = plan({
-      settings: settings({ artistPhoto: { instagramOk: true }, uploadIds: ['u1'] }),
+      settings: settings({ artistPhoto: { instagramOk: true }, uploads: [{ id: 'u1', instagramOk: true }] }),
       releases: [rel('a', '2024-03-01')],
     });
     expect(posts.map(p => [p.imageKey, p.imageOnInstagram])).toEqual([['cover:a', true], ['photo', true]]);
@@ -277,6 +312,33 @@ describe('pictures', () => {
     for (const p of support) expect(p.imageKey).toBe('photo');
     // Shown on Instagram once in any four weeks; otherwise it goes to the other networks only.
     expect(support.filter(p => p.imageOnInstagram).length).toBeLessThan(support.length);
+  });
+
+  it('uses uploads only on posts that aren’t about a release, least recently used first', () => {
+    const many = Array.from({ length: 20 }, (_, i) => rel(`r${i}`, `20${10 + i}-01-01`));
+    const posts = plan({
+      settings: settings({
+        postsPerWeek: 3,
+        artistPhoto: { instagramOk: true },
+        uploads: [{ id: 'u1', instagramOk: true }, { id: 'u2', instagramOk: true }],
+      }),
+      releases: many,
+      to: '2027-02-01T00:00:00Z',
+    });
+    for (const p of posts.filter(p => p.kind !== 'support')) expect(p.imageKey).not.toMatch(/^upload:/);
+    const support = posts.filter(p => p.kind === 'support').map(p => p.imageKey);
+    expect(support.slice(0, 3)).toEqual(['upload:u1', 'upload:u2', 'photo']);
+  });
+
+  it('never offers Instagram an upload outside its shape range', () => {
+    const many = Array.from({ length: 20 }, (_, i) => rel(`r${i}`, `20${10 + i}-01-01`));
+    const posts = plan({
+      settings: settings({ postsPerWeek: 3, uploads: [{ id: 'wide', instagramOk: false }] }),
+      releases: many,
+    });
+    const support = posts.filter(p => p.kind === 'support');
+    expect(support.length).toBeGreaterThan(0);
+    for (const p of support) expect(p).toMatchObject({ imageKey: 'upload:wide', imageOnInstagram: false });
   });
 
   it('never offers Instagram a photo outside its shape range', () => {

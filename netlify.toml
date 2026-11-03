@@ -421,6 +421,18 @@
   to = "/.netlify/functions/artist-promote"
   status = 200
 
+# The Promote page's asset library and release campaigns (api/functions/artist-promote-assets.ts,
+# artist-campaigns.ts), behind the same flag.
+[[redirects]]
+  from = "/api/artist-promote/assets"
+  to = "/.netlify/functions/artist-promote-assets"
+  status = 200
+
+[[redirects]]
+  from = "/api/artist-campaigns"
+  to = "/.netlify/functions/artist-campaigns"
+  status = 200
+
 [[redirects]]
   from = "/api/desktop/version"
   to = "/.netlify/functions/desktop-version"

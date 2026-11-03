@@ -49,7 +49,11 @@ export interface PlanSettings {
   variantCounts: Partial<Record<AutopostKind, number>>;
   /** null when Unstream holds no photo of the artist. */
   artistPhoto: { instagramOk: boolean } | null;
-  uploadIds: string[];
+  /**
+   * The artist's asset library (`promote_assets`), oldest first. Used only by posts that aren't
+   * about a release (Brandon, 2026-11-02); `instagramOk` is false for a shape Instagram refuses.
+   */
+  uploads: { id: string; instagramOk: boolean }[];
 }
 
 /** A post already handed to Buffer: autopost's own, or a campaign's. */
@@ -62,7 +66,10 @@ export interface PastPost {
   imageOnInstagram: boolean;
 }
 
-/** An active campaign: its release, and the local dates its posts go out on. */
+/**
+ * A running campaign: its release, and the local dates its posts go out on. Autopost leaves the
+ * release to the campaign, and leaves those dates and the day either side of each empty.
+ */
 export interface PlanCampaign {
   releaseId: string;
   dates: string[];
@@ -124,8 +131,14 @@ const MIN_CATALOGUE_SPACING_DAYS = 14;
 const MIN_GAP_DAYS = 3;
 /** A call for support at most once in this many posts… */
 const SUPPORT_EVERY = 4;
-/** …and only at this many posts a week or more. Below it, every slot belongs to the music. */
+/**
+ * …and below this many posts a week, also at most once in this many days: about once a month,
+ * so a slow rhythm still carries the artist's uploads now and then (Brandon, 2026-11-02).
+ */
 const SUPPORT_MIN_PER_WEEK = 3;
+const SLOW_SUPPORT_EVERY_DAYS = 28;
+/** Autopost leaves this many days either side of a campaign post empty, as well as its day. */
+const CAMPAIGN_GAP_DAYS = 1;
 const INSTAGRAM_IMAGE_REPEAT_DAYS = 28;
 
 /** 1–7 releases → 1 a week, 8–14 → 2, 15 or more → 3. None → nothing to post. */
@@ -276,7 +289,8 @@ export function planSlots(input: PlanInput): PlannedPost[] {
   const endMs = new Date(input.to).getTime();
   const enabledMs = new Date(settings.enabledAt).getTime();
 
-  const campaignDays = new Set(campaigns.flatMap(c => c.dates));
+  const campaignDays = new Set(campaigns.flatMap(c => c.dates.flatMap(d =>
+    Array.from({ length: 2 * CAMPAIGN_GAP_DAYS + 1 }, (_, i) => addDays(d, i - CAMPAIGN_GAP_DAYS)))));
   const campaignReleases = new Set(campaigns.map(c => c.releaseId));
   // A release with a campaign is left to the campaign.
   const releases = input.releases.filter(r => !campaignReleases.has(r.id)).sort(newestFirst);
@@ -331,28 +345,46 @@ export function planSlots(input: PlanInput): PlannedPost[] {
     return r?.hasCover ? `cover:${r.id}` : null;
   };
 
+  /** The image used least recently anywhere (never used counts as longest ago), first on ties. */
+  const leastRecentlyUsed = (keys: string[], date: string): string | null => {
+    let best: { key: string; last: string } | null = null;
+    for (const key of keys) {
+      const last = timeline
+        .filter(m => m.imageKey === key && m.date <= date)
+        .reduce((latest, m) => (m.date > latest ? m.date : latest), '');
+      if (!best || last < best.last) best = { key, last };
+    }
+    return best?.key ?? null;
+  };
+
   /**
-   * Release moments and Bandcamp Friday use the release's cover. A catalogue post rotates
-   * through its cover, the artist's photo and uploads, and a call for support through the photo
-   * and uploads (covers belong to their releases' own posts), never showing one on Instagram
-   * twice in four weeks. With nothing fresh left, Instagram skips the post and the other
-   * networks still get the cover or photo.
+   * Release moments and Bandcamp Friday use the release's cover. A catalogue post uses its cover,
+   * or the artist's photo when Instagram showed that cover recently. A call for support, the one
+   * post not about a release, rotates through the artist's uploads and photo, least recently used
+   * first (Brandon, 2026-11-02: uploads go only on posts that aren't about a release). Nothing is
+   * shown on Instagram twice in four weeks: with nothing fresh left, Instagram skips the post and
+   * the other networks still get an image.
    */
   const pickImage = (kind: AutopostKind, releaseId: string | null, date: string) => {
     if (kind !== 'catalogue' && kind !== 'support') {
       const key = coverKey(releaseId);
       return { imageKey: key, imageOnInstagram: key !== null };
     }
-    const photoForInstagram = settings.artistPhoto?.instagramOk ? ['photo'] : [];
-    const uploads = settings.uploadIds.map(id => `upload:${id}`);
-    const candidates = kind === 'catalogue'
-      ? [coverKey(releaseId), ...photoForInstagram, ...uploads]
-      : [...photoForInstagram, ...uploads];
-    for (const key of candidates) {
-      if (key && !usedOnInstagramRecently(key, date)) return { imageKey: key, imageOnInstagram: true };
+    if (kind === 'catalogue') {
+      const candidates = [coverKey(releaseId), settings.artistPhoto?.instagramOk ? 'photo' : null];
+      for (const key of candidates) {
+        if (key && !usedOnInstagramRecently(key, date)) return { imageKey: key, imageOnInstagram: true };
+      }
+      return { imageKey: coverKey(releaseId), imageOnInstagram: false };
     }
-    const fallback = kind === 'catalogue' ? coverKey(releaseId) : (settings.artistPhoto ? 'photo' : null);
-    return { imageKey: fallback, imageOnInstagram: false };
+    const forInstagram = [
+      ...settings.uploads.filter(u => u.instagramOk).map(u => `upload:${u.id}`),
+      ...(settings.artistPhoto?.instagramOk ? ['photo'] : []),
+    ];
+    const fresh = leastRecentlyUsed(forInstagram.filter(key => !usedOnInstagramRecently(key, date)), date);
+    if (fresh) return { imageKey: fresh, imageOnInstagram: true };
+    const any = [...settings.uploads.map(u => `upload:${u.id}`), ...(settings.artistPhoto ? ['photo'] : [])];
+    return { imageKey: leastRecentlyUsed(any, date), imageOnInstagram: false };
   };
 
   const place = (date: string, kind: AutopostKind, releaseId: string | null) => {
@@ -427,9 +459,11 @@ export function planSlots(input: PlanInput): PlannedPost[] {
   };
 
   const supportDue = (date: string) => {
-    if (perWeek < SUPPORT_MIN_PER_WEEK || !kindOn('support')) return false;
+    if (!kindOn('support')) return false;
     const recent = autopostsBefore(date).slice(-(SUPPORT_EVERY - 1));
-    return recent.length === SUPPORT_EVERY - 1 && recent.every(m => m.kind !== 'support');
+    if (recent.length < SUPPORT_EVERY - 1 || recent.some(m => m.kind === 'support')) return false;
+    if (perWeek >= SUPPORT_MIN_PER_WEEK) return true;
+    return !timeline.some(m => m.kind === 'support' && m.date <= date && daysBetween(m.date, date) < SLOW_SUPPORT_EVERY_DAYS);
   };
 
   const firstDate = localDate(new Date(startMs).toISOString(), tz);

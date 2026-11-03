@@ -476,7 +476,7 @@ export function ArtistPromotePage() {
         <section className={SECTION} aria-labelledby="promote-recent">
           <h3 id="promote-recent" className="font-medium text-text-primary">Recent</h3>
           <ol className="space-y-3">
-            {page.recent.map(post => <ScheduledPostItem key={post.at} post={post} imageFirstTicked={[]} posting={posting} />)}
+            {page.recent.map(post => <ScheduledPostItem key={`${post.kind}-${post.at}`} post={post} imageFirstTicked={[]} posting={posting} />)}
           </ol>
         </section>
       )}

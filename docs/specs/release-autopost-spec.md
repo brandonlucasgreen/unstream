@@ -97,9 +97,9 @@ Each week has as many slots as the artist chose. Slots are filled in priority or
    - **Out now:** a release found already out, within 14 days of release, that missed its release-day post.
    - **Still new:** a release in its first 6 weeks, at most one slot in two.
 3. **The catalogue** fills what's left. It picks the qualifying release mentioned longest ago (never mentioned counts as longest), with ties going to the newest. A release is never mentioned twice inside its spacing, which is `max(14 days, the catalogue's natural gap)`.
-4. **A call for support** replaces a catalogue post at most once every 4 posts, and only at 3 or more posts a week. Below that every slot belongs to the music. It links to their Tip page if they take tips, otherwise their artist page (`unstream.stream/a/{artist}`).
+4. **A call for support** replaces a catalogue post at most once every 4 posts. Below 3 posts a week it also waits 28 days since the last one, so it comes about once a month (Brandon, 2026-11-02: until then it never ran below 3 a week, which left the asset library nothing to do at the recommended rhythm). It links to their Tip page if they take tips, otherwise their artist page (`unstream.stream/a/{artist}`). It's the one post not about a release, so it's the one that carries the artist's uploads (see "Pictures").
 
-**A release with a campaign is left to the campaign.** Autopost writes no release-moment or catalogue posts about it while the campaign runs, and leaves any day the campaign posts on empty. That way no day gets two posts and nothing is said twice. Releases without a campaign still get the automatic moments above, inside the weekly number.
+**A release with a campaign is left to the campaign.** Autopost writes no release-moment or catalogue posts about it while the campaign runs, and leaves any day the campaign posts on empty, **and the day either side of it** (`CAMPAIGN_GAP_DAYS`, Brandon, 2026-11-02), so a launch never stacks an autopost against a campaign post on consecutive days. That way no day gets two posts and nothing is said twice. Releases without a campaign still get the automatic moments above, inside the weekly number.
 
 **Fixed-date posts are placed first, for the whole period,** so the slots filled after them can see them coming, and **no release is named twice within 3 days** for any reason. Without that, the catalogue would happily post a release on Friday that Bandcamp Friday names the next week.
 
@@ -109,23 +109,43 @@ Some days have nothing that qualifies, such as a one-release catalogue whose onl
 
 ## Release campaigns
 
-**A short, more intense run of posts for one new or upcoming release, written by the artist** (Brandon, 2026-10-29). Autopost's rhythm is right for the long tail and too quiet for a launch. A launch is also when artists most want to speak in their own words, so campaigns are manual: Unstream lays out the plan, and the artist writes the posts.
+**A short, more intense run of posts for one new or upcoming release** (Brandon, 2026-10-29; built 2026-11-02). Autopost's rhythm is right for the long tail and too quiet for a launch. The Campaigns tab of the Promote page (`/promote/:slug/campaigns`, `PromoteCampaignsPage.tsx`).
 
-**What Unstream adds, compared with writing them straight into Buffer.** If a campaign were only a compose box, Buffer already has one. Unstream adds three things:
+**How it works:**
 
-- **A timeline built from the release date.** Choosing a release lays out suggested posts relative to its date: announce (about three weeks before), pre-order open, a week to go, release day, the first Bandcamp Friday after it, and a week on. Each step can be dropped, moved or added to. If the release date changes, every post not yet in Buffer moves with it.
-- **The facts, ready to use.** The same `{variables}` as templates (`{link}`, `{where}`, `{price}`, `{date}`), so the pre-order link and the "out on Bandcamp and Mirlo" line are right without copying them in.
-- **A prompt for each step,** saying what that post is for ("Tell people the date and where to pre-order"). It's a nudge, not suggested copy.
+1. **Pick a release, confirm its date, choose how early to start** (1 to 8 weeks before; 4 is recommended). Any qualifying release can be picked, since a re-release or a wrongly catalogued date is the artist's call; the date they confirm is the one `{date}` reads.
+2. **Unstream proposes the posts** (`proposeCampaign`, `api/functions/campaign-plan.ts`, pure and tested). This changed from the first design, where the artist wrote every post from a blank prompt (Brandon, 2026-11-02): the proposal is a set of **drafts from templates**, in the artist's first-person voice, filled with Unstream's facts. **Still no LLM** (see "No LLM writes the posts"). The artist edits, moves, drops or adds posts before anything is scheduled.
+3. **It lays over autopost.** The editor shows the campaign's weeks as a calendar with its posts, autopost's days and release day. Autopost steps aside on each campaign day and the day either side, so no network gets two Unstream posts on one day, and campaign posts don't count against the weekly number.
+
+**The timeline** (`CAMPAIGN_STEPS`, `api/shared/campaign-steps.ts`; D is release day):
+
+| Step | When | Image |
+|---|---|---|
+| Announcement | the start date | cover |
+| The story behind it | D−21 | an upload or their photo |
+| Thanking the people on it (album or EP only) | D−14 | an upload or their photo |
+| One week to go | D−7 | cover |
+| Tomorrow | D−1 | an upload or their photo |
+| Release day | D | cover |
+| Thank you | D+3 | an upload or their photo |
+| In case you missed it | D+10 | cover |
+| Bandcamp Friday | the first after release, within 45 days | cover |
+
+Posts are **at least 2 days apart**, except the day before release and release day. When a short runway puts two steps too close, the one that matters more to the launch stays (release day, then the announcement, the week-to-go and Bandcamp Friday, then the rest). Nothing is proposed before tomorrow. Drafts ask for pre-orders only while the release is `announced` and only before release day.
+
+**Where the shape comes from.** Published, unpaywalled release-promotion advice agrees on the order of the beats, though few sources give day offsets and almost none give post counts: CD Baby's six-week social plan (four weeks before, two after) and its 30-day plan (announce about 25 days out), Sonicbids' four-week plan (first track about D−21, pre-order push about D−14), and a daily countdown in the final week, which CD Baby puts in Stories rather than the feed, hence only "a week to go" and "tomorrow" here. Buffer's 2025 frequency studies put Instagram's sweet spot at 3–5 posts a week and LinkedIn's at 2–5, and found the biggest gain going from 1–2 posts to 3–5. A launch week of campaign plus autopost lands there. Buffer's 2026 format data and Rachel Karten's *Link in Bio* both warn against repeating the same post, which is why personal steps rotate through the artist's uploads and photo while release steps use the cover. No unpaywalled musician-specific material from Karten or Matt Navarra was found, so nothing here is attributed to them. Bandcamp's own guidance that pre-orders suit established artists, and that a pre-order is released by hand, is why pre-order wording only appears while the release is announced.
 
 **How it behaves:**
 
-- **Starting one:** the Promote page offers "Start a campaign" for any release that's `announced` or out within the last 14 days. When Unstream first catalogues such a release for an artist with autopost on, the page shows a banner and sends **one** email offering a campaign. That email is an offer, not an approval: ignoring it changes nothing, and the automatic release moments still run. An artist can turn the email off.
-- **Posts are the artist's text,** with an image per post: the cover art, the artist's photo, one of their uploads, or a new upload. Uploads matter most here: a launch is when artists have new photos, a poster or a teaser they want to use, so the campaign editor puts the upload button on each step. Instagram's image rule applies as in autopost, except that a campaign post with no image is flagged when it's written, not skipped silently.
-- **It runs on top of the rhythm.** Campaign posts don't count against the weekly number, which is how a release week gets more posts. Autopost steps aside for that release and on campaign days (see "Filling each slot").
-- **The same pipeline posts it.** Campaign posts are rows in the same posts table, pushed to Buffer 72 hours ahead with the same rechecks and the tag `unstream: release campaign`. No second scheduler.
-- **No approvals here either.** The artist wrote every word, and scheduling a campaign is the consent.
+- **Posts are the artist's text,** stored as templates (`release_campaign_posts.text`) and filled when sent, so `{link}` reads "link in bio" on Instagram and TikTok and `{where}` is current. Every post is checked on save: a real date from tomorrow on, one post a day per campaign and none on another campaign's day, valid template, fits every ticked network, and an image the artist still has.
+- **Images:** the cover, the artist's photo, any upload, or none. Instagram's rule applies as in autopost, and a post with no image (or an upload outside Instagram's shape) is **flagged in the editor**, not skipped silently.
+- **The same pipeline posts it.** `release-autopost-sweep` sends due campaign posts 72 hours ahead with the same rechecks (verified claim, feature gate, ticked channels still in Buffer, the release still qualifying) and the tag `unstream: release campaign`, **whether autopost is switched on or not**; a paused artist's campaign waits with their autopost. Campaign posts go to the channels and posting time chosen on the Autopost tab.
+- **Editing:** moving release day moves every post not yet in Buffer by the same number of days. Posts already in Buffer are shown, never changed. Saving replaces the unsent posts in one transaction (`save_release_campaign`).
+- **Stopping** deletes the unsent posts; the ones already in Buffer stay there.
+- **A post whose day passes unsent** (Buffer down for three days, say) is not sent late.
+- **No approvals here either.** The artist pressed Schedule, which is the consent.
 
-**Out of scope for the first version:** campaigns for anything but a release (tours, merch), and suggested copy of any kind.
+**Not built yet:** the email offering a campaign when a new release is catalogued, and campaigns for anything but a release (tours, merch).
 
 ## The words: templates, and deciding how they work
 
@@ -155,7 +175,7 @@ My recommendation is option 1, with the `{note}` prompt doing the work of making
 
 1. **Release covers.** Every catalogued release already carries `releases.artwork_url`, from its Bandcamp, Mirlo, Faircamp or Discogs listing. Covers are square, so every network takes them.
 2. **The artist's photo:** their own `custom_image_url` if they set one on their claimed profile, else `artists.image_url` from their Bandcamp page. That address is already repaired when Bandcamp deletes the old file (`refreshDeadArtistPhoto`). Photos come in any shape, so one outside Instagram's 4:5 to 1.91:1 range is skipped for Instagram.
-3. **Photos the artist uploads.** Optional for autopost, there for variety. Campaigns are where they'll really be used (see "Release campaigns").
+3. **Photos the artist uploads,** in the **Asset library** tab (`/promote/:slug/assets`, built 2026-11-02). Autopost puts them **only on posts that aren't about a release**, which today means the call for support, in turn, least recently used first (Brandon, 2026-11-02). Campaign posts can use any of them.
 
 **Deliberately not sources:**
 - **Wikimedia Commons photos,** which MusicBrainz reaches through Wikidata. They usually need a photographer credit to be used, they're mostly of well-known artists, and they can picture a namesake.
@@ -166,16 +186,16 @@ At one to three posts a week, a handful of covers plus one photo is enough. An a
 **Instagram needs an image on every post.** Ticking an Instagram channel during setup says so, shows the images Unstream already has for them, and offers uploads, without requiring them. Then:
 
 - Release-moment and Bandcamp Friday posts use the cover art.
-- Catalogue posts on Instagram rotate through their release's cover, the artist's photo and any uploads; support posts through the photo and uploads only, since covers belong to their releases' own posts. Neither repeats an image used on Instagram in the last 4 weeks, so the grid doesn't fill up with one picture.
+- Catalogue posts on Instagram use their release's cover, or the artist's photo when Instagram showed that cover recently; support posts rotate through the uploads and the photo, since covers belong to their releases' own posts. Neither repeats an image used on Instagram in the last 4 weeks, so the grid doesn't fill up with one picture.
 - **With nothing usable, that Instagram post is skipped** and the other channels go out as normal. The settings page says so: "3 Instagram posts skipped this month: add a photo."
 
 The other networks show a link preview when there's no image, so they're never skipped.
 
 **Uploads, kept small.** Offered in v1 for autopost and needed by campaigns:
-- Up to 12 images per artist profile, JPEG or PNG, shared between autopost and campaigns.
-- Resized in the browser to 2,048px on the long side before upload, which keeps every request under a Netlify function's 6 MB body limit.
-- Rejected with a plain message if they're outside Instagram's shape range. Instagram would refuse them anyway, and cropping someone's photo automatically can cut through a face.
-- Stored in R2 (below), and deletable from the settings page.
+- Up to 12 images per artist profile, shared between autopost and campaigns (`promote_assets`).
+- Any format the browser can read (JPEG, PNG, WebP, GIF, AVIF), resized in the browser to 2,048px on the long side and re-encoded as JPEG before upload (`promoteImages.ts`). That keeps every request under a Netlify function's 6 MB body limit and strips location metadata. The server reads the bytes' own header and stores only JPEG or PNG.
+- **Accepted whatever their shape** (changed 2026-11-02 from rejecting them): one outside Instagram's range is marked "Not for Instagram" and goes to the other networks only, like an artist photo of that shape. Never cropped automatically, which can cut through a face.
+- Stored in R2 under `promote/{artistId}/{hash}` (below). **Removing one is real:** it's hidden at once, and the file is deleted as soon as no post already in Buffer needs it, straight away or by a later sweep (`purgeRemovedAssets`). Unsent campaign posts using it lose their image and are flagged.
 
 **Every image is copied to R2 when its post is pushed, and Buffer gets the copy** (settled 2026-10-29). Buffer fetches an image on the day the post publishes, not when it's created: the weekly social posts found that out when a deleted artist photo failed a post (CLAUDE.md, "Social posts"). Bandcamp deletes old files, so the source address can't be trusted to still be there three days later. The copy is keyed by the image's hash, so a cover posted every month is stored once, and it's fetched back from the bucket's public address before Buffer gets it. A source that won't load (a 404) means the post goes without it, and Instagram skips it.
 
@@ -289,12 +309,14 @@ Built in `20261029120000_release-autopost.sql`:
 - **`release_autopost_posts`**, one row per slot handed to Buffer (upcoming slots aren't stored): `id`, `artist_id`, `slot_at`, `slot_date`, `kind`, `release_id` (null for support posts), `template_index`, `image_key`, `image_on_instagram`, `status` (`pushing` | `pushed` | `failed`), `attempts`, `buffer_post_ids jsonb` (which analytics uses to tell which release a Buffer post was about), `captions jsonb` (exactly what was sent, per channel), `error`, timestamps. Unique on `(artist_id, slot_at)`: that's the claim. Pushing and pushed rows are the history spacing is measured from.
 - **`releases.note`**: a new nullable column (280 characters at most) for the per-release `{note}`, added to `curated_fields` when an artist writes it, so a re-crawl never touches it.
 
-Still to come, with campaigns and uploads:
+Built in `20261102120000_promote-assets-and-campaigns.sql`:
 
-- **Campaign posts** in the same `release_autopost_posts` table, adding `text` (the artist's own words) and `campaign_id`. They're created by the artist ahead of time, so unlike autopost slots they are stored before they're pushed.
-- **`release_autopost_campaigns`**: `id`, `artist_id`, `release_id`, `status` (`active` | `ended` | `cancelled`), `created_at`. A campaign's steps are its posts' rows. Each row's position relative to the release date is stored too, so a moved date can move the posts not yet pushed.
-- **`release_autopost_images`**: `id`, `artist_id`, `r2_key`, `width`, `height`, `last_used_at`, `created_at`.
-- **`release_autopost_settings.campaign_emails`** (default on): the one offer email per new release.
+- **`promote_assets`**: `id`, `artist_id`, `user_id`, `storage_key`, `url`, `content_type`, `width`, `height`, `byte_size`, `deleted_at`, `created_at`. Named for the Promote page rather than autopost, since campaigns share it and it may hold other media later.
+- **`release_campaigns`**: `id`, `artist_id`, `user_id`, `release_id`, `release_date` (the date the artist confirmed), `status` (`active` | `cancelled`). One running campaign per release.
+- **`release_campaign_posts`**: `campaign_id`, `step`, `post_date`, `text`, `image_key`, then the same push columns as autopost's (`status` adds `planned`, `attempts`, `slot_at`, `buffer_post_ids`, `captions`, `error`). Unique on `(campaign_id, post_date)`. **A table of its own rather than rows in `release_autopost_posts`** as first planned: campaign posts are stored and edited ahead, autopost rows exist only once claimed, and sharing one table would have put a filter on every autopost read and a second meaning on its `(artist_id, slot_at)` claim.
+- **`save_release_campaign()`**: replaces a campaign's unsent posts in one transaction. EXECUTE revoked from `PUBLIC, anon, authenticated`.
+
+Still to come: **`release_autopost_settings.campaign_emails`** (default on), the one offer email per new release.
 
 ## Reused from curator posts
 
@@ -308,7 +330,7 @@ Already built and merged (#697–#708):
 
 ## UI: the Promote page
 
-**Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. **Tabs along its top, one per promotion tool** (Brandon, 2026-10-30; `PromoteTabs.tsx`): Autopost, at `/promote/:slug` itself, is the only one so far. Custom images for autopost, on-demand social cards and the embeddable widget are expected as tabs of their own, each at a path below it. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
+**Its own page, `/promote/:slug`, reached from a Promote button on each artist's card on `/my-artists`, beside Edit and View** (Brandon, 2026-10-29). It began as a tab under Edit, but it isn't about the artist's profile. **Tabs along its top, one per promotion tool** (Brandon, 2026-10-30; `PromoteTabs.tsx`): Autopost is at `/promote/:slug` itself; Campaigns and the Asset library are at paths below it, and on-demand social cards and the embeddable widget are expected to join them the same way. Shown only to the admin while the flag is off. Built in step 2b (`ArtistPromotePage.tsx`, behind `/api/artist-promote`). Setup is one page, top to bottom:
 
 1. **Where it posts:** connect Buffer, choose the organization (already chosen when there's only one), tick channels. (Ticking Instagram used to explain its image rule; that went with the copy trim of 2026-10-30, since a post that skips it says so in "Coming up".) **The on/off switch sits at the top of this section** (Brandon, 2026-10-29), shown once Buffer has a channel autopost can use. It saves the moment it's flipped and says in words what each position means: on, posts go to Buffer; off, nothing more does, **nothing is saved as a draft**, and the settings are kept.
    - **New to Buffer:** before connecting, the page says an account can be made on Buffer's own screen, and that social accounts have to be connected in Buffer.
@@ -320,9 +342,11 @@ Already built and merged (#697–#708):
 4. **Coming up:** today and the next four weeks, exactly as they'll post: date, kind, release, image, and whether Instagram skips it. **A week at a time** (Brandon, 2026-10-30): four tabs from the artist's today, each with its post count and a dot when something in it needs a look, then that week's seven days as a strip and its posts underneath. Each post's state is a row of small chips, an icon and a word or two each, with the reason as the tooltip: when it goes to Buffer, "Retrying", "Failed", or once it's in Buffer one chip per channel (its scheduled time, "Posted" linking to the post, "Failed", "Draft", "Needs approval", "Removed", "Skipped"). Each channel's state is read back from Buffer by channel and creation date, matched on the post ids stored at push. Built by `autopost-schedule-view.ts`; while the page is in view it reads `?part=schedule` again every two minutes and on returning to the tab.
 5. **Recent:** the last two weeks of posts, newest first, with the same status.
 
-Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked, campaigns, and a one-line summary on the `/my-artists` card.
+Campaign posts appear in "Coming up" and "Recent" beside autopost's, labelled "Campaign: {step}".
 
-**Campaigns**, when built, add "Start a campaign" for any qualifying new or upcoming release. It opens the timeline: one card per step, each with its date, its prompt, a text box with the `{variables}` and a live preview, the image, and the channels. Steps can be added, dropped or moved.
+**Tabs** (2026-11-02): Autopost, **Campaigns** (`/promote/:slug/campaigns`; see "Release campaigns") and **Asset library** (`/promote/:slug/assets`; see "Pictures"). Each keeps to the Autopost tab's amount of copy: one line saying what it's for, then the tool.
+
+Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream holds when Instagram is ticked, and a one-line summary on the `/my-artists` card.
 
 ## Measuring it
 
@@ -335,8 +359,8 @@ Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream h
 
 1. **The rotation, on paper.** `planSlots` (`api/functions/autopost-plan.ts`) and `renderTemplate` (`api/shared/autopost-templates.ts`) with their tests, plus `npm run preview:autopost -- <artist-slug>`, which prints the next 12 weeks from the real catalogue. That shows what Kid Lightbulbs, a one-release artist and a twenty-release artist would get, before anything posts.
 2. **Brandon only.** In two parts: **2a, the engine** (the tables, the sweep that plans and pushes, image copies to R2; `api/functions/release-autopost-sweep.ts`), then **2b, the Promote page** (connecting Buffer with `posts:read` and a return path, the settings, "Coming up"). Then on Kid Lightbulbs' channels for a few weeks. **This is also the templates test:** Brandon tries the defaults against writing his own, and that decides what artists start from.
-3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together.
-4. **Uploads,** shared by autopost and campaigns. Campaigns need them from the start; for autopost they're an optional extra.
+3. **Release campaigns,** alongside step 2 rather than after it, on Kid Lightbulbs' next release. A launch is where artists feel the need most, so the five artists in step 5 should be offered both together. **Built 2026-11-02**, except the offer email.
+4. **Uploads,** shared by autopost and campaigns: the Asset library tab. **Built 2026-11-02.**
 5. **Five verified artists,** asked personally, with different catalogue sizes. Watch the measures above for a month.
 6. **Decide.** Turn the flag on for every verified artist, change it, or stop. The recommendation formula and the 2-day cooldown are settled here, with real numbers.
 
@@ -350,6 +374,6 @@ Not yet built: the `{note}` prompt (step 3 below), showing the images Unstream h
 ## Open questions
 
 1. **What do artists start from: defaults, blank, or rules?** Answered by Brandon's test in Build plan step 2.
-2. **Support posts start at 3 a week, the top of the recommended range,** so most artists will never get one. Should one or two a week get an occasional one too, say one a month?
-3. **A campaign's suggested timeline:** six steps from three weeks out to a week after. Is that the right shape, or too much to ask an artist to write?
+2. ~~Support posts below 3 a week?~~ Settled 2026-11-02: about once a month (28 days apart), so uploads appear at every rhythm.
+3. **A campaign's suggested timeline:** up to nine posts over a four-week runway, now proposed as drafts rather than blank prompts. Is that too many for a small artist's audience? Watch how many proposed posts artists delete before scheduling.
 4. **Bandcamp Friday copy.** Bandcamp waives its share that day, but payment processing fees still apply. Is "Bandcamp waives its fee today" accurate enough on its own?

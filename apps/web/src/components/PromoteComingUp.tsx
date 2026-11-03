@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { KIND_COPY } from './PromoteTemplatesEditor';
+import { stepLabel } from '../../../../api/shared/campaign-steps';
 import { needsAttention, PromotePostStatus } from './PromotePostStatus';
 import type { ScheduledPost } from '../services/promote';
 
@@ -42,12 +43,13 @@ export function ScheduledPostItem({ post, imageFirstTicked, posting }: {
       )}
       <div className="min-w-0 space-y-1">
         <p className="text-xs text-text-muted">
-          {formatDate(post.date, { weekday: 'short', day: 'numeric', month: 'short' })} · {KIND_COPY[post.kind].label}
+          {formatDate(post.date, { weekday: 'short', day: 'numeric', month: 'short' })} · {post.kind === 'campaign' ? `Campaign: ${stepLabel(post.step ?? 'custom')}` : KIND_COPY[post.kind].label}
           {post.release ? ` · ${post.release.title}` : ''}
           {skips ? ` · skips ${imageFirstTicked.join(' and ')}` : ''}
         </p>
         <p className="text-sm text-text-primary whitespace-pre-line break-words">{post.text ?? 'No template could be filled for this one, so it won’t post.'}</p>
-        <PromotePostStatus state={post.state} posting={posting} />
+        {/* A campaign's posts go to Buffer whether autopost is on or not; only a pause stops them. */}
+        <PromotePostStatus state={post.state} posting={post.kind === 'campaign' && posting === 'off' ? 'on' : posting} />
       </div>
     </li>
   );
@@ -122,7 +124,7 @@ export function PromoteComingUp({ today, posts, imageFirstTicked, posting }: {
           <p className="text-sm text-text-secondary">Nothing posts this week.</p>
         ) : (
           <ol className="space-y-3">
-            {week.posts.map(post => <ScheduledPostItem key={post.at} post={post} imageFirstTicked={imageFirstTicked} posting={posting} />)}
+            {week.posts.map(post => <ScheduledPostItem key={`${post.kind}-${post.at}`} post={post} imageFirstTicked={imageFirstTicked} posting={posting} />)}
           </ol>
         )}
       </div>
