@@ -63,15 +63,20 @@ function renderTab() {
   );
 }
 
-/** Get to the editor: pick the release, ask for a proposal. */
+/** Get to the editor: pick the release, then ask for a proposal. */
 async function openEditor() {
   promote.proposeCampaign.mockResolvedValue({
     posts: [{ step: 'announce', date: '2026-11-06', text: '{title} comes out {date}.', imageKey: null }],
     autopost: [],
   });
-  fireEvent.change(await screen.findByLabelText('Release'), { target: { value: 'r1' } });
-  fireEvent.click(await screen.findByRole('button', { name: 'Propose posts' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Next: plan posts' }));
   await screen.findByRole('heading', { name: 'Luminaires' });
+}
+
+/** The new-campaign step, as far as the channel ticks: choosing a release reveals the rest. */
+async function newCampaign() {
+  fireEvent.change(await screen.findByLabelText('Release'), { target: { value: 'r1' } });
+  await screen.findByRole('button', { name: 'Next: plan posts' });
 }
 
 beforeEach(() => {
@@ -79,6 +84,15 @@ beforeEach(() => {
   for (const fn of Object.values(promote)) fn.mockReset();
 });
 afterEach(cleanup);
+
+/** A saved campaign as the page lists it. */
+const saved = (over: Record<string, unknown> = {}) => ({
+  id: 'c-1', releaseId: 'r1', release: { title: 'Luminaires', artworkUrl: null }, releaseDate: '2026-12-04',
+  channelIds: ['ig'],
+  posts: [{ id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'planned' as const, error: null }],
+  autopost: [],
+  ...over,
+});
 
 describe('PromoteCampaignsPage', () => {
   it('connects Buffer from here, coming back to this tab, for an artist who starts on it', async () => {
@@ -108,12 +122,78 @@ describe('PromoteCampaignsPage', () => {
     await screen.findByRole('heading', { name: 'New campaign' });
   });
 
-  it('starts a campaign on autopost’s channels but saves whatever the artist ticks', async () => {
+  it('asks for Buffer rather than a channel when there is nothing to tick', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ buffer: { connected: false }, defaultChannelIds: [] }));
+    renderTab();
+    await newCampaign();
+    expect(screen.getByText('Connect Buffer above to choose where this campaign posts.')).toBeTruthy();
+    expect(screen.queryByRole('checkbox')).toBeNull();
+    expect(screen.queryByText('Tick at least one channel for this campaign.')).toBeNull();
+    expect((screen.getByRole('button', { name: 'Next: plan posts' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('asks for Buffer, not a channel, when editing a campaign with Buffer gone', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ buffer: { connected: false }, defaultChannelIds: [], campaigns: [saved()] }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+    // The Buffer section above says how; the editor points at it instead of an alert.
+    expect(screen.getAllByText('Connect Buffer above to choose where this campaign posts.')).toHaveLength(1);
+    expect(screen.queryByText('Tick at least one channel for this campaign.')).toBeNull();
+  });
+
+  it('starts the next campaign from the default ticks, not the last one’s', async () => {
     promote.getCampaignsPage.mockResolvedValue(loaded());
     promote.saveCampaign.mockResolvedValue(loaded());
     renderTab();
+    await newCampaign();
+    fireEvent.click(screen.getByLabelText(/threads/i));
     await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Schedule campaign' }));
+    await waitFor(() => expect(promote.saveCampaign).toHaveBeenCalled());
 
+    await newCampaign();
+    expect((screen.getByLabelText(/threads/i) as HTMLInputElement).checked).toBe(false);
+    expect((screen.getByLabelText(/bluesky/i) as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('says when a campaign can’t post because none of its channels is in Buffer', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ campaigns: [saved({ channelIds: ['gone'] })] }));
+    renderTab();
+    expect(await screen.findByText('Not posting: none of its channels is in Buffer. Edit it to choose where it posts.')).toBeTruthy();
+  });
+
+  it('doesn’t name as next a post the sweep has given up on', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({
+      campaigns: [saved({
+        posts: [
+          { id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'failed', error: 'refused', gaveUp: true },
+          { id: 'p2', step: 'release_day', date: '2026-12-04', text: 'hi', imageKey: null, status: 'planned', error: null },
+        ],
+      })],
+    }));
+    renderTab();
+    expect(await screen.findByText(/next December 4, 2026/)).toBeTruthy();
+  });
+
+  it('keeps the posts of a campaign planned after release when its release date is corrected', async () => {
+    // Every post after release day: it was planned once the release was out.
+    promote.getCampaignsPage.mockResolvedValue(loaded({ campaigns: [saved({ releaseDate: '2025-10-23', channelIds: ['bsky'] })] }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+    expect(screen.getByText('Your posts keep their dates; this is the date {date} reads.')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/^Release date/), { target: { value: '2024-10-23' } });
+    expect((screen.getByLabelText('Date') as HTMLInputElement).value).toBe('2026-11-06');
+  });
+
+  it('picks the channels on the new-campaign step, starting from autopost’s', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded());
+    promote.saveCampaign.mockResolvedValue(loaded());
+    renderTab();
+    await newCampaign();
+
+    // Alongside the release and the run, not inside the editor (Brandon, 2026-11-03).
     const bluesky = screen.getByLabelText(/bluesky/i) as HTMLInputElement;
     const threads = screen.getByLabelText(/threads/i) as HTMLInputElement;
     expect(bluesky.checked).toBe(true);
@@ -121,19 +201,43 @@ describe('PromoteCampaignsPage', () => {
 
     fireEvent.click(threads);
     fireEvent.click(bluesky);
+    await openEditor();
+    // The editor says where it posts; the control was one step back.
+    expect(screen.getByText('kid · Threads')).toBeTruthy();
+
     fireEvent.click(screen.getByRole('button', { name: 'Schedule campaign' }));
     await waitFor(() => expect(promote.saveCampaign).toHaveBeenCalled());
     expect(promote.saveCampaign.mock.calls[0][2]).toMatchObject({ channelIds: ['th'], organizationId: 'org-1' });
   });
 
-  it('won’t schedule a campaign with nowhere to post', async () => {
+  it('won’t plan a campaign with nowhere to post', async () => {
     promote.getCampaignsPage.mockResolvedValue(loaded());
     renderTab();
-    await openEditor();
+    await newCampaign();
 
     fireEvent.click(screen.getByLabelText(/bluesky/i));
     expect(screen.getByText('Tick at least one channel for this campaign.')).toBeTruthy();
-    expect((screen.getByRole('button', { name: 'Schedule campaign' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Next: plan posts' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(promote.proposeCampaign).not.toHaveBeenCalled();
+  });
+
+  it('won’t save a scheduled campaign with every channel unticked', async () => {
+    // A scheduled campaign keeps its picker in the editor, so the Save guard still matters there.
+    promote.getCampaignsPage.mockResolvedValue(loaded({
+      campaigns: [{
+        id: 'c-1', releaseId: 'r1', release: { title: 'Luminaires', artworkUrl: null }, releaseDate: '2026-12-04',
+        channelIds: ['ig'],
+        posts: [{ id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'planned', error: null }],
+        autopost: [],
+      }],
+    }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+
+    fireEvent.click(screen.getByLabelText(/instagram/i));
+    expect(screen.getByText('Tick at least one channel for this campaign.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Save changes' }) as HTMLButtonElement).disabled).toBe(true);
     expect(promote.saveCampaign).not.toHaveBeenCalled();
   });
 
@@ -149,6 +253,7 @@ describe('PromoteCampaignsPage', () => {
     renderTab();
     fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
     await screen.findByRole('heading', { name: 'Luminaires' });
+    // A scheduled campaign has no new-campaign step to go back to, so it keeps the control.
     expect((screen.getByLabelText(/instagram/i) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText(/threads/i) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText(/bluesky/i) as HTMLInputElement).checked).toBe(false);

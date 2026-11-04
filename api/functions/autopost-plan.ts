@@ -12,8 +12,12 @@
 
 import type { AutopostKind } from '../shared/autopost-templates';
 import type { PostingDay } from './buffer-client';
+import { addDays, dateToUtcMs, daysBetween } from '../shared/calendar-dates';
 
 export type { AutopostKind };
+// The date arithmetic is shared with the Promote page's editors (api/shared/calendar-dates.ts);
+// re-exported because every planner caller already imports it from here.
+export { addDays, daysBetween };
 
 // ---------------------------------------------------------------------------------------------
 // Inputs and outputs
@@ -150,20 +154,6 @@ export function recommendedPostsPerWeek(qualifyingReleases: number): number {
 // ---------------------------------------------------------------------------------------------
 // Calendar helpers (local dates as YYYY-MM-DD strings)
 // ---------------------------------------------------------------------------------------------
-
-function dateToUtcMs(date: string): number {
-  const [y, m, d] = date.split('-').map(Number);
-  return Date.UTC(y, m - 1, d);
-}
-
-export function addDays(date: string, days: number): string {
-  return new Date(dateToUtcMs(date) + days * 86_400_000).toISOString().slice(0, 10);
-}
-
-/** Whole days from a to b (negative when b is earlier). */
-export function daysBetween(a: string, b: string): number {
-  return Math.round((dateToUtcMs(b) - dateToUtcMs(a)) / 86_400_000);
-}
 
 function dayOfWeek(date: string): number {
   return new Date(dateToUtcMs(date)).getUTCDay();

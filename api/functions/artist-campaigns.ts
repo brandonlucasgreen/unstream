@@ -29,6 +29,7 @@ import { addDays, daysBetween, isValidTimezone, localDate, PLAN_HORIZON_DAYS } f
 import { proposeCampaign } from './campaign-plan';
 import {
   defaultAutopostSettings,
+  MAX_ATTEMPTS,
   getAutopostHistory,
   getAutopostReleases,
   getAutopostSettings,
@@ -78,8 +79,10 @@ async function promoteBuffer(userId: string, organizationId: string | null): Pro
  * when nothing has — an artist may never open the Autopost tab — creating the settings row with
  * autopost off if there isn't one. If it moves (the stored organization is no longer in their
  * Buffer), autopost's ticked channels go with it: they were ids inside the old organization and
- * mean nothing in the new one. Autopost is left switched on, with nothing to post to, rather than
- * switched off behind the artist's back; its own tab says so and asks for channels.
+ * mean nothing in the new one. Autopost is switched off with them: "on" with no channels is a
+ * state its own tab refuses to save, and it would show as posting while posting nothing. Its tab
+ * then says it's off and asks for channels. Other campaigns' channels are left as they are; the
+ * Campaigns tab marks a campaign none of whose channels are in Buffer as not posting.
  */
 async function rememberOrganization(
   artistId: string,
@@ -90,7 +93,7 @@ async function rememberOrganization(
 ): Promise<void> {
   if (settings?.organizationId === organizationId) return;
   const base = settings ?? defaultAutopostSettings(artistId, userId, timezone ?? undefined);
-  await saveAutopostSettings({ ...base, organizationId, channelIds: [] });
+  await saveAutopostSettings({ ...base, organizationId, channelIds: [], enabled: false });
 }
 
 function releaseShown(r: AutopostRelease) {
@@ -202,13 +205,20 @@ function validatePosts(
  * an artist with more than one Buffer organization picks here before anything is saved, and the
  * channels shown have to be that organization's.
  */
-async function pageState(artist: AutopostArtist, userId: string, now: Date, organizationId: string | null = null) {
+async function pageState(
+  artist: AutopostArtist,
+  userId: string,
+  now: Date,
+  organizationId: string | null = null,
+  // What a save has just read and not changed, so the page after it doesn't ask Buffer again.
+  known: { buffer: BufferState; releases: AutopostRelease[]; uploads: PromoteAsset[] } | null = null,
+) {
   const settings = await ownSettings(artist.id, userId);
   const [releases, uploads, campaigns, buffer, history] = await Promise.all([
-    getAutopostReleases(artist.id),
-    listAssets(artist.id),
+    known?.releases ?? getAutopostReleases(artist.id),
+    known?.uploads ?? listAssets(artist.id),
     listCampaigns(artist.id),
-    promoteBuffer(userId, organizationId ?? settings?.organizationId ?? null),
+    known?.buffer ?? promoteBuffer(userId, organizationId ?? settings?.organizationId ?? null),
     getAutopostHistory(artist.id, now),
   ]);
   const timezone = settings?.timezone ?? 'America/New_York';
@@ -240,7 +250,11 @@ async function pageState(artist: AutopostArtist, userId: string, now: Date, orga
       release: byId.get(c.releaseId) ? { title: byId.get(c.releaseId)!.title, artworkUrl: byId.get(c.releaseId)!.artworkUrl } : null,
       releaseDate: c.releaseDate,
       channelIds: c.channelIds,
-      posts: c.posts.map(p => ({ id: p.id, step: p.step, date: p.postDate, text: p.text, imageKey: p.imageKey, status: p.status, error: p.error })),
+      posts: c.posts.map(p => ({
+        id: p.id, step: p.step, date: p.postDate, text: p.text, imageKey: p.imageKey, status: p.status, error: p.error,
+        // Failed with every attempt spent: the sweep won't try it again, so it isn't "next".
+        gaveUp: p.status === 'failed' && p.attempts >= MAX_ATTEMPTS,
+      })),
       autopost: autopostAround(ctx, { releaseId: c.releaseId, dates: c.posts.map(p => p.postDate), campaignId: c.id }, now),
     })),
   };
@@ -339,7 +353,7 @@ async function handleRequest(event: PromoteEvent) {
       const created = await createCampaign({ artistId: artist.id, userId, releaseId, releaseDate, channelIds, posts: result.posts });
       if (!created) return respond(400, { error: 'This release already has a campaign' });
     }
-    return respond(200, await pageState(artist, userId, now));
+    return respond(200, await pageState(artist, userId, now, null, { buffer, releases, uploads }));
   } catch (error) {
     Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `artist-campaigns:${event.httpMethod}` }, extra: { artistId: artist.id, action } });
     return respond(500, { error: 'Something went wrong. Try again in a moment.' });

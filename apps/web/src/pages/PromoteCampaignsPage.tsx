@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { CampaignEditor, type ImageChoice } from '../components/CampaignEditor';
 import { PromoteBufferChannels, PromoteChannelPicker } from '../components/PromoteBufferChannels';
+import { networkName } from '../../../../api/shared/autopost-networks';
+import { addDays } from '../../../../api/shared/calendar-dates';
 import { BUFFER_OUTCOMES } from '../data/buffer';
 import { DEFAULT_RUN_WEEKS, DEFAULT_RUNWAY_WEEKS, RUN_WEEKS, RUNWAY_WEEKS } from '../../../../api/shared/campaign-steps';
 import {
@@ -45,6 +47,8 @@ interface Draft {
   releaseDate: string;
   /** This campaign's own Buffer channels, not autopost's. */
   channelIds: string[];
+  /** Counts down to release day, rather than running from after it (see CampaignEditor). */
+  anchoredToRelease: boolean;
   posts: CampaignPostDraft[];
   autopost: AutopostDay[];
 }
@@ -54,12 +58,17 @@ const PRIMARY_BUTTON = 'px-3 py-2 text-sm rounded-lg bg-accent-primary text-acce
 const SECONDARY_BUTTON = 'px-3 py-2 text-sm rounded-lg border border-border hover:bg-bg-secondary disabled:opacity-50';
 const OVERLAY_DEBOUNCE_MS = 600;
 
-function formatDate(date: string) {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+/**
+ * Whether a saved campaign counts down to release day. One planned once the release was out runs
+ * from the day after it was planned, so every post comes after release day; any post on or before
+ * it means the campaign was built around it.
+ */
+function countsDownToRelease(c: { releaseDate: string; posts: { date: string }[] }): boolean {
+  return c.posts.length === 0 || c.posts.some(p => p.date <= c.releaseDate);
 }
 
-function addDays(date: string, days: number): string {
-  return new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+function formatDate(date: string) {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
 
 export function PromoteCampaignsPage() {
@@ -78,6 +87,11 @@ export function PromoteCampaignsPage() {
   const [releaseDate, setReleaseDate] = useState('');
   const [runway, setRunway] = useState<number>(DEFAULT_RUNWAY_WEEKS);
   const [runWeeks, setRunWeeks] = useState<number>(DEFAULT_RUN_WEEKS);
+  // The channels a new campaign will post to, chosen on this step with the release and the run
+  // (Brandon, 2026-11-03), not left to the editor. Null until the artist touches them, and until
+  // then the server's default stands in: autopost's channels where they have them, else everything
+  // they've connected. A starting point the artist changes before scheduling, not a rule.
+  const [newChannelIds, setNewChannelIds] = useState<string[] | null>(null);
   // Which Buffer organization to post from, when the artist has more than one and hasn't settled
   // it yet. Null until the page loads; the server stores it with the first campaign saved.
   const [chosenOrg, setChosenOrg] = useState<string | null>(null);
@@ -148,6 +162,9 @@ export function PromoteCampaignsPage() {
   const available = buffer.connected && buffer.organizationId === chosenOrg ? buffer.channels.filter(c => c.supported) : [];
   const canPost = available.length > 0;
   const serviceOf = new Map(available.map(c => [c.id, c.service]));
+  const nameOf = new Map(available.map(c => [c.id, `${c.name} · ${networkName(c.service)}`]));
+  const newChannels = (newChannelIds ?? (loaded.defaultChannelIds.length ? loaded.defaultChannelIds : available.map(c => c.id)))
+    .filter(id => serviceOf.has(id));
   const withCampaign = new Set(loaded.campaigns.map(c => c.releaseId));
   const choosable = loaded.releases.filter(r => !withCampaign.has(r.id));
   const chosen = loaded.releases.find(r => r.id === releaseId) ?? null;
@@ -183,15 +200,8 @@ export function PromoteCampaignsPage() {
         : { releaseId: chosen.id, releaseDate, startDate: addDays(releaseDate, -7 * runway) });
       overlayKey.current = `${chosen.id}|${proposal.posts.map(p => p.date).sort().join(',')}`;
       setDraft({
-        id: null,
-        releaseId: chosen.id,
-        releaseDate,
-        // A starting point the artist changes before scheduling, not a rule: autopost's channels
-        // where they have them, else everything they've connected.
-        channelIds: (loaded.defaultChannelIds.length ? loaded.defaultChannelIds : available.map(c => c.id))
-          .filter(id => serviceOf.has(id)),
-        posts: proposal.posts,
-        autopost: proposal.autopost,
+        id: null, releaseId: chosen.id, releaseDate, channelIds: newChannels, anchoredToRelease: !alreadyOut,
+        posts: proposal.posts, autopost: proposal.autopost,
       });
     } catch (err) {
       fail(err, 'PromoteCampaignsPage.propose', 'Couldn’t propose posts just now. Try again.');
@@ -210,6 +220,7 @@ export function PromoteCampaignsPage() {
       setDraft(null);
       setReleaseId('');
       setReleaseDate('');
+      setNewChannelIds(null);
     } catch (err) {
       fail(err, 'PromoteCampaignsPage.save', 'Couldn’t save. Try again.');
     } finally {
@@ -315,7 +326,12 @@ export function PromoteCampaignsPage() {
           <ul className="space-y-3">
             {loaded.campaigns.map(c => {
               const inBuffer = c.posts.filter(p => p.status === 'pushed').length;
-              const next = c.posts.find(p => p.status !== 'pushed' && p.date > loaded.today);
+              // Still to go to Buffer: not there or on its way, and not a failure that won't be retried.
+              const waiting = c.posts.filter(p => p.status !== 'pushed' && p.status !== 'pushing' && !p.gaveUp && p.date > loaded.today);
+              const next = waiting[0];
+              // Its channels all gone from Buffer, or never set: the sweep holds its posts back, and
+              // without saying so here the artist would only find out when nothing appeared.
+              const noChannels = canPost && waiting.length > 0 && !c.channelIds.some(id => serviceOf.has(id));
               return (
                 <li key={c.id} className="flex items-center gap-3">
                   {c.release?.artworkUrl
@@ -327,6 +343,9 @@ export function PromoteCampaignsPage() {
                       Out {formatDate(c.releaseDate)} · {c.posts.length} post{c.posts.length === 1 ? '' : 's'}
                       {inBuffer ? `, ${inBuffer} in Buffer` : ''}{next ? ` · next ${formatDate(next.date)}` : ''}
                     </p>
+                    {noChannels && (
+                      <p className="text-xs text-warning">Not posting: none of its channels is in Buffer. Edit it to choose where it posts.</p>
+                    )}
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <button
@@ -343,6 +362,9 @@ export function PromoteCampaignsPage() {
                           // A channel removed in Buffer since it was ticked drops out here, so the
                           // ticks are what would actually be saved.
                           channelIds: c.channelIds.filter(id => serviceOf.has(id)),
+                          // Decided once, from the campaign as saved: worked out live, typing a new
+                          // year digit by digit could flip it halfway and strand the posts.
+                          anchoredToRelease: countsDownToRelease(c),
                           posts: c.posts,
                           autopost: c.autopost,
                         });
@@ -420,8 +442,24 @@ export function PromoteCampaignsPage() {
                       </select>
                     </label>
                   )}
-                  <button type="button" disabled={busy || !releaseDate} onClick={propose} className={PRIMARY_BUTTON}>
-                    {busy ? 'Planning…' : 'Propose posts'}
+                  {canPost ? (
+                    <>
+                      <PromoteChannelPicker
+                        channels={available}
+                        channelIds={newChannels}
+                        what="campaign posts"
+                        onChange={setNewChannelIds}
+                      />
+                      {newChannels.length === 0 && (
+                        <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+                      )}
+                    </>
+                  ) : (
+                    // Nothing to tick yet: the way forward is the Buffer section above, not an alert here.
+                    <p className="text-sm text-text-secondary">Connect Buffer above to choose where this campaign posts.</p>
+                  )}
+                  <button type="button" disabled={busy || !releaseDate || newChannels.length === 0} onClick={propose} className={PRIMARY_BUTTON}>
+                    {busy ? 'Planning…' : 'Next: plan posts'}
                   </button>
                 </>
               )}
@@ -442,19 +480,31 @@ export function PromoteCampaignsPage() {
               Where this campaign posts. Autopost’s channels are set separately, on the{' '}
               <Link to={`/promote/${encodeURIComponent(slug)}`} className="text-link hover:underline">Autopost tab</Link>.
             </p>
-            <PromoteChannelPicker
-              channels={available}
-              channelIds={draft.channelIds}
-              what="campaign posts"
-              onChange={channelIds => setDraft({ ...draft, channelIds })}
-            />
-            {draft.channelIds.length === 0 && (
-              <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+            {draft.id && !canPost ? (
+              // As on the new-campaign step: nothing to tick until Buffer is back.
+              <p className="text-sm text-text-secondary">Connect Buffer above to choose where this campaign posts.</p>
+            ) : draft.id ? (
+              <>
+                <PromoteChannelPicker
+                  channels={available}
+                  channelIds={draft.channelIds}
+                  what="campaign posts"
+                  onChange={channelIds => setDraft({ ...draft, channelIds })}
+                />
+                {draft.channelIds.length === 0 && (
+                  <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-text-primary">
+                {draft.channelIds.map(id => nameOf.get(id) ?? '').filter(Boolean).join(', ')}
+              </p>
             )}
           </div>
           <CampaignEditor
             release={draftRelease}
             releaseDate={draft.releaseDate}
+            anchoredToRelease={draft.anchoredToRelease}
             posts={draft.posts}
             autopost={draft.autopost}
             today={loaded.today}
