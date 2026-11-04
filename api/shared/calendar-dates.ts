@@ -1,6 +1,8 @@
-// Calendar dates as YYYY-MM-DD strings, counted in whole UTC days. The release autopost planner
-// (api/functions/autopost-plan.ts) and the Promote page's editors both reason in these, and they
-// have to agree: the server plans the days the browser draws. One copy, imported by both.
+// Calendar dates as YYYY-MM-DD strings, counted in whole UTC days. UTC on purpose: a date here is
+// a day on a calendar, not an instant, so no timezone or clock change may move it by one. The
+// release autopost planner (api/functions/autopost-plan.ts) and the Promote page's editors both
+// reason in these, and they have to agree: the server plans the days the browser draws. One copy,
+// imported by both.
 
 /** Midnight UTC of a YYYY-MM-DD date, in milliseconds. */
 export function dateToUtcMs(date: string): number {
