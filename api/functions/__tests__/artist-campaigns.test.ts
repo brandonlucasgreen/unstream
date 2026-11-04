@@ -235,6 +235,34 @@ describe('/api/artist-campaigns', () => {
     }));
   });
 
+  it('switches autopost off when the organization moves, rather than leave it on with no channels', async () => {
+    // The stored organization has gone from their Buffer; the one left is offered instead.
+    mocks.getAutopostSettings.mockResolvedValue({ ...settings, organizationId: 'org-gone', channelIds: ['old-1'] });
+    expect((await call('POST', {}, body())).statusCode).toBe(200);
+    expect(mocks.saveAutopostSettings).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: 'org-1', channelIds: [], enabled: false,
+    }));
+  });
+
+  it('asks Buffer for channels once per save, not again to draw the page after it', async () => {
+    expect((await call('POST', {}, body())).statusCode).toBe(200);
+    expect(mocks.listOrganizations).toHaveBeenCalledTimes(1);
+    expect(mocks.listChannels).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks a post the sweep has given up on, so it isn’t shown as next', async () => {
+    const failed = (id: string, attempts: number) => ({
+      id, campaignId: 'c-1', artistId: 'artist-1', step: 'announce', postDate: '2026-11-06', text: 'x', imageKey: null,
+      status: 'failed', attempts, slotAt: null, bufferPostIds: [], captions: {}, error: 'refused',
+    });
+    mocks.listCampaigns.mockResolvedValue([{
+      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-12-04', channelIds: ['bsky'],
+      createdAt: '2026-11-01T00:00:00Z', posts: [failed('done', 3), { ...failed('retry', 1), postDate: '2026-11-08' }],
+    }]);
+    const [campaign] = json(await call('GET')).campaigns;
+    expect(campaign.posts.map((p: { id: string; gaveUp: boolean }) => [p.id, p.gaveUp])).toEqual([['done', true], ['retry', false]]);
+  });
+
   it('doesn’t rewrite the organization an artist already has', async () => {
     expect((await call('POST', {}, body())).statusCode).toBe(200);
     expect(mocks.saveAutopostSettings).not.toHaveBeenCalled();

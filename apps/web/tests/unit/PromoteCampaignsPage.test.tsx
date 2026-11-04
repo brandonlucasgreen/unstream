@@ -85,6 +85,15 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
+/** A saved campaign as the page lists it. */
+const saved = (over: Record<string, unknown> = {}) => ({
+  id: 'c-1', releaseId: 'r1', release: { title: 'Luminaires', artworkUrl: null }, releaseDate: '2026-12-04',
+  channelIds: ['ig'],
+  posts: [{ id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'planned' as const, error: null }],
+  autopost: [],
+  ...over,
+});
+
 describe('PromoteCampaignsPage', () => {
   it('connects Buffer from here, coming back to this tab, for an artist who starts on it', async () => {
     promote.getCampaignsPage.mockResolvedValue(loaded({ buffer: { connected: false }, defaultChannelIds: [] }));
@@ -111,6 +120,61 @@ describe('PromoteCampaignsPage', () => {
     fireEvent.change(await screen.findByLabelText('Buffer organization'), { target: { value: 'org-2' } });
     await waitFor(() => expect(promote.getCampaignsPage).toHaveBeenLastCalledWith('tok', 'kid-lightbulbs', 'org-2'));
     await screen.findByRole('heading', { name: 'New campaign' });
+  });
+
+  it('asks for Buffer rather than a channel when there is nothing to tick', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ buffer: { connected: false }, defaultChannelIds: [] }));
+    renderTab();
+    await newCampaign();
+    expect(screen.getByText('Connect Buffer above to choose where this campaign posts.')).toBeTruthy();
+    expect(screen.queryByRole('checkbox')).toBeNull();
+    expect(screen.queryByText('Tick at least one channel for this campaign.')).toBeNull();
+    expect((screen.getByRole('button', { name: 'Next: plan posts' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('starts the next campaign from the default ticks, not the last one’s', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded());
+    promote.saveCampaign.mockResolvedValue(loaded());
+    renderTab();
+    await newCampaign();
+    fireEvent.click(screen.getByLabelText(/threads/i));
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Schedule campaign' }));
+    await waitFor(() => expect(promote.saveCampaign).toHaveBeenCalled());
+
+    await newCampaign();
+    expect((screen.getByLabelText(/threads/i) as HTMLInputElement).checked).toBe(false);
+    expect((screen.getByLabelText(/bluesky/i) as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('says when a campaign can’t post because none of its channels is in Buffer', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ campaigns: [saved({ channelIds: ['gone'] })] }));
+    renderTab();
+    expect(await screen.findByText('Not posting: none of its channels is in Buffer. Edit it to choose where it posts.')).toBeTruthy();
+  });
+
+  it('doesn’t name as next a post the sweep has given up on', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({
+      campaigns: [saved({
+        posts: [
+          { id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'failed', error: 'refused', gaveUp: true },
+          { id: 'p2', step: 'release_day', date: '2026-12-04', text: 'hi', imageKey: null, status: 'planned', error: null },
+        ],
+      })],
+    }));
+    renderTab();
+    expect(await screen.findByText(/next December 4, 2026/)).toBeTruthy();
+  });
+
+  it('keeps the posts of a campaign planned after release when its release date is corrected', async () => {
+    // Every post after release day: it was planned once the release was out.
+    promote.getCampaignsPage.mockResolvedValue(loaded({ campaigns: [saved({ releaseDate: '2025-10-23', channelIds: ['bsky'] })] }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+    expect(screen.getByText('Your posts keep their dates; this is the date {date} reads.')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/^Release date/), { target: { value: '2024-10-23' } });
+    expect((screen.getByLabelText('Date') as HTMLInputElement).value).toBe('2026-11-06');
   });
 
   it('picks the channels on the new-campaign step, starting from autopost’s', async () => {

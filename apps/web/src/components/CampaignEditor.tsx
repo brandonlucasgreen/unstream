@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { isImageFirstNetwork, networkName } from '../../../../api/shared/autopost-networks';
 import { releaseTemplateVars, renderTemplate, templateProblems } from '../../../../api/shared/autopost-templates';
 import { stepLabel } from '../../../../api/shared/campaign-steps';
+import { addDays, daysBetween } from '../../../../api/shared/calendar-dates';
 import type { AutopostDay, CampaignPostDraft, CampaignRelease } from '../services/promote';
 
 // One release campaign being planned or edited, on the Campaigns tab of the Promote page: a
@@ -9,15 +10,7 @@ import type { AutopostDay, CampaignPostDraft, CampaignRelease } from '../service
 // its date, words, a live preview and its image. Posts already in Buffer are shown, not edited.
 // The template language and its facts are the shared ones, so the preview is what will post.
 
-const DAY_MS = 86_400_000;
 
-function addDays(date: string, days: number): string {
-  return new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
-}
-
-function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
-}
 
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { ...options, timeZone: 'UTC' });
@@ -34,10 +27,17 @@ export interface ImageChoice {
 }
 
 export function CampaignEditor({
-  release, releaseDate, posts, autopost, today, services, images, artist, problems, onChange,
+  release, releaseDate, anchoredToRelease, posts, autopost, today, services, images, artist, problems, onChange,
 }: {
   release: CampaignRelease;
   releaseDate: string;
+  /**
+   * True for a campaign that counts down to release day, its posts placed around it. False for one
+   * planned after the release was out, whose posts run from the day after it was planned: there,
+   * release day is only the date {date} reads, so moving it moves no posts, and a release long past
+   * doesn't stretch the calendar back to it (it once showed a year of empty weeks and no posts).
+   */
+  anchoredToRelease: boolean;
   posts: CampaignPostDraft[];
   autopost: AutopostDay[];
   today: string;
@@ -55,16 +55,24 @@ export function CampaignEditor({
   const setPost = (target: CampaignPostDraft, patch: Partial<CampaignPostDraft>) =>
     onChange({ releaseDate, posts: posts.map(p => (p === target ? { ...p, ...patch } : p)) });
 
-  // Moving release day moves every post not yet in Buffer with it.
+  // Moving release day moves every post not yet in Buffer with it — for a campaign counting down
+  // to it. One planned after release keeps its dates; only the {date} the posts read changes.
   const moveRelease = (next: string) => {
     if (!next) return;
+    if (!anchoredToRelease) {
+      onChange({ releaseDate: next, posts });
+      return;
+    }
     const shift = daysBetween(releaseDate, next);
     onChange({ releaseDate: next, posts: posts.map(p => (sent(p) ? p : { ...p, date: addDays(p.date, shift) })) });
   };
 
   const addPost = () => {
     const taken = new Set(posts.map(p => p.date));
-    let date = ordered.length ? addDays(ordered[ordered.length - 1].date, 2) : addDays(today, 1);
+    // Two days after the last post, but never before tomorrow: that post may have gone out long ago.
+    const tomorrow = addDays(today, 1);
+    const afterLast = ordered.length ? addDays(ordered[ordered.length - 1].date, 2) : tomorrow;
+    let date = afterLast > tomorrow ? afterLast : tomorrow;
     while (taken.has(date)) date = addDays(date, 1);
     onChange({ releaseDate, posts: [...posts, { step: 'custom', date, text: '', imageKey: images[0]?.key ?? null }] });
   };
@@ -83,10 +91,12 @@ export function CampaignEditor({
           onChange={e => moveRelease(e.target.value)}
           className="px-2 py-1 bg-bg-primary border border-border rounded-lg"
         />
-        <span className="text-xs text-text-muted">Moving it moves the posts with it.</span>
+        <span className="text-xs text-text-muted">
+          {anchoredToRelease ? 'Moving it moves the posts with it.' : 'Your posts keep their dates; this is the date {date} reads.'}
+        </span>
       </label>
 
-      <CampaignCalendar posts={ordered} autopost={autopost} releaseDate={releaseDate} />
+      <CampaignCalendar posts={ordered} autopost={autopost} releaseDate={releaseDate} anchoredToRelease={anchoredToRelease} />
 
       <p className="text-xs text-text-muted">
         Posts can use {'{title}'}, {'{date}'}, {'{where}'}, {'{price}'} and {'{link}'}, filled in when they go out.
@@ -115,16 +125,25 @@ export function CampaignEditor({
   );
 }
 
-/** The campaign's weeks, Monday first: its posts, autopost's, and release day. */
-function CampaignCalendar({ posts, autopost, releaseDate }: { posts: CampaignPostDraft[]; autopost: AutopostDay[]; releaseDate: string }) {
+/**
+ * The campaign's weeks, Monday first: its posts, autopost's, and release day. The weeks are the
+ * posts' own, stretched to release day only for a campaign counting down to it.
+ */
+function CampaignCalendar({ posts, autopost, releaseDate, anchoredToRelease }: {
+  posts: CampaignPostDraft[];
+  autopost: AutopostDay[];
+  releaseDate: string;
+  anchoredToRelease: boolean;
+}) {
   if (posts.length === 0) return null;
-  const dates = [...posts.map(p => p.date), releaseDate].sort();
+  const dates = [...posts.map(p => p.date), ...(anchoredToRelease ? [releaseDate] : [])].sort();
   const first = dates[0];
   const last = dates[dates.length - 1];
   const start = addDays(first, -((new Date(`${first}T00:00:00Z`).getUTCDay() + 6) % 7));
   const weeks = Math.min(16, Math.ceil((daysBetween(start, last) + 1) / 7));
   const campaignDays = new Set(posts.map(p => p.date));
   const autopostDays = new Set(autopost.map(a => a.date));
+  const showsRelease = releaseDate >= start && releaseDate <= addDays(start, weeks * 7 - 1);
 
   return (
     <div className="w-full space-y-1.5" aria-label="Calendar">
@@ -157,7 +176,7 @@ function CampaignCalendar({ posts, autopost, releaseDate }: { posts: CampaignPos
       <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted" aria-hidden="true">
         <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-accent-primary" />Campaign</span>
         <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm border border-accent-primary" />Autopost</span>
-        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm ring-2 ring-accent-primary" />Release day</span>
+        {showsRelease && <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm ring-2 ring-accent-primary" />Release day</span>}
       </p>
     </div>
   );

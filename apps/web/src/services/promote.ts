@@ -207,6 +207,8 @@ export interface CampaignPostDraft {
   imageKey: string | null;
   status?: 'planned' | 'pushing' | 'pushed' | 'failed';
   error?: string | null;
+  /** Failed with every attempt spent, so the sweep won't send it. Saved posts only. */
+  gaveUp?: boolean;
 }
 
 /** The days autopost posts on around a campaign. */

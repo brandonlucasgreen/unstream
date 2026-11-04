@@ -3,6 +3,7 @@ import { KIND_COPY } from './PromoteTemplatesEditor';
 import { stepLabel } from '../../../../api/shared/campaign-steps';
 import { needsAttention, PromotePostStatus } from './PromotePostStatus';
 import type { ScheduledPost } from '../services/promote';
+import { addDays, daysBetween } from '../../../../api/shared/calendar-dates';
 
 // "Coming up" on the Promote page, a week at a time (Brandon, 2026-10-30): four week tabs from
 // the artist's today, each with how many posts it holds, a strip of its seven days, and that
@@ -11,16 +12,8 @@ import type { ScheduledPost } from '../services/promote';
 export type Posting = 'on' | 'off' | 'paused';
 
 const WEEKS = 4;
-const DAY_MS = 86_400_000;
-
 /** Plain YYYY-MM-DD arithmetic, in UTC so no timezone moves a day. */
-function addDays(date: string, days: number): string {
-  return new Date(Date.parse(`${date}T00:00:00Z`) + days * DAY_MS).toISOString().slice(0, 10);
-}
 
-function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
-}
 
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { ...options, timeZone: 'UTC' });
