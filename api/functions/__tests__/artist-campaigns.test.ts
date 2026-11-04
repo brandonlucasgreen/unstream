@@ -9,10 +9,12 @@ const mocks = vi.hoisted(() => {
   return {
     BufferNotConnectedError,
     resolveAccountRequest: vi.fn(),
+    sessionMissingSecondFactor: vi.fn(),
     canUseReleaseAutopost: vi.fn(),
     getAutopostArtist: vi.fn(),
     getAutopostReleases: vi.fn(),
     getAutopostSettings: vi.fn(),
+    saveAutopostSettings: vi.fn(),
     getAutopostHistory: vi.fn(),
     listAssets: vi.fn(),
     listCampaigns: vi.fn(),
@@ -20,6 +22,7 @@ const mocks = vi.hoisted(() => {
     updateCampaign: vi.fn(),
     cancelCampaign: vi.fn(),
     usableAccessToken: vi.fn(),
+    listOrganizations: vi.fn(),
     listChannels: vi.fn(),
   };
 });
@@ -29,11 +32,18 @@ vi.mock('../ratelimit', () => ({
   checkRateLimit: async () => ({ limited: false }),
   getClientIp: () => '127.0.0.1',
 }));
+vi.mock('../middleware', async importOriginal => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
+  sessionMissingSecondFactor: mocks.sessionMissingSecondFactor,
+}));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
-vi.mock('../release-autopost-db', () => ({
+vi.mock('../release-autopost-db', async importOriginal => ({
+  // The real one: what an artist who starts on this tab gets a settings row of.
+  defaultAutopostSettings: (await importOriginal<typeof import('../release-autopost-db')>()).defaultAutopostSettings,
   getAutopostArtist: mocks.getAutopostArtist,
   getAutopostReleases: mocks.getAutopostReleases,
   getAutopostSettings: mocks.getAutopostSettings,
+  saveAutopostSettings: mocks.saveAutopostSettings,
   getAutopostHistory: mocks.getAutopostHistory,
   MAX_ATTEMPTS: 3,
 }));
@@ -46,7 +56,7 @@ vi.mock('../release-campaigns-db', async importOriginal => ({
   cancelCampaign: mocks.cancelCampaign,
 }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
-vi.mock('../buffer-client', () => ({ listChannels: mocks.listChannels }));
+vi.mock('../buffer-client', () => ({ listOrganizations: mocks.listOrganizations, listChannels: mocks.listChannels }));
 vi.mock('../../lib/sentry', () => ({ Sentry: { captureException: vi.fn(), captureMessage: vi.fn() }, withSentry: (h: unknown) => h }));
 
 const { handler } = await import('../artist-campaigns');
@@ -74,6 +84,8 @@ const release = {
 };
 
 const post = (over: Record<string, unknown> = {}) => ({ step: 'announce', date: '2026-11-06', text: '{title} comes out {date}. {link}', imageKey: 'cover', ...over });
+/** A campaign body: its own channels, which are not autopost's unless it says so. */
+const body = (over: Record<string, unknown> = {}) => ({ releaseId: 'r1', releaseDate: '2026-12-04', channelIds: ['bsky', 'ig'], posts: [post()], ...over });
 
 describe('/api/artist-campaigns', () => {
   beforeEach(() => {
@@ -81,6 +93,7 @@ describe('/api/artist-campaigns', () => {
     vi.setSystemTime(new Date('2026-11-02T17:00:00Z'));
     for (const fn of Object.values(mocks)) if (typeof fn === 'function' && 'mockReset' in fn) fn.mockReset();
     mocks.resolveAccountRequest.mockResolvedValue({ key: 'user:user-1', user: { userId: 'user-1', email: 'admin@example.com' } });
+    mocks.sessionMissingSecondFactor.mockResolvedValue(false);
     mocks.canUseReleaseAutopost.mockResolvedValue(true);
     mocks.getAutopostArtist.mockResolvedValue({ id: 'artist-1', slug: 'kid-lightbulbs', name: 'Kid Lightbulbs', photoUrl: 'https://f4.bcbits.com/img/p.jpg', verifiedOwnerId: 'user-1' });
     mocks.getAutopostReleases.mockResolvedValue([release]);
@@ -90,9 +103,11 @@ describe('/api/artist-campaigns', () => {
     mocks.listCampaigns.mockResolvedValue([]);
     mocks.createCampaign.mockResolvedValue('c-1');
     mocks.usableAccessToken.mockResolvedValue('token');
+    mocks.listOrganizations.mockResolvedValue([{ id: 'org-1', name: 'Kid Lightbulbs' }]);
     mocks.listChannels.mockResolvedValue([
       { id: 'bsky', name: 'kid', service: 'bluesky', isDisconnected: false },
       { id: 'ig', name: 'kid', service: 'instagram', isDisconnected: false },
+      { id: 'th', name: 'kid', service: 'threads', isDisconnected: false },
     ]);
   });
 
@@ -106,10 +121,34 @@ describe('/api/artist-campaigns', () => {
     expect((await call('GET')).statusCode).toBe(403);
   });
 
-  it('lists releases, where posts go, and whether autopost is on', async () => {
+  it('refuses a sign-in that hasn’t finished its second step', async () => {
+    mocks.sessionMissingSecondFactor.mockResolvedValue(true);
+    expect((await call('GET')).statusCode).toBe(403);
+    expect((await call('POST', {}, body())).statusCode).toBe(403);
+    expect(mocks.createCampaign).not.toHaveBeenCalled();
+  });
+
+  it('lists releases, the artist’s Buffer and whether autopost is on', async () => {
     const page = json(await call('GET'));
-    expect(page).toMatchObject({ available: true, today: '2026-11-02', services: ['bluesky', 'instagram'], autopostOn: true, campaigns: [] });
+    expect(page).toMatchObject({ available: true, today: '2026-11-02', autopostOn: true, campaigns: [] });
+    expect(page.buffer).toMatchObject({ connected: true, organizationId: 'org-1' });
+    expect(page.buffer.channels.map((c: { id: string }) => c.id)).toEqual(['bsky', 'ig', 'th']);
+    // A new campaign starts from autopost's channels, not from every channel they have.
+    expect(page.defaultChannelIds).toEqual(['bsky', 'ig']);
     expect(page.releases[0]).toMatchObject({ id: 'r1', title: 'Luminaires', onBandcamp: true });
+  });
+
+  it('looks at another Buffer organization when asked, without saving anything', async () => {
+    mocks.listOrganizations.mockResolvedValue([{ id: 'org-1', name: 'Kid' }, { id: 'org-2', name: 'The label' }]);
+    const page = json(await call('GET', { organizationId: 'org-2' }));
+    expect(page.buffer.organizationId).toBe('org-2');
+    expect(mocks.listChannels).toHaveBeenCalledWith('token', 'org-2');
+    expect(mocks.saveAutopostSettings).not.toHaveBeenCalled();
+  });
+
+  it('offers every channel for a first campaign when autopost has none', async () => {
+    mocks.getAutopostSettings.mockResolvedValue(null);
+    expect(json(await call('GET')).defaultChannelIds).toEqual(['bsky', 'ig', 'th']);
   });
 
   it('proposes posts and the autopost days around them, without saving anything', async () => {
@@ -133,11 +172,11 @@ describe('/api/artist-campaigns', () => {
     for (const p of res.posts) expect(p.text).not.toMatch(/\bnew\b|pre-order/i);
   });
 
-  it('schedules a campaign of valid posts', async () => {
-    const res = await call('POST', {}, { releaseId: 'r1', releaseDate: '2026-12-04', posts: [post(), post({ step: 'release_day', date: '2026-12-04' })] });
+  it('schedules a campaign of valid posts, on the channels it chose', async () => {
+    const res = await call('POST', {}, body({ posts: [post(), post({ step: 'release_day', date: '2026-12-04' })] }));
     expect(res.statusCode).toBe(200);
     expect(mocks.createCampaign).toHaveBeenCalledWith(expect.objectContaining({
-      releaseId: 'r1', releaseDate: '2026-12-04',
+      releaseId: 'r1', releaseDate: '2026-12-04', channelIds: ['bsky', 'ig'],
       posts: [
         { step: 'announce', postDate: '2026-11-06', text: '{title} comes out {date}. {link}', imageKey: 'cover' },
         { step: 'release_day', postDate: '2026-12-04', text: '{title} comes out {date}. {link}', imageKey: 'cover' },
@@ -146,9 +185,7 @@ describe('/api/artist-campaigns', () => {
   });
 
   it('refuses posts it couldn’t send, saying which and why', async () => {
-    const res = await call('POST', {}, {
-      releaseId: 'r1',
-      releaseDate: '2026-12-04',
+    const res = await call('POST', {}, body({
       posts: [
         post({ date: '2026-11-02' }),
         post({ date: '2026-11-10', text: '{title} {nope}' }),
@@ -157,7 +194,7 @@ describe('/api/artist-campaigns', () => {
         post({ date: '2026-11-16' }),
         post({ date: '2026-11-16' }),
       ],
-    });
+    }));
     expect(res.statusCode).toBe(400);
     const { problems } = json(res);
     expect(problems[0]).toEqual(['Choose a date from tomorrow on']);
@@ -169,24 +206,52 @@ describe('/api/artist-campaigns', () => {
     expect(mocks.createCampaign).not.toHaveBeenCalled();
   });
 
-  it('needs channels to post to before it schedules anything', async () => {
-    mocks.getAutopostSettings.mockResolvedValue({ ...settings, channelIds: [] });
-    const res = await call('POST', {}, { releaseId: 'r1', releaseDate: '2026-12-04', posts: [post()] });
-    expect(res.statusCode).toBe(400);
-    expect(json(res).error).toMatch(/Autopost tab/);
+  it('needs channels of its own, whatever autopost posts to', async () => {
+    // Autopost's channels don't stand in for a campaign's: it says where it posts or it isn't saved.
+    expect(json(await call('POST', {}, body({ channelIds: [] }))).error).toMatch(/at least one channel/);
+    // Nor does a channel the artist doesn't have in Buffer.
+    expect(json(await call('POST', {}, body({ channelIds: ['someone-elses'] }))).error).toMatch(/at least one channel/);
+    expect(mocks.createCampaign).not.toHaveBeenCalled();
+
+    mocks.usableAccessToken.mockRejectedValue(new mocks.BufferNotConnectedError('no connection'));
+    expect(json(await call('POST', {}, body())).error).toMatch(/Connect Buffer/);
+    expect(mocks.createCampaign).not.toHaveBeenCalled();
+  });
+
+  it('checks each post against the networks this campaign posts to, not autopost’s', async () => {
+    // 301 characters is over Bluesky's limit and inside Threads'.
+    const long = post({ text: 'x'.repeat(301) });
+    expect(json(await call('POST', {}, body({ channelIds: ['th'], posts: [long] }))).error).toBeUndefined();
+    expect(mocks.createCampaign).toHaveBeenCalledWith(expect.objectContaining({ channelIds: ['th'] }));
+    expect(json(await call('POST', {}, body({ channelIds: ['bsky'], posts: [long] }))).problems[0][0]).toMatch(/Too long for bluesky/);
+  });
+
+  it('settles the Buffer organization for an artist who starts on this tab', async () => {
+    mocks.getAutopostSettings.mockResolvedValue(null);
+    expect((await call('POST', {}, body())).statusCode).toBe(200);
+    // Autopost off, and the organization stored so the sweep knows where the channels live.
+    expect(mocks.saveAutopostSettings).toHaveBeenCalledWith(expect.objectContaining({
+      artistId: 'artist-1', userId: 'user-1', enabled: false, organizationId: 'org-1', channelIds: [],
+    }));
+  });
+
+  it('doesn’t rewrite the organization an artist already has', async () => {
+    expect((await call('POST', {}, body())).statusCode).toBe(200);
+    expect(mocks.saveAutopostSettings).not.toHaveBeenCalled();
   });
 
   it('keeps a post already in Buffer, and won’t put another on its day', async () => {
     mocks.listCampaigns.mockResolvedValue([{
-      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-12-04', createdAt: '2026-11-01T00:00:00Z',
+      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-12-04',
+      channelIds: ['bsky'], createdAt: '2026-11-01T00:00:00Z',
       posts: [{ id: 'p1', campaignId: 'c-1', artistId: 'artist-1', step: 'announce', postDate: '2026-11-04', text: 'x', imageKey: null,
         status: 'pushed', attempts: 1, slotAt: '2026-11-04T15:00:00Z', bufferPostIds: [], captions: {}, error: null }],
     }]);
-    const res = await call('PUT', { id: 'c-1' }, { releaseDate: '2026-12-04', posts: [post({ date: '2026-11-04' })] });
+    const res = await call('PUT', { id: 'c-1' }, body({ posts: [post({ date: '2026-11-04' })] }));
     expect(json(res).problems[0]).toEqual(['Another post in this campaign is on this day']);
-    const ok = await call('PUT', { id: 'c-1' }, { releaseDate: '2026-12-11', posts: [post({ date: '2026-11-20' })] });
+    const ok = await call('PUT', { id: 'c-1' }, body({ releaseDate: '2026-12-11', channelIds: ['th'], posts: [post({ date: '2026-11-20' })] }));
     expect(ok.statusCode).toBe(200);
-    expect(mocks.updateCampaign).toHaveBeenCalledWith('c-1', '2026-12-11', [expect.objectContaining({ postDate: '2026-11-20' })]);
+    expect(mocks.updateCampaign).toHaveBeenCalledWith('c-1', '2026-12-11', ['th'], [expect.objectContaining({ postDate: '2026-11-20' })]);
   });
 
   it('stops only its own campaigns', async () => {

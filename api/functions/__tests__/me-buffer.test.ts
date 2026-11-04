@@ -202,9 +202,20 @@ describe('the gate', () => {
     expect(res.headers.Location).toBe('https://unstream.stream/promote/kid-lightbulbs?buffer=cancelled');
   });
 
+  it('returns to the Campaigns tab when that is where the artist connected', async () => {
+    asUser('admin@example.com');
+    await call('POST', '/start', '', { returnTo: '/promote/kid-lightbulbs/campaigns' });
+    expect(redisSet.mock.calls[0][1]).toMatchObject({ returnTo: '/promote/kid-lightbulbs/campaigns' });
+
+    redisGet.mockResolvedValue({ userId: 'u1', verifier: 'v', returnTo: '/promote/kid-lightbulbs/campaigns' });
+    exchangeCode.mockResolvedValue({ accessToken: 'a', refreshToken: 'r', expiresAt: new Date() });
+    const res = await call('GET', '/callback', '?state=s&code=c');
+    expect(res.headers.Location).toBe('https://unstream.stream/promote/kid-lightbulbs/campaigns?buffer=connected');
+  });
+
   it('refuses to return anywhere but the pages that connect Buffer', async () => {
     asUser('admin@example.com');
-    for (const returnTo of ['https://evil.example', '//evil.example', '/settings', '/promote/x/../../admin', '/artist-edit/x/promote']) {
+    for (const returnTo of ['https://evil.example', '//evil.example', '/settings', '/promote/x/../../admin', '/artist-edit/x/promote', '/promote/x/assets', '/promote/x/campaigns/edit']) {
       expect((await call('POST', '/start', '', { returnTo })).statusCode).toBe(400);
     }
     expect(redisSet).not.toHaveBeenCalled();

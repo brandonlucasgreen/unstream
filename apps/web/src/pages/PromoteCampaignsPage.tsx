@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { CampaignEditor, type ImageChoice } from '../components/CampaignEditor';
+import { PromoteBufferChannels, PromoteChannelPicker } from '../components/PromoteBufferChannels';
+import { BUFFER_OUTCOMES } from '../data/buffer';
 import { DEFAULT_RUN_WEEKS, DEFAULT_RUNWAY_WEEKS, RUN_WEEKS, RUNWAY_WEEKS } from '../../../../api/shared/campaign-steps';
 import {
   campaignOverlay,
@@ -12,6 +14,7 @@ import {
   PromoteApiError,
   proposeCampaign,
   saveCampaign,
+  startBufferConnection,
   type AutopostDay,
   type CampaignPostDraft,
   type CampaignsPage,
@@ -27,6 +30,11 @@ import {
 // autopost's posts fall around them. Autopost steps aside on campaign days
 // and the day either side, so no network gets two posts on a day. Nothing is scheduled until the
 // artist presses Schedule; posts then go to Buffer 72 hours ahead, as autopost's do.
+//
+// **Each campaign picks its own channels** (Brandon, 2026-11-03): a launch may want Instagram and
+// TikTok where the weekly rhythm only wants Bluesky. Only the Buffer connection and organization
+// are shared with autopost, and both can be set up here, so an artist who comes to Campaigns
+// first never has to open the Autopost tab.
 
 type Loaded = Extract<CampaignsPage, { available: true }>;
 
@@ -35,6 +43,8 @@ interface Draft {
   id: string | null;
   releaseId: string;
   releaseDate: string;
+  /** This campaign's own Buffer channels, not autopost's. */
+  channelIds: string[];
   posts: CampaignPostDraft[];
   autopost: AutopostDay[];
 }
@@ -55,6 +65,7 @@ function addDays(date: string, days: number): string {
 export function PromoteCampaignsPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { session, isLoading: authLoading } = useAuth();
   const [page, setPage] = useState<CampaignsPage | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -67,7 +78,19 @@ export function PromoteCampaignsPage() {
   const [releaseDate, setReleaseDate] = useState('');
   const [runway, setRunway] = useState<number>(DEFAULT_RUNWAY_WEEKS);
   const [runWeeks, setRunWeeks] = useState<number>(DEFAULT_RUN_WEEKS);
+  // Which Buffer organization to post from, when the artist has more than one and hasn't settled
+  // it yet. Null until the page loads; the server stores it with the first campaign saved.
+  const [chosenOrg, setChosenOrg] = useState<string | null>(null);
+  // Read once: the address loses the parameter straight after.
+  const [bufferOutcome] = useState(() => searchParams.get('buffer'));
   useReportArtistName(page?.available ? page.artist.name : undefined);
+
+  useEffect(() => {
+    if (!searchParams.has('buffer')) return;
+    const rest = new URLSearchParams(searchParams);
+    rest.delete('buffer');
+    setSearchParams(rest, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const tokenRef = useRef(session?.access_token);
   tokenRef.current = session?.access_token;
@@ -82,7 +105,11 @@ export function PromoteCampaignsPage() {
     if (!slug) return;
     let cancelled = false;
     getCampaignsPage(tokenRef.current, slug)
-      .then(p => { if (!cancelled) setPage(p); })
+      .then(p => {
+        if (cancelled) return;
+        setPage(p);
+        if (p.available && p.buffer.connected) setChosenOrg(p.buffer.organizationId);
+      })
       .catch(err => {
         if (cancelled) return;
         if (!(err instanceof PromoteApiError) || err.status >= 500) Sentry.captureException(err, { extra: { context: 'PromoteCampaignsPage.load', slug } });
@@ -116,7 +143,11 @@ export function PromoteCampaignsPage() {
 
   const loaded: Loaded = page;
   const token = session.access_token;
-  const canPost = loaded.bufferConnected && loaded.services.length > 0;
+  const buffer = loaded.buffer;
+  /** The channels Buffer has for the chosen organization that Unstream can post to. */
+  const available = buffer.connected && buffer.organizationId === chosenOrg ? buffer.channels.filter(c => c.supported) : [];
+  const canPost = available.length > 0;
+  const serviceOf = new Map(available.map(c => [c.id, c.service]));
   const withCampaign = new Set(loaded.campaigns.map(c => c.releaseId));
   const choosable = loaded.releases.filter(r => !withCampaign.has(r.id));
   const chosen = loaded.releases.find(r => r.id === releaseId) ?? null;
@@ -151,7 +182,17 @@ export function PromoteCampaignsPage() {
         ? { releaseId: chosen.id, releaseDate, runWeeks }
         : { releaseId: chosen.id, releaseDate, startDate: addDays(releaseDate, -7 * runway) });
       overlayKey.current = `${chosen.id}|${proposal.posts.map(p => p.date).sort().join(',')}`;
-      setDraft({ id: null, releaseId: chosen.id, releaseDate, posts: proposal.posts, autopost: proposal.autopost });
+      setDraft({
+        id: null,
+        releaseId: chosen.id,
+        releaseDate,
+        // A starting point the artist changes before scheduling, not a rule: autopost's channels
+        // where they have them, else everything they've connected.
+        channelIds: (loaded.defaultChannelIds.length ? loaded.defaultChannelIds : available.map(c => c.id))
+          .filter(id => serviceOf.has(id)),
+        posts: proposal.posts,
+        autopost: proposal.autopost,
+      });
     } catch (err) {
       fail(err, 'PromoteCampaignsPage.propose', 'Couldn’t propose posts just now. Try again.');
     } finally {
@@ -165,7 +206,7 @@ export function PromoteCampaignsPage() {
     setError(null);
     setProblems(undefined);
     try {
-      setPage(await saveCampaign(token, slug, draft));
+      setPage(await saveCampaign(token, slug, { ...draft, organizationId: chosenOrg }));
       setDraft(null);
       setReleaseId('');
       setReleaseDate('');
@@ -190,7 +231,36 @@ export function PromoteCampaignsPage() {
     }
   };
 
+  const connect = async () => {
+    setBusy(true);
+    try {
+      window.location.href = await startBufferConnection(token, slug, 'campaigns');
+    } catch (err) {
+      fail(err, 'PromoteCampaignsPage.connect', 'Couldn’t reach Buffer.');
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Ask Buffer again: after the artist connects channels there, and when they pick a different
+   * organization, whose channels only the server can list. Nothing is saved by looking.
+   */
+  const refresh = async (organizationId: string | null = chosenOrg) => {
+    setBusy(true);
+    try {
+      const fresh = await getCampaignsPage(token, slug, organizationId);
+      setPage(fresh);
+      if (fresh.available && fresh.buffer.connected) setChosenOrg(fresh.buffer.organizationId);
+    } catch (err) {
+      fail(err, 'PromoteCampaignsPage.refresh', 'Couldn’t check Buffer just now. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const draftRelease = draft ? loaded.releases.find(r => r.id === draft.releaseId) ?? null : null;
+  // The networks this campaign posts to, so the editor can check each post's length against them.
+  const draftServices = [...new Set((draft?.channelIds ?? []).flatMap(id => serviceOf.get(id) ?? []))];
   const images: ImageChoice[] = [
     ...(draftRelease?.artworkUrl ? [{ key: 'cover', url: draftRelease.artworkUrl, label: 'Cover art', instagramOk: true }] : []),
     ...(loaded.artist.photoUrl ? [{ key: 'photo', url: loaded.artist.photoUrl, label: 'Your photo', instagramOk: true }] : []),
@@ -209,12 +279,34 @@ export function PromoteCampaignsPage() {
           Posting has stopped. <Link to={`/promote/${encodeURIComponent(slug)}`} className="underline">See the Autopost tab</Link>.
         </p>
       )}
+      {bufferOutcome && BUFFER_OUTCOMES[bufferOutcome] && (
+        <p className="text-sm text-text-secondary" role="status">{BUFFER_OUTCOMES[bufferOutcome]}</p>
+      )}
+
+      {/* Until there's somewhere to post, setting that up is the whole page. After that the
+          channels are chosen campaign by campaign, in the editor. */}
       {!canPost && (
-        <p className="text-sm text-text-secondary">
-          Campaign posts go to the channels you choose on the{' '}
-          <Link to={`/promote/${encodeURIComponent(slug)}`} className="text-link hover:underline">Autopost tab</Link>. Choose them
-          there first.
-        </p>
+        <section className={SECTION} aria-labelledby="campaigns-buffer">
+          <h3 id="campaigns-buffer" className="font-medium text-text-primary">Where campaign posts go</h3>
+          <p className="text-sm text-text-secondary">
+            Campaign posts are scheduled and published through{' '}
+            <a href="https://buffer.com" target="_blank" rel="noopener noreferrer" className="text-link hover:underline">Buffer</a>,
+            the same connection autopost uses. You pick which channels each campaign posts to when you plan it.
+          </p>
+          <PromoteBufferChannels
+            buffer={buffer}
+            organizationId={chosenOrg}
+            channelIds={[]}
+            busy={busy}
+            what="campaign posts"
+            onConnect={connect}
+            onCheckAgain={() => refresh()}
+            onChange={({ organizationId }) => {
+              setChosenOrg(organizationId);
+              if (organizationId) void refresh(organizationId);
+            }}
+          />
+        </section>
       )}
 
       {loaded.campaigns.length > 0 && !draft && (
@@ -244,7 +336,16 @@ export function PromoteCampaignsPage() {
                         setError(null);
                         setProblems(undefined);
                         overlayKey.current = `${c.releaseId}|${c.posts.map(p => p.date).sort().join(',')}`;
-                        setDraft({ id: c.id, releaseId: c.releaseId, releaseDate: c.releaseDate, posts: c.posts, autopost: c.autopost });
+                        setDraft({
+                          id: c.id,
+                          releaseId: c.releaseId,
+                          releaseDate: c.releaseDate,
+                          // A channel removed in Buffer since it was ticked drops out here, so the
+                          // ticks are what would actually be saved.
+                          channelIds: c.channelIds.filter(id => serviceOf.has(id)),
+                          posts: c.posts,
+                          autopost: c.autopost,
+                        });
                       }}
                       className={SECONDARY_BUTTON}
                     >
@@ -336,20 +437,35 @@ export function PromoteCampaignsPage() {
           {draft.posts.length === 0 && (
             <p className="text-sm text-text-secondary">Nothing to propose for these dates. Add a post of your own.</p>
           )}
+          <div className="space-y-1 border-b border-border pb-3">
+            <p className="text-sm text-text-secondary">
+              Where this campaign posts. Autopost’s channels are set separately, on the{' '}
+              <Link to={`/promote/${encodeURIComponent(slug)}`} className="text-link hover:underline">Autopost tab</Link>.
+            </p>
+            <PromoteChannelPicker
+              channels={available}
+              channelIds={draft.channelIds}
+              what="campaign posts"
+              onChange={channelIds => setDraft({ ...draft, channelIds })}
+            />
+            {draft.channelIds.length === 0 && (
+              <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+            )}
+          </div>
           <CampaignEditor
             release={draftRelease}
             releaseDate={draft.releaseDate}
             posts={draft.posts}
             autopost={draft.autopost}
             today={loaded.today}
-            services={loaded.services}
+            services={draftServices}
             images={images}
             artist={loaded.artist}
             problems={problems}
             onChange={next => setDraft({ ...draft, ...next })}
           />
           <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-3 border-t border-border bg-bg-primary px-1 py-3">
-            <button type="button" disabled={busy || !canPost || draft.posts.length === 0} onClick={save} className={PRIMARY_BUTTON}>
+            <button type="button" disabled={busy || draft.channelIds.length === 0 || draft.posts.length === 0} onClick={save} className={PRIMARY_BUTTON}>
               {busy ? 'Saving…' : draft.id ? 'Save changes' : 'Schedule campaign'}
             </button>
             <button type="button" disabled={busy} onClick={() => { setDraft(null); setError(null); setProblems(undefined); }} className={SECONDARY_BUTTON}>

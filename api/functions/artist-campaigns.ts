@@ -1,32 +1,49 @@
 // API endpoint: /api/artist-campaigns — release campaigns, the Campaigns tab of the Promote page
 // (docs/specs/release-autopost-spec.md, "Release campaigns"). Brandon, 2026-11-02.
 //
-//   GET    ?artist={slug}                      the artist's campaigns, the releases they can start
-//                                              one for, their images, and where posts go
+//   GET    ?artist={slug}[&organizationId={id}] the artist's campaigns with the channels each
+//                                              posts to, the releases they can start one for,
+//                                              their images, and their Buffer. organizationId
+//                                              looks at another of their Buffer organizations
 //   POST   ?artist={slug}&action=propose       Unstream's proposed posts for a release, and the
 //          { releaseId, releaseDate,               autopost days around them. Nothing is saved.
 //            startDate | runWeeks }                startDate before release; runWeeks once it's out
 //   POST   ?artist={slug}&action=overlay       the autopost days around an edited set of dates
 //          { releaseId, dates, campaignId? }
-//   POST   ?artist={slug}                      schedule a campaign: { releaseId, releaseDate, posts }
-//   PUT    ?artist={slug}&id={id}              replace its unsent posts: { releaseDate, posts }
+//   POST   ?artist={slug}                      schedule a campaign:
+//                                              { releaseId, releaseDate, channelIds, posts }
+//   PUT    ?artist={slug}&id={id}              replace its unsent posts:
+//                                              { releaseDate, channelIds, posts }
 //   DELETE ?artist={slug}&id={id}              stop it; posts already in Buffer stay there
 //
 // Every post is checked here before it's stored: a real step, a date from tomorrow on and none
-// shared, words that fill for this release and fit every ticked network, and an image the artist
-// has. So what's saved is always something the sweep can send.
+// shared, words that fill for this release and fit every network the campaign posts to, and an
+// image the artist has. So what's saved is always something the sweep can send.
+//
+// **A campaign chooses its own channels** (Brandon, 2026-11-03). Autopost's weekly rhythm and a
+// launch want different places; only the Buffer connection and the organization are shared, since
+// those are the artist's account, not the campaign's. So this tab connects Buffer itself: an
+// artist who comes here first never has to open the Autopost tab.
 
-import { addDays, daysBetween, localDate, PLAN_HORIZON_DAYS } from './autopost-plan';
+import { addDays, daysBetween, isValidTimezone, localDate, PLAN_HORIZON_DAYS } from './autopost-plan';
 import { proposeCampaign } from './campaign-plan';
-import { getAutopostHistory, getAutopostReleases, getAutopostSettings, type AutopostArtist, type AutopostRelease, type AutopostSettings } from './release-autopost-db';
+import {
+  defaultAutopostSettings,
+  getAutopostHistory,
+  getAutopostReleases,
+  getAutopostSettings,
+  saveAutopostSettings,
+  type AutopostArtist,
+  type AutopostRelease,
+  type AutopostSettings,
+} from './release-autopost-db';
 import { planForArtist, toTemplateRelease } from './release-autopost-schedule';
 import { listAssets, type PromoteAsset } from './promote-assets-db';
 import { cancelCampaign, createCampaign, listCampaigns, updateCampaign, type Campaign, type NewPost } from './release-campaigns-db';
 import { authorizePromoteRequest, parseBody, type PromoteEvent } from './promote-request';
 import { fitsInstagram } from './autopost-media';
-import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { listChannels } from './buffer-client';
-import { AUTOPOST_NETWORK_LIMITS, isAutopostNetwork, isImageFirstNetwork } from '../shared/autopost-networks';
+import { bufferState, bufferToken, usableChannels, type BufferState } from './promote-buffer';
+import { AUTOPOST_NETWORK_LIMITS, isImageFirstNetwork } from '../shared/autopost-networks';
 import { releaseTemplateVars, renderTemplate, templateProblems } from '../shared/autopost-templates';
 import { isCampaignStep } from '../shared/campaign-steps';
 import { BANDCAMP_FRIDAY_DATES } from '../shared/bandcamp-friday';
@@ -40,25 +57,40 @@ const MAX_DAYS_AHEAD = 400;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const isDate = (v: unknown): v is string => typeof v === 'string' && DATE.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`));
 
-/** The artist's own Buffer channels autopost (and so campaigns) post to, or null when there's no connection. */
-async function tickedServices(settings: AutopostSettings | null): Promise<string[] | null> {
-  if (!settings?.organizationId || settings.channelIds.length === 0) return [];
-  try {
-    const token = await usableAccessToken(settings.userId);
-    const ticked = new Set(settings.channelIds);
-    return (await listChannels(token, settings.organizationId))
-      .filter(c => ticked.has(c.id) && !c.isDisconnected && isAutopostNetwork(c.service))
-      .map(c => c.service);
-  } catch (error) {
-    if (error instanceof BufferNotConnectedError) return null;
-    throw error;
-  }
-}
-
 /** The artist's own settings, only if they're the current owner's (a claim that changed hands starts afresh). */
 async function ownSettings(artistId: string, userId: string): Promise<AutopostSettings | null> {
   const s = await getAutopostSettings(artistId);
   return s && s.userId === userId ? s : null;
+}
+
+/**
+ * The artist's Buffer, asked about the organization they post from: the one on their settings row,
+ * or the one being chosen now. A single organization needs no choosing, so `bufferState` offers it
+ * already chosen and an artist who starts here never sees a picker.
+ */
+async function promoteBuffer(userId: string, organizationId: string | null): Promise<BufferState> {
+  return bufferState(await bufferToken(userId), organizationId);
+}
+
+/**
+ * The Buffer organization is the artist's, not one campaign's: one Buffer login and one workspace
+ * per artist, kept on the settings row and shared with autopost. So saving a campaign settles it
+ * when nothing has — an artist may never open the Autopost tab — creating the settings row with
+ * autopost off if there isn't one. If it moves (the stored organization is no longer in their
+ * Buffer), autopost's ticked channels go with it: they were ids inside the old organization and
+ * mean nothing in the new one. Autopost is left switched on, with nothing to post to, rather than
+ * switched off behind the artist's back; its own tab says so and asks for channels.
+ */
+async function rememberOrganization(
+  artistId: string,
+  userId: string,
+  settings: AutopostSettings | null,
+  organizationId: string,
+  timezone: string | null,
+): Promise<void> {
+  if (settings?.organizationId === organizationId) return;
+  const base = settings ?? defaultAutopostSettings(artistId, userId, timezone ?? undefined);
+  await saveAutopostSettings({ ...base, organizationId, channelIds: [] });
 }
 
 function releaseShown(r: AutopostRelease) {
@@ -93,7 +125,9 @@ function autopostAround(
   const horizon = Math.min(MAX_DAYS_AHEAD, Math.max(PLAN_HORIZON_DAYS, daysBetween(today, last) + 8));
   const others = ctx.campaigns.filter(c => c.id !== draft.campaignId);
   const asCampaign: Campaign = {
-    id: 'draft', artistId: ctx.artist.id, userId: settings.userId, releaseId: draft.releaseId, releaseDate: last, createdAt: now.toISOString(),
+    id: 'draft', artistId: ctx.artist.id, userId: settings.userId, releaseId: draft.releaseId, releaseDate: last,
+    // Only the dates matter here: this stands in for the campaign so autopost can step aside.
+    channelIds: [], createdAt: now.toISOString(),
     posts: draft.dates.map((d, i) => ({
       id: `draft-${i}`, campaignId: 'draft', artistId: ctx.artist.id, step: 'custom', postDate: d, text: '', imageKey: null,
       status: 'planned', attempts: 0, slotAt: null, bufferPostIds: [], captions: {}, error: null,
@@ -163,13 +197,18 @@ function validatePosts(
   return { posts };
 }
 
-async function pageState(artist: AutopostArtist, userId: string, now: Date) {
+/**
+ * Everything the tab shows. `organizationId` asks Buffer about one other than the stored one:
+ * an artist with more than one Buffer organization picks here before anything is saved, and the
+ * channels shown have to be that organization's.
+ */
+async function pageState(artist: AutopostArtist, userId: string, now: Date, organizationId: string | null = null) {
   const settings = await ownSettings(artist.id, userId);
-  const [releases, uploads, campaigns, services, history] = await Promise.all([
+  const [releases, uploads, campaigns, buffer, history] = await Promise.all([
     getAutopostReleases(artist.id),
     listAssets(artist.id),
     listCampaigns(artist.id),
-    tickedServices(settings),
+    promoteBuffer(userId, organizationId ?? settings?.organizationId ?? null),
     getAutopostHistory(artist.id, now),
   ]);
   const timezone = settings?.timezone ?? 'America/New_York';
@@ -184,9 +223,12 @@ async function pageState(artist: AutopostArtist, userId: string, now: Date) {
     available: true,
     artist: { name: artist.name, slug: artist.slug, photoUrl: artist.photoUrl },
     today,
-    // Where campaign posts go: the channels ticked on the Autopost tab.
-    bufferConnected: services !== null,
-    services: services ?? [],
+    // The connection and the organization, shared with autopost; the channels are each campaign's.
+    buffer,
+    // What a new campaign starts ticked with: autopost's channels, else every channel they have.
+    defaultChannelIds: settings?.channelIds.length
+      ? usableChannels(buffer, settings.channelIds).map(c => c.id)
+      : buffer.connected ? buffer.channels.filter(c => c.supported).map(c => c.id) : [],
     autopostOn: Boolean(settings?.enabled),
     pausedReason: settings?.pausedReason ?? null,
     releases: sorted.map(releaseShown),
@@ -197,6 +239,7 @@ async function pageState(artist: AutopostArtist, userId: string, now: Date) {
       releaseId: c.releaseId,
       release: byId.get(c.releaseId) ? { title: byId.get(c.releaseId)!.title, artworkUrl: byId.get(c.releaseId)!.artworkUrl } : null,
       releaseDate: c.releaseDate,
+      channelIds: c.channelIds,
       posts: c.posts.map(p => ({ id: p.id, step: p.step, date: p.postDate, text: p.text, imageKey: p.imageKey, status: p.status, error: p.error })),
       autopost: autopostAround(ctx, { releaseId: c.releaseId, dates: c.posts.map(p => p.postDate), campaignId: c.id }, now),
     })),
@@ -212,7 +255,8 @@ async function handleRequest(event: PromoteEvent) {
   const id = event.queryStringParameters?.id;
 
   try {
-    if (event.httpMethod === 'GET') return respond(200, await pageState(artist, userId, now));
+    const organizationId = event.queryStringParameters?.organizationId || null;
+    if (event.httpMethod === 'GET') return respond(200, await pageState(artist, userId, now, organizationId));
 
     const campaigns = await listCampaigns(artist.id);
     if (event.httpMethod === 'DELETE') {
@@ -264,10 +308,17 @@ async function handleRequest(event: PromoteEvent) {
 
     if (action) return respond(400, { error: 'Unknown action' });
 
-    // Saving: there has to be somewhere to post.
-    const services = await tickedServices(settings);
-    if (services === null) return respond(400, { error: 'Reconnect Buffer on the Autopost tab first' });
-    if (services.length === 0) return respond(400, { error: 'Choose channels on the Autopost tab first' });
+    // Saving: there has to be somewhere to post. The channels are this campaign's own, checked
+    // against what Buffer says now, so a channel removed there can't be stored.
+    const wantedOrg = typeof body.organizationId === 'string' && body.organizationId ? body.organizationId : null;
+    const buffer = await promoteBuffer(userId, wantedOrg ?? settings?.organizationId ?? null);
+    if (!buffer.connected) return respond(400, { error: 'Connect Buffer first' });
+    if (!buffer.organizationId) return respond(400, { error: 'Choose which Buffer organization to post from' });
+    const wanted = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
+    const channels = usableChannels(buffer, [...new Set(wanted)]);
+    if (channels.length === 0) return respond(400, { error: 'Choose at least one channel for this campaign' });
+    const services = [...new Set(channels.map(c => c.service))];
+    const timezone = typeof body.timezone === 'string' && isValidTimezone(body.timezone) ? body.timezone : null;
 
     if (event.httpMethod === 'POST' && campaigns.some(c => c.releaseId === releaseId)) {
       return respond(400, { error: 'This release already has a campaign' });
@@ -279,10 +330,13 @@ async function handleRequest(event: PromoteEvent) {
     });
     if ('error' in result) return respond(400, result);
 
+    // Only once everything is valid: settling the organization is a write of its own.
+    await rememberOrganization(artist.id, userId, settings, buffer.organizationId, timezone);
+    const channelIds = channels.map(c => c.id);
     if (existing) {
-      await updateCampaign(existing.id, releaseDate, result.posts);
+      await updateCampaign(existing.id, releaseDate, channelIds, result.posts);
     } else {
-      const created = await createCampaign({ artistId: artist.id, userId, releaseId, releaseDate, posts: result.posts });
+      const created = await createCampaign({ artistId: artist.id, userId, releaseId, releaseDate, channelIds, posts: result.posts });
       if (!created) return respond(400, { error: 'This release already has a campaign' });
     }
     return respond(200, await pageState(artist, userId, now));

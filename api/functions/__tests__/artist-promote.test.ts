@@ -35,7 +35,9 @@ vi.mock('../middleware', async (importOriginal) => ({
   sessionMissingSecondFactor: mocks.sessionMissingSecondFactor,
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
-vi.mock('../release-autopost-db', () => ({
+vi.mock('../release-autopost-db', async importOriginal => ({
+  // The real one: what a brand-new artist starts from is part of what this endpoint answers.
+  defaultAutopostSettings: (await importOriginal<typeof import('../release-autopost-db')>()).defaultAutopostSettings,
   getAutopostArtist: mocks.getAutopostArtist,
   getAutopostSettings: mocks.getAutopostSettings,
   saveAutopostSettings: mocks.saveAutopostSettings,

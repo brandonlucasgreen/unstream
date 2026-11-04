@@ -204,6 +204,16 @@ export function localInstant(date: string, time: string, timezone: string): stri
   return new Date(wall - offsetAt(guess)).toISOString();
 }
 
+/** Whether a string names a timezone this runtime knows, e.g. 'Europe/Lisbon'. */
+export function isValidTimezone(tz: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Leave Buffer this long to take a post before its time. */
 const QUEUE_LEAD_MS = 10 * 60_000;
 

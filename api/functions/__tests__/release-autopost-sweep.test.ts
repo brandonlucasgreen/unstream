@@ -183,8 +183,9 @@ describe('release-autopost-sweep', () => {
       text: 'One week until {title} is out, {date}. {link}', imageKey: 'upload:u1', status: 'planned', attempts: 0,
       slotAt: null, bufferPostIds: [], captions: {}, error: null, ...over,
     });
-    const campaign = (posts: unknown[]) => ({
-      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-11-20', createdAt: '2026-11-01T00:00:00Z', posts,
+    const campaign = (posts: unknown[], channelIds = ['bsky', 'ig']) => ({
+      id: 'c-1', artistId: 'artist-1', userId: 'user-1', releaseId: 'r1', releaseDate: '2026-11-20',
+      channelIds, createdAt: '2026-11-01T00:00:00Z', posts,
     });
     const upload = { id: 'u1', url: 'https://cards.unstream.stream/promote/artist-1/u.jpg', storageKey: 'promote/artist-1/u.jpg', width: 1080, height: 1350, createdAt: '2026-11-01T00:00:00Z' };
 
@@ -233,6 +234,33 @@ describe('release-autopost-sweep', () => {
       mocks.claimCampaignPost.mockResolvedValue(false);
       await run();
       expect(mocks.finishCampaignPost).not.toHaveBeenCalled();
+    });
+
+    it('posts a campaign to its own channels, not autopost’s', async () => {
+      // Autopost posts to Bluesky and Instagram; this campaign is a Threads-only launch.
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()], ['other'])]);
+      await run();
+      expect(mocks.createPost.mock.calls.map(c => c[1].channelId)).toEqual(['other']);
+    });
+
+    it('sends a campaign for an artist who has ticked no channels for autopost', async () => {
+      mocks.getActiveAutopostSettings.mockResolvedValue([]);
+      mocks.artistsWithCampaignPostsDue.mockResolvedValue(['artist-1']);
+      mocks.getAutopostSettings.mockResolvedValue({ ...settings, enabled: false, channelIds: [] });
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()], ['bsky'])]);
+      const res = await run();
+      expect(JSON.parse(res.body)).toMatchObject({ pushed: 1, failed: 0, skipped: [] });
+      expect(mocks.createPost.mock.calls.map(c => c[1].channelId)).toEqual(['bsky']);
+    });
+
+    it('leaves a campaign post unclaimed, not failed, when its channels have gone from Buffer', async () => {
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost()], ['gone'])]);
+      const res = await run();
+      expect(mocks.claimCampaignPost).not.toHaveBeenCalled();
+      expect(mocks.finishCampaignPost).not.toHaveBeenCalled();
+      expect(JSON.parse(res.body).unscheduled).toEqual([
+        { artistId: 'artist-1', date: '2026-11-13', reasons: ['none of this campaign’s channels is in Buffer any more'] },
+      ]);
     });
 
     it('fails a campaign post whose release no longer qualifies, rather than posting it', async () => {

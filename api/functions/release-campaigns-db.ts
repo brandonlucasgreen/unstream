@@ -40,6 +40,11 @@ export interface Campaign {
   userId: string;
   releaseId: string;
   releaseDate: string;
+  /**
+   * The Buffer channels this campaign posts to, its own and not autopost's (migration
+   * 20261103120000). Inside the artist's organization, which stays on the settings row.
+   */
+  channelIds: string[];
   createdAt: string;
   posts: CampaignPost[];
 }
@@ -70,6 +75,7 @@ const toPost = (r: PostRow): CampaignPost => ({
 
 interface CampaignRow {
   id: string; artist_id: string; user_id: string; release_id: string; release_date: string; created_at: string;
+  channel_ids: string[] | null;
   release_campaign_posts: PostRow[] | null;
 }
 
@@ -79,6 +85,7 @@ const toCampaign = (r: CampaignRow): Campaign => ({
   userId: r.user_id,
   releaseId: r.release_id,
   releaseDate: r.release_date,
+  channelIds: r.channel_ids ?? [],
   createdAt: r.created_at,
   posts: (r.release_campaign_posts ?? []).map(toPost).sort((a, b) => (a.postDate < b.postDate ? -1 : 1)),
 });
@@ -87,7 +94,7 @@ const toCampaign = (r: CampaignRow): Campaign => ({
 export async function listCampaigns(artistId: string): Promise<Campaign[]> {
   const { data, error } = await client()
     .from('release_campaigns')
-    .select(`id, artist_id, user_id, release_id, release_date, created_at, release_campaign_posts ( ${POST_COLUMNS} )`)
+    .select(`id, artist_id, user_id, release_id, release_date, channel_ids, created_at, release_campaign_posts ( ${POST_COLUMNS} )`)
     .eq('artist_id', artistId)
     .eq('status', 'active')
     .order('release_date', { ascending: true })
@@ -103,20 +110,21 @@ export interface NewPost {
   imageKey: string | null;
 }
 
-async function savePosts(campaignId: string, releaseDate: string, posts: NewPost[]): Promise<void> {
+async function savePosts(campaignId: string, releaseDate: string, channelIds: string[], posts: NewPost[]): Promise<void> {
   const { error } = await client().rpc('save_release_campaign', {
     p_campaign_id: campaignId,
     p_release_date: releaseDate,
+    p_channel_ids: channelIds,
     p_posts: posts.map(p => ({ step: p.step, post_date: p.postDate, text: p.text, image_key: p.imageKey })),
   });
   if (error) throw new Error(`saving campaign posts failed: ${error.message}`);
 }
 
 /** Start a campaign. Returns null when the release already has one running. */
-export async function createCampaign(input: { artistId: string; userId: string; releaseId: string; releaseDate: string; posts: NewPost[] }): Promise<string | null> {
+export async function createCampaign(input: { artistId: string; userId: string; releaseId: string; releaseDate: string; channelIds: string[]; posts: NewPost[] }): Promise<string | null> {
   const { data, error } = await client()
     .from('release_campaigns')
-    .insert({ artist_id: input.artistId, user_id: input.userId, release_id: input.releaseId, release_date: input.releaseDate })
+    .insert({ artist_id: input.artistId, user_id: input.userId, release_id: input.releaseId, release_date: input.releaseDate, channel_ids: input.channelIds })
     .select('id')
     .single();
   if (error) {
@@ -126,7 +134,7 @@ export async function createCampaign(input: { artistId: string; userId: string; 
   }
   const id = (data as { id: string }).id;
   try {
-    await savePosts(id, input.releaseDate, input.posts);
+    await savePosts(id, input.releaseDate, input.channelIds, input.posts);
   } catch (err) {
     // Don't leave an empty campaign behind holding the release.
     await client().from('release_campaigns').delete().eq('id', id);
@@ -135,9 +143,12 @@ export async function createCampaign(input: { artistId: string; userId: string; 
   return id;
 }
 
-/** Replace a campaign's unsent posts and its release date. Sent posts are never touched. */
-export async function updateCampaign(campaignId: string, releaseDate: string, posts: NewPost[]): Promise<void> {
-  await savePosts(campaignId, releaseDate, posts);
+/**
+ * Replace a campaign's unsent posts, its release date and its channels. Sent posts are never
+ * touched, and neither are the channels they went to: those posts are in Buffer already.
+ */
+export async function updateCampaign(campaignId: string, releaseDate: string, channelIds: string[], posts: NewPost[]): Promise<void> {
+  await savePosts(campaignId, releaseDate, channelIds, posts);
 }
 
 /** Stop a campaign: its unsent posts are deleted, and those already in Buffer stay there. */

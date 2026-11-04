@@ -75,6 +75,29 @@ function toSettings(row: SettingsRow): AutopostSettings {
   };
 }
 
+/**
+ * What an artist starts from before they've saved anything: autopost off, recommended rhythm,
+ * Unstream's templates. Saved as it stands when the Campaigns tab settles the Buffer organization
+ * for an artist who has never opened the Autopost tab, so it must be inert.
+ */
+export function defaultAutopostSettings(artistId: string, userId: string, timezone = 'America/New_York'): AutopostSettings {
+  return {
+    artistId,
+    userId,
+    enabled: false,
+    enabledAt: null,
+    postsPerWeek: null,
+    timezone,
+    // "Recommended": the channel's Buffer queue picks the time.
+    postTime: null,
+    organizationId: null,
+    channelIds: [],
+    kindsOff: [],
+    templates: null,
+    pausedReason: null,
+  };
+}
+
 /** Every artist with autopost switched on and not paused. */
 export async function getActiveAutopostSettings(): Promise<AutopostSettings[]> {
   const { data, error } = await client()
