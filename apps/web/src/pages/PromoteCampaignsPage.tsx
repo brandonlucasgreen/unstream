@@ -80,7 +80,9 @@ export function PromoteCampaignsPage() {
   const [runway, setRunway] = useState<number>(DEFAULT_RUNWAY_WEEKS);
   const [runWeeks, setRunWeeks] = useState<number>(DEFAULT_RUN_WEEKS);
   // The channels a new campaign will post to, chosen on this step with the release and the run
-  // (Brandon, 2026-11-03), not left to the editor. Seeded from the server's default on load.
+  // (Brandon, 2026-11-03), not left to the editor. Null until the artist touches them, and until
+  // then the server's default stands in: autopost's channels where they have them, else everything
+  // they've connected. A starting point the artist changes before scheduling, not a rule.
   const [newChannelIds, setNewChannelIds] = useState<string[] | null>(null);
   // Which Buffer organization to post from, when the artist has more than one and hasn't settled
   // it yet. Null until the page loads; the server stores it with the first campaign saved.

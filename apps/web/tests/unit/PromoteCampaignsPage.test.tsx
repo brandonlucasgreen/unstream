@@ -147,6 +147,26 @@ describe('PromoteCampaignsPage', () => {
     expect(promote.proposeCampaign).not.toHaveBeenCalled();
   });
 
+  it('won’t save a scheduled campaign with every channel unticked', async () => {
+    // A scheduled campaign keeps its picker in the editor, so the Save guard still matters there.
+    promote.getCampaignsPage.mockResolvedValue(loaded({
+      campaigns: [{
+        id: 'c-1', releaseId: 'r1', release: { title: 'Luminaires', artworkUrl: null }, releaseDate: '2026-12-04',
+        channelIds: ['ig'],
+        posts: [{ id: 'p1', step: 'announce', date: '2026-11-06', text: 'hi', imageKey: null, status: 'planned', error: null }],
+        autopost: [],
+      }],
+    }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+
+    fireEvent.click(screen.getByLabelText(/instagram/i));
+    expect(screen.getByText('Tick at least one channel for this campaign.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Save changes' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(promote.saveCampaign).not.toHaveBeenCalled();
+  });
+
   it('edits a running campaign with the channels it was saved with', async () => {
     promote.getCampaignsPage.mockResolvedValue(loaded({
       campaigns: [{
