@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { CampaignEditor, type ImageChoice } from '../components/CampaignEditor';
 import { PromoteBufferChannels, PromoteChannelPicker } from '../components/PromoteBufferChannels';
+import { networkName } from '../../../../api/shared/autopost-networks';
 import { BUFFER_OUTCOMES } from '../data/buffer';
 import { DEFAULT_RUN_WEEKS, DEFAULT_RUNWAY_WEEKS, RUN_WEEKS, RUNWAY_WEEKS } from '../../../../api/shared/campaign-steps';
 import {
@@ -78,6 +79,9 @@ export function PromoteCampaignsPage() {
   const [releaseDate, setReleaseDate] = useState('');
   const [runway, setRunway] = useState<number>(DEFAULT_RUNWAY_WEEKS);
   const [runWeeks, setRunWeeks] = useState<number>(DEFAULT_RUN_WEEKS);
+  // The channels a new campaign will post to, chosen on this step with the release and the run
+  // (Brandon, 2026-11-03), not left to the editor. Seeded from the server's default on load.
+  const [newChannelIds, setNewChannelIds] = useState<string[] | null>(null);
   // Which Buffer organization to post from, when the artist has more than one and hasn't settled
   // it yet. Null until the page loads; the server stores it with the first campaign saved.
   const [chosenOrg, setChosenOrg] = useState<string | null>(null);
@@ -148,6 +152,9 @@ export function PromoteCampaignsPage() {
   const available = buffer.connected && buffer.organizationId === chosenOrg ? buffer.channels.filter(c => c.supported) : [];
   const canPost = available.length > 0;
   const serviceOf = new Map(available.map(c => [c.id, c.service]));
+  const nameOf = new Map(available.map(c => [c.id, `${c.name} · ${networkName(c.service)}`]));
+  const newChannels = (newChannelIds ?? (loaded.defaultChannelIds.length ? loaded.defaultChannelIds : available.map(c => c.id)))
+    .filter(id => serviceOf.has(id));
   const withCampaign = new Set(loaded.campaigns.map(c => c.releaseId));
   const choosable = loaded.releases.filter(r => !withCampaign.has(r.id));
   const chosen = loaded.releases.find(r => r.id === releaseId) ?? null;
@@ -182,17 +189,7 @@ export function PromoteCampaignsPage() {
         ? { releaseId: chosen.id, releaseDate, runWeeks }
         : { releaseId: chosen.id, releaseDate, startDate: addDays(releaseDate, -7 * runway) });
       overlayKey.current = `${chosen.id}|${proposal.posts.map(p => p.date).sort().join(',')}`;
-      setDraft({
-        id: null,
-        releaseId: chosen.id,
-        releaseDate,
-        // A starting point the artist changes before scheduling, not a rule: autopost's channels
-        // where they have them, else everything they've connected.
-        channelIds: (loaded.defaultChannelIds.length ? loaded.defaultChannelIds : available.map(c => c.id))
-          .filter(id => serviceOf.has(id)),
-        posts: proposal.posts,
-        autopost: proposal.autopost,
-      });
+      setDraft({ id: null, releaseId: chosen.id, releaseDate, channelIds: newChannels, posts: proposal.posts, autopost: proposal.autopost });
     } catch (err) {
       fail(err, 'PromoteCampaignsPage.propose', 'Couldn’t propose posts just now. Try again.');
     } finally {
@@ -420,8 +417,17 @@ export function PromoteCampaignsPage() {
                       </select>
                     </label>
                   )}
-                  <button type="button" disabled={busy || !releaseDate} onClick={propose} className={PRIMARY_BUTTON}>
-                    {busy ? 'Planning…' : 'Propose posts'}
+                  <PromoteChannelPicker
+                    channels={available}
+                    channelIds={newChannels}
+                    what="campaign posts"
+                    onChange={setNewChannelIds}
+                  />
+                  {newChannels.length === 0 && (
+                    <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+                  )}
+                  <button type="button" disabled={busy || !releaseDate || newChannels.length === 0} onClick={propose} className={PRIMARY_BUTTON}>
+                    {busy ? 'Planning…' : 'Next: plan posts'}
                   </button>
                 </>
               )}
@@ -442,14 +448,22 @@ export function PromoteCampaignsPage() {
               Where this campaign posts. Autopost’s channels are set separately, on the{' '}
               <Link to={`/promote/${encodeURIComponent(slug)}`} className="text-link hover:underline">Autopost tab</Link>.
             </p>
-            <PromoteChannelPicker
-              channels={available}
-              channelIds={draft.channelIds}
-              what="campaign posts"
-              onChange={channelIds => setDraft({ ...draft, channelIds })}
-            />
-            {draft.channelIds.length === 0 && (
-              <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+            {draft.id ? (
+              <>
+                <PromoteChannelPicker
+                  channels={available}
+                  channelIds={draft.channelIds}
+                  what="campaign posts"
+                  onChange={channelIds => setDraft({ ...draft, channelIds })}
+                />
+                {draft.channelIds.length === 0 && (
+                  <p className="text-xs text-error" role="alert">Tick at least one channel for this campaign.</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-text-primary">
+                {draft.channelIds.map(id => nameOf.get(id) ?? '').filter(Boolean).join(', ')}
+              </p>
             )}
           </div>
           <CampaignEditor
