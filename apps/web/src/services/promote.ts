@@ -134,11 +134,15 @@ export function savePromoteSettings(token: string, slug: string, settings: Promo
   return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`, { method: 'PUT', body: JSON.stringify(settings) });
 }
 
-/** Where to send the artist to connect Buffer; Buffer sends them back to the Promote page. */
-export async function startBufferConnection(token: string, slug: string): Promise<string> {
+/**
+ * Where to send the artist to connect Buffer; Buffer sends them back to the tab they started on,
+ * since either the Autopost or the Campaigns tab may be where they connect it.
+ */
+export async function startBufferConnection(token: string, slug: string, tab: 'autopost' | 'campaigns' = 'autopost'): Promise<string> {
+  const returnTo = `/promote/${slug}${tab === 'campaigns' ? '/campaigns' : ''}`;
   const { authorizeUrl } = await call<{ authorizeUrl?: string; available?: boolean }>(token, '/api/me/buffer/start', {
     method: 'POST',
-    body: JSON.stringify({ returnTo: `/promote/${slug}` }),
+    body: JSON.stringify({ returnTo }),
   });
   if (!authorizeUrl) throw new PromoteApiError('Buffer isn’t available right now', 503);
   return authorizeUrl;
@@ -216,6 +220,8 @@ export interface SavedCampaign {
   releaseId: string;
   release: { title: string; artworkUrl: string | null } | null;
   releaseDate: string;
+  /** The Buffer channels this campaign posts to: its own, not autopost's. */
+  channelIds: string[];
   posts: CampaignPostDraft[];
   autopost: AutopostDay[];
 }
@@ -227,9 +233,10 @@ export type CampaignsPage =
     artist: { name: string; slug: string; photoUrl: string | null };
     /** The artist's own date today, YYYY-MM-DD. */
     today: string;
-    bufferConnected: boolean;
-    /** The networks of the channels ticked on the Autopost tab, where campaign posts go too. */
-    services: string[];
+    /** The Buffer connection and organization, shared with autopost; channels are per campaign. */
+    buffer: PromoteBuffer;
+    /** What a new campaign starts ticked with: autopost's channels, else every channel they have. */
+    defaultChannelIds: string[];
     autopostOn: boolean;
     pausedReason: string | null;
     releases: CampaignRelease[];
@@ -240,8 +247,9 @@ export type CampaignsPage =
 
 const campaignsUrl = (slug: string, query = '') => `/api/artist-campaigns?artist=${encodeURIComponent(slug)}${query}`;
 
-export function getCampaignsPage(token: string, slug: string): Promise<CampaignsPage> {
-  return call(token, campaignsUrl(slug));
+/** `organizationId` looks at another of the artist's Buffer organizations before anything is saved. */
+export function getCampaignsPage(token: string, slug: string, organizationId?: string | null): Promise<CampaignsPage> {
+  return call(token, campaignsUrl(slug, organizationId ? `&organizationId=${encodeURIComponent(organizationId)}` : ''));
 }
 
 /** Before release, `startDate` is when to begin; once it's out, `runWeeks` is how long to run from tomorrow. */
@@ -254,12 +262,20 @@ export function campaignOverlay(token: string, slug: string, input: { releaseId:
 }
 
 /** Schedule a new campaign (no id) or replace an existing one's unsent posts. */
-export function saveCampaign(token: string, slug: string, campaign: { id: string | null; releaseId: string; releaseDate: string; posts: CampaignPostDraft[] }): Promise<CampaignsPage> {
+export function saveCampaign(token: string, slug: string, campaign: { id: string | null; releaseId: string; releaseDate: string; channelIds: string[]; organizationId: string | null; posts: CampaignPostDraft[] }): Promise<CampaignsPage> {
   // Only what the artist can change; posts already in Buffer are left as they are by the server.
   const posts = campaign.posts
     .filter(p => p.status !== 'pushed' && p.status !== 'pushing')
     .map(p => ({ step: p.step, date: p.date, text: p.text, imageKey: p.imageKey }));
-  const body = JSON.stringify({ releaseId: campaign.releaseId, releaseDate: campaign.releaseDate, posts });
+  const body = JSON.stringify({
+    releaseId: campaign.releaseId,
+    releaseDate: campaign.releaseDate,
+    channelIds: campaign.channelIds,
+    organizationId: campaign.organizationId,
+    // Only read when the artist has no promote settings yet: campaigns may be where they start.
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+    posts,
+  });
   return campaign.id
     ? call(token, campaignsUrl(slug, `&id=${encodeURIComponent(campaign.id)}`), { method: 'PUT', body })
     : call(token, campaignsUrl(slug), { method: 'POST', body });

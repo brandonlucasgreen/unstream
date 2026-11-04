@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   resolveAccountRequest: vi.fn(),
+  sessionMissingSecondFactor: vi.fn(),
   canUseReleaseAutopost: vi.fn(),
   getAutopostArtist: vi.fn(),
   listAssets: vi.fn(),
@@ -17,6 +18,10 @@ vi.mock('../ratelimit', () => ({
   resolveAccountRequest: mocks.resolveAccountRequest,
   checkRateLimit: async () => ({ limited: false }),
   getClientIp: () => '127.0.0.1',
+}));
+vi.mock('../middleware', async importOriginal => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
+  sessionMissingSecondFactor: mocks.sessionMissingSecondFactor,
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
 vi.mock('../release-autopost-db', () => ({ getAutopostArtist: mocks.getAutopostArtist }));
@@ -53,6 +58,7 @@ describe('/api/artist-promote/assets', () => {
     for (const fn of Object.values(mocks)) fn.mockReset();
     Object.assign(process.env, BUCKET_ENV);
     mocks.resolveAccountRequest.mockResolvedValue({ key: 'user:user-1', user: { userId: 'user-1', email: 'a@example.com' } });
+    mocks.sessionMissingSecondFactor.mockResolvedValue(false);
     mocks.canUseReleaseAutopost.mockResolvedValue(true);
     mocks.getAutopostArtist.mockResolvedValue({ id: 'artist-1', slug: 'kid-lightbulbs', name: 'K', photoUrl: null, verifiedOwnerId: 'user-1' });
     mocks.listAssets.mockResolvedValue([]);

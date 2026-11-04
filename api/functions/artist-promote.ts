@@ -17,6 +17,7 @@ import { buildCorsHeaders, SECOND_FACTOR_REQUIRED_ERROR, sessionMissingSecondFac
 import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
 import { canUseReleaseAutopost } from './release-autopost-access';
 import {
+  defaultAutopostSettings,
   getAutopostArtist,
   getAutopostHistory,
   getAutopostReleases,
@@ -29,13 +30,14 @@ import {
   type AutopostSettings,
 } from './release-autopost-db';
 import { PUSH_AHEAD_HOURS, planForArtist, toTemplateRelease } from './release-autopost-schedule';
-import { isAutopostNetwork, variantsFor } from './autopost-channel-post';
-import { addDays, localDate, localInstant, recommendedPostsPerWeek } from './autopost-plan';
+import { variantsFor } from './autopost-channel-post';
+import { addDays, isValidTimezone, localDate, localInstant, recommendedPostsPerWeek } from './autopost-plan';
+import { bufferState, bufferToken, usableChannels } from './promote-buffer';
 import { buildCampaignView, buildScheduleView, type CampaignViewSlot, type LivePosts, type ViewSlot } from './autopost-schedule-view';
 import { listAssets, type PromoteAsset } from './promote-assets-db';
 import { listCampaigns } from './release-campaigns-db';
-import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { listChannelPosts, listChannels, listOrganizations } from './buffer-client';
+import { BufferNotConnectedError } from './buffer-db';
+import { listChannelPosts } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import {
@@ -62,25 +64,6 @@ interface HandlerEvent {
   body?: string | null;
 }
 
-/** What a new artist starts from: off, recommended rhythm, Unstream's templates. */
-function defaultSettings(artistId: string, userId: string): AutopostSettings {
-  return {
-    artistId,
-    userId,
-    enabled: false,
-    enabledAt: null,
-    postsPerWeek: null,
-    timezone: 'America/New_York',
-    // "Recommended": the channel's Buffer queue picks the time.
-    postTime: null,
-    organizationId: null,
-    channelIds: [],
-    kindsOff: [],
-    templates: null,
-    pausedReason: null,
-  };
-}
-
 /** The image behind a key, as the page shows it. `cover` alone is a campaign's own release. */
 function imageUrlFor(key: string | null, release: AutopostRelease | null, artist: AutopostArtist, uploads: PromoteAsset[]): string | null {
   if (!key) return null;
@@ -91,54 +74,9 @@ function imageUrlFor(key: string | null, release: AutopostRelease | null, artist
 }
 
 
-function isValidTimezone(tz: string): boolean {
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone: tz });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 async function takesTips(slug: string): Promise<boolean> {
   if (!(await getFeatureFlag('tipsFans'))) return false;
   return (await getTipsLiveSlugs([slug]))?.has(slug) ?? false;
-}
-
-/**
- * A usable Buffer token, or null when the account isn't connected. Read once per request and
- * shared: two reads at once could both refresh it, and Buffer revokes a connection whose refresh
- * token is spent twice (usableAccessToken in buffer-db.ts).
- */
-async function bufferToken(userId: string): Promise<string | null> {
-  try {
-    return await usableAccessToken(userId);
-  } catch (error) {
-    if (error instanceof BufferNotConnectedError) return null;
-    throw error;
-  }
-}
-
-/** The Buffer side of the page: their organizations, and the chosen one's channels. */
-async function bufferState(token: string | null, organizationId: string | null) {
-  if (!token) return { connected: false as const };
-  try {
-    const organizations = await listOrganizations(token);
-    // Nothing to choose with a single organization, so it's offered already chosen.
-    const orgId = organizations.some(o => o.id === organizationId)
-      ? organizationId
-      : organizations.length === 1 ? organizations[0].id : null;
-    const channels = orgId ? (await listChannels(token, orgId)).filter(c => !c.isDisconnected) : [];
-    return {
-      connected: true as const,
-      organizations,
-      organizationId: orgId,
-      channels: channels.map(c => ({ id: c.id, name: c.name, service: c.service, supported: isAutopostNetwork(c.service) })),
-    };
-  } catch (error) {
-    if (error instanceof BufferNotConnectedError) return { connected: false as const };
-    throw error;
-  }
 }
 
 /**
@@ -213,19 +151,11 @@ async function validatedSettings(body: Record<string, unknown>, current: Autopos
   const organizationId = typeof body.organizationId === 'string' && body.organizationId ? body.organizationId : null;
   const wantedChannels = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
   if (organizationId) {
-    let token: string;
-    try {
-      token = await usableAccessToken(current.userId);
-    } catch (error) {
-      if (error instanceof BufferNotConnectedError) return { error: 'Connect Buffer first' };
-      throw error;
-    }
-    const organizations = await listOrganizations(token);
-    if (!organizations.some(o => o.id === organizationId)) return { error: 'That isn’t one of your Buffer organizations' };
-    const allowed = new Set((await listChannels(token, organizationId))
-      .filter(c => !c.isDisconnected && isAutopostNetwork(c.service)).map(c => c.id));
+    const state = await bufferState(await bufferToken(current.userId), organizationId);
+    if (!state.connected) return { error: 'Connect Buffer first' };
+    if (state.organizationId !== organizationId) return { error: 'That isn’t one of your Buffer organizations' };
     next.organizationId = organizationId;
-    next.channelIds = [...new Set(wantedChannels)].filter(id => allowed.has(id));
+    next.channelIds = usableChannels(state, [...new Set(wantedChannels)]).map(c => c.id);
   } else {
     next.organizationId = null;
     next.channelIds = [];
@@ -432,7 +362,7 @@ async function handleRequest(event: HandlerEvent) {
 
     const stored = await getAutopostSettings(artist.id);
     // A claim that changed hands: the old owner's settings (and Buffer) are not the new owner's.
-    const current = stored && stored.userId === user.userId ? stored : defaultSettings(artist.id, user.userId);
+    const current = stored && stored.userId === user.userId ? stored : defaultAutopostSettings(artist.id, user.userId);
 
     if (event.httpMethod === 'GET') {
       if (event.queryStringParameters?.part === 'schedule') return respond(200, await schedulePart(artist, current));

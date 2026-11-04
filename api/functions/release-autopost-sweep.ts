@@ -2,6 +2,10 @@
 // (docs/specs/release-autopost-spec.md, "How it runs"). It also sends release campaigns' posts,
 // by the same rules and through the same checks: there is no second scheduler.
 //
+// Autopost posts to the channels ticked on the Autopost tab; **a campaign posts to its own**
+// (`release_campaigns.channel_ids`, 2026-11-03). Both come from the one Buffer connection and the
+// one organization on the settings row, so Buffer is still asked for its channels once per artist.
+//
 // Invoked every 6 hours by .github/workflows/release-autopost-sweep.yml, the recatalog-sweep
 // precedent: there are no scheduled Netlify functions in this repo. For each artist with
 // autopost on, it plans the next PLAN_HORIZON_DAYS exactly as the Promote page's "Coming up" does
@@ -86,7 +90,11 @@ interface ArtistResult {
   skipped?: string;
   pushed: number;
   failed: number;
-  /** Slots no channel had a posting time for, with why: left unclaimed, never failed. */
+  /**
+   * Posts no channel could take, with why: left unclaimed, never failed. A day no channel has a
+   * posting time for (one the artist paused in Buffer), or a campaign whose channels have all
+   * gone from Buffer — neither is retried away, and both come round again on the next run.
+   */
   unscheduled: { date: string; reasons: string[] }[];
 }
 
@@ -259,6 +267,9 @@ async function pushCampaignPost(
 ): Promise<'pushed' | 'failed' | 'taken' | { unscheduled: string[] }> {
   const { settings, artist } = ctx;
   const at = localInstant(post.postDate, settings.postTime ?? '00:00', settings.timezone);
+  // The campaign's own channels, not autopost's. None left in Buffer isn't a failure to retry
+  // away: the post waits, and goes out if the artist fixes its channels before its day.
+  if (ctx.channels.length === 0) return { unscheduled: ['none of this campaign’s channels is in Buffer any more'] };
   const timed = ctx.channels.map(channel => ({ channel, time: channelTime({ at, date: post.postDate }, channel, settings, ctx.now) }));
   const untimed = timed.flatMap(t => 'none' in t.time ? [`${t.channel.service}: ${t.time.none}`] : []);
   if (untimed.length === timed.length) return { unscheduled: untimed };
@@ -307,9 +318,9 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   const artist = await getAutopostArtist(settings.artistId);
   if (!artist || artist.verifiedOwnerId !== settings.userId) return { ...result, skipped: 'owner no longer holds the verified claim' };
   if (!(await canUseReleaseAutopost(await getUserEmail(settings.userId)))) return { ...result, skipped: 'not allowed by the releaseAutopost flag' };
-  if (!settings.organizationId || settings.channelIds.length === 0) {
-    return { ...result, skipped: 'not set up: no organization or channels' };
-  }
+  // The organization is shared by autopost and every campaign; the channels are not, so an artist
+  // with none ticked for autopost may still have a campaign to send.
+  if (!settings.organizationId) return { ...result, skipped: 'not set up: no Buffer organization' };
 
   const [releases, history, uploads, campaigns] = await Promise.all([
     getAutopostReleases(artist.id),
@@ -318,8 +329,9 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
     listCampaigns(artist.id),
   ]);
 
-  // Autopost's own posts only while it's switched on; campaign posts whether it is or not.
-  const due = settings.enabled && settings.enabledAt
+  // Autopost's own posts only while it's switched on with somewhere to post; campaign posts
+  // whether it is or not.
+  let due = settings.enabled && settings.enabledAt && settings.channelIds.length > 0
     ? planForArtist({ ...settings, enabledAt: settings.enabledAt }, artist, releases, history, { uploads, campaigns }, now)
       .filter(p => isDueToPush(p, now, PUSH_AHEAD_HOURS))
     : [];
@@ -343,18 +355,26 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
   }
 
   // Read from Buffer, not trusted from storage: a channel removed or disconnected there since it
-  // was ticked is skipped, never posted to.
-  const ticked = new Set(settings.channelIds);
+  // was ticked is skipped, never posted to. Asked once for the artist, then split between
+  // autopost and each campaign, which tick their channels separately.
   const orgId = settings.organizationId;
   const [bufferChannels, schedules] = await Promise.all([
     listChannels(token, orgId),
     settings.postTime === null ? listChannelSchedules(token, orgId) : Promise.resolve([]),
   ]);
   const scheduleById = new Map(schedules.map(c => [c.id, c]));
-  const channels = bufferChannels
-    .filter(c => ticked.has(c.id) && !c.isDisconnected && isAutopostNetwork(c.service))
-    .map(c => ({ id: c.id, service: c.service, schedule: scheduleById.get(c.id) ?? null }));
-  if (channels.length === 0) return { ...result, skipped: 'none of the ticked channels is available in Buffer' };
+  const inBuffer = new Map(bufferChannels
+    .filter(c => !c.isDisconnected && isAutopostNetwork(c.service))
+    .map(c => [c.id, { id: c.id, service: c.service, schedule: scheduleById.get(c.id) ?? null }]));
+  const pick = (ids: string[]): SweepChannel[] => ids.flatMap(id => inBuffer.get(id) ?? []);
+
+  const channels = pick(settings.channelIds);
+  if (due.length > 0 && channels.length === 0) {
+    // Autopost has nothing to post to; a campaign of its own channels still might.
+    result.skipped = 'none of autopost’s ticked channels is available in Buffer';
+    due = [];
+  }
+  if (due.length === 0 && campaignDue.length === 0) return result;
 
   const images: ImageContext = {
     artist,
@@ -379,7 +399,7 @@ async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now:
     if (campaignDue.length > 0) {
       const tagId = await ensureTag(token, orgId, CAMPAIGN_TAG.name, CAMPAIGN_TAG.color);
       for (const { post, campaign } of campaignDue) {
-        count(await pushCampaignPost(post, campaign, { ...images, settings, channels, token, tagId, now }), post.postDate);
+        count(await pushCampaignPost(post, campaign, { ...images, settings, channels: pick(campaign.channelIds), token, tagId, now }), post.postDate);
       }
     }
   } catch (error) {
