@@ -12,8 +12,6 @@ import { addDays, daysBetween } from '../../../../api/shared/calendar-dates';
 export type Posting = 'on' | 'off' | 'paused';
 
 const WEEKS = 4;
-/** Plain YYYY-MM-DD arithmetic, in UTC so no timezone moves a day. */
-
 
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { ...options, timeZone: 'UTC' });

@@ -132,6 +132,16 @@ describe('PromoteCampaignsPage', () => {
     expect((screen.getByRole('button', { name: 'Next: plan posts' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it('asks for Buffer, not a channel, when editing a campaign with Buffer gone', async () => {
+    promote.getCampaignsPage.mockResolvedValue(loaded({ buffer: { connected: false }, defaultChannelIds: [], campaigns: [saved()] }));
+    renderTab();
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    await screen.findByRole('heading', { name: 'Luminaires' });
+    // The Buffer section above says how; the editor points at it instead of an alert.
+    expect(screen.getAllByText('Connect Buffer above to choose where this campaign posts.')).toHaveLength(1);
+    expect(screen.queryByText('Tick at least one channel for this campaign.')).toBeNull();
+  });
+
   it('starts the next campaign from the default ticks, not the last one’s', async () => {
     promote.getCampaignsPage.mockResolvedValue(loaded());
     promote.saveCampaign.mockResolvedValue(loaded());

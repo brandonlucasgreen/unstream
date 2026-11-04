@@ -71,7 +71,6 @@ function formatDate(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
 
-
 export function PromoteCampaignsPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -481,7 +480,10 @@ export function PromoteCampaignsPage() {
               Where this campaign posts. Autopost’s channels are set separately, on the{' '}
               <Link to={`/promote/${encodeURIComponent(slug)}`} className="text-link hover:underline">Autopost tab</Link>.
             </p>
-            {draft.id ? (
+            {draft.id && !canPost ? (
+              // As on the new-campaign step: nothing to tick until Buffer is back.
+              <p className="text-sm text-text-secondary">Connect Buffer above to choose where this campaign posts.</p>
+            ) : draft.id ? (
               <>
                 <PromoteChannelPicker
                   channels={available}

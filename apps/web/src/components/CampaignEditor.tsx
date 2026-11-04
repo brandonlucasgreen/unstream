@@ -10,8 +10,6 @@ import type { AutopostDay, CampaignPostDraft, CampaignRelease } from '../service
 // its date, words, a live preview and its image. Posts already in Buffer are shown, not edited.
 // The template language and its facts are the shared ones, so the preview is what will post.
 
-
-
 function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, { ...options, timeZone: 'UTC' });
 }

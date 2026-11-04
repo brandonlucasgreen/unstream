@@ -155,7 +155,6 @@ export function recommendedPostsPerWeek(qualifyingReleases: number): number {
 // Calendar helpers (local dates as YYYY-MM-DD strings)
 // ---------------------------------------------------------------------------------------------
 
-
 function dayOfWeek(date: string): number {
   return new Date(dateToUtcMs(date)).getUTCDay();
 }
