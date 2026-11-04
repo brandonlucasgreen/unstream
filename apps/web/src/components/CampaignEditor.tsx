@@ -127,7 +127,7 @@ function CampaignCalendar({ posts, autopost, releaseDate }: { posts: CampaignPos
   const autopostDays = new Set(autopost.map(a => a.date));
 
   return (
-    <div className="max-w-md space-y-1.5" aria-label="Calendar">
+    <div className="w-full space-y-1.5" aria-label="Calendar">
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wide text-text-muted" aria-hidden="true">
         {Array.from({ length: 7 }, (_, i) => <span key={i}>{formatDate(addDays(start, i), { weekday: 'narrow' })}</span>)}
       </div>
@@ -271,7 +271,13 @@ function CampaignPostCard({
 
       {(skips.length > 0 || preview.problem || problems.length > 0) && (
         <ul className="space-y-0.5 text-xs">
-          {skips.length > 0 && <li className="text-warning">{image ? 'This image is the wrong shape for' : 'No image, so it skips'} {skips.join(' and ')}</li>}
+          {skips.length > 0 && (
+            <li className="text-warning">
+              {image
+                ? 'This image does not meet Instagram’s aspect ratio requirements.'
+                : `No image, so it skips ${skips.join(' and ')}`}
+            </li>
+          )}
           {[...new Set([...(preview.problem ? [preview.problem] : []), ...problems])].map(p => <li key={p} className="text-error">{p}</li>)}
         </ul>
       )}
