@@ -21,6 +21,9 @@ vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 // Whether tips are switched on, asked once for the Tips buttons.
 const getTipsAvailable = vi.fn();
 vi.mock('../../src/services/tips', () => ({ getTipsAvailable: (...a: unknown[]) => getTipsAvailable(...a) }));
+// Whether Promote is open to this account (the releaseAutopost flag, or the admin), asked once.
+const getPromoteAvailable = vi.fn();
+vi.mock('../../src/services/promote', () => ({ getPromoteAvailable: (...a: unknown[]) => getPromoteAvailable(...a) }));
 // Per-profile stats are their own request against their own endpoint.
 vi.mock('../../src/components/ArtistAnalytics', () => ({ ArtistAnalytics: () => null }));
 
@@ -42,6 +45,8 @@ describe('MyArtistsPage', () => {
     mockFetch.mockReset();
     getTipsAvailable.mockReset();
     getTipsAvailable.mockResolvedValue(false);
+    getPromoteAvailable.mockReset();
+    getPromoteAvailable.mockResolvedValue(false);
     mockUseAuth.mockReturnValue({
       session: { access_token: 'token' },
       isLoading: false,
@@ -61,9 +66,12 @@ describe('MyArtistsPage', () => {
     expect(screen.getByRole('link', { name: /search for your name/i }).getAttribute('href')).toBe('/');
   });
 
-  it('gives each page the artist manages its own button: Releases always, Tips when tips are on, Promote for the admin', async () => {
+  it('gives each page the artist manages its own button: Releases always, Tips and Promote when the server opens them', async () => {
     getTipsAvailable.mockResolvedValue(true);
-    mockUseAuth.mockReturnValue({ session: { access_token: 'token' }, isLoading: false, isAdmin: true });
+    // Not the admin: once the releaseAutopost flag is on, the server says yes to any artist, and
+    // the button has to follow the server rather than an admin check in the browser.
+    getPromoteAvailable.mockResolvedValue(true);
+    mockUseAuth.mockReturnValue({ session: { access_token: 'token' }, isLoading: false, isAdmin: false });
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -77,7 +85,7 @@ describe('MyArtistsPage', () => {
     expect(screen.getByRole('link', { name: 'Promote' }).getAttribute('href')).toBe('/promote/honeycrush');
   });
 
-  it('hides Tips while tips are off, and Promote from anyone but the admin', async () => {
+  it('hides Tips and Promote while the server keeps them closed', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -88,6 +96,7 @@ describe('MyArtistsPage', () => {
 
     await screen.findByRole('link', { name: 'Releases' });
     await waitFor(() => expect(getTipsAvailable).toHaveBeenCalled());
+    await waitFor(() => expect(getPromoteAvailable).toHaveBeenCalled());
     expect(screen.queryByRole('link', { name: 'Tips' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Promote' })).toBeNull();
   });

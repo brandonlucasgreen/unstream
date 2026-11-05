@@ -22,8 +22,8 @@ import {
 // page"), reached from the Promote button on /my-artists and rendered inside ArtistSettingsLayout,
 // as the Autopost tab of the Promote page's tools (components/PromoteTabs.tsx).
 // Its own page rather than a tab under Edit, because it isn't about the artist's profile (Brandon,
-// 2026-10-29). Admin-only while the releaseAutopost flag is off: the server answers
-// { available: false } to anyone else.
+// 2026-10-29). Behind the releaseAutopost flag (the admin always gets in): the server answers
+// { available: false } to anyone the flag shuts out.
 //
 // The settings are edited here and saved together; "Coming up" is the server's plan from the
 // saved settings, so it's exactly what will post, and it refreshes on every save. Each post says

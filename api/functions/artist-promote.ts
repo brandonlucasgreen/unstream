@@ -7,6 +7,8 @@
 //                                            only "Coming up" and "Recent": what the page polls, so
 //                                            it doesn't ask Buffer for organizations and channels
 //   PUT /api/artist-promote?artist={slug}   save the settings, whole
+//   GET /api/artist-promote?summary=1       only { available }: whether this account may use
+//                                            Promote at all, for the button on /my-artists
 //
 // Two checks, both on every request: the feature gate (`canUseReleaseAutopost`, admin-only while
 // the `releaseAutopost` flag is off) and the verified claim (only the artist's own verified owner).
@@ -351,6 +353,10 @@ async function handleRequest(event: HandlerEvent) {
 
   // The gate first, so nothing about the feature, or the artist, is said to anyone it excludes.
   if (!(await canUseReleaseAutopost(user.email))) return respond(200, { available: false });
+  // /my-artists asks only whether to show the Promote button, before any artist is chosen, so the
+  // gate's answer is the whole answer: no artist, database or Buffer read. The tips summary
+  // (`/api/tips/settings?summary=1`) is the precedent.
+  if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') return respond(200, { available: true });
 
   const slug = event.queryStringParameters?.artist;
   if (!slug) return respond(400, { error: 'artist is required' });

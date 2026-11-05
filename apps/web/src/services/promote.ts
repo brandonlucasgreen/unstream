@@ -120,6 +120,12 @@ async function call<T>(token: string, url: string, init: RequestInit = {}): Prom
   return body as T;
 }
 
+/** Whether this account may use Promote at all: the admin always, everyone once the releaseAutopost flag is on. */
+export async function getPromoteAvailable(token: string): Promise<boolean> {
+  const { available } = await call<{ available: boolean }>(token, '/api/artist-promote?summary=1');
+  return available;
+}
+
 export function getPromotePage(token: string, slug: string): Promise<PromotePage> {
   return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`);
 }

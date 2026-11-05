@@ -11,8 +11,8 @@ import { DEFAULT_PAGE_TITLE } from '../data/seo';
  * artist to.
  *
  * Every claim here has to stay true of the product, so check it when a feature changes:
- * Promote is "coming soon" while release autopost sits behind its `releaseAutopost` flag, and
- * comes off when that flag opens to every artist. Tips are open to artists (`tipsArtists`).
+ * Promote is open to every artist (`releaseAutopost`, 2026-11-05) and carries a "Beta" label
+ * while it's new. Tips are open to artists (`tipsArtists`).
  * There is no public iPhone app, so "mid-stream" names the Mac app and the extensions.
  */
 
@@ -34,7 +34,7 @@ interface Feature {
   body: string;
   accent: Accent;
   icon: ReactNode;
-  comingSoon?: boolean;
+  beta?: boolean;
 }
 
 // Outline icons on the app's 24-unit grid.
@@ -65,7 +65,7 @@ const ICONS = {
   pen: <path d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" />,
 };
 
-// Promote comes last while it is still "Coming soon": what an artist can use today goes first.
+// Promote comes last while it is in beta: the longest-standing tools go first.
 const REACH_FEATURES: Feature[] = [
   {
     title: 'Every place to buy, with what you keep',
@@ -90,7 +90,7 @@ const REACH_FEATURES: Feature[] = [
     body: 'Connect your Buffer account and pick how often to post. Unstream fills your queue with your releases, Bandcamp Friday and your back catalog. Your words on a schedule, never written by AI.',
     accent: 'primary',
     icon: ICONS.megaphone,
-    comingSoon: true,
+    beta: true,
   },
 ];
 
@@ -126,7 +126,7 @@ const PROFILE_FEATURES: Feature[] = [
 const INSTEAD_OF: { insteadOf: string; unstream: string; cost: string }[] = [
   { insteadOf: 'a link-in-bio page', unstream: 'Your Unstream page', cost: 'Free' },
   { insteadOf: 'a release announcement list', unstream: 'Release alerts', cost: 'Free' },
-  { insteadOf: 'a post scheduler', unstream: 'Promote, with Buffer’s free plan (coming soon)', cost: 'Free' },
+  { insteadOf: 'a post scheduler', unstream: 'Promote, with Buffer’s free plan (beta)', cost: 'Free' },
   { insteadOf: 'a tip jar subscription', unstream: 'Tips', cost: 'No monthly fee' },
 ];
 
@@ -287,9 +287,9 @@ function FeatureGrid({ features }: { features: Feature[] }) {
           </div>
           <h3 className="font-semibold text-text-primary mb-1">
             {feature.title}
-            {feature.comingSoon && (
+            {feature.beta && (
               <span className="ml-2 align-middle inline-block rounded-full bg-fill-primary text-accent-foreground text-[0.7rem] font-bold uppercase tracking-wide px-2 py-0.5">
-                Coming soon
+                Beta
               </span>
             )}
           </h3>
