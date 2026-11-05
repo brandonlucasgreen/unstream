@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { ArtistAnalytics } from './ArtistAnalytics';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
 import { getTipsAvailable } from '../services/tips';
+import { getPromoteAvailable } from '../services/promote';
 
 // The body of /my-artists: the profiles this user has claimed, with their stats, and a button for
 // each page the artist manages: Edit (the profile), Releases, Tips and Promote. Those were tabs
@@ -29,13 +30,16 @@ const SECONDARY_LINK =
   'px-3 py-1.5 rounded-lg border border-border text-text-muted text-sm hover:text-text-primary hover:border-border-hover transition-colors';
 
 export function ClaimedArtistsSection() {
-  const { session, isAdmin } = useAuth();
+  const { session } = useAuth();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ClaimedProfile[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Tips ship dark: the button appears only once the server has a Stripe key. A failed check hides
   // it rather than breaking the page, and is reported.
   const [tipsAvailable, setTipsAvailable] = useState(false);
+  // Promote is behind the releaseAutopost flag (the admin always gets in), and only the server
+  // reads flags, so it is asked the same way. Hidden until it answers yes, and on a failure.
+  const [promoteAvailable, setPromoteAvailable] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -43,6 +47,9 @@ export function ClaimedArtistsSection() {
     getTipsAvailable(session.access_token)
       .then(available => { if (!cancelled) setTipsAvailable(available === true); })
       .catch(err => Sentry.captureException(err, { extra: { context: 'myArtists.tipsAvailable' } }));
+    getPromoteAvailable(session.access_token)
+      .then(available => { if (!cancelled) setPromoteAvailable(available === true); })
+      .catch(err => Sentry.captureException(err, { extra: { context: 'myArtists.promoteAvailable' } }));
     return () => { cancelled = true; };
   }, [session]);
 
@@ -135,12 +142,7 @@ export function ClaimedArtistsSection() {
                     </Link>
                     <Link to={`/releases/${profile.slug}`} className={SECONDARY_LINK}>Releases</Link>
                     {tipsAvailable && <Link to={`/tips/${profile.slug}`} className={SECONDARY_LINK}>Tips</Link>}
-                    {/* Admin-only because the server only lets the admin in while the releaseAutopost
-                        flag is off (canUseReleaseAutopost). Switching the flag on for everyone has to
-                        show this to everyone too. */}
-                    {isAdmin && (
-                      <Link to={`/promote/${profile.slug}`} className={SECONDARY_LINK}>Promote</Link>
-                    )}
+                    {promoteAvailable && <Link to={`/promote/${profile.slug}`} className={SECONDARY_LINK}>Promote</Link>}
                     <Link to={`/a/${profile.slug}`} className={SECONDARY_LINK}>View</Link>
                   </div>
                 </div>

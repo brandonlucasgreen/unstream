@@ -122,6 +122,17 @@ describe('who gets in', () => {
     expect(mocks.getAutopostArtist).not.toHaveBeenCalled();
   });
 
+  it('answers the /my-artists button with the gate alone, for any account it admits', async () => {
+    mocks.canUseReleaseAutopost.mockResolvedValue(true);
+    const res = await handler({ httpMethod: 'GET', headers: { authorization: 'Bearer t' }, queryStringParameters: { summary: '1' }, body: null } as never) as Res;
+    expect(json(res)).toEqual({ available: true });
+    expect(mocks.getAutopostArtist).not.toHaveBeenCalled();
+
+    mocks.canUseReleaseAutopost.mockResolvedValue(false);
+    const refused = await handler({ httpMethod: 'GET', headers: { authorization: 'Bearer t' }, queryStringParameters: { summary: '1' }, body: null } as never) as Res;
+    expect(json(refused)).toEqual({ available: false });
+  });
+
   it('refuses anyone but the artist’s verified owner', async () => {
     mocks.getAutopostArtist.mockResolvedValue({ id: 'a1', slug: 'kid-lightbulbs', name: 'Kid Lightbulbs', photoUrl: null, verifiedOwnerId: 'someone-else' });
     expect((await call('GET')).statusCode).toBe(403);
