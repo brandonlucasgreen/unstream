@@ -201,6 +201,21 @@ describe('persistSearchResults — must NOT fuse different artists', () => {
     expect(slugs()).toEqual(['artist-twelve-thirty-four', 'someone-else']);
   });
 
+  it('keeps two artists on one Faircamp site apart', async () => {
+    // A Faircamp address is a whole site, and cult.kidlightbulbs.com lists Kid Lightbulbs and
+    // Brandon Lucas Green (as about half the webring's sites list several artists). Taking the site
+    // for identity took Brandon Lucas Green for the claimed Kid Lightbulbs row, so he was never
+    // stored, and his page and Claim link pointed at nothing.
+    existingArtist('a1', 'Kid Lightbulbs',
+      [{ sourceId: 'faircamp', url: 'https://cult.kidlightbulbs.com' }], 'claimed');
+
+    await persistSearchResults([
+      result('Brandon Lucas Green', [{ sourceId: 'faircamp', url: 'https://cult.kidlightbulbs.com' }]),
+    ] as never);
+
+    expect(slugs()).toEqual(['brandon-lucas-green', 'kid-lightbulbs']);
+  });
+
   it('refuses to guess when two artists both hold the URL', async () => {
     // Already-broken data. Picking one would attach this result to a coin flip.
     existingArtist('a1', 'First Claimant', [{ sourceId: 'bandcamp', url: 'https://shared.bandcamp.com' }]);

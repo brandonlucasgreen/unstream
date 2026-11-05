@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { attachArtistPageSlugs } from '../search-sources';
 import { recordSlugs } from '../search-utils';
-import { artistSlug } from '../db';
+import { artistSlug, searchPersistSkipReason } from '../db';
 import type { AggregatedResult } from '../search-utils';
 
 // The address of an artist's page, returned so a native client can actually reach their releases.
@@ -20,7 +20,8 @@ function result(overrides: Partial<AggregatedResult> = {}): AggregatedResult {
     id: 'r1',
     name: 'Explosions in the Sky',
     type: 'artist',
-    platforms: [],
+    // A real link, since a card with none is never stored and so gets no slug (tested below).
+    platforms: [{ sourceId: 'bandcamp', url: 'https://example.bandcamp.com' }],
     matchConfidence: 'verified',
     ...overrides,
   } as AggregatedResult;
@@ -126,7 +127,7 @@ describe('attachArtistPageSlugs', () => {
     });
 
     it('gives no slug to a card with nothing to tell it apart', () => {
-      const results = [sofia(), result({ id: 'bare', name: 'Paracosm' })];
+      const results = [sofia(), result({ id: 'bare', name: 'Paracosm', platforms: [{ sourceId: 'officialsite', url: 'https://bare.example' }] })];
       attachArtistPageSlugs(results);
 
       expect(results.map(r => r.knownSlug)).toEqual(['paracosm', undefined]);
@@ -136,13 +137,46 @@ describe('attachArtistPageSlugs', () => {
       // The stored-artist merge already matched Sofia to the `paracosm` row; a second card that
       // would derive the same address (another `paracosm` Bandcamp is impossible, but a city twin
       // is not) must not be pointed at it.
-      const twin = () => result({ id: 'twin', name: 'Paracosm', location: { city: 'Orlando' } });
+      const twin = () => result({ id: 'twin', name: 'Paracosm', platforms: [{ sourceId: 'officialsite', url: 'https://twin.example' }], location: { city: 'Orlando' } });
       const results = [{ ...orlando(), knownSlug: 'paracosm-orlando' }, twin()];
       const slugs = recordSlugs(results);
       attachArtistPageSlugs(results, slugs);
 
       expect(results.map(r => r.knownSlug)).toEqual(['paracosm-orlando', undefined]);
       expect(slugs.get(results[1])).toBeNull();
+    });
+  });
+
+  // Search hands out these addresses before the background write runs, so an address the write
+  // will never fill is a page that 404s and a Claim that fails at "Artist not found".
+  describe('cards the write will skip', () => {
+    it('gives no slug to a card with no direct link', () => {
+      const results = [
+        result({ id: 'none', name: 'No Links', platforms: [] }),
+        result({ id: 'search', name: 'Search Only', platforms: [{ sourceId: 'bandcamp', url: 'https://bandcamp.com/search?q=search+only' }] }),
+        result({ id: 'excluded', name: 'Tip Jar', platforms: [{ sourceId: 'kofi', url: 'https://ko-fi.com/tipjar' }] }),
+      ];
+      attachArtistPageSlugs(results);
+
+      expect(results.map(r => r.knownSlug)).toEqual([undefined, undefined, undefined]);
+    });
+
+    it('gives no slug to a non-artist name', () => {
+      const results = [result({ name: 'ChatGPT', platforms: [{ sourceId: 'officialsite', url: 'https://chatgpt.com' }] })];
+      attachArtistPageSlugs(results);
+
+      expect(results[0].knownSlug).toBeUndefined();
+    });
+
+    it('agrees with the write, through the one function', () => {
+      const cards = [
+        result({ id: 'a', name: 'Brandon Lucas Green', platforms: [{ sourceId: 'faircamp', url: 'https://cult.kidlightbulbs.com' }] }),
+        result({ id: 'b', name: 'No Links', platforms: [] }),
+      ];
+      attachArtistPageSlugs(cards);
+
+      for (const card of cards) expect(!!card.knownSlug).toBe(searchPersistSkipReason(card) === null);
+      expect(cards[0].knownSlug).toBe('brandon-lucas-green');
     });
   });
 });

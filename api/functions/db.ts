@@ -4176,9 +4176,18 @@ export async function findKnownArtistSlugsByName(term: string, limit = 6): Promi
  * Protocol shut down (July 2026). Postgres still uses the index for a subset (checked on PGlite
  * with the real migration), and no stored link carried `nina`, so rebuilding the index to drop it
  * would have bought nothing.
+ *
+ * **Faircamp is not here, and it stays in the index predicate the same way.** A Faircamp address is
+ * a whole site, and many sites carry several artists — 50 of the 103 in the webring directory on
+ * 2026-11-05. Search attaches the site to every artist it lists, so the site says nothing about
+ * which of them a card is: `cult.kidlightbulbs.com` lists Kid Lightbulbs and Brandon Lucas Green,
+ * and while Faircamp was here, every Brandon Lucas Green card was taken for the claimed Kid
+ * Lightbulbs row and never stored, leaving its page and its Claim link pointing at nothing. The
+ * catalogue makes the same distinction: it takes from a Faircamp site only the releases credited
+ * to the artist by name.
  */
 const IDENTITY_PLATFORMS = new Set([
-  'bandcamp', 'mirlo', 'jamcoop', 'faircamp', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even',
+  'bandcamp', 'mirlo', 'jamcoop', 'discogs', 'beatport', 'bandwagon', 'subvert', 'even',
 ]);
 
 /** At most this many URLs are checked per artist, to bound the query. Ordered by trustworthiness. */
@@ -4371,6 +4380,41 @@ export interface PersistableResult {
 }
 
 /**
+ * Why `persistSearchResults` will write no row for this card, or null if it will — for the reasons
+ * that can be decided from the card alone, without the database.
+ *
+ * Search hands out a card's page and Claim address (`attachArtistPageSlugs`) before the write
+ * happens, in a background function. It asks this first, so a card the write will skip isn't sent
+ * to an address that will never exist: an artist page that 404s and a claim that fails at "Artist
+ * not found". The write skips for the same reasons, through the same function, so the two can't
+ * drift.
+ */
+export function searchPersistSkipReason(
+  result: Pick<PersistableResult, 'name' | 'platforms'>,
+): string | null {
+  // Only artists with at least one real, direct link are stored; manual search links and the
+  // platforms in EXCLUDED_PLATFORMS are not a presence.
+  if (!result.platforms.some(p => !EXCLUDED_PLATFORMS.has(p.sourceId) && isDirectLink(p.url))) {
+    return 'no direct link';
+  }
+
+  // Keyed by the name's slug, not the card's address: `xparacosm` must not let an excluded or
+  // non-artist name through.
+  const nameSlug = artistSlug(result.name);
+
+  // Software products, brands and TV shows can carry a MusicBrainz entry and a Beatport listing,
+  // and the pipeline's default verdict is 'verified', so without this gate one search mints them a
+  // permanent /artist/ page. The search response may still show what it found — it is the durable
+  // row that must not exist. See api/lib/non-artist-names.ts.
+  if (isNonArtistSlug(nameSlug)) return `non-artist (${nameSlug})`;
+
+  // Acts excluded on ethical grounds — a separate, editorial list. See api/lib/excluded-artists.ts.
+  if (isExcludedArtistSlug(nameSlug)) return `excluded artist (${nameSlug})`;
+
+  return null;
+}
+
+/**
  * Persist the artists and links a search turned up.
  *
  * **This does not request release cataloging, deliberately.** It used to: every search handed
@@ -4417,13 +4461,16 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
   await Promise.all(results.map(async result => {
     if (result.type !== 'artist') return;
 
-    // Filter out excluded platforms and non-direct links
+    const skipReason = searchPersistSkipReason(result);
+    if (skipReason) {
+      console.log(`[DB] Skipping persist for "${result.name}": ${skipReason}`);
+      return;
+    }
+
+    // Excluded platforms and manual search links are not written as links.
     const validPlatforms = result.platforms.filter(
       p => !EXCLUDED_PLATFORMS.has(p.sourceId) && isDirectLink(p.url)
     );
-
-    // Only persist artists with at least 1 real direct link
-    if (validPlatforms.length === 0) return;
 
     const decided = slugOf(result);
     if (decided === null) {
@@ -4434,26 +4481,6 @@ export async function persistSearchResults(results: PersistableResult[]): Promis
 
     if ((slugCounts.get(slug) ?? 0) > 1) {
       console.log(`[DB] Skipping persist for "${result.name}": ${slugCounts.get(slug)} artists at "${slug}" in one search`);
-      return;
-    }
-
-    // Both lists below are keyed by the name's slug, not the address: `xparacosm` must not let an
-    // excluded or non-artist name through.
-    const nameSlug = artistSlug(result.name);
-
-    // Software products, brands and TV shows can carry a MusicBrainz entry and a Beatport
-    // listing, and the pipeline's default verdict is 'verified', so without this gate one
-    // search mints them a permanent /artist/ page. Checked here rather than earlier because
-    // the search response may still legitimately show what it found — it is the durable row
-    // that must not exist. See api/lib/non-artist-names.ts.
-    if (isNonArtistSlug(nameSlug)) {
-      console.log(`[DB] Skipping persist for non-artist "${result.name}" (${nameSlug})`);
-      return;
-    }
-
-    // Acts excluded on ethical grounds — a separate, editorial list. See api/lib/excluded-artists.ts.
-    if (isExcludedArtistSlug(nameSlug)) {
-      console.log(`[DB] Skipping persist for excluded artist "${result.name}" (${nameSlug})`);
       return;
     }
 
