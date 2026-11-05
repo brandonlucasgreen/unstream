@@ -2,7 +2,7 @@ import { parse } from 'node-html-parser';
 import { Sentry, withSentry } from '../lib/sentry';
 import { findBandcampArtist } from '../search/bandcamp-probe';
 import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } from './cache';
-import { getMergeOverrides, getLinkSuppressions } from './db';
+import { getMergeOverrides, getLinkSuppressions, searchPersistSkipReason } from './db';
 import { requestSearchPersist } from './request-persist';
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
@@ -1646,6 +1646,8 @@ async function searchAllPlatforms(
  * - **Skip unverified results.** `persistSearchResults` doesn't write them, so they have no row.
  * - **No slug without a row of its own.** A same-name card with nothing to tell it apart is not
  *   written, so it gets no slug — handing it the name's would link it to another artist's page.
+ * - **No slug for a card the write will skip** (`searchPersistSkipReason`: no direct link, a
+ *   non-artist or excluded name). Its Claim link would end at "Artist not found".
  */
 export function attachArtistPageSlugs(
   results: AggregatedResult[],
@@ -1655,6 +1657,7 @@ export function attachArtistPageSlugs(
     if (result.type !== 'artist') continue;
     if (result.claimedSlug || result.knownSlug) continue;
     if (result.matchConfidence === 'unverified') continue;
+    if (searchPersistSkipReason(result)) continue;
     const slug = slugs.get(result);
     if (slug) result.knownSlug = slug;
   }
