@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   mockFrom: vi.fn(),
   mockReadAllPages: vi.fn(),
   mockFetchAllAlbums: vi.fn(),
+  mockFetchCollection: vi.fn(),
   mockResolveArtists: vi.fn(),
 }));
 
@@ -27,10 +28,10 @@ vi.mock('../collection-matching', () => ({
 }));
 vi.mock('../bandcamp-subsonic', async importOriginal => {
   const original = await importOriginal<typeof import('../bandcamp-subsonic')>();
-  return { ...original, subsonicFetchAllAlbums: mocks.mockFetchAllAlbums };
+  return { ...original, subsonicFetchCollection: mocks.mockFetchCollection };
 });
 
-import { handler } from '../bandcamp-sync-background';
+import { handler, missingArtistsNote } from '../bandcamp-sync-background';
 import { SubsonicError } from '../bandcamp-subsonic';
 import { encryptCredential } from '../credential-crypto';
 
@@ -101,6 +102,14 @@ describe('bandcamp-sync-background handler', () => {
     process.env.BANDCAMP_CREDENTIAL_KEY = randomBytes(32).toString('base64');
     mocks.mockReadAllPages.mockResolvedValue({ ok: true, rows: [] });
     mocks.mockResolveArtists.mockResolvedValue({ created: 0, catalogRequested: 0 });
+    // Most tests are about what happens to a collection once fetched, so by default Bandcamp's
+    // album list answers and `mockFetchAllAlbums` is what it answered. The artist-by-artist
+    // fallback's own tests override mockFetchCollection.
+    mocks.mockFetchCollection.mockImplementation(async (credential: unknown) => ({
+      albums: await mocks.mockFetchAllAlbums(credential),
+      missingArtists: [],
+      listFailure: null,
+    }));
   });
 
   afterEach(() => {
@@ -361,6 +370,65 @@ describe('bandcamp-sync-background handler', () => {
     expect(connectionUpdates.at(-1)).toMatchObject({
       sync_status: 'error',
       sync_error: expect.stringContaining('Re-sync'),
+    });
+  });
+
+  describe('when Bandcamp’s album list fails and the collection is fetched artist by artist', () => {
+    it('imports what arrived, names the artists that didn’t, and reports the list failure to Sentry', async () => {
+      const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+      const { connectionUpdates, upsertBatches } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext },
+      });
+      mocks.mockFetchCollection.mockResolvedValue({
+        albums: [{ id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' }],
+        missingArtists: ['Honeycrush'],
+        listFailure: 'getAlbumList2: HTTP 500 (offset 0, size 100)',
+      });
+      const sentry = await import('../../lib/sentry');
+      const captureMessage = vi.spyOn(sentry.Sentry, 'captureMessage');
+
+      const res = await handler(internalEvent({ userId: 'user-1' }));
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toMatchObject({ imported: 1, missingArtists: 1 });
+      expect(upsertBatches.flat()).toHaveLength(1);
+      expect(connectionUpdates.at(-1)).toMatchObject({
+        sync_status: 'idle',
+        item_count: 1,
+        sync_error: expect.stringContaining('Honeycrush'),
+      });
+      expect(captureMessage).toHaveBeenCalledWith(
+        expect.stringContaining('artist by artist'),
+        expect.objectContaining({ extra: expect.objectContaining({ listFailure: 'getAlbumList2: HTTP 500 (offset 0, size 100)' }) })
+      );
+      captureMessage.mockRestore();
+    });
+
+    it('leaves no note when every artist arrived', async () => {
+      const ciphertext = encryptCredential(JSON.stringify({ t: 'tok', s: 'salt' }));
+      const { connectionUpdates } = setupDb({
+        connectionRow: { bandcamp_username: 'fan', credential_ciphertext: ciphertext },
+      });
+      mocks.mockFetchCollection.mockResolvedValue({
+        albums: [{ id: 'al-1', name: 'Illinois', artist: 'Sufjan Stevens' }],
+        missingArtists: [],
+        listFailure: 'getAlbumList2: HTTP 500 (offset 0, size 100)',
+      });
+
+      await handler(internalEvent({ userId: 'user-1' }));
+      expect(connectionUpdates.at(-1)).toMatchObject({ sync_status: 'idle', sync_error: null });
+    });
+  });
+
+  describe('missingArtistsNote', () => {
+    it('is null when nothing is missing', () => {
+      expect(missingArtistsNote([])).toBeNull();
+    });
+
+    it('names one artist, a few, or the first five and how many more', () => {
+      expect(missingArtistsNote(['Honeycrush'])).toContain('for one artist: Honeycrush.');
+      expect(missingArtistsNote(['A', 'B', 'C'])).toContain('for 3 artists: A, B and C.');
+      expect(missingArtistsNote(['A', 'B', 'C', 'D', 'E', 'F', 'G'])).toContain('for 7 artists: A, B, C, D, E and 2 more.');
     });
   });
 

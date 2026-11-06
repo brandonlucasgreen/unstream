@@ -230,9 +230,15 @@ export function SettingsPage() {
             <SharingControls />
           </section>
 
-          {/* Bandcamp collection section */}
+          {/* Bandcamp collection section. Labelled Beta (Brandon, 2026-11-06): it rides on
+              Bandcamp's own Subsonic beta, which fails some collections outright. */}
           <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Bandcamp collection</h2>
+            <h2 className="text-lg font-semibold">
+              Bandcamp collection
+              <span className="ml-2 align-middle inline-block rounded-full bg-fill-primary text-accent-foreground text-[0.7rem] font-bold uppercase tracking-wide px-2 py-0.5">
+                Beta
+              </span>
+            </h2>
             <BandcampConnect />
           </section>
 

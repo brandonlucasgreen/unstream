@@ -11,7 +11,9 @@
 // Failure semantics — the "never cache uncertainty" rule applied to a sync: a fetch that
 // dies mid-pagination throws (see subsonicFetchAllAlbums) and lands in the catch block,
 // which records sync_status='error' on the connection row. It must never record a partial
-// import as a completed sync — that would show a user a quietly wrong collection.
+// import as a quietly complete one — that would show a user a silently wrong collection.
+// The one partial import allowed is subsonicFetchCollection's artist-by-artist fallback,
+// and it names every artist it couldn't fetch in `sync_error` (see missingArtistsNote).
 
 import { Sentry, withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
@@ -20,7 +22,7 @@ import { purgeUserShareCacheForUser } from './purge-cache';
 import { isInternalRequest } from './middleware';
 import { decryptCredential } from './credential-crypto';
 import {
-  subsonicFetchAllAlbums,
+  subsonicFetchCollection,
   SubsonicError,
   type SubsonicAlbum,
   type SubsonicCredential,
@@ -205,6 +207,25 @@ async function resolveArtistsSafely(userId: string): Promise<CollectionResolveSu
   }
 }
 
+/** How many missing artists the settings page names before "and N more". */
+const MISSING_ARTISTS_NAMED = 5;
+
+/**
+ * The note a partial import leaves on the connection row, beside a successful status: which
+ * artists Bandcamp wouldn't send, so the gap is visible rather than silent. Null when nothing
+ * is missing.
+ */
+export function missingArtistsNote(missingArtists: string[]): string | null {
+  if (missingArtists.length === 0) return null;
+  const named = missingArtists.slice(0, MISSING_ARTISTS_NAMED);
+  const rest = missingArtists.length - named.length;
+  const list = rest > 0
+    ? `${named.join(', ')} and ${rest} more`
+    : named.length === 1 ? named[0] : `${named.slice(0, -1).join(', ')} and ${named.at(-1)}`;
+  const whose = missingArtists.length === 1 ? 'one artist' : `${missingArtists.length} artists`;
+  return `Bandcamp wouldn’t send the releases for ${whose}: ${list}. Everything else was imported. Bandcamp’s Subsonic support is in beta — use Re-sync to try again.`;
+}
+
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
@@ -281,7 +302,17 @@ async function handleRequest(event: {
       return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Credential unusable' }) };
     }
 
-    const albums = await subsonicFetchAllAlbums(credential);
+    const { albums, missingArtists, listFailure } = await subsonicFetchCollection(credential);
+    if (listFailure) {
+      // Reported as its own event, not under the sync-failure issue: this sync goes on to succeed,
+      // and how often Bandcamp's album list fails (and how) is worth seeing on its own. Counts and
+      // Bandcamp's error only — no names from the collection.
+      Sentry.captureMessage('bandcamp-sync: album list failed, fetched artist by artist', {
+        level: 'warning',
+        tags: { function: 'bandcamp-sync' },
+        extra: { listFailure, albums: albums.length, missingArtists: missingArtists.length },
+      });
+    }
 
     // Dedupe by Subsonic id — a duplicate in one upsert batch is a Postgres error
     // ("cannot affect row a second time"), not a harmless overwrite.
@@ -380,7 +411,7 @@ async function handleRequest(event: {
       .from('bandcamp_connections')
       .update({
         sync_status: 'idle',
-        sync_error: null,
+        sync_error: missingArtistsNote(missingArtists),
         item_count: uniqueAlbums.length,
         last_synced_at: new Date().toISOString(),
       })
@@ -389,12 +420,13 @@ async function handleRequest(event: {
       throw new Error(`connection status update failed: ${doneError.message}`);
     }
 
-    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${toWrite.length} written, ${uniqueAlbums.length - toWrite.length} unchanged, ${matches.releases.size} matched to releases, ${matches.artists.size} artists)`);
+    console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${toWrite.length} written, ${uniqueAlbums.length - toWrite.length} unchanged, ${matches.releases.size} matched to releases, ${matches.artists.size} artists)${listFailure ? `, artist by artist after "${listFailure}", ${missingArtists.length} artists missing` : ''}`);
 
     outcome = {
       statusCode: 200,
       body: {
         imported: uniqueAlbums.length,
+        missingArtists: missingArtists.length,
         matched: matches.releases.size,
         artistsMatched: matches.artists.size,
       },
@@ -414,7 +446,7 @@ async function handleRequest(event: {
     await recordFailure(
       isAuth
         ? 'Bandcamp rejected the stored login. Disconnect and reconnect with a fresh username and password from Fan Settings → Subsonic.'
-        : 'The sync failed partway through. Bandcamp’s Subsonic support is in beta — use Re-sync to try again.'
+        : 'Bandcamp couldn’t send your collection. Its Subsonic support is in beta — use Re-sync to try again.'
     );
     outcome = { statusCode: 500, body: { error: 'Sync failed' } };
   }

@@ -41,6 +41,13 @@ const REQUEST_TIMEOUT_MS = 30_000;
 // path where a Netlify function is killed in seconds.
 const RETRY_DELAYS_MS = [1_000, 4_000];
 
+// Artist-by-artist fallback (subsonicFetchCollection): how many getArtist calls run at once, and
+// how many times each is retried. One retry, not two: a collection of a few hundred artists where
+// getArtist is broken outright would otherwise spend most of the background function's 15 minutes
+// sleeping between retries.
+const ARTIST_CONCURRENCY = 4;
+const ARTIST_RETRIES = 1;
+
 /** The stored credential: t = md5(password + s). The password itself is never stored. */
 export interface SubsonicCredential {
   username: string;
@@ -111,6 +118,7 @@ interface SubsonicResponseBody {
     status?: string;
     error?: { code?: number; message?: string };
     artists?: { index?: { artist?: unknown[] }[] };
+    artist?: { album?: unknown[] };
     albumList2?: { album?: unknown[] };
   };
 }
@@ -198,12 +206,13 @@ export async function subsonicArtistCount(credential: SubsonicCredential): Promi
   return indexes.reduce((sum, idx) => sum + (idx.artist?.length ?? 0), 0);
 }
 
-function toAlbum(raw: unknown): SubsonicAlbum | null {
+/** `fallbackArtist` fills in an album listed under getArtist that doesn't repeat its artist. */
+function toAlbum(raw: unknown, fallbackArtist?: string): SubsonicAlbum | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const record = raw as Record<string, unknown>;
   const id = record.id;
   const name = record.name;
-  const artist = record.artist;
+  const artist = typeof record.artist === 'string' ? record.artist : fallbackArtist;
   if (typeof id !== 'string' || typeof name !== 'string' || typeof artist !== 'string') {
     return null;
   }
@@ -300,8 +309,10 @@ function withPageContext(error: unknown, offset: number, size: number): unknown 
  *   - a transient failure is retried before it is believed;
  *   - a page that still fails is asked for again, smaller, from the same offset. A 500 that
  *     only some users see, on the one call that asks for 500 records at once, reads like
- *     Bandcamp timing out while building a big page — so making the page smaller is the
- *     one lever we have. Halving stops at MIN_PAGE_SIZE, then the sync fails honestly.
+ *     Bandcamp timing out while building a big page — so the page is made smaller.
+ *     Halving stops at MIN_PAGE_SIZE and then throws. That alone didn't rescue the accounts
+ *     that fail this way every time, so subsonicFetchCollection catches it and goes artist by
+ *     artist.
  */
 export async function subsonicFetchAllAlbums(
   credential: SubsonicCredential
@@ -344,4 +355,97 @@ export async function subsonicFetchAllAlbums(
     offset += rawAlbums.length;
   }
   throw new SubsonicError(`getAlbumList2: collection exceeded ${MAX_ALBUMS} albums`);
+}
+
+/** What subsonicFetchCollection got, and whether it had to go the long way round. */
+export interface CollectionFetch {
+  albums: SubsonicAlbum[];
+  /** Artists whose albums Bandcamp wouldn't send, by name, sorted. Empty unless `listFailure`. */
+  missingArtists: string[];
+  /** Why the album list failed, when the collection was fetched artist by artist instead. */
+  listFailure: string | null;
+}
+
+/**
+ * The whole collection: the album list (subsonicFetchAllAlbums), or, when Bandcamp won't send
+ * that, the same albums artist by artist.
+ *
+ * Why the second route exists: for some collections Bandcamp's getAlbumList2 fails on the very
+ * first page, at every page size, quickly and every time — one account has failed that way since
+ * 2026-08-14, another since 2026-11-04 (each sync failed ~24s in, which is the retry backoff
+ * alone, so Bandcamp was answering in a few hundred milliseconds, not timing out). That reads
+ * like one record in the collection breaking Bandcamp's list, and getArtist confines such a
+ * record to the one artist it belongs to.
+ *
+ * **This is the one place a sync may import less than the whole collection**, and only by naming
+ * what's missing. An artist whose albums Bandcamp won't send is listed in `missingArtists` for the
+ * settings page to show, never dropped silently; and if every artist fails, nothing was learned
+ * about the collection, so it throws rather than reporting an empty import. A rejected credential
+ * is never a reason to try another route: it throws straight away.
+ */
+export async function subsonicFetchCollection(credential: SubsonicCredential): Promise<CollectionFetch> {
+  try {
+    return { albums: await subsonicFetchAllAlbums(credential), missingArtists: [], listFailure: null };
+  } catch (error) {
+    if (!(error instanceof SubsonicError) || error.isAuthFailure) throw error;
+    const byArtist = await subsonicFetchAlbumsByArtist(credential);
+    return { ...byArtist, listFailure: error.message };
+  }
+}
+
+interface ArtistEntry {
+  id: string;
+  name: string;
+}
+
+async function subsonicFetchAlbumsByArtist(
+  credential: SubsonicCredential
+): Promise<{ albums: SubsonicAlbum[]; missingArtists: string[] }> {
+  const index = await subsonicRequest(credential, 'getArtists', {}, RETRY_DELAYS_MS.length);
+  const artists: ArtistEntry[] = [];
+  for (const bucket of index.artists?.index ?? []) {
+    for (const raw of bucket.artist ?? []) {
+      if (typeof raw !== 'object' || raw === null) continue;
+      const { id, name } = raw as Record<string, unknown>;
+      if (typeof id === 'string' && typeof name === 'string') artists.push({ id, name });
+    }
+  }
+
+  const albums: SubsonicAlbum[] = [];
+  const missingArtists: string[] = [];
+  let lastFailure: SubsonicError | null = null;
+  let stop: unknown = null;
+  let next = 0;
+
+  // A small pool rather than one at a time: a large collection is hundreds of artists, and the
+  // background function has 15 minutes for all of them plus the import.
+  const worker = async () => {
+    while (stop === null && next < artists.length) {
+      const artist = artists[next++];
+      try {
+        const envelope = await subsonicRequest(credential, 'getArtist', { id: artist.id }, ARTIST_RETRIES);
+        for (const raw of envelope.artist?.album ?? []) {
+          const album = toAlbum(raw, artist.name);
+          if (album) albums.push(album);
+        }
+        if (albums.length > MAX_ALBUMS) {
+          stop = new SubsonicError(`getArtist: collection exceeded ${MAX_ALBUMS} albums`);
+        }
+      } catch (error) {
+        if (error instanceof SubsonicError && !error.isAuthFailure) {
+          missingArtists.push(artist.name);
+          lastFailure = error;
+        } else {
+          stop = error;
+        }
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(ARTIST_CONCURRENCY, artists.length) }, worker));
+
+  if (stop !== null) throw stop;
+  if (artists.length > 0 && missingArtists.length === artists.length) {
+    throw lastFailure ?? new SubsonicError('getArtist: every artist failed');
+  }
+  return { albums, missingArtists: missingArtists.sort((a, b) => a.localeCompare(b)) };
 }

@@ -153,6 +153,46 @@ describe('ArtistPromotePage', () => {
     })));
   });
 
+  // The page's own Save is below the templates; the channels need one where they're chosen.
+  it('saves the channels from a Save inside “Where it posts”, and says so there', async () => {
+    const on = loaded({ buffer: connected, settings: { ...(loaded() as Extract<PromotePage, { available: true }>).settings, enabled: true, organizationId: 'org1', channelIds: ['ig'] } });
+    promote.getPromotePage.mockResolvedValue(on);
+    promote.savePromoteSettings.mockResolvedValue(on);
+    renderTab();
+    const where = await screen.findByRole('region', { name: 'Where it posts' });
+    fireEvent.click(within(where).getByRole('checkbox', { name: /kidlightbulbs · TikTok/ }));
+    fireEvent.click(within(where).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({
+      organizationId: 'org1', channelIds: ['ig', 'tt'],
+    })));
+    expect(await within(where).findByRole('status')).toBeTruthy();
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+  });
+
+  // Moving organization needs a save before its channels can be read, and the page's other Save
+  // isn't shown until autopost has channels — so this one is the only way forward.
+  it('offers Save beside a newly chosen Buffer organization, before autopost is set up', async () => {
+    const twoOrgs = { ...connected, organizations: [...connected.organizations, { id: 'org2', name: 'Kid Lightbulbs Ltd' }] };
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: twoOrgs }));
+    promote.savePromoteSettings.mockResolvedValue(loaded({ buffer: { ...twoOrgs, organizationId: 'org2' } }));
+    renderTab();
+    const where = await screen.findByRole('region', { name: 'Where it posts' });
+    fireEvent.change(within(where).getByRole('combobox'), { target: { value: 'org2' } });
+    expect(within(where).getByText(/Save to see this organization’s channels/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Save changes' })).toBeNull();
+    fireEvent.click(within(where).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(promote.savePromoteSettings).toHaveBeenCalledWith('tok', 'kid-lightbulbs', expect.objectContaining({
+      organizationId: 'org2', channelIds: [],
+    })));
+  });
+
+  it('has no Save beside “connect your channels in Buffer first”', async () => {
+    promote.getPromotePage.mockResolvedValue(loaded({ buffer: { ...connected, channels: [] } }));
+    renderTab();
+    await screen.findByRole('button', { name: 'Check again' });
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
+  });
+
   it('tells a new Buffer user with no accounts connected where to connect them, and checks again', async () => {
     const empty = { ...connected, channels: [] };
     promote.getPromotePage.mockResolvedValue(loaded({ buffer: empty }));

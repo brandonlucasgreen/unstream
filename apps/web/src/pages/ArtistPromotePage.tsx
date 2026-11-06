@@ -89,6 +89,9 @@ export function ArtistPromotePage() {
   const [problems, setProblems] = useState<Record<string, string[]> | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Which Save row was pressed last, so "Saved" or the error shows beside the button that was used
+  // rather than in both rows at once.
+  const [savedFrom, setSavedFrom] = useState<SaveRowPlace>('footer');
   // Read once: the address loses the parameter straight after.
   const [bufferOutcome] = useState(() => searchParams.get('buffer'));
   useReportArtistName(page?.available ? page.artist.name : undefined);
@@ -252,6 +255,18 @@ export function ArtistPromotePage() {
 
   const posting = !page.settings.enabled ? 'off' : page.settings.pausedReason ? 'paused' : 'on';
 
+  // The channel picker gets a Save of its own, inside "Where it posts" (Brandon, 2026-11-06). The
+  // page's other Save sits below the templates, a long way from the channels, and isn't there at
+  // all until autopost is ready — so someone choosing between Buffer organizations, told "Save to
+  // see this organization's channels", had nothing to press. Shown whenever there's a choice of
+  // organization or channels to save; not beside "connect your channels in Buffer first".
+  const choosingChannels = buffer.connected && Boolean(form.organizationId)
+    && (form.organizationId !== buffer.organizationId || buffer.channels.some(c => c.supported));
+  const saveFrom = (place: SaveRowPlace) => {
+    setSavedFrom(place);
+    void save();
+  };
+
   // The switch saves straight away, with whatever else is on the page: a switch that needed a
   // separate Save would look on while doing nothing.
   const toggle = () => save({ ...form, enabled: !form.enabled });
@@ -273,7 +288,7 @@ export function ArtistPromotePage() {
         <p className="text-sm text-error" role="alert">{pausedMessage(page.settings.pausedReason, buffer.connected)}</p>
       )}
 
-      {!ready && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
+      {!choosingChannels && saveError && <p className="text-sm text-error" role="alert">{saveError}</p>}
 
       <section
         className={SECTION}
@@ -300,6 +315,15 @@ export function ArtistPromotePage() {
           onCheckAgain={refresh}
           onChange={update}
         />
+        {choosingChannels && (
+          <SaveRow
+            label="Save"
+            busy={busy}
+            saved={saved && savedFrom === 'channels'}
+            error={savedFrom === 'channels' || !ready ? saveError : null}
+            onSave={() => saveFrom('channels')}
+          />
+        )}
       </section>
 
       {ready ? (
@@ -386,10 +410,14 @@ export function ArtistPromotePage() {
           />
         </section>
 
-        <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-3 border-t border-border bg-bg-primary px-1 py-3">
-          <button type="button" disabled={busy} onClick={() => save()} className={PRIMARY_BUTTON}>{busy ? 'Saving…' : 'Save changes'}</button>
-          {saved && <span className="text-xs text-text-muted" role="status">Saved</span>}
-          {saveError && <span className="text-xs text-error" role="alert">{saveError}</span>}
+        <div className="sticky bottom-0 -mx-1 border-t border-border bg-bg-primary px-1 py-3">
+          <SaveRow
+            label="Save changes"
+            busy={busy}
+            saved={saved && savedFrom === 'footer'}
+            error={savedFrom === 'footer' ? saveError : null}
+            onSave={() => saveFrom('footer')}
+          />
         </div>
 
         <section className={SECTION} aria-labelledby="promote-coming-up">
@@ -416,6 +444,25 @@ export function ArtistPromotePage() {
           </ol>
         </section>
       )}
+    </div>
+  );
+}
+
+type SaveRowPlace = 'channels' | 'footer';
+
+/** A Save button with what happened beside it. Both rows save the whole form. */
+function SaveRow({ label, busy, saved, error, onSave }: {
+  label: string;
+  busy: boolean;
+  saved: boolean;
+  error: string | null;
+  onSave: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <button type="button" disabled={busy} onClick={onSave} className={PRIMARY_BUTTON}>{busy ? 'Saving…' : label}</button>
+      {saved && <span className="text-xs text-text-muted" role="status">Saved</span>}
+      {error && <span className="text-xs text-error" role="alert">{error}</span>}
     </div>
   );
 }
