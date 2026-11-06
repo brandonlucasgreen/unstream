@@ -369,7 +369,7 @@ describe('bandcamp-sync-background handler', () => {
     expect(upsertBatches).toHaveLength(0);
     expect(connectionUpdates.at(-1)).toMatchObject({
       sync_status: 'error',
-      sync_error: expect.stringContaining('Re-sync'),
+      sync_error: expect.stringContaining('signing out of bandcamp.com'),
     });
   });
 
@@ -426,9 +426,11 @@ describe('bandcamp-sync-background handler', () => {
     });
 
     it('names one artist, a few, or the first five and how many more', () => {
-      expect(missingArtistsNote(['Honeycrush'])).toContain('for one artist: Honeycrush.');
-      expect(missingArtistsNote(['A', 'B', 'C'])).toContain('for 3 artists: A, B and C.');
-      expect(missingArtistsNote(['A', 'B', 'C', 'D', 'E', 'F', 'G'])).toContain('for 7 artists: A, B, C, D, E and 2 more.');
+      expect(missingArtistsNote(['Honeycrush'])).toContain('the following artists: Honeycrush.');
+      expect(missingArtistsNote(['A', 'B', 'C'])).toContain('the following artists: A, B and C.');
+      expect(missingArtistsNote(['A', 'B', 'C', 'D', 'E', 'F', 'G'])).toContain('the following artists: A, B, C, D, E and 2 more.');
+      // The settings page links a closing "contact us." (BandcampConnect's SyncMessage).
+      expect(missingArtistsNote(['A'])).toMatch(/contact us\.$/);
     });
   });
 

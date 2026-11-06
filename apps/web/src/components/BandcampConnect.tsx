@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
@@ -26,6 +27,23 @@ interface ConnectionStatus {
  * syncStatus and ends the poll. A flat 5s spent ~240 requests reaching that point; this
  * spends ~58, with no perceptible change while anyone is actually looking.
  */
+const CONTACT_US = 'contact us.';
+
+/**
+ * A sync message from the server, with a closing "contact us." linked to /contact. The messages
+ * are stored as plain text on the connection row (bandcamp-sync-background.ts, me-bandcamp.ts),
+ * so the link is added here rather than carried in them.
+ */
+function SyncMessage({ text, className }: { text: string; className: string }) {
+  if (!text.endsWith(CONTACT_US)) return <p className={className}>{text}</p>;
+  return (
+    <p className={className}>
+      {text.slice(0, -CONTACT_US.length)}
+      <Link to="/contact" className="text-link hover:underline">contact us</Link>.
+    </p>
+  );
+}
+
 function pollDelayMs(elapsedMs: number): number {
   if (elapsedMs < 60_000) return 5_000;
   if (elapsedMs < 5 * 60_000) return 15_000;
@@ -303,7 +321,7 @@ export function BandcampConnect() {
       )}
 
       {status.syncStatus === 'error' && status.syncError && (
-        <p className="text-sm text-error">{status.syncError}</p>
+        <SyncMessage text={status.syncError} className="text-sm text-error" />
       )}
 
       {status.syncStatus === 'idle' && (
@@ -318,7 +336,7 @@ export function BandcampConnect() {
       {/* A sync that imported everything but some artists says which (bandcamp-sync-background's
           missingArtistsNote). Not styled as an error: the import worked. */}
       {status.syncStatus === 'idle' && status.syncError && (
-        <p className="text-sm text-text-secondary">{status.syncError}</p>
+        <SyncMessage text={status.syncError} className="text-sm text-text-secondary" />
       )}
 
       {error && <p className="text-sm text-error">{error}</p>}
