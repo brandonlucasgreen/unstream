@@ -7,6 +7,8 @@ import { describe, it, expect } from 'vitest';
 import {
   FOOTER_LINKS,
   FOOTER_MADE_WITH_LOVE,
+  HEADER_ACCOUNT_LABEL,
+  HEADER_ACCOUNT_LINKS,
   HEADER_LOGIN_LINK,
   HEADER_NAV_LINKS,
   siteFooterHtml,
@@ -24,6 +26,21 @@ describe('site header', () => {
     const entries = [...header.matchAll(/\{ to: '([^']+)', label: t\('nav\.(\w+)'\)(, button: true)? \}/g)]
       .map(m => ({ href: m[1], label: strings.nav[m[2]] }));
     expect(entries).toEqual([...HEADER_NAV_LINKS, HEADER_LOGIN_LINK]);
+  });
+
+  it("has Header.tsx's Account group, minus the admin-only Curator Posts", () => {
+    const entries = [...header.matchAll(/\{ to: '([^']+)', label: t\('nav\.account\.(\w+)'\) \}/g)]
+      .map(m => ({ href: m[1], label: strings.nav.account[m[2]] }))
+      .filter(l => l.href !== '/curator/new');
+    expect(entries).toEqual(HEADER_ACCOUNT_LINKS);
+    expect(strings.nav.account.label).toBe(HEADER_ACCOUNT_LABEL);
+  });
+
+  it('links every account item in both the dropdown and the menu', () => {
+    const html = siteHeaderHtml();
+    for (const link of HEADER_ACCOUNT_LINKS) {
+      expect(html.split(`<a href="${link.href}"`).length - 1).toBe(2);
+    }
   });
 
   it('links every nav item in both the inline nav and the menu', () => {

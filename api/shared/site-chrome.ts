@@ -7,13 +7,22 @@
 // copy, and site-chrome-copies.test.ts fails when its links stop matching Header.tsx's signed-out
 // nav or Footer.tsx.
 //
-// Signed-out only. Whether someone is signed in lives in the browser (Supabase's session in
-// localStorage), and this page renders on the server and is cached per URL, so it shows the
-// header a signed-out visitor sees. Login takes a signed-in one straight to their account.
+// Both headers, signed out and signed in, are in the HTML. Whether someone is signed in lives only
+// in the browser (Supabase's session in localStorage), and the page is rendered on the server and
+// cached per URL, so the server can't choose. SIGNED_IN_SCRIPT, placed right after the header,
+// reads localStorage and adds `sc-signed-in` to <html>; CSS shows one header or the other. It
+// renders nothing and fetches nothing, so the page still has one renderer, and without
+// JavaScript a visitor gets the signed-out header, which still works (Login takes a signed-in
+// person to their account).
 //
-// No script. The two things the React header opens with a click — the search row below `xl`
-// and the menu below `md` — are <details> elements, which open and close without JavaScript.
-// They share a `name`, so opening one closes the other, as the React header's do.
+// The signed-in header is the Account menu only. The Admin menu is left out (its counts need an
+// admin API call) and so is Sign out: signing out properly revokes the session at Supabase,
+// which needs supabase-js, and clearing localStorage alone would leave it live. Every other page
+// has both.
+//
+// The things the React header opens with a click — the search row below `xl`, the menu below
+// `md` and the Account dropdown — are <details> elements, which open and close without
+// JavaScript. They share a `name`, so opening one closes the others, as the React header's do.
 
 export interface ChromeLink {
   href: string;
@@ -34,6 +43,25 @@ export const HEADER_NAV_LINKS: ChromeLink[] = [
 ];
 
 export const HEADER_LOGIN_LINK: ChromeLink = { href: '/login', label: 'Login' };
+
+/** Header.tsx's Account group, without Curator Posts (admin-only while its flag is off). */
+export const HEADER_ACCOUNT_LABEL = 'Account';
+export const HEADER_ACCOUNT_LINKS: ChromeLink[] = [
+  { href: '/my-artists', label: 'My Artists' },
+  { href: '/my-collection', label: 'My Collection' },
+  { href: '/settings', label: 'Settings' },
+];
+
+/**
+ * Marks <html> signed in when the browser holds a Supabase session, and fills in the email the
+ * menu shows, as the React drawer does. The key is supabase-js's default,
+ * `sb-<project ref>-auth-token` (apps/web/src/services/auth.ts sets no storageKey); the anchor
+ * keeps out `…-auth-token-code-verifier`, which a half-finished sign-in leaves behind. A
+ * session with a refresh token is one the SPA would resume, even once its access token has
+ * expired. The email goes in as textContent, never markup. Any failure (storage blocked, bad
+ * JSON) leaves the signed-out header.
+ */
+export const SIGNED_IN_SCRIPT = `<script>(function(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!k||!/^sb-[a-z0-9]+-auth-token$/.test(k))continue;var s=JSON.parse(localStorage.getItem(k)||'null');if(!s||!s.refresh_token)continue;document.documentElement.classList.add('sc-signed-in');var e=s.user&&s.user.email,el=document.querySelector('.sc-menu-email');if(el&&typeof e==='string')el.textContent=e;return}}catch(_){}})();</script>`;
 
 export const FOOTER_MADE_WITH_LOVE: ChromeLink = {
   href: 'https://bgreen.lol',
@@ -86,8 +114,23 @@ export const SITE_CHROME_CSS = `
   .sc-nav a:hover { color: var(--sc-text); }
   .sc-nav a.sc-login { padding: 8px 16px; border-radius: 8px; background: var(--sc-accent); color: var(--sc-on-accent); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
   .sc-nav a.sc-login:hover { color: var(--sc-on-accent); opacity: 0.9; }
+  html:not(.sc-signed-in) .sc-when-in, html.sc-signed-in .sc-when-out { display: none !important; }
+  .sc-dropdown { position: relative; }
+  .sc-dropdown > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 4px; color: var(--sc-muted); }
+  .sc-dropdown > summary::-webkit-details-marker { display: none; }
+  .sc-dropdown > summary:hover, .sc-dropdown[open] > summary { color: var(--sc-text); }
+  .sc-dropdown > summary svg { width: 14px; height: 14px; transition: transform 0.15s; }
+  .sc-dropdown[open] > summary svg { transform: rotate(180deg); }
+  .sc-dropdown-panel { position: absolute; right: 0; top: 100%; margin-top: 8px; min-width: 176px; padding: 4px 0; border: 1px solid var(--sc-border); border-radius: 12px; background: var(--sc-bg); box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+  .sc-nav .sc-dropdown-panel a { display: block; padding: 8px 16px; color: var(--sc-text); }
+  .sc-nav .sc-dropdown-panel a:hover { background: var(--sc-hover); }
   .sc-menu { margin-right: -8px; }
   .sc-menu-panel { position: absolute; left: 0; right: 0; top: 100%; display: flex; flex-direction: column; background: var(--sc-bg); border-top: 1px solid var(--sc-border); border-bottom: 1px solid var(--sc-border); box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+  .sc-menu-panel nav { display: flex; flex-direction: column; }
+  .sc-menu-email { padding: 16px 24px; font-size: 14px; line-height: 20px; color: var(--sc-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-menu-email:empty { display: none; }
+  .sc-menu-heading { padding: 16px 24px 4px; font-size: 14px; line-height: 20px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sc-muted); }
+  .sc-menu-panel .sc-when-in a { padding: 12px 24px; border-bottom: 0; }
   .sc-menu-panel a { padding: 16px 24px; font-size: 18px; line-height: 26px; color: var(--sc-text); text-decoration: none; border-bottom: 1px solid var(--sc-border); }
   .sc-menu-panel a:last-child { border-bottom: 0; }
   .sc-menu-panel a:hover { background: var(--sc-hover); }
@@ -125,6 +168,7 @@ function searchForm(): string {
 
 export function siteHeaderHtml(): string {
   const navLinks = HEADER_NAV_LINKS.map(l => `<a href="${l.href}">${l.label}</a>`).join('\n        ');
+  const accountLinks = HEADER_ACCOUNT_LINKS.map(l => `<a href="${l.href}">${l.label}</a>`).join('\n              ');
   return `<header class="sc-header">
     <div class="sc-header-row">
       <a href="/" class="sc-brand">${UNSTREAM_LOGO_SVG} Unstream</a>
@@ -134,19 +178,35 @@ export function siteHeaderHtml(): string {
           <summary aria-label="Search artists"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${SEARCH_ICON_PATH}"/></svg></summary>
           <div class="sc-search-row">${searchForm()}</div>
         </details>
-        <nav class="sc-nav" aria-label="Main menu">
+        <nav class="sc-nav sc-when-out" aria-label="Main menu">
         ${navLinks}
         <a href="${HEADER_LOGIN_LINK.href}" class="sc-login">${HEADER_LOGIN_LINK.label}</a>
         </nav>
+        <nav class="sc-nav sc-when-in" aria-label="Main menu">
+          <details class="sc-dropdown" name="sc-header">
+            <summary>${HEADER_ACCOUNT_LABEL}<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></summary>
+            <div class="sc-dropdown-panel">
+              ${accountLinks}
+            </div>
+          </details>
+        </nav>
         <details class="sc-toggle sc-menu" name="sc-header">
           <summary aria-label="Open menu"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
-          <nav class="sc-menu-panel" aria-label="Main menu">
+          <div class="sc-menu-panel">
+            <nav class="sc-when-out" aria-label="Main menu">
             ${[...HEADER_NAV_LINKS, HEADER_LOGIN_LINK].map(l => `<a href="${l.href}">${l.label}</a>`).join('\n            ')}
-          </nav>
+            </nav>
+            <nav class="sc-when-in" aria-label="Main menu">
+              <p class="sc-menu-email"></p>
+              <p class="sc-menu-heading">${HEADER_ACCOUNT_LABEL}</p>
+              ${accountLinks}
+            </nav>
+          </div>
         </details>
       </div>
     </div>
-  </header>`;
+  </header>
+  ${SIGNED_IN_SCRIPT}`;
 }
 
 export function siteFooterHtml(): string {

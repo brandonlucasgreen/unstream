@@ -9,7 +9,9 @@
 // try to take it over: one route with two renderers is the UNS-100 bifurcation class that
 // produced a run of back-button and bfcache bugs where every fix partially reverted the last
 // (see docs/postmortems/UNS-100-bifurcation-retro.md). Nothing on this page hydrates or re-renders
-// client-side — the only script anywhere in it is an inline image-error fallback.
+// client-side. Its only scripts are an inline image-error fallback and the header's signed-in
+// check (api/shared/site-chrome.ts), which picks between two server-rendered headers and renders
+// nothing itself.
 //
 // **Route precedence.** netlify.toml declares this *before* `/a/*`, because `/a/*` also matches
 // `/a/artist/release` and artist-page-static would otherwise answer first. The regex here
