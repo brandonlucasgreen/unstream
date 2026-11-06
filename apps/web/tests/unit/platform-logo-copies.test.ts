@@ -66,7 +66,18 @@ describe('platformLogoSvg', () => {
     expect(svg).toContain(`d="${PLATFORM_LOGO_PATHS.subvert}"`);
   });
 
+  // Every mark the SPA draws, not only the logos platforms sent us: the edge pages had only
+  // Subvert's until 2026-11-06, so every Bandcamp card on a release page showed 🎵.
+  it.each(markIds)('draws the %s mark on the edge-rendered pages too', (id) => {
+    expect(platformLogoSvg(id, 18)).toContain(`d="${SIMPLE_ICON_PATHS[id]!.d}"`);
+  });
+
+  it('keeps the fill rule the mark needs', () => {
+    expect(platformLogoSvg('ampwall', 18)).toContain('fill-rule="evenodd"');
+    expect(platformLogoSvg('bandcamp', 18)).not.toContain('fill-rule');
+  });
+
   it('returns null for a platform without one, so the page prints its emoji', () => {
-    expect(platformLogoSvg('bandcamp', 18)).toBeNull();
+    expect(platformLogoSvg('steady', 18)).toBeNull();
   });
 });
