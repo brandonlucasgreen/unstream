@@ -21,6 +21,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { platformLogoSvg } from "../shared/platform-logos.ts";
+import { SITE_CHROME_CSS, siteFooterHtml, siteHeaderHtml } from "../shared/site-chrome.ts";
 import {
   AVAILABILITY_LABELS,
   AVAILABILITY_ORDER,
@@ -38,12 +39,10 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 110 110" aria-hidden="true"><defs><filter id="gs"><feColorMatrix type="saturate" values="0"/></filter></defs><g transform="translate(22,22) scale(1.8333)" filter="url(#gs)"><path fill="#50A5E6" d="M30 22c-3 0-6.688 7.094-7 10-.421 3.915 2 4 2 4h11V26s-3.438-4-6-4z"/><ellipse transform="rotate(-60 27.574 28.49)" fill="#1C6399" cx="27.574" cy="28.489" rx="5.848" ry="1.638"/><path fill="#F9CA55" d="M20.086 0c1.181 0 2.138.957 2.138 2.138 0 .789.668 10.824.668 10.824L17.948 18V2.138C17.948.957 18.905 0 20.086 0z"/><path fill="#FFDC5D" d="M18.875 4.323c0-1.099.852-1.989 1.903-1.989 1.051 0 1.903.891 1.903 1.989 0 0 .535 5.942 1.192 9.37.878 1.866 1.369 4.682 1.261 6.248.054.398 5.625 5.006 5.625 5.006-.281 1.813-2.259 6.155-4.759 8.159l-3.521-2.924c-2.885-.404-4.458-3.331-4.458-4.264 0-2.984.854-21.595.854-21.595z"/><path fill="#50A5E6" d="M6 22c3 0 6.688 7.094 7 10 .421 3.915-2 4-2 4H0V26s3.438-4 6-4z"/><ellipse transform="rotate(-30 8.424 28.489)" fill="#1C6399" cx="8.426" cy="28.489" rx="1.638" ry="5.848"/><path fill="#F9CA55" d="M16.061.011c-1.266-.127-2.333.864-2.333 2.103 0 .78-.184 10.319-.184 10.319L17.895 18l.062-15.765c0-1.106-.795-2.114-1.896-2.224z"/><path fill="#FFDC5D" d="M17.125 4.323c0-1.099-.852-1.989-1.903-1.989-1.051 0-1.903.891-1.903 1.989 0 0-.535 5.942-1.192 9.37-.878 1.866-1.369 4.682-1.261 6.248-.054.398-5.625 5.006-5.625 5.006C5.522 26.76 7.5 31.102 10 33.106l3.521-2.924c2.885-.404 4.458-3.331 4.458-4.264 0-2.984-.854-21.595-.854-21.595z"/><path fill="#F9CA55" d="M17.958 25.823c-.414 0-.75-.336-.75-.75V2.792c0-.414.336-.75.75-.75s.75.336.75.75v22.282c.001.413-.335.749-.75.749z"/></g><path d="M14,52 A41,41 0 0,1 96,52" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><line x1="14" y1="52" x2="14" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="96" y1="52" x2="96" y2="64" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="3" y="60" width="22" height="28" rx="9" fill="currentColor"/><rect x="85" y="60" width="22" height="28" rx="9" fill="currentColor"/></svg>';
-
-const CSS = `
-  :root { --bg: #121212; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; --footer-border: #1a1a1a; }
+const CSS = `${SITE_CHROME_CSS}
+  :root { --bg: #121212; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; }
   @media (prefers-color-scheme: light) {
-    :root { --bg: #fafafa; --bg2: #f5f5f5; --text: #1a1a1a; --muted: #555; --border: #e0e0e0; --accent: #e55a2b; --footer-border: #e0e0e0; }
+    :root { --bg: #fafafa; --bg2: #f5f5f5; --text: #1a1a1a; --muted: #555; --border: #e0e0e0; --accent: #e55a2b; }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Stack Sans Headline', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
@@ -51,33 +50,11 @@ const CSS = `
   a { color: inherit; }
   /* 896px (Tailwind's max-w-4xl) to match the width ArtistPage.tsx and Footer.tsx use — this
      page has no SPA counterpart to fall through to (see the note at the top of this file), so
-     its hand-rolled header/footer is what every real visitor sees and needs to look like the
-     rest of the app, not a narrower one-off. */
+     it is what every real visitor sees and needs to look like the rest of the app, not a
+     narrower one-off. The header and footer are the app's, from api/shared/site-chrome.ts. */
   .container { max-width: 896px; margin: 0 auto; padding: 0 24px; width: 100%; }
   .page-content { position: relative; flex: 1; display: flex; flex-direction: column; }
   @keyframes bc-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
-  .site-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .site-header .brand { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; flex-shrink: 0; }
-  .site-header .brand:hover { opacity: 0.8; }
-  /* Matches the React HeaderSearch this page can't render: a magnifying glass inside the
-     field and no submit button. Enter submits the form, which is what the icon implies and
-     what every other page in the app does — a separate "Search" button only appeared here
-     because plain SSR made it the obvious way to submit. */
-  .site-header .header-search { position: relative; flex: 1; max-width: 420px; margin: 0 auto; }
-  .site-header .header-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
-  .site-header .header-search input { width: 100%; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 36px; font-size: 14px; color: var(--text); font-family: inherit; }
-  .site-header .header-search input::placeholder { color: var(--muted); }
-  .site-header .header-search input:focus { outline: none; border-color: var(--accent); }
-  @media (max-width: 640px) { .site-header .header-search { display: none; } }
-  /* Unlike artist-page-static, this page has no SPA counterpart to hand real browsers off to
-     (see the note at the top of this file) — every visitor sees this exact header, so it's the
-     only place a signed-out fan following a release alert can reach the login page. */
-  .site-header .nav-right { display: flex; align-items: center; flex-shrink: 0; }
-  /* A filled accent button, matching the React header's Login. It was a muted text link here,
-     which read as secondary navigation rather than the primary action for a signed-out fan
-     arriving from a release alert. */
-  .site-header .nav-button { padding: 8px 16px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-  .site-header .nav-button:hover { opacity: 0.9; }
 
   .release-head { display: flex; gap: 20px; align-items: flex-start; }
   .release-art { width: 160px; height: 160px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--border); background: var(--bg2); object-fit: cover; }
@@ -179,14 +156,13 @@ function temporarilyUnavailable(artistSlug?: string): Response {
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-  </header>
+  ${siteHeaderHtml()}
   <main class="unavailable">
     <h1>This page is temporarily unavailable</h1>
     <p>We couldn't load this release just now. It's still here; this is usually brief.</p>
     <nav><a href="">Try again</a>${artistLink}</nav>
   </main>
+  ${siteFooterHtml()}
 </body>
 </html>`;
   return new Response(html, {
@@ -447,19 +423,7 @@ export default async function handler(request: Request, context: Context) {
   <style>${CSS}</style>
 </head>
 <body>
-  <header class="site-header">
-    <a href="/" class="brand">${LOGO_SVG} Unstream</a>
-    <!-- Plain GET form, no JS: this page is pure SSR, so it can't render the React
-         HeaderSearch. Submitting lands on /?q=… where the SPA renders results. Never point
-         this at /search — that URL belongs to the noscript-search edge function. -->
-    <form class="header-search" action="/" method="get" role="search">
-      <svg class="header-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" name="q" placeholder="Search artists..." aria-label="Search artists" enterkeyhint="search">
-    </form>
-    <div class="nav-right">
-      <a href="/login" class="nav-button">Login</a>
-    </div>
-  </header>
+  ${siteHeaderHtml()}
 
   <div class="page-content">
     <div class="container" style="padding-top:32px;padding-bottom:32px">
@@ -489,35 +453,7 @@ export default async function handler(request: Request, context: Context) {
     </div>
   </div>
 
-  <div style="padding:24px 16px;text-align:center">
-    <a href="https://unstream.stream" style="color:var(--text);text-decoration:none;font-weight:700;font-size:18px">Powered by Unstream</a>
-    <p style="font-size:16px;color:var(--muted);margin-top:4px">Find music on platforms that pay artists fairly.</p>
-  </div>
-
-  <footer style="margin-top:auto;padding:24px 16px;border-top:1px solid var(--footer-border)">
-    <div style="max-width:896px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:16px;color:var(--muted)">
-      <a href="https://bgreen.lol" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Made with love in Massachusetts, USA</a>
-      <nav style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px">
-        <a href="/artists" style="color:var(--muted);text-decoration:none">Indie Artist Index</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/platforms" style="color:var(--muted);text-decoration:none">Platforms</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/changelog" style="color:var(--muted);text-decoration:none">Changelog</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="https://github.com/brandonlucasgreen/unstream" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Codebase</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/support" style="color:var(--muted);text-decoration:none">Donate</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/faq" style="color:var(--muted);text-decoration:none">FAQ</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="https://letterbird.co/hi-d2078591" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-decoration:none">Contact</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/privacy-policy" style="color:var(--muted);text-decoration:none">Privacy policy</a>
-        <span style="color:var(--muted);opacity:0.4;font-size:12px">&#x2022;</span>
-        <a href="/terms" style="color:var(--muted);text-decoration:none">Terms of use</a>
-      </nav>
-    </div>
-  </footer>
+  ${siteFooterHtml()}
 </body>
 </html>`;
 
