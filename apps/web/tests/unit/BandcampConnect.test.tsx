@@ -158,6 +158,29 @@ describe('BandcampConnect', () => {
     });
     expect(screen.getByRole('button', { name: 'Re-sync' })).not.toBeNull();
   });
+
+  // A partial import (Bandcamp's album list failed, some artists wouldn't come one by one) is a
+  // success that names what's missing.
+  it('shows which artists are missing beside a successful import', async () => {
+    mockFetch.mockResolvedValueOnce(
+      statusResponse({
+        connected: true,
+        username: 'fan',
+        syncStatus: 'idle',
+        syncError: 'Bandcamp wouldn’t send the releases for one artist: Honeycrush.',
+        itemCount: 41,
+        lastSyncedAt: '2026-11-06T02:00:00.000Z',
+      })
+    );
+
+    render(<BandcampConnect />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/41 releases imported/)).not.toBeNull();
+    });
+    expect(screen.getByText(/one artist: Honeycrush/)).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'Re-sync' })).not.toBeNull();
+  });
 });
 
 // The poll that runs while a sync is in flight. Its ceiling has always been the server's —

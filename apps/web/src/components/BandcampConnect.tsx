@@ -315,6 +315,12 @@ export function BandcampConnect() {
         </p>
       )}
 
+      {/* A sync that imported everything but some artists says which (bandcamp-sync-background's
+          missingArtistsNote). Not styled as an error: the import worked. */}
+      {status.syncStatus === 'idle' && status.syncError && (
+        <p className="text-sm text-text-secondary">{status.syncError}</p>
+      )}
+
       {error && <p className="text-sm text-error">{error}</p>}
 
       {!confirmingDisconnect ? (
