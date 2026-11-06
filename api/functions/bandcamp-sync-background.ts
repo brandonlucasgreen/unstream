@@ -222,8 +222,7 @@ export function missingArtistsNote(missingArtists: string[]): string | null {
   const list = rest > 0
     ? `${named.join(', ')} and ${rest} more`
     : named.length === 1 ? named[0] : `${named.slice(0, -1).join(', ')} and ${named.at(-1)}`;
-  const whose = missingArtists.length === 1 ? 'one artist' : `${missingArtists.length} artists`;
-  return `Bandcamp wouldn’t send the releases for ${whose}: ${list}. Everything else was imported. Bandcamp’s Subsonic support is in beta — use Re-sync to try again.`;
+  return `Bandcamp failed to import the following artists: ${list}. Please re-sync to try those again. If they’re still missing, sign out of bandcamp.com and back in, then re-sync. If neither of these succeed, contact us.`;
 }
 
 async function handleRequest(event: {
@@ -446,7 +445,9 @@ async function handleRequest(event: {
     await recordFailure(
       isAuth
         ? 'Bandcamp rejected the stored login. Disconnect and reconnect with a fresh username and password from Fan Settings → Subsonic.'
-        : 'Bandcamp couldn’t send your collection. Its Subsonic support is in beta — use Re-sync to try again.'
+        // Signing out of bandcamp.com and back in is what fixed it for the fan who reported a
+        // failing sync (2026-11-06). Ends "contact us." so the settings page can link it.
+        : 'Bandcamp returned an error when Unstream asked for your collection. Please try signing out of bandcamp.com and back in, then re-sync. If that doesn’t work, disconnect Bandcamp below and connect it again. If neither of these succeed, contact us.'
     );
     outcome = { statusCode: 500, body: { error: 'Sync failed' } };
   }

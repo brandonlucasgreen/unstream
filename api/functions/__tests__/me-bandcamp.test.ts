@@ -158,7 +158,7 @@ describe('me-bandcamp handler', () => {
     mockConnectionRow({ sync_status: 'syncing', sync_error: null, updated_at: hoursAgo(1) });
     const body = JSON.parse((await handler(authedEvent('GET')))!.body);
     expect(body.syncStatus).toBe('error');
-    expect(body.syncError).toContain('Re-sync');
+    expect(body.syncError).toContain('re-sync');
   });
 
   it('GET still reports a recently started sync as running', async () => {

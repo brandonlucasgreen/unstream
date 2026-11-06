@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 const mockUseAuth = vi.fn();
 vi.mock('../../src/contexts/AuthContext', () => ({
@@ -29,7 +30,7 @@ describe('BandcampConnect', () => {
   it('shows the connect form with the Bandcamp settings link when not connected', async () => {
     mockFetch.mockResolvedValueOnce(statusResponse({ connected: false }));
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
 
     await waitFor(() => {
       expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
@@ -47,7 +48,7 @@ describe('BandcampConnect', () => {
       statusResponse({ connected: true, username: 'fan', syncStatus: 'syncing', syncError: null })
     );
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
     await waitFor(() => {
       expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
@@ -76,7 +77,7 @@ describe('BandcampConnect', () => {
       json: async () => ({ error: 'Bandcamp rejected that username or credential.' }),
     });
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
     await waitFor(() => {
       expect(screen.getByLabelText('Username (from Bandcamp)')).not.toBeNull();
     });
@@ -104,7 +105,7 @@ describe('BandcampConnect', () => {
       })
     );
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
 
     await waitFor(() => {
       expect(screen.getByText('fan')).not.toBeNull();
@@ -119,7 +120,7 @@ describe('BandcampConnect', () => {
     );
     mockFetch.mockResolvedValueOnce(statusResponse({ connected: false, itemsDeleted: 5 }));
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Disconnect' })).not.toBeNull();
     });
@@ -147,16 +148,36 @@ describe('BandcampConnect', () => {
         connected: true,
         username: 'fan',
         syncStatus: 'error',
-        syncError: 'The sync failed partway through.',
+        syncError: 'Bandcamp returned an error when Unstream asked for your collection. Please try signing out of bandcamp.com and back in, then re-sync. If neither of these succeed, contact us.',
       })
     );
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
 
     await waitFor(() => {
-      expect(screen.getByText('The sync failed partway through.')).not.toBeNull();
+      expect(screen.getByText(/Bandcamp returned an error/)).not.toBeNull();
     });
     expect(screen.getByRole('button', { name: 'Re-sync' })).not.toBeNull();
+    // The server's closing "contact us." becomes a link to the contact page.
+    expect(screen.getByRole('link', { name: 'contact us' }).getAttribute('href')).toBe('/contact');
+  });
+
+  it('shows a message without "contact us." as it is, with no link', async () => {
+    mockFetch.mockResolvedValueOnce(
+      statusResponse({
+        connected: true,
+        username: 'fan',
+        syncStatus: 'error',
+        syncError: 'Sync could not be started. Use Re-sync to try again.',
+      })
+    );
+
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
+
+    await waitFor(() => {
+      expect(screen.getByText('Sync could not be started. Use Re-sync to try again.')).not.toBeNull();
+    });
+    expect(screen.queryByRole('link', { name: 'contact us' })).toBeNull();
   });
 
   // A partial import (Bandcamp's album list failed, some artists wouldn't come one by one) is a
@@ -167,18 +188,19 @@ describe('BandcampConnect', () => {
         connected: true,
         username: 'fan',
         syncStatus: 'idle',
-        syncError: 'Bandcamp wouldn’t send the releases for one artist: Honeycrush.',
+        syncError: 'Bandcamp failed to import the following artists: Honeycrush. Please re-sync to try those again. If neither of these succeed, contact us.',
         itemCount: 41,
         lastSyncedAt: '2026-11-06T02:00:00.000Z',
       })
     );
 
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
 
     await waitFor(() => {
       expect(screen.getByText(/41 releases imported/)).not.toBeNull();
     });
-    expect(screen.getByText(/one artist: Honeycrush/)).not.toBeNull();
+    expect(screen.getByText(/following artists: Honeycrush/)).not.toBeNull();
+    expect(screen.getByRole('link', { name: 'contact us' }).getAttribute('href')).toBe('/contact');
     expect(screen.getByRole('button', { name: 'Re-sync' })).not.toBeNull();
   });
 });
@@ -196,7 +218,7 @@ describe('BandcampConnect sync polling', () => {
     mockFetch.mockResolvedValue(
       statusResponse({ connected: true, username: 'fan', syncStatus: 'syncing', syncError: null })
     );
-    render(<BandcampConnect />);
+    render(<MemoryRouter><BandcampConnect /></MemoryRouter>);
     await act(async () => {});
     expect(mockFetch).toHaveBeenCalledTimes(1);
   }

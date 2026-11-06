@@ -56,7 +56,7 @@ interface ConnectionRow {
 const STALE_SYNC_MS = 20 * 60 * 1000;
 
 const STALE_SYNC_MESSAGE =
-  'The last import didn’t finish. Bandcamp’s Subsonic support is in beta and can stall on large collections — use Re-sync to try again.';
+  'The last import didn’t finish. Please re-sync to try again. If it stalls again, sign out of bandcamp.com and back in, then re-sync. If neither of these succeed, contact us.';
 
 function isStaleSync(row: { sync_status: string; updated_at: string | null }): boolean {
   if (row.sync_status !== 'syncing' || !row.updated_at) return false;
