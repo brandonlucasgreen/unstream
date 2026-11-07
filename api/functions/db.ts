@@ -1255,6 +1255,58 @@ async function getExistingSources(client: SupabaseClient, releaseIds: string[]):
 }
 
 /**
+ * Which of these listings already belong to a release of some *other* artist row.
+ *
+ * `UNIQUE (platform, external_id)` is global, so such a listing can never become a source here:
+ * a new release made for it would lose its source write and be deleted again by
+ * `discardUnsourcedRelease` — an insert and a delete on every catalogue pass, for good. Measured
+ * 2026-11-07, that was every `[catalog] new releases discarded` event: a Faircamp site shared by
+ * several artists (the label's releases held by whichever artist was catalogued first), a release
+ * credited to two artists, two rows for one artist sharing a link. Checking first, in one read per
+ * pass, means the pass writes nothing for them.
+ *
+ * `ownReleaseIds` are this artist's releases; a hit on one of those is `findReleaseBySource`'s
+ * business, not this function's. A failed read returns an empty set, which falls back to the old
+ * behaviour (insert, fail, discard, report) rather than skipping a real release because a read
+ * blipped.
+ */
+async function getListingsHeldElsewhere(
+  client: SupabaseClient,
+  platform: string,
+  externalIds: (string | null)[],
+  ownReleaseIds: string[]
+): Promise<Set<string>> {
+  const held = new Set<string>();
+  const ids = [...new Set(externalIds.filter((id): id is string => Boolean(id)))];
+  const own = new Set(ownReleaseIds);
+
+  // Chunked because these ids are full URLs for Faircamp, Jam.coop and Mirlo, and they travel in
+  // the request URL.
+  for (let i = 0; i < ids.length; i += 100) {
+    const { data, error } = await client
+      .from('release_sources')
+      .select('release_id, external_id')
+      .eq('platform', platform)
+      .in('external_id', ids.slice(i, i + 100));
+
+    if (error) {
+      console.error('[DB] getListingsHeldElsewhere failed:', error.message);
+      return new Set();
+    }
+    for (const row of (data as { release_id: string; external_id: string }[]) || []) {
+      if (!own.has(row.release_id)) held.add(row.external_id);
+    }
+  }
+  return held;
+}
+
+/** One log line per pass for the listings skipped because another artist holds them. */
+function logHeldElsewhere(artistId: string, platform: string, count: number): void {
+  if (count === 0) return;
+  console.log(`[DB] ${platform} catalogue for ${artistId}: skipped ${count} listing(s) another artist already holds`);
+}
+
+/**
  * The stored release that already holds this platform listing, if any — checked before any
  * title match, because the platform's own id is a stronger identity than our reading of its
  * title. `UNIQUE (platform, external_id)` already lets a listing belong to only one release, so
@@ -1401,7 +1453,11 @@ async function discardUnsourcedRelease(client: SupabaseClient, releaseId: string
   return true;
 }
 
-/** One Sentry event per pass, not per release: an alias artist row can collide on every listing. */
+/**
+ * One Sentry event per pass, not per release. Listings another artist already holds are skipped
+ * before this point (getListingsHeldElsewhere), so what reaches it is unexpected: a race with
+ * another pass, or a source write that failed for some other reason.
+ */
 function reportDiscardedReleases(artistId: string, platform: string, count: number): void {
   if (count === 0) return;
   Sentry.captureMessage('[catalog] new releases discarded: source write failed', {
@@ -1447,6 +1503,9 @@ export async function persistReleases(
 
     const written: PersistedRelease[] = [];
     let discarded = 0;
+    const catalogPlatform = releases[0].source.platform;
+    let skippedHeldElsewhere = 0;
+    const heldElsewhere = await getListingsHeldElsewhere(client, catalogPlatform, releases.map(r => r.source.externalId), existing.map(r => r.id));
 
     for (const release of releases) {
       // The listing's own id first (see findReleaseBySource), then title identity — not
@@ -1493,6 +1552,12 @@ export async function persistReleases(
         }
         releaseId = prior.id;
       } else {
+        // Another artist's release holds this listing, so it can never be a source here.
+        if (release.source.platform === catalogPlatform && release.source.externalId && heldElsewhere.has(release.source.externalId)) {
+          skippedHeldElsewhere++;
+          continue;
+        }
+
         // Slug must not collide with anything already stored for this artist.
         let slug = release.slug;
         if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
@@ -1562,6 +1627,7 @@ export async function persistReleases(
       });
     }
 
+    logHeldElsewhere(artistId, catalogPlatform, skippedHeldElsewhere);
     reportDiscardedReleases(artistId, releases[0].source.platform, discarded);
     return written;
   } catch (error) {
@@ -1942,6 +2008,8 @@ export async function persistDiscogsReleases(
 
     const written: PersistedRelease[] = [];
     let discarded = 0;
+    let skippedHeldElsewhere = 0;
+    const heldElsewhere = await getListingsHeldElsewhere(client, 'discogs', releases.map(r => r.masterId), existing.map(r => r.id));
 
     for (const release of releases) {
       let prior = byMasterId.get(release.masterId);
@@ -2000,6 +2068,12 @@ export async function persistDiscogsReleases(
         }
         releaseId = prior.id;
       } else {
+        // Another artist's release holds this listing, so it can never be a source here.
+        if (release.masterId && heldElsewhere.has(release.masterId)) {
+          skippedHeldElsewhere++;
+          continue;
+        }
+
         let slug = release.slug;
         if (takenSlugs.has(slug)) slug = `${slug}-${release.matchKey.slice(0, 6)}`;
         takenSlugs.add(slug);
@@ -2091,6 +2165,7 @@ export async function persistDiscogsReleases(
       });
     }
 
+    logHeldElsewhere(artistId, 'discogs', skippedHeldElsewhere);
     reportDiscardedReleases(artistId, 'discogs', discarded);
     return written;
   } catch (error) {
@@ -2251,6 +2326,8 @@ export async function persistFaircampReleases(
 
     const written: PersistedRelease[] = [];
     let discarded = 0;
+    let skippedHeldElsewhere = 0;
+    const heldElsewhere = await getListingsHeldElsewhere(client, 'faircamp', releases.map(r => r.externalUrl), existing.map(r => r.id));
 
     for (const release of releases) {
       // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
@@ -2281,6 +2358,12 @@ export async function persistFaircampReleases(
         }
         releaseId = prior.id;
       } else {
+        // Another artist's release holds this listing, so it can never be a source here.
+        if (release.externalUrl && heldElsewhere.has(release.externalUrl)) {
+          skippedHeldElsewhere++;
+          continue;
+        }
+
         const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
@@ -2351,6 +2434,7 @@ export async function persistFaircampReleases(
       });
     }
 
+    logHeldElsewhere(artistId, 'faircamp', skippedHeldElsewhere);
     reportDiscardedReleases(artistId, 'faircamp', discarded);
     return written;
   } catch (error) {
@@ -2418,6 +2502,8 @@ export async function persistJamcoopReleases(
 
     const written: PersistedRelease[] = [];
     let discarded = 0;
+    let skippedHeldElsewhere = 0;
+    const heldElsewhere = await getListingsHeldElsewhere(client, 'jamcoop', releases.map(r => r.externalUrl), existing.map(r => r.id));
 
     for (const release of releases) {
       // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
@@ -2456,6 +2542,12 @@ export async function persistJamcoopReleases(
         }
         releaseId = prior.id;
       } else {
+        // Another artist's release holds this listing, so it can never be a source here.
+        if (release.externalUrl && heldElsewhere.has(release.externalUrl)) {
+          skippedHeldElsewhere++;
+          continue;
+        }
+
         const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
@@ -2537,6 +2629,7 @@ export async function persistJamcoopReleases(
       });
     }
 
+    logHeldElsewhere(artistId, 'jamcoop', skippedHeldElsewhere);
     reportDiscardedReleases(artistId, 'jamcoop', discarded);
     return written;
   } catch (error) {
@@ -2607,6 +2700,8 @@ export async function persistMirloReleases(
 
     const written: PersistedRelease[] = [];
     let discarded = 0;
+    let skippedHeldElsewhere = 0;
+    const heldElsewhere = await getListingsHeldElsewhere(client, 'mirlo', releases.map(r => r.externalUrl), existing.map(r => r.id));
 
     for (const release of releases) {
       // The listing's own id first — see findReleaseBySource for the phantom rows this prevents.
@@ -2645,6 +2740,12 @@ export async function persistMirloReleases(
         }
         releaseId = prior.id;
       } else {
+        // Another artist's release holds this listing, so it can never be a source here.
+        if (release.externalUrl && heldElsewhere.has(release.externalUrl)) {
+          skippedHeldElsewhere++;
+          continue;
+        }
+
         const fuzzy = findFuzzyReleaseMatch(existing, release);
 
         let slug = release.slug;
@@ -2726,6 +2827,7 @@ export async function persistMirloReleases(
       });
     }
 
+    logHeldElsewhere(artistId, 'mirlo', skippedHeldElsewhere);
     reportDiscardedReleases(artistId, 'mirlo', discarded);
     return written;
   } catch (error) {

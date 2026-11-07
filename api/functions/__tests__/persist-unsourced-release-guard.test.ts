@@ -7,6 +7,11 @@
 // the global UNIQUE (platform, external_id) rejects the source and the row used to stay, rendering
 // on artist pages and feeds with nowhere to buy it. findReleaseBySource (#554) only looks within
 // the artist, so it can't see these.
+//
+// Since 2026-11-07 a listing another artist already holds is skipped before anything is written
+// (getListingsHeldElsewhere): inserting it only to delete it again was an insert and a delete on
+// every catalogue pass, and a Sentry event each time. The discard guard stays for what that read
+// can't see — another pass taking the listing in between.
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -14,6 +19,8 @@ interface Row { [k: string]: unknown }
 
 const tables: Record<string, Row[]> = {};
 const writes: { table: string; op: 'update' | 'insert' | 'delete'; patch: Row }[] = [];
+/** External ids whose source insert collides even though no stored row holds them yet: a race. */
+const raceConflicts = new Set<string>();
 
 function makeClient() {
   return {
@@ -46,7 +53,8 @@ function makeClient() {
           // The global unique index production enforces, regardless of which release (or artist)
           // holds the listing.
           if (table === 'release_sources' && patch.external_id &&
-              rowsOf().some(r => r.platform === patch.platform && r.external_id === patch.external_id)) {
+              (raceConflicts.has(patch.external_id as string) ||
+                rowsOf().some(r => r.platform === patch.platform && r.external_id === patch.external_id))) {
             const error = { code: '23505', message: 'duplicate key value violates unique constraint "idx_release_sources_external"' };
             return { select: () => ({ single: () => Promise.resolve({ data: null, error }) }) };
           }
@@ -114,12 +122,14 @@ const listing = (externalUrl: string) => [{
   externalUrl,
 }];
 
+const releaseInserts = () => writes.filter(w => w.table === 'releases' && w.op === 'insert');
 const myReleases = () => (tables.releases ?? []).filter(r => r.artist_id === ARTIST).map(r => r.id).sort();
 const unsourced = () => (tables.releases ?? []).filter(r => !(tables.release_sources ?? []).some(s => s.release_id === r.id) && r.id !== 'mine' && r.id !== 'near');
 
 beforeEach(() => {
   for (const key of Object.keys(tables)) delete tables[key];
   writes.length = 0;
+  raceConflicts.clear();
   captureMessage.mockClear();
 });
 
@@ -147,11 +157,25 @@ describe.each([
     expect(myReleases()).toEqual(['mine', 'near']);
   });
 
-  it('reports the discard to Sentry once per pass, tagged by platform', async () => {
+  it('skips it without writing a release or reporting to Sentry', async () => {
     seed(platform, url);
 
     await persist(ARTIST, listing(url) as never);
 
+    expect(releaseInserts()).toHaveLength(0);
+    expect(writes.filter(w => w.op === 'delete')).toHaveLength(0);
+    expect(captureMessage).not.toHaveBeenCalled();
+  });
+
+  it('still discards and reports when another pass takes the listing first', async () => {
+    seed(platform, url);
+    raceConflicts.add(`${url}-raced`);
+
+    const written = await persist(ARTIST, listing(`${url}-raced`) as never);
+
+    expect(written).toHaveLength(0);
+    expect(myReleases()).toEqual(['mine']);
+    expect(unsourced()).toHaveLength(0);
     expect(captureMessage).toHaveBeenCalledTimes(1);
     expect(captureMessage.mock.calls[0][1]).toMatchObject({ tags: { platform }, extra: { artistId: ARTIST, count: 1 } });
   });
@@ -187,7 +211,8 @@ describe('a Bandcamp listing another artist row already holds', () => {
 
     expect(written).toHaveLength(0);
     expect(myReleases()).toEqual(['mine']);
-    expect(captureMessage).toHaveBeenCalledTimes(1);
+    expect(releaseInserts()).toHaveLength(0);
+    expect(captureMessage).not.toHaveBeenCalled();
   });
 });
 
@@ -211,6 +236,8 @@ describe('a Discogs master already credited to another artist', () => {
 
     expect(written).toHaveLength(0);
     expect(myReleases()).toEqual(['mine']);
+    expect(releaseInserts()).toHaveLength(0);
+    expect(captureMessage).not.toHaveBeenCalled();
   });
 
   it('does not flag a near-miss partner for review', async () => {
