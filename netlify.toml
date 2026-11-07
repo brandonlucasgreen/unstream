@@ -472,6 +472,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/analytics/promote"
+  to = "/.netlify/functions/analytics-promote"
+  status = 200
+
+[[redirects]]
   from = "/api/admin/merge-override"
   to = "/.netlify/functions/admin-merge-override"
   status = 200

@@ -74,6 +74,7 @@
     "functions/__tests__/analytics-dashboard.test.ts",
     "functions/__tests__/analytics-range.test.ts",
     "functions/__tests__/analytics-traffic.test.ts",
+    "functions/__tests__/analytics-promote.test.ts",
     "functions/__tests__/analytics-app-event.test.ts",
     "functions/__tests__/analytics-event.test.ts",
     "functions/__tests__/persist-release-detail-churn.test.ts",
