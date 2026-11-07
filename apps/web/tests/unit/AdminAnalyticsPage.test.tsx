@@ -32,10 +32,15 @@ const DASHBOARD = {
   streaming_services: [{ service: 'youtube', activations: 5 }],
 };
 
-function respond(traffic: unknown, trafficStatus = 200) {
+const PROMOTE = { autopost: { enabled: 12, paused: 2 }, campaigns: { running: 29, artists: 23 } };
+
+function respond(traffic: unknown, trafficStatus = 200, promote: unknown = PROMOTE, promoteStatus = 200) {
   mockFetch.mockImplementation((url: string) => {
     if (String(url).startsWith('/api/analytics/traffic')) {
       return Promise.resolve({ ok: trafficStatus === 200, status: trafficStatus, json: async () => traffic });
+    }
+    if (String(url).startsWith('/api/analytics/promote')) {
+      return Promise.resolve({ ok: promoteStatus === 200, status: promoteStatus, json: async () => promote });
     }
     return Promise.resolve({ ok: true, status: 200, json: async () => DASHBOARD });
   });
@@ -89,7 +94,26 @@ describe('AdminAnalyticsPage', () => {
     expect(screen.getByText('Extension · Chrome')).not.toBeNull();
   });
 
-  it('asks both endpoints for the range picked', async () => {
+  it('shows Promote usage: autopost artists, artists with a campaign, active campaigns', async () => {
+    respond({ configured: false });
+    renderPage();
+    await screen.findByText('Autopost on');
+    expect(screen.getByText('12')).not.toBeNull();
+    expect(screen.getByText('artists · 2 paused')).not.toBeNull();
+    expect(screen.getByText('23')).not.toBeNull();
+    expect(screen.getByText('29')).not.toBeNull();
+    expect(mockFetch.mock.calls.find(([url]) => url === '/api/analytics/promote')?.[1])
+      .toEqual({ headers: { Authorization: 'Bearer admin-token' } });
+  });
+
+  it('keeps the search numbers when Promote usage fails', async () => {
+    respond({ configured: false }, 200, { error: 'Failed to fetch Promote usage' }, 500);
+    renderPage();
+    await screen.findByText('Couldn’t load Promote usage: Failed to fetch Promote usage');
+    expect(screen.getByText('Extension · Chrome')).not.toBeNull();
+  });
+
+  it('asks both range endpoints for the range picked, and not Promote, which is a snapshot', async () => {
     respond({ configured: false });
     renderPage();
     await screen.findByText('Extension · Chrome');

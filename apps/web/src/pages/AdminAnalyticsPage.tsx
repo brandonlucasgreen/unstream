@@ -59,6 +59,12 @@ type TrafficData =
       top_referrers: { name: string; visitors: number }[];
     };
 
+/** /api/analytics/promote: a snapshot of Promote usage right now, outside the date range. */
+interface PromoteUsage {
+  autopost: { enabled: number; paused: number };
+  campaigns: { running: number; artists: number };
+}
+
 // ─── Date range ──────────────────────────────────────────────────────────────
 
 const PRESETS = [
@@ -387,6 +393,37 @@ function TrafficSection({ traffic, error }: { traffic: TrafficData | null; error
   );
 }
 
+// ─── Promote usage ───────────────────────────────────────────────────────────
+
+function PromoteSection({ usage, error }: { usage: PromoteUsage | null; error: string | null }) {
+  if (error) {
+    return (
+      <Panel title="Promote">
+        <p className="text-error text-sm">Couldn’t load Promote usage: {error}</p>
+      </Panel>
+    );
+  }
+  if (!usage) return null;
+  const { autopost, campaigns } = usage;
+  return (
+    <section aria-labelledby="promote-usage" className="space-y-3">
+      <div>
+        <h2 id="promote-usage" className="font-display text-sm font-semibold text-text-primary">Promote</h2>
+        <p className="text-text-muted text-xs mt-0.5">Right now. The date range above doesn’t apply.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <MetricCard
+          label="Autopost on"
+          value={autopost.enabled.toLocaleString()}
+          sub={autopost.paused > 0 ? `artists · ${autopost.paused.toLocaleString()} paused` : 'artists'}
+        />
+        <MetricCard label="Artists with a campaign" value={campaigns.artists.toLocaleString()} sub="scheduled or running" />
+        <MetricCard label="Active campaigns" value={campaigns.running.toLocaleString()} sub="with posts still to go" />
+      </div>
+    </section>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function AdminAnalyticsPage() {
@@ -401,6 +438,10 @@ export function AdminAnalyticsPage() {
   const [failed, setFailed] = useState<{ key: string; message: string } | null>(null);
   const [trafficResult, setTrafficResult] = useState<{ traffic: TrafficData | null; error: string | null }>({
     traffic: null,
+    error: null,
+  });
+  const [promoteResult, setPromoteResult] = useState<{ usage: PromoteUsage | null; error: string | null }>({
+    usage: null,
     error: null,
   });
 
@@ -445,6 +486,25 @@ export function AdminAnalyticsPage() {
 
     return () => { current = false; };
   }, [authLoading, isAdmin, session, navigate, from, to, rangeKey]);
+
+  // Promote usage is a snapshot, so it loads once rather than with every range change, and on
+  // its own so a failure here can't take the search numbers with it.
+  useEffect(() => {
+    if (authLoading || !isAdmin) return;
+    let current = true;
+    fetch('/api/analytics/promote', { headers: { Authorization: `Bearer ${session?.access_token}` } })
+      .then(async res => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => null) as { error?: string } | null;
+          throw new Error(body?.error ?? `HTTP ${res.status}`);
+        }
+        return res.json() as Promise<PromoteUsage>;
+      })
+      .then(usage => { if (current) setPromoteResult({ usage, error: null }); })
+      // The endpoint reports its own query failures to Sentry.
+      .catch(e => { if (current) setPromoteResult({ usage: null, error: e.message }); });
+    return () => { current = false; };
+  }, [authLoading, isAdmin, session]);
 
   const data = loaded?.data ?? null;
   const error = failed?.key === rangeKey ? failed.message : null;
@@ -585,6 +645,8 @@ export function AdminAnalyticsPage() {
           </div>
 
           <TrafficSection traffic={traffic} error={trafficError} />
+
+          <PromoteSection usage={promoteResult.usage} error={promoteResult.error} />
 
         </div>
       </main>
