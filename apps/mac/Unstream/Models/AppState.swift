@@ -213,7 +213,7 @@ class AppState: ObservableObject {
             lastFetchTime = Date()
             nowPlayingLookup = .loaded
             api.trackAppEvent(eventType: "search", context: ["has_results": results.count > 0, "result_count": results.count, "search_kind": "now_playing"])
-            trackSearchAppearances(results)
+            trackSearchAppearances(results, metric: "streaming")
             print("[AppState] Got \(results.count) results for \(artist)")
             if let callback = onArtistResultsReady {
                 await callback(artist, results)
@@ -242,11 +242,13 @@ class AppState: ObservableObject {
 
     // MARK: - Analytics
 
-    /// Track search appearances for claimed artists in the results
-    private func trackSearchAppearances(_ results: [ArtistResult]) {
+    /// Track search appearances for claimed artists in the results. Now-playing lookups pass
+    /// "streaming": the artist's Analytics page counts those as "heard while streaming" (a fan was
+    /// listening to them on a streaming service), and adds them to the search total itself.
+    private func trackSearchAppearances(_ results: [ArtistResult], metric: String = "search") {
         for result in results {
             if result.type == "artist", let slug = result.claimedSlug {
-                api.trackAnalyticsEvent(slug: slug, metric: "search")
+                api.trackAnalyticsEvent(slug: slug, metric: metric)
             }
         }
     }

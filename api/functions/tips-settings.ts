@@ -11,11 +11,10 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
-import { getFeatureFlag } from './feature-flags';
 import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
-import { canSetUpTips, getGoals, getTipAccount, stripeHold, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
+import { getGoals, getTipAccount, stripeHold, tipsOpenToArtist, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
 import { TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
 import { purgeCacheTags } from './purge-cache';
 import {
@@ -45,11 +44,9 @@ async function handleRequest(event: HandlerEvent) {
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
 
-  // The artist settings header asks only whether to show the Manage Tips tab: Stripe configured,
-  // and tips open to the caller — the admin by allowlist (works with the flag off), or anyone the
-  // tipsArtists flag admits. No profile, database or Stripe read here; the flag store failing
-  // closed means the tab hides while Redis is down, matching the endpoints' own behaviour.
-  const tipsOpenToCaller = !!stripeMode() && (canSetUpTips(user.email) || (await getFeatureFlag('tipsArtists')));
+  // /my-artists asks only whether to show the Tips button (tipsOpenToArtist). No profile, database
+  // or Stripe read here.
+  const tipsOpenToCaller = await tipsOpenToArtist(user.email);
   if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
     return respond(200, { available: tipsOpenToCaller });
   }

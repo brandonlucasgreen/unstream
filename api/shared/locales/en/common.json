@@ -2,7 +2,6 @@
   "nav": {
     "account": {
       "label": "Account",
-      "myArtists": "My Artists",
       "collection": "My Collection",
       "savedArtists": "My Saved Artists",
       "curatorPosts": "Curator Posts",
@@ -18,6 +17,15 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "mainMenu": "Main menu",
+    "artist": {
+      "yourArtists": "Your artists",
+      "analytics": "Analytics",
+      "viewPage": "View page",
+      "editPage": "Edit page",
+      "releases": "Releases",
+      "tips": "Tips",
+      "promote": "Promote"
+    },
     "admin": {
       "label": "Admin",
       "verify": "Verify",

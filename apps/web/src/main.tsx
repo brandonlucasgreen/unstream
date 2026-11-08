@@ -39,6 +39,7 @@ const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => 
 const MyArtistsPage = lazyWithRetry(() => import('./pages/MyArtistsPage.tsx').then(m => ({ default: m.MyArtistsPage })))
 const MyCollectionPage = lazyWithRetry(() => import('./pages/MyCollectionPage.tsx').then(m => ({ default: m.MyCollectionPage })))
 const MySavedArtistsPage = lazyWithRetry(() => import('./pages/MySavedArtistsPage.tsx').then(m => ({ default: m.MySavedArtistsPage })))
+const ArtistAnalyticsPage = lazyWithRetry(() => import('./pages/ArtistAnalyticsPage.tsx').then(m => ({ default: m.ArtistAnalyticsPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
@@ -48,6 +49,7 @@ const PromoteCampaignsPage = lazyWithRetry(() => import('./pages/PromoteCampaign
 const PromoteAssetsPage = lazyWithRetry(() => import('./pages/PromoteAssetsPage.tsx').then(m => ({ default: m.PromoteAssetsPage })))
 // One frame per page an artist manages from /my-artists, each knowing which page it is.
 const loadSettingsLayout = () => import('./pages/ArtistSettingsLayout.tsx')
+const AnalyticsLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="analytics" /> })))
 const EditProfileLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="profile" /> })))
 const ReleasesLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="releases" /> })))
 const TipsLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="tips" /> })))
@@ -151,6 +153,9 @@ createRoot(document.getElementById('root')!).render(
               {/* What an artist manages from /my-artists, each its own page with its own button there.
                   They were tabs under Edit until 2026-10-29; the old tab addresses redirect, since
                   Stripe's onboarding links and tip emails point at /artist-edit/:slug/tips. */}
+              <Route path="/analytics/:slug" element={<AnalyticsLayout />}>
+                <Route index element={<ArtistAnalyticsPage />} />
+              </Route>
               <Route path="/artist-edit/:slug" element={<EditProfileLayout />}>
                 <Route index element={<ArtistEditPage />} />
               </Route>

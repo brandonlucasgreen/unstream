@@ -7,6 +7,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
 import { isLiveMode, stripeMode, type StripeAccount } from './stripe';
+import { getFeatureFlag } from './feature-flags';
 import { Sentry } from '../lib/sentry';
 
 export interface TipAccountRow {
@@ -55,6 +56,17 @@ export interface Goal {
 export function canSetUpTips(email: string): boolean {
   const admin = process.env.ADMIN_EMAIL;
   return !!admin && email.toLowerCase() === admin.toLowerCase();
+}
+
+/**
+ * Whether this account sees the artist side of tips at all (Manage Tips, the Tips button and menu
+ * item): Stripe configured, and tips open to the caller — the admin by allowlist (works with the
+ * flag off), or anyone the tipsArtists flag admits. The flag store failing closed hides it while
+ * Redis is down, matching the endpoints' own behaviour. Shared by `/api/tips/settings?summary=1`
+ * and `/api/me/artist-nav`, so the button and the menu can't disagree.
+ */
+export async function tipsOpenToArtist(email: string): Promise<boolean> {
+  return !!stripeMode() && (canSetUpTips(email) || (await getFeatureFlag('tipsArtists')));
 }
 
 /**

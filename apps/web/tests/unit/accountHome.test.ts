@@ -1,5 +1,6 @@
-// Where a signed-in person lands, with no explicit destination asked for: My Artists if they
-// have at least one verified artist, otherwise My Collection.
+// Where a signed-in person lands, with no explicit destination asked for: their artist's
+// Analytics page if they have one verified artist, My Artists if they have several, otherwise My
+// Collection.
 //
 // "Verified" needs no separate check — /api/artist-auth's GET already filters to
 // `verified_at IS NOT NULL`, so a non-empty `profiles` is the whole question. The tests below
@@ -32,12 +33,22 @@ describe('resolveAccountHome', () => {
     captureMessage.mockClear();
   });
 
-  it('sends an artist with a verified claim to My Artists', async () => {
+  it("sends an artist with one verified claim to that artist's Analytics", async () => {
     answers(200, { profiles: [{ id: '1', slug: 'kid-lightbulbs' }] });
 
-    expect(await resolveAccountHome('token')).toBe(ARTIST_HOME);
+    expect(await resolveAccountHome('token')).toBe('/analytics/kid-lightbulbs');
     expect(mockFetch.mock.calls[0][0]).toBe('/api/artist-auth');
     expect(mockFetch.mock.calls[0][1].headers.Authorization).toBe('Bearer token');
+  });
+
+  it('sends an account with several artists to My Artists, to pick one', async () => {
+    answers(200, { profiles: [{ id: '1', slug: 'paracosm' }, { id: '2', slug: 'xparacosm' }] });
+    expect(await resolveAccountHome('token')).toBe(ARTIST_HOME);
+  });
+
+  it('sends a sole profile without a slug to My Artists rather than a broken address', async () => {
+    answers(200, { profiles: [{ id: '1' }] });
+    expect(await resolveAccountHome('token')).toBe(ARTIST_HOME);
   });
 
   it('sends a fan with no claim to My Collection', async () => {

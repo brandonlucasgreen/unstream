@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { ArtistAnalytics } from './ArtistAnalytics';
 import { ArtistRowsSkeleton } from './LoadingSkeletons';
 import { getTipsAvailable } from '../services/tips';
 import { getPromoteAvailable } from '../services/promote';
 
-// The body of /my-artists: the profiles this user has claimed, with their stats, and a button for
-// each page the artist manages: Edit (the profile), Releases, Tips and Promote. Those were tabs
-// under Edit until 2026-10-29; only Edit is about the profile.
+// The body of /my-artists: the profiles this user has claimed, with a button for each page the
+// artist manages: Edit (the profile), Analytics, Releases, Tips and Promote. Those were tabs under
+// Edit until 2026-10-29; the stats on each card became the Analytics page on 2026-11-08.
 //
 // It carries no heading of its own — the page is dedicated to it, so the h1 there is the
 // only one needed. It fetches and skeletons on its own rather than being handed data by
@@ -140,6 +139,7 @@ export function ClaimedArtistsSection() {
                     >
                       Edit
                     </Link>
+                    <Link to={`/analytics/${profile.slug}`} className={SECONDARY_LINK}>Analytics</Link>
                     <Link to={`/releases/${profile.slug}`} className={SECONDARY_LINK}>Releases</Link>
                     {tipsAvailable && <Link to={`/tips/${profile.slug}`} className={SECONDARY_LINK}>Tips</Link>}
                     {promoteAvailable && <Link to={`/promote/${profile.slug}`} className={SECONDARY_LINK}>Promote</Link>}
@@ -147,7 +147,6 @@ export function ClaimedArtistsSection() {
                   </div>
                 </div>
               </div>
-              <ArtistAnalytics slug={profile.slug} />
             </div>
           ))}
         </div>

@@ -5,6 +5,7 @@ import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav
 import { NavDropdown } from './NavDropdown';
 import { HeaderSearch } from './HeaderSearch';
 import { useAuth } from '../contexts/AuthContext';
+import { buildArtistMenu, getArtistNav, type ArtistNav } from '../services/artistNav';
 
 function UnstreamLogo() {
   return (
@@ -46,6 +47,7 @@ export function Header() {
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
   const [pendingReleaseReviewCount, setPendingReleaseReviewCount] = useState(0);
   const [pendingTipsCount, setPendingTipsCount] = useState(0);
+  const [artistNav, setArtistNav] = useState<ArtistNav | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
@@ -83,6 +85,20 @@ export function Header() {
       .catch(() => { /* aborted or network error */ });
     return () => controller.abort();
   }, [isAdmin, session?.access_token]);
+
+  // The artist menu: which artists this account has verified, and whether Tips and Promote show.
+  // Asked once per browser session, not per page (services/artistNav.ts).
+  const userId = user?.id;
+  const accessToken = session?.access_token;
+  useEffect(() => {
+    if (!userId || !accessToken) {
+      setArtistNav(null);
+      return;
+    }
+    let cancelled = false;
+    getArtistNav(userId, accessToken).then(nav => { if (!cancelled) setArtistNav(nav); });
+    return () => { cancelled = true; };
+  }, [userId, accessToken]);
 
   // Artists whose Stripe account is ready and waiting on approval. The summary read is database
   // only; the full /api/admin/tips list asks Stripe about every account.
@@ -139,12 +155,13 @@ export function Header() {
 
   // Everything a signed-in person owns, behind one label. The dashboard used to be a
   // single page of artist management, releases, collection and saved artists; it is now
-  // My Artists, My Collection and My Saved Artists, and this group is where further account pages go rather
-  // than another top-level nav item each.
+  // My Collection and My Saved Artists here, with each artist's pages in the artist menu above.
+  // My Artists left this menu on 2026-11-08, once the artist menu covered it (Brandon); the page
+  // stays, as the sign-in landing for an account with several artists. This group is where
+  // further account pages go rather than another top-level nav item each.
   const accountGroup: NavGroup = {
     label: t('nav.account.label'),
     items: [
-      { to: '/my-artists', label: t('nav.account.myArtists') },
       { to: '/my-collection', label: t('nav.account.collection') },
       { to: '/my-saved-artists', label: t('nav.account.savedArtists') },
       // Admin-only because the server only lets the admin in while the curatorPosts flag is off
@@ -154,11 +171,24 @@ export function Header() {
     ],
   };
 
+  // Each artist's own pages, in a menu of their own rather than behind My Artists: one named after
+  // the artist, or "Your artists" with a section per artist (services/artistNav.ts).
+  const artistGroup = buildArtistMenu(artistNav, {
+    yourArtists: t('nav.artist.yourArtists'),
+    analytics: t('nav.artist.analytics'),
+    viewPage: t('nav.artist.viewPage'),
+    editPage: t('nav.artist.editPage'),
+    releases: t('nav.artist.releases'),
+    tips: t('nav.artist.tips'),
+    promote: t('nav.artist.promote'),
+  });
+
   // Shared by the inline desktop nav and the mobile hamburger menu, so new
   // items only need adding in one place.
   const navItems: NavEntry[] = session
     ? [
         ...(isAdmin ? [adminGroup] : []),
+        ...(artistGroup ? [artistGroup] : []),
         accountGroup,
       ]
     : [
