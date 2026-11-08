@@ -60,6 +60,20 @@ describe('admin-tips', () => {
     });
   });
 
+  it('counts only the accounts an admin could approve now, without asking Stripe', async () => {
+    db.tables.artist_tip_accounts = [
+      liveRow({ artist_id: 'a1', tips_approved_at: null }),                           // waiting: counts
+      liveRow({ artist_id: 'a2', tips_approved_at: null, charges_enabled: false }),   // still onboarding
+      liveRow({ artist_id: 'a3', tips_approved_at: null, deauthorized_at: '2026-10-01' }), // disconnected
+      liveRow({ artist_id: 'a4' }),                                                   // already approved
+      liveRow({ artist_id: 'a5', tips_approved_at: null, livemode: true }),          // other Stripe mode
+    ];
+    const res = await handler({ httpMethod: 'GET', headers: {}, queryStringParameters: { summary: '1' }, body: null });
+    expect(JSON.parse(res.body)).toEqual({ available: true, pending: 1 });
+    // It runs on every admin page load, so it must not cost a Stripe call per account.
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   const seedOwner = (profile: Record<string, unknown> = {}) => {
     db.tables.artists = [{ id: ARTIST, name: 'Kid Lightbulbs', slug: 'kid-lightbulbs' }];
     db.tables.artist_profiles = [{ artist_id: ARTIST, user_id: 'owner-1', verified_at: '2026-01-01', ...profile }];

@@ -6,6 +6,9 @@
 // connected Stripe account's business name and country, and approves.
 //
 //   GET                                                    accounts in this Stripe mode, awaiting approval first
+//   GET ?summary=1                                         { available, pending }: how many could be approved
+//                                                          now, for the Admin menu's count. Database only —
+//                                                          the full GET asks Stripe about every account
 //   POST { action: 'approve', artistId, stripeAccountId }  approve exactly the account the admin looked at,
 //                                                          then email the artist that tips are on
 //   POST { action: 'revoke', artistId }                    switch tips off for abuse or misrepresentation
@@ -23,6 +26,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 interface HandlerEvent {
   httpMethod: string;
   headers: Record<string, string | undefined>;
+  queryStringParameters?: Record<string, string | undefined> | null;
   body?: string | null;
 }
 
@@ -39,6 +43,21 @@ async function handleRequest(event: HandlerEvent) {
   if (!stripeMode()) return respond(200, { available: false, accounts: [] });
 
   try {
+    if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
+      // The rows tipsState calls 'awaiting_approval': charges enabled, not disconnected, not yet
+      // approved. One still onboarding can't be approved, so counting it would badge the menu
+      // with work the admin can't do.
+      const { data, error } = await client
+        .from('artist_tip_accounts')
+        .select('artist_id')
+        .eq('livemode', isLiveMode())
+        .eq('charges_enabled', true)
+        .is('tips_approved_at', null)
+        .is('deauthorized_at', null);
+      if (error) throw new Error(error.message);
+      return respond(200, { available: true, pending: (data ?? []).length });
+    }
+
     if (event.httpMethod === 'GET') {
       const { data, error } = await client
         .from('artist_tip_accounts')
