@@ -103,6 +103,9 @@ export function Header() {
         label: pendingVerifyCount > 0 ? t('nav.admin.verifyCount', { count: pendingVerifyCount }) : t('nav.admin.verify'),
         emphasis: pendingVerifyCount > 0,
       },
+      // No pending count, unlike Verify: /api/admin/tips asks Stripe about every account, too
+      // costly to run on each admin page load. The tips-review-notify push covers new arrivals.
+      { to: '/admin/tips', label: t('nav.admin.tips') },
       {
         to: '/admin/release-review',
         label: pendingReleaseReviewCount > 0 ? t('nav.admin.releaseReviewCount', { count: pendingReleaseReviewCount }) : t('nav.admin.releaseReview'),

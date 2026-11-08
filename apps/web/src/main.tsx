@@ -63,6 +63,7 @@ const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage.
 const TermsOfUsePage = lazyWithRetry(() => import('./pages/TermsOfUsePage.tsx').then(m => ({ default: m.TermsOfUsePage })))
 const AdminMergePage = lazyWithRetry(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
 const AdminVerifyPage = lazyWithRetry(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
+const AdminTipsPage = lazyWithRetry(() => import('./pages/AdminTipsPage.tsx').then(m => ({ default: m.AdminTipsPage })))
 const AdminLinksPage = lazyWithRetry(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
 const AdminReleaseReviewPage = lazyWithRetry(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
 const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
@@ -180,6 +181,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/for-artists" element={<ForArtistsPage />} />
               <Route path="/admin/merge" element={<AdminMergePage />} />
               <Route path="/admin/verify" element={<AdminVerifyPage />} />
+              <Route path="/admin/tips" element={<AdminTipsPage />} />
               <Route path="/admin/links" element={<AdminLinksPage />} />
               <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />

@@ -22,6 +22,7 @@
       "label": "Admin",
       "verify": "Verify",
       "verifyCount": "Verify ({{count}})",
+      "tips": "Tips review",
       "releaseReview": "Release review",
       "releaseReviewCount": "Release review ({{count}})",
       "removedLinks": "Removed links",

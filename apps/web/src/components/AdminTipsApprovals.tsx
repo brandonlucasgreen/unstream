@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 
-// Tips approval on /admin/verify (docs/specs/artist-patronage-spec.md §6, gate 3). Compare the
+// Tips approval on /admin/tips (docs/specs/artist-patronage-spec.md §6, gate 3). Compare the
 // claimed artist with the Stripe account's business name and country before approving: this is
 // the defence against someone claiming a profile and collecting an artist's tips.
 
@@ -62,7 +62,10 @@ export function AdminTipsApprovals() {
     load();
   };
 
-  if (!data?.available) return error ? <p className="text-sm text-error">{error}</p> : null;
+  if (error && !data) return <p className="text-sm text-error">{error}</p>;
+  if (!data) return null;
+  // It is the whole of /admin/tips, so a blank page would read as broken rather than switched off.
+  if (!data.available) return <p className="text-sm text-text-muted">Tips aren't set up on this deploy (no Stripe key).</p>;
 
   return (
     <section className="space-y-4">

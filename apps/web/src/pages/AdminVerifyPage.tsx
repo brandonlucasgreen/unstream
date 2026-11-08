@@ -5,7 +5,6 @@ import { Header } from '../components/Header';
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { AdminDuplicateArtists } from '../components/AdminDuplicateArtists';
-import { AdminTipsApprovals } from '../components/AdminTipsApprovals';
 
 interface VerificationRequest {
   id: string;
@@ -134,8 +133,6 @@ export function AdminVerifyPage() {
               {error}
             </div>
           )}
-
-          <AdminTipsApprovals />
 
           {loading ? (
             <SkeletonScreen label="Loading verification requests">

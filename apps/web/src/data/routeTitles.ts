@@ -30,6 +30,7 @@ const ROUTE_TITLES: [pattern: string, title: string][] = [
   ['/platforms', 'Platforms | Unstream'],
   ['/admin/merge', 'Merge results | Unstream Admin'],
   ['/admin/verify', 'Verification | Unstream Admin'],
+  ['/admin/tips', 'Tips review | Unstream Admin'],
   ['/admin/links', 'Removed links | Unstream Admin'],
   ['/admin/release-review', 'Release review | Unstream Admin'],
   ['/admin/analytics', 'Analytics | Unstream Admin'],
