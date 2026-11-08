@@ -16,6 +16,11 @@ export type NavItem = {
   button?: boolean;
   /** `to` is a full URL to an outside site (e.g. Contact) — render a plain `<a>`, not a router `Link`. */
   external?: boolean;
+  /**
+   * A heading drawn above this item when it differs from the previous item's — how one menu holds
+   * several artists' pages, each under its artist's name.
+   */
+  section?: string;
 };
 
 /** A labelled set of links — a dropdown on desktop, an indented block here. */
@@ -30,6 +35,12 @@ export type NavEntry = NavItem | NavGroup;
 
 export function isNavGroup(entry: NavEntry): entry is NavGroup {
   return 'items' in entry;
+}
+
+/** Whether `items[index]` opens a new section, so its heading is drawn above it. */
+export function startsSection(items: NavItem[], index: number): boolean {
+  const section = items[index].section;
+  return !!section && (index === 0 || items[index - 1].section !== section);
 }
 
 /**
@@ -130,17 +141,21 @@ export function MobileNav({
                 }`}>
                   {entry.label}
                 </p>
-                {entry.items.map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={close}
-                    className={`block px-6 py-3 text-base hover:bg-bg-hover transition-colors ${
-                      item.emphasis ? 'text-link font-medium' : 'text-text-primary'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
+                {entry.items.map((item, index) => (
+                  <div key={item.to}>
+                    {startsSection(entry.items, index) && (
+                      <p className="px-6 pt-3 pb-1 text-sm font-semibold text-text-secondary">{item.section}</p>
+                    )}
+                    <Link
+                      to={item.to}
+                      onClick={close}
+                      className={`block px-6 py-3 text-base hover:bg-bg-hover transition-colors ${
+                        item.emphasis ? 'text-link font-medium' : 'text-text-primary'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </div>
                 ))}
               </div>
             ) : entry.external ? (

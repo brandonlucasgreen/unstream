@@ -7,6 +7,9 @@ import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
+import { RELEASE_VIEW_PREFIX, STREAMING_METRIC } from './artist-activity';
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Build set of valid source IDs for click: metrics from the SourceId union + platform sets
 const VALID_SOURCE_IDS = new Set<string>([
@@ -37,9 +40,12 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Validate metric values: must be 'search', 'view', or 'click:{valid_source_id}'
+// Valid metrics (see artist-activity.ts for what each one means): 'search', 'streaming', 'view',
+// 'click:{valid_source_id}', and 'release_view:{release id}' — the last checked against the
+// artist below, since its id can't be checked against a fixed list.
 function isValidMetric(metric: string): boolean {
-  if (metric === 'search' || metric === 'view') return true;
+  if (metric === 'search' || metric === 'view' || metric === STREAMING_METRIC) return true;
+  if (metric.startsWith(RELEASE_VIEW_PREFIX)) return UUID_REGEX.test(metric.slice(RELEASE_VIEW_PREFIX.length));
   if (metric.startsWith('click:')) {
     const sourceId = metric.slice(6);
     return VALID_SOURCE_IDS.has(sourceId);
@@ -49,6 +55,9 @@ function isValidMetric(metric: string): boolean {
 
 // Module-level cache: slug → artist_id (persists across warm invocations)
 const slugCache = new Map<string, string>();
+
+// `${artistId}:${releaseId}` pairs already confirmed to belong together.
+const releaseOwnerCache = new Set<string>();
 
 // More slugs than any real search renders is abuse, not analytics.
 const MAX_BATCH_SLUGS = 24;
@@ -119,6 +128,25 @@ async function handleRequest(event: {
 
   if (ids.length === 0) {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  }
+
+  // A release view must name one of this artist's releases. Otherwise anyone could write rows
+  // that the artist's Analytics page would then go looking up. One artist per release view: the
+  // release page sends exactly one.
+  if (metric.startsWith(RELEASE_VIEW_PREFIX)) {
+    if (ids.length !== 1) return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    const releaseId = metric.slice(RELEASE_VIEW_PREFIX.length);
+    const key = `${ids[0]}:${releaseId}`;
+    if (!releaseOwnerCache.has(key)) {
+      const { data: release } = await client
+        .from('releases')
+        .select('id')
+        .eq('id', releaseId)
+        .eq('artist_id', ids[0])
+        .maybeSingle();
+      if (!release) return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+      releaseOwnerCache.add(key);
+    }
   }
 
   // Atomic upsert-increment: the single-row RPC for one event, the batch RPC for many —

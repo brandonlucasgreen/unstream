@@ -578,6 +578,13 @@
   to = "/.netlify/functions/me-feed-token"
   status = 200
 
+# The header's artist menu: the artists this account has verified, and whether Tips and Promote
+# show for it. Asked once per browser session.
+[[redirects]]
+  from = "/api/me/artist-nav"
+  to = "/.netlify/functions/me-artist-nav"
+  status = 200
+
 # The "Recent Releases" shortlist on /my-collection — the same window the private feed above serves,
 # read straight rather than as a calendar.
 [[redirects]]

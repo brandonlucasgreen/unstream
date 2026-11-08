@@ -17,6 +17,7 @@ const ROUTE_TITLES: [pattern: string, title: string][] = [
   ['/my-collection', 'My Collection | Unstream'],
   ['/my-saved-artists', 'My Saved Artists | Unstream'],
   ['/curator/new', 'Curator Posts | Unstream'],
+  ['/analytics/:slug', 'Analytics | Unstream'],
   ['/tips/:slug', 'Manage tips | Unstream'],
   ['/releases/:slug', 'Manage releases | Unstream'],
   ['/promote/:slug', 'Promote | Unstream'],

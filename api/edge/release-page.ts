@@ -9,9 +9,10 @@
 // try to take it over: one route with two renderers is the UNS-100 bifurcation class that
 // produced a run of back-button and bfcache bugs where every fix partially reverted the last
 // (see docs/postmortems/UNS-100-bifurcation-retro.md). Nothing on this page hydrates or re-renders
-// client-side. Its only scripts are an inline image-error fallback and the header's signed-in
+// client-side. Its only scripts are an inline image-error fallback, the header's signed-in
 // check (api/shared/site-chrome.ts), which picks between two server-rendered headers and renders
-// nothing itself.
+// nothing itself, and the view count for the artist's Analytics page
+// (api/shared/release-view-beacon.ts), which renders nothing at all.
 //
 // **Route precedence.** netlify.toml declares this *before* `/a/*`, because `/a/*` also matches
 // `/a/artist/release` and artist-page-static would otherwise answer first. The regex here
@@ -24,6 +25,7 @@ import { PLATFORMS } from "../shared/platform-registry.ts";
 import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { platformLogoSvg } from "../shared/platform-logos.ts";
 import { SITE_CHROME_CSS, siteFooterHtml, siteHeaderHtml } from "../shared/site-chrome.ts";
+import { releaseViewBeaconHtml } from "../shared/release-view-beacon.ts";
 import {
   AVAILABILITY_LABELS,
   AVAILABILITY_ORDER,
@@ -200,6 +202,7 @@ export default async function handler(request: Request, context: Context) {
 
     let artist: { id: string; name: string; image_url: string | null };
     let release: {
+      id: string;
       title: string;
       release_type: string;
       release_date: string | null;
@@ -269,7 +272,7 @@ export default async function handler(request: Request, context: Context) {
       const { data: releaseData, error: releaseError } = await supabase
         .from('releases')
         .select(`
-          title, release_type, release_date, date_precision, status, artwork_url,
+          id, title, release_type, release_date, date_precision, status, artwork_url,
           release_sources ( platform, url, source, detail_checked_at,
             release_offers ( format, price, currency, availability )
           )
@@ -456,6 +459,7 @@ export default async function handler(request: Request, context: Context) {
   </div>
 
   ${siteFooterHtml()}
+  ${releaseViewBeaconHtml(artistSlug, release.id)}
 </body>
 </html>`;
 

@@ -24,8 +24,6 @@ vi.mock('../../src/services/tips', () => ({ getTipsAvailable: (...a: unknown[]) 
 // Whether Promote is open to this account (the releaseAutopost flag, or the admin), asked once.
 const getPromoteAvailable = vi.fn();
 vi.mock('../../src/services/promote', () => ({ getPromoteAvailable: (...a: unknown[]) => getPromoteAvailable(...a) }));
-// Per-profile stats are their own request against their own endpoint.
-vi.mock('../../src/components/ArtistAnalytics', () => ({ ArtistAnalytics: () => null }));
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
@@ -113,6 +111,8 @@ describe('MyArtistsPage', () => {
     expect(await screen.findByText('Honeycrush')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Edit' }).getAttribute('href')).toBe('/artist-edit/honeycrush');
     expect(screen.getByRole('link', { name: 'View' }).getAttribute('href')).toBe('/a/honeycrush');
+    // The stats that used to sit on this card are their own page now.
+    expect(screen.getByRole('link', { name: 'Analytics' }).getAttribute('href')).toBe('/analytics/honeycrush');
     expect(screen.queryByText(/haven't claimed an artist profile/i)).toBeNull();
   });
 

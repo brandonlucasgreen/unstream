@@ -5,6 +5,7 @@ import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav
 import { NavDropdown } from './NavDropdown';
 import { HeaderSearch } from './HeaderSearch';
 import { useAuth } from '../contexts/AuthContext';
+import { buildArtistMenu, getArtistNav, type ArtistNav } from '../services/artistNav';
 
 function UnstreamLogo() {
   return (
@@ -46,6 +47,7 @@ export function Header() {
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
   const [pendingReleaseReviewCount, setPendingReleaseReviewCount] = useState(0);
   const [pendingTipsCount, setPendingTipsCount] = useState(0);
+  const [artistNav, setArtistNav] = useState<ArtistNav | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
@@ -83,6 +85,20 @@ export function Header() {
       .catch(() => { /* aborted or network error */ });
     return () => controller.abort();
   }, [isAdmin, session?.access_token]);
+
+  // The artist menu: which artists this account has verified, and whether Tips and Promote show.
+  // Asked once per browser session, not per page (services/artistNav.ts).
+  const userId = user?.id;
+  const accessToken = session?.access_token;
+  useEffect(() => {
+    if (!userId || !accessToken) {
+      setArtistNav(null);
+      return;
+    }
+    let cancelled = false;
+    getArtistNav(userId, accessToken).then(nav => { if (!cancelled) setArtistNav(nav); });
+    return () => { cancelled = true; };
+  }, [userId, accessToken]);
 
   // Artists whose Stripe account is ready and waiting on approval. The summary read is database
   // only; the full /api/admin/tips list asks Stripe about every account.
@@ -154,11 +170,24 @@ export function Header() {
     ],
   };
 
+  // Each artist's own pages, in a menu of their own rather than behind My Artists: one named after
+  // the artist, or "Your artists" with a section per artist (services/artistNav.ts).
+  const artistGroup = buildArtistMenu(artistNav, {
+    yourArtists: t('nav.artist.yourArtists'),
+    analytics: t('nav.artist.analytics'),
+    viewPage: t('nav.artist.viewPage'),
+    editProfile: t('nav.artist.editProfile'),
+    releases: t('nav.artist.releases'),
+    tips: t('nav.artist.tips'),
+    promote: t('nav.artist.promote'),
+  });
+
   // Shared by the inline desktop nav and the mobile hamburger menu, so new
   // items only need adding in one place.
   const navItems: NavEntry[] = session
     ? [
         ...(isAdmin ? [adminGroup] : []),
+        ...(artistGroup ? [artistGroup] : []),
         accountGroup,
       ]
     : [

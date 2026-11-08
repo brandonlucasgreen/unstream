@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { forgetArtistNav } from '../services/artistNav';
 
 interface ClaimDoneStepProps {
   slug: string | undefined;
@@ -7,6 +9,9 @@ interface ClaimDoneStepProps {
 }
 
 export function ClaimDoneStep({ slug, discoveredLinks, alreadyVerified }: ClaimDoneStepProps) {
+  // The header's artist menu was answered before this claim existed; ask again on the next page.
+  useEffect(() => { forgetArtistNav(); }, []);
+
   return (
     <div className="text-center space-y-4 p-6 rounded-lg bg-bg-secondary border border-border">
       <div className="text-3xl">✅</div>

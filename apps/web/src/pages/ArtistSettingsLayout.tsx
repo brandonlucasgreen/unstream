@@ -6,7 +6,7 @@ import { ArtistSettingsHeader, type ArtistSettingsSection } from '../components/
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 
-// The frame around each page an artist manages from /my-artists: /artist-edit/:slug (Edit),
+// The frame around each page an artist manages: /analytics/:slug, /artist-edit/:slug (Edit),
 // /releases/:slug, /tips/:slug and /promote/:slug. One per page, not tabs: they were tabs under
 // Edit until 2026-10-29. The page loads the artist's name with its own data and hands it up here,
 // and only the content area shows a skeleton while it loads.

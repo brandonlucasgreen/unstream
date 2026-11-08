@@ -18,6 +18,15 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "mainMenu": "Main menu",
+    "artist": {
+      "yourArtists": "Your artists",
+      "analytics": "Analytics",
+      "viewPage": "View page",
+      "editProfile": "Edit profile",
+      "releases": "Releases",
+      "tips": "Tips",
+      "promote": "Promote"
+    },
     "admin": {
       "label": "Admin",
       "verify": "Verify",

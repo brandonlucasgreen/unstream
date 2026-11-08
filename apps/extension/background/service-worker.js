@@ -248,23 +248,22 @@ async function handleMusicDetection(data, tabId) {
     return;
   }
 
-  // The product `search` event counts once per listening stretch with an artist, cache hit or
-  // not (see lib/search-tracking.js).
+  // Both counts are once per listening stretch with an artist, cache hit or not (see
+  // lib/search-tracking.js): the product `search` event, and the artist's own `streaming` count —
+  // "heard while streaming" on their Analytics page. Until 2.10 the artist's count fired on every
+  // track as a plain `search`, so one album played was twelve search appearances; now it is one
+  // listening session, which is what an artist reading "spotted while streaming" would assume.
   if (await claimNowPlayingSearch(artist)) {
     trackAppEvent('search', {
       has_results: results.length > 0,
       result_count: results.length,
       search_kind: 'now_playing',
     });
-  }
 
-  // The artist's own search appearance fires on every detection, cache hit or not. A listener
-  // really did play this artist, so it is a real event wherever the results came from —
-  // suppressing it on a cache hit would under-report to the artist.
-
-  for (const result of results) {
-    if (result.type === 'artist' && result.claimedSlug) {
-      trackAnalyticsEvent(result.claimedSlug, 'search');
+    for (const result of results) {
+      if (result.type === 'artist' && result.claimedSlug) {
+        trackAnalyticsEvent(result.claimedSlug, 'streaming');
+      }
     }
   }
 

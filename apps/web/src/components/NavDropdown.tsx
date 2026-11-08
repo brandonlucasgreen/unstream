@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { NavGroup } from './MobileNav';
+import { startsSection, type NavGroup } from './MobileNav';
 
 /**
- * Desktop-only nav dropdown for a group of links (currently the admin pages).
+ * Desktop-only nav dropdown for a group of links (the admin pages, the account pages, and each
+ * artist's pages).
  *
  * A disclosure, not a menu: plain links behind a button with `aria-expanded`, so
  * it doesn't promise the arrow-key behaviour `aria-haspopup` implies. Closes on
@@ -71,17 +72,23 @@ export function NavDropdown({ group }: { group: NavGroup }) {
 
       {open && (
         <div id={panelId} className="absolute right-0 top-full mt-2 min-w-44 rounded-xl border border-border bg-bg-primary py-1 shadow-lg">
-          {group.items.map(item => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              className={`block px-4 py-2 text-sm hover:bg-bg-hover transition-colors ${
-                item.emphasis ? 'text-link font-medium' : 'text-text-primary'
-              }`}
-            >
-              {item.label}
-            </Link>
+          {group.items.map((item, index) => (
+            <div key={item.to}>
+              {startsSection(group.items, index) && (
+                <p className={`px-4 pb-1 text-xs font-semibold uppercase tracking-wide text-text-muted ${index === 0 ? 'pt-2' : 'pt-3 mt-1 border-t border-border'}`}>
+                  {item.section}
+                </p>
+              )}
+              <Link
+                to={item.to}
+                onClick={() => setOpen(false)}
+                className={`block px-4 py-2 text-sm hover:bg-bg-hover transition-colors ${
+                  item.emphasis ? 'text-link font-medium' : 'text-text-primary'
+                }`}
+              >
+                {item.label}
+              </Link>
+            </div>
           ))}
         </div>
       )}

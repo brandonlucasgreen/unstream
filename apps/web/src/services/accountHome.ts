@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/react';
 
-// Where a signed-in person lands when nothing more specific was asked for: their own
-// artists if they have a verified claim, otherwise their collection.
+// Where a signed-in person lands when nothing more specific was asked for: their artist's
+// Analytics page if they have one verified claim (Brandon, 2026-11-08), My Artists if they have
+// several, otherwise their collection.
 //
 // `/api/artist-auth` already filters to `verified_at IS NOT NULL`, so a non-empty
 // `profiles` *is* "has at least one verified artist" — there is no separate check to make,
@@ -32,7 +33,12 @@ export async function resolveAccountHome(accessToken: string): Promise<string> {
       return COLLECTION_HOME;
     }
     const data = await response.json();
-    return Array.isArray(data.profiles) && data.profiles.length > 0 ? ARTIST_HOME : COLLECTION_HOME;
+    const profiles: Array<{ slug?: unknown }> = Array.isArray(data.profiles) ? data.profiles : [];
+    if (profiles.length === 0) return COLLECTION_HOME;
+    if (profiles.length === 1 && typeof profiles[0].slug === 'string' && profiles[0].slug) {
+      return `/analytics/${encodeURIComponent(profiles[0].slug)}`;
+    }
+    return ARTIST_HOME;
   } catch (e) {
     Sentry.captureException(e, { extra: { context: 'accountHome.resolve' } });
     return COLLECTION_HOME;
