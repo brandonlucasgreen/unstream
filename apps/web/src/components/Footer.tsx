@@ -13,8 +13,6 @@ export function Footer() {
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/artists" className="hover:text-text-primary transition-colors">{t('footer.indieArtistIndex')}</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
-          <Link to="/known-artists" className="hover:text-text-primary transition-colors">{t('footer.artistsYouKnow')}</Link>
-          <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/platforms" className="hover:text-text-primary transition-colors">{t('footer.platforms')}</Link>
           <span className="text-text-muted/40 text-xs">&#x2022;</span>
           <Link to="/changelog" className="hover:text-text-primary transition-colors">{t('footer.changelog')}</Link>

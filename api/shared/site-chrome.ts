@@ -72,7 +72,6 @@ export const FOOTER_MADE_WITH_LOVE: ChromeLink = {
 export const FOOTER_LINKS: ChromeLink[] = [
   { href: '/for-artists', label: 'For Artists' },
   { href: '/artists', label: 'Indie Artist Index' },
-  { href: '/known-artists', label: 'Artists You Know' },
   { href: '/platforms', label: 'Platforms' },
   { href: '/changelog', label: 'Changelog' },
   { href: '/press', label: 'Press kit' },
