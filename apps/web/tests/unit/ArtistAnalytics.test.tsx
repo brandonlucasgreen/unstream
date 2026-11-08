@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// The body of /analytics/:slug: totals for the period, then the last 90 days as a list grouped by
+// The body of /analytics/:slug: totals for the period, then the last 30 days as a list grouped by
 // day. An empty list explains itself rather than vanishing.
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
@@ -55,7 +55,7 @@ describe('ArtistAnalytics', () => {
   it('explains an empty list instead of hiding it', async () => {
     answer({ activity: [] });
     render(<ArtistAnalytics slug="kid-lightbulbs" />);
-    expect(await screen.findByText('Nothing yet in the last 90 days.')).toBeTruthy();
+    expect(await screen.findByText('Nothing yet in the last 30 days.')).toBeTruthy();
   });
 
   it('hands the artist name up for the page heading', async () => {

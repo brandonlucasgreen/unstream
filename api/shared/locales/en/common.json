@@ -2,7 +2,6 @@
   "nav": {
     "account": {
       "label": "Account",
-      "myArtists": "My Artists",
       "collection": "My Collection",
       "savedArtists": "My Saved Artists",
       "curatorPosts": "Curator Posts",
@@ -22,7 +21,7 @@
       "yourArtists": "Your artists",
       "analytics": "Analytics",
       "viewPage": "View page",
-      "editProfile": "Edit profile",
+      "editPage": "Edit page",
       "releases": "Releases",
       "tips": "Tips",
       "promote": "Promote"

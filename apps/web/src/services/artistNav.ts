@@ -84,7 +84,7 @@ export interface ArtistMenuLabels {
   yourArtists: string;
   analytics: string;
   viewPage: string;
-  editProfile: string;
+  editPage: string;
   releases: string;
   tips: string;
   promote: string;
@@ -93,7 +93,8 @@ export interface ArtistMenuLabels {
 /**
  * The header's artist menu, or null for an account with no verified artist.
  *
- * One artist: a menu named after them, with their six pages (Brandon, 2026-11-08). Several: one
+ * One artist: a menu named after them, with their six pages: View page, Edit page, Analytics,
+ * Releases, Tips, Promote (Brandon, 2026-11-08). Several: one
  * "Your artists" menu with the same pages under each artist's name, so the header gains one item
  * however many artists there are. As of November 2026 no account has more than two; a label with
  * dozens would need a different shape (a list of names, each to its own hub), and this one should
@@ -107,9 +108,9 @@ export function buildArtistMenu(nav: ArtistNav | null, labels: ArtistMenuLabels)
     const s = encodeURIComponent(slug);
     const section = several ? name : undefined;
     return [
-      { to: `/analytics/${s}`, label: labels.analytics, section },
       { to: `/a/${s}`, label: labels.viewPage, section },
-      { to: `/artist-edit/${s}`, label: labels.editProfile, section },
+      { to: `/artist-edit/${s}`, label: labels.editPage, section },
+      { to: `/analytics/${s}`, label: labels.analytics, section },
       { to: `/releases/${s}`, label: labels.releases, section },
       ...(nav.tips ? [{ to: `/tips/${s}`, label: labels.tips, section }] : []),
       ...(nav.promote ? [{ to: `/promote/${s}`, label: labels.promote, section }] : []),

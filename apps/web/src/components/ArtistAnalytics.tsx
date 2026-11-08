@@ -8,7 +8,7 @@ import { describeActivity, describeDay, type ActivityItem } from '../utils/artis
 import type { SourceId } from '../types';
 
 // The body of /analytics/:slug: the totals for a period, then everything that happened in the last
-// 90 days as a list (GET /api/analytics/stats, api/functions/artist-activity.ts).
+// 30 days as a list (GET /api/analytics/stats, api/functions/artist-activity.ts).
 //
 // The list carries the page. Most claimed artists see single-digit numbers in a month, and a few
 // totals can say that without the whole page being a dashboard of zeros; listed one by one, the
@@ -123,10 +123,8 @@ export function ArtistAnalytics({ slug, onLoaded }: { slug: string; onLoaded?: (
               <StatTile value={data.fans.saved} label="Fans who saved you" />
             </div>
             <p className="text-xs text-text-muted">
-              <strong className="font-medium">Heard while streaming</strong> counts fans who were
-              listening to you on a streaming service with Unstream's browser extension or Mac app
-              open, and were shown where to support you. It's part of Searches too. Fans who saved
-              you is all time{data.fans.supported > 0 && <>; {data.fans.supported} of them marked you as supported</>}.
+              “Heard while streaming” counts fans who were listening to you on a streaming service
+              with Unstream's browser extension or app open.
             </p>
 
             {Object.keys(data.clicksByPlatform).length > 0 && (
@@ -171,11 +169,11 @@ export function ArtistAnalytics({ slug, onLoaded }: { slug: string; onLoaded?: (
         <section className="space-y-4" aria-labelledby="activity-heading">
           <div>
             <h2 id="activity-heading" className="text-lg font-semibold">Activity</h2>
-            <p className="text-sm text-text-muted">The last 90 days. Fans are never named.</p>
+            <p className="text-sm text-text-muted">The last 30 days. Fans are never named.</p>
           </div>
           {days.length === 0 ? (
             <div className="text-center py-10 rounded-lg border border-border border-dashed">
-              <p className="text-text-muted">Nothing yet in the last 90 days.</p>
+              <p className="text-text-muted">Nothing yet in the last 30 days.</p>
               <p className="text-text-muted text-sm mt-1">
                 Saves, views, clicks and tips will show up here as they happen.
               </p>

@@ -112,7 +112,7 @@ export function MobileNav({
           <h2 id="mobile-nav-title" className="sr-only">{t('nav.mainMenu')}</h2>
           {/* Close button sits where the hamburger was, so the drawer reads as
               opening out of the header rather than landing on top of it. */}
-          <div className="flex items-center justify-end p-4">
+          <div className="flex shrink-0 items-center justify-end p-4">
             <button
               ref={closeRef}
               type="button"
@@ -127,13 +127,17 @@ export function MobileNav({
           </div>
 
           {email && (
-            <p className="truncate px-6 pb-4 text-xs text-text-muted">{email}</p>
+            // shrink-0: `truncate` hides overflow, which lets a flex item shrink below its text, so
+            // once the menu outgrew the screen (the artist menu did) this line was squeezed and
+            // clipped instead of the list scrolling.
+            <p className="shrink-0 truncate px-6 pb-4 text-xs text-text-muted">{email}</p>
           )}
 
           {/* Groups render as a heading plus indented links rather than a
               collapsible section: the drawer is full-height, so hiding a handful
               of admin links behind another tap would only add a step. */}
-          <div className="flex flex-col border-t border-border">
+          {/* The part that scrolls when the menu is taller than the screen. */}
+          <div className="flex min-h-0 flex-col overflow-y-auto border-t border-border">
             {items.map(entry => isNavGroup(entry) ? (
               <div key={entry.label} className="border-b border-border">
                 <p className={`px-6 pt-4 pb-1 text-xs font-medium uppercase tracking-wider ${
@@ -192,7 +196,7 @@ export function MobileNav({
                 close();
                 onSignOut();
               }}
-              className="mt-auto border-t border-border px-6 py-4 text-left text-base text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
+              className="mt-auto shrink-0 border-t border-border px-6 py-4 text-left text-base text-text-muted hover:bg-bg-hover hover:text-text-primary transition-colors"
             >
               {t('nav.signOut')}
             </button>

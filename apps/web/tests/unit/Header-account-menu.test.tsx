@@ -46,13 +46,14 @@ describe('Header account menu', () => {
     auth.isAdmin = true;
     renderHeader();
     const links = accountLinks();
-    expect(links.slice(links.indexOf('/my-artists'))).toEqual(['/my-artists', '/my-collection', '/my-saved-artists', '/curator/new', '/settings']);
+    expect(links.slice(links.indexOf('/my-collection'))).toEqual(['/my-collection', '/my-saved-artists', '/curator/new', '/settings']);
     expect(screen.getByText('nav.account.curatorPosts')).toBeTruthy();
   });
 
   it('leaves it out for everyone else', () => {
     auth.isAdmin = false;
     renderHeader();
-    expect(accountLinks()).toEqual(['/my-artists', '/my-collection', '/my-saved-artists', '/settings']);
+    // No My Artists: the artist menu covers it (2026-11-08).
+    expect(accountLinks()).toEqual(['/my-collection', '/my-saved-artists', '/settings']);
   });
 });

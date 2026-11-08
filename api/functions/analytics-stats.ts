@@ -1,6 +1,6 @@
 // GET /api/analytics/stats?slug={slug}&period=7d|30d|90d|all
 // Authenticated endpoint returning aggregated analytics for a verified artist: the totals for the
-// period, and the activity list for the last 90 days whatever the period (artist-activity.ts).
+// period, and the activity list for the last 30 days whatever the period (artist-activity.ts).
 // Behind /analytics/:slug.
 
 import { withSentry, Sentry } from '../lib/sentry';
@@ -11,8 +11,8 @@ import { isLiveMode } from './stripe';
 import { keptAfterRefund } from '../shared/tips';
 import { buildActivity, summarizeAnalytics, RELEASE_VIEW_PREFIX, type AnalyticsRow } from './artist-activity';
 
-/** How far back the activity list reaches, whatever period the totals cover. */
-const ACTIVITY_DAYS = 90;
+/** How far back the activity list reaches, whatever period the totals cover (Brandon, 2026-11-08). */
+const ACTIVITY_DAYS = 30;
 
 const isoDay = (daysAgo: number) => {
   const date = new Date();

@@ -44,10 +44,12 @@ export const HEADER_NAV_LINKS: ChromeLink[] = [
 
 export const HEADER_LOGIN_LINK: ChromeLink = { href: '/login', label: 'Login' };
 
-/** Header.tsx's Account group, without Curator Posts (admin-only while its flag is off). */
+/**
+ * Header.tsx's Account group, without Curator Posts (admin-only while its flag is off). The artist
+ * menu isn't drawn here: this header is static, and that menu comes from the API.
+ */
 export const HEADER_ACCOUNT_LABEL = 'Account';
 export const HEADER_ACCOUNT_LINKS: ChromeLink[] = [
-  { href: '/my-artists', label: 'My Artists' },
   { href: '/my-collection', label: 'My Collection' },
   { href: '/my-saved-artists', label: 'My Saved Artists' },
   { href: '/settings', label: 'Settings' },

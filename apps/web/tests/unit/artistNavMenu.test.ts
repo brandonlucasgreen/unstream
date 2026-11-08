@@ -10,7 +10,7 @@ const labels = {
   yourArtists: 'Your artists',
   analytics: 'Analytics',
   viewPage: 'View page',
-  editProfile: 'Edit profile',
+  editPage: 'Edit page',
   releases: 'Releases',
   tips: 'Tips',
   promote: 'Promote',
@@ -26,9 +26,9 @@ describe('buildArtistMenu', () => {
     const menu = buildArtistMenu({ artists: [{ name: 'Kid Lightbulbs', slug: 'kid-lightbulbs' }], tips: true, promote: true }, labels);
     expect(menu?.label).toBe('Kid Lightbulbs');
     expect(menu?.items.map(i => i.to)).toEqual([
-      '/analytics/kid-lightbulbs',
       '/a/kid-lightbulbs',
       '/artist-edit/kid-lightbulbs',
+      '/analytics/kid-lightbulbs',
       '/releases/kid-lightbulbs',
       '/tips/kid-lightbulbs',
       '/promote/kid-lightbulbs',
@@ -38,7 +38,7 @@ describe('buildArtistMenu', () => {
 
   it('leaves out Tips and Promote unless the server opened them', () => {
     const menu = buildArtistMenu({ artists: [{ name: 'Kid Lightbulbs', slug: 'kid-lightbulbs' }], tips: false, promote: false }, labels);
-    expect(menu?.items.map(i => i.label)).toEqual(['Analytics', 'View page', 'Edit profile', 'Releases']);
+    expect(menu?.items.map(i => i.label)).toEqual(['View page', 'Edit page', 'Analytics', 'Releases']);
   });
 
   it("groups several artists' pages under each artist's name", () => {
