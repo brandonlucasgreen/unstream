@@ -33,13 +33,9 @@ export interface RecentRelease {
  * Only the subheadings with something under them render. When neither list has anything, one box
  * says so rather than two boxes explaining the same silence.
  *
- * The calendar these lists share a window with is subscribed to on /my-saved-artists, next to the
- * artists it follows (Brandon, 2026-11-08). The foot of this section links there — a link to the
- * one subscribe control, not a second one — so a fan reading the lists still finds out the
- * calendar exists.
- *
- * Presentational — the page fetches, and hands that link in as a prop so this component needs no
- * Router (see below).
+ * Presentational — the page fetches. It says nothing about the release calendar on
+ * /my-saved-artists: the calendar follows saved artists, not the collection, so the two are kept
+ * apart on purpose (Brandon, 2026-11-08).
  *
  * **Release rows are plain `<a>`, never react-router `<Link>`**, for the same reason as
  * `ReleasesSection`: `/a/{artist}/{release}` is rendered by the `release-page` edge function and
@@ -49,12 +45,10 @@ export interface RecentRelease {
 export function RecentReleasesSection({
   upcoming,
   recent,
-  calendarLink,
   error,
 }: {
   upcoming: RecentRelease[];
   recent: RecentRelease[];
-  calendarLink: ReactNode;
   error?: string | null;
 }) {
   const lists = [
@@ -101,11 +95,6 @@ export function RecentReleasesSection({
           </div>
         ))}
 
-        {/*
-          Unconditional, like the calendar itself was when it sat here: a fan with nothing out this
-          month is exactly who wants telling when something is.
-        */}
-        <p className="text-sm text-text-muted">Want these in your calendar? {calendarLink}</p>
       </div>
     </section>
   );

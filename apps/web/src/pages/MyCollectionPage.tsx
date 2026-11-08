@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -85,19 +85,13 @@ export function MyCollectionPage() {
             Releases — Upcoming and Recent — above the collection because they are the part of
             this page that changes, and only rendered once the fan has saved somebody: for a fan
             following nobody it could only ever be empty. `artistsLoaded` gates it so the box
-            doesn't flash in and out while the list is still arriving. Its foot links to the
-            release calendar on /my-saved-artists, which carries the same gate.
+            doesn't flash in and out while the list is still arriving.
           */}
           {artistsLoaded && savedArtists.length > 0 && (
             <RecentReleasesSection
               upcoming={upcomingReleases}
               recent={recentReleases}
               error={releasesError}
-              calendarLink={
-                <Link to="/my-saved-artists#release-calendar" className="text-link hover:underline">
-                  Subscribe on My Saved Artists
-                </Link>
-              }
             />
           )}
 

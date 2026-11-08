@@ -4,6 +4,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { SavedArtistsSection } from '../components/SavedArtistsSection';
 import { ReleaseCalendarSection } from '../components/ReleaseCalendarSection';
+import { ReleaseFeedOffSwitch } from '../components/ReleaseFeedOffSwitch';
 
 /**
  * The artists a fan follows: the saved list (and which of them they've supported), and the one
@@ -28,16 +29,29 @@ export function MySavedArtistsPage() {
         <div className="max-w-6xl mx-auto space-y-8">
           <h1 className="text-2xl font-bold">My Saved Artists</h1>
 
+          {/*
+            The calendar leads the page (Brandon, 2026-11-08). Gated on the fan having saved
+            somebody — asked and answered (Brandon, 2026-10-21): their feed would carry nothing,
+            and the subscription only means something once there is an artist to follow. Don't
+            ungate it, and don't add a subscribe entry point anywhere else. `artistsLoaded` keeps
+            it from flashing in and out while the list arrives.
+          */}
+          {artistsLoaded && savedArtists.length > 0 && <ReleaseCalendarSection />}
+
           <SavedArtistsSection />
 
           {/*
-            Gated on the fan having saved somebody — asked and answered (Brandon, 2026-10-21):
-            their feed would carry nothing, and the subscription only means something once there
-            is an artist to follow. Don't ungate it, and don't add a second subscribe entry point
-            elsewhere to make it reachable sooner. `artistsLoaded` keeps it from flashing in and out
-            while the list arrives.
+            A calendar link outlives the saved artists that justified it, so a fan who made one,
+            leaked it, and then cleared their list still needs a way to kill it. The calendar's own
+            controls can turn it off, but they're gated above, so this stands in for them — after the
+            empty state, since nearly nobody here has ever made one. It used to sit on /settings.
           */}
-          {artistsLoaded && savedArtists.length > 0 && <ReleaseCalendarSection />}
+          {artistsLoaded && savedArtists.length === 0 && (
+            <section className="p-4 rounded-lg bg-bg-secondary border border-border">
+              <h2 className="text-sm font-semibold text-text-secondary mb-3">Release calendar</h2>
+              <ReleaseFeedOffSwitch />
+            </section>
+          )}
         </div>
       </main>
 

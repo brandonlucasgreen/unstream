@@ -56,23 +56,28 @@ beforeEach(() => mockFetch.mockReset());
 afterEach(cleanup);
 
 describe('MySavedArtistsPage', () => {
-  it('shows the saved list and the release calendar once the fan has saved somebody', () => {
+  it('leads with the release calendar once the fan has saved somebody', () => {
     auth([artist]);
     renderPage();
 
-    expect(screen.getByRole('heading', { name: 'My Saved Artists', level: 1 })).toBeTruthy();
     expect(screen.getByText('Kid Lightbulbs')).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Release calendar' })).toBeTruthy();
+    const headings = screen.getAllByRole('heading').map(h => h.textContent?.trim());
+    expect(headings.slice(0, 3)).toEqual(['My Saved Artists', 'Release calendar', 'Saved Artists']);
+    expect(screen.queryByRole('button', { name: /Turn off my release feed/ })).toBeNull();
     // ReleaseFeedControls asks for a token only when pressed; the page itself fetches nothing.
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it('keeps the calendar hidden from a fan who has saved nobody', () => {
+  it('offers a fan who has saved nobody only the off switch, after the empty state', () => {
     auth([]);
     renderPage();
 
     expect(screen.getByText('No saved artists yet.')).toBeTruthy();
-    expect(screen.queryByRole('heading', { name: 'Release calendar' })).toBeNull();
+    // No way to subscribe (a feed of nobody carries nothing)...
+    expect(screen.queryByRole('button', { name: /Create my feed link/ })).toBeNull();
+    // ...but a link made earlier outlives the list, so it can still be killed.
+    expect(screen.getByRole('button', { name: /Turn off my release feed/ })).toBeTruthy();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('does not flash the calendar in while the list is still loading', () => {
@@ -80,5 +85,6 @@ describe('MySavedArtistsPage', () => {
     renderPage();
 
     expect(screen.queryByRole('heading', { name: 'Release calendar' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Turn off my release feed/ })).toBeNull();
   });
 });

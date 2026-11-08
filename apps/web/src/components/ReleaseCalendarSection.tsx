@@ -1,32 +1,20 @@
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { ReleaseFeedControls } from './ReleaseFeedControls';
 
 /**
  * The private release calendar, on /my-saved-artists: one subscription (calendar or RSS) covering
  * every artist the fan has saved.
  *
- * It lives beside the list it follows (Brandon, 2026-11-08). Before that it sat under Releases on
- * /my-collection, and before *that* on /settings, where in months of being live not one fan ever
- * minted a token. The page only renders this once the fan has saved somebody — a feed of nobody
- * carries nothing — and revoking stays on /settings (`ReleaseFeedOffSwitch`), since a token
- * outlives the saved artists that justified it.
+ * It heads the page that lists the artists it follows (Brandon, 2026-11-08), and only there: it
+ * covers saved artists, not the collection, so /my-collection doesn't mention it. Before that it
+ * sat under Releases on /my-collection, and before *that* on /settings, where in months of being
+ * live not one fan ever minted a token. The page renders it only once the fan has saved somebody
+ * — a feed of nobody carries nothing — and shows `ReleaseFeedOffSwitch` in its place otherwise.
  *
  * Rendering it mints nothing: `ReleaseFeedControls` asks for a token only when pressed.
- *
- * The Releases section on /my-collection links to `#release-calendar`. React Router doesn't jump
- * to a fragment on navigation, so this does it once mounted.
  */
 export function ReleaseCalendarSection() {
-  const location = useLocation();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (location.hash === '#release-calendar') sectionRef.current?.scrollIntoView();
-  }, [location.hash]);
-
   return (
-    <section id="release-calendar" ref={sectionRef} className="scroll-mt-24">
+    <section>
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
         <CalendarIcon />
         <RssIcon />

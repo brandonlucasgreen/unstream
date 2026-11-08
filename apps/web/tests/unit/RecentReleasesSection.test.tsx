@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-// The "Releases" section on /my-collection — Upcoming and Recent under one heading, with a link to
-// the release calendar on /my-saved-artists. The web's first fan-facing release surface.
+// The "Releases" section on /my-collection — Upcoming and Recent under one heading. The web's first
+// fan-facing release surface.
 //
 // What's worth locking here is the set of things that would be quietly wrong rather than broken:
 // an unreleased album filed under "Recent", a fabricated date on a year-only release, a secondhand
 // marketplace ranked above a direct purchase, an empty state that vanishes instead of explaining
-// itself, and a calendar link that disappears along with it.
+// itself, and a subscribe control creeping back in beside the collection.
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { RecentReleasesSection, type RecentRelease } from 'src/components/RecentReleasesSection';
@@ -37,7 +37,6 @@ function show(
       upcoming={lists.upcoming ?? []}
       recent={lists.recent ?? []}
       error={error}
-      calendarLink={<span>calendar link</span>}
     />
   );
 }
@@ -121,9 +120,6 @@ describe('RecentReleasesSection', () => {
     expect(screen.getByText(/Nothing new from your saved artists this month/)).toBeTruthy();
     // One box, not two empty subheadings explaining the same silence.
     expect(screen.getAllByRole('heading').map(h => h.textContent)).toEqual(['Releases']);
-    // The way to the calendar has to survive the empty state — a fan with nothing out this month
-    // is exactly who wants to be told when something is.
-    expect(screen.getByText('calendar link')).toBeTruthy();
   });
 
   it('says so when the read failed, instead of claiming there is nothing new', () => {
@@ -132,11 +128,10 @@ describe('RecentReleasesSection', () => {
     expect(screen.queryByText(/Nothing new from your saved artists/)).toBeNull();
   });
 
-  it('links to the calendar once, and offers no subscribe control of its own', () => {
+  it('leaves the release calendar to /my-saved-artists', () => {
     show({ upcoming: [release({ releaseSlug: 'announced' })], recent: [release()] });
-    // The calendar lives on /my-saved-artists. Both lists come out of the same feed token, so one
-    // link covers the pair, and a button here would be a second subscribe entry point.
-    expect(screen.getAllByText('calendar link')).toHaveLength(1);
+    // The calendar covers saved artists, not the collection, so it isn't offered here at all.
+    expect(screen.queryByText(/calendar/i)).toBeNull();
     expect(screen.queryByRole('button')).toBeNull();
   });
 

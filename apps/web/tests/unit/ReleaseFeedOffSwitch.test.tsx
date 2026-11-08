@@ -1,15 +1,12 @@
 // @vitest-environment jsdom
-// The /settings off switch for a private release feed.
+// The off switch for a private release feed, shown on /my-saved-artists in place of the Release
+// calendar when the fan has saved nobody.
 //
-// Subscribing lives under Release calendar on /my-saved-artists, behind its "has saved somebody"
-// gate. A token outlives the saved artists that justified it, so revoking it cannot sit behind the
+// Subscribing lives in that calendar, behind its "has saved somebody" gate. A token outlives the saved artists that justified it, so revoking it cannot sit behind the
 // same gate — this is what stops a leaked /feed/f/{token} URL being unrevokable.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 
-vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
-}));
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: { access_token: 'tok' } }) }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
 
@@ -25,7 +22,7 @@ describe('ReleaseFeedOffSwitch', () => {
     render(<ReleaseFeedOffSwitch />);
 
     // GET /api/me/feed-token creates a token when none exists. Probing "do you have one?" would
-    // hand a credential to every visitor to /settings — which is why this offers the switch
+    // hand a credential to every fan who opened the page — which is why this offers the switch
     // without knowing, and why DELETE being idempotent is what makes that honest.
     expect(fetchMock).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: /Turn off my release feed/ })).toBeTruthy();
@@ -67,10 +64,5 @@ describe('ReleaseFeedOffSwitch', () => {
     // Telling someone a leaked link is dead when it is still live is the one wrong answer here.
     expect(await screen.findByText(/Something went wrong/)).toBeTruthy();
     expect(screen.queryByText(/has stopped working/)).toBeNull();
-  });
-
-  it('points at where the feed is actually subscribed to', () => {
-    render(<ReleaseFeedOffSwitch />);
-    expect(screen.getByRole('link', { name: 'My Saved Artists' }).getAttribute('href')).toBe('/my-saved-artists#release-calendar');
   });
 });

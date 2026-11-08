@@ -13,7 +13,6 @@ import { EmailChangeForm } from '../components/EmailChangeForm';
 import { refreshSessionAfterEmailChange } from '../services/auth';
 import { SharingControls } from '../components/SharingControls';
 import { NewsletterPrompt } from '../components/NewsletterPrompt';
-import { ReleaseFeedOffSwitch } from '../components/ReleaseFeedOffSwitch';
 import { NotificationPreferences } from '../components/NotificationPreferences';
 import { BandcampConnect } from '../components/BandcampConnect';
 import { YourTips } from '../components/YourTips';
@@ -241,15 +240,6 @@ export function SettingsPage() {
               </span>
             </h2>
             <BandcampConnect />
-          </section>
-
-          {/* Revoking the private release feed, and nothing else about it — subscribing lives
-              under Release calendar on /my-saved-artists. A token outlives the saved artists that
-              justified it, so the off switch can't sit behind the same gate; see the component's
-              own note. */}
-          <section className="p-6 rounded-lg bg-bg-secondary border border-border space-y-4">
-            <h2 className="text-lg font-semibold">Release feed</h2>
-            <ReleaseFeedOffSwitch />
           </section>
 
           {/* Tips this fan has left (`#tips`, the /tip/thanks deep link). Draws its own card, and
