@@ -20,41 +20,41 @@ export interface RecentRelease {
 }
 
 /**
- * Everything release-shaped on /my-collection, under one "Releases" heading: what the artists
- * you saved have announced, what they've just put out, and the calendar to subscribe to both.
+ * The "Releases" section of /my-collection: what the artists you saved have announced, and what
+ * they've just put out.
  *
- * Release alerts have only ever existed in the Mac app and the browser extension, and the private
- * release feed shipped with its only entry point buried on /settings — where, in the months it
- * has been live, not one fan ever minted a token. The calendar is a feature, not a setting, so it
- * now sits with the lists it feeds on rather than among passwords and notification toggles.
- *
- * **One section, three subheadings.** The window for the lists (past 30 days plus everything
- * upcoming) is `getFeedReleasesForUser`'s, deliberately — the feed and the page disagreeing about
- * what counts as recent would read as a bug in whichever one you happened to be looking at — but
- * an album that isn't out yet is not a *recent release*, so the two are headed apart. Upcoming
+ * **One section, two subheadings.** The window for the lists (past 30 days plus everything
+ * upcoming) is `getFeedReleasesForUser`'s, deliberately — the private feed and the page disagreeing
+ * about what counts as recent would read as a bug in whichever one you happened to be looking at —
+ * but an album that isn't out yet is not a *recent release*, so the two are headed apart. Upcoming
  * leads, because it is the news; the server sends the two lists already split and capped
  * separately.
  *
  * Only the subheadings with something under them render. When neither list has anything, one box
- * says so rather than two boxes explaining the same silence. The calendar is always last and
- * always there — through the empty state and through a failed read, since a fan with nothing out
- * this month is exactly who wants telling when something is.
+ * says so rather than two boxes explaining the same silence.
  *
- * Presentational — the page fetches, and hands the auth-dependent subscribe panel in as a prop.
+ * The calendar these lists share a window with is subscribed to on /my-saved-artists, next to the
+ * artists it follows (Brandon, 2026-11-08). The foot of this section links there — a link to the
+ * one subscribe control, not a second one — so a fan reading the lists still finds out the
+ * calendar exists.
  *
- * **Rows are plain `<a>`, never react-router `<Link>`**, for the same reason as `ReleasesSection`:
- * `/a/{artist}/{release}` is rendered by the `release-page` edge function and the SPA has no
- * route for a two-segment `/a/` path, so a client-side navigation there renders nothing.
+ * Presentational — the page fetches, and hands that link in as a prop so this component needs no
+ * Router (see below).
+ *
+ * **Release rows are plain `<a>`, never react-router `<Link>`**, for the same reason as
+ * `ReleasesSection`: `/a/{artist}/{release}` is rendered by the `release-page` edge function and
+ * the SPA has no route for a two-segment `/a/` path, so a client-side navigation there renders
+ * nothing.
  */
 export function RecentReleasesSection({
   upcoming,
   recent,
-  subscribePanel,
+  calendarLink,
   error,
 }: {
   upcoming: RecentRelease[];
   recent: RecentRelease[];
-  subscribePanel: ReactNode;
+  calendarLink: ReactNode;
   error?: string | null;
 }) {
   const lists = [
@@ -102,25 +102,16 @@ export function RecentReleasesSection({
         ))}
 
         {/*
-          Last, and unconditional: both lists come out of the one feed token, so the calendar
-          belongs to the pair rather than to either, and it is the part of this section that still
-          has something to offer when they are empty or failed to load. Rendering the panel outright
-          mints nothing — ReleaseFeedControls deliberately asks for a token only when pressed.
+          Unconditional, like the calendar itself was when it sat here: a fan with nothing out this
+          month is exactly who wants telling when something is.
         */}
-        <div>
-          <Subheading>
-            <CalendarIcon />
-            <RssIcon />
-            Release calendar
-          </Subheading>
-          <div className="p-4 rounded-lg bg-bg-secondary border border-border">{subscribePanel}</div>
-        </div>
+        <p className="text-sm text-text-muted">Want these in your calendar? {calendarLink}</p>
       </div>
     </section>
   );
 }
 
-/** One item inside the Releases section — smaller than the section's own heading, same for each. */
+/** One list inside the Releases section — smaller than the section's own heading, same for each. */
 function Subheading({ children }: { children: ReactNode }) {
   return (
     <h3 className="text-sm font-semibold text-text-secondary mb-3 flex items-center gap-1.5">
@@ -194,48 +185,5 @@ function ReleaseRow({ release }: { release: RecentRelease }) {
         )}
       </span>
     </a>
-  );
-}
-
-/**
- * The same pair as `ReleasesSection`'s heading, drawn as strokes at the same weight so they read
- * as one mark rather than two icons from different sets — the two formats the one feed token
- * serves.
- *
- * `aria-hidden` because the subheading's own text names the thing.
- */
-function CalendarIcon() {
-  return (
-    <svg
-      className="w-3.5 h-3.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18M8 3v4M16 3v4" />
-    </svg>
-  );
-}
-
-function RssIcon() {
-  return (
-    <svg
-      className="w-3.5 h-3.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16" />
-      <circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
   );
 }

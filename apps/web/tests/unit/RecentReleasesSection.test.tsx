@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
-// The "Releases" section on /my-collection — Upcoming, Recent and the calendar under one
-// heading. The web's first
-// fan-facing release surface.
+// The "Releases" section on /my-collection — Upcoming and Recent under one heading, with a link to
+// the release calendar on /my-saved-artists. The web's first fan-facing release surface.
 //
 // What's worth locking here is the set of things that would be quietly wrong rather than broken:
 // an unreleased album filed under "Recent", a fabricated date on a year-only release, a secondhand
 // marketplace ranked above a direct purchase, an empty state that vanishes instead of explaining
-// itself, and a subscribe control that mints a credential nobody asked for.
+// itself, and a calendar link that disappears along with it.
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { RecentReleasesSection, type RecentRelease } from 'src/components/RecentReleasesSection';
@@ -38,7 +37,7 @@ function show(
       upcoming={lists.upcoming ?? []}
       recent={lists.recent ?? []}
       error={error}
-      subscribePanel={<p>subscribe panel</p>}
+      calendarLink={<span>calendar link</span>}
     />
   );
 }
@@ -100,9 +99,9 @@ describe('RecentReleasesSection', () => {
       recent: [release({ releaseSlug: 'out', title: 'Out Now' })],
     });
 
-    // One h2 for the group, a smaller one per item, calendar last.
+    // One h2 for the group, a smaller one per list.
     const headings = screen.getAllByRole('heading').map(h => h.textContent);
-    expect(headings).toEqual(['Releases', 'Upcoming', 'Recent', 'Release calendar']);
+    expect(headings).toEqual(['Releases', 'Upcoming', 'Recent']);
     expect(screen.getByRole('heading', { name: 'Releases' }).tagName).toBe('H2');
     expect(screen.getByRole('heading', { name: 'Upcoming' }).tagName).toBe('H3');
 
@@ -114,17 +113,17 @@ describe('RecentReleasesSection', () => {
   it('renders only the list that has something in it', () => {
     show({ recent: [release()] });
 
-    expect(screen.getAllByRole('heading').map(h => h.textContent)).toEqual(['Releases', 'Recent', 'Release calendar']);
+    expect(screen.getAllByRole('heading').map(h => h.textContent)).toEqual(['Releases', 'Recent']);
   });
 
   it('explains itself when there is nothing new, rather than disappearing', () => {
     show({});
     expect(screen.getByText(/Nothing new from your saved artists this month/)).toBeTruthy();
     // One box, not two empty subheadings explaining the same silence.
-    expect(screen.getAllByRole('heading').map(h => h.textContent)).toEqual(['Releases', 'Release calendar']);
-    // The calendar has to survive the empty state — a fan with nothing out this month is exactly
-    // who wants to be told when something is.
-    expect(screen.getByText('subscribe panel')).toBeTruthy();
+    expect(screen.getAllByRole('heading').map(h => h.textContent)).toEqual(['Releases']);
+    // The way to the calendar has to survive the empty state — a fan with nothing out this month
+    // is exactly who wants to be told when something is.
+    expect(screen.getByText('calendar link')).toBeTruthy();
   });
 
   it('says so when the read failed, instead of claiming there is nothing new', () => {
@@ -133,24 +132,12 @@ describe('RecentReleasesSection', () => {
     expect(screen.queryByText(/Nothing new from your saved artists/)).toBeNull();
   });
 
-  it('keeps the calendar at the foot of the section, with no toggle in the way', () => {
-    show({ recent: [release()] });
-
-    // It used to hide behind a reveal button, on the theory that a feed token is a credential.
-    // ReleaseFeedControls already handles that — it asks for a token only when pressed — so the
-    // panel renders outright and the section needs no button of its own.
-    expect(screen.getByText('subscribe panel')).toBeTruthy();
-    expect(screen.queryByRole('button')).toBeNull();
-
-    const headings = screen.getAllByRole('heading').map(h => h.textContent);
-    expect(headings[headings.length - 1]).toBe('Release calendar');
-  });
-
-  it('offers one calendar for the pair, not one per list', () => {
+  it('links to the calendar once, and offers no subscribe control of its own', () => {
     show({ upcoming: [release({ releaseSlug: 'announced' })], recent: [release()] });
-    // Both lists come out of the same feed token, so a second subscribe panel would be a second
-    // treatment for one action.
-    expect(screen.getAllByText('subscribe panel')).toHaveLength(1);
+    // The calendar lives on /my-saved-artists. Both lists come out of the same feed token, so one
+    // link covers the pair, and a button here would be a second subscribe entry point.
+    expect(screen.getAllByText('calendar link')).toHaveLength(1);
+    expect(screen.queryByRole('button')).toBeNull();
   });
 
   it('names the platforms for a screen reader, which the icons alone cannot', () => {

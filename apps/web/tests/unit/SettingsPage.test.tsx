@@ -19,6 +19,7 @@ vi.mock('src/components/Footer', () => ({ Footer: () => null }));
 vi.mock('src/components/SharingControls', () => ({ SharingControls: () => <p>sharing</p> }));
 vi.mock('src/components/BandcampConnect', () => ({ BandcampConnect: () => null }));
 vi.mock('src/components/ReleaseFeedOffSwitch', () => ({ ReleaseFeedOffSwitch: () => null }));
+vi.mock('src/components/YourTips', () => ({ YourTips: () => null }));
 vi.mock('src/components/NewsletterPrompt', () => ({ NewsletterPrompt: () => null }));
 vi.mock('src/components/NotificationPreferences', () => ({ NotificationPreferences: () => null }));
 vi.mock('src/components/UsernameField', () => ({ UsernameField: () => <p>username field</p> }));

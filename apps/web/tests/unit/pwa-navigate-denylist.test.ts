@@ -24,7 +24,7 @@ describe('service worker navigate fallback', () => {
     expect(passesThrough(path)).toBe(true);
   });
 
-  it.each(['/', '/curator/new', '/my-collection', '/settings', '/my-artists', '/claim/kid-lightbulbs'])(
+  it.each(['/', '/curator/new', '/my-collection', '/my-saved-artists', '/settings', '/my-artists', '/claim/kid-lightbulbs'])(
     'serves the app shell for %s',
     path => {
       expect(passesThrough(path)).toBe(false);

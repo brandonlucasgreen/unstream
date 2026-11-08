@@ -7,8 +7,8 @@ import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 /**
  * Turn off an existing private release feed, from /settings.
  *
- * The feed itself is subscribed to on /my-collection, under Releases — and that section only
- * renders once a fan has saved somebody, deliberately, because a feed of nobody carries nothing.
+ * The feed itself is subscribed to on /my-saved-artists, under Release calendar — and that section
+ * only renders once a fan has saved somebody, deliberately, because a feed of nobody carries nothing.
  * A *token*, though, outlives the thing that made it: a fan who minted one, pasted the URL
  * somewhere it leaked, and later cleared their saved artists would otherwise have no way to
  * revoke it. Revoking a credential belongs with the account controls anyway, so this is the one
@@ -54,8 +54,8 @@ export function ReleaseFeedOffSwitch() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-text-muted">
-        Subscribe to your private calendar and RSS links under Releases on{' '}
-        <Link to="/my-collection" className="text-link hover:underline">My Collection</Link>.
+        Subscribe to your private calendar and RSS links on{' '}
+        <Link to="/my-saved-artists#release-calendar" className="text-link hover:underline">My Saved Artists</Link>.
         If you've created one and want it to stop working — you shared it by accident, or you're
         done with it — turn it off here.
       </p>

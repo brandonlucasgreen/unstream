@@ -111,4 +111,22 @@ describe('MyCollectionPage request waves', () => {
     });
     expect(urlsRequested()).not.toContain('/api/artist-auth');
   });
+
+  it('asks the context for the saved list, which gates the Releases section', async () => {
+    // The saved list used to be loaded by SavedArtistsSection on this page; it moved to
+    // /my-saved-artists, and without this call a fan landing here would never see Releases.
+    const loadSavedArtists = vi.fn();
+    mockUseAuth.mockReturnValue({ ...mockUseAuth(), loadSavedArtists });
+    mockFetch.mockImplementation(() =>
+      Promise.resolve({ ok: true, json: async () => ({ items: [], total: 0 }) })
+    );
+
+    render(
+      <MemoryRouter>
+        <MyCollectionPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(loadSavedArtists).toHaveBeenCalled());
+  });
 });

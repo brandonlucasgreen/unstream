@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // The /settings off switch for a private release feed.
 //
-// Subscribing lives under Releases on /my-collection, behind that section's "has saved somebody"
+// Subscribing lives under Release calendar on /my-saved-artists, behind its "has saved somebody"
 // gate. A token outlives the saved artists that justified it, so revoking it cannot sit behind the
 // same gate — this is what stops a leaked /feed/f/{token} URL being unrevokable.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -71,6 +71,6 @@ describe('ReleaseFeedOffSwitch', () => {
 
   it('points at where the feed is actually subscribed to', () => {
     render(<ReleaseFeedOffSwitch />);
-    expect(screen.getByRole('link', { name: 'My Collection' }).getAttribute('href')).toBe('/my-collection');
+    expect(screen.getByRole('link', { name: 'My Saved Artists' }).getAttribute('href')).toBe('/my-saved-artists#release-calendar');
   });
 });

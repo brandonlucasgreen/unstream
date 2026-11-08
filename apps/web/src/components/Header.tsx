@@ -116,13 +116,14 @@ export function Header() {
 
   // Everything a signed-in person owns, behind one label. The dashboard used to be a
   // single page of artist management, releases, collection and saved artists; it is now
-  // My Artists and Collection, and this group is where further account pages go rather
+  // My Artists, My Collection and My Saved Artists, and this group is where further account pages go rather
   // than another top-level nav item each.
   const accountGroup: NavGroup = {
     label: t('nav.account.label'),
     items: [
       { to: '/my-artists', label: t('nav.account.myArtists') },
       { to: '/my-collection', label: t('nav.account.collection') },
+      { to: '/my-saved-artists', label: t('nav.account.savedArtists') },
       // Admin-only because the server only lets the admin in while the curatorPosts flag is off
       // (canUseCuratorPosts). Switching the flag on for everyone has to show this to everyone too.
       ...(isAdmin ? [{ to: '/curator/new', label: t('nav.account.curatorPosts') }] : []),

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// The "Tip History" list on /my-collection: hidden until there's a tip, then each with artist,
+// The "Tip history" list on /settings: hidden until there's a tip, then each with artist,
 // amount and status.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
@@ -7,7 +7,7 @@ import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
 const state = vi.hoisted(() => ({ hash: '' }));
 vi.mock('react-router-dom', () => ({
   Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
-  useLocation: () => ({ pathname: '/my-collection', search: '', hash: state.hash }),
+  useLocation: () => ({ pathname: '/settings', search: '', hash: state.hash }),
 }));
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: { access_token: 'tok' } }) }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));
@@ -53,7 +53,7 @@ describe('YourTips', () => {
       tip({ id: 't2', artistName: 'Honeycrush', artistSlug: 'honeycrush', amountCents: 1000, paidCents: 1000, status: 'refunded' }),
     ] })));
     render(<YourTips />);
-    expect(await screen.findByRole('heading', { name: 'Tip History' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Tip history' })).toBeTruthy();
     expect(screen.getByText('Kid Lightbulbs').getAttribute('href')).toBe('/a/kid-lightbulbs');
     expect(screen.getByText('$5.00')).toBeTruthy();
     expect(screen.getByText('you paid $5.46')).toBeTruthy();
@@ -80,14 +80,13 @@ describe('YourTips', () => {
 
     render(<YourTips />);
 
-    // /my-collection is the signed-in home: a request here is paid on nearly every session, to
-    // answer "no tips" for nearly every account.
+    // A request on every Settings visit would answer "no tips" for nearly every account.
     expect(fetchMock).not.toHaveBeenCalled();
 
     scrollIntoView();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(await screen.findByRole('heading', { name: 'Tip History' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: 'Tip history' })).toBeTruthy();
   });
 
   it('asks straight away when the thanks page deep-links to #tips', async () => {

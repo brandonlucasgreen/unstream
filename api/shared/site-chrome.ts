@@ -49,6 +49,7 @@ export const HEADER_ACCOUNT_LABEL = 'Account';
 export const HEADER_ACCOUNT_LINKS: ChromeLink[] = [
   { href: '/my-artists', label: 'My Artists' },
   { href: '/my-collection', label: 'My Collection' },
+  { href: '/my-saved-artists', label: 'My Saved Artists' },
   { href: '/settings', label: 'Settings' },
 ];
 
