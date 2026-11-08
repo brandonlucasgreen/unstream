@@ -1,6 +1,14 @@
 /**
- * Generate sitemap.xml from the artists manifest.
- * Includes all /artist/{slug} URLs plus static pages.
+ * Generate sitemap.xml: static pages, every claimed artist, and the artists manifest.
+ *
+ * Artist URLs are listed at /a/{slug}, never /artist/{slug}: both routes render the same page, and
+ * artist-page-static's canonical tag names /a/ for every artist. A sitemap listing the other
+ * address hands Google two conflicting answers to "which URL is this page".
+ *
+ * Claimed artists (a verified artist_profiles row) are listed first and come from Supabase, not
+ * the manifest: they are the pages with artist-written content, and until 2026-11 none of them
+ * were in the sitemap at all, which held only the pre-generated pages. If that read fails they
+ * are left out with a warning, as they always were, rather than failing the build.
  *
  * Output: public/sitemap.xml
  * Usage: npx tsx scripts/generate-sitemap.ts
@@ -131,12 +139,47 @@ async function fetchCanonicalSlugs(client: SupabaseClient | null, aliases: strin
   return canonical;
 }
 
+/**
+ * `slug -> lastmod` for every claimed artist (verified profile), or null if the read failed.
+ * lastmod is the later of the profile's and the artist row's `updated_at`, since an artist's own
+ * edits land on the profile and search refreshes land on the row.
+ */
+async function fetchClaimedArtists(client: SupabaseClient | null): Promise<Map<string, string> | null> {
+  if (!client) return null;
+
+  const claimed = new Map<string, string>();
+  const PAGE = 1000; // PostgREST's silent per-response cap
+
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await client
+      .from('artist_profiles')
+      .select('updated_at, artists!inner(slug, updated_at)')
+      .not('verified_at', 'is', null)
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.warn(`⚠️  Claimed artist lookup failed (${error.message}) — claimed artists will be omitted.`);
+      return null;
+    }
+    const rows = data as unknown as Array<{ updated_at: string | null; artists: { slug: string; updated_at: string | null } | null }>;
+    for (const row of rows) {
+      if (!row.artists?.slug) continue;
+      const dates = [row.updated_at, row.artists.updated_at].filter((d): d is string => !!d).sort();
+      claimed.set(row.artists.slug, dates[dates.length - 1] ?? new Date().toISOString());
+    }
+    if (rows.length < PAGE) break;
+  }
+
+  return claimed;
+}
+
 async function main() {
   // Static pages
   const staticPages = [
     { url: '/', changefreq: 'weekly', priority: '1.0' },
     { url: '/platforms', changefreq: 'monthly', priority: '0.8' },
     { url: '/for-artists', changefreq: 'monthly', priority: '0.8' },
+    { url: '/artists', changefreq: 'weekly', priority: '0.7' },
     { url: '/faq', changefreq: 'monthly', priority: '0.6' },
     { url: '/press', changefreq: 'monthly', priority: '0.5' },
     { url: '/contact', changefreq: 'monthly', priority: '0.5' },
@@ -150,6 +193,30 @@ async function main() {
     <priority>${page.priority}</priority>
   </url>`);
 
+  const client = getSupabase();
+  const listed = new Set<string>();
+
+  function pushArtist(slug: string, lastmod: string) {
+    listed.add(slug);
+    urls.push(`  <url>
+    <loc>${escapeXml(`${BASE_URL}/a/${slug}`)}</loc>
+    <lastmod>${lastmod.split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+  }
+
+  // Claimed artists first: the pages artists wrote themselves
+  const claimed = await fetchClaimedArtists(client);
+  if (claimed) {
+    for (const [slug, lastmod] of claimed) {
+      if (isExcludedArtistSlug(slug)) continue;
+      pushArtist(slug, lastmod);
+    }
+    console.log(`Added ${listed.size} claimed artist URLs to sitemap`);
+  }
+  const claimedCount = listed.size;
+
   // Artist pages from manifest, reconciled against the database that actually renders them
   if (existsSync(MANIFEST_PATH)) {
     const rawManifest: ManifestEntry[] = JSON.parse(readFileSync(MANIFEST_PATH, 'utf-8'));
@@ -161,7 +228,6 @@ async function main() {
     const manifest = rawManifest.filter(a => !isExcludedArtistSlug(a.slug));
     const excluded = rawManifest.length - manifest.length;
 
-    const client = getSupabase();
     const updatedAt = await fetchArtistUpdatedAt(client, manifest.map(a => a.slug));
 
     // Manifest slugs with no row of their own may be retired slugs rather than missing artists.
@@ -185,7 +251,6 @@ async function main() {
 
     let omitted = 0;
     let realiased = 0;
-    const listed = new Set<string>();
 
     for (const artist of manifest) {
       let slug = artist.slug;
@@ -206,19 +271,13 @@ async function main() {
         lastmod = updatedAt.get(canonical) ?? artist.lastUpdated;
       }
 
-      // Two manifest slugs can alias to one artist; the sitemap must not list them twice.
+      // Two manifest slugs can alias to one artist, and a manifest artist may since have claimed
+      // their page; the sitemap must not list anyone twice.
       if (listed.has(slug)) continue;
-      listed.add(slug);
-
-      urls.push(`  <url>
-    <loc>${escapeXml(`${BASE_URL}/artist/${slug}`)}</loc>
-    <lastmod>${lastmod.split('T')[0]}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`);
+      pushArtist(slug, lastmod);
     }
 
-    console.log(`Added ${listed.size} artist URLs to sitemap`);
+    console.log(`Added ${listed.size - claimedCount} manifest artist URLs to sitemap`);
     if (excluded > 0) {
       console.log(`Skipped ${excluded} excluded artist${excluded === 1 ? '' : 's'} (api/lib/excluded-artists.ts).`);
     }
