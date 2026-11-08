@@ -284,7 +284,7 @@ Not legal advice. The reasoning in `artist-tips-spec.md` §5 holds and is summar
    tips are unconditional; the fee is the artist's choice), and an **artist addendum** accepted when an
    artist turns tips on (they're the seller; refunds and disputes are theirs; Unstream can switch tips off
    for abuse or misrepresentation).
-3. **Admin approval of each artist's first tips setup** in `/admin/verify`, showing the claimed artist
+3. **Admin approval of each artist's first tips setup** in `/admin/tips` (part of `/admin/verify` until 2026-11-08), showing the claimed artist
    beside the connected Stripe account's business name and country. Approval sets `tips_approved_at`;
    checkout and the charge run both refuse without it. Changing the connected account needs re-approval.
    This is the defence against someone claiming a profile and collecting an artist's tips.

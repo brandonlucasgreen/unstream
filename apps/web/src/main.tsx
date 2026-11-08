@@ -38,6 +38,7 @@ const ClaimPage = lazyWithRetry(() => import('./pages/ClaimPage.tsx').then(m => 
 const LoginPage = lazyWithRetry(() => import('./pages/LoginPage.tsx').then(m => ({ default: m.LoginPage })))
 const MyArtistsPage = lazyWithRetry(() => import('./pages/MyArtistsPage.tsx').then(m => ({ default: m.MyArtistsPage })))
 const MyCollectionPage = lazyWithRetry(() => import('./pages/MyCollectionPage.tsx').then(m => ({ default: m.MyCollectionPage })))
+const MySavedArtistsPage = lazyWithRetry(() => import('./pages/MySavedArtistsPage.tsx').then(m => ({ default: m.MySavedArtistsPage })))
 const ArtistEditPage = lazyWithRetry(() => import('./pages/ArtistEditPage.tsx').then(m => ({ default: m.ArtistEditPage })))
 const ArtistReleasesPage = lazyWithRetry(() => import('./pages/ArtistReleasesPage.tsx').then(m => ({ default: m.ArtistReleasesPage })))
 const ArtistTipsPage = lazyWithRetry(() => import('./pages/ArtistTipsPage.tsx').then(m => ({ default: m.ArtistTipsPage })))
@@ -62,6 +63,7 @@ const PrivacyPolicyPage = lazyWithRetry(() => import('./pages/PrivacyPolicyPage.
 const TermsOfUsePage = lazyWithRetry(() => import('./pages/TermsOfUsePage.tsx').then(m => ({ default: m.TermsOfUsePage })))
 const AdminMergePage = lazyWithRetry(() => import('./pages/AdminMergePage.tsx').then(m => ({ default: m.AdminMergePage })))
 const AdminVerifyPage = lazyWithRetry(() => import('./pages/AdminVerifyPage.tsx').then(m => ({ default: m.AdminVerifyPage })))
+const AdminTipsPage = lazyWithRetry(() => import('./pages/AdminTipsPage.tsx').then(m => ({ default: m.AdminTipsPage })))
 const AdminLinksPage = lazyWithRetry(() => import('./pages/AdminLinksPage.tsx').then(m => ({ default: m.AdminLinksPage })))
 const AdminReleaseReviewPage = lazyWithRetry(() => import('./pages/AdminReleaseReviewPage.tsx').then(m => ({ default: m.AdminReleaseReviewPage })))
 const ResetPasswordPage = lazyWithRetry(() => import('./pages/ResetPasswordPage.tsx').then(m => ({ default: m.ResetPasswordPage })))
@@ -88,7 +90,7 @@ function ArtistLoginRedirect() {
 }
 
 // The dashboard split into /my-artists (artist management) and /my-collection (the fan's
-// releases, collection and saved artists). Both old routes stay for bookmarks and links in
+// releases and collection; saved artists later moved to /my-saved-artists). Both old routes stay for bookmarks and links in
 // emails already sent, and land on the fan half — what most accounts came for. (Sign-in
 // itself resolves between the two; see services/accountHome.ts.)
 function DashboardRedirect() {
@@ -145,6 +147,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/dashboard" element={<DashboardRedirect />} />
               <Route path="/my-artists" element={<MyArtistsPage />} />
               <Route path="/my-collection" element={<MyCollectionPage />} />
+              <Route path="/my-saved-artists" element={<MySavedArtistsPage />} />
               {/* What an artist manages from /my-artists, each its own page with its own button there.
                   They were tabs under Edit until 2026-10-29; the old tab addresses redirect, since
                   Stripe's onboarding links and tip emails point at /artist-edit/:slug/tips. */}
@@ -178,6 +181,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/for-artists" element={<ForArtistsPage />} />
               <Route path="/admin/merge" element={<AdminMergePage />} />
               <Route path="/admin/verify" element={<AdminVerifyPage />} />
+              <Route path="/admin/tips" element={<AdminTipsPage />} />
               <Route path="/admin/links" element={<AdminLinksPage />} />
               <Route path="/admin/release-review" element={<AdminReleaseReviewPage />} />
               <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />

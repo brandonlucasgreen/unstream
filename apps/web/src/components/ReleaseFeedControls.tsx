@@ -12,7 +12,7 @@ interface FeedUrls {
  * Subscribe to a private calendar of upcoming releases from your saved artists.
  *
  * The link is **not fetched on mount.** A feed token is a credential, and one is created the
- * first time it's asked for — so loading /settings shouldn't mint one for every visitor who
+ * first time it's asked for — so loading the page shouldn't mint one for every visitor who
  * never wanted a calendar. The user presses a button; that press is the request.
  *
  * The URL is deliberately shown in full rather than hidden behind a copy button alone: calendar

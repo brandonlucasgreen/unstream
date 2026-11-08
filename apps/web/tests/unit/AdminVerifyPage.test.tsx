@@ -110,3 +110,15 @@ describe('AdminVerifyPage: ownership checkbox state reaches server', () => {
     });
   });
 });
+
+describe('AdminVerifyPage: tips review lives on /admin/tips', () => {
+  afterEach(cleanup);
+
+  it('does not load tips accounts', async () => {
+    setupFetchMock();
+    render(<AdminVerifyPage />);
+    await screen.findByText('Test Artist');
+    const urls = mockFetch.mock.calls.map(call => String(call[0]));
+    expect(urls.some(url => url.startsWith('/api/admin/tips'))).toBe(false);
+  });
+});

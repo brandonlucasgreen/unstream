@@ -1,19 +1,17 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
 
 /**
- * Turn off an existing private release feed, from /settings.
+ * Turn off an existing private release feed, on /my-saved-artists when the fan has saved nobody.
  *
- * The feed itself is subscribed to on /my-collection, under Releases — and that section only
- * renders once a fan has saved somebody, deliberately, because a feed of nobody carries nothing.
- * A *token*, though, outlives the thing that made it: a fan who minted one, pasted the URL
- * somewhere it leaked, and later cleared their saved artists would otherwise have no way to
- * revoke it. Revoking a credential belongs with the account controls anyway, so this is the one
- * feed control that lives here. **It is not a second subscribe entry point** — there is no
- * create and no rotate, and it must not grow one.
+ * The feed is subscribed to from the Release calendar at the top of that page, which renders only
+ * once a fan has saved somebody — deliberately, because a feed of nobody carries nothing. A
+ * *token*, though, outlives the thing that made it: a fan who minted one, pasted the URL somewhere
+ * it leaked, and later cleared their saved artists would otherwise have no way to revoke it. So
+ * the page shows this in the calendar's place. It lived on /settings until 2026-11-08. **It is not
+ * a second subscribe entry point** — there is no create and no rotate, and it must not grow one.
  *
  * It deliberately **asks nothing on mount**: GET /api/me/feed-token mints a token when none
  * exists, so probing "do you have one?" would create the very credential this is here to
@@ -54,10 +52,8 @@ export function ReleaseFeedOffSwitch() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-text-muted">
-        Subscribe to your private calendar and RSS links under Releases on{' '}
-        <Link to="/my-collection" className="text-link hover:underline">My Collection</Link>.
-        If you've created one and want it to stop working — you shared it by accident, or you're
-        done with it — turn it off here.
+        Made a calendar or RSS link for your saved artists before? If you want it to stop working —
+        you shared it by accident, or you're done with it — turn it off here.
       </p>
 
       {error && <p className="text-sm text-error">{error}</p>}
@@ -65,7 +61,7 @@ export function ReleaseFeedOffSwitch() {
       {done ? (
         <p className="text-sm text-text-secondary">
           Turned off. Any link you had has stopped working, and anything subscribed to it will stop
-          updating. You can create a new one from My Collection whenever you like.
+          updating. Save an artist and you can create a new one here.
         </p>
       ) : confirming ? (
         <div className="flex flex-wrap gap-2">

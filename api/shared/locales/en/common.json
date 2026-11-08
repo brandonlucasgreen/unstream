@@ -4,6 +4,7 @@
       "label": "Account",
       "myArtists": "My Artists",
       "collection": "My Collection",
+      "savedArtists": "My Saved Artists",
       "curatorPosts": "Curator Posts",
       "settings": "Settings"
     },
@@ -21,6 +22,8 @@
       "label": "Admin",
       "verify": "Verify",
       "verifyCount": "Verify ({{count}})",
+      "tips": "Tips review",
+      "tipsCount": "Tips review ({{count}})",
       "releaseReview": "Release review",
       "releaseReviewCount": "Release review ({{count}})",
       "removedLinks": "Removed links",

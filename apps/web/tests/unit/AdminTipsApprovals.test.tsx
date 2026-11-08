@@ -28,6 +28,12 @@ beforeEach(() => { fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('AdminTipsApprovals', () => {
+  it('says tips are switched off rather than leaving /admin/tips blank', async () => {
+    fetchMock.mockResolvedValue(json(200, { available: false, accounts: [] }));
+    render(<AdminTipsApprovals />);
+    expect(await screen.findByText(/Tips aren't set up on this deploy/)).toBeTruthy();
+  });
+
   it('says why Approve is disabled', async () => {
     fetchMock.mockResolvedValue(listing(account({ claimVerified: false, chargesEnabled: false })));
     render(<AdminTipsApprovals />);

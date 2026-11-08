@@ -42,17 +42,17 @@ function renderHeader() {
 afterEach(cleanup);
 
 describe('Header account menu', () => {
-  it('lists Curator Posts for the admin, between My Collection and Settings', () => {
+  it('lists Curator Posts for the admin, between My Saved Artists and Settings', () => {
     auth.isAdmin = true;
     renderHeader();
     const links = accountLinks();
-    expect(links.slice(links.indexOf('/my-artists'))).toEqual(['/my-artists', '/my-collection', '/curator/new', '/settings']);
+    expect(links.slice(links.indexOf('/my-artists'))).toEqual(['/my-artists', '/my-collection', '/my-saved-artists', '/curator/new', '/settings']);
     expect(screen.getByText('nav.account.curatorPosts')).toBeTruthy();
   });
 
   it('leaves it out for everyone else', () => {
     auth.isAdmin = false;
     renderHeader();
-    expect(accountLinks()).toEqual(['/my-artists', '/my-collection', '/settings']);
+    expect(accountLinks()).toEqual(['/my-artists', '/my-collection', '/my-saved-artists', '/settings']);
   });
 });

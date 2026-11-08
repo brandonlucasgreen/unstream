@@ -45,6 +45,7 @@ export function Header() {
   const { session, user, isAdmin, signOut } = useAuth();
   const [pendingVerifyCount, setPendingVerifyCount] = useState(0);
   const [pendingReleaseReviewCount, setPendingReleaseReviewCount] = useState(0);
+  const [pendingTipsCount, setPendingTipsCount] = useState(0);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   // Fetch pending verification count for admins — only on admin-relevant pages
@@ -83,6 +84,23 @@ export function Header() {
     return () => controller.abort();
   }, [isAdmin, session?.access_token]);
 
+  // Artists whose Stripe account is ready and waiting on approval. The summary read is database
+  // only; the full /api/admin/tips list asks Stripe about every account.
+  useEffect(() => {
+    if (!isAdmin || !session?.access_token) return;
+    const controller = new AbortController();
+    fetch('/api/admin/tips?summary=1', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+      signal: controller.signal,
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (typeof data?.pending === 'number') setPendingTipsCount(data.pending);
+      })
+      .catch(() => { /* aborted or network error */ });
+    return () => controller.abort();
+  }, [isAdmin, session?.access_token]);
+
   async function handleSignOut() {
     await signOut();
     navigate('/login');
@@ -96,12 +114,17 @@ export function Header() {
   // review is still visible without opening the menu.
   const adminGroup: NavGroup = {
     label: t('nav.admin.label'),
-    emphasis: pendingVerifyCount > 0 || pendingReleaseReviewCount > 0,
+    emphasis: pendingVerifyCount > 0 || pendingReleaseReviewCount > 0 || pendingTipsCount > 0,
     items: [
       {
         to: '/admin/verify',
         label: pendingVerifyCount > 0 ? t('nav.admin.verifyCount', { count: pendingVerifyCount }) : t('nav.admin.verify'),
         emphasis: pendingVerifyCount > 0,
+      },
+      {
+        to: '/admin/tips',
+        label: pendingTipsCount > 0 ? t('nav.admin.tipsCount', { count: pendingTipsCount }) : t('nav.admin.tips'),
+        emphasis: pendingTipsCount > 0,
       },
       {
         to: '/admin/release-review',
@@ -116,13 +139,14 @@ export function Header() {
 
   // Everything a signed-in person owns, behind one label. The dashboard used to be a
   // single page of artist management, releases, collection and saved artists; it is now
-  // My Artists and Collection, and this group is where further account pages go rather
+  // My Artists, My Collection and My Saved Artists, and this group is where further account pages go rather
   // than another top-level nav item each.
   const accountGroup: NavGroup = {
     label: t('nav.account.label'),
     items: [
       { to: '/my-artists', label: t('nav.account.myArtists') },
       { to: '/my-collection', label: t('nav.account.collection') },
+      { to: '/my-saved-artists', label: t('nav.account.savedArtists') },
       // Admin-only because the server only lets the admin in while the curatorPosts flag is off
       // (canUseCuratorPosts). Switching the flag on for everyone has to show this to everyone too.
       ...(isAdmin ? [{ to: '/curator/new', label: t('nav.account.curatorPosts') }] : []),
