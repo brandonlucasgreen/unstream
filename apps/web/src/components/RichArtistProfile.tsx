@@ -27,7 +27,7 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 }
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
-  const { artist, profile } = payload;
+  const { artist, profile, links } = payload;
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
 
@@ -166,7 +166,13 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
         </div>
       </div>
 
-      {embedOpen && <EmbedWidgetPanel artistName={artist.name} slug={slug} />}
+      {embedOpen && (
+        <EmbedWidgetPanel
+          artistName={artist.name}
+          slug={slug}
+          links={[...links, ...payload.socialLinks]}
+        />
+      )}
 
       {/* Content container */}
       <div className="pb-8">

@@ -252,21 +252,21 @@ describe('RichArtistProfile', () => {
     expect(codeBlock!.textContent).toContain('class="unstream-widget"');
   });
 
-  it('updates the embed code when theme or link count changes', () => {
+  it('updates the embed code when the theme, link style or platforms change', () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
     fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
-
-    // Change theme to light
-    const lightButtons = screen.getAllByRole('button', { name: 'Light' });
-    fireEvent.click(lightButtons[0]);
     const codeBlock = document.querySelector('pre');
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Light' })[0]);
     expect(codeBlock!.textContent).toContain('data-theme="light"');
 
-    // Change link count via slider
-    const slider = document.querySelector('input[type="range"]') as HTMLInputElement;
-    expect(slider).toBeTruthy();
-    fireEvent.change(slider, { target: { value: 10 } });
-    expect(codeBlock!.textContent).toContain('data-max-links="10"');
+    fireEvent.click(screen.getByRole('button', { name: 'Full width' }));
+    expect(codeBlock!.textContent).toContain('data-layout="full"');
+
+    // The page's links and socials are all offered, and all included to start with.
+    expect(codeBlock!.textContent).toContain('data-platforms="all"');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Patreon' }));
+    expect(codeBlock!.textContent).toContain('data-platforms="bandcamp,instagram"');
   });
 
   it('previews with the real widget, drawn from the same settings as the snippet', () => {
@@ -278,7 +278,8 @@ describe('RichArtistProfile', () => {
     expect(preview.getAttribute('data-artist')).toBe('Kid Lightbulbs');
     expect(preview.getAttribute('data-slug')).toBe('kid-lightbulbs');
     expect(preview.getAttribute('data-theme')).toBe('light');
-    expect(preview.getAttribute('data-max-links')).toBe('6');
+    expect(preview.getAttribute('data-platforms')).toBe('all');
+    expect(preview.getAttribute('data-layout')).toBe('flexible');
     expect(document.querySelector('script[src="/widget.js"]')).toBeTruthy();
     expect(document.querySelector('pre')!.textContent).toContain('data-slug="kid-lightbulbs"');
   });

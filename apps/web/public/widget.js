@@ -87,6 +87,18 @@
     light: { bg: '#ffffff', text: '#1a1a1a' },
   };
 
+  // data-layout: each link as an icon alone, a pill sized to its name, or a full-width row.
+  var LAYOUTS = ['icons', 'flexible', 'full'];
+
+  // data-platforms: "all" (every link the artist has, including ones they add later) or a
+  // comma-separated list of platform ids. Absent on embeds copied before it existed, which
+  // fall back to data-max-links.
+  function chosenPlatforms(value) {
+    if (value === null) return null;
+    if (value.trim() === 'all') return 'all';
+    return value.split(',').map(function (id) { return id.trim(); }).filter(Boolean);
+  }
+
   // Only #rgb or #rrggbb: the value goes into the widget's stylesheet, so anything else is
   // ignored rather than passed through.
   function hexColor(value) {
@@ -122,7 +134,13 @@
   function createWidget(container) {
     var artist = container.getAttribute('data-artist');
     var theme = container.getAttribute('data-theme') || 'dark';
-    var maxLinks = parseInt(container.getAttribute('data-max-links') || '6', 10);
+    var options = {
+      layout: LAYOUTS.indexOf(container.getAttribute('data-layout')) === -1
+        ? 'flexible'
+        : container.getAttribute('data-layout'),
+      platforms: chosenPlatforms(container.getAttribute('data-platforms')),
+      maxLinks: parseInt(container.getAttribute('data-max-links') || '6', 10),
+    };
 
     if (!artist) {
       container.innerHTML = '<p style="color:red">Unstream widget: missing data-artist attribute</p>';
@@ -164,6 +182,11 @@
       '.uw-link:hover { background: ' + badgeBgHover + '; }',
       '.uw-link-icon { font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; }',
       '.uw-link-icon svg { width: 14px; height: 14px; flex-shrink: 0; }',
+      '.uw-links-full { flex-direction: column; }',
+      '.uw-links-full .uw-link { display: flex; gap: 8px; padding: 9px 12px; }',
+      '.uw-links-icons .uw-link { padding: 8px; }',
+      '.uw-links-icons .uw-link-icon { width: 20px; height: 20px; font-size: 17px; }',
+      '.uw-links-icons .uw-link-icon svg { width: 18px; height: 18px; }',
       // An emoji drawn as a flat silhouette in the text colour, to sit beside the one-colour marks.
       '.uw-emoji { color: transparent; text-shadow: 0 0 0 ' + text + '; line-height: 1; }',
       '.uw-footer { display: flex; align-items: center; justify-content: space-between; }',
@@ -193,7 +216,7 @@
           root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
           return;
         }
-        renderWidget(root, data, maxLinks, slug);
+        renderWidget(root, data, options, slug);
       },
       function () {
         root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
@@ -237,10 +260,23 @@
     return load;
   }
 
-  function renderWidget(root, artist, maxLinks, slug) {
-    var directLinks = (artist.platforms || []).filter(isDirectLink);
-    var sorted = sortPlatforms(directLinks);
-    var shown = sorted.slice(0, maxLinks);
+  function renderWidget(root, artist, options, slug) {
+    var directLinks = (artist.platforms || []).filter(function (link) {
+      return isDirectLink(link) && platforms[link.sourceId];
+    });
+    var shown;
+    var hiddenCount = 0;
+    if (options.platforms) {
+      // Chosen by the artist: in the order they arranged their page, every link they picked.
+      shown = options.platforms === 'all'
+        ? directLinks
+        : directLinks.filter(function (link) { return options.platforms.indexOf(link.sourceId) !== -1; });
+    } else {
+      // An embed copied before platforms could be chosen: the first data-max-links by priority.
+      var sorted = sortPlatforms(directLinks);
+      shown = sorted.slice(0, options.maxLinks);
+      hiddenCount = sorted.length - shown.length;
+    }
     var profileUrl = BASE_URL + '/a/' + encodeURIComponent(slug);
 
     var html = '';
@@ -254,21 +290,23 @@
     html += '<p class="uw-subtitle">Support me directly at:</p>';
     html += '</div></a>';
 
-    html += '<div class="uw-links">';
+    var iconsOnly = options.layout === 'icons';
+    html += '<div class="uw-links uw-links-' + options.layout + '">';
     shown.forEach(function (link) {
       var p = platforms[link.sourceId];
-      if (!p) return;
-      html += '<a class="uw-link" href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener">';
+      // An icon-only link still names its platform, to screen readers and on hover.
+      var label = iconsOnly ? ' aria-label="' + escapeHtml(p.name) + '" title="' + escapeHtml(p.name) + '"' : '';
+      html += '<a class="uw-link" href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener"' + label + '>';
       html += '<span class="uw-link-icon">' + platformIcon(p) + '</span>';
-      html += escapeHtml(p.name);
+      if (!iconsOnly) html += escapeHtml(p.name);
       html += '</a>';
     });
     html += '</div>';
 
     html += '<div class="uw-footer">';
     html += '<a class="uw-powered" href="' + BASE_URL + '" target="_blank" rel="noopener">Powered by Unstream</a>';
-    if (sorted.length > maxLinks) {
-      html += '<a class="uw-more" href="' + profileUrl + '" target="_blank" rel="noopener">+' + (sorted.length - maxLinks) + ' more</a>';
+    if (hiddenCount > 0) {
+      html += '<a class="uw-more" href="' + profileUrl + '" target="_blank" rel="noopener">+' + hiddenCount + ' more</a>';
     }
     html += '</div>';
 

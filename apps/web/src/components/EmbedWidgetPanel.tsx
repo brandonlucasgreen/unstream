@@ -1,8 +1,32 @@
 import { useCallback, useState } from 'react';
 import { contrastRatio } from '../utils/colors';
+import { sources, sourceCategories } from '../services/sources';
+import type { SourceId } from '../types';
 import { EmbedWidgetPreview } from './EmbedWidgetPreview';
+import { PlatformIcon } from './PlatformIcon';
 
 type EmbedStyle = 'dark' | 'light' | 'custom';
+type EmbedLayout = 'icons' | 'flexible' | 'full';
+
+const LAYOUT_LABELS: Record<EmbedLayout, string> = {
+  icons: 'Icons only',
+  flexible: 'Flexible',
+  full: 'Full width',
+};
+
+/**
+ * The platforms the widget can draw, once each, in the order the artist's page lists them. Its
+ * table holds every platform in sources.ts except the category buckets and custom links ('other'),
+ * which platform-logo-copies.test.ts keeps true.
+ */
+export function embeddablePlatforms(links: { platform: string }[]): SourceId[] {
+  const ids: SourceId[] = [];
+  for (const { platform } of links) {
+    const known = platform in sources && !(platform in sourceCategories) && platform !== 'other';
+    if (known && !ids.includes(platform as SourceId)) ids.push(platform as SourceId);
+  }
+  return ids;
+}
 
 // widget.js's own THEMES. Custom colours start from the preset the artist was looking at.
 export const EMBED_THEMES = {
@@ -46,12 +70,29 @@ function ColourField({ label, value, onChange }: {
 }
 
 /** "Embed this profile on your website": the controls, a live preview and the snippet. */
-export function EmbedWidgetPanel({ artistName, slug }: { artistName: string; slug: string }) {
+export function EmbedWidgetPanel({ artistName, slug, links }: {
+  artistName: string;
+  slug: string;
+  /** The artist's links in page order, socials included. */
+  links: { platform: string }[];
+}) {
   const [style, setStyle] = useState<EmbedStyle>('dark');
   const [bg, setBg] = useState<string>(EMBED_THEMES.dark.bg);
   const [text, setText] = useState<string>(EMBED_THEMES.dark.text);
-  const [maxLinks, setMaxLinks] = useState(6);
+  const [layout, setLayout] = useState<EmbedLayout>('flexible');
+  // What the artist unticked, rather than what they ticked: with nothing unticked the embed
+  // carries "all", and picks up links they add later without a new snippet.
+  const [excluded, setExcluded] = useState<Set<SourceId>>(new Set());
   const [copied, setCopied] = useState(false);
+
+  const platforms = embeddablePlatforms(links);
+  const chosen = platforms.filter((id) => !excluded.has(id));
+  const toggle = (id: SourceId) => {
+    const next = new Set(excluded);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setExcluded(next);
+  };
 
   const chooseStyle = (next: EmbedStyle) => {
     if (next === 'custom' && style !== 'custom') {
@@ -69,7 +110,8 @@ export function EmbedWidgetPanel({ artistName, slug }: { artistName: string; slu
     ...(style === 'custom'
       ? { 'data-bg': bg, 'data-text': text }
       : { 'data-theme': style }),
-    'data-max-links': String(maxLinks),
+    'data-layout': layout,
+    'data-platforms': chosen.length === platforms.length ? 'all' : chosen.join(','),
   };
 
   const embedCode = `<div class="unstream-widget" ${Object.entries(attributes)
@@ -95,32 +137,17 @@ export function EmbedWidgetPanel({ artistName, slug }: { artistName: string; slu
         Embed this profile on your website
       </h2>
 
-      <div className="flex flex-wrap items-center gap-4 mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">Theme:</span>
-          <button onClick={() => chooseStyle('dark')} className={optionClass(style === 'dark')}>
-            Dark
-          </button>
-          <button onClick={() => chooseStyle('light')} className={optionClass(style === 'light')}>
-            Light
-          </button>
-          <button onClick={() => chooseStyle('custom')} className={optionClass(style === 'custom')}>
-            Custom
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">
-            Links: <span>{maxLinks}</span>
-          </span>
-          <input
-            type="range"
-            min={3}
-            max={12}
-            value={maxLinks}
-            onChange={(e) => setMaxLinks(Number(e.target.value))}
-            className="w-20 accent-accent-primary"
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-xs text-text-muted">Theme:</span>
+        <button onClick={() => chooseStyle('dark')} className={optionClass(style === 'dark')}>
+          Dark
+        </button>
+        <button onClick={() => chooseStyle('light')} className={optionClass(style === 'light')}>
+          Light
+        </button>
+        <button onClick={() => chooseStyle('custom')} className={optionClass(style === 'custom')}>
+          Custom
+        </button>
       </div>
 
       {style === 'custom' && (
@@ -134,6 +161,56 @@ export function EmbedWidgetPanel({ artistName, slug }: { artistName: string; slu
           )}
         </div>
       )}
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-xs text-text-muted">Links:</span>
+        {(Object.keys(LAYOUT_LABELS) as EmbedLayout[]).map((option) => (
+          <button key={option} onClick={() => setLayout(option)} className={optionClass(layout === option)}>
+            {LAYOUT_LABELS[option]}
+          </button>
+        ))}
+      </div>
+
+      <fieldset className="mb-3 border-0 p-0 m-0">
+        <legend className="text-xs text-text-muted mb-2 p-0">Platforms to include:</legend>
+        <div className="flex flex-wrap gap-2">
+          {platforms.map((id) => {
+            const included = !excluded.has(id);
+            return (
+              <label
+                key={id}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs cursor-pointer border transition-colors ${
+                  included
+                    ? 'border-accent-primary/40 bg-accent-primary/10 text-text-primary'
+                    : 'border-border text-text-muted'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={included}
+                  onChange={() => toggle(id)}
+                  className="accent-accent-primary"
+                />
+                <PlatformIcon
+                  sourceId={id}
+                  color="currentColor"
+                  emoji={sources[id].icon}
+                  className="w-3.5 h-3.5"
+                  emojiClassName=""
+                />
+                {sources[id].name}
+              </label>
+            );
+          })}
+        </div>
+        <p className="text-xs text-text-muted mt-2 mb-0">
+          {chosen.length === 0
+            ? 'Pick at least one platform to embed.'
+            : chosen.length === platforms.length
+              ? 'Every platform on your page, including any you add later.'
+              : "Only these. A platform you add to your page later won't appear until you copy a new snippet."}
+        </p>
+      </fieldset>
 
       {/* The real widget, drawn by /widget.js exactly as it will be on the artist's site. */}
       <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
@@ -149,7 +226,8 @@ export function EmbedWidgetPanel({ artistName, slug }: { artistName: string; slu
         </pre>
         <button
           onClick={handleCopy}
-          className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-link hover:bg-accent-primary/20 transition-colors"
+          disabled={chosen.length === 0}
+          className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-link hover:bg-accent-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {copied ? 'Copied!' : 'Copy'}
         </button>

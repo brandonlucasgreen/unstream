@@ -107,6 +107,57 @@ describe('widget.js', () => {
     );
   });
 
+  it('shows only the chosen platforms, in the order the artist arranged them', async () => {
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'bandcamp, officialsite' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(2));
+    const names = [...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent);
+    expect(names).toEqual(['\u2B50Official Site', 'Bandcamp']);
+    expect(shadowOf(el).querySelector('.uw-more')).toBeNull();
+  });
+
+  it('shows every platform for "all", with no cap', async () => {
+    const many = {
+      ...artist,
+      platforms: ['bandcamp', 'mirlo', 'ampwall', 'subvert', 'faircamp', 'kofi', 'patreon', 'discogs'].map(
+        (sourceId) => ({ sourceId, url: `https://example.com/${sourceId}` }),
+      ),
+    };
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve(many) });
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'all' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(8));
+    expect(shadowOf(el).querySelector('.uw-more')).toBeNull();
+  });
+
+  it('keeps an old embed to its link count, by priority, with a "+N more"', async () => {
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-max-links': '2' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(2));
+    expect([...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent)).toEqual(['Bandcamp', 'Subvert']);
+    expect(shadowOf(el).querySelector('.uw-more')!.textContent).toBe('+1 more');
+  });
+
+  it('draws icon-only links that still name their platform', async () => {
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-layout': 'icons' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelector('.uw-link')).toBeTruthy());
+    const bandcamp = shadowOf(el).querySelector('.uw-link')!;
+    expect(bandcamp.textContent).toBe('');
+    expect(bandcamp.getAttribute('aria-label')).toBe('Bandcamp');
+    expect(bandcamp.getAttribute('title')).toBe('Bandcamp');
+    expect(shadowOf(el).querySelector('.uw-links')!.className).toBe('uw-links uw-links-icons');
+  });
+
+  it('draws full-width rows, and falls back to flexible for a layout it does not know', async () => {
+    const full = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-layout': 'full' });
+    const unknown = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-layout': '"><script>' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(unknown).querySelector('.uw-links')).toBeTruthy());
+    expect(shadowOf(full).querySelector('.uw-links')!.className).toBe('uw-links uw-links-full');
+    expect(shadowOf(unknown).querySelector('.uw-links')!.className).toBe('uw-links uw-links-flexible');
+  });
+
   it('forgets a failed lookup, so the next widget tries again', async () => {
     fetchMock.mockRejectedValue(new Error('offline'));
     const first = addWidget({ 'data-artist': 'Kid Lightbulbs' });
