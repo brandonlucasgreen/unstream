@@ -37,7 +37,7 @@ describe('ArtistEditPage', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
-      if (init?.method === 'PUT') return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) });
+      if (init?.method === 'PUT') return Promise.resolve({ ok: true, json: () => Promise.resolve({ slug: 'kid-lightbulbs' }) });
       if (url.startsWith('/api/artist?')) return Promise.resolve({ ok: true, json: () => Promise.resolve(artist) });
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
     });
@@ -76,5 +76,20 @@ describe('ArtistEditPage', () => {
       { platform: 'divider' },
       { platform: 'other', url: 'https://kidlightbulbs.com', displayName: 'Website' },
     ]);
+  });
+
+  it('keeps Save, Cancel and the save result in a bar pinned to the bottom of the screen', async () => {
+    renderPage();
+    await screen.findByRole('button', { name: 'Move Bandcamp' });
+    const save = screen.getByRole('button', { name: 'Save changes' });
+    const bar = save.closest('.sticky')!;
+    expect(bar.className).toContain('bottom-0');
+    expect(bar.contains(screen.getByRole('link', { name: 'Cancel' }))).toBe(true);
+
+    fireEvent.click(save);
+    // By text: the drag-and-drop lists carry their own role="status" live regions.
+    const saved = await screen.findByText('Changes saved!');
+    expect(saved.getAttribute('role')).toBe('status');
+    expect(bar.contains(saved)).toBe(true);
   });
 });

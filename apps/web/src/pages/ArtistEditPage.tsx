@@ -488,18 +488,6 @@ export function ArtistEditPage() {
 
   return (
     <div className="space-y-8">
-      {form.error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
-          {form.error}
-        </div>
-      )}
-
-      {form.success && (
-        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-success text-sm">
-          {form.success}
-        </div>
-      )}
-
       {/* Artist Name */}
       <section className="space-y-2">
         <label htmlFor="name" className="block text-sm font-medium">
@@ -882,21 +870,36 @@ export function ArtistEditPage() {
         />
       </section>
 
-      {/* Save */}
-      <div className="flex items-center gap-4 pt-4 border-t border-border">
-        <button
-          onClick={handleSave}
-          disabled={form.saving}
-          className="px-6 py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
-        >
-          {form.saving ? 'Saving...' : 'Save changes'}
-        </button>
-        <Link
-          to="/my-artists"
-          className="text-sm text-text-muted hover:text-text-primary transition-colors"
-        >
-          Cancel
-        </Link>
+      {/* Save: pinned to the bottom of the screen while the form scrolls under it, as on
+          Promote, and settling into place above the Danger zone at the end. The page's messages
+          (a save's result, a photo lookup, a removal) show here too, so they're never off-screen
+          from the button that caused them. */}
+      <div className="sticky bottom-0 z-10 -mx-1 space-y-2 border-t border-border bg-bg-primary px-1 py-3">
+        {form.error && (
+          <div role="alert" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-error text-sm">
+            {form.error}
+          </div>
+        )}
+        {form.success && (
+          <div role="status" className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-success text-sm">
+            {form.success}
+          </div>
+        )}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleSave}
+            disabled={form.saving}
+            className="px-6 py-2 rounded-lg bg-accent-primary text-accent-foreground font-medium hover:bg-accent-primary/90 transition-colors disabled:opacity-50"
+          >
+            {form.saving ? 'Saving...' : 'Save changes'}
+          </button>
+          <Link
+            to="/my-artists"
+            className="text-sm text-text-muted hover:text-text-primary transition-colors"
+          >
+            Cancel
+          </Link>
+        </div>
       </div>
 
       {/* Danger zone — removing the claim lives here rather than on the dashboard, where it
