@@ -6,7 +6,7 @@ import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } f
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
-import { EmbedWidgetPreview } from './EmbedWidgetPreview';
+import { EmbedWidgetPanel } from './EmbedWidgetPanel';
 
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
@@ -16,11 +16,6 @@ interface RichArtistProfileProps {
   onUnsave?: () => void;
   isSaved?: boolean;
   disabledSave?: boolean;
-}
-
-// For a value pasted into the embed snippet's HTML attributes.
-function escapeAttribute(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 function getLocationText(artist: ArtistPagePayload['artist']): string {
@@ -46,26 +41,9 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
 
   // Embed widget state
   const [embedOpen, setEmbedOpen] = useState(false);
-  const [embedTheme, setEmbedTheme] = useState<'dark' | 'light'>('dark');
-  const [maxLinks, setMaxLinks] = useState(6);
-  const [copied, setCopied] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const shareUrl = `https://unstream.stream/a/${slug}`;
-
-  // data-slug lets the widget find this exact page; data-artist is its fallback and its label.
-  const embedCode = `<div class="unstream-widget" data-artist="${escapeAttribute(artist.name)}" data-slug="${slug}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
-<script src="https://unstream.stream/widget.js" async></script>`;
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(embedCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.warn('[RichArtistProfile] clipboard.writeText failed:', err);
-    }
-  }, [embedCode]);
 
   const handleLinkClick = useCallback((platform: string) => {
     analytics.trackArtistLinkClick(slug, platform);
@@ -188,81 +166,7 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
         </div>
       </div>
 
-      {embedOpen && (
-        <div className="pb-6 text-left">
-          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
-            Embed this profile on your website
-          </h2>
-          {/* Theme + Link count controls */}
-          <div className="flex flex-wrap items-center gap-4 mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-muted">Theme:</span>
-              <button
-                onClick={() => setEmbedTheme('dark')}
-                className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
-                  embedTheme === 'dark'
-                    ? 'bg-accent-primary/15 text-link'
-                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
-                }`}
-              >
-                Dark
-              </button>
-              <button
-                onClick={() => setEmbedTheme('light')}
-                className={`px-2.5 py-1 rounded text-xs font-medium border-none cursor-pointer font-body transition-colors ${
-                  embedTheme === 'light'
-                    ? 'bg-accent-primary/15 text-link'
-                    : 'bg-bg-secondary text-text-muted hover:text-text-primary'
-                }`}
-              >
-                Light
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-text-muted">
-                Links: <span>{maxLinks}</span>
-              </span>
-              <input
-                type="range"
-                min={3}
-                max={12}
-                value={maxLinks}
-                onChange={(e) => setMaxLinks(Number(e.target.value))}
-                className="w-20 accent-accent-primary"
-              />
-            </div>
-          </div>
-
-          {/* The real widget, drawn by /widget.js exactly as it will be on the artist's site. */}
-          <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
-            <div className="text-xs text-text-muted uppercase tracking-wider mb-3">
-              Embed preview
-            </div>
-            <EmbedWidgetPreview
-              artistName={artist.name}
-              slug={slug}
-              theme={embedTheme}
-              maxLinks={maxLinks}
-            />
-          </div>
-
-          {/* Code block */}
-          <div className="relative">
-            <pre className="bg-bg-secondary border border-border rounded-lg p-4 pr-16 overflow-x-auto text-xs text-text-muted font-mono whitespace-pre-wrap break-all">
-              {embedCode}
-            </pre>
-            <button
-              onClick={handleCopy}
-              className="absolute top-2 right-2 px-3 py-1 rounded text-xs font-medium border-none cursor-pointer font-body bg-accent-primary/10 text-link hover:bg-accent-primary/20 transition-colors"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <p className="text-xs text-text-muted mt-2">
-            Paste this into your website's HTML. The widget loads asynchronously and won't affect your page speed.
-          </p>
-        </div>
-      )}
+      {embedOpen && <EmbedWidgetPanel artistName={artist.name} slug={slug} />}
 
       {/* Content container */}
       <div className="pb-8">

@@ -82,10 +82,30 @@
     );
   }
 
+  var THEMES = {
+    dark: { bg: '#1a1a1a', text: '#f0f0f0' },
+    light: { bg: '#ffffff', text: '#1a1a1a' },
+  };
+
+  // Only #rgb or #rrggbb: the value goes into the widget's stylesheet, so anything else is
+  // ignored rather than passed through.
+  function hexColor(value) {
+    if (!value || !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return null;
+    if (value.length === 4) {
+      return '#' + value[1] + value[1] + value[2] + value[2] + value[3] + value[3];
+    }
+    return value;
+  }
+
+  function withOpacity(hex, opacity) {
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + opacity + ')';
+  }
+
   // The table's paths and emoji are our own constants, never data from the API, so they go in
   // unescaped.
   function platformIcon(p) {
-    if (!p.d) return p.emoji;
+    if (!p.d) return '<span class="uw-emoji">' + p.emoji + '</span>';
     var rule = p.fillRule ? ' fill-rule="' + p.fillRule + '" clip-rule="' + p.fillRule + '"' : '';
     return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path' + rule + ' d="' + p.d + '"/></svg>';
   }
@@ -111,13 +131,16 @@
 
     var shadow = container.attachShadow({ mode: 'open' });
 
-    var isDark = theme === 'dark';
-    var bg = isDark ? '#1a1a1a' : '#ffffff';
-    var text = isDark ? '#f0f0f0' : '#1a1a1a';
-    var textMuted = isDark ? '#999999' : '#666666';
-    var border = isDark ? '#2a2a2a' : '#e0e0e0';
-    var badgeBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-    var badgeBgHover = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)';
+    // Two colours set everything: data-bg and data-text when the artist picked their own, else
+    // the theme's pair. The muted text, border and pill shades are the text colour at lower
+    // opacity, so they suit any background the artist chooses.
+    var preset = THEMES[theme] || THEMES.dark;
+    var bg = hexColor(container.getAttribute('data-bg')) || preset.bg;
+    var text = hexColor(container.getAttribute('data-text')) || preset.text;
+    var textMuted = withOpacity(text, 0.62);
+    var border = withOpacity(text, 0.12);
+    var badgeBg = withOpacity(text, 0.08);
+    var badgeBgHover = withOpacity(text, 0.14);
 
     var style = document.createElement('style');
     // No @font-face import here, deliberately. This style element lives inside the shadow
@@ -141,6 +164,8 @@
       '.uw-link:hover { background: ' + badgeBgHover + '; }',
       '.uw-link-icon { font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; }',
       '.uw-link-icon svg { width: 14px; height: 14px; flex-shrink: 0; }',
+      // An emoji drawn as a flat silhouette in the text colour, to sit beside the one-colour marks.
+      '.uw-emoji { color: transparent; text-shadow: 0 0 0 ' + text + '; line-height: 1; }',
       '.uw-footer { display: flex; align-items: center; justify-content: space-between; }',
       '.uw-powered { font-size: 11px; color: ' + textMuted + '; text-decoration: none; transition: color 0.15s; }',
       '.uw-powered:hover { color: #ff6b35; }',

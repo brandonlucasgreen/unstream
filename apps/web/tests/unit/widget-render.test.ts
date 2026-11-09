@@ -79,6 +79,34 @@ describe('widget.js', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('draws in the colours the artist picked, and ignores anything that is not a hex colour', async () => {
+    const custom = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-bg': '#123456', 'data-text': '#fc0' });
+    const bad = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-theme': 'light', 'data-bg': 'red; } * { display: none', 'data-text': 'url(x)' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(bad).querySelector('.uw-link')).toBeTruthy());
+
+    const customCss = custom.shadowRoot!.querySelector('style')!.textContent!;
+    expect(customCss).toContain('.uw-root { font-family: "Stack Sans Headline", system-ui, sans-serif; background: #123456;');
+    expect(customCss).toContain('color: #ffcc00;');
+    expect(customCss).toContain('rgba(255,204,0,0.08)');
+
+    const badCss = bad.shadowRoot!.querySelector('style')!.textContent!;
+    expect(badCss).toContain('background: #ffffff;');
+    expect(badCss).not.toContain('display: none');
+    expect(badCss).not.toContain('url(x)');
+  });
+
+  it('draws an emoji icon as a silhouette in the text colour, like the marks', async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve(artist) });
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-text': '#112233' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelector('.uw-emoji')).toBeTruthy());
+    expect(shadowOf(el).querySelector('.uw-emoji')!.textContent).toBe('\u2B50');
+    expect(el.shadowRoot!.querySelector('style')!.textContent).toContain(
+      '.uw-emoji { color: transparent; text-shadow: 0 0 0 #112233;'
+    );
+  });
+
   it('forgets a failed lookup, so the next widget tries again', async () => {
     fetchMock.mockRejectedValue(new Error('offline'));
     const first = addWidget({ 'data-artist': 'Kid Lightbulbs' });

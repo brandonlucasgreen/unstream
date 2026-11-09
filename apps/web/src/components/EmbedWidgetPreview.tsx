@@ -30,17 +30,16 @@ function loadWidgetScript(): Promise<void> {
   return widgetScript;
 }
 
-interface EmbedWidgetPreviewProps {
-  artistName: string;
-  slug: string;
-  theme: 'dark' | 'light';
-  maxLinks: number;
-}
+/**
+ * Draws the widget from the same `data-*` attributes the embed snippet carries, so the preview
+ * can't show anything the snippet wouldn't.
+ */
+export function EmbedWidgetPreview({ attributes }: { attributes: Record<string, string> }) {
+  // The widget draws each container once, so any change swaps in a fresh container (the key
+  // below) and asks the widget to draw it. widget.js fetches the artist once per page, so
+  // dragging the slider or a colour picker doesn't refetch.
+  const key = JSON.stringify(attributes);
 
-export function EmbedWidgetPreview({ artistName, slug, theme, maxLinks }: EmbedWidgetPreviewProps) {
-  // The widget draws each container once, so a change of theme or link count swaps in a fresh
-  // container (the key below) and asks the widget to draw it. widget.js fetches the artist once
-  // per page, so dragging the slider doesn't refetch.
   useEffect(() => {
     let cancelled = false;
     loadWidgetScript()
@@ -51,16 +50,7 @@ export function EmbedWidgetPreview({ artistName, slug, theme, maxLinks }: EmbedW
     return () => {
       cancelled = true;
     };
-  }, [artistName, slug, theme, maxLinks]);
+  }, [key]);
 
-  return (
-    <div
-      key={`${slug}-${theme}-${maxLinks}`}
-      className="unstream-widget"
-      data-artist={artistName}
-      data-slug={slug}
-      data-theme={theme}
-      data-max-links={maxLinks}
-    />
-  );
+  return <div key={key} className="unstream-widget" {...attributes} />;
 }
