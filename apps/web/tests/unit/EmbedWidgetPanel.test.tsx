@@ -128,6 +128,13 @@ describe('EmbedWidgetPanel', () => {
     expect(screen.queryByRole('button', { name: "Use my page's order" })).toBeNull();
   });
 
+  it('puts a plain link to the artist page inside the snippet, for when the script never runs', () => {
+    render(<EmbedWidgetPanel artistName='The "Quoted" <Band>' slug="the-quoted-band" links={links} />);
+    expect(snippet()).toContain(
+      '<a href="https://unstream.stream/a/the-quoted-band">Support The &quot;Quoted&quot; &lt;Band> directly</a></div>',
+    );
+  });
+
   it.each(Object.entries(EMBED_THEMES))('seeds %s with the colours widget.js draws it in', (name, colours) => {
     expect(widgetSource).toContain(`    ${name}: { bg: '${colours.bg}', text: '${colours.text}' },`);
   });
