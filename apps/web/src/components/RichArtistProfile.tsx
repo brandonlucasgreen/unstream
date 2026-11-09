@@ -6,6 +6,9 @@ import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } f
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
+import { PlatformIcon } from './PlatformIcon';
+import { sources } from '../services/sources';
+import type { SourceId } from '../types';
 
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
@@ -243,7 +246,15 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                   key={link.platform + link.url}
                   className="flex items-center justify-between text-xs py-1.5 px-2 rounded border border-border"
                 >
-                  <span className="text-text-primary">
+                  {/* Drawn in the text colour, as /widget.js draws it on the artist's site. */}
+                  <span className="flex items-center gap-2 text-text-primary">
+                    <PlatformIcon
+                      sourceId={link.platform as SourceId}
+                      color="currentColor"
+                      emoji={sources[link.platform as SourceId]?.icon ?? ''}
+                      className="w-3.5 h-3.5 shrink-0"
+                      emojiClassName="w-3.5 text-center"
+                    />
                     {link.displayName || link.platform}
                   </span>
                   {link.payoutPercent && (

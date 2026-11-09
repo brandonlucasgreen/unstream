@@ -6,10 +6,13 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { PLATFORM_LOGO_PATHS, platformLogoSvg } from '../../../../api/shared/platform-logos';
 import { SIMPLE_ICON_PATHS } from '../../src/components/PlatformIcon';
+import { SOCIAL_ICON_PATHS } from '../../../../api/shared/social-icon-paths';
+import { sources, sourceCategories } from '../../src/services/sources';
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const extensionPopup = read('../../../extension/popup/popup.js');
 const macBrandIcons = read('../../../mac/Unstream/Views/Shared/BrandIcons.swift');
+const widget = read('../../public/widget.js');
 
 const logoIds = Object.keys(PLATFORM_LOGO_PATHS);
 
@@ -56,6 +59,48 @@ describe('Mac app platform marks', () => {
   it.each(markIds)('%s is drawn in the Mac app with the same fill rule', (id) => {
     const evenOdd = SIMPLE_ICON_PATHS[id]!.fillRule === 'evenodd' ? ', evenOdd: true' : '';
     expect(macBrandIcons).toContain(`"${id}": PlatformLogo(path: BrandIconPaths.${id}${evenOdd}),`);
+  });
+});
+
+// The embed widget (public/widget.js) runs on artists' own sites and is served as-is, so it keeps
+// its own table. It drew emoji for most platforms (🎵 for Bandcamp) and skipped any platform it
+// didn't list (Subvert), while the embed preview on the artist page showed no icons at all.
+describe('embed widget platforms', () => {
+  // widget.js keeps every emoji as \u escapes: a partner page served in another charset would
+  // otherwise decode the script's raw UTF-8 into mojibake.
+  const jsEscape = (text: string) =>
+    [...text]
+      .flatMap((ch) => [...Array(ch.length).keys()].map((i) => ch.charCodeAt(i)))
+      .map((code) => '\\u' + code.toString(16).toUpperCase().padStart(4, '0'))
+      .join('');
+
+  it('has no raw non-ASCII text outside its comments', () => {
+    const code = widget.split('\n').filter((line) => !line.trimStart().startsWith('//'));
+    expect(code.filter((line) => /[^\x00-\x7F]/.test(line))).toEqual([]);
+  });
+
+  const widgetTable = new Map(
+    [...widget.matchAll(/^ {4}([a-z]+): \{ name: '([^']*)', (d|emoji): /gm)].map((m) => [m[1], m[2]]),
+  );
+  const platformIds = Object.keys(sources).filter(
+    (id) => !(id in sourceCategories) && id !== 'other',
+  ) as (keyof typeof sources)[];
+
+  it('lists every platform the site draws, by the same name', () => {
+    expect(Object.fromEntries(widgetTable)).toEqual(
+      Object.fromEntries(platformIds.map((id) => [id, sources[id].name])),
+    );
+  });
+
+  it.each(platformIds)('%s has the same mark (or emoji) as the site', (id) => {
+    const mark = SIMPLE_ICON_PATHS[id as keyof typeof SIMPLE_ICON_PATHS] ?? SOCIAL_ICON_PATHS[id];
+    const name = sources[id].name;
+    if (mark) {
+      const rule = 'fillRule' in mark && mark.fillRule ? `, fillRule: '${mark.fillRule}'` : '';
+      expect(widget).toContain(`    ${id}: { name: '${name}', d: '${mark.d}'${rule} },`);
+    } else {
+      expect(widget).toContain(`    ${id}: { name: '${name}', emoji: '${jsEscape(sources[id].icon)}' },`);
+    }
   });
 });
 
