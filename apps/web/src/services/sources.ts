@@ -26,7 +26,7 @@ export const sources: Record<SourceId, Source> = {
     name: 'Mirlo',
     description: 'Open source patronage platform',
     color: '#BE3455',
-    icon: '🪺',
+    icon: '🐦‍⬛',
     category: 'marketplace',
     hasEmbed: false,
     searchUrlTemplate: 'https://mirlo.space/search?query={query}',
@@ -86,7 +86,7 @@ export const sources: Record<SourceId, Source> = {
     name: 'Faircamp',
     description: 'Decentralized static music sites',
     color: '#22c55e',
-    icon: '🏕️',
+    icon: '⛺️',
     // The artist's self-hosted page IS their official page (UNS-221).
     category: 'official',
     sectionCategory: 'official',

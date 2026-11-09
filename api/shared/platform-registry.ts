@@ -56,7 +56,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
   mirlo: {
     name: 'Mirlo',
     color: '#BE3455',
-    icon: '🪺',
+    icon: '🐦‍⬛',
     category: 'marketplace',
     payoutPercent: '86-90%',
     // Verified live 2026-08-05: every trackGroup is a download. Artists can link a merch store
@@ -165,7 +165,7 @@ export const PLATFORMS: Record<string, PlatformMeta> = {
   faircamp: {
     name: 'Faircamp',
     color: '#22c55e',
-    icon: '🏕️',
+    icon: '⛺️',
     // The artist's self-hosted page IS their official page (UNS-221) — the same role
     // officialsite plays for a hosted site.
     category: 'official',
