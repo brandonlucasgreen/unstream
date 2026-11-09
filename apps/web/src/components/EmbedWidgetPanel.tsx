@@ -37,8 +37,8 @@ export const EMBED_THEMES = {
 // Below WCAG AA for body text, the widget's small labels get hard to read.
 const MIN_CONTRAST = 4.5;
 
-// For a value pasted into the embed snippet's HTML attributes.
-function escapeAttribute(value: string): string {
+// For a value pasted into the embed snippet's HTML (attributes and the fallback link's text).
+function escapeForSnippet(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
@@ -144,9 +144,17 @@ export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }
     'data-platforms': platformsAttribute(platforms, ordered, excluded),
   };
 
+  // What the embed shows if widget.js never runs (a content blocker, scripts off, a network
+  // failure): a plain link to the artist's page. The widget draws into a shadow root, which hides
+  // the link once it has rendered, so visitors see one or the other, never both.
+  const fallback = {
+    href: `https://unstream.stream/a/${encodeURIComponent(slug)}`,
+    text: `Support ${artistName} directly`,
+  };
+
   const embedCode = `<div class="unstream-widget" ${Object.entries(attributes)
-    .map(([name, value]) => `${name}="${escapeAttribute(value)}"`)
-    .join(' ')}></div>
+    .map(([name, value]) => `${name}="${escapeForSnippet(value)}"`)
+    .join(' ')}><a href="${fallback.href}">${escapeForSnippet(fallback.text)}</a></div>
 <script src="https://unstream.stream/widget.js" async></script>`;
 
   const lowContrast = style === 'custom' && contrastRatio(text, bg) < MIN_CONTRAST;
@@ -241,7 +249,7 @@ export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }
         <div className="text-xs text-text-muted uppercase tracking-wider mb-3">
           Embed preview
         </div>
-        <EmbedWidgetPreview attributes={attributes} />
+        <EmbedWidgetPreview attributes={attributes} fallback={fallback} />
       </div>
 
       <div className="relative">
