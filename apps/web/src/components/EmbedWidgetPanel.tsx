@@ -89,11 +89,13 @@ export function platformsAttribute(
 }
 
 /** "Embed this profile on your website": the controls, a live preview and the snippet. */
-export function EmbedWidgetPanel({ artistName, slug, links }: {
+export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }: {
   artistName: string;
   slug: string;
   /** The artist's links in page order, socials included. */
   links: { platform: string }[];
+  /** Off where the page around it already says what this is (the Promote tab). */
+  showHeading?: boolean;
 }) {
   const [style, setStyle] = useState<EmbedStyle>('dark');
   const [bg, setBg] = useState<string>(EMBED_THEMES.dark.bg);
@@ -161,9 +163,11 @@ export function EmbedWidgetPanel({ artistName, slug, links }: {
 
   return (
     <div className="pb-6 text-left">
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
-        Embed this profile on your website
-      </h2>
+      {showHeading && (
+        <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+          Embed this profile on your website
+        </h2>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-xs text-text-muted">Theme:</span>
