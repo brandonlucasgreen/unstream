@@ -1410,7 +1410,7 @@ async function searchAllPlatforms(
   mode: SearchMode,
   deferEnrichment: boolean,
   timer: SearchTimer,
-): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean }> {
+): Promise<{ results: AggregatedResult[]; enrichmentApplied: boolean; failedSources: string[] }> {
   // Merge overrides come from Supabase and are needed in Phase 2.5 — start the
   // fetch now so it rides along with the platform fan-out instead of adding a
   // round-trip afterwards. getMergeOverrides catches its own errors ([] on failure).
@@ -1479,6 +1479,16 @@ async function searchAllPlatforms(
     ['even', evenResults],
     ['musicbrainz', musicbrainzResult],
   ];
+  // Sources that didn't answer this search, so an empty answer can say it isn't the whole story.
+  // MusicBrainz reports a failed search as a resolved `searchFailed` rather than a rejection.
+  const failedSources: string[] = [];
+  for (const [platform, result] of platformSettledResults) {
+    if (result.status === 'rejected') failedSources.push(platform);
+  }
+  if (musicbrainzResult.status === 'fulfilled' && musicbrainzResult.value?.searchFailed) {
+    failedSources.push('musicbrainz');
+  }
+
   for (const [platform, result] of platformSettledResults) {
     if (result.status === 'rejected') {
       const error = result.reason as Error;
@@ -1619,7 +1629,7 @@ async function searchAllPlatforms(
   // how artists shipped without their official site: the client saw
   // hasPendingEnrichment: false and never called Phase 2 to fill the gap.
   const enrichmentApplied = mbData !== null && mbData.artistName !== null && mbData.enrichmentComplete;
-  return { results: finalResults, enrichmentApplied };
+  return { results: finalResults, enrichmentApplied, failedSources };
 }
 
 /**
@@ -1712,10 +1722,30 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     const storedArtists = await storedArtistsPromise;
     const results = searchResult.results;
 
+    // Fold stored artists in: claimed cards replace generic same-name results
+    // in place, known artists fill holes the platforms missed.
+    const finalResults = mergeStoredArtistsIntoResults(results, storedArtists, normalizedQuery);
+
     // UC5: Capture zero-result searches for monitoring (volume signal for coverage gaps)
-    if (results.length === 0) {
-      // Dedupe: only capture once per unique normalized query per 24h
-      const shouldCapture = await checkSentryDedup(`uc5:${normalizedQuery}`, 24 * 60 * 60);
+    //
+    // Counted after stored artists are folded in: a fan who got a stored card did not get an
+    // empty page, and counting before the merge reported searches answered from storage as
+    // coverage gaps.
+    //
+    // An empty answer from a search where a source didn't answer, or where MusicBrainz was left
+    // for the client's Phase 2, isn't a coverage gap either; it is captured all the same, but
+    // tagged `search_complete:no` so `search_complete:yes` is the real gap list. Sampled in
+    // November 2026, zero-result events for Grateful Dead and BTS both followed a MusicBrainz 503.
+    if (finalResults.length === 0) {
+      const incompleteReasons = [
+        ...searchResult.failedSources,
+        ...(deferEnrichment && !searchResult.enrichmentApplied ? ['musicbrainz-deferred'] : []),
+      ];
+      const searchComplete = incompleteReasons.length === 0;
+      // Dedupe: only capture once per unique normalized query per 24h. Incomplete answers
+      // keep their own key, so an outage doesn't hide the same query's real gap for a day.
+      const dedupKey = searchComplete ? `uc5:${normalizedQuery}` : `uc5:incomplete:${normalizedQuery}`;
+      const shouldCapture = await checkSentryDedup(dedupKey, 24 * 60 * 60);
       if (shouldCapture) {
         Sentry.captureMessage('Search returned 0 results', {
           level: 'info',
@@ -1733,6 +1763,8 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
             // real artist name and we have no coverage; 'fuzzy' means a human typed
             // it and it may just be a typo. Very different follow-ups.
             search_mode: mode,
+            search_complete: searchComplete ? 'yes' : 'no',
+            ...(searchComplete ? {} : { incomplete_sources: incompleteReasons.join(',') }),
           },
           extra: {
             query,
@@ -1742,9 +1774,6 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       }
     }
 
-    // Fold stored artists in: claimed cards replace generic same-name results
-    // in place, known artists fill holes the platforms missed.
-    const finalResults = mergeStoredArtistsIntoResults(results, storedArtists, normalizedQuery);
     // Where each artist card is stored, decided once: the save below writes there, and the card's
     // links point there (attachArtistPageSlugs).
     const slugs = recordSlugs(finalResults);
