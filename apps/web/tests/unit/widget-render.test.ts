@@ -107,13 +107,38 @@ describe('widget.js', () => {
     );
   });
 
-  it('shows only the chosen platforms, in the order the artist arranged them', async () => {
+  it('shows only the chosen platforms, in the order the embed lists them', async () => {
     const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'bandcamp, officialsite' });
     (0, eval)(widgetSource);
     await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(2));
     const names = [...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent);
-    expect(names).toEqual(['\u2B50Official Site', 'Bandcamp']);
+    expect(names).toEqual(['Bandcamp', '\u2B50Official Site']);
     expect(shadowOf(el).querySelector('.uw-more')).toBeNull();
+  });
+
+  it('follows the listed ones with every other link, in page order, after a "*"', async () => {
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'bandcamp,*' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(3));
+    const names = [...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent);
+    expect(names).toEqual(['Bandcamp', '\u2B50Official Site', 'Subvert']);
+  });
+
+  it('keeps two links on one platform together, in page order, at that platform\'s place', async () => {
+    const twoBandcamps = {
+      ...artist,
+      platforms: [
+        { sourceId: 'bandcamp', url: 'https://one.bandcamp.com' },
+        { sourceId: 'subvert', url: 'https://subvert.fm/x' },
+        { sourceId: 'bandcamp', url: 'https://two.bandcamp.com' },
+      ],
+    };
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve(twoBandcamps) });
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'subvert,bandcamp' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelectorAll('.uw-link')).toHaveLength(3));
+    const hrefs = [...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['https://subvert.fm/x', 'https://one.bandcamp.com', 'https://two.bandcamp.com']);
   });
 
   it('shows every platform for "all", with no cap', async () => {

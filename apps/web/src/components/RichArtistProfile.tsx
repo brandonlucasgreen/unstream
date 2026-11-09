@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { analytics } from '../services/analytics';
 import { resolveSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
@@ -6,7 +6,6 @@ import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } f
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
-import { EmbedWidgetPanel } from './EmbedWidgetPanel';
 
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
@@ -17,6 +16,12 @@ interface RichArtistProfileProps {
   isSaved?: boolean;
   disabledSave?: boolean;
 }
+
+// Loaded only when the artist opens Embed: it carries the drag-and-drop library, which no fan
+// viewing an artist page needs.
+const EmbedWidgetPanel = lazy(() =>
+  import('./EmbedWidgetPanel').then((module) => ({ default: module.EmbedWidgetPanel })),
+);
 
 function getLocationText(artist: ArtistPagePayload['artist']): string {
   const region = artist.country || artist.countryCode;
@@ -167,11 +172,13 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
       </div>
 
       {embedOpen && (
-        <EmbedWidgetPanel
-          artistName={artist.name}
-          slug={slug}
-          links={[...links, ...payload.socialLinks]}
-        />
+        <Suspense fallback={<p className="pb-6 text-xs text-text-muted">Loading embed options…</p>}>
+          <EmbedWidgetPanel
+            artistName={artist.name}
+            slug={slug}
+            links={[...links, ...payload.socialLinks]}
+          />
+        </Suspense>
       )}
 
       {/* Content container */}

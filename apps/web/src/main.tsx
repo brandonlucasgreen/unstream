@@ -47,6 +47,7 @@ const ArtistPromotePage = lazyWithRetry(() => import('./pages/ArtistPromotePage.
 const PromoteTabsLayout = lazyWithRetry(() => import('./components/PromoteTabs.tsx').then(m => ({ default: m.PromoteTabsLayout })))
 const PromoteCampaignsPage = lazyWithRetry(() => import('./pages/PromoteCampaignsPage.tsx').then(m => ({ default: m.PromoteCampaignsPage })))
 const PromoteAssetsPage = lazyWithRetry(() => import('./pages/PromoteAssetsPage.tsx').then(m => ({ default: m.PromoteAssetsPage })))
+const PromoteEmbedPage = lazyWithRetry(() => import('./pages/PromoteEmbedPage.tsx').then(m => ({ default: m.PromoteEmbedPage })))
 // One frame per page an artist manages from /my-artists, each knowing which page it is.
 const loadSettingsLayout = () => import('./pages/ArtistSettingsLayout.tsx')
 const AnalyticsLayout = lazyWithRetry(() => loadSettingsLayout().then(m => ({ default: () => <m.ArtistSettingsLayout section="analytics" /> })))
@@ -171,6 +172,7 @@ createRoot(document.getElementById('root')!).render(
                   <Route index element={<ArtistPromotePage />} />
                   <Route path="campaigns" element={<PromoteCampaignsPage />} />
                   <Route path="assets" element={<PromoteAssetsPage />} />
+                  <Route path="embed" element={<PromoteEmbedPage />} />
                 </Route>
               </Route>
               <Route path="/artist-edit/:slug/releases" element={<RedirectToReleases />} />

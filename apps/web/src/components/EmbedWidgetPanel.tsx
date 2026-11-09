@@ -3,7 +3,7 @@ import { contrastRatio } from '../utils/colors';
 import { sources, sourceCategories } from '../services/sources';
 import type { SourceId } from '../types';
 import { EmbedWidgetPreview } from './EmbedWidgetPreview';
-import { PlatformIcon } from './PlatformIcon';
+import { EmbedPlatformList } from './EmbedPlatformList';
 
 type EmbedStyle = 'dark' | 'light' | 'custom';
 type EmbedLayout = 'icons' | 'flexible' | 'full';
@@ -69,12 +69,33 @@ function ColourField({ label, value, onChange }: {
   );
 }
 
+function isReordered(pageOrder: SourceId[], embedOrder: SourceId[]): boolean {
+  return embedOrder.some((id, index) => id !== pageOrder[index]);
+}
+
+/**
+ * The snippet's data-platforms. Everything in page order is "all"; everything reordered keeps a
+ * trailing "*", so a platform added to the page later still appears (at the end). A subset is
+ * exactly that subset, in embed order.
+ */
+export function platformsAttribute(
+  pageOrder: SourceId[],
+  embedOrder: SourceId[],
+  excluded: Set<SourceId>,
+): string {
+  const chosen = embedOrder.filter((id) => !excluded.has(id));
+  if (chosen.length < pageOrder.length) return chosen.join(',');
+  return isReordered(pageOrder, embedOrder) ? [...chosen, '*'].join(',') : 'all';
+}
+
 /** "Embed this profile on your website": the controls, a live preview and the snippet. */
-export function EmbedWidgetPanel({ artistName, slug, links }: {
+export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }: {
   artistName: string;
   slug: string;
   /** The artist's links in page order, socials included. */
   links: { platform: string }[];
+  /** Off where the page around it already says what this is (the Promote tab). */
+  showHeading?: boolean;
 }) {
   const [style, setStyle] = useState<EmbedStyle>('dark');
   const [bg, setBg] = useState<string>(EMBED_THEMES.dark.bg);
@@ -83,10 +104,19 @@ export function EmbedWidgetPanel({ artistName, slug, links }: {
   // What the artist unticked, rather than what they ticked: with nothing unticked the embed
   // carries "all", and picks up links they add later without a new snippet.
   const [excluded, setExcluded] = useState<Set<SourceId>>(new Set());
+  // The embed's own order, starting from the page's. Changing it never touches the page.
+  const [order, setOrder] = useState<SourceId[]>(() => embeddablePlatforms(links));
   const [copied, setCopied] = useState(false);
 
   const platforms = embeddablePlatforms(links);
-  const chosen = platforms.filter((id) => !excluded.has(id));
+  // Robust to the page's links changing under the panel: drop the gone, append the new.
+  const ordered = [
+    ...order.filter((id) => platforms.includes(id)),
+    ...platforms.filter((id) => !order.includes(id)),
+  ];
+  const chosen = ordered.filter((id) => !excluded.has(id));
+  const allChosen = chosen.length === platforms.length;
+  const reordered = isReordered(platforms, ordered);
   const toggle = (id: SourceId) => {
     const next = new Set(excluded);
     if (next.has(id)) next.delete(id);
@@ -111,7 +141,7 @@ export function EmbedWidgetPanel({ artistName, slug, links }: {
       ? { 'data-bg': bg, 'data-text': text }
       : { 'data-theme': style }),
     'data-layout': layout,
-    'data-platforms': chosen.length === platforms.length ? 'all' : chosen.join(','),
+    'data-platforms': platformsAttribute(platforms, ordered, excluded),
   };
 
   const embedCode = `<div class="unstream-widget" ${Object.entries(attributes)
@@ -133,9 +163,11 @@ export function EmbedWidgetPanel({ artistName, slug, links }: {
 
   return (
     <div className="pb-6 text-left">
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
-        Embed this profile on your website
-      </h2>
+      {showHeading && (
+        <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">
+          Embed this profile on your website
+        </h2>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-xs text-text-muted">Theme:</span>
@@ -172,43 +204,35 @@ export function EmbedWidgetPanel({ artistName, slug, links }: {
       </div>
 
       <fieldset className="mb-3 border-0 p-0 m-0">
-        <legend className="text-xs text-text-muted mb-2 p-0">Platforms to include:</legend>
-        <div className="flex flex-wrap gap-2">
-          {platforms.map((id) => {
-            const included = !excluded.has(id);
-            return (
-              <label
-                key={id}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs cursor-pointer border transition-colors ${
-                  included
-                    ? 'border-accent-primary/40 bg-accent-primary/10 text-text-primary'
-                    : 'border-border text-text-muted'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={included}
-                  onChange={() => toggle(id)}
-                  className="accent-accent-primary"
-                />
-                <PlatformIcon
-                  sourceId={id}
-                  color="currentColor"
-                  emoji={sources[id].icon}
-                  className="w-3.5 h-3.5"
-                  emojiClassName=""
-                />
-                {sources[id].name}
-              </label>
-            );
-          })}
-        </div>
+        <legend className="text-xs text-text-muted mb-2 p-0">
+          Platforms to include, in order (drag to rearrange; this doesn't change your page):
+        </legend>
+        <EmbedPlatformList
+          order={ordered}
+          excluded={excluded}
+          onReorder={setOrder}
+          onToggle={toggle}
+        />
         <p className="text-xs text-text-muted mt-2 mb-0">
           {chosen.length === 0
             ? 'Pick at least one platform to embed.'
-            : chosen.length === platforms.length
-              ? 'Every platform on your page, including any you add later.'
-              : "Only these. A platform you add to your page later won't appear until you copy a new snippet."}
+            : !allChosen
+              ? "Only these. A platform you add to your page later won't appear until you copy a new snippet."
+              : reordered
+                ? 'In this order. A platform you add to your page later goes at the end.'
+                : 'Every platform on your page, in its order, including any you add later.'}
+          {reordered && (
+            <>
+              {' '}
+              <button
+                type="button"
+                onClick={() => setOrder(platforms)}
+                className="text-link bg-transparent border-none p-0 cursor-pointer underline font-body text-xs"
+              >
+                Use my page's order
+              </button>
+            </>
+          )}
         </p>
       </fieldset>
 

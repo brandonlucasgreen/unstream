@@ -57,6 +57,12 @@ const basePayload: ArtistPagePayload = {
   bandcampFriday: false,
 };
 
+// The embed panel is lazy-loaded, so opening it is asynchronous.
+async function openEmbed() {
+  fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+  await screen.findByText('Embed preview');
+}
+
 describe('RichArtistProfile', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -242,9 +248,9 @@ describe('RichArtistProfile', () => {
     expect(screen.queryByText('Follow')).toBeNull();
   });
 
-  it('renders the embed widget with the artist name in the code snippet', () => {
+  it('renders the embed widget with the artist name in the code snippet', async () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    await openEmbed();
     const codeBlock = document.querySelector('pre');
     expect(codeBlock).toBeTruthy();
     expect(codeBlock!.textContent).toContain('data-artist="Kid Lightbulbs"');
@@ -252,9 +258,9 @@ describe('RichArtistProfile', () => {
     expect(codeBlock!.textContent).toContain('class="unstream-widget"');
   });
 
-  it('updates the embed code when the theme, link style or platforms change', () => {
+  it('updates the embed code when the theme, link style or platforms change', async () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    await openEmbed();
     const codeBlock = document.querySelector('pre');
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Light' })[0]);
@@ -269,9 +275,9 @@ describe('RichArtistProfile', () => {
     expect(codeBlock!.textContent).toContain('data-platforms="bandcamp,instagram"');
   });
 
-  it('previews with the real widget, drawn from the same settings as the snippet', () => {
+  it('previews with the real widget, drawn from the same settings as the snippet', async () => {
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    await openEmbed();
     fireEvent.click(screen.getAllByRole('button', { name: 'Light' })[0]);
 
     const preview = document.querySelector('.unstream-widget')!;
@@ -284,10 +290,10 @@ describe('RichArtistProfile', () => {
     expect(document.querySelector('pre')!.textContent).toContain('data-slug="kid-lightbulbs"');
   });
 
-  it('escapes the artist name in the snippet', () => {
+  it('escapes the artist name in the snippet', async () => {
     const payload = { ...basePayload, artist: { ...basePayload.artist, name: 'The "Quoted" Band' } };
     render(<RichArtistProfile payload={payload} slug="the-quoted-band" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    await openEmbed();
     expect(document.querySelector('pre')!.textContent).toContain('data-artist="The &quot;Quoted&quot; Band"');
   });
 
@@ -296,7 +302,7 @@ describe('RichArtistProfile', () => {
     Object.assign(navigator, { clipboard: { writeText } });
 
     render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    await openEmbed();
 
     const copyBtn = screen.getByText('Copy');
     fireEvent.click(copyBtn);
