@@ -393,9 +393,24 @@ export function applyLinkSuppressions(
 export { normalizeAccents, foldToAscii };
 
 // Normalize a search query for API calls
-// Removes accents but preserves spaces and basic punctuation
+// Removes accents and YouTube channel suffixes, but preserves spaces and basic punctuation
 export function normalizeSearchQuery(query: string): string {
-  return normalizeAccents(query);
+  return stripYouTubeChannelSuffix(normalizeAccents(query));
+}
+
+/**
+ * Drop the suffix YouTube puts on a channel name: "Anthrax - Topic" (the auto-generated
+ * channel for an artist's catalogue) and "FaithlessVEVO". Extension builds up to 2.9.3 send
+ * the channel name from YouTube's Media Session metadata as the artist, suffix and all, so
+ * every one of these came back empty and landed in the zero-result log.
+ *
+ * Case-sensitive on purpose — YouTube always writes them this way — and VEVO only when glued
+ * to a lowercase letter or digit, so a name that merely ends in those letters is left alone.
+ * A query that is nothing but the suffix is returned unchanged.
+ */
+export function stripYouTubeChannelSuffix(query: string): string {
+  const stripped = query.replace(/\s+-\s+Topic$/, '').replace(/(?<=[a-z0-9])VEVO$/, '').trim();
+  return stripped || query;
 }
 
 /**

@@ -29,9 +29,20 @@
     return weakMatches >= 2;
   }
 
-  function isTopicChannel() {
-    const el = document.querySelector('#channel-name a');
-    return el && (el.textContent?.trim() || '').endsWith(' - Topic');
+  function channelNameFromPage() {
+    return document.querySelector('#channel-name a')?.textContent?.trim() || '';
+  }
+
+  // "Anthrax - Topic" is YouTube's auto-generated channel for an artist's catalogue.
+  function isTopicChannel(channelName) {
+    return /\s-\sTopic$/.test(channelName);
+  }
+
+  function cleanChannelName(channelName) {
+    return channelName
+      .replace(/\s*-\s*Topic$/i, '')
+      .replace(/VEVO$/i, '')
+      .trim();
   }
 
   function hasMusicCategory() {
@@ -73,38 +84,50 @@
     return null;
   }
 
+  // Media Session metadata comes first when YouTube publishes it, but on youtube.com its
+  // `artist` is the channel name for every video — a podcast, a weather report, a gaming
+  // channel. Returning it as-is skipped the music check below and sent each of those to
+  // search as an artist. So both sources go through
+  // the same check and the same channel-name cleanup.
   function getNowPlaying() {
+    let videoTitle;
+    let channelName;
+
     const ms = getFromMediaSession();
-    if (ms) return ms;
+    if (ms) {
+      videoTitle = ms.title.trim();
+      channelName = ms.artist.trim();
+    } else {
+      const video = document.querySelector('video');
+      if (!video || video.paused) return null;
 
-    const video = document.querySelector('video');
-    if (!video || video.paused) return null;
-
-    const titleElement =
-      document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
-      document.querySelector('h1.ytd-video-primary-info-renderer yt-formatted-string') ||
-      document.querySelector('#title h1 yt-formatted-string');
-    if (!titleElement) return null;
-
-    const videoTitle = titleElement.textContent?.trim();
+      const titleElement =
+        document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
+        document.querySelector('h1.ytd-video-primary-info-renderer yt-formatted-string') ||
+        document.querySelector('#title h1 yt-formatted-string');
+      videoTitle = titleElement?.textContent?.trim();
+      channelName = channelNameFromPage();
+    }
     if (!videoTitle) return null;
+
+    const topic = isTopicChannel(channelName) || isTopicChannel(channelNameFromPage());
 
     // Require music signals: strong keyword match, topic channel, music
     // category, or a weak keyword match combined with music category
-    const isMusic = isMusicVideo(videoTitle) || isTopicChannel() || hasMusicCategory();
+    const isMusic = isMusicVideo(videoTitle) || topic || hasMusicCategory();
     if (!isMusic) return null;
+
+    // A topic channel's video is titled with the song alone, and the channel is the artist.
+    if (topic) {
+      const artist = cleanChannelName(channelName || channelNameFromPage());
+      return artist ? { artist, title: videoTitle } : null;
+    }
 
     const extracted = extractArtist(videoTitle);
     if (extracted) return extracted;
 
-    const channelEl = document.querySelector('#channel-name a');
-    if (channelEl) {
-      const artist = channelEl.textContent?.trim()
-        ?.replace(/\s*-\s*Topic$/i, '')
-        ?.replace(/VEVO$/i, '')
-        ?.trim();
-      if (artist) return { artist, title: videoTitle };
-    }
+    const artist = cleanChannelName(channelName || channelNameFromPage());
+    if (artist) return { artist, title: videoTitle };
 
     return null;
   }

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   normalizeAccents,
   normalizeSearchQuery,
+  stripYouTubeChannelSuffix,
   normalizeForComparison,
   namesMatch,
   namesEqualIgnoringArticles,
@@ -75,6 +76,32 @@ describe('normalizeSearchQuery', () => {
   it('removes accents but preserves spaces and punctuation', () => {
     expect(normalizeSearchQuery('Tanerélle')).toBe('Tanerelle');
     expect(normalizeSearchQuery('Four Tet')).toBe('Four Tet');
+  });
+
+  it('drops YouTube channel suffixes', () => {
+    expect(normalizeSearchQuery('Anthrax - Topic')).toBe('Anthrax');
+    expect(normalizeSearchQuery('FaithlessVEVO')).toBe('Faithless');
+  });
+});
+
+describe('stripYouTubeChannelSuffix', () => {
+  it('drops the auto-generated topic-channel suffix', () => {
+    expect(stripYouTubeChannelSuffix('Anthrax - Topic')).toBe('Anthrax');
+    expect(stripYouTubeChannelSuffix('Glass Beach - Topic')).toBe('Glass Beach');
+  });
+
+  it('drops a VEVO suffix glued to the name', () => {
+    expect(stripYouTubeChannelSuffix('FaithlessVEVO')).toBe('Faithless');
+    expect(stripYouTubeChannelSuffix('TherapyVEVO')).toBe('Therapy');
+  });
+
+  it('leaves names that only look like it alone', () => {
+    expect(stripYouTubeChannelSuffix('Topic')).toBe('Topic');
+    expect(stripYouTubeChannelSuffix('Hot Topic')).toBe('Hot Topic');
+    expect(stripYouTubeChannelSuffix('VEVO')).toBe('VEVO');
+    expect(stripYouTubeChannelSuffix('DJ VEVO')).toBe('DJ VEVO');
+    expect(stripYouTubeChannelSuffix('Off - topic')).toBe('Off - topic');
+    expect(stripYouTubeChannelSuffix('Grateful Dead')).toBe('Grateful Dead');
   });
 });
 
