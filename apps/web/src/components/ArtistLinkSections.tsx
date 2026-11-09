@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import type { ArtistPagePayload } from '../types/artist-page';
 import { sources } from '../services/sources';
 import { groupLinksIntoSections, type PageSectionKey } from '../../../../api/shared/page-sections';
@@ -91,9 +91,11 @@ export function resolveLinkGroups(payload: ArtistPagePayload): Map<PageSectionKe
  * One section's pills, split at the artist's own divider positions into wrapped rows
  * with a rule between rows — the arrangement they set for those links.
  */
-export function SectionPillGroups({ group, handleLinkClick }: {
+export function SectionPillGroups({ group, handleLinkClick, leading }: {
   group: ArtistPageLinkGroup;
   handleLinkClick: (platform: string) => void;
+  /** A pill that opens the first row, ahead of the links (the Patronage section's Tip button). */
+  leading?: ReactNode;
 }) {
   const dividerIndexes = new Set(group.dividerIndexes ?? []);
   const groups: ArtistLink[][] = [];
@@ -114,6 +116,7 @@ export function SectionPillGroups({ group, handleLinkClick }: {
         <Fragment key={groupIndex}>
           {groupIndex > 0 && <hr className="border-0 border-t border-border" />}
           <div className="platform-pill-row">
+            {groupIndex === 0 && leading}
             {rows.map(link => {
               const badge = (
                 <SourceBadge

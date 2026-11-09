@@ -92,8 +92,11 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
       )}
 
       {/* Hero */}
-      <div className="pt-12 pb-8 text-center">
-        <div className="w-32 h-32 rounded-full border-2 border-border mx-auto mb-4 flex items-center justify-center overflow-hidden bg-bg-secondary">
+      {/* Centred and stacked on a phone. From md up, the photo moves to the right with the name,
+          location and actions beside it on the left, so the header stops pushing the links a
+          photo's height down the page (Brandon, 2026-11-09). */}
+      <div className="pt-12 pb-8 text-center md:pt-10 md:flex md:flex-row-reverse md:items-center md:gap-8 md:text-left">
+        <div className="w-32 h-32 shrink-0 rounded-full border-2 border-border mx-auto mb-4 md:mx-0 md:mb-0 flex items-center justify-center overflow-hidden bg-bg-secondary">
           {imageUrl && (
             <img
               src={imageUrl}
@@ -106,68 +109,70 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             {artist.name[0]?.toUpperCase() || '?'}
           </span>
         </div>
-        <div className="flex items-center justify-center gap-2">
-          <h1 className="font-display text-2xl font-bold text-text-primary">
-            {artist.name}
-          </h1>
-          {artist.matchConfidence === 'claimed' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-primary/15 text-link">
-              <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Verified
-            </span>
+        <div className="md:flex-1 md:min-w-0">
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <h1 className="font-display text-2xl font-bold text-text-primary">
+              {artist.name}
+            </h1>
+            {artist.matchConfidence === 'claimed' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-primary/15 text-link">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Verified
+              </span>
+            )}
+          </div>
+          {locationText && (
+            <div className="mt-1.5 text-sm text-text-muted">{locationText}</div>
           )}
-        </div>
-        {locationText && (
-          <div className="mt-1.5 text-sm text-text-muted">{locationText}</div>
-        )}
-        <div className="mt-3 flex items-center justify-center gap-4">
-          {onSave && (
-            <button
-              onClick={isSaved ? onUnsave : onSave}
-              disabled={disabledSave}
-              aria-label={isSaved ? `Unsave ${artist.name}` : `Save ${artist.name}`}
-              title={isSaved ? 'Saved' : 'Save artist'}
-              className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
-                isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              <svg
-                className={`w-4 h-4 transition-all ${isSaved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'}`}
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+          <div className="mt-3 flex items-center justify-center md:justify-start gap-4">
+            {onSave && (
+              <button
+                onClick={isSaved ? onUnsave : onSave}
+                disabled={disabledSave}
+                aria-label={isSaved ? `Unsave ${artist.name}` : `Save ${artist.name}`}
+                title={isSaved ? 'Saved' : 'Save artist'}
+                className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
+                  isSaved ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                <svg
+                  className={`w-4 h-4 transition-all ${isSaved ? 'fill-accent-secondary' : 'fill-transparent stroke-current'}`}
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {isSaved ? 'Saved' : 'Save'}
+              </button>
+            )}
+            <button
+              onClick={handleShare}
+              aria-label={`Share ${artist.name}`}
+              title="Share"
+              className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-secondary transition-colors"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 7.5L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
-              {isSaved ? 'Saved' : 'Save'}
+              {shareCopied ? 'Copied!' : 'Share'}
             </button>
-          )}
-          <button
-            onClick={handleShare}
-            aria-label={`Share ${artist.name}`}
-            title="Share"
-            className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-accent-secondary transition-colors"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 7.5L12 3m0 0l4.5 4.5M12 3v13.5" />
-            </svg>
-            {shareCopied ? 'Copied!' : 'Share'}
-          </button>
-          <button
-            onClick={() => setEmbedOpen(!embedOpen)}
-            aria-label="Embed this profile"
-            title="Embed this profile on your website"
-            className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
-              embedOpen ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
-            }`}
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-            </svg>
-            Embed
-          </button>
+            <button
+              onClick={() => setEmbedOpen(!embedOpen)}
+              aria-label="Embed this profile"
+              title="Embed this profile on your website"
+              className={`inline-flex items-center gap-1.5 text-sm transition-colors ${
+                embedOpen ? 'text-accent-secondary' : 'text-text-muted hover:text-accent-secondary'
+              }`}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+              </svg>
+              Embed
+            </button>
+          </div>
         </div>
       </div>
 
@@ -192,14 +197,23 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
           if (sectionKey === 'patronage') {
             const group = groupBySection.get('patronage');
             if (!payload.tips?.enabled && (!group || group.links.length === 0)) return null;
+            const tipButton = payload.tips?.enabled
+              ? <TipButton key="tip" slug={payload.artist.slug} artistName={payload.artist.name} />
+              : null;
             return (
               <div key="patronage" className="mb-6 space-y-3">
                 <h2 className="text-xs uppercase tracking-wider text-text-muted">
                   Patronage
                 </h2>
-                {payload.tips?.enabled && (
-                  <div className="platform-pill-row">
-                    <TipButton slug={payload.artist.slug} artistName={payload.artist.name} />
+                {/* The Tip button opens the first row of patronage pills, so it sits beside the
+                    artist's Ko-fi, PayPal and the rest rather than on a line of its own. */}
+                {group && group.links.length > 0 ? (
+                  <SectionPillGroups group={group} handleLinkClick={handleLinkClick} leading={tipButton} />
+                ) : (
+                  tipButton && <div className="platform-pill-row">{tipButton}</div>
+                )}
+                {payload.tips?.enabled && payload.tips.goals.length > 0 && (
+                  <div className="space-y-1">
                     {payload.tips.goals.map(goal => (
                       <TipLink
                         key={goal.id}
@@ -212,9 +226,6 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
                       </TipLink>
                     ))}
                   </div>
-                )}
-                {group && group.links.length > 0 && (
-                  <SectionPillGroups group={group} handleLinkClick={handleLinkClick} />
                 )}
               </div>
             );
