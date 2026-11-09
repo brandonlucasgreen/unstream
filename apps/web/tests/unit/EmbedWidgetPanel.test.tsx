@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { EmbedWidgetPanel, EMBED_THEMES, embeddablePlatforms } from '../../src/components/EmbedWidgetPanel';
+import { EmbedWidgetPanel, EMBED_THEMES, embeddablePlatforms, platformsAttribute } from '../../src/components/EmbedWidgetPanel';
 
 const widgetSource = readFileSync(path.resolve(__dirname, '../../public/widget.js'), 'utf8');
 
@@ -51,10 +51,10 @@ describe('EmbedWidgetPanel', () => {
   it('warns when the custom colours are too close to read', () => {
     render(<EmbedWidgetPanel artistName="Kid Lightbulbs" slug="kid-lightbulbs" links={links} />);
     fireEvent.click(screen.getByRole('button', { name: 'Custom' }));
-    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByText(/hard to read/)).toBeNull();
 
     fireEvent.input(screen.getByLabelText('Text colour'), { target: { value: '#333333' } });
-    expect(screen.getByRole('status').textContent).toMatch(/hard to read/);
+    expect(screen.getByText(/hard to read/)).toBeTruthy();
   });
 
   it('goes back to a theme without leaving colours in the snippet', () => {
@@ -104,6 +104,28 @@ describe('EmbedWidgetPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Icons only' }));
     expect(snippet()).toContain('data-layout="icons"');
     expect(preview().getAttribute('data-layout')).toBe('icons');
+  });
+
+  it('writes data-platforms from the embed order and what is ticked', () => {
+    const page = ['bandcamp', 'subvert', 'instagram'] as const;
+    const none = new Set<never>();
+    expect(platformsAttribute([...page], [...page], none)).toBe('all');
+    // Reordered with everything ticked: the order, then "*" so later links still appear.
+    expect(platformsAttribute([...page], ['instagram', 'bandcamp', 'subvert'], none)).toBe('instagram,bandcamp,subvert,*');
+    // A subset is exactly that subset, in embed order, with no "*".
+    expect(platformsAttribute([...page], ['instagram', 'bandcamp', 'subvert'], new Set(['subvert'] as const))).toBe(
+      'instagram,bandcamp',
+    );
+  });
+
+  it('lists the platforms in the page order with a handle each, and offers no reset until reordered', () => {
+    render(<EmbedWidgetPanel artistName="Kid Lightbulbs" slug="kid-lightbulbs" links={links} />);
+    expect(screen.getAllByRole('button', { name: /^Move / }).map((b) => b.getAttribute('aria-label'))).toEqual([
+      'Move Bandcamp',
+      'Move Subvert',
+      'Move Instagram',
+    ]);
+    expect(screen.queryByRole('button', { name: "Use my page's order" })).toBeNull();
   });
 
   it.each(Object.entries(EMBED_THEMES))('seeds %s with the colours widget.js draws it in', (name, colours) => {

@@ -90,13 +90,17 @@
   // data-layout: each link as an icon alone, a pill sized to its name, or a full-width row.
   var LAYOUTS = ['icons', 'flexible', 'full'];
 
-  // data-platforms: "all" (every link the artist has, including ones they add later) or a
-  // comma-separated list of platform ids. Absent on embeds copied before it existed, which
-  // fall back to data-max-links.
+  // data-platforms: which links to show, in what order. A comma-separated list of platform ids,
+  // shown in that order; a "*" in it adds every other link after them, in the order of the
+  // artist's page, so links they add later still appear. "all" is "*" on its own. Absent on
+  // embeds copied before it existed, which fall back to data-max-links.
   function chosenPlatforms(value) {
     if (value === null) return null;
-    if (value.trim() === 'all') return 'all';
-    return value.split(',').map(function (id) { return id.trim(); }).filter(Boolean);
+    var tokens = value.split(',').map(function (id) { return id.trim(); }).filter(Boolean);
+    return {
+      ids: tokens.filter(function (id) { return id !== '*' && id !== 'all'; }),
+      rest: tokens.indexOf('*') !== -1 || tokens.indexOf('all') !== -1,
+    };
   }
 
   // Only #rgb or #rrggbb: the value goes into the widget's stylesheet, so anything else is
@@ -267,10 +271,19 @@
     var shown;
     var hiddenCount = 0;
     if (options.platforms) {
-      // Chosen by the artist: in the order they arranged their page, every link they picked.
-      shown = options.platforms === 'all'
-        ? directLinks
-        : directLinks.filter(function (link) { return options.platforms.indexOf(link.sourceId) !== -1; });
+      // Chosen by the artist, in their order (two links on one platform keep their page order).
+      var chosen = options.platforms;
+      shown = [];
+      chosen.ids.forEach(function (id) {
+        directLinks.forEach(function (link) {
+          if (link.sourceId === id) shown.push(link);
+        });
+      });
+      if (chosen.rest) {
+        directLinks.forEach(function (link) {
+          if (chosen.ids.indexOf(link.sourceId) === -1) shown.push(link);
+        });
+      }
     } else {
       // An embed copied before platforms could be chosen: the first data-max-links by priority.
       var sorted = sortPlatforms(directLinks);
