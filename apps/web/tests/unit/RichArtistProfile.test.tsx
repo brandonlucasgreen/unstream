@@ -406,6 +406,22 @@ describe('RichArtistProfile', () => {
       expect(patreonIndex).toBeGreaterThan(tipIndex);
     });
 
+    it('puts the Tip button in the same row as the patronage platforms, first', () => {
+      render(<MemoryRouter><RichArtistProfile payload={claimedPayload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const tip = screen.getByText('Tip Kid Lightbulbs').closest('a')!;
+      const row = tip.parentElement!;
+      expect(row.className).toContain('platform-pill-row');
+      expect(row.firstElementChild).toBe(tip);
+      expect(row.textContent).toContain('Patreon');
+    });
+
+    it('still shows the Tip button when the artist has no patronage platforms', () => {
+      const payload = { ...claimedPayload, links: claimedPayload.links.filter(l => l.platform !== 'patreon') };
+      render(<MemoryRouter><RichArtistProfile payload={payload} slug="kid-lightbulbs" /></MemoryRouter>);
+      const tip = screen.getByText('Tip Kid Lightbulbs').closest('a')!;
+      expect(tip.parentElement!.className).toContain('platform-pill-row');
+    });
+
     it('renders sections in the payload sectionOrder when the artist rearranged them', () => {
       const payload = {
         ...basePayload,

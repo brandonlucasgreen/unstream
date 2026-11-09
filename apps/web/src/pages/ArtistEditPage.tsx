@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { SortableList } from '../components/SortableList';
 import { DEFAULT_SECTION_ORDER, normalizeSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
 import type { SourceId } from '../types';
 
@@ -14,10 +15,25 @@ import type { SourceId } from '../types';
 const DIVIDER_PLATFORM = 'divider';
 
 interface LinkEntry {
+  /** This page's own handle on the row, for drag and drop. Never sent to the server. */
+  id: string;
   platform: string;
   url: string;
   displayName?: string;
 }
+
+let nextLinkId = 0;
+const newLinkId = () => `link-${++nextLinkId}`;
+
+const SECTION_LABELS: Record<PageSectionKey, string> = {
+  patronage: 'Patronage — tips first, then supporter platforms',
+  bio: 'Bio',
+  featured: 'Featured Release',
+  marketplaces: 'Marketplaces — Bandcamp, Mirlo, and stores',
+  social: 'Social — Follow links',
+  // Never in the artist's order (it always follows Marketplaces); here for the type's sake.
+  official: 'Official pages',
+};
 
 // All platforms available for adding (sourced from the shared catalog).
 // The "other" entry is overridden here so its dropdown label reads "Other"
@@ -160,7 +176,7 @@ const initialFormState: FormState = {
   fetchingAvatar: null,
   links: [],
   sectionOrder: [...DEFAULT_SECTION_ORDER],
-  // Loaded state resets it; only moveSection sets it true. Note LOAD_DATA spreads later, so
+  // Loaded state resets it; only reorderSections sets it true. Note LOAD_DATA spreads later, so
   // LOAD_DATA must also reset it (see the load dispatch) or a prior session's flag could leak.
   sectionOrderTouched: false,
   city: '',
@@ -202,6 +218,7 @@ export function ArtistEditPage() {
         const data = await response.json();
         const storedLinks: LinkEntry[] = (data.platforms || []).map(
           (p: { sourceId: string; url: string; displayName?: string }) => ({
+            id: newLinkId(),
             platform: p.sourceId.startsWith('other') ? 'other' : p.sourceId,
             url: p.url,
             displayName: p.displayName || '',
@@ -214,7 +231,7 @@ export function ArtistEditPage() {
         const existingLinks: LinkEntry[] = [];
         storedLinks.forEach((link, index) => {
           if (dividerPositions.includes(index)) {
-            existingLinks.push({ platform: DIVIDER_PLATFORM, url: '' });
+            existingLinks.push({ id: newLinkId(), platform: DIVIDER_PLATFORM, url: '' });
           }
           existingLinks.push(link);
         });
@@ -252,15 +269,15 @@ export function ArtistEditPage() {
   function addLink() {
     const usedPlatforms = new Set(form.links.map(l => l.platform));
     const available = ALL_PLATFORMS.find(p => !usedPlatforms.has(p.id));
-    set('links', [...form.links, { platform: available?.id || 'other', url: '', displayName: '' }]);
+    set('links', [...form.links, { id: newLinkId(), platform: available?.id || 'other', url: '', displayName: '' }]);
   }
 
   function addOtherLink() {
-    set('links', [...form.links, { platform: 'other', url: '', displayName: '' }]);
+    set('links', [...form.links, { id: newLinkId(), platform: 'other', url: '', displayName: '' }]);
   }
 
   function addDivider() {
-    set('links', [...form.links, { platform: DIVIDER_PLATFORM, url: '' }]);
+    set('links', [...form.links, { id: newLinkId(), platform: DIVIDER_PLATFORM, url: '' }]);
   }
 
   function updateLink(index: number, field: 'platform' | 'url' | 'displayName', value: string) {
@@ -306,21 +323,9 @@ export function ArtistEditPage() {
     set('fetchingAvatar', null);
   }
 
-  function moveLink(index: number, direction: -1 | 1) {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= form.links.length) return;
-    const updated = [...form.links];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    set('links', updated);
-  }
-
-  function moveSection(index: number, direction: -1 | 1) {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= form.sectionOrder.length) return;
-    const updated = [...form.sectionOrder];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+  function reorderSections(updated: PageSectionKey[]) {
     dispatch({ type: 'SET', field: 'sectionOrder', value: updated });
-    // Only moveSection sets this — so Save always sends the arrangement the artist actually
+    // Only a reorder sets this — so Save always sends the arrangement the artist actually
     // arranged, including a revert back to the default order (which would otherwise look
     // unchanged and never save — the bug Brandon hit, UNS-221).
     dispatch({ type: 'SET', field: 'sectionOrderTouched', value: true });
@@ -604,45 +609,23 @@ export function ArtistEditPage() {
           Choose the order of the sections on your artist page. Official pages (your website, Wikipedia, Faircamp, Newsletter) always follow Marketplaces.
         </p>
 
-        <div className="space-y-2">
-          {form.sectionOrder.map((section, index) => {
-            const label = section === 'patronage'
-              ? 'Patronage — tips first, then supporter platforms'
-              : section === 'bio'
-                ? 'Bio'
-                : section === 'featured'
-                  ? 'Featured Release'
-                  : section === 'marketplaces'
-                    ? 'Marketplaces — Bandcamp, Mirlo, and stores'
-                    : 'Social — Follow links';
-            return (
-              <div
-                key={section}
-                className="flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border border-border"
-              >
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    onClick={() => moveSection(index, -1)}
-                    disabled={index === 0}
-                    className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                    title="Move up"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    onClick={() => moveSection(index, 1)}
-                    disabled={index === form.sectionOrder.length - 1}
-                    className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                    title="Move down"
-                  >
-                    ▼
-                  </button>
-                </div>
-                <span className="flex-1 text-sm text-text-primary">{label}</span>
-              </div>
-            );
-          })}
-        </div>
+        <SortableList
+          items={form.sectionOrder}
+          getId={(section) => section}
+          getLabel={(section) => SECTION_LABELS[section].split(' — ')[0]}
+          onReorder={reorderSections}
+          className="space-y-2"
+          renderItem={(section, handle, isDragging) => (
+            <div
+              className={`flex items-center gap-3 p-3 rounded-lg bg-bg-secondary border ${
+                isDragging ? 'shadow-lg border-accent-primary/60' : 'border-border'
+              }`}
+            >
+              {handle}
+              <span className="flex-1 text-sm text-text-primary">{SECTION_LABELS[section]}</span>
+            </div>
+          )}
+        />
       </section>
 
       {/* Bio */}
@@ -666,7 +649,7 @@ export function ArtistEditPage() {
             className="w-4 h-4 mt-0.5 rounded accent-accent-primary flex-shrink-0"
           />
           <span className="text-sm">
-            Show a bio on search results
+            Show bio on search results
             <span className="block text-xs text-text-muted">
               If you haven't written one, we'll use your Bandcamp, Discogs or Wikipedia bio.
             </span>
@@ -783,7 +766,7 @@ export function ArtistEditPage() {
         </p>
 
         <p className="text-xs text-text-muted">
-          Dividers draw a horizontal line between links on your artist page, so you can group them. Move them with the arrows like any other row — social links always appear in their own "Follow" section, so a divider next to one moves to the nearest gap.
+          Dividers draw a horizontal line between links on your artist page, so you can group them. Drag them by the handle like any other row — social links always appear in their own "Follow" section, so a divider next to one moves to the nearest gap.
         </p>
 
         {form.links.length === 0 && (
@@ -792,38 +775,30 @@ export function ArtistEditPage() {
           </p>
         )}
 
-        <div className="space-y-2">
-          {form.links.map((link, index) => {
+        <SortableList
+          items={form.links}
+          getId={(link) => link.id}
+          getLabel={(link) => link.platform === DIVIDER_PLATFORM
+            ? 'divider'
+            : link.platform === 'other'
+              ? (link.displayName || 'custom link')
+              : (sources[link.platform as SourceId]?.name || link.platform)}
+          onReorder={(links) => set('links', links)}
+          className="space-y-2"
+          renderItem={(link, handle, isDragging) => {
+            const index = form.links.indexOf(link);
             const streamingWarning = getStreamingWarning(link.url);
             const isOther = link.platform === 'other';
             const isDivider = link.platform === DIVIDER_PLATFORM;
 
             return (
-              <div key={index} className="space-y-1">
+              <div className="space-y-1">
                 <div
-                  className={`flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border ${streamingWarning ? 'border-amber-500/30' : 'border-border'}`}
+                  className={`flex items-center gap-2 p-3 rounded-lg bg-bg-secondary border ${
+                    isDragging ? 'shadow-lg border-accent-primary/60' : streamingWarning ? 'border-amber-500/30' : 'border-border'
+                  }`}
                 >
-                  {/* Reorder buttons */}
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      onClick={() => moveLink(index, -1)}
-                      disabled={index === 0}
-                      aria-label={`Move link ${index + 1} up`}
-                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                      title="Move up"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      onClick={() => moveLink(index, 1)}
-                      disabled={index === form.links.length - 1}
-                      aria-label={`Move link ${index + 1} down`}
-                      className="text-text-muted hover:text-text-primary disabled:opacity-20 text-xs leading-none"
-                      title="Move down"
-                    >
-                      ▼
-                    </button>
-                  </div>
+                  {handle}
 
                   {isDivider ? (
                     /* Divider: renders as a horizontal rule on the public page */
@@ -903,8 +878,8 @@ export function ArtistEditPage() {
                 )}
               </div>
             );
-          })}
-        </div>
+          }}
+        />
       </section>
 
       {/* Save */}
