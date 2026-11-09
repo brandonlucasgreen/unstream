@@ -269,6 +269,27 @@ describe('RichArtistProfile', () => {
     expect(codeBlock!.textContent).toContain('data-max-links="10"');
   });
 
+  it('previews with the real widget, drawn from the same settings as the snippet', () => {
+    render(<RichArtistProfile payload={basePayload} slug="kid-lightbulbs" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Light' })[0]);
+
+    const preview = document.querySelector('.unstream-widget')!;
+    expect(preview.getAttribute('data-artist')).toBe('Kid Lightbulbs');
+    expect(preview.getAttribute('data-slug')).toBe('kid-lightbulbs');
+    expect(preview.getAttribute('data-theme')).toBe('light');
+    expect(preview.getAttribute('data-max-links')).toBe('6');
+    expect(document.querySelector('script[src="/widget.js"]')).toBeTruthy();
+    expect(document.querySelector('pre')!.textContent).toContain('data-slug="kid-lightbulbs"');
+  });
+
+  it('escapes the artist name in the snippet', () => {
+    const payload = { ...basePayload, artist: { ...basePayload.artist, name: 'The "Quoted" Band' } };
+    render(<RichArtistProfile payload={payload} slug="the-quoted-band" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Embed this profile' }));
+    expect(document.querySelector('pre')!.textContent).toContain('data-artist="The &quot;Quoted&quot; Band"');
+  });
+
   it('copies the code to clipboard and shows Copied! feedback', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });

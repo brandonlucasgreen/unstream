@@ -6,9 +6,7 @@ import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } f
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
-import { PlatformIcon } from './PlatformIcon';
-import { sources } from '../services/sources';
-import type { SourceId } from '../types';
+import { EmbedWidgetPreview } from './EmbedWidgetPreview';
 
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
@@ -20,6 +18,11 @@ interface RichArtistProfileProps {
   disabledSave?: boolean;
 }
 
+// For a value pasted into the embed snippet's HTML attributes.
+function escapeAttribute(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
 function getLocationText(artist: ArtistPagePayload['artist']): string {
   const region = artist.country || artist.countryCode;
   if (artist.city && region) return `${artist.city}, ${region}`;
@@ -29,7 +32,7 @@ function getLocationText(artist: ArtistPagePayload['artist']): string {
 }
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
-  const { artist, profile, links } = payload;
+  const { artist, profile } = payload;
   const imageUrl = profile?.customImageUrl || artist.imageUrl;
   const locationText = getLocationText(artist);
 
@@ -50,7 +53,8 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
   const [shareCopied, setShareCopied] = useState(false);
   const shareUrl = `https://unstream.stream/a/${slug}`;
 
-  const embedCode = `<div class="unstream-widget" data-artist="${artist.name}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
+  // data-slug lets the widget find this exact page; data-artist is its fallback and its label.
+  const embedCode = `<div class="unstream-widget" data-artist="${escapeAttribute(artist.name)}" data-slug="${slug}" data-theme="${embedTheme}" data-max-links="${maxLinks}"></div>
 <script src="https://unstream.stream/widget.js" async></script>`;
 
   const handleCopy = useCallback(async () => {
@@ -229,45 +233,17 @@ export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave
             </div>
           </div>
 
-          {/* Static card preview — the embed widget is rendered client-side by /widget.js
-              on the consumer's site (see https://bgreen.lol/music/ for a live example), so
-              a live iframe preview isn't possible here. Show a static preview of what the
-              embed will look like. */}
+          {/* The real widget, drawn by /widget.js exactly as it will be on the artist's site. */}
           <div className="bg-bg-primary rounded-lg p-4 mb-3 border border-border">
-            <div className="text-xs text-text-muted uppercase tracking-wider mb-2">
+            <div className="text-xs text-text-muted uppercase tracking-wider mb-3">
               Embed preview
             </div>
-            <div className="text-sm font-medium text-text-primary mb-2">
-              {artist.name}
-            </div>
-            <div className="flex flex-col gap-1">
-              {links.slice(0, maxLinks).map((link) => (
-                <div
-                  key={link.platform + link.url}
-                  className="flex items-center justify-between text-xs py-1.5 px-2 rounded border border-border"
-                >
-                  {/* Drawn in the text colour, as /widget.js draws it on the artist's site. */}
-                  <span className="flex items-center gap-2 text-text-primary">
-                    <PlatformIcon
-                      sourceId={link.platform as SourceId}
-                      color="currentColor"
-                      emoji={sources[link.platform as SourceId]?.icon ?? ''}
-                      className="w-3.5 h-3.5 shrink-0"
-                      emojiClassName="w-3.5 text-center"
-                    />
-                    {link.displayName || link.platform}
-                  </span>
-                  {link.payoutPercent && (
-                    <span className="text-text-muted">
-                      {link.payoutPercent} to artist
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-text-muted mt-2">
-              The actual embed renders this content via JavaScript on your website.
-            </p>
+            <EmbedWidgetPreview
+              artistName={artist.name}
+              slug={slug}
+              theme={embedTheme}
+              maxLinks={maxLinks}
+            />
           </div>
 
           {/* Code block */}

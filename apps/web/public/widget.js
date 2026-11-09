@@ -156,43 +156,67 @@
     root.innerHTML = '<div class="uw-loading">Loading...</div>';
     shadow.appendChild(root);
 
-    var slug = artist.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    // data-slug names the artist's page exactly. Embeds copied before it existed carry only the
+    // name, so the slug is guessed from it — which misses any artist whose page address isn't
+    // their name (a same-name artist stored under their Bandcamp account, a re-slugged name).
+    var slug = container.getAttribute('data-slug') ||
+      artist.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-    // Try the artist API first (fast for DB artists), fall back to search
-    var artistUrl = BASE_URL + '/api/artist?slug=' + encodeURIComponent(slug);
-    fetch(artistUrl)
+    loadArtist(slug, artist).then(
+      function (data) {
+        if (!data) {
+          root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
+          return;
+        }
+        renderWidget(root, data, maxLinks, slug);
+      },
+      function () {
+        root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
+      }
+    );
+  }
+
+  // One request per artist per page, however many widgets ask: Unstream's own embed preview
+  // redraws the widget on every change of theme or link count. A failed request is forgotten, so
+  // the next widget tries again rather than inheriting the failure.
+  var artistLoads = {};
+
+  function loadArtist(slug, artist) {
+    if (artistLoads[slug]) return artistLoads[slug];
+
+    // Try the artist API first (fast for DB artists), fall back to search. Resolves to the
+    // artist, or null when neither knows them.
+    var load = fetch(BASE_URL + '/api/artist?slug=' + encodeURIComponent(slug))
       .then(function (res) {
         if (!res.ok) throw new Error('Not found');
         return res.json();
       })
       .then(function (data) {
         if (!data || !data.name) throw new Error('Invalid');
-        renderWidget(root, data, maxLinks, slug);
+        return data;
       })
       .catch(function () {
-        // Fall back to search API
-        var searchUrl = BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist);
-        fetch(searchUrl)
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            if (!data.results || data.results.length === 0) {
-              root.innerHTML = '<div class="uw-error">Artist not found. <a class="uw-more" href="' + BASE_URL + '/?q=' + encodeURIComponent(artist) + '" target="_blank" rel="noopener">Search on Unstream</a></div>';
-              return;
-            }
-            var artistResult = data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
-            renderWidget(root, artistResult, maxLinks, slug);
+        return fetch(BASE_URL + '/api/search/sources?query=' + encodeURIComponent(artist))
+          .then(function (res) {
+            if (!res.ok) throw new Error('Search failed');
+            return res.json();
           })
-          .catch(function () {
-            root.innerHTML = '<div class="uw-error">Could not load artist data.</div>';
+          .then(function (data) {
+            if (!data.results || data.results.length === 0) return null;
+            return data.results.find(function (r) { return r.type === 'artist'; }) || data.results[0];
           });
       });
+
+    artistLoads[slug] = load;
+    load.catch(function () { delete artistLoads[slug]; });
+    return load;
   }
 
   function renderWidget(root, artist, maxLinks, slug) {
     var directLinks = (artist.platforms || []).filter(isDirectLink);
     var sorted = sortPlatforms(directLinks);
     var shown = sorted.slice(0, maxLinks);
-    var profileUrl = BASE_URL + '/a/' + slug;
+    var profileUrl = BASE_URL + '/a/' + encodeURIComponent(slug);
 
     var html = '';
 
@@ -235,6 +259,10 @@
       }
     }
   }
+
+  // For a page that adds widgets after this script has run (a single-page app, or Unstream's own
+  // embed preview): call UnstreamWidget.init() once they are in the document.
+  window.UnstreamWidget = { init: init };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
