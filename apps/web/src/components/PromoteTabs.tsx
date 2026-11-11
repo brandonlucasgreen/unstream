@@ -22,14 +22,20 @@ export function PromoteTabs({ slug }: { slug: string }) {
   // Matched against the route pattern, which the encoded slug can't upset.
   const match = useMatch('/promote/:slug/*');
   const current = match?.params['*']?.replace(/\/+$/, '') ?? '';
+  // The baseline is an inset shadow, not a border the tabs overlap with -mb-px: overflow-x-auto
+  // makes overflow-y scrollable too, so a tab hanging 1px below the strip let it scroll vertically
+  // (the tabs slid out of view on iOS). The active tab's border paints over the shadow instead.
   return (
-    <nav aria-label="Promotion tools" className="flex gap-1 border-b border-border overflow-x-auto">
+    <nav
+      aria-label="Promotion tools"
+      className="flex gap-1 overflow-x-auto overflow-y-hidden shadow-[inset_0_-1px_0_var(--color-border)]"
+    >
       {TABS.map(tab => (
         <Link
           key={tab.label}
           to={tab.path ? `${base}/${tab.path}` : base}
           aria-current={tab.path === current ? 'page' : undefined}
-          className={`inline-flex items-center min-h-11 px-2 sm:px-3 -mb-px border-b-2 text-sm whitespace-nowrap transition-colors ${
+          className={`inline-flex items-center min-h-11 px-2 sm:px-3 border-b-2 text-sm whitespace-nowrap transition-colors ${
             tab.path === current
               ? 'border-accent-primary text-text-primary font-medium'
               : 'border-transparent text-text-muted hover:text-text-primary'
