@@ -181,7 +181,10 @@ const NOT_LIST = [
   ],
   ['Not a marketplace.', 'Unstream takes no cut, except for an optional percentage of tips. Artists can choose whether to share a cut with Unstream or not in their accounts.'],
   ['Not a discovery engine.', 'It’s for artists you already like, not artists you haven’t met.'],
-  ['Not artists-first.', 'Artists have a feature set, but the audience is fans.'],
+  [
+    'Not built mainly for artists.',
+    'Artists can claim and run their own page, but the audience is fans. When what’s easiest for fans and what’s fair to artists pull apart, artists win.',
+  ],
 ];
 
 /**
