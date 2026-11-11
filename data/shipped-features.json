@@ -49,13 +49,6 @@
     "announced": true
   },
   {
-    "id": "ios-app",
-    "title": "iOS app coming soon",
-    "description": "An iOS app is in the works — search for artists, save your favorites, and get release alerts on your iPhone and iPad. Stay tuned.",
-    "date": "2026-04-11",
-    "announced": true
-  },
-  {
     "id": "ai-policy-indicator",
     "title": "AI music policy badges",
     "description": "See which platforms ban or restrict AI-generated music right on the search results. Badges for banned (🚫) and AI-cautious (🛡️) platforms, with a legend at the bottom of each result.",
@@ -92,8 +85,8 @@
   },
   {
     "id": "mac-ios-sync",
-    "title": "Sync saved artists on Mac and iOS",
-    "description": "Sign in on the Mac menu bar app or iOS app to sync your saved artists across devices. Saved artists from the web, extension, and native apps all stay in sync.",
+    "title": "Sync saved artists on Mac",
+    "description": "Sign in on the Mac menu bar app to sync your saved artists across devices. Saved artists from the web, extension, and Mac app all stay in sync.",
     "date": "2026-06-20",
     "announced": true
   },

@@ -62,7 +62,6 @@ Sign in (free) to:
 
 - **Web** - [unstream.stream](https://unstream.stream) (free, no account needed)
 - **macOS menu bar app** - Detects what's playing in Spotify, Apple Music, or any browser-based player and shows support options. Includes a global keyboard shortcut, saved artist support list, release alerts for new music on Bandcamp, Mirlo, Faircamp and other stores, ListenBrainz scrobbling, and social sharing.
-- **iOS app** - Search, support list, and release alerts on iPhone and iPad (universal Apple app).
 - **Chrome extension** - [Chrome Web Store](https://chromewebstore.google.com/detail/unstream-support-music-di/ghoiopeidkganjdebkgkehaofnmjofkf) - Detects playback on Spotify, Apple Music, YouTube, YouTube Music, SoundCloud, and Bandcamp, plus about 20 more players including Tidal, Deezer, Amazon Music, Qobuz, Audius, and Mixcloud.
 - **Firefox extension** - [Mozilla Add-ons](https://addons.mozilla.org/en-US/firefox/addon/unstream/)
 - **iOS Shortcut** - Share from Spotify or Apple Music to search on Unstream

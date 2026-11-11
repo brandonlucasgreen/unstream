@@ -12,7 +12,7 @@ import { Footer } from '../components/Footer';
  * this page so the answer to "can you send me…" is always "it's already there."
  *
  * PLATFORM_COUNT is the site-wide public figure and has to match what the rest of the site says
- * (index.html meta, DevelopersPage, ImportPage, the guides). It is deliberately conservative:
+ * (index.html meta, DevelopersPage, the guides). It is deliberately conservative:
  * a strict count of buy/support/borrow entries in `api/shared/platform-registry.ts` comes out
  * higher, so "17+" stays true as platforms are added and never needs a correction.
  */
