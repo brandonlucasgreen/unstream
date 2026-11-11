@@ -40,7 +40,6 @@ const ROUTE_TITLES: [pattern: string, title: string][] = [
   ['/press', 'Press kit | Unstream'],
   ['/contact', 'Contact | Unstream'],
   ['/extension', 'Browser extension | Unstream'],
-  ['/import', 'Import your music library | Unstream'],
   ['/changelog', 'Changelog | Unstream'],
   ['/faq', 'FAQ | Unstream'],
   ['/settings', 'Settings | Unstream'],
