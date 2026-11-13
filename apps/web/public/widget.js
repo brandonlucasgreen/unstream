@@ -16,6 +16,10 @@
   // so platform-logo-copies.test.ts keeps this table equal to them. Marks are drawn in the link's
   // text colour, so they read on both themes (Discogs' and Ampwall's near-black brand colours
   // would vanish on the dark one).
+  //
+  // One exception: Newsletter. The widget flattens an emoji into a silhouette (.uw-emoji), and the
+  // envelope emoji flattens into a plain rectangle, so the widget draws an envelope where the site,
+  // in colour, keeps its emoji. The envelope is Material Icons' "mail" (Google, Apache 2.0).
   var platforms = {
     bandcamp: { name: 'Bandcamp', d: 'M0 18.75l7.437-13.5H24l-7.438 13.5H0z' },
     mirlo: { name: 'Mirlo', emoji: '\uD83D\uDC26\u200D\u2B1B' },
@@ -42,7 +46,7 @@
     bluesky: { name: 'Bluesky', d: 'M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z' },
     mastodon: { name: 'Mastodon', d: 'M23.268 5.313c-.35-2.578-2.617-4.61-5.304-5.004C17.51.242 15.792 0 11.813 0h-.03c-3.98 0-4.835.242-5.288.309C3.882.692 1.496 2.518.917 5.127.64 6.412.61 7.837.661 9.143c.074 1.874.088 3.745.26 5.611.118 1.24.325 2.47.62 3.68.55 2.237 2.777 4.098 4.96 4.857 2.336.792 4.849.923 7.256.38.265-.061.527-.132.786-.213.585-.184 1.27-.39 1.774-.753a.057.057 0 0 0 .023-.043v-1.809a.052.052 0 0 0-.02-.041.053.053 0 0 0-.046-.01 20.282 20.282 0 0 1-4.709.545c-2.73 0-3.463-1.284-3.674-1.818a5.593 5.593 0 0 1-.319-1.433.053.053 0 0 1 .066-.054c1.517.363 3.072.546 4.632.546.376 0 .75 0 1.125-.01 1.57-.044 3.224-.124 4.768-.422.038-.008.077-.015.11-.024 2.435-.464 4.753-1.92 4.989-5.604.008-.145.03-1.52.03-1.67.002-.512.167-3.63-.024-5.545zm-3.748 9.195h-2.561V8.29c0-1.309-.55-1.976-1.67-1.976-1.23 0-1.846.79-1.846 2.35v3.403h-2.546V8.663c0-1.56-.617-2.35-1.848-2.35-1.112 0-1.668.668-1.67 1.977v6.218H4.822V8.102c0-1.31.337-2.35 1.011-3.12.696-.77 1.608-1.164 2.74-1.164 1.311 0 2.302.5 2.962 1.498l.638 1.06.638-1.06c.66-.999 1.65-1.498 2.96-1.498 1.13 0 2.043.395 2.74 1.164.675.77 1.012 1.81 1.012 3.12z' },
     peertube: { name: 'PeerTube', d: 'M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.243 17.07V6.93L18.258 12l-7.5 5.07z' },
-    newsletter: { name: 'Newsletter', emoji: '\uD83D\uDCE7' },
+    newsletter: { name: 'Newsletter', d: 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z' },
     wikipedia: { name: 'Wikipedia', d: 'M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.045c.924-.005 5.401 0 5.401 0l.051.045v.434c0 .119-.075.176-.225.176l-.564.031c-.485.029-.727.164-.727.436 0 .135.053.33.166.601 1.082 2.646 4.818 10.521 4.818 10.521l.136.046 2.411-4.81-.482-1.067-1.658-3.264s-.318-.654-.428-.872c-.728-1.443-.712-1.518-1.447-1.617-.207-.023-.313-.05-.313-.149v-.468l.06-.045h4.292l.113.037v.451c0 .105-.076.15-.227.15l-.308.047c-.792.061-.661.381-.136 1.422l1.582 3.252 1.758-3.504c.293-.64.233-.801.111-.947-.07-.084-.305-.22-.812-.24l-.201-.021c-.052 0-.098-.015-.145-.051-.045-.031-.067-.076-.067-.129v-.427l.061-.045c1.247-.008 4.043 0 4.043 0l.059.045v.436c0 .121-.059.178-.193.178-.646.03-.782.095-1.023.439-.12.186-.375.589-.646 1.039l-2.301 4.273-.065.135 2.792 5.712.17.048 4.396-10.438c.154-.422.129-.722-.064-.895-.197-.172-.346-.273-.857-.295l-.42-.016c-.061 0-.105-.014-.152-.045-.043-.029-.072-.075-.072-.119v-.436l.059-.045h4.961l.041.045v.437c0 .119-.074.18-.209.18-.648.03-1.127.18-1.443.421-.314.255-.557.616-.736 1.067 0 0-4.043 9.258-5.426 12.339-.525 1.007-1.053.917-1.503-.031-.571-1.171-1.773-3.786-2.646-5.71l.053-.036z' },
     liberapay: { name: 'Liberapay', d: 'M2.32 0A2.321 2.321 0 0 0 0 2.32v19.36A2.321 2.321 0 0 0 2.32 24h19.36A2.32 2.32 0 0 0 24 21.68V2.32A2.32 2.32 0 0 0 21.68 0zm9.208 3.98l-2.27 9.405a2.953 2.953 0 0 0-.073.539.853.853 0 0 0 .09.432.7.7 0 0 0 .334.302c.157.077.378.126.661.147l-.49 2.008c-.772 0-1.38-.1-1.82-.3-.441-.203-.757-.477-.947-.826a2.391 2.391 0 0 1-.278-1.2c.005-.452.068-.933.188-1.445l2.074-8.67zm3.9 3.888c.61 0 1.135.092 1.576.277.44.185.802.438 1.085.76.283.32.493.696.629 1.126.136.43.204.89.204 1.379v.001c0 .794-.13 1.52-.392 2.179a5.16 5.16 0 0 1-1.086 1.706 4.84 4.84 0 0 1-1.665 1.118c-.648.267-1.353.4-2.114.4-.37 0-.74-.033-1.11-.098l-.735 2.956H9.403l2.71-11.298c.435-.13.934-.248 1.494-.351a10.045 10.045 0 0 1 1.821-.155zm-.31 2.041a4.67 4.67 0 0 0-.98.098l-1.143 4.752c.185.044.413.065.685.065.425 0 .812-.079 1.16-.237a2.556 2.556 0 0 0 .89-.661c.244-.283.435-.623.571-1.02a4.03 4.03 0 0 0 .204-1.315c0-.468-.104-.865-.31-1.192-.207-.326-.566-.49-1.077-.49z' },
     venmo: { name: 'Venmo', d: 'M21.772 13.119c-.267 0-.381-.251-.38-.655 0-.533.121-1.575.712-1.575.267 0 .357.243.357.598 0 .533-.13 1.632-.689 1.632Zm.502-3.377c-1.677 0-2.405 1.285-2.405 2.658 0 1.042.421 1.874 1.693 1.874 1.717 0 2.438-1.406 2.438-2.763 0-1.025-.462-1.769-1.726-1.769Zm-3.833 0c-.558 0-.964.17-1.393.477-.154-.275-.462-.477-.932-.477-.542 0-.947.219-1.247.437l-.04-.364H13.54l-.688 4.354h1.506l.479-3.053c.129-.065.323-.154.518-.154.145 0 .267.049.267.267 0 .056-.016.145-.024.218l-.429 2.722h1.498l.478-3.053c.138-.073.324-.154.51-.154.146 0 .268.049.268.267 0 .056-.017.145-.025.218l-.429 2.722h1.499l.461-2.908c.025-.153.049-.388.049-.549 0-.582-.267-.97-1.037-.97Zm-6.871 0c-.575 0-.98.219-1.287.421l-.017-.348H8.962l-.689 4.354H9.78l.478-3.053c.13-.065.324-.154.518-.154.147 0 .268.049.268.242 0 .081-.024.227-.032.299l-.422 2.666h1.499l.462-2.908c.024-.153.049-.388.049-.549 0-.582-.268-.97-1.03-.97Zm-5.631 1.834c.041-.485.413-.824.697-.824.162 0 .299.097.299.291 0 .404-.713.533-.996.533Zm.843-1.834c-1.604 0-2.382 1.39-2.382 2.698 0 1.01.478 1.817 1.814 1.817.527 0 1.07-.113 1.418-.282l.186-1.26c-.494.25-.874.347-1.271.347-.365 0-.64-.194-.64-.687.826-.008 2.252-.347 2.252-1.453 0-.687-.494-1.18-1.377-1.18Zm-4.239.267c.089.186.146.412.146.743 0 .606-.429 1.494-.777 2.06l-.373-2.989L0 9.969l.705 4.2h1.757c.77-1.01 1.718-2.448 1.718-3.554 0-.347-.073-.622-.235-.889l-1.402.283Z' },
@@ -52,6 +56,23 @@
     tipeee: { name: 'Tipeee', emoji: '\uD83C\uDF81' },
     bigcartel: { name: 'Big Cartel', d: 'M12 13.068v-1.006c0-.63.252-1.256.88-1.508l7.79-4.9c.503-.252.755-.88.755-1.51V0L12 6.03 2.575 0v12.69c0 3.394 1.51 6.284 4.02 7.917L11.875 24l5.28-3.393c2.513-1.51 4.02-4.398 4.02-7.916V7.036L12 13.068z' },
   };
+
+  // An artist's own custom links: the page stores them as other_0, other_1, ... in their page order
+  // (api/shared/link-dividers.ts), each with the label the artist typed. Older rows may say just
+  // "other". Drawn with that label and a link mark, Material Icons' "link" (Google, Apache 2.0).
+  var CUSTOM_LINK_MARK = 'M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z';
+
+  function isCustomLink(id) {
+    return id === 'other' || /^other_[0-9]+$/.test(id);
+  }
+
+  // What to draw for a link: its platform's entry, a custom link's own label, or null for a
+  // platform this widget doesn't know (left out).
+  function linkInfo(link) {
+    if (platforms[link.sourceId]) return platforms[link.sourceId];
+    if (isCustomLink(link.sourceId)) return { name: link.displayName || 'Link', d: CUSTOM_LINK_MARK };
+    return null;
+  }
 
   var priorityCategories = [
     'bandcamp', 'mirlo', 'ampwall', 'subvert', 'qobuz', 'faircamp', 'bandwagon', 'jamcoop',
@@ -72,9 +93,12 @@
     });
   }
 
+  // Only a real http(s) page: the save endpoint already refuses anything else, but this runs on
+  // artists' own sites, and a custom link's URL is whatever the artist typed.
   function isDirectLink(link) {
     var url = link.url || '';
     return (
+      /^https?:\/\//i.test(url) &&
       url.indexOf('duckduckgo.com') === -1 &&
       url.indexOf('google.com/search') === -1 &&
       url.indexOf('searchStyle=search') === -1 &&
@@ -87,8 +111,9 @@
     light: { bg: '#ffffff', text: '#1a1a1a' },
   };
 
-  // data-layout: each link as an icon alone, a pill sized to its name, or a full-width row.
-  var LAYOUTS = ['icons', 'flexible', 'full'];
+  // data-layout: each link as an icon alone, its name alone, a pill with both sized to its name, or
+  // a full-width row.
+  var LAYOUTS = ['icons', 'text', 'flexible', 'full'];
 
   // data-platforms: which links to show, in what order. A comma-separated list of platform ids,
   // shown in that order; a "*" in it adds every other link after them, in the order of the
@@ -191,6 +216,7 @@
       '.uw-links-icons .uw-link { padding: 8px; }',
       '.uw-links-icons .uw-link-icon { width: 20px; height: 20px; font-size: 17px; }',
       '.uw-links-icons .uw-link-icon svg { width: 18px; height: 18px; }',
+      '.uw-links-text .uw-link { padding: 6px 12px; }',
       // An emoji drawn as a flat silhouette in the text colour, to sit beside the one-colour marks.
       '.uw-emoji { color: transparent; text-shadow: 0 0 0 ' + text + '; line-height: 1; }',
       '.uw-footer { display: flex; align-items: center; justify-content: space-between; }',
@@ -266,7 +292,7 @@
 
   function renderWidget(root, artist, options, slug) {
     var directLinks = (artist.platforms || []).filter(function (link) {
-      return isDirectLink(link) && platforms[link.sourceId];
+      return isDirectLink(link) && linkInfo(link);
     });
     var shown;
     var hiddenCount = 0;
@@ -304,13 +330,14 @@
     html += '</div></a>';
 
     var iconsOnly = options.layout === 'icons';
+    var textOnly = options.layout === 'text';
     html += '<div class="uw-links uw-links-' + options.layout + '">';
     shown.forEach(function (link) {
-      var p = platforms[link.sourceId];
+      var p = linkInfo(link);
       // An icon-only link still names its platform, to screen readers and on hover.
       var label = iconsOnly ? ' aria-label="' + escapeHtml(p.name) + '" title="' + escapeHtml(p.name) + '"' : '';
       html += '<a class="uw-link" href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener"' + label + '>';
-      html += '<span class="uw-link-icon">' + platformIcon(p) + '</span>';
+      if (!textOnly) html += '<span class="uw-link-icon">' + platformIcon(p) + '</span>';
       if (!iconsOnly) html += escapeHtml(p.name);
       html += '</a>';
     });

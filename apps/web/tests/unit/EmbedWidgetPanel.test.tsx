@@ -10,7 +10,7 @@ const widgetSource = readFileSync(path.resolve(__dirname, '../../public/widget.j
 const links = [
   { platform: 'bandcamp' },
   { platform: 'subvert' },
-  { platform: 'other' },
+  { platform: 'notaplatform' },
   { platform: 'bandcamp' },
   { platform: 'instagram' },
 ];
@@ -104,6 +104,28 @@ describe('EmbedWidgetPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Icons only' }));
     expect(snippet()).toContain('data-layout="icons"');
     expect(preview().getAttribute('data-layout')).toBe('icons');
+    fireEvent.click(screen.getByRole('button', { name: 'Text only' }));
+    expect(snippet()).toContain('data-layout="text"');
+    expect(preview().getAttribute('data-layout')).toBe('text');
+  });
+
+  it("offers the artist's custom links by their own labels, and embeds them by id", () => {
+    const withCustom = [
+      { platform: 'bandcamp' },
+      { platform: 'other_0', displayName: 'Tape store' },
+      { platform: 'other_1', displayName: 'Merch' },
+      { platform: 'other', displayName: null },
+    ];
+    expect(embeddablePlatforms(withCustom)).toEqual(['bandcamp', 'other_0', 'other_1', 'other']);
+    render(<EmbedWidgetPanel artistName="Kid Lightbulbs" slug="kid-lightbulbs" links={withCustom} />);
+    expect(screen.getAllByRole('checkbox').map((box) => box.closest('label')!.textContent)).toEqual([
+      'Bandcamp',
+      '\u{1F517}Tape store',
+      '\u{1F517}Merch',
+      '\u{1F517}Link',
+    ]);
+    fireEvent.click(screen.getByRole('checkbox', { name: /Merch/ }));
+    expect(snippet()).toContain('data-platforms="bandcamp,other_0,other"');
   });
 
   it('writes data-platforms from the embed order and what is ticked', () => {

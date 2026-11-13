@@ -183,6 +183,70 @@ describe('widget.js', () => {
     expect(shadowOf(unknown).querySelector('.uw-links')!.className).toBe('uw-links uw-links-flexible');
   });
 
+  it('draws text-only links with no icon', async () => {
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-layout': 'text' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelector('.uw-link')).toBeTruthy());
+    expect(shadowOf(el).querySelector('.uw-links')!.className).toBe('uw-links uw-links-text');
+    expect(shadowOf(el).querySelector('.uw-link-icon')).toBeNull();
+    expect([...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent)).toEqual([
+      'Bandcamp', 'Subvert', 'Official Site',
+    ]);
+  });
+
+  it('draws Newsletter as an envelope, not an emoji that flattens into a blank rectangle', async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve({
+      name: 'Kid Lightbulbs',
+      platforms: [{ sourceId: 'newsletter', url: 'https://buttondown.com/lightbulbs' }],
+    }) });
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelector('.uw-link')).toBeTruthy());
+    const link = shadowOf(el).querySelector('.uw-link')!;
+    expect(link.textContent).toBe('Newsletter');
+    expect(link.querySelector('svg path')).toBeTruthy();
+    expect(link.querySelector('.uw-emoji')).toBeNull();
+  });
+
+  it("draws an artist's custom links under their own labels, escaped, and picks them by id", async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve({
+      name: 'Kid Lightbulbs',
+      platforms: [
+        { sourceId: 'bandcamp', url: 'https://kidlightbulbs.bandcamp.com' },
+        { sourceId: 'other_0', url: 'https://example.com/tapes', displayName: '<b>Tapes</b>' },
+        { sourceId: 'other_1', url: 'https://example.com/merch', displayName: 'Merch' },
+        { sourceId: 'other', url: 'https://example.com/old' },
+        { sourceId: 'other_x', url: 'https://example.com/nope', displayName: 'Not a custom link' },
+      ],
+    }) });
+    const all = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'all' });
+    const chosen = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'other_1,bandcamp' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(chosen).querySelectorAll('.uw-link')).toHaveLength(2));
+    expect([...shadowOf(all).querySelectorAll('.uw-link')].map((a) => a.textContent)).toEqual([
+      'Bandcamp', '<b>Tapes</b>', 'Merch', 'Link',
+    ]);
+    expect(shadowOf(all).querySelector('b')).toBeNull();
+    expect([...shadowOf(chosen).querySelectorAll('.uw-link')].map((a) => a.getAttribute('href'))).toEqual([
+      'https://example.com/merch', 'https://kidlightbulbs.bandcamp.com',
+    ]);
+  });
+
+  it('leaves out a link that is not an http(s) URL', async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve({
+      name: 'Kid Lightbulbs',
+      platforms: [
+        { sourceId: 'instagram', url: 'Instagram - https://www.instagram.com/x/' },
+        { sourceId: 'other_0', url: 'javascript:alert(1)', displayName: 'Shop' },
+        { sourceId: 'bandcamp', url: 'https://kidlightbulbs.bandcamp.com' },
+      ],
+    }) });
+    const el = addWidget({ 'data-artist': 'Kid Lightbulbs', 'data-platforms': 'all' });
+    (0, eval)(widgetSource);
+    await vi.waitFor(() => expect(shadowOf(el).querySelector('.uw-link')).toBeTruthy());
+    expect([...shadowOf(el).querySelectorAll('.uw-link')].map((a) => a.textContent)).toEqual(['Bandcamp']);
+  });
+
   it('forgets a failed lookup, so the next widget tries again', async () => {
     fetchMock.mockRejectedValue(new Error('offline'));
     const first = addWidget({ 'data-artist': 'Kid Lightbulbs' });

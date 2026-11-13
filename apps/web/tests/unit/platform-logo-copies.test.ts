@@ -92,7 +92,16 @@ describe('embed widget platforms', () => {
     );
   });
 
-  it.each(platformIds)('%s has the same mark (or emoji) as the site', (id) => {
+  // Emoji the widget can't draw: it flattens each into a silhouette in the text colour, and the
+  // site's 📧 flattens into a blank rectangle. widget.js draws its own mark for these instead.
+  const WIDGET_OWN_MARKS = ['newsletter'];
+
+  it.each(WIDGET_OWN_MARKS)('%s gets a mark of its own in the widget, in place of the emoji', (id) => {
+    expect(SIMPLE_ICON_PATHS[id as keyof typeof SIMPLE_ICON_PATHS] ?? SOCIAL_ICON_PATHS[id]).toBeUndefined();
+    expect(widget).toMatch(new RegExp(`^ {4}${id}: \\{ name: '${sources[id as keyof typeof sources].name}', d: 'M`, 'm'));
+  });
+
+  it.each(platformIds.filter((id) => !WIDGET_OWN_MARKS.includes(id)))('%s has the same mark (or emoji) as the site', (id) => {
     const mark = SIMPLE_ICON_PATHS[id as keyof typeof SIMPLE_ICON_PATHS] ?? SOCIAL_ICON_PATHS[id];
     const name = sources[id].name;
     if (mark) {
