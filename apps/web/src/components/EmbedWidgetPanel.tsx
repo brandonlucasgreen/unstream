@@ -6,26 +6,48 @@ import { EmbedWidgetPreview } from './EmbedWidgetPreview';
 import { EmbedPlatformList } from './EmbedPlatformList';
 
 type EmbedStyle = 'dark' | 'light' | 'custom';
-type EmbedLayout = 'icons' | 'flexible' | 'full';
+type EmbedLayout = 'icons' | 'text' | 'flexible' | 'full';
 
 const LAYOUT_LABELS: Record<EmbedLayout, string> = {
   icons: 'Icons only',
+  text: 'Text only',
   flexible: 'Flexible',
   full: 'Full width',
 };
 
+type EmbedLink = { platform: string; displayName?: string | null };
+
 /**
- * The platforms the widget can draw, once each, in the order the artist's page lists them. Its
- * table holds every platform in sources.ts except the category buckets and custom links ('other'),
- * which platform-logo-copies.test.ts keeps true.
+ * A custom link the artist added to their page. The page stores them as other_0, other_1, ... in
+ * page order (api/shared/link-dividers.ts); older rows may say just "other". widget.js draws them
+ * with their own label, by the same test.
  */
-export function embeddablePlatforms(links: { platform: string }[]): SourceId[] {
-  const ids: SourceId[] = [];
+export function isCustomLink(platform: string): boolean {
+  return platform === 'other' || /^other_[0-9]+$/.test(platform);
+}
+
+/**
+ * What the widget can draw, once each, in the order the artist's page lists them: every platform
+ * in sources.ts except the category buckets (widget.js's table, which platform-logo-copies.test.ts
+ * keeps true), plus each of the artist's custom links.
+ */
+export function embeddablePlatforms(links: EmbedLink[]): string[] {
+  const ids: string[] = [];
   for (const { platform } of links) {
     const known = platform in sources && !(platform in sourceCategories) && platform !== 'other';
-    if (known && !ids.includes(platform as SourceId)) ids.push(platform as SourceId);
+    if ((known || isCustomLink(platform)) && !ids.includes(platform)) ids.push(platform);
   }
   return ids;
+}
+
+/** The name the widget shows for each choice: a custom link's own label, else the platform's. */
+function embedLabels(links: EmbedLink[]): Record<string, string> {
+  const labels: Record<string, string> = {};
+  for (const { platform, displayName } of links) {
+    if (isCustomLink(platform)) labels[platform] = displayName || 'Link';
+    else if (platform in sources) labels[platform] = sources[platform as SourceId].name;
+  }
+  return labels;
 }
 
 // widget.js's own THEMES. Custom colours start from the preset the artist was looking at.
@@ -69,7 +91,7 @@ function ColourField({ label, value, onChange }: {
   );
 }
 
-function isReordered(pageOrder: SourceId[], embedOrder: SourceId[]): boolean {
+function isReordered(pageOrder: string[], embedOrder: string[]): boolean {
   return embedOrder.some((id, index) => id !== pageOrder[index]);
 }
 
@@ -79,9 +101,9 @@ function isReordered(pageOrder: SourceId[], embedOrder: SourceId[]): boolean {
  * exactly that subset, in embed order.
  */
 export function platformsAttribute(
-  pageOrder: SourceId[],
-  embedOrder: SourceId[],
-  excluded: Set<SourceId>,
+  pageOrder: string[],
+  embedOrder: string[],
+  excluded: Set<string>,
 ): string {
   const chosen = embedOrder.filter((id) => !excluded.has(id));
   if (chosen.length < pageOrder.length) return chosen.join(',');
@@ -92,8 +114,8 @@ export function platformsAttribute(
 export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }: {
   artistName: string;
   slug: string;
-  /** The artist's links in page order, socials included. */
-  links: { platform: string }[];
+  /** The artist's links in page order, socials and custom links included. */
+  links: EmbedLink[];
   /** Off where the page around it already says what this is (the Promote tab). */
   showHeading?: boolean;
 }) {
@@ -103,12 +125,13 @@ export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }
   const [layout, setLayout] = useState<EmbedLayout>('flexible');
   // What the artist unticked, rather than what they ticked: with nothing unticked the embed
   // carries "all", and picks up links they add later without a new snippet.
-  const [excluded, setExcluded] = useState<Set<SourceId>>(new Set());
+  const [excluded, setExcluded] = useState<Set<string>>(new Set());
   // The embed's own order, starting from the page's. Changing it never touches the page.
-  const [order, setOrder] = useState<SourceId[]>(() => embeddablePlatforms(links));
+  const [order, setOrder] = useState<string[]>(() => embeddablePlatforms(links));
   const [copied, setCopied] = useState(false);
 
   const platforms = embeddablePlatforms(links);
+  const labels = embedLabels(links);
   // Robust to the page's links changing under the panel: drop the gone, append the new.
   const ordered = [
     ...order.filter((id) => platforms.includes(id)),
@@ -117,7 +140,7 @@ export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }
   const chosen = ordered.filter((id) => !excluded.has(id));
   const allChosen = chosen.length === platforms.length;
   const reordered = isReordered(platforms, ordered);
-  const toggle = (id: SourceId) => {
+  const toggle = (id: string) => {
     const next = new Set(excluded);
     if (next.has(id)) next.delete(id);
     else next.add(id);
@@ -218,6 +241,7 @@ export function EmbedWidgetPanel({ artistName, slug, links, showHeading = true }
         <EmbedPlatformList
           order={ordered}
           excluded={excluded}
+          labelFor={(id) => labels[id]}
           onReorder={setOrder}
           onToggle={toggle}
         />
