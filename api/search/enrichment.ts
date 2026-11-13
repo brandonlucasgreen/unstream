@@ -313,6 +313,21 @@ export interface DiscogsArtistData {
   failed: boolean;
 }
 
+/**
+ * One entry of a Discogs artist's `urls`, as a usable address, or null. The field is free text
+ * that anyone can edit, so entries arrive as "Facebook - https://www.facebook.com/x/",
+ * "Instagram: https://...", or a bare "instagram.com/x". Stored as-is, those became links that a
+ * browser reads as relative paths: 16 such rows were on artist pages by 2026-11-13.
+ */
+export function cleanDiscogsUrl(raw: string): string | null {
+  const text = raw.trim();
+  const embedded = text.match(/https?:\/\/\S+/i);
+  if (embedded) return embedded[0];
+  // A bare address: one word with a dot in its host, like "instagram.com/x".
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(text)) return `https://${text}`;
+  return null;
+}
+
 // Fetch social links and the bio from the Discogs API — one request answers both.
 export async function fetchDiscogsArtist(discogsUrl: string): Promise<DiscogsArtistData> {
   const socialLinks: SocialLink[] = [];
@@ -336,8 +351,9 @@ export async function fetchDiscogsArtist(discogsUrl: string): Promise<DiscogsArt
     const data = await response.json() as { urls?: string[]; profile?: string };
     const urls = data.urls || [];
 
-    for (const url of urls) {
-      const socialLink = parseSocialUrl(url);
+    for (const raw of urls) {
+      const url = cleanDiscogsUrl(raw);
+      const socialLink = url ? parseSocialUrl(url) : null;
       if (socialLink) {
         socialLinks.push(socialLink);
       }

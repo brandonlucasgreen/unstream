@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  cleanDiscogsUrl,
   isMastodonInstance,
   isPeerTubeInstance,
   parseSocialUrl,
@@ -56,5 +57,32 @@ describe('parseSocialUrl', () => {
     expect(parseSocialUrl(
       'https://siteassets.parastorage.com/x?y=%2c.imageencodingavif'
     )).toBeNull();
+  });
+});
+
+// Discogs' urls field is free text. These are the shapes found in artist_links on 2026-11-13,
+// each stored verbatim and rendered as a broken relative link.
+describe('cleanDiscogsUrl', () => {
+  it.each([
+    ['Facebook - https://www.facebook.com/timstaffell/', 'https://www.facebook.com/timstaffell/'],
+    ['Instagram: https://www.instagram.com/FishinaBirdcage', 'https://www.instagram.com/FishinaBirdcage'],
+    ['facebook page: https://www.facebook.com/Ezzy000', 'https://www.facebook.com/Ezzy000'],
+    ['Twitter - https://www.instagram.com/888theband/', 'https://www.instagram.com/888theband/'],
+    ['instagram.com/fumurolls', 'https://instagram.com/fumurolls'],
+    ['  https://www.tiktok.com/@hotmulligan  ', 'https://www.tiktok.com/@hotmulligan'],
+  ])('reads %j as %j', (raw, expected) => {
+    expect(cleanDiscogsUrl(raw)).toBe(expected);
+  });
+
+  it('gives up on text with no address in it', () => {
+    expect(cleanDiscogsUrl('see my website')).toBeNull();
+    expect(cleanDiscogsUrl('')).toBeNull();
+  });
+
+  it('classifies the cleaned address, not the label in front of it', () => {
+    expect(parseSocialUrl(cleanDiscogsUrl('Twitter - https://www.instagram.com/888theband/')!)).toEqual({
+      platform: 'instagram',
+      url: 'https://www.instagram.com/888theband/',
+    });
   });
 });
