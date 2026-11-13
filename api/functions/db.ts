@@ -3,6 +3,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { artistSlug } from '../shared/artist-slug';
+import { GUESSED_SLUG_CANDIDATE_LIMIT, nameGuessPattern, pickArtistForGuessedSlug } from '../shared/guessed-slug';
 import {
   isBandcampSearchLink,
   normalizeUrlForMatch,
@@ -3831,6 +3832,9 @@ export async function putBandcampProbe(
  *
  * Order matters and is the caller's responsibility: a **live** `artists.slug` always wins, so an
  * alias can never shadow a real artist that later takes that slug.
+ *
+ * A slug that isn't an alias gets one more chance: if it is exactly one artist's name slugified,
+ * that artist is the canonical (`/a/impulse-nine` -> `impulsenine`). See api/shared/guessed-slug.ts.
  */
 export interface AliasResolution {
   canonical: string | null;
@@ -3858,7 +3862,20 @@ export async function resolveArtistSlugAlias(slug: string): Promise<AliasResolut
       return { canonical: null, failed: true };
     }
     const target = (data as { artists?: { slug?: string } } | null)?.artists?.slug;
-    return { canonical: target ?? null, failed: false };
+    if (target) return { canonical: target, failed: false };
+
+    const pattern = nameGuessPattern(slug);
+    if (!pattern) return { canonical: null, failed: false };
+    const { data: candidates, error: guessError } = await client
+      .from('artists')
+      .select('slug, name')
+      .ilike('name', pattern)
+      .limit(GUESSED_SLUG_CANDIDATE_LIMIT);
+    if (guessError) {
+      console.error('[DB] Failed to resolve guessed artist slug:', guessError.message);
+      return { canonical: null, failed: true };
+    }
+    return { canonical: pickArtistForGuessedSlug(slug, candidates ?? []), failed: false };
   } catch (error) {
     console.error('[DB] resolveArtistSlugAlias error:', error);
     return { canonical: null, failed: true };

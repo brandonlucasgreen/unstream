@@ -27,7 +27,7 @@ export function setAnswers(a: Record<string, { data: unknown; error: unknown }>)
 export function createClient() {
   let table = '';
   const q: any = {
-    select: () => q, eq: () => q, abortSignal: () => q, maybeSingle: () => q,
+    select: () => q, eq: () => q, ilike: () => q, limit: () => q, abortSignal: () => q, maybeSingle: () => q,
     then: (resolve: any) => resolve(answers[table] ?? { data: null, error: null }),
   };
   return { from(t: string) { table = t; return q; } };

@@ -517,10 +517,18 @@ function formatArtistNotification(artistName, results) {
   // when the same artist appears with and without a claimed profile.
   const slug = primaryResult.claimedSlug || artistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+  // The slugified name is only a dedupe key, never a page: an artist's slug isn't always their
+  // name (Impulse Nine is `impulsenine`), so /a/<slugified name> can be a dead page that search
+  // engines report as a soft 404. Without a claimed page, the click goes to a search.
+  const notificationId = primaryResult.claimedSlug
+    ? `artist-${primaryResult.claimedSlug}`
+    : `search-${encodeURIComponent(artistName)}`;
+
   return {
     title: `Now playing: ${artistName}`,
     message,
     slug,
+    notificationId,
   };
 }
 
@@ -544,7 +552,7 @@ async function maybeNotifyArtist(artistName, results) {
 
   // Send browser notification
   try {
-    await chrome.notifications.create(`artist-${notification.slug}`, {
+    await chrome.notifications.create(notification.notificationId, {
       type: 'basic',
       iconUrl: chrome.runtime.getURL('icons/icon128.png'),
       title: notification.title,
@@ -789,9 +797,13 @@ async function sendReleaseNotification(release) {
 // Handle notification clicks
 chrome.notifications.onClicked.addListener(async (notificationId) => {
   if (notificationId.startsWith('artist-')) {
-    const slugOrName = notificationId.replace('artist-', '');
-    const url = `https://unstream.stream/a/${encodeURIComponent(slugOrName)}`;
+    const slug = notificationId.replace('artist-', '');
+    const url = `https://unstream.stream/a/${encodeURIComponent(slug)}`;
     await chrome.tabs.create({ url });
+  } else if (notificationId.startsWith('search-')) {
+    // Already percent-encoded by formatArtistNotification.
+    const query = notificationId.replace('search-', '');
+    await chrome.tabs.create({ url: `https://unstream.stream/?q=${query}` });
   } else if (notificationId.startsWith('release-')) {
     const releaseId = notificationId.replace('release-', '');
     const releases = await getNewReleases();

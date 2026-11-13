@@ -49,7 +49,7 @@ class NowPlayingNotificationManager {
         guard !platforms.isEmpty else { return }
 
         let artistSlug = topResult.claimedSlug ?? slugify(artist)
-        let artistUrl = "https://unstream.stream/a/\(artistSlug)"
+        let artistUrl = notificationURL(for: artist, claimedSlug: topResult.claimedSlug)
 
         let content = UNMutableNotificationContent()
         content.title = "Now playing: \(artist)"
@@ -65,6 +65,20 @@ class NowPlayingNotificationManager {
         try? await UNUserNotificationCenter.current().add(request)
     }
 
+    /// Where clicking the notification goes: the artist's page when they have a claimed one,
+    /// otherwise a search. Never `/a/<slugified name>`: an artist's slug isn't always their name
+    /// (Impulse Nine is `impulsenine`), and a guessed one is a dead page that search engines
+    /// then report as a soft 404.
+    private func notificationURL(for artist: String, claimedSlug: String?) -> String {
+        if let claimedSlug {
+            return "https://unstream.stream/a/\(claimedSlug)"
+        }
+        var components = URLComponents(string: "https://unstream.stream/")!
+        components.queryItems = [URLQueryItem(name: "q", value: artist)]
+        return components.url?.absoluteString ?? "https://unstream.stream"
+    }
+
+    /// Identifies the notification, so one artist isn't announced twice. Not a URL.
     private func slugify(_ name: String) -> String {
         name.lowercased()
             .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)

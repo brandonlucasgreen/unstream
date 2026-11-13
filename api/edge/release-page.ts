@@ -26,6 +26,7 @@ import { isBandcampFriday } from "../shared/bandcamp-friday.ts";
 import { platformLogoSvg } from "../shared/platform-logos.ts";
 import { SITE_CHROME_CSS, siteFooterHtml, siteHeaderHtml } from "../shared/site-chrome.ts";
 import { releaseViewBeaconHtml } from "../shared/release-view-beacon.ts";
+import { GUESSED_SLUG_CANDIDATE_LIMIT, nameGuessPattern, pickArtistForGuessedSlug } from "../shared/guessed-slug.ts";
 import {
   AVAILABILITY_LABELS,
   AVAILABILITY_ORDER,
@@ -249,7 +250,20 @@ export default async function handler(request: Request, context: Context) {
           .maybeSingle();
         if (aliasError) throw aliasError;
 
-        const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
+        // Then a slug guessed from the artist's name, as artist-page-static does
+        // (api/shared/guessed-slug.ts).
+        let canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug ?? null;
+        const pattern = canonical ? null : nameGuessPattern(artistSlug);
+        if (pattern) {
+          const { data: candidates, error: guessError } = await supabase
+            .from('artists')
+            .select('slug, name')
+            .ilike('name', pattern)
+            .limit(GUESSED_SLUG_CANDIDATE_LIMIT)
+            .abortSignal(controller.signal);
+          if (guessError) throw guessError;
+          canonical = pickArtistForGuessedSlug(artistSlug, candidates ?? []);
+        }
         clearTimeout(timeoutId);
         if (!canonical) return passThrough(context);
 

@@ -12,6 +12,7 @@ import {
 } from "../shared/page-sections.ts";
 import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, releaseTypeLabel } from "../shared/release-display.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
+import { GUESSED_SLUG_CANDIDATE_LIMIT, nameGuessPattern, pickArtistForGuessedSlug } from "../shared/guessed-slug.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
 import { MAX_OPEN_GOALS } from "../shared/tips.ts";
 import { FLAGS_HASH_KEY, TIPS_FANS_FLAG_FIELD, flagIsOn } from "../shared/tips-flag.ts";
@@ -496,6 +497,20 @@ const CSS = `
   .avatar-fallback { font-size:48px;font-weight:600;color:var(--muted) }
 `;
 
+/**
+ * Every lookup answered and none found this artist. The SPA shell still renders (its not-found
+ * card is what a person would see), but with a real 404 and noindex: the shell's 200 is what
+ * Search Console reports as a soft 404. Only for a definite miss — a lookup that errored or timed
+ * out falls through to the plain shell, because an outage isn't evidence the artist is gone.
+ */
+async function notFoundForCrawler(context: Context): Promise<Response> {
+  const shell = await context.next();
+  const headers = new Headers(shell.headers);
+  headers.set('X-Robots-Tag', 'noindex');
+  headers.set('Cache-Control', 'no-store');
+  return new Response(shell.body, { status: 404, headers });
+}
+
 export default async function handler(request: Request, context: Context) {
   try {
     const url = new URL(request.url);
@@ -530,12 +545,13 @@ export default async function handler(request: Request, context: Context) {
     let releaseCount = 0;
 
     try {
-      const { data: artistData } = await supabase
+      const { data: artistData, error: artistError } = await supabase
         .from('artists')
         .select('*')
         .eq('slug', slug)
         .abortSignal(controller.signal)
-        .single();
+        .maybeSingle();
+      if (artistError) throw artistError;
 
       artist = artistData;
 
@@ -550,17 +566,33 @@ export default async function handler(request: Request, context: Context) {
       //
       // Duplicates resolveArtistSlugAlias in api/functions/db.ts — edge functions run on Deno and
       // cannot import from api/functions.
+      //
+      // After the alias, a URL guessed from the artist's name (`impulse-nine` for Impulse Nine,
+      // stored as `impulsenine`) redirects to the one artist with that name, if there is exactly
+      // one. See api/shared/guessed-slug.ts.
       if (!artist) {
-        const { data: alias } = await supabase
+        const { data: alias, error: aliasError } = await supabase
           .from('artist_slug_aliases')
           .select('artists!inner(slug)')
           .eq('alias', slug.toLowerCase())
           .abortSignal(controller.signal)
           .maybeSingle();
+        if (aliasError) throw aliasError;
 
-        const canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug;
+        let canonical = (alias as { artists?: { slug?: string } } | null)?.artists?.slug ?? null;
+        const pattern = canonical ? null : nameGuessPattern(slug);
+        if (pattern) {
+          const { data: candidates, error: guessError } = await supabase
+            .from('artists')
+            .select('slug, name')
+            .ilike('name', pattern)
+            .limit(GUESSED_SLUG_CANDIDATE_LIMIT)
+            .abortSignal(controller.signal);
+          if (guessError) throw guessError;
+          canonical = pickArtistForGuessedSlug(slug, candidates ?? []);
+        }
         clearTimeout(timeoutId);
-        if (!canonical) return context.next();
+        if (!canonical) return notFoundForCrawler(context);
 
         const prefix = url.pathname.startsWith('/artist/') ? '/artist/' : '/a/';
         return new Response(null, {
