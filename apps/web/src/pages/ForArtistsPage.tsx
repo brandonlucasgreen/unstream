@@ -161,7 +161,8 @@ export function ForArtistsPage() {
             </h1>
             <p className="text-text-secondary text-lg max-w-2xl mb-6">
               Send fans to wherever you earn the most, take tips, and keep your music in front of people, so you can
-              get back to making it.
+              get back to making it. We never simulate artists — no voice clones, no style mimicry — and every
+              flagged search result gets human review.
             </p>
             <div className="max-w-2xl">
               <ClaimSearch />
