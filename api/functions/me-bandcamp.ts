@@ -16,19 +16,13 @@ import { getClient } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { encryptCredential, isCredentialKeyConfigured } from './credential-crypto';
+import { buildAccountCorsHeaders } from './account-cors';
 import {
   deriveSubsonicToken,
   subsonicPing,
   subsonicArtistCount,
   SubsonicError,
 } from './bandcamp-subsonic';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-};
 
 const CONNECTION_SELECT =
   'bandcamp_username, sync_status, sync_error, item_count, last_synced_at, updated_at';
@@ -169,8 +163,15 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, DELETE, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // POST carries a Bandcamp username and password that this endpoint verifies live against
@@ -195,24 +196,24 @@ async function handleRequest(event: {
   const isCredentialWrite = event.httpMethod === 'POST';
 
   if (isCredentialWrite) {
-    const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
+    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
     if (rl.limited) return rl.response;
   }
 
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
 
   if (!isCredentialWrite) {
-    const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+    const rl = await checkRateLimit(key, 'account', corsHeaders);
     if (rl.limited) return rl.response;
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   if (event.httpMethod === 'GET') {
@@ -224,10 +225,10 @@ async function handleRequest(event: {
 
     if (error) {
       console.error('[me-bandcamp] Error fetching connection:', error.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load connection status' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load connection status' }) };
     }
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(toStatusShape(row)) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toStatusShape(row)) };
   }
 
   if (event.httpMethod === 'POST') {
@@ -235,7 +236,7 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     // Re-sync an existing connection.
@@ -247,15 +248,15 @@ async function handleRequest(event: {
         .maybeSingle();
       if (error) {
         console.error('[me-bandcamp] Error checking connection for resync:', error.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
       }
       if (!existing) {
-        return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'No Bandcamp connection to sync' }) };
+        return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'No Bandcamp connection to sync' }) };
       }
       // A stale 'syncing' row is a sync that was killed, not one still running — refusing it
       // would leave the user with no way to retry at all.
       if (existing.sync_status === 'syncing' && !isStaleSync(existing)) {
-        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'A sync is already running' }) };
+        return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'A sync is already running' }) };
       }
 
       // Mark syncing before asking: the background function reads this row, so the
@@ -266,7 +267,7 @@ async function handleRequest(event: {
         .eq('user_id', user.userId);
       if (markError) {
         console.error('[me-bandcamp] Error updating sync status:', markError.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
       }
 
       const started = await requestSync(user.userId, event.headers.host);
@@ -284,19 +285,19 @@ async function handleRequest(event: {
         .single();
       if (readError) {
         console.error('[me-bandcamp] Error reading connection after resync:', readError.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
       }
-      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(toStatusShape(row)) };
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toStatusShape(row)) };
     }
 
     // Connect.
     const username = typeof body.username === 'string' ? body.username.trim() : '';
     const password = typeof body.password === 'string' ? body.password : '';
     if (!username || username.length > 200) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The username Bandcamp generated is required' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'The username Bandcamp generated is required' }) };
     }
     if (!password || password.length > 500) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'The password Bandcamp generated is required' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'The password Bandcamp generated is required' }) };
     }
 
     if (!isCredentialKeyConfigured()) {
@@ -304,7 +305,7 @@ async function handleRequest(event: {
       // silently unusable until the env var lands.
       console.error('[me-bandcamp] BANDCAMP_CREDENTIAL_KEY is not configured');
       Sentry.captureMessage('me-bandcamp: BANDCAMP_CREDENTIAL_KEY not configured', 'error');
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Bandcamp connections are not available right now' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Bandcamp connections are not available right now' }) };
     }
 
     // Derive the salted token; the password is not referenced again after this line.
@@ -319,14 +320,14 @@ async function handleRequest(event: {
       if (error instanceof SubsonicError && error.isAuthFailure) {
         return {
           statusCode: 400,
-          headers: CORS_HEADERS,
+          headers: corsHeaders,
           body: JSON.stringify({ error: 'Bandcamp rejected that username or password. Check both against Fan Settings → Subsonic on Bandcamp.' }),
         };
       }
       console.warn('[me-bandcamp] Bandcamp ping failed:', error instanceof Error ? error.message : String(error));
       return {
         statusCode: 502,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Bandcamp didn’t respond. Their Subsonic support is in beta — try again in a minute.' }),
       };
     }
@@ -358,7 +359,7 @@ async function handleRequest(event: {
 
     if (upsertError) {
       console.error('[me-bandcamp] Error storing connection:', upsertError.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save the connection' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to save the connection' }) };
     }
 
     const started = await requestSync(user.userId, event.headers.host);
@@ -371,7 +372,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         connected: true,
         username,
@@ -387,7 +388,7 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     const { error: deleteError } = await client
@@ -397,7 +398,7 @@ async function handleRequest(event: {
 
     if (deleteError) {
       console.error('[me-bandcamp] Error deleting connection:', deleteError.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to disconnect' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to disconnect' }) };
     }
 
     let itemsDeleted = 0;
@@ -411,7 +412,7 @@ async function handleRequest(event: {
         console.error('[me-bandcamp] Error deleting collection items:', itemsError.message);
         return {
           statusCode: 500,
-          headers: CORS_HEADERS,
+          headers: corsHeaders,
           body: JSON.stringify({ error: 'Disconnected, but deleting imported items failed. Try again from Settings.' }),
         };
       }
@@ -420,10 +421,10 @@ async function handleRequest(event: {
       await purgeUserShareCacheForUser(user.userId, 'me-bandcamp');
     }
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ connected: false, itemsDeleted }) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ connected: false, itemsDeleted }) };
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 export const handler = withSentry(handleRequest);

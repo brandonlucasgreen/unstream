@@ -27,6 +27,11 @@ import {
   type SubsonicCredential,
 } from './bandcamp-subsonic';
 
+// The wildcard is deliberate, though the owner's Bearer token is one of three ways in (see
+// "Three ways to be allowed" below). The answer is an image that browsers load through <img>,
+// which never consults CORS, and it is cached at the CDN by URL for a month, so an origin
+// echoed per request (account-cors.ts) would be frozen into the cache for whoever asked
+// first. The Bearer path is for non-browser clients; nothing here changes account state.
 const BASE_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',

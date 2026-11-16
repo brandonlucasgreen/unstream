@@ -13,6 +13,7 @@ import { purgeCacheTags } from './purge-cache';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 import { safeEmbedStyle } from '../shared/embed-style';
 import { normalizeSectionOrder } from '../shared/page-sections';
+import { buildAccountCorsHeaders } from './account-cors';
 
 function getServiceClient() {
   return getClient();
@@ -34,13 +35,6 @@ async function authenticateRequest(authHeader: string | undefined): Promise<stri
   if (isMissingSecondFactor(data.user, token)) return null;
   return data.user.id;
 }
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'PUT, DELETE, OPTIONS',
-};
 
 // Allowed embed domains for featured releases
 export const ALLOWED_EMBED_DOMAINS = [
@@ -167,10 +161,10 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
 // search data that existed before the claim and still describes a real artist; what goes is
 // everything the claim added — bio, photo, featured release, divider layout — all of which live
 // on the artist_profiles row. Platform links stay: they were discoverable before the claim too.
-async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: string) {
+async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: string, corsHeaders: Record<string, string>) {
   const owned = await resolveOwnedArtist(slug, userId);
   if (!owned.ok || !owned.artistId || !owned.artistName) {
-    return { statusCode: owned.status, headers: CORS_HEADERS, body: JSON.stringify({ error: owned.error }) };
+    return { statusCode: owned.status, headers: corsHeaders, body: JSON.stringify({ error: owned.error }) };
   }
 
   // Scoped to user_id as well as artist_id even though ownership is already proven: this is the
@@ -188,11 +182,11 @@ async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: s
       tags: { subsystem: 'artist-profile' },
       extra: { artistId: owned.artistId, slug },
     });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to remove this artist. Please try again.' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to remove this artist. Please try again.' }) };
   }
 
   if (!count) {
-    return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'This artist is no longer claimed by your account.' }) };
+    return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'This artist is no longer claimed by your account.' }) };
   }
 
   // Back to auto-discovered. Left flagged as claimed, the row would never expire and enrichment
@@ -216,7 +210,7 @@ async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: s
   await purgeArtistCaches(owned.artistName, slug);
   console.log(`[Profile] Claim removed for "${owned.artistName}" (${slug})`);
 
-  return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
 }
 
 async function handleRequest(event: {
@@ -225,26 +219,33 @@ async function handleRequest(event: {
   queryStringParameters?: Record<string, string> | null;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'PUT, DELETE, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rl = await checkRateLimit(ip, 'standard', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'PUT' && event.httpMethod !== 'DELETE') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   const client = getServiceClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   const userId = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
   if (!userId) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Authentication required' }) };
   }
 
   // DELETE takes its slug from the query string like the other delete endpoints here — a body
@@ -252,9 +253,9 @@ async function handleRequest(event: {
   if (event.httpMethod === 'DELETE') {
     const slug = event.queryStringParameters?.slug;
     if (!slug) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug is required' }) };
     }
-    return handleRemoveClaim(client, slug, userId);
+    return handleRemoveClaim(client, slug, userId, corsHeaders);
   }
 
   let body: {
@@ -278,16 +279,16 @@ async function handleRequest(event: {
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
   const { slug } = body;
   if (!slug) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug is required' }) };
   }
   // Validated before any write, so a bad value can't leave half an update applied.
   if (body.showBio !== undefined && typeof body.showBio !== 'boolean') {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'showBio must be a boolean' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'showBio must be a boolean' }) };
   }
 
   // Find the artist and verify ownership
@@ -298,7 +299,7 @@ async function handleRequest(event: {
     .single();
 
   if (findError || !artist) {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
+    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Artist not found' }) };
   }
 
   const { data: profile, error: profileError } = await client
@@ -308,15 +309,15 @@ async function handleRequest(event: {
     .single();
 
   if (profileError || !profile) {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Profile not found' }) };
+    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Profile not found' }) };
   }
 
   if (profile.user_id !== userId) {
-    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'You do not own this profile' }) };
+    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'You do not own this profile' }) };
   }
 
   if (!profile.verified_at) {
-    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Profile not yet verified' }) };
+    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Profile not yet verified' }) };
   }
 
   // --- Update slug ---
@@ -324,7 +325,7 @@ async function handleRequest(event: {
   if (body.newSlug && body.newSlug !== slug) {
     const newSlug = slugify(body.newSlug);
     if (!newSlug || newSlug.length < 2) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Slug must be at least 2 characters' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Slug must be at least 2 characters' }) };
     }
 
     // Check if slug is already taken
@@ -336,7 +337,7 @@ async function handleRequest(event: {
       .single();
 
     if (existing) {
-      return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'That URL slug is already taken' }) };
+      return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'That URL slug is already taken' }) };
     }
 
     const { error: slugError } = await client
@@ -346,7 +347,7 @@ async function handleRequest(event: {
 
     if (slugError) {
       console.error('[Profile] Slug update failed:', slugError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update slug' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update slug' }) };
     }
 
     finalSlug = newSlug;
@@ -357,10 +358,10 @@ async function handleRequest(event: {
   if (body.newName && body.newName !== artist.name) {
     const newName = body.newName.trim();
     if (!newName || newName.length < 1) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist name cannot be empty' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Artist name cannot be empty' }) };
     }
     if (newName.length > 100) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist name is too long' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Artist name is too long' }) };
     }
 
     const { error: nameError } = await client
@@ -370,7 +371,7 @@ async function handleRequest(event: {
 
     if (nameError) {
       console.error('[Profile] Name update failed:', nameError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update name' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update name' }) };
     }
     console.log(`[Profile] Name changed: "${artist.name}" → "${newName}" for slug "${finalSlug}"`);
   }
@@ -401,7 +402,7 @@ async function handleRequest(event: {
 
     if (locationError) {
       console.error('[Profile] Location update failed:', locationError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update location' }) };
     }
   }
 
@@ -415,7 +416,7 @@ async function handleRequest(event: {
 
     if (bioError) {
       console.error('[Profile] Bio update failed:', bioError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update bio' }) };
     }
   }
 
@@ -428,7 +429,7 @@ async function handleRequest(event: {
 
     if (showBioError) {
       console.error('[Profile] Bio visibility update failed:', showBioError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update bio visibility' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update bio visibility' }) };
     }
   }
 
@@ -439,11 +440,11 @@ async function handleRequest(event: {
       try {
         const parsed = new URL(body.customImageUrl);
         if (parsed.protocol !== 'https:') {
-          return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Image URL must use HTTPS' }) };
+          return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Image URL must use HTTPS' }) };
         }
         imageUrl = body.customImageUrl;
       } catch {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid image URL' }) };
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid image URL' }) };
       }
     }
     const { error: imageError } = await client
@@ -453,7 +454,7 @@ async function handleRequest(event: {
 
     if (imageError) {
       console.error('[Profile] Image URL update failed:', imageError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update image' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update image' }) };
     }
   }
 
@@ -471,7 +472,7 @@ async function handleRequest(event: {
       if (!embed) {
         return {
           statusCode: 400,
-          headers: CORS_HEADERS,
+          headers: corsHeaders,
           body: JSON.stringify({
             error: "That embed code isn't supported. Use an embed from Bandcamp, YouTube, Spotify, SoundCloud, Apple Music, Vimeo, Tidal, or a platform you've linked on this profile.",
           }),
@@ -486,7 +487,7 @@ async function handleRequest(event: {
 
     if (embedError) {
       console.error('[Profile] Embed update failed:', embedError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update embed' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update embed' }) };
     }
   }
 
@@ -497,7 +498,7 @@ async function handleRequest(event: {
     if (!sectionOrder) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'sectionOrder must be a list of section keys' }),
       };
     }
@@ -508,7 +509,7 @@ async function handleRequest(event: {
 
     if (sectionError) {
       console.error('[Profile] Section order update failed:', sectionError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update section order' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update section order' }) };
     }
   }
 
@@ -548,7 +549,7 @@ async function handleRequest(event: {
         tags: { subsystem: 'artist-profile' },
         extra: { artistId: artist.id, linkCount: links.length, dividerCount: dividers.length },
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update links' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update links' }) };
     }
 
     console.log(`[Profile] Updated ${links.length} links and ${dividers.length} dividers for artist "${artist.name}"`);
@@ -558,7 +559,7 @@ async function handleRequest(event: {
 
   return {
     statusCode: 200,
-    headers: CORS_HEADERS,
+    headers: corsHeaders,
     body: JSON.stringify({ success: true, slug: finalSlug }),
   };
 }

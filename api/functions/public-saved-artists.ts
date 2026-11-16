@@ -13,6 +13,10 @@ import { getClient, readAllPages } from './db';
 import { artistUrlFor, collectionArtUrl, releaseUrlFor, resolveArtistPages } from './collection-utils';
 import { checkRateLimit, getClientIp } from './ratelimit';
 
+// The wildcard is deliberate. This endpoint takes no Authorization header and answers only
+// what the public /u/:handle page already shows anyone, and its 200s are cached at the CDN by
+// URL, so an origin echoed per request (account-cors.ts) would be frozen into the cache for
+// whoever asked first.
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',

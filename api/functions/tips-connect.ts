@@ -36,7 +36,8 @@ import {
   type StripeAccountLink,
 } from './stripe';
 import { canSetUpTips, getTipAccount, type TipAccountRow } from './tips-db';
-import { siteUrl, TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
+import { siteUrl, TIPS_ARTIST_METHODS, respond } from './tips-http';
+import { buildAccountCorsHeaders } from './account-cors';
 import { ARTIST_ADDENDUM_VERSION, isStripeConnectCountry } from '../shared/tips';
 import { Sentry, withSentry } from '../lib/sentry';
 
@@ -47,12 +48,20 @@ interface HandlerEvent {
 }
 
 async function handleRequest(event: HandlerEvent) {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why). Every answer leaves through here, so none can miss it.
+  const corsHeaders = buildAccountCorsHeaders(event.headers.origin || event.headers.Origin, TIPS_ARTIST_METHODS);
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
+  const response = await answer(event, corsHeaders);
+  return { ...response, headers: { ...response.headers, ...corsHeaders } };
+}
+
+async function answer(event: HandlerEvent, corsHeaders: Record<string, string>) {
   if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
 
   // The full auth-server check, not the fast local one: this links a payout account to a profile.
   const user = await authenticateBearer(event.headers.authorization);
-  const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', corsHeaders);
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
   if (!stripeMode()) return respond(503, { error: 'Tips are not available yet' });

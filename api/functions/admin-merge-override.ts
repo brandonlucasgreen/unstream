@@ -5,27 +5,28 @@ import { withSentry } from '../lib/sentry';
 import { getClient, invalidateAdminListCache } from './db';
 import { authenticateAdmin } from './middleware';
 import { isSearchOnlyLink, sourceIdFromUrl } from './search-utils';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body?: string;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -34,7 +35,7 @@ async function handleRequest(event: {
   if (!admin) {
     return {
       statusCode: 401,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Unauthorized' }),
     };
   }
@@ -52,7 +53,7 @@ async function handleRequest(event: {
   } catch {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Invalid JSON' }),
     };
   }
@@ -62,7 +63,7 @@ async function handleRequest(event: {
   if (!group_name?.trim()) {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'group_name is required' }),
     };
   }
@@ -70,7 +71,7 @@ async function handleRequest(event: {
   if (!Array.isArray(platform_urls) || platform_urls.length < 2) {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'At least 2 platform_urls are required' }),
     };
   }
@@ -85,7 +86,7 @@ async function handleRequest(event: {
   if (filteredPlatformUrls.length < 2) {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'At least 2 non-search platform_urls are required' }),
     };
   }
@@ -94,7 +95,7 @@ async function handleRequest(event: {
   if (!client) {
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Database not configured' }),
     };
   }
@@ -115,7 +116,7 @@ async function handleRequest(event: {
     console.error('[Admin] Failed to insert merge override:', error);
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         error: 'Failed to save merge override',
         detail: error.message || error.code || String(error),
@@ -129,7 +130,7 @@ async function handleRequest(event: {
 
   return {
     statusCode: 201,
-    headers: CORS_HEADERS,
+    headers: corsHeaders,
     body: JSON.stringify({ success: true, override: data }),
   };
 }

@@ -17,6 +17,7 @@ import { checkRateLimit, resolveAccountRequest, checkSentryDedup, getClientIp } 
 import { requestArtistCatalog } from './request-catalog';
 import { purgeCacheTags } from './purge-cache';
 import { Sentry, withSentry } from '../lib/sentry';
+import { buildAccountCorsHeaders } from './account-cors';
 
 function getServiceClient() {
   return getClient();
@@ -101,20 +102,22 @@ function forTag(value: string): string {
   return value.length > 64 ? `${value.slice(0, 64)}…` : value;
 }
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
-
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token. The
+  // extension's popup saves and removes here from its own origin, so that is allowed too
+  // (account-cors.ts says why, for both).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, OPTIONS',
+    { allowExtensionOrigins: true },
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // The per-user rate-limit bucket can only exist once the token has been verified, so
@@ -122,7 +125,7 @@ async function handleRequest(event: {
   // round trip to the auth server on a warm invocation (see resolveAccountRequest).
   const ip = getClientIp(event.headers);
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getServiceClient();
@@ -132,13 +135,13 @@ async function handleRequest(event: {
     await reportSavedArtistFailure('db-not-configured', 'Supabase is not configured — no saved-artist request can succeed', {
       httpMethod: event.httpMethod,
     });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   // GET: List user's saved artists (auth required)
   if (event.httpMethod === 'GET') {
     if (!user) {
-      return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+      return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
     }
 
     try {
@@ -168,7 +171,7 @@ async function handleRequest(event: {
           dbMessage: savedError.message,
           dbCode: savedError.code,
         });
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch saved artists' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to fetch saved artists' }) };
       }
 
       const savedArtists = (saved || []).map(row => {
@@ -192,47 +195,47 @@ async function handleRequest(event: {
 
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ savedArtists }),
       };
     } catch (error) {
       console.error('[saved-artists] GET error:', error);
       Sentry.captureException(error, { tags: { reason: 'list-threw' }, extra: { context: 'saved-artists.list' } });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
   // POST: Route by action field
   if (event.httpMethod === 'POST') {
     if (!user) {
-      return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+      return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
     }
 
     let body: Record<string, unknown>;
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     const action = (body.action as string) || 'save';
 
     if (action === 'check') {
-      return handleCheck(user, body, client);
+      return handleCheck(user, body, client, corsHeaders);
     }
     if (action === 'remove') {
-      return handleRemove(user, body, client);
+      return handleRemove(user, body, client, corsHeaders);
     }
     if (action === 'support') {
-      return handleSupport(user, body, client);
+      return handleSupport(user, body, client, corsHeaders);
     }
     if (action === 'unsupport') {
-      return handleUnsupport(user, body, client);
+      return handleUnsupport(user, body, client, corsHeaders);
     }
-    return handleSave(user, body, client);
+    return handleSave(user, body, client, corsHeaders);
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 // Resolve a slug to an existing artists table row (no creation).
@@ -257,7 +260,7 @@ async function findExistingArtist(
   return exact || ciData;
 }
 
-async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
+async function handleSave(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient, corsHeaders: Record<string, string>) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   const artistName = body.name as string | undefined;
   const artistImageUrl = body.imageUrl as string | undefined;
@@ -266,7 +269,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
     await reportSavedArtistFailure('save-missing-artist-id', 'Save rejected — no artistId in the body', {
       bodyKeys: Object.keys(body),
     });
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId (slug) is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'artistId (slug) is required' }) };
   }
 
   const invalid = invalidArtistSlugReason(artistSlug);
@@ -276,7 +279,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
       artistSlugLength: artistSlug.length,
       artistName,
     });
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: invalid.error }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: invalid.error }) };
   }
 
   try {
@@ -325,7 +328,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
         dbMessage: upsertError.message,
         dbCode: upsertError.code,
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save artist' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to save artist' }) };
     }
 
     // Saving is the strongest signal that someone wants this artist's releases — it's what
@@ -338,7 +341,7 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         success: true,
         server_time: serverNow,
@@ -357,17 +360,17 @@ async function handleSave(user: { userId: string; email: string }, body: Record<
   } catch (error) {
     console.error('[saved-artists] Save error:', error);
     Sentry.captureException(error, { tags: { reason: 'save-threw' }, extra: { context: 'saved-artists.save' } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 
-async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
+async function handleRemove(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient, corsHeaders: Record<string, string>) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
     await reportSavedArtistFailure('remove-missing-artist-id', 'Remove rejected — no artistId in the body', {
       bodyKeys: Object.keys(body),
     });
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   // Remove validates the identifier the same way save does. It used to accept anything, so
@@ -378,7 +381,7 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
       artistSlug: forTag(artistSlug),
       artistSlugLength: artistSlug.length,
     });
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: invalid.error }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: invalid.error }) };
   }
 
   try {
@@ -412,7 +415,7 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
         dbMessage: updateError.message,
         dbCode: updateError.code,
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to remove saved artist' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to remove saved artist' }) };
     }
 
     // If the user has public sharing enabled, purge the CDN cache for their page
@@ -426,25 +429,25 @@ async function handleRemove(user: { userId: string; email: string }, body: Recor
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ success: true, server_time: removeTime }),
     };
   } catch (error) {
     console.error('[saved-artists] Remove error:', error);
     Sentry.captureException(error, { tags: { reason: 'remove-threw' }, extra: { context: 'saved-artists.remove' } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 
-async function handleCheck(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
+async function handleCheck(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient, corsHeaders: Record<string, string>) {
   const artistSlugs = body.artistIds as string[];
   if (!artistSlugs || !Array.isArray(artistSlugs)) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistIds array is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'artistIds array is required' }) };
   }
 
   // Cap at 100 IDs
   if (artistSlugs.length > 100) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Maximum 100 artist IDs allowed' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Maximum 100 artist IDs allowed' }) };
   }
 
   try {
@@ -462,27 +465,27 @@ async function handleCheck(user: { userId: string; email: string }, body: Record
         dbMessage: checkError.message,
         dbCode: checkError.code,
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to check saved artists' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to check saved artists' }) };
     }
 
     const savedArtistIds = (saved || []).map((row: any) => row.artist_slug);
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ savedArtistIds }),
     };
   } catch (error) {
     console.error('[saved-artists] Check error:', error);
     Sentry.captureException(error, { tags: { reason: 'check-threw' }, extra: { context: 'saved-artists.check' } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 
-async function handleSupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
+async function handleSupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient, corsHeaders: Record<string, string>) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   try {
@@ -507,11 +510,11 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
         dbMessage: updateError.message,
         dbCode: updateError.code,
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to support artist' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to support artist' }) };
     }
 
     if (!updated) {
-      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Saved artist not found' }) };
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Saved artist not found' }) };
     }
 
     const artistRow = (updated as any).artists;
@@ -519,7 +522,7 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         success: true,
         savedArtist: {
@@ -540,14 +543,14 @@ async function handleSupport(user: { userId: string; email: string }, body: Reco
   } catch (error) {
     console.error('[saved-artists] Support error:', error);
     Sentry.captureException(error, { tags: { reason: 'support-threw' }, extra: { context: 'saved-artists.support' } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 
-async function handleUnsupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient) {
+async function handleUnsupport(user: { userId: string; email: string }, body: Record<string, unknown>, client: ServiceClient, corsHeaders: Record<string, string>) {
   const artistSlug = (body.artistId as string) || (body.slug as string);
   if (!artistSlug) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artistId is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'artistId is required' }) };
   }
 
   try {
@@ -572,11 +575,11 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
         dbMessage: updateError.message,
         dbCode: updateError.code,
       });
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to unsupport artist' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to unsupport artist' }) };
     }
 
     if (!updated) {
-      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Saved artist not found' }) };
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Saved artist not found' }) };
     }
 
     const artistRow = (updated as any).artists;
@@ -584,7 +587,7 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         success: true,
         savedArtist: {
@@ -605,7 +608,7 @@ async function handleUnsupport(user: { userId: string; email: string }, body: Re
   } catch (error) {
     console.error('[saved-artists] Unsupport error:', error);
     Sentry.captureException(error, { tags: { reason: 'unsupport-threw' }, extra: { context: 'saved-artists.unsupport' } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 

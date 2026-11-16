@@ -8,37 +8,38 @@ import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { isReservedHandle } from '../lib/reserved-handles';
 import { purgeCacheTags } from './purge-cache';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   // GET: return current sharing status
@@ -52,12 +53,12 @@ async function handleRequest(event: {
 
       if (usernameError) {
         console.error('[user-sharing] Error fetching username:', usernameError.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
       }
 
       // No username set — sharing is unavailable
       if (!usernameRow) {
-        return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'No username set. Set a username in Settings to enable sharing.' }) };
+        return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'No username set. Set a username in Settings to enable sharing.' }) };
       }
 
       const isPublic = usernameRow.saved_artists_public === true;
@@ -65,7 +66,7 @@ async function handleRequest(event: {
 
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           public: isPublic,
           public_handle: isPublic ? handle : null,
@@ -74,7 +75,7 @@ async function handleRequest(event: {
       };
     } catch (error) {
       console.error('[user-sharing] GET error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
@@ -84,12 +85,12 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     const wantPublic = body.public;
     if (typeof wantPublic !== 'boolean') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Field "public" (boolean) is required' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Field "public" (boolean) is required' }) };
     }
 
     try {
@@ -102,19 +103,19 @@ async function handleRequest(event: {
 
       if (usernameError) {
         console.error('[user-sharing] Error fetching username:', usernameError.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
       }
 
       // No username — can't enable sharing
       if (!usernameRow) {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username in Settings before enabling sharing.' }) };
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Set a username in Settings before enabling sharing.' }) };
       }
 
       const handle = usernameRow.username;
 
       // Defense in depth: reject reserved handles even if they somehow got into the usernames table
       if (isReservedHandle(handle)) {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'This username is reserved and cannot be used for sharing.' }) };
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'This username is reserved and cannot be used for sharing.' }) };
       }
 
       if (wantPublic) {
@@ -127,12 +128,12 @@ async function handleRequest(event: {
 
         if (flagError) {
           console.error('[user-sharing] Error setting saved_artists_public:', flagError.message);
-          return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to enable sharing' }) };
+          return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to enable sharing' }) };
         }
 
         return {
           statusCode: 200,
-          headers: CORS_HEADERS,
+          headers: corsHeaders,
           body: JSON.stringify({
             public: true,
             public_handle: handle,
@@ -148,7 +149,7 @@ async function handleRequest(event: {
 
         if (flagError) {
           console.error('[user-sharing] Error clearing saved_artists_public:', flagError.message);
-          return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to disable sharing' }) };
+          return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to disable sharing' }) };
         }
 
         // Purge CDN cache for this user's shared page so it stops serving publicly.
@@ -161,7 +162,7 @@ async function handleRequest(event: {
 
         return {
           statusCode: 200,
-          headers: CORS_HEADERS,
+          headers: corsHeaders,
           body: JSON.stringify({
             public: false,
             public_handle: null,
@@ -171,11 +172,11 @@ async function handleRequest(event: {
       }
     } catch (error) {
       console.error('[user-sharing] POST error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 export const handler = withSentry(handleRequest);

@@ -10,7 +10,7 @@
 // so the remaining risk (someone else holding that URL) is bounded by accepting only sessions under a
 // day old that nobody has claimed yet.
 //
-// Follows the other me-* endpoints (resolveAccountRequest, the account limiter, hand-rolled CORS)
+// Follows the other me-* endpoints (resolveAccountRequest, the account limiter, account-cors.ts)
 // and is in api/tsconfig.json's typecheck include — keep it there. Reads filter on the Stripe mode
 // of the configured key, so a test tip made through `npm run dev` never shows on the real site.
 
@@ -21,13 +21,7 @@ import { isLiveMode, stripeMode, stripeRequest, StripeError, type StripeCheckout
 import { markArtistSupported } from './tips-db';
 import { keptAfterRefund } from '../shared/tips';
 import { Sentry, withSentry } from '../lib/sentry';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$/;
 const SESSION_ID_REGEX = /^cs_(test|live)_[A-Za-z0-9]{10,200}$/;
@@ -53,14 +47,22 @@ interface JsonResponse {
   body: string;
 }
 
+/** A JSON answer; handleRequest adds the CORS headers, which depend on who is asking. */
 const respond = (statusCode: number, body: unknown): JsonResponse =>
-  ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
+  ({ statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 async function handleRequest(event: HandlerEvent): Promise<JsonResponse> {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why). Every answer leaves through here, so none can miss it.
+  const corsHeaders = buildAccountCorsHeaders(event.headers.origin || event.headers.Origin, 'GET, POST, OPTIONS');
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
+  const response = await answer(event, corsHeaders);
+  return { ...response, headers: { ...response.headers, ...corsHeaders } };
+}
 
+async function answer(event: HandlerEvent, corsHeaders: Record<string, string>): Promise<JsonResponse> {
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response as JsonResponse;
 
   if (event.httpMethod !== 'GET' && event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });

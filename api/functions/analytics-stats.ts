@@ -10,6 +10,7 @@ import { authenticateBearerFast } from './middleware';
 import { isLiveMode } from './stripe';
 import { keptAfterRefund } from '../shared/tips';
 import { buildActivity, summarizeAnalytics, RELEASE_VIEW_PREFIX, type AnalyticsRow } from './artist-activity';
+import { buildAccountCorsHeaders } from './account-cors';
 
 /** How far back the activity list reaches, whatever period the totals cover (Brandon, 2026-11-08). */
 const ACTIVITY_DAYS = 30;
@@ -20,13 +21,6 @@ const isoDay = (daysAgo: number) => {
   return date.toISOString().slice(0, 10);
 };
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
 const VALID_PERIODS = new Set(['7d', '30d', '90d', 'all']);
 
 async function handleRequest(event: {
@@ -34,25 +28,32 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string>;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   // Rate-limit check (Redis) and token validation (Supabase Auth) are both
   // network round-trips with no data dependency — run them concurrently.
   const ip = getClientIp(event.headers || {});
-  const rlPromise = checkRateLimit(ip, 'standard', CORS_HEADERS);
+  const rlPromise = checkRateLimit(ip, 'standard', corsHeaders);
   const authPromise = authenticateBearerFast(event.headers?.authorization || event.headers?.Authorization).catch(() => null);
   const rl = await rlPromise;
   if (rl.limited) return rl.response;
 
   const auth = await authPromise;
   if (!auth) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
   // Parse params
@@ -60,15 +61,15 @@ async function handleRequest(event: {
   const period = event.queryStringParameters?.period || '30d';
 
   if (!slug) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug parameter required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug parameter required' }) };
   }
   if (!VALID_PERIODS.has(period)) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid period. Use 7d, 30d, 90d, or all' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid period. Use 7d, 30d, 90d, or all' }) };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Server configuration error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Server configuration error' }) };
   }
 
   // Resolve artist and verify ownership. The two lookups are independent —
@@ -91,11 +92,11 @@ async function handleRequest(event: {
   ]);
 
   if (!artist) {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artist not found' }) };
+    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Artist not found' }) };
   }
 
   if (!profile) {
-    return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authorized to view analytics for this artist' }) };
+    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Not authorized to view analytics for this artist' }) };
   }
 
   const periodSince = period === 'all'
@@ -223,7 +224,7 @@ async function handleRequest(event: {
     return {
       statusCode: 200,
       headers: {
-        ...CORS_HEADERS,
+        ...corsHeaders,
         'Cache-Control': 'private, max-age=60',
       },
       body: JSON.stringify({
@@ -243,7 +244,7 @@ async function handleRequest(event: {
     };
   } catch (err) {
     Sentry.captureException(err, { extra: { context: 'analytics-stats', slug, period } });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
   }
 }
 

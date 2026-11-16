@@ -15,7 +15,8 @@ import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
 import { getGoals, getTipAccount, stripeHold, tipsOpenToArtist, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
-import { TIPS_CORS_HEADERS as CORS_HEADERS, respond } from './tips-http';
+import { TIPS_ARTIST_METHODS, respond } from './tips-http';
+import { buildAccountCorsHeaders } from './account-cors';
 import { purgeCacheTags } from './purge-cache';
 import {
   MAX_GOAL_TITLE_LENGTH,
@@ -37,10 +38,18 @@ interface HandlerEvent {
 }
 
 async function handleRequest(event: HandlerEvent) {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why). Every answer leaves through here, so none can miss it.
+  const corsHeaders = buildAccountCorsHeaders(event.headers.origin || event.headers.Origin, TIPS_ARTIST_METHODS);
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
+  const response = await answer(event, corsHeaders);
+  return { ...response, headers: { ...response.headers, ...corsHeaders } };
+}
+
+async function answer(event: HandlerEvent, corsHeaders: Record<string, string>) {
 
   const user = await authenticateBearer(event.headers.authorization);
-  const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', corsHeaders);
   if (rl.limited) return rl.response!;
   if (!user) return respond(401, { error: 'Not authenticated' });
 

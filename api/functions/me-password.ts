@@ -8,17 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { decodeJwt } from 'jose';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
-
-// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
-// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
-// non-API-key requests, which would break local dev and other origins using
-// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string; accessToken: string } | null> {
   if (!authHeader?.startsWith('Bearer ')) return null;
@@ -39,47 +29,54 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
   // Strict tier (10/min) — auth-sensitive endpoint
-  const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
+  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
   }
 
   const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   if (!url || !serviceKey || !anonKey) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   const user = await authenticateRequest(event.headers.authorization);
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
   const currentPassword = body.current_password as string | undefined;
   const newPassword = body.new_password as string | undefined;
 
   if (!currentPassword || !newPassword) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Current password and new password are required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Current password and new password are required' }) };
   }
 
   if (newPassword.length < 8) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'New password must be at least 8 characters' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'New password must be at least 8 characters' }) };
   }
 
   // Two-step verification, defense in depth (see docs/specs/two-factor-auth-spec.md).
@@ -107,11 +104,11 @@ async function handleRequest(event: {
     });
     if (factorsError) {
       console.error('[me-password] Error listing MFA factors:', factorsError.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Could not verify two-step verification status. Please try again.' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Could not verify two-step verification status. Please try again.' }) };
     }
     const hasVerifiedFactor = (factorsResult?.factors ?? []).some(f => f.status === 'verified');
     if (hasVerifiedFactor) {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Your account uses two-step verification. Complete the second step at sign-in before changing your password.' }) };
+      return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Your account uses two-step verification. Complete the second step at sign-in before changing your password.' }) };
     }
   }
 
@@ -124,7 +121,7 @@ async function handleRequest(event: {
   });
 
   if (verifyError) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Current password is incorrect' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Current password is incorrect' }) };
   }
 
   // Update the password using the service role (admin API).
@@ -136,10 +133,10 @@ async function handleRequest(event: {
 
   if (updateError) {
     console.error('[me-password] Error updating password:', updateError.message);
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update password' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update password' }) };
   }
 
-  return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
 }
 
 export const handler = withSentry(handleRequest);

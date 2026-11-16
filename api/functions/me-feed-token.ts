@@ -12,13 +12,7 @@ import { withSentry } from '../lib/sentry';
 import { randomBytes } from 'crypto';
 import { deleteFeedToken, getFeedToken, setFeedToken } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 const SITE = 'https://unstream.stream';
 
@@ -45,27 +39,31 @@ function feedUrls(token: string) {
   };
 }
 
-function json(statusCode: number, body: unknown) {
-  return {
-    statusCode,
-    // The response contains the token, so it must not be cached anywhere shared.
-    headers: { ...CORS_HEADERS, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(body),
-  };
-}
-
 async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, DELETE, OPTIONS',
+  );
+  const json = (statusCode: number, body: unknown) => ({
+    statusCode,
+    // The response contains the token, so it must not be cached anywhere shared.
+    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
+    body: JSON.stringify(body),
+  });
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (!user) return json(401, { error: 'Not signed in' });
