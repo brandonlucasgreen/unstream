@@ -85,6 +85,10 @@ you restore into a local copy, then copy back only what's missing.
 
    ```bash
    mkdir restore-db && cd restore-db && supabase init --force
+   # Match production's Auth version: the auth tables come from the local Auth container, and
+   # an older one lacks columns the backup fills. The backup run's log prints the version it
+   # restored with ("Restoring with production's Auth v2.x.y"); use that one.
+   mkdir -p supabase/.temp && printf 'v2.x.y' > supabase/.temp/gotrue-version
    supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
    ```
 
