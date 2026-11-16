@@ -12,6 +12,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { ApiError, apiRequest } from '../services/api';
 
 interface DuplicateRow {
   id: string;
@@ -112,11 +113,11 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
     setRefreshing(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/artist-duplicates', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load duplicates');
+      const data = await apiRequest<{ pairs?: DuplicatePair[]; reslugCandidates?: ReslugCandidate[]; reslugSkippedChosen?: number }>(
+        token,
+        '/api/admin/artist-duplicates',
+        { failureMessage: 'Failed to load duplicates' },
+      );
       setPairs(data.pairs || []);
       setReslugs(data.reslugCandidates || []);
       setSkippedChosen(data.reslugSkippedChosen || 0);
@@ -134,19 +135,17 @@ export function AdminDuplicateArtists({ session }: { session: Session | null }) 
     body: Record<string, unknown>,
   ): Promise<T | null> {
     if (!token) return null;
-    const res = await fetch('/api/admin/artist-duplicates', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    // A refused merge still carries `steps`, which the preview wants to show — so a non-2xx is only
-    // an error when there is nothing useful in the body.
-    if (!res.ok && !('steps' in data)) {
-      setError(data.error || data.refused || 'Request failed');
+    try {
+      return await apiRequest<T>(token, '/api/admin/artist-duplicates', { method: 'POST', body });
+    } catch (e) {
+      if (!(e instanceof ApiError)) throw e;
+      // A refused merge still carries `steps`, which the preview wants to show — so a non-2xx is only
+      // an error when there is nothing useful in the body.
+      if ('steps' in e.body) return e.body as T;
+      const { error, refused } = e.body as { error?: string; refused?: string };
+      setError(error || refused || 'Request failed');
       return null;
     }
-    return data as T;
   }
 
   /** Patch one pair in place, leaving the rest of the list — and the scroll position — untouched. */

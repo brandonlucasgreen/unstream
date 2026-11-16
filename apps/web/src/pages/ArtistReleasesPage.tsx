@@ -9,6 +9,7 @@ import { formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/rele
 import { sources } from '../services/sources';
 import { applyPendingOrder } from '../utils/releaseOrder';
 import type { SourceId } from '../types';
+import { ApiError, apiRequest } from '../services/api';
 
 const PLATFORM_OPTIONS = (Object.values(sources) as { id: SourceId; name: string }[])
   .filter(s => s.id !== 'other')
@@ -102,16 +103,11 @@ export function ArtistReleasesPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/artist-releases?slug=${encodeURIComponent(slug)}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to fetch (${response.status})`);
-      }
-
-      const data = await response.json();
+      const data = await apiRequest<{ releases?: OwnerRelease[]; catalog?: CatalogInfo | null; artistName?: string }>(
+        session.access_token,
+        `/api/artist-releases?slug=${encodeURIComponent(slug)}`,
+        { failureMessage: status => `Failed to fetch (${status})` },
+      );
       setReleases(data.releases || []);
       setCatalog(data.catalog ?? null);
       setArtistName(data.artistName);
@@ -136,16 +132,11 @@ export function ArtistReleasesPage() {
       setError(null);
 
       try {
-        const response = await fetch('/api/artist-releases', {
+        await apiRequest(session.access_token, '/api/artist-releases', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ slug, ...body }),
+          body: { slug, ...body },
+          failureMessage: status => `Action failed (${status})`,
         });
-
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.error || `Action failed (${response.status})`);
-        }
 
         await fetchReleases();
         return true;
@@ -383,15 +374,17 @@ function CatalogNowPanel({
   const readState = useCallback(async (): Promise<
     { ok: true; state: CatalogState | null } | { ok: false; reason: string }
   > => {
-    const response = await fetch(`/api/artist-releases?slug=${encodeURIComponent(slug)}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      return { ok: false, reason: body.error || 'Could not read catalog state' };
+    let data: { catalog?: CatalogInfo | null };
+    try {
+      data = await apiRequest(token, `/api/artist-releases?slug=${encodeURIComponent(slug)}`, {
+        failureMessage: 'Could not read catalog state',
+      });
+    } catch (e) {
+      // The server answered and said no. A request that never got an answer is the caller's to handle.
+      if (e instanceof ApiError) return { ok: false, reason: e.message };
+      throw e;
     }
-    const data = await response.json();
-    const info = (data.catalog ?? null) as CatalogInfo | null;
+    const info = data.catalog ?? null;
     if (info?.stateError) return { ok: false, reason: info.stateError };
     return { ok: true, state: info?.state ?? null };
   }, [slug, token]);
@@ -447,24 +440,17 @@ function CatalogNowPanel({
     setRunning(true);
     setStatus('Scanning your links…');
     try {
-      const response = await fetch('/api/artist-releases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ slug, action: 'catalog' }),
-      });
-      const body = await response.json().catch(() => ({}));
-
       // 202 means queued and nothing more. The endpoint reports the refusals it can predict
       // (cataloging disabled, secret missing) as real errors; everything else is settled by
       // polling.
-      if (!response.ok && response.status !== 202) {
-        setStatus(body.error || 'Could not start');
-        setRunning(false);
-        return;
-      }
+      await apiRequest(token, '/api/artist-releases', {
+        method: 'POST',
+        body: { slug, action: 'catalog' },
+        failureMessage: 'Could not start',
+      });
       poll();
-    } catch {
-      setStatus('Could not start');
+    } catch (e) {
+      setStatus(e instanceof ApiError ? e.message : 'Could not start');
       setRunning(false);
     }
   }, [slug, token, poll]);

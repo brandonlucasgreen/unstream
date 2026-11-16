@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { ApiError, apiRequest } from '../services/api';
 
 interface SharingState {
   public: boolean;
@@ -21,22 +22,20 @@ export function SharingControls() {
   const fetchSharing = useCallback(async () => {
     if (!session) return;
     try {
-      const res = await fetch('/api/me/saved-artists-sharing', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      const data = await apiRequest<SharingState>(session.access_token, '/api/me/saved-artists-sharing', {
+        failureMessage: 'Failed to fetch sharing status',
       });
-      if (res.status === 404) {
+      setSharing(data);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) {
         // No username set — sharing unavailable
         setSharing(null);
         return;
       }
-      if (res.status === 429) {
+      if (isRateLimited(e)) {
         setError(RATE_LIMIT_MESSAGE);
         return;
       }
-      if (!res.ok) throw new Error('Failed to fetch sharing status');
-      const data = await res.json();
-      setSharing(data);
-    } catch (e) {
       Sentry.captureException(e, { extra: { context: 'SharingControls.fetchSharing' } });
       setError('Failed to load sharing status.');
     } finally {
@@ -53,19 +52,11 @@ export function SharingControls() {
     setToggling(true);
     setError(null);
     try {
-      const res = await fetch('/api/me/saved-artists-sharing', {
+      const data = await apiRequest<SharingState>(session.access_token, '/api/me/saved-artists-sharing', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ public: makePublic }),
+        body: { public: makePublic },
+        failureMessage: 'Failed to update sharing',
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to update sharing');
-      }
-      const data = await res.json();
       setSharing(data);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'SharingControls.toggle' } });

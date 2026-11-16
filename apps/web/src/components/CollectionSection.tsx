@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { CollectionGrid } from './CollectionGrid';
+import { apiRequest } from '../services/api';
 
 // The /my-collection page's own section: the owner's view of their collection (Support Loop Step 3).
 // The public page (/u/:handle) shows only purchased, non-hidden items; here the owner
@@ -32,11 +33,9 @@ export function CollectionSection() {
   const fetchCollection = useCallback(async () => {
     if (!session) return;
     try {
-      const res = await fetch('/api/me/collection', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      const data = await apiRequest<{ items?: CollectionItem[] }>(session.access_token, '/api/me/collection', {
+        failureMessage: 'Failed to load collection',
       });
-      if (!res.ok) throw new Error('Failed to load collection');
-      const data = await res.json();
       setItems(data.items || []);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'CollectionSection.fetch' } });
@@ -53,19 +52,11 @@ export function CollectionSection() {
     setTogglingId(item.id);
     setError(null);
     try {
-      const res = await fetch('/api/me/collection', {
+      const updated = await apiRequest<{ id: string; hidden: boolean }>(session.access_token, '/api/me/collection', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ id: item.id, hidden: !item.hidden }),
+        body: { id: item.id, hidden: !item.hidden },
+        failureMessage: 'Failed to update item',
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to update item');
-      }
-      const updated = await res.json();
       setItems(prev => prev ? prev.map(i => (i.id === updated.id ? { ...i, hidden: updated.hidden } : i)) : prev);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'CollectionSection.toggleHidden' } });

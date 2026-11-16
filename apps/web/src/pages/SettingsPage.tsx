@@ -18,7 +18,8 @@ import { BandcampConnect } from '../components/BandcampConnect';
 import { YourTips } from '../components/YourTips';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { ApiError, apiRequest } from '../services/api';
 
 interface Settings {
   username: string | null;
@@ -64,22 +65,18 @@ export function SettingsPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('/api/me/settings', {
-          headers: { 'Authorization': `Bearer ${session!.access_token}` },
+        const data = await apiRequest<Settings>(session!.access_token, '/api/me/settings', {
+          failureMessage: 'Failed to load settings',
         });
-
-        if (response.status === 429) {
-          setError(RATE_LIMIT_MESSAGE);
-        } else if (!response.ok) {
-          throw new Error('Failed to load settings');
-        } else {
-          const data: Settings = await response.json();
-          setSettings(data);
-          setPendingEmailChange(data.pendingEmailChange ?? null);
-        }
+        setSettings(data);
+        setPendingEmailChange(data.pendingEmailChange ?? null);
       } catch (e) {
-        Sentry.captureException(e, { extra: { context: 'settings.loadSettings' } });
-        setError('Failed to load settings. Please try again.');
+        if (isRateLimited(e)) {
+          setError(RATE_LIMIT_MESSAGE);
+        } else {
+          Sentry.captureException(e, { extra: { context: 'settings.loadSettings' } });
+          setError('Failed to load settings. Please try again.');
+        }
       }
       setLoading(false);
     }
@@ -94,49 +91,44 @@ export function SettingsPage() {
 
     async function confirmChange() {
       try {
-        const response = await fetch('/api/me/email/confirm', {
+        const data = await apiRequest<{ email?: unknown }>(session!.access_token, '/api/me/email/confirm', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session!.access_token}`,
-          },
-          body: JSON.stringify({ token: confirmToken }),
+          body: { token: confirmToken },
+          failureMessage: 'We could not confirm that email change. Start a new one below.',
         });
-        const data = await response.json().catch(() => ({}));
+        const newEmail = typeof data.email === 'string' ? data.email : '';
 
-        if (response.ok) {
-          setConfirmStatus('success');
-          setConfirmMessage(`Your email is now ${data.email || 'updated'}. Sign-in and notification emails go to the new address.`);
-          setPendingEmailChange(null);
-          // Seed the new address straight away: the settings GET fired on mount may have
-          // returned the pre-change address, and both "Signed in as" and the form's
-          // duplicate check read settings.email. The session refresh below re-runs the
-          // settings load, which keeps this honest (fix list item 4 on UNS-212).
-          if (typeof data.email === 'string' && data.email) {
-            setSettings((prev) => (prev ? { ...prev, email: data.email } : prev));
-          }
-          // Pick up a re-issued session so the JWT's email claim matches immediately. Best
-          // effort: the held token stays valid until it expires, and AuthContext refreshes
-          // it on the next authenticated call regardless.
-          refreshSessionAfterEmailChange().then(refreshError => {
-            if (refreshError && refreshError.error && refreshError.error !== 'Auth not configured') {
-              Sentry.captureMessage(`Email-change session refresh failed: ${refreshError.error}`, {
-                level: 'warning',
-                tags: { context: 'settings.confirmEmailChange' },
-              });
-            }
-          });
-        } else if (response.status === 429) {
-          setConfirmStatus('error');
-          setConfirmMessage(RATE_LIMIT_MESSAGE);
-        } else {
-          setConfirmStatus('error');
-          setConfirmMessage(data.error || 'We could not confirm that email change. Start a new one below.');
+        setConfirmStatus('success');
+        setConfirmMessage(`Your email is now ${newEmail || 'updated'}. Sign-in and notification emails go to the new address.`);
+        setPendingEmailChange(null);
+        // Seed the new address straight away: the settings GET fired on mount may have
+        // returned the pre-change address, and both "Signed in as" and the form's
+        // duplicate check read settings.email. The session refresh below re-runs the
+        // settings load, which keeps this honest (fix list item 4 on UNS-212).
+        if (newEmail) {
+          setSettings((prev) => (prev ? { ...prev, email: newEmail } : prev));
         }
+        // Pick up a re-issued session so the JWT's email claim matches immediately. Best
+        // effort: the held token stays valid until it expires, and AuthContext refreshes
+        // it on the next authenticated call regardless.
+        refreshSessionAfterEmailChange().then(refreshError => {
+          if (refreshError && refreshError.error && refreshError.error !== 'Auth not configured') {
+            Sentry.captureMessage(`Email-change session refresh failed: ${refreshError.error}`, {
+              level: 'warning',
+              tags: { context: 'settings.confirmEmailChange' },
+            });
+          }
+        });
       } catch (e) {
-        Sentry.captureException(e, { extra: { context: 'settings.confirmEmailChange' } });
         setConfirmStatus('error');
-        setConfirmMessage('Network error while confirming. Try the link again.');
+        if (isRateLimited(e)) {
+          setConfirmMessage(RATE_LIMIT_MESSAGE);
+        } else if (e instanceof ApiError) {
+          setConfirmMessage(e.message);
+        } else {
+          Sentry.captureException(e, { extra: { context: 'settings.confirmEmailChange' } });
+          setConfirmMessage('Network error while confirming. Try the link again.');
+        }
       }
       // Drop the token from the URL — through the router, not history.replaceState, so the
       // router's location forgets it too. Otherwise a remount that still carries the used

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
+import { AdminGate } from '../components/AdminGate';
 import { getFeatureFlags, updateFeatureFlag, type FeatureFlagMap } from '../services/featureFlags';
 
 /**
@@ -31,7 +32,15 @@ const FLAG_COPY: Record<string, { title: string; caption: string }> = {
 };
 
 export function AdminFlagsPage() {
-  const { isAdmin, session } = useAuth();
+  return (
+    <AdminGate>
+      <AdminFlagsContent />
+    </AdminGate>
+  );
+}
+
+function AdminFlagsContent() {
+  const { session } = useAuth();
   const [flags, setFlags] = useState<FeatureFlagMap>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,10 +62,8 @@ export function AdminFlagsPage() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchFlags();
-    }
-  }, [isAdmin, fetchFlags]);
+    fetchFlags();
+  }, [fetchFlags]);
 
   const handleToggle = async (flag: string) => {
     if (!session?.access_token) return;
@@ -78,14 +85,6 @@ export function AdminFlagsPage() {
       setTogglingFlag(null);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-text-muted">Not authorized.</p>
-      </div>
-    );
-  }
 
   const flagNames = Object.keys(flags);
 

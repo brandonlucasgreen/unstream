@@ -7,9 +7,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { ResultCard } from 'src/components/ResultCard';
 import type { SearchResult } from 'src/types';
 
+const auth = vi.hoisted(() => ({ session: { access_token: 'admin-token' } as { access_token: string } | null }));
+
 vi.mock('src/contexts/AuthContext', () => ({
   useAuth: () => ({
-    session: { access_token: 'admin-token' },
+    session: auth.session,
     isArtistSaved: () => false,
     saveArtist: vi.fn(),
     removeSavedArtist: vi.fn(),
@@ -46,6 +48,7 @@ const render = (ui: React.ReactElement) => renderComponent(<MemoryRouter>{ui}</M
 
 describe('ResultCard admin link removal', () => {
   beforeEach(() => {
+    auth.session = { access_token: 'admin-token' };
     mockFetch.mockReset();
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
   });
@@ -102,6 +105,20 @@ describe('ResultCard admin link removal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove link' }));
 
     await waitFor(() => expect(screen.getByText('Database not configured')).toBeTruthy());
+    expect(onLinkRemoved).not.toHaveBeenCalled();
+  });
+
+  // It used to go out as the literal header "Bearer undefined".
+  it('sends nothing when there is no session', async () => {
+    auth.session = null;
+    const onLinkRemoved = vi.fn();
+    render(<ResultCard result={RESULT} isAdmin onLinkRemoved={onLinkRemoved} />);
+
+    fireEvent.click(screen.getByLabelText('Remove the Bandcamp link'));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove link' }));
+
+    expect(await screen.findByText('Unauthorized')).toBeTruthy();
+    expect(mockFetch).not.toHaveBeenCalled();
     expect(onLinkRemoved).not.toHaveBeenCalled();
   });
 });

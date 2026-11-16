@@ -5,6 +5,8 @@ import { Header } from '../components/Header';
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { PlatformIcon } from '../components/PlatformIcon';
+import { AdminGate } from '../components/AdminGate';
+import { apiRequest } from '../services/api';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import { formatReleaseDate, releaseTypeLabel } from '../../../../api/shared/release-display';
 import type { SourceId } from '../types';
@@ -37,7 +39,15 @@ interface ReviewPair {
  * side's sources over, then removes the now-empty duplicate row).
  */
 export function AdminReleaseReviewPage() {
-  const { isAdmin, session } = useAuth();
+  return (
+    <AdminGate>
+      <AdminReleaseReviewContent />
+    </AdminGate>
+  );
+}
+
+function AdminReleaseReviewContent() {
+  const { session } = useAuth();
   const [pairs, setPairs] = useState<ReviewPair[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,16 +59,9 @@ export function AdminReleaseReviewPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/release-review', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+      const data = await apiRequest<{ pairs?: ReviewPair[] }>(session.access_token, '/api/admin/release-review', {
+        failureMessage: status => `Failed to fetch (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to fetch (${response.status})`);
-      }
-
-      const data = await response.json();
       setPairs(data.pairs || []);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'admin.releaseReview.fetchQueue' } });
@@ -69,8 +72,8 @@ export function AdminReleaseReviewPage() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (isAdmin) fetchQueue();
-  }, [isAdmin, fetchQueue]);
+    fetchQueue();
+  }, [fetchQueue]);
 
   const runAction = async (key: string, body: Record<string, unknown>) => {
     if (!session?.access_token) return;
@@ -78,19 +81,11 @@ export function AdminReleaseReviewPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/release-review', {
+      await apiRequest(session.access_token, '/api/admin/release-review', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(body),
+        body,
+        failureMessage: status => `Action failed (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Action failed (${response.status})`);
-      }
 
       await fetchQueue();
     } catch (err) {
@@ -100,14 +95,6 @@ export function AdminReleaseReviewPage() {
       setActionLoading(null);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-text-muted">Not authorized.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">

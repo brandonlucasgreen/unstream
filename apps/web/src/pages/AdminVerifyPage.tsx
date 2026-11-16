@@ -5,6 +5,8 @@ import { Header } from '../components/Header';
 import { SkeletonScreen } from '../components/Skeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { AdminDuplicateArtists } from '../components/AdminDuplicateArtists';
+import { AdminGate } from '../components/AdminGate';
+import { apiRequest } from '../services/api';
 
 interface VerificationRequest {
   id: string;
@@ -21,7 +23,15 @@ interface VerificationRequest {
 }
 
 export function AdminVerifyPage() {
-  const { isAdmin, session } = useAuth();
+  return (
+    <AdminGate>
+      <AdminVerifyContent />
+    </AdminGate>
+  );
+}
+
+function AdminVerifyContent() {
+  const { session } = useAuth();
   const [requests, setRequests] = useState<VerificationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,18 +45,9 @@ export function AdminVerifyPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/verify', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
+      const data = await apiRequest<{ requests?: VerificationRequest[] }>(session.access_token, '/api/admin/verify', {
+        failureMessage: status => `Failed to fetch (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to fetch (${response.status})`);
-      }
-
-      const data = await response.json();
       setRequests(data.requests || []);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'admin.verify.fetchRequests' } });
@@ -57,10 +58,8 @@ export function AdminVerifyPage() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchRequests();
-    }
-  }, [isAdmin, fetchRequests]);
+    fetchRequests();
+  }, [fetchRequests]);
 
   const handleAction = async (requestId: string, action: 'approve' | 'reject') => {
     if (!session?.access_token) return;
@@ -68,24 +67,16 @@ export function AdminVerifyPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/verify', {
+      await apiRequest(session.access_token, '/api/admin/verify', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+        body: {
           action,
           requestId,
           reviewerNotes: reviewerNotes[requestId]?.trim() || undefined,
           ownershipVerified: action === 'approve' ? ownershipChecked[requestId] === true : undefined,
-        }),
+        },
+        failureMessage: status => `Failed to ${action} (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to ${action} (${response.status})`);
-      }
 
       // Refresh the list
       await fetchRequests();
@@ -107,14 +98,6 @@ export function AdminVerifyPage() {
       setActionLoading(null);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-text-muted">Not authorized.</p>
-      </div>
-    );
-  }
 
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const pastRequests = requests.filter(r => r.status !== 'pending');
