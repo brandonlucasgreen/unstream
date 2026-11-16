@@ -1,9 +1,12 @@
 # Engineering history: the evidence behind the rules
 
-`CLAUDE.md` states the rules this codebase runs on. This file holds the measurements,
-incidents and abandoned approaches that produced them — the *why*, at the length the why
-actually needs. Each section here is referenced from the corresponding section of
-`CLAUDE.md`.
+The `CLAUDE.md` files state the rules this codebase runs on: the root one holds the rules
+for every change, and one in each directory (`api/`, `api/functions/`, `api/edge/`,
+`apps/web/`, `apps/mac/`, `apps/extension/`, `scripts/`, `supabase/`) holds the rules for
+that area. This file holds the measurements, incidents and abandoned approaches that
+produced them — the *why*, at the length the why actually needs. Each section here backs a
+section in one of those files; the root file's "Where things are" says which file covers
+what.
 
 Read this when you are about to change one of those rules, or when a rule looks arbitrary
 and you want to know what it cost to learn. **Treat every number as a dated measurement,
@@ -504,6 +507,45 @@ silently stale — the worse of the two failures.
 `data/` and `scripts/` are deliberately absent from that list: the whole `data/` tree is
 copied into `dist/`, and `scripts/` generates the manifests, feeds and sitemap. If you add
 a path whose contents reach the built site, check it isn't shadowed.
+
+Since 2026-11-16 a `CLAUDE.md` in any directory counts as never published, because the
+rulebook is now split across directories the build does read (`api/`, `apps/web/`,
+`scripts/`). The two exceptions are `apps/web/public/` and `data/`: the build copies both to
+the live site whole, so a file there is published whatever it is called.
+
+---
+
+## Pushing to a pull request that has already merged
+
+**Rule it produced:** check a pull request's state before pushing to its branch, every time.
+
+PRs here are squash-merged, so a commit pushed to a merged PR's branch is never an ancestor
+of `main`. The push still succeeds and the closed PR shows nothing new, so the work looks
+shipped.
+
+It happened on 2026-11-03: four review fixes to the Campaigns tab were pushed to #743's branch ten minutes after it merged, and never reached `main` until Brandon noticed.
+
+---
+
+## Why `CLAUDE.md` is split by directory
+
+**Rule it produced:** the root `CLAUDE.md` holds only what applies to any change and stays
+under 25 KB; a rule that matters in one directory goes in that directory's `CLAUDE.md`.
+
+Measured 2026-11-16: the root file was 446 lines and 92 KB, and every session loaded all of
+it, whatever it was about to touch. Hard rules, the reasons for them and feature-by-feature
+reference sat in the same long paragraphs, so the rules that mattered were hard to find.
+
+Claude Code loads a directory's `CLAUDE.md` when it first reads a file in that directory, so
+the area detail moved into eight nested files and the root dropped to 24 KB. Nothing was
+rewritten in the move: a script checked that every sentence of the old file still exists in
+the new set. A session that starts at the repo root has not loaded the nested files, which
+is why the root file carries a map and tells the reader to open the area's file first.
+
+Two limits to know about. `api/functions/` is one flat folder, so its file (36 KB) carries
+search, releases, collections and tips together; there is no narrower directory to hang them
+on. And never put a `CLAUDE.md` under `apps/web/public/` or `data/`, where the build would
+publish it.
 
 ---
 

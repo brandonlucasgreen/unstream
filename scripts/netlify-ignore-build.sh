@@ -41,8 +41,22 @@ IGNORED_PREFIXES=(
   "supabase/"
   ".github/"
   "README.md"
-  "CLAUDE.md"
 )
+
+# The agent rulebook is split across directories: a CLAUDE.md at the root and one in each
+# area it governs (api/, api/functions/, apps/web/, scripts/, ...). Several of those sit in
+# directories the build does read, so a prefix can't cover them; they are matched by name
+# instead. Nothing reads them: the function and edge bundlers only pick up .js/.ts files.
+#
+# The two exceptions are the directories the build copies to the live site whole. A
+# CLAUDE.md under apps/web/public/ or data/ would be published, so it has to build.
+is_rulebook() {
+  case "$1" in
+    apps/web/public/* | data/*) return 1 ;;
+    CLAUDE.md | */CLAUDE.md) return 0 ;;
+  esac
+  return 1
+}
 
 if [ -z "${CACHED_COMMIT_REF:-}" ] || [ -z "${COMMIT_REF:-}" ]; then
   echo "No cached commit to compare against — building."
@@ -68,6 +82,9 @@ fi
 
 while IFS= read -r file; do
   ignorable=false
+  if is_rulebook "$file"; then
+    ignorable=true
+  fi
   for prefix in "${IGNORED_PREFIXES[@]}"; do
     case "$file" in
       "$prefix"*)
