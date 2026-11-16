@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { apiRequest } from '../services/api';
 
 /**
  * Turn off an existing private release feed, on /my-saved-artists when the fan has saved nobody.
@@ -30,17 +31,16 @@ export function ReleaseFeedOffSwitch() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch('/api/me/feed-token', {
+      await apiRequest(session.access_token, '/api/me/feed-token', {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        failureMessage: status => `feed-token DELETE failed: ${status}`,
       });
-      if (res.status === 429) {
+      setDone(true);
+    } catch (e) {
+      if (isRateLimited(e)) {
         setError(RATE_LIMIT_MESSAGE);
         return;
       }
-      if (!res.ok) throw new Error(`feed-token DELETE failed: ${res.status}`);
-      setDone(true);
-    } catch (e) {
       Sentry.captureException(e, { extra: { context: 'ReleaseFeedOffSwitch.turnOff' } });
       setError('Something went wrong. Please try again.');
     } finally {

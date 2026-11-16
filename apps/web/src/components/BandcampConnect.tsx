@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { apiRequest } from '../services/api';
 
 // Settings section for connecting a Bandcamp collection via Bandcamp's Subsonic API
 // (open beta). The credential goes straight to /api/me/bandcamp over one POST and is never
@@ -72,17 +73,16 @@ export function BandcampConnect() {
   const fetchStatus = useCallback(async (): Promise<boolean> => {
     if (!session) return false;
     try {
-      const res = await fetch('/api/me/bandcamp', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      const data = await apiRequest<ConnectionStatus>(session.access_token, '/api/me/bandcamp', {
+        failureMessage: 'Failed to fetch Bandcamp connection status',
       });
-      if (res.status === 429) {
+      setStatus(data);
+      return true;
+    } catch (e) {
+      if (isRateLimited(e)) {
         setError(RATE_LIMIT_MESSAGE);
         return false;
       }
-      if (!res.ok) throw new Error('Failed to fetch Bandcamp connection status');
-      setStatus(await res.json());
-      return true;
-    } catch (e) {
       Sentry.captureException(e, { extra: { context: 'BandcampConnect.fetchStatus' } });
       setError('Failed to load Bandcamp connection status.');
       return true;
@@ -148,18 +148,11 @@ export function BandcampConnect() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch('/api/me/bandcamp', {
+      const data = await apiRequest<ConnectionStatus>(session.access_token, '/api/me/bandcamp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ username: username.trim(), password: credential }),
+        body: { username: username.trim(), password: credential },
+        failureMessage: 'Failed to connect Bandcamp',
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to connect Bandcamp');
-      }
       setCredential('');
       setUsername('');
       setStatus({
@@ -185,16 +178,11 @@ export function BandcampConnect() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch('/api/me/bandcamp', {
+      const data = await apiRequest<ConnectionStatus>(session.access_token, '/api/me/bandcamp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ resync: true }),
+        body: { resync: true },
+        failureMessage: 'Failed to start sync',
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to start sync');
       setStatus(data);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'BandcampConnect.resync' } });
@@ -209,16 +197,11 @@ export function BandcampConnect() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch('/api/me/bandcamp', {
+      await apiRequest(session.access_token, '/api/me/bandcamp', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ deleteItems }),
+        body: { deleteItems },
+        failureMessage: 'Failed to disconnect',
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to disconnect');
       setStatus({ connected: false });
       setConfirmingDisconnect(false);
     } catch (e) {

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { PlatformLink } from '../types';
 import { getSource } from './ResultCardUtils';
 import { Dialog } from './Dialog';
+import { apiRequest } from '../services/api';
 
 interface AdminRemoveLinkDialogProps {
   artistName: string;
@@ -36,25 +37,17 @@ export function AdminRemoveLinkDialog({ artistName, platform, onClose, onRemoved
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/link-suppression', {
+      await apiRequest(session?.access_token, '/api/admin/link-suppression', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
+        body: {
           url: platform.url,
           source_id: platform.sourceId,
           artist_name: artistName,
           scope,
           reason: reason.trim() || null,
-        }),
+        },
+        failureMessage: status => `Failed to remove link (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to remove link (${response.status})`);
-      }
 
       onRemoved(platform.url);
       close();

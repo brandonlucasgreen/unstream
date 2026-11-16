@@ -8,6 +8,7 @@ import { Skeleton } from '../components/Skeleton';
 import { PageSkeleton } from '../components/PageSkeleton';
 import { StatTilesSkeleton } from '../components/LoadingSkeletons';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
+import { ApiError, apiRequest } from '../services/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -461,15 +462,14 @@ export function AdminAnalyticsPage() {
     // must not take the search numbers with it.
     let current = true;
     const query = new URLSearchParams({ from, to });
-    const headers = { Authorization: `Bearer ${session?.access_token}` };
     const getJson = async <T,>(path: string): Promise<T> => {
-      const res = await fetch(`${path}?${query}`, { headers });
-      if (!res.ok) {
+      try {
+        return await apiRequest<T>(session?.access_token, `${path}?${query}`);
+      } catch (e) {
         // Both endpoints say why in `error`, and the traffic one passes GoatCounter's reason in `detail`.
-        const body = await res.json().catch(() => null) as { error?: string; detail?: string } | null;
-        throw new Error(body?.detail ?? body?.error ?? `HTTP ${res.status}`);
+        if (e instanceof ApiError && typeof e.body.detail === 'string') throw new Error(e.body.detail);
+        throw e;
       }
-      return res.json();
     };
 
     getJson<DashboardData>('/api/analytics/dashboard')
@@ -492,14 +492,7 @@ export function AdminAnalyticsPage() {
   useEffect(() => {
     if (authLoading || !isAdmin) return;
     let current = true;
-    fetch('/api/analytics/promote', { headers: { Authorization: `Bearer ${session?.access_token}` } })
-      .then(async res => {
-        if (!res.ok) {
-          const body = await res.json().catch(() => null) as { error?: string } | null;
-          throw new Error(body?.error ?? `HTTP ${res.status}`);
-        }
-        return res.json() as Promise<PromoteUsage>;
-      })
+    apiRequest<PromoteUsage>(session?.access_token, '/api/analytics/promote')
       .then(usage => { if (current) setPromoteResult({ usage, error: null }); })
       // The endpoint reports its own query failures to Sentry.
       .catch(e => { if (current) setPromoteResult({ usage: null, error: e.message }); });

@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { apiRequest } from '../services/api';
 
 interface FeedUrls {
   ics: string;
@@ -34,19 +35,16 @@ export function ReleaseFeedControls() {
       setBusy(true);
       setError(null);
       try {
-        const res = await fetch('/api/me/feed-token', {
+        const data = await apiRequest<{ revoked?: boolean; ics: string; atom: string }>(session.access_token, '/api/me/feed-token', {
           method,
-          headers: { Authorization: `Bearer ${session.access_token}` },
+          failureMessage: status => `feed-token ${method} failed: ${status}`,
         });
-        if (res.status === 429) {
+        setUrls(data.revoked ? null : { ics: data.ics, atom: data.atom });
+      } catch (e) {
+        if (isRateLimited(e)) {
           setError(RATE_LIMIT_MESSAGE);
           return;
         }
-        if (!res.ok) throw new Error(`feed-token ${method} failed: ${res.status}`);
-
-        const data = await res.json();
-        setUrls(data.revoked ? null : { ics: data.ics, atom: data.atom });
-      } catch (e) {
         Sentry.captureException(e, { extra: { context: 'ReleaseFeedControls.call', method } });
         setError('Something went wrong. Please try again.');
       } finally {

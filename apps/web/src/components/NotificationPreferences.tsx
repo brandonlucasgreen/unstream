@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { RATE_LIMIT_MESSAGE } from '../utils/rateLimit';
+import { RATE_LIMIT_MESSAGE, isRateLimited } from '../utils/rateLimit';
+import { apiRequest } from '../services/api';
 
 interface Preferences {
   newRelease: boolean;
@@ -39,17 +40,15 @@ export function NotificationPreferences() {
   const fetchPreferences = useCallback(async () => {
     if (!session) return;
     try {
-      const res = await fetch('/api/me/notification-preferences', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      const data = await apiRequest<Preferences>(session.access_token, '/api/me/notification-preferences', {
+        failureMessage: 'Failed to fetch notification preferences',
       });
-      if (res.status === 429) {
+      setPreferences(data);
+    } catch (e) {
+      if (isRateLimited(e)) {
         setError(RATE_LIMIT_MESSAGE);
         return;
       }
-      if (!res.ok) throw new Error('Failed to fetch notification preferences');
-      const data = await res.json();
-      setPreferences(data);
-    } catch (e) {
       Sentry.captureException(e, { extra: { context: 'NotificationPreferences.fetchPreferences' } });
       setError('Failed to load notification preferences.');
     } finally {
@@ -67,19 +66,11 @@ export function NotificationPreferences() {
     setTogglingKey(key);
     setError(null);
     try {
-      const res = await fetch('/api/me/notification-preferences', {
+      const data = await apiRequest<Preferences>(session.access_token, '/api/me/notification-preferences', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ [key]: next }),
+        body: { [key]: next },
+        failureMessage: 'Failed to update notification preferences',
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to update notification preferences');
-      }
-      const data = await res.json();
       setPreferences(data);
     } catch (e) {
       Sentry.captureException(e, { extra: { context: 'NotificationPreferences.toggle', key } });

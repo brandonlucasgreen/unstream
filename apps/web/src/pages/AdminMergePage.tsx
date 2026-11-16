@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import type { SearchResult } from '../types';
 import { sources } from '../services/sources';
 import { PlatformIcon } from '../components/PlatformIcon';
+import { AdminGate } from '../components/AdminGate';
+import { apiRequest } from '../services/api';
 
 interface MergeLink {
   id: string;
@@ -14,7 +16,15 @@ interface MergeLink {
 }
 
 export function AdminMergePage() {
-  const { isAdmin, session } = useAuth();
+  return (
+    <AdminGate>
+      <AdminMergeContent />
+    </AdminGate>
+  );
+}
+
+function AdminMergeContent() {
+  const { session } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const selectedResults: SearchResult[] = (location.state as { results?: SearchResult[] })?.results || [];
@@ -80,25 +90,17 @@ export function AdminMergePage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/merge-override', {
+      await apiRequest(session?.access_token, '/api/admin/merge-override', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
+        body: {
           group_name: artistName.trim(),
           platform_urls: platformUrls,
           excluded_urls: excludedLinks.map(l => l.url),
           canonical_image_url: imageUrl.trim() || null,
           notes: notes.trim() || null,
-        }),
+        },
+        failureMessage: status => `Failed to save (${status})`,
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to save (${response.status})`);
-      }
 
       navigate('/', { replace: true });
     } catch (err) {
@@ -108,14 +110,6 @@ export function AdminMergePage() {
       setSaving(false);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-text-muted">Not authorized.</p>
-      </div>
-    );
-  }
 
   if (selectedResults.length === 0) {
     return (

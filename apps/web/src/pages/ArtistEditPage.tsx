@@ -8,6 +8,7 @@ import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { SortableList } from '../components/SortableList';
 import { DEFAULT_SECTION_ORDER, normalizeSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
 import type { SourceId } from '../types';
+import { ApiError, apiRequest } from '../services/api';
 
 // A divider entry is a horizontal rule on the public artist page, not a link.
 // It lives in this list so it can be reordered alongside the links; the API
@@ -457,22 +458,19 @@ export function ArtistEditPage() {
 
     set('removing', true);
     try {
-      const response = await fetch(`/api/artist-profile?slug=${encodeURIComponent(form.currentSlug)}`, {
+      await apiRequest(session.access_token, `/api/artist-profile?slug=${encodeURIComponent(form.currentSlug)}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
+        failureMessage: 'Failed to remove this artist. Please try again.',
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        set('error', data.error || 'Failed to remove this artist. Please try again.');
-        set('removing', false);
-        return;
-      }
 
       navigate('/my-artists', { replace: true });
     } catch (e) {
-      Sentry.captureException(e, { extra: { context: 'artistEdit.removeArtist' } });
-      set('error', 'Network error. Please try again.');
+      if (e instanceof ApiError) {
+        set('error', e.message);
+      } else {
+        Sentry.captureException(e, { extra: { context: 'artistEdit.removeArtist' } });
+        set('error', 'Network error. Please try again.');
+      }
       set('removing', false);
     }
   }

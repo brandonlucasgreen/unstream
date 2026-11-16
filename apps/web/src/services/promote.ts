@@ -3,6 +3,7 @@
 // (/api/artist-promote/assets) and release campaigns (/api/artist-campaigns).
 
 import type { AutopostKind, TemplateRelease } from '../../../../api/shared/autopost-templates';
+import { ApiError, apiRequest, type ApiRequestOptions } from './api';
 
 export interface PromoteSettings {
   enabled: boolean;
@@ -107,17 +108,14 @@ export class PromoteApiError extends Error {
   }
 }
 
-async function call<T>(token: string, url: string, init: RequestInit = {}): Promise<T> {
-  const r = await fetch(url, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-  });
-  const body = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    const { error, problems } = body as { error?: string; problems?: Record<string, string[]> };
-    throw new PromoteApiError(error ?? `HTTP ${r.status}`, r.status, problems);
+async function call<T>(token: string, url: string, options: ApiRequestOptions = {}): Promise<T> {
+  try {
+    return await apiRequest<T>(token, url, options);
+  } catch (err) {
+    if (!(err instanceof ApiError)) throw err;
+    const { error, problems } = err.body as { error?: string; problems?: Record<string, string[]> };
+    throw new PromoteApiError(error ?? `HTTP ${err.status}`, err.status, problems);
   }
-  return body as T;
 }
 
 /** Whether this account may use Promote at all: the admin always, everyone once the releaseAutopost flag is on. */
@@ -137,7 +135,7 @@ export function getPromoteSchedule(token: string, slug: string): Promise<Promote
 export type PromoteSettingsInput = Omit<PromoteSettings, 'enabledAt' | 'pausedReason'>;
 
 export function savePromoteSettings(token: string, slug: string, settings: PromoteSettingsInput): Promise<PromotePage> {
-  return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`, { method: 'PUT', body: JSON.stringify(settings) });
+  return call(token, `/api/artist-promote?artist=${encodeURIComponent(slug)}`, { method: 'PUT', body: settings });
 }
 
 /**
@@ -148,7 +146,7 @@ export async function startBufferConnection(token: string, slug: string, tab: 'a
   const returnTo = `/promote/${slug}${tab === 'campaigns' ? '/campaigns' : ''}`;
   const { authorizeUrl } = await call<{ authorizeUrl?: string; available?: boolean }>(token, '/api/me/buffer/start', {
     method: 'POST',
-    body: JSON.stringify({ returnTo }),
+    body: { returnTo },
   });
   if (!authorizeUrl) throw new PromoteApiError('Buffer isn’t available right now', 503);
   return authorizeUrl;
@@ -177,7 +175,7 @@ export function getPromoteAssets(token: string, slug: string): Promise<PromoteAs
 
 /** Upload one image, already resized and encoded by the browser, as base64. */
 export function uploadPromoteAsset(token: string, slug: string, base64: string): Promise<PromoteAssets> {
-  return call(token, assetsUrl(slug), { method: 'POST', body: JSON.stringify({ data: base64 }) });
+  return call(token, assetsUrl(slug), { method: 'POST', body: { data: base64 } });
 }
 
 export function removePromoteAsset(token: string, slug: string, id: string): Promise<PromoteAssets> {
@@ -262,11 +260,11 @@ export function getCampaignsPage(token: string, slug: string, organizationId?: s
 
 /** Before release, `startDate` is when to begin; once it's out, `runWeeks` is how long to run from tomorrow. */
 export function proposeCampaign(token: string, slug: string, input: { releaseId: string; releaseDate: string; startDate?: string; runWeeks?: number }): Promise<{ posts: CampaignPostDraft[]; autopost: AutopostDay[] }> {
-  return call(token, campaignsUrl(slug, '&action=propose'), { method: 'POST', body: JSON.stringify(input) });
+  return call(token, campaignsUrl(slug, '&action=propose'), { method: 'POST', body: input });
 }
 
 export function campaignOverlay(token: string, slug: string, input: { releaseId: string; dates: string[]; campaignId: string | null }): Promise<{ autopost: AutopostDay[] }> {
-  return call(token, campaignsUrl(slug, '&action=overlay'), { method: 'POST', body: JSON.stringify(input) });
+  return call(token, campaignsUrl(slug, '&action=overlay'), { method: 'POST', body: input });
 }
 
 /** Schedule a new campaign (no id) or replace an existing one's unsent posts. */
@@ -275,7 +273,7 @@ export function saveCampaign(token: string, slug: string, campaign: { id: string
   const posts = campaign.posts
     .filter(p => p.status !== 'pushed' && p.status !== 'pushing')
     .map(p => ({ step: p.step, date: p.date, text: p.text, imageKey: p.imageKey }));
-  const body = JSON.stringify({
+  const body = {
     releaseId: campaign.releaseId,
     releaseDate: campaign.releaseDate,
     channelIds: campaign.channelIds,
@@ -283,7 +281,7 @@ export function saveCampaign(token: string, slug: string, campaign: { id: string
     // Only read when the artist has no promote settings yet: campaigns may be where they start.
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
     posts,
-  });
+  };
   return campaign.id
     ? call(token, campaignsUrl(slug, `&id=${encodeURIComponent(campaign.id)}`), { method: 'PUT', body })
     : call(token, campaignsUrl(slug), { method: 'POST', body });

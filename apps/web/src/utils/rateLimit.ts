@@ -8,4 +8,11 @@
  * (UNSTREAM-WEB-12), none of which described what had actually happened — and the
  * user was told to "try again", which is the one thing that makes it worse.
  */
+import { ApiError } from '../services/api';
+
 export const RATE_LIMIT_MESSAGE = 'Too many requests right now. Wait a minute, then refresh the page.';
+
+/** Whether a failed `apiRequest` was that 429. */
+export function isRateLimited(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 429;
+}

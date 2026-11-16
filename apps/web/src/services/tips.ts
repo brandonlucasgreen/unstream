@@ -2,6 +2,7 @@
 // (/api/tips/checkout) and a fan's own record (/api/me/tips).
 
 import type { TipGoal } from '../types/artist-page';
+import { ApiError, apiRequest, type ApiRequestOptions } from './api';
 
 export type TipsState =
   | 'not_connected'
@@ -37,17 +38,14 @@ export interface TipSettings {
   totals: { month: TipTotals; allTime: TipTotals } | null;
 }
 
-async function call<T>(token: string, url: string, init: RequestInit = {}): Promise<T> {
-  const r = await fetch(url, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-  });
-  const body = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    const { error, code } = body as { error?: string; code?: string };
-    throw new TipsApiError(error ?? `HTTP ${r.status}`, r.status, code);
+async function call<T>(token: string, url: string, options: ApiRequestOptions = {}): Promise<T> {
+  try {
+    return await apiRequest<T>(token, url, options);
+  } catch (err) {
+    if (!(err instanceof ApiError)) throw err;
+    const { error, code } = err.body as { error?: string; code?: string };
+    throw new TipsApiError(error ?? `HTTP ${err.status}`, err.status, code);
   }
-  return body as T;
 }
 
 export class TipsApiError extends Error {
@@ -72,20 +70,20 @@ export function getTipSettings(token: string, slug: string): Promise<TipSettings
 }
 
 export function updateTipSettings(token: string, slug: string, patch: { tipsEnabled?: boolean; feeBasisPoints?: number }): Promise<TipSettings> {
-  return call(token, '/api/tips/settings', { method: 'PUT', body: JSON.stringify({ slug, action: 'update', ...patch }) });
+  return call(token, '/api/tips/settings', { method: 'PUT', body: { slug, action: 'update', ...patch } });
 }
 
 export function createGoal(token: string, slug: string, goal: { title: string; targetCents: number }): Promise<{ goals: TipGoal[] }> {
-  return call(token, '/api/tips/settings', { method: 'PUT', body: JSON.stringify({ slug, action: 'createGoal', ...goal }) });
+  return call(token, '/api/tips/settings', { method: 'PUT', body: { slug, action: 'createGoal', ...goal } });
 }
 
 export function closeGoal(token: string, slug: string, goalId: string): Promise<{ goals: TipGoal[] }> {
-  return call(token, '/api/tips/settings', { method: 'PUT', body: JSON.stringify({ slug, action: 'closeGoal', goalId }) });
+  return call(token, '/api/tips/settings', { method: 'PUT', body: { slug, action: 'closeGoal', goalId } });
 }
 
 /** Start or resume Stripe onboarding; resolves to the Stripe-hosted URL to send the artist to. */
 export async function connectStripe(token: string, slug: string, opts: { country?: string; acceptAddendum?: boolean }): Promise<string> {
-  const { url } = await call<{ url: string }>(token, '/api/tips/connect', { method: 'POST', body: JSON.stringify({ slug, ...opts }) });
+  const { url } = await call<{ url: string }>(token, '/api/tips/connect', { method: 'POST', body: { slug, ...opts } });
   return url;
 }
 
@@ -181,7 +179,7 @@ export async function getMyTips(token: string): Promise<FanTip[]> {
 export async function claimTip(token: string, sessionId: string, artistSlug: string): Promise<'saved' | 'pending'> {
   const { status } = await call<{ status: 'saved' | 'pending' }>(token, '/api/me/tips', {
     method: 'POST',
-    body: JSON.stringify({ sessionId, artistSlug }),
+    body: { sessionId, artistSlug },
   });
   return status;
 }

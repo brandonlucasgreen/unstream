@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/Header';
+import { AdminGate } from '../components/AdminGate';
+import { ApiError, apiRequest } from '../services/api';
 
 interface LinkSuppression {
   id: string;
@@ -22,8 +23,15 @@ interface LinkSuppression {
  * this page exists so they can be audited and reversed.
  */
 export function AdminLinksPage() {
-  const { isAdmin, session } = useAuth();
-  const navigate = useNavigate();
+  return (
+    <AdminGate>
+      <AdminLinksContent />
+    </AdminGate>
+  );
+}
+
+function AdminLinksContent() {
+  const { session } = useAuth();
   const [suppressions, setSuppressions] = useState<LinkSuppression[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,52 +42,34 @@ export function AdminLinksPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/link-suppression', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` },
-      });
-      if (!response.ok) throw new Error(`Failed to load (${response.status})`);
-      const data = await response.json();
+      const data = await apiRequest<{ suppressions?: LinkSuppression[] }>(session.access_token, '/api/admin/link-suppression');
       setSuppressions(data.suppressions || []);
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'admin.linkSuppressions.list' } });
-      setError(err instanceof Error ? err.message : 'Failed to load removed links.');
+      // These two say only the status, never the server's own wording.
+      setError(err instanceof ApiError ? `Failed to load (${err.status})` : err instanceof Error ? err.message : 'Failed to load removed links.');
     } finally {
       setLoading(false);
     }
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (isAdmin) fetchSuppressions();
-  }, [isAdmin, fetchSuppressions]);
+    fetchSuppressions();
+  }, [fetchSuppressions]);
 
   const handleRestore = async (id: string) => {
     setRestoringId(id);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/link-suppression?id=${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` },
-      });
-      if (!response.ok) throw new Error(`Failed to restore (${response.status})`);
+      await apiRequest(session?.access_token, `/api/admin/link-suppression?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
       setSuppressions(prev => prev.filter(s => s.id !== id));
     } catch (err) {
       Sentry.captureException(err, { extra: { context: 'admin.linkSuppressions.restore' } });
-      setError(err instanceof Error ? err.message : 'Failed to restore link.');
+      setError(err instanceof ApiError ? `Failed to restore (${err.status})` : err instanceof Error ? err.message : 'Failed to restore link.');
     } finally {
       setRestoringId(null);
     }
   };
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-text-muted">Not authorized.</p>
-        <button onClick={() => navigate('/')} className="text-link hover:underline">
-          Back to search
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
