@@ -9,25 +9,16 @@ import {
   type AutopostKind,
   type TemplateRelease,
 } from '../../../../api/shared/autopost-templates';
+import { KIND_COPY } from './PromoteTemplatesEditorUtils';
 
 // "What to say" on the Promote page: each kind of post, switched on or off, with its variants in
 // editable boxes and a live preview against the artist's newest release. The template language is
 // the shared one (api/shared/autopost-templates.ts), so the preview is exactly what the sweep posts.
 
-export const KIND_COPY: Record<AutopostKind, { label: string; when: string }> = {
-  bandcamp_friday: { label: 'Bandcamp Friday', when: 'On Bandcamp Fridays, about your newest release there.' },
-  release_day: { label: 'Release day', when: 'On the day a new release comes out, if Unstream finds it before then.' },
-  preorder: { label: 'Pre-order', when: 'Once, when a new release is announced at least three days ahead.' },
-  out_now: { label: 'Out now', when: 'For a new release Unstream only finds after its release day.' },
-  still_new: { label: 'Still new', when: 'A release in its first six weeks, at most every other post.' },
-  catalogue: { label: 'From the archives', when: 'Everything else: your releases in turn, so nothing repeats too soon.' },
-  support: { label: 'Ways to support you', when: 'About once a month, or one post in four at three or more a week. Uses your asset library’s images.' },
-};
-
 const MAX_VARIANTS = 5;
 
 /** The variants a kind shows: the artist's own, or Unstream's until they edit them. */
-export function variantsShown(kind: AutopostKind, templates: Partial<Record<AutopostKind, string[]>>): string[] {
+function variantsShown(kind: AutopostKind, templates: Partial<Record<AutopostKind, string[]>>): string[] {
   return templates[kind] ?? DEFAULT_TEMPLATES[kind];
 }
 

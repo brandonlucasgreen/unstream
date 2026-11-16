@@ -32,7 +32,7 @@ function settings(state: TipsState): TipSettings {
 
 let location: { pathname: string; search: string } | null = null;
 function LocationProbe() {
-  location = useLocation();
+  location = useLocation(); // eslint-disable-line react-hooks/globals -- a test probe: handing the router's location to the test is its whole job
   return null;
 }
 

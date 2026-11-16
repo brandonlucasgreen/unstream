@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
   useParams: () => ({ slug: 'kid-lightbulbs' }),
   useSearchParams: () => [new URLSearchParams('')],
 }));

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { UnclaimedQuietCard } from 'src/components/UnclaimedQuietCard';
 import type { ArtistPagePayload } from 'src/types/artist-page';
 
 // Mock react-router-dom Link
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 
 // Mock analytics
@@ -16,12 +17,12 @@ vi.mock('src/services/analytics', () => ({
 
 // Mock PlatformIcon
 vi.mock('src/components/PlatformIcon', () => ({
-  PlatformIcon: ({ sourceId }: any) => <span data-testid={`platform-icon-${sourceId}`}>{sourceId}</span>,
+  PlatformIcon: ({ sourceId }: { sourceId: string }) => <span data-testid={`platform-icon-${sourceId}`}>{sourceId}</span>,
 }));
 
 // Mock SocialIcon
 vi.mock('src/components/SocialIcon', () => ({
-  SocialIcon: ({ platform }: any) => <span data-testid={`social-icon-${platform}`}>{platform}</span>,
+  SocialIcon: ({ platform }: { platform: string }) => <span data-testid={`social-icon-${platform}`}>{platform}</span>,
 }));
 
 const unclaimedPayload: ArtistPagePayload = {

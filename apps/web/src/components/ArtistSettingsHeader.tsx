@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { SECTION_LABELS } from './ArtistSettingsHeaderUtils';
 
 // The top of each page an artist manages (Analytics, Edit, Releases, Tips, Promote): one heading
 // saying which page and which artist ("Manage Tips: Kid Lightbulbs", Brandon, 2026-10-29), and a
@@ -10,15 +11,6 @@ import { Link } from 'react-router-dom';
 // (Brandon, 2026-11-08).
 
 export type ArtistSettingsSection = 'analytics' | 'profile' | 'releases' | 'tips' | 'promote';
-
-/** What each page is, before the artist's name in its heading. */
-export const SECTION_LABELS: Record<ArtistSettingsSection, string> = {
-  analytics: 'Analytics',
-  profile: 'Edit Page',
-  releases: 'Manage Releases',
-  tips: 'Manage Tips',
-  promote: 'Promote',
-};
 
 export function ArtistSettingsHeader({ slug, artistName, section }: {
   slug: string;

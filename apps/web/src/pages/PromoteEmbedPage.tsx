@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
-import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { TabSkeleton } from './ArtistSettingsLayout';
+import { useReportArtistName } from '../hooks/useReportArtistName';
 import { EmbedWidgetPanel } from '../components/EmbedWidgetPanel';
 import type { ArtistPagePayload } from '../types/artist-page';
 

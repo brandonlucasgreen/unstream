@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { EmbedWidgetPanel, EMBED_THEMES, embeddablePlatforms, platformsAttribute } from '../../src/components/EmbedWidgetPanel';
+import { EmbedWidgetPanel, EMBED_THEMES } from '../../src/components/EmbedWidgetPanel';
+import { embeddablePlatforms, platformsAttribute } from '../../src/components/EmbedWidgetPanelUtils';
 
 const widgetSource = readFileSync(path.resolve(__dirname, '../../public/widget.js'), 'utf8');
 

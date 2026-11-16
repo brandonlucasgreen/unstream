@@ -9,7 +9,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 vi.mock('src/components/Header', () => ({ Header: () => null }));
 vi.mock('src/components/Footer', () => ({ Footer: () => null }));
 
-import { ArtistSettingsLayout, useReportArtistName } from 'src/pages/ArtistSettingsLayout';
+import { ArtistSettingsLayout } from 'src/pages/ArtistSettingsLayout';
+import { useReportArtistName } from 'src/hooks/useReportArtistName';
 import { PromoteTabsLayout } from 'src/components/PromoteTabs';
 
 function Tool() {

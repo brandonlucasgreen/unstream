@@ -1,5 +1,5 @@
 import type { PlatformResult } from '../shared-types';
-import { fetchWithTimeout } from '../shared-utils';
+import { describeError, fetchWithTimeout } from '../shared-utils';
 
 // Check if a Mirlo artist page exists (Mirlo is client-side rendered).
 export async function searchMirlo(query: string): Promise<PlatformResult[]> {
@@ -37,9 +37,10 @@ export async function searchMirlo(query: string): Promise<PlatformResult[]> {
         });
       }
     }
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('Mirlo search error:', error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    if (name !== 'AbortError') {
+      console.error('Mirlo search error:', message);
     }
   }
 

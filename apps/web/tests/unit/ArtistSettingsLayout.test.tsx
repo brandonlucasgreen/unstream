@@ -8,7 +8,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { ArtistSettingsLayout, RedirectToSection, useReportArtistName } from 'src/pages/ArtistSettingsLayout';
+import { ArtistSettingsLayout, RedirectToSection } from 'src/pages/ArtistSettingsLayout';
+import { useReportArtistName } from 'src/hooks/useReportArtistName';
 
 vi.mock('src/components/Header', () => ({ Header: () => null }));
 vi.mock('src/components/Footer', () => ({ Footer: () => null }));

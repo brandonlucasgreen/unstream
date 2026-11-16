@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
 
+/** Chrome's `beforeinstallprompt` event. It isn't a web standard, so the DOM types don't have it. */
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<unknown>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 export function usePWA() {
   const [isStandalone] = useState(() =>
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
-     (navigator as any).standalone === true)
+     (navigator as Navigator & { standalone?: boolean }).standalone === true)
   );
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
@@ -44,7 +50,7 @@ export function usePWA() {
 
   const handleInstallClick = async () => {
     if (!installPrompt) return;
-    const promptEvent = installPrompt as any;
+    const promptEvent = installPrompt as BeforeInstallPromptEvent;
     promptEvent.prompt();
     const { outcome } = await promptEvent.userChoice;
     setInstallPrompt(null);

@@ -1,5 +1,5 @@
 import type { MusicBrainzEnrichmentResponse, PlatformResult, SocialLink, SocialPlatform } from '../shared-types';
-import { delay, musicBrainzArtistQuery } from '../shared-utils';
+import { delay, describeError, musicBrainzArtistQuery } from '../shared-utils';
 import { fetchDiscogsSocialLinks, fetchOfficialSiteSocialLinks, mergeSocialLinks, parseSocialUrl } from '../social-links';
 
 const USER_AGENT = 'Unstream/1.0 (https://github.com/unstream - ethical music finder)';
@@ -111,8 +111,9 @@ export async function searchMusicBrainz(query: string): Promise<PlatformResult[]
         }
       }
     }
-  } catch (error: any) {
-    console.error('MusicBrainz search error:', error.name, error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    console.error('MusicBrainz search error:', name, message);
   }
 
   return results;
@@ -238,8 +239,9 @@ export async function searchMusicBrainzEnrichment(query: string): Promise<MusicB
       hasPre2005Release,
       socialLinks: allSocialLinks,
     };
-  } catch (error: any) {
-    console.error('MusicBrainz enrichment error:', error.name, error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    console.error('MusicBrainz enrichment error:', name, message);
     return emptyResult;
   }
 }

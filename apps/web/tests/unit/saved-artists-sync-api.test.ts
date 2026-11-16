@@ -1,80 +1,10 @@
 // Tests for saved-artists sync endpoint (UNS-93)
 // and new last_modified/device_id fields on existing endpoints.
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-// ---------------------------------------------------------------------------
-// Helper: build a mock Supabase query chain that the handlers call
-// ---------------------------------------------------------------------------
-
-function buildMockQuery(resolvedData: any, resolvedError: any = null) {
-  const query: Record<string, any> = {};
-
-  const chainable = () => {
-    const q: Record<string, any> = {};
-    // Each method returns the chain so calls can be stacked
-    for (const method of ['eq', 'gt', 'order', 'limit', 'in', 'select', 'single']) {
-      q[method] = vi.fn().mockReturnValue(q);
-    }
-    // Terminal: .select() returns the chain too, but we also wire up the
-    // final promise resolution via the enclosing query mock below.
-    return q;
-  };
-
-  const q = chainable();
-
-  // The Supabase .from().select().eq()... resolves to { data, error }
-  const fromMock = vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        gt: vi.fn().mockReturnValue({
-          order: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-          }),
-        }),
-        order: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-        }),
-        in: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-        }),
-        order: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-        }),
-      }),
-      in: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-      gt: vi.fn().mockReturnValue({
-        order: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-        }),
-      }),
-      order: vi.fn().mockReturnValue({
-        limit: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-      }),
-    }),
-    upsert: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-      }),
-    }),
-    update: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-          }),
-        }),
-      }),
-    }),
-    delete: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: resolvedData, error: resolvedError }),
-      }),
-    }),
-  });
-
-  return { from: fromMock };
-}
+/** The `artists` row joined onto a saved artist; null when the artist has no row of their own. */
+type JoinedArtist = { id: string; name: string; slug: string; image_url: string | null } | null;
 
 // ---------------------------------------------------------------------------
 // Tests for sync endpoint response shape and query construction
@@ -132,10 +62,10 @@ describe('saved-artists-sync endpoint', () => {
         supported_at: '2026-02-01T00:00:00Z',
         last_modified: '2026-03-01T00:00:00Z',
         device_id: 'mac-studio',
-        artists: null,
+        artists: null as JoinedArtist,
       };
 
-      const artistRow = (row as any).artists;
+      const artistRow = row.artists;
       const claimed = !!artistRow;
       const result = {
         id: row.id,
@@ -178,7 +108,7 @@ describe('saved-artists-sync endpoint', () => {
         artists: { id: 'artist-uuid', name: 'Radiohead', slug: 'radiohead', image_url: 'https://new.img/radiohead.jpg' },
       };
 
-      const artistRow = (row as any).artists;
+      const artistRow = row.artists;
       const result = {
         artistId: artistRow?.slug || row.artist_slug || row.artist_id,
         name: artistRow?.name || row.artist_name || 'Unknown',
@@ -343,10 +273,10 @@ describe('saved-artists API - last_modified and device_id fields (UNS-93)', () =
         supported_at: null,
         last_modified: '2026-05-01T00:00:00Z',
         device_id: 'mac-studio',
-        artists: null,
+        artists: null as JoinedArtist,
       };
 
-      const artistRow = (row as any).artists;
+      const artistRow = row.artists;
       const result = {
         artistId: artistRow?.slug || row.artist_slug || row.artist_id,
         name: artistRow?.name || row.artist_name || 'Unknown',
@@ -483,10 +413,10 @@ describe('saved-artists API - last_modified and device_id fields (UNS-93)', () =
         supported_at: '2026-06-01T00:00:00Z',
         last_modified: '2026-06-01T00:00:00Z',
         device_id: 'iphone-15-pro',
-        artists: null,
+        artists: null as JoinedArtist,
       };
 
-      const artistRow = (updated as any).artists;
+      const artistRow = updated.artists;
       const response = {
         artistId: artistRow?.slug || updated.artist_slug,
         name: artistRow?.name || updated.artist_name || 'Unknown',

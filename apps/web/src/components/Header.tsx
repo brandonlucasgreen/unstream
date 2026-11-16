@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MobileNav, isNavGroup, type NavEntry, type NavGroup } from './MobileNav';
+import { MobileNav, type NavEntry, type NavGroup } from './MobileNav';
+import { isNavGroup } from './MobileNavUtils';
 import { NavDropdown } from './NavDropdown';
 import { HeaderSearch } from './HeaderSearch';
 import { useAuth } from '../contexts/AuthContext';

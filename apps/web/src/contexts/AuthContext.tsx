@@ -508,7 +508,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth(): AuthContextValue {
+export function useAuth(): AuthContextValue { // eslint-disable-line react-refresh/only-export-components -- the hook lives with its provider (94 files import it from here); the cost is a full reload, not a hot update, when this file is edited in dev
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
