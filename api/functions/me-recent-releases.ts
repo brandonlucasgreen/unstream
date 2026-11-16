@@ -3,13 +3,11 @@
 // GET — shortlists of upcoming and recent releases by the signed-in fan's saved artists, for the
 // "Upcoming Releases" and "Recent Releases" sections of /my-collection.
 //
-// Follows the same conventions as the other me-* endpoints (bearer auth against the anon client,
-// hand-rolled permissive CORS) and is in api/tsconfig.json's typecheck include — keep it there.
+// An account endpoint like the other me-* ones, on the shared wrapper (http/endpoint.ts).
 
 import { withSentry } from '../lib/sentry';
 import { getFeedReleasesForUser, type FeedReleaseRow } from './db';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 /**
  * How many rows each dashboard section shows. A shortlist, not a list: these sit beside Saved
@@ -21,13 +19,6 @@ import { buildAccountCorsHeaders } from './account-cors';
  * of everything that actually came out.
  */
 export const RECENT_RELEASE_LIMIT = 6;
-
-/** One response shape for every path, so callers (and tests) don't have to narrow a union. */
-interface JsonResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-}
 
 function toShortlistRow(row: FeedReleaseRow) {
   return {
@@ -83,48 +74,22 @@ export function splitRecentReleases(
   };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-}): Promise<JsonResponse> {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // One verification, not two: deriving the rate-limit bucket already checked the token
-  // (see resolveAccountRequest), so the user it found is the user this handler uses.
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response as JsonResponse;
-
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not signed in' }) };
-  }
-
+async function handleRequest({ user }: SignedInRequest): Promise<EndpointResult> {
   const rows = await getFeedReleasesForUser(user.userId);
 
   return {
-    statusCode: 200,
+    status: 200,
+    body: splitRecentReleases(rows),
     // One fan's saved artists — never cached by anything shared, the same rule the private feed
     // follows.
-    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(splitRecentReleases(rows)),
+    headers: { 'Cache-Control': 'private, no-store' },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: false,
+}, handleRequest));

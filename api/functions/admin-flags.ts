@@ -4,8 +4,8 @@
 // Infrastructure only: adding a flag here does not switch any feature on. Readers ask the store
 // (api/functions/feature-flags.ts) and keep their feature admin-only until the flag reads "on".
 
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import {
   FEATURE_FLAGS,
   FeatureFlagStoreUnavailableError,
@@ -14,72 +14,31 @@ import {
   setFeatureFlag,
 } from './feature-flags';
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
-  if (!admin) {
-    return {
-      statusCode: 401,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
-
+async function handleRequest({ method, user: admin, body }: SignedInRequest): Promise<EndpointResult> {
   // GET: every known flag and whether it is live to everyone. Answers all-false rather than an
   // error when Redis is down, so the admin page still renders and says what it doesn't know.
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ flags: await getFeatureFlags() }),
+      status: 200,
+      body: { flags: await getFeatureFlags() },
     };
   }
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  let body: { flag?: unknown; enabled?: unknown };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Invalid JSON' }),
-    };
-  }
-
+  // POST from here on: the wrapper has already refused every other method.
   const { flag, enabled } = body;
 
   // The registry decides what exists — an unknown name is a client bug, not a new flag.
   if (typeof flag !== 'string' || !isFeatureFlag(flag)) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: `flag must be one of: ${FEATURE_FLAGS.join(', ')}` }),
+      status: 400,
+      body: { error: `flag must be one of: ${FEATURE_FLAGS.join(', ')}` },
     };
   }
 
   if (typeof enabled !== 'boolean') {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'enabled must be a boolean' }),
+      status: 400,
+      body: { error: 'enabled must be a boolean' },
     };
   }
 
@@ -89,9 +48,8 @@ async function handleRequest(event: {
     // The one failure the admin must see: a toggle that did not land must never look like it did.
     if (error instanceof FeatureFlagStoreUnavailableError) {
       return {
-        statusCode: 503,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Feature flag store is unavailable — the flag was not changed' }),
+        status: 503,
+        body: { error: 'Feature flag store is unavailable — the flag was not changed' },
       };
     }
     throw error;
@@ -104,10 +62,14 @@ async function handleRequest(event: {
   });
 
   return {
-    statusCode: 200,
-    headers: CORS_HEADERS,
-    body: JSON.stringify({ flags: await getFeatureFlags() }),
+    status: 200,
+    body: { flags: await getFeatureFlags() },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

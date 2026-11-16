@@ -29,6 +29,7 @@
   "include": [
     "functions/*.ts",
     "functions/db/*.ts",
+    "functions/http/*.ts",
     "functions/__tests__/*.ts",
     "shared/*.ts",
     "lib/*.ts",

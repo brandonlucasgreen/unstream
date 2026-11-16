@@ -8,28 +8,15 @@
 import { withSentry } from '../lib/sentry';
 import { cacheGetOrFetch, artistCacheKey } from './cache';
 import { suggestArtists, cleanSuggestTerm, type ArtistSuggestion } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
-import { validateQuery, buildPublicCorsHeaders } from './middleware';
+import { validateQuery } from './middleware';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 const SUGGEST_CACHE_TTL = 5 * 60; // seconds; the artists table changes slowly
 
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
-  const corsHeaders = buildPublicCorsHeaders();
-
-  // 'lenient' tier: the debounced typeahead fires on every typing pause, so it
-  // must not share the 30/min 'standard' bucket with account/settings actions —
-  // an actively-searching user would 429 themselves out of unrelated endpoints.
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'lenient', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  const queryResult = validateQuery(event.queryStringParameters?.query);
+async function handleRequest({ query: params }: PublicRequest): Promise<EndpointResult> {
+  const queryResult = validateQuery(params.query);
   if ('error' in queryResult) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: queryResult.error }),
-    };
+    return { status: 400, body: { error: queryResult.error } };
   }
   const query = queryResult.query;
 
@@ -55,13 +42,19 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   }
 
   return {
-    statusCode: 200,
-    headers: {
-      ...corsHeaders,
-      'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate',
-    },
-    body: JSON.stringify({ query, suggestions }),
+    status: 200,
+    body: { query, suggestions },
+    headers: { 'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate' },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient' tier: the debounced typeahead fires on every typing pause, so it
+  // must not share the 30/min 'standard' bucket with account/settings actions —
+  // an actively-searching user would 429 themselves out of unrelated endpoints.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

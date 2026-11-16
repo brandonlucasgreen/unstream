@@ -52,7 +52,7 @@ describe('search-suggest handler', () => {
     mocks.mockSuggestArtists.mockResolvedValue([
       { slug: 'the-argent-grub', name: 'The Argent Grub', imageUrl: null },
     ]);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { query: 'argent' } });
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(body.suggestions).toHaveLength(1);
@@ -60,20 +60,20 @@ describe('search-suggest handler', () => {
   });
 
   it('returns an empty 200 for sub-2-character queries without hitting the DB', async () => {
-    const res = await handler({ queryStringParameters: { query: 'a' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { query: 'a' } });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).suggestions).toEqual([]);
     expect(mocks.mockSuggestArtists).not.toHaveBeenCalled();
   });
 
   it('rejects a missing query', async () => {
-    const res = await handler({ queryStringParameters: {} });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: {} });
     expect(res.statusCode).toBe(400);
   });
 
   it('does not cache a DB failure as "no suggestions"', async () => {
     mocks.mockSuggestArtists.mockResolvedValue(null);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { query: 'argent' } });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).suggestions).toEqual([]);
     expect(mocks.lastShouldCache.value).toBe(false);
@@ -81,7 +81,7 @@ describe('search-suggest handler', () => {
 
   it('does cache a genuine empty answer', async () => {
     mocks.mockSuggestArtists.mockResolvedValue([]);
-    await handler({ queryStringParameters: { query: 'zzzznobody' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzzznobody' } });
     expect(mocks.lastShouldCache.value).toBe(true);
   });
 
@@ -91,24 +91,24 @@ describe('search-suggest handler', () => {
     // "sufjan stevens" shared a key but produced different ILIKE patterns, so
     // whichever ran first answered for both.
     mocks.mockSuggestArtists.mockResolvedValue([]);
-    await handler({ queryStringParameters: { query: 'sufjan-stevens' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'sufjan-stevens' } });
     const hyphenKey = mocks.lastCacheKey.value;
     expect(mocks.mockSuggestArtists).toHaveBeenLastCalledWith('sufjan-stevens');
 
-    await handler({ queryStringParameters: { query: 'sufjan stevens' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'sufjan stevens' } });
     expect(mocks.lastCacheKey.value).not.toBe(hyphenKey);
     expect(mocks.mockSuggestArtists).toHaveBeenLastCalledWith('sufjan stevens');
   });
 
   it('uses the lenient rate-limit tier, not the shared standard bucket', async () => {
     mocks.mockSuggestArtists.mockResolvedValue([]);
-    await handler({ queryStringParameters: { query: 'argent' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'argent' } });
     expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith('127.0.0.1', 'lenient', expect.anything());
   });
 
   it('sends the shared public CORS headers', async () => {
     mocks.mockSuggestArtists.mockResolvedValue([]);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { query: 'argent' } });
     expect(res.headers['X-Content-Type-Options']).toBe('nosniff');
     expect(res.headers['Access-Control-Allow-Origin']).toBe('*');
   });
