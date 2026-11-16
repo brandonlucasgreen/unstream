@@ -11,10 +11,8 @@
 import { withSentry } from '../lib/sentry';
 import { randomBytes, createHash } from 'crypto';
 import { getClient } from './db';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { sendTransactionalEmail } from '../lib/resend';
-import { buildAccountCorsHeaders } from './account-cors';
-import { SECOND_FACTOR_REQUIRED_ERROR, sessionMissingSecondFactor } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 // Same shape as LoginPage's EMAIL_PATTERN — string-only early validation so the user gets
 // a specific message instead of a raw database or Supabase error.
@@ -34,43 +32,18 @@ export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, not a module constant: the allowlisted origin depends on the caller (fix
-  // list item 1 on UNS-212 — never '*', these endpoints carry a user's Bearer token).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'POST, DELETE, OPTIONS',
-  );
+/** One person's pending email change: never cached by anything shared. */
+function json(status: number, body: unknown): EndpointResult {
+  return { status, body, headers: { 'Cache-Control': 'private, no-store' } };
+}
 
-  const json = (statusCode: number, body: unknown) => ({
-    statusCode,
-    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(body),
-  });
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // One verification, not two: resolveAccountRequest checks the token while deriving the
-  // rate-limit bucket (see me-feed-token.ts for the established pattern).
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  if (!user) return json(401, { error: 'Not signed in' });
-  if (await sessionMissingSecondFactor(event.headers.authorization)) return json(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
-
+async function handleRequest({ method, user, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
     return json(500, { error: 'Database not configured' });
   }
 
-  if (event.httpMethod === 'DELETE') {
+  if (method === 'DELETE') {
     const { error } = await client
       .from('email_change_requests')
       .delete()
@@ -88,23 +61,7 @@ async function handleRequest(event: {
     return json(200, { cancelled: true });
   }
 
-  // POST and DELETE are the whole surface; anything else is a method error, not a missing
-  // resource (repo convention — see artist-releases.ts).
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: { ...corsHeaders, Allow: 'POST, DELETE, OPTIONS' },
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return json(400, { error: 'Invalid JSON' });
-  }
-
+  // POST from here on: the wrapper has already refused every other method.
   const newEmail = typeof body.new_email === 'string' ? body.new_email.trim().toLowerCase() : '';
   if (!EMAIL_PATTERN.test(newEmail)) {
     return json(400, { error: "That email address doesn't look right. Check it and try again." });
@@ -181,4 +138,12 @@ async function handleRequest(event: {
   return json(202, { pending: true, new_email: newEmail });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['POST', 'DELETE'],
+  // Changing the sign-in email changes the account: a stolen password alone must not be able
+  // to propose a new address, so a session that owes its second step is refused.
+  auth: 'accountWithSecondStep',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

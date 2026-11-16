@@ -13,32 +13,13 @@
 
 import { withSentry, Sentry } from '../lib/sentry';
 import { getClient } from './db';
-import { buildCorsHeaders } from './middleware';
-import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { tipsOpenToArtist } from './tips-db';
 import { canUseReleaseAutopost } from './release-autopost-access';
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-}
-
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  if (event.httpMethod !== 'GET') return respond(405, { error: 'Method not allowed' });
-
-  const { key, user } = await resolveAccountRequest(
-    event.headers.authorization || event.headers.Authorization || undefined,
-    getClientIp(event.headers),
-  );
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
-  if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
-  if (!user) return respond(401, { error: 'Not signed in' });
-
+async function handleRequest({ user }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
-  if (!client) return respond(500, { error: 'Database not configured' });
+  if (!client) return { status: 500, body: { error: 'Database not configured' } };
 
   try {
     const { data, error } = await client
@@ -55,17 +36,23 @@ async function handleRequest(event: HandlerEvent) {
       .map(artist => ({ name: artist.name, slug: artist.slug }));
 
     // A fan with no artist gets no menu, so the flag reads would be wasted on them.
-    if (artists.length === 0) return respond(200, { artists, tips: false, promote: false });
+    if (artists.length === 0) return { status: 200, body: { artists, tips: false, promote: false } };
 
     const [tips, promote] = await Promise.all([
       tipsOpenToArtist(user.email),
       canUseReleaseAutopost(user.email),
     ]);
-    return respond(200, { artists, tips, promote });
+    return { status: 200, body: { artists, tips, promote } };
   } catch (err) {
     Sentry.captureException(err, { extra: { context: 'me-artist-nav' } });
-    return respond(500, { error: 'Something went wrong' });
+    return { status: 500, body: { error: 'Something went wrong' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: false,
+}, handleRequest));

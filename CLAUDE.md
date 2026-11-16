@@ -50,7 +50,7 @@ Some tasks cross directories. Open these before starting:
 
 - **A platform** (name, payout, category, icon): `api/CLAUDE.md`, "Platform registry". Its hand-kept copies need the same change.
 - **A merge of two results by artist name**: `api/functions/CLAUDE.md`, "Search flow". The Bandcamp-account check lives in three copies.
-- **A new endpoint**: `api/functions/CLAUDE.md` (Sentry wrapper, CORS shape, second-factor check, its test).
+- **A new endpoint**: `api/functions/CLAUDE.md` (the `endpoint()` wrapper, Sentry wrapper, CORS shape, second-factor check, its test).
 - **A feature flag, or a new way into a flagged feature**: `apps/web/CLAUDE.md`, "Feature flags: the server decides, everywhere".
 
 **Removed on purpose.** Each of these was tried and taken out; read the note before proposing it again: hosting on Cloudflare Workers (below) · the Discord bot, search as a cataloguing trigger, release type as release identity, tips Phase 1 (`api/functions/CLAUDE.md`) · passkeys as a second step, the guides section (`apps/web/CLAUDE.md`) · a weekly digest in this repo, the Dispatch as RSS (`scripts/CLAUDE.md`).

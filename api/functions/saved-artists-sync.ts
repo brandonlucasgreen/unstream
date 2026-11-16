@@ -6,52 +6,17 @@
 
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 const SYNC_LIMIT = 500;
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token. The
-  // extension's popup syncs from here, from its own origin, so that is allowed too
-  // (account-cors.ts says why, for both).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, OPTIONS',
-    { allowExtensionOrigins: true },
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // The per-user rate-limit bucket can only exist once the token has been verified, so
-  // resolving the bucket resolves the caller too — one local JWT check, not two, and no
-  // round trip to the auth server on a warm invocation (see resolveAccountRequest).
-  const ip = getClientIp(event.headers);
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
+async function handleRequest({ user, query: params }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  const since = event.queryStringParameters?.since;
+  const since = params.since;
 
   let query = client
     .from('saved_artists')
@@ -79,7 +44,7 @@ async function handleRequest(event: {
   if (since) {
     const sinceDate = new Date(since);
     if (isNaN(sinceDate.getTime())) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid since parameter: must be ISO-8601' }) };
+      return { status: 400, body: { error: 'Invalid since parameter: must be ISO-8601' } };
     }
     // Use > not >= for cursor safety — a client passing server_time from last pull
     // should not re-receive rows modified at exactly that instant
@@ -91,7 +56,7 @@ async function handleRequest(event: {
 
     if (savedError) {
       console.error('[saved-artists-sync] Error fetching:', savedError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to fetch saved artists' }) };
+      return { status: 500, body: { error: 'Failed to fetch saved artists' } };
     }
 
     const artists = (saved || []).map(row => {
@@ -117,15 +82,19 @@ async function handleRequest(event: {
 
     const serverTime = new Date().toISOString();
 
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ artists, server_time: serverTime }),
-    };
+    return { status: 200, body: { artists, server_time: serverTime } };
   } catch (error) {
     console.error('[saved-artists-sync] GET error:', error);
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { status: 500, body: { error: 'Internal server error' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // The extension's popup syncs from here, from its own origin, so that is allowed too
+  // (account-cors.ts says why).
+  cors: 'accountAndExtension',
+  methods: ['GET'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: false,
+}, handleRequest));

@@ -4,15 +4,14 @@
 // POST   — rotate: issue a new token, instantly breaking every existing subscription.
 // DELETE — revoke entirely.
 //
-// Follows the same conventions as the other me-* endpoints (bearer auth against the anon
-// client, hand-rolled permissive CORS, service-role client for the write). These are the only
-// files in api/tsconfig.json's typecheck include — keep this one in it.
+// An account endpoint like the other me-* ones: the shared wrapper (http/endpoint.ts) answers
+// the preflight, signs the caller in and rate-limits; the writes go through the service-role
+// client.
 
 import { withSentry } from '../lib/sentry';
 import { randomBytes } from 'crypto';
 import { deleteFeedToken, getFeedToken, setFeedToken } from './db';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 const SITE = 'https://unstream.stream';
 
@@ -39,37 +38,15 @@ function feedUrls(token: string) {
   };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, POST, DELETE, OPTIONS',
-  );
-  const json = (statusCode: number, body: unknown) => ({
-    statusCode,
-    // The response contains the token, so it must not be cached anywhere shared.
-    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
-    body: JSON.stringify(body),
-  });
+/** The response contains the token, so it must not be cached anywhere shared. */
+function json(status: number, body: unknown): EndpointResult {
+  return { status, body, headers: { 'Cache-Control': 'private, no-store' } };
+}
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // One verification, not two: deriving the rate-limit bucket already checked the token
-  // (see resolveAccountRequest), so the user it found is the user this handler uses.
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  if (!user) return json(401, { error: 'Not signed in' });
+async function handleRequest({ method, user }: SignedInRequest): Promise<EndpointResult> {
   const userId = user.userId;
 
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     // Created on first read rather than at signup: most fans will never subscribe, and a token
     // that exists is a credential that can leak, so it shouldn't be minted speculatively.
     const existing = await getFeedToken(userId);
@@ -82,7 +59,7 @@ async function handleRequest(event: {
     return json(200, { ...feedUrls(token), created: true });
   }
 
-  if (event.httpMethod === 'POST') {
+  if (method === 'POST') {
     const token = generateToken();
     if (!(await setFeedToken(userId, token))) {
       return json(500, { error: 'Could not rotate the feed link' });
@@ -91,14 +68,18 @@ async function handleRequest(event: {
     return json(200, { ...feedUrls(token), rotated: true });
   }
 
-  if (event.httpMethod === 'DELETE') {
-    if (!(await deleteFeedToken(userId))) {
-      return json(500, { error: 'Could not revoke the feed link' });
-    }
-    return json(200, { revoked: true });
+  // DELETE: the wrapper has already refused every other method.
+  if (!(await deleteFeedToken(userId))) {
+    return json(500, { error: 'Could not revoke the feed link' });
   }
-
-  return json(405, { error: 'Method not allowed' });
+  return json(200, { revoked: true });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'account',
+  rateLimit: 'account',
+  // POST rotates and DELETE revokes; neither reads a body.
+  jsonBody: false,
+}, handleRequest));

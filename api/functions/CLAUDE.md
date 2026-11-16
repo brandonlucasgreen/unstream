@@ -6,7 +6,7 @@ Read this with the root `CLAUDE.md` (rules for every change) and `api/CLAUDE.md`
 2. Search flow
 3. Redis is metered
 4. Reading the database
-5. API middleware & security
+5. API middleware & security — and the `endpoint()` wrapper new endpoints are written with
 6. Auth on the server
 7. Account settings, claims, admin tools, artist analytics, the v1 API
 8. Releases and the catalogue — ingest, the sweep, dedup, collections
@@ -61,6 +61,12 @@ Upstash's free tier is **500,000 commands a month** (~16,600/day) — a *command
 
 `api/functions/middleware.ts` centralizes CORS (`buildCorsHeaders` / `buildPublicCorsHeaders`), auth (`authenticateBearer`, `authenticateBearerFast`, `authenticateAdmin`, `authenticateApiKey`, `isInternalRequest`), query validation (`validateQuery`), v1 envelopes (`v1Response`), and SSRF protection.
 
+**A new endpoint uses the wrapper, `endpoint()` in `api/functions/http/endpoint.ts`.** It declares what it is in one plain object (`cors`, `methods`, `auth`, `rateLimit`, `jsonBody`) and supplies a function that is handed `{ method, user, body, query }` and returns `{ status, body, headers? }`. The wrapper answers the preflight, refuses other methods with 405, authenticates, rate-limits, parses the JSON body, and puts the CORS headers on every answer, its own refusals and a thrown error's 500 included. It exists because every handler used to choose those pieces separately, and the two gaps found on 2026-11-16 (`claim-artist.ts` skipping the two-step check, 20 signed-in endpoints answering `*`) were both a handler choosing wrong. Three things to know:
+
+- **`auth` picks an existing function, never new logic:** `'none'`, `'account'` (`resolveAccountRequest`, the fast local check; for fan endpoints the Mac app and extension call), `'accountWithSecondStep'` (the same, then `sessionMissingSecondFactor`; **for anything that acts as an artist, moves money or changes the account**) and `'admin'` (`authenticateAdmin`). A signed-in endpoint can't be declared with `cors: 'public'`: the types refuse it.
+- **It spends the Redis commands the hand-written handler did, and no more:** one `checkRateLimit` per request, keyed the same way, and none for admin. A method it refuses costs nothing.
+- **Not everything is on it yet, and some never will be.** `endpoint-wrapper-adoption.test.ts` lists every function as on the wrapper or not yet, with what moving each group takes (a full-round-trip mode for `authenticateBearer`, the internal secret, the v1 API key). That list only shrinks; a new function that is in neither list fails the test. Still export through `withSentry(endpoint({...}, handleRequest))`. `http/` is typechecked by `api/tsconfig.json` (`functions/http/*.ts`), and must never gain `http/http.ts` or `http/index.ts`, for the same reason as `db/`.
+
 **CORS has three shapes.** `buildCorsHeaders` (v1, admin) restricts anonymous callers to `https://unstream.stream` and opens up for API-key requests. `buildAccountCorsHeaders` (`account-cors.ts`) is for every endpoint a signed-in person calls with a Bearer token (the `me-*` endpoints, saved artists, claim, artist profile, artist analytics, the artist side of tips): it echoes only the site and the local dev origins, never `*`, and on `saved-artists` and `saved-artists-sync` also the browser extension's own origin, because the extension's popup calls those two and can't count on its host permission (Firefox makes it optional). `account-cors.test.ts` holds each of them to it and fails on a new function that takes a token and hand-rolls a wildcard. `buildPublicCorsHeaders` (`search-stored`, `search-suggest`, `platforms-list`, `api-status`) and the search endpoints send `Access-Control-Allow-Origin: *`, as do `collection-art` and `public-saved-artists`, whose comments say why.
 
 SSRF protection starts with an **explicit hostname allowlist** — `ALLOWED_OUTBOUND_HOSTNAMES` + `isUrlHostnameAllowed()`. Every outbound fetch must pass it, and a new platform fetch means adding its hostname (wildcards like `*.bandcamp.com` work). It also blocks non-HTTP(S) schemes, localhost and private and metadata IPs. Its comments record *why* hosts were removed (e.g. no `qobuz.com`: robots-disallowed, links come from MusicBrainz relations and are displayed but never fetched) — preserve that reasoning when editing. **A hostname check alone is not an SSRF boundary**: any URL that came from a request, a database row or scraped markup goes through `safeFetch` (`api/functions/safe-fetch.ts`), which follows redirects by hand, re-validates every hop, and requires every resolved IP to be public (`169-254-169-254.nip.io` passes a string check). `check-releases`, `catalog-artist-background` and `artist-photo-refresh` use it.
@@ -84,7 +90,7 @@ On the server:
 
 ## Account settings
 
-`/settings` is backed by the `me-*` functions (`me-settings`, `me-username`, `me-location`, `me-password`, `me-notifications`, `me-bandcamp`) plus `user-sharing.ts`; `me-tips` backs its Tip History section; `me-feed-token` backs the Release calendar on `/my-saved-artists` instead. Each should have a test in `api/functions/__tests__/` (`me-feed-token` doesn't yet), which is typechecked by being there — **follow that pattern for new account endpoints.** The "Two-step verification" section (`id="two-step"`, below Password) is the exception that needs no backing function: it talks to Supabase Auth directly from the browser.
+`/settings` is backed by the `me-*` functions (`me-settings`, `me-username`, `me-location`, `me-password`, `me-notifications`, `me-bandcamp`) plus `user-sharing.ts`; `me-tips` backs its Tip History section; `me-feed-token` backs the Release calendar on `/my-saved-artists` instead. Each should have a test in `api/functions/__tests__/`, which is typechecked by being there — **follow that pattern for new account endpoints.** The "Two-step verification" section (`id="two-step"`, below Password) is the exception that needs no backing function: it talks to Supabase Auth directly from the browser.
 
 ## Claiming an artist
 

@@ -9,8 +9,7 @@
 
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 const DEFAULT_PREFERENCES = {
   newRelease: true,
@@ -33,39 +32,13 @@ function toResponseShape(row: PreferencesRow | null) {
   };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, POST, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  // One verification, not two: deriving the rate-limit bucket already checked the token
-  // (see resolveAccountRequest), so the user it found is the user this handler uses.
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
+async function handleRequest({ method, user, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     const { data: row, error } = await client
       .from('notification_preferences')
       .select('new_release, new_platform_link, weekly_analytics_recap')
@@ -74,61 +47,57 @@ async function handleRequest(event: {
 
     if (error) {
       console.error('[me-notifications] Error fetching preferences:', error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load notification preferences' }) };
+      return { status: 500, body: { error: 'Failed to load notification preferences' } };
     }
 
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toResponseShape(row)) };
+    return { status: 200, body: toResponseShape(row) };
   }
 
-  if (event.httpMethod === 'POST') {
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
+  // POST from here on: the wrapper has already refused every other method.
+  const patch: Partial<PreferencesRow> = {};
+  if ('newRelease' in body) {
+    if (typeof body.newRelease !== 'boolean') {
+      return { status: 400, body: { error: 'newRelease must be a boolean' } };
     }
-
-    const patch: Partial<PreferencesRow> = {};
-    if ('newRelease' in body) {
-      if (typeof body.newRelease !== 'boolean') {
-        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'newRelease must be a boolean' }) };
-      }
-      patch.new_release = body.newRelease;
+    patch.new_release = body.newRelease;
+  }
+  if ('newPlatformLink' in body) {
+    if (typeof body.newPlatformLink !== 'boolean') {
+      return { status: 400, body: { error: 'newPlatformLink must be a boolean' } };
     }
-    if ('newPlatformLink' in body) {
-      if (typeof body.newPlatformLink !== 'boolean') {
-        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'newPlatformLink must be a boolean' }) };
-      }
-      patch.new_platform_link = body.newPlatformLink;
+    patch.new_platform_link = body.newPlatformLink;
+  }
+  if ('weeklyAnalyticsRecap' in body) {
+    if (typeof body.weeklyAnalyticsRecap !== 'boolean') {
+      return { status: 400, body: { error: 'weeklyAnalyticsRecap must be a boolean' } };
     }
-    if ('weeklyAnalyticsRecap' in body) {
-      if (typeof body.weeklyAnalyticsRecap !== 'boolean') {
-        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'weeklyAnalyticsRecap must be a boolean' }) };
-      }
-      patch.weekly_analytics_recap = body.weeklyAnalyticsRecap;
-    }
-
-    if (Object.keys(patch).length === 0) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No recognized preference fields in body' }) };
-    }
-
-    // Upsert: most users have no row yet. Unset fields fall back to the column default (true)
-    // on first insert via onConflict merge semantics — an existing row keeps its other columns.
-    const { data: row, error } = await client
-      .from('notification_preferences')
-      .upsert({ user_id: user.userId, ...patch }, { onConflict: 'user_id' })
-      .select('new_release, new_platform_link, weekly_analytics_recap')
-      .single();
-
-    if (error) {
-      console.error('[me-notifications] Error updating preferences:', error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update notification preferences' }) };
-    }
-
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toResponseShape(row)) };
+    patch.weekly_analytics_recap = body.weeklyAnalyticsRecap;
   }
 
-  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
+  if (Object.keys(patch).length === 0) {
+    return { status: 400, body: { error: 'No recognized preference fields in body' } };
+  }
+
+  // Upsert: most users have no row yet. Unset fields fall back to the column default (true)
+  // on first insert via onConflict merge semantics — an existing row keeps its other columns.
+  const { data: row, error } = await client
+    .from('notification_preferences')
+    .upsert({ user_id: user.userId, ...patch }, { onConflict: 'user_id' })
+    .select('new_release, new_platform_link, weekly_analytics_recap')
+    .single();
+
+  if (error) {
+    console.error('[me-notifications] Error updating preferences:', error.message);
+    return { status: 500, body: { error: 'Failed to update notification preferences' } };
+  }
+
+  return { status: 200, body: toResponseShape(row) };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));
