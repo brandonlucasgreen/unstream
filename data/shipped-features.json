@@ -144,6 +144,6 @@
     "title": "Sign in with a passkey",
     "description": "Sign in to Unstream with Touch ID, Face ID, your phone or a password manager, without typing a password or waiting for an email. Add a passkey in Settings, then choose \"Sign in with a passkey\" next time.",
     "date": "2026-11-01",
-    "announced": false
+    "announced": true
   }
 ]
