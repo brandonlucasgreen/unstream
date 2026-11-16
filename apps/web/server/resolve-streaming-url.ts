@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from './shared-utils';
+import { describeError, fetchWithTimeout } from './shared-utils';
 
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
 
@@ -105,8 +105,9 @@ export async function resolveStreamingUrl(url: string): Promise<{ artistName: st
     }
 
     return null;
-  } catch (error: any) {
-    console.error('URL resolution error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('URL resolution error:', message);
     return null;
   }
 }

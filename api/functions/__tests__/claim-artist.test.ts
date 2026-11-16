@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   notifySavedArtistsOfNewLinks: vi.fn(() => Promise.resolve()),
   sendAdminPush: vi.fn(),
   captureMessage: vi.fn(),
-  user: { id: 'user-1', email: 'claimant@example.com' },
+  user: { id: 'user-1', email: 'claimant@example.com' } as { id: string; email: string; factors?: { status: string }[] },
 }));
 
 /** Just enough of the PostgREST query builder for claim-artist.ts. */
@@ -82,15 +82,16 @@ vi.mock('@supabase/supabase-js', () => ({
 }));
 
 import { handler } from '../claim-artist';
+import { answered } from './answered';
 
 const ARTIST = { id: 'artist-1', name: 'Kid Lightbulbs', slug: 'kid-lightbulbs', image_url: null };
 
 function post(body: Row) {
-  return handler({
+  return answered(handler({
     httpMethod: 'POST',
     headers: { authorization: 'Bearer token' },
     body: JSON.stringify(body),
-  });
+  }));
 }
 
 /** A page naming the artist, linking back, and offering a Bandcamp link. */

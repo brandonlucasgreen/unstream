@@ -4,10 +4,10 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { NewsletterSignup } from '../components/NewsletterSignup';
 import { PlatformIcon } from '../components/PlatformIcon';
-import { sources, sourceCategories } from '../services/sources';
 import { DEFAULT_PAGE_TITLE } from '../data/seo';
 import { LIGHTBULBS_ON_HEADING, LIGHTBULBS_ON_BLURB } from '../data/newsletter';
 import type { Source } from '../types';
+import { supportPlatformGroups } from './PlatformsPageUtils';
 
 /**
  * Every platform Unstream searches, grouped the way results are.
@@ -16,22 +16,8 @@ import type { Source } from '../types';
  * long-form prose that drifted from the registry. This page is generated from
  * `services/sources.ts`, which mirrors `api/shared/platform-registry.ts`, so adding a platform
  * there adds it here and a changed payout figure can't disagree with the result cards.
- *
- * Official, social and the emptied `decentralized` bucket (UNS-226) are left out: officials
- * and socials are where an artist is, not ways to pay them, and an empty bucket renders as
- * a heading over nothing.
+ * Which groups it lists, and why, is in PlatformsPageUtils.ts.
  */
-const SUPPORT_CATEGORIES = ['marketplace', 'patronage', 'library'] as const;
-
-export function supportPlatformGroups(): { key: string; name: string; description: string; platforms: Source[] }[] {
-  return SUPPORT_CATEGORIES.map((key) => ({
-    key,
-    name: sourceCategories[key].name,
-    description: sourceCategories[key].description,
-    platforms: sourceCategories[key].sources.map((id) => sources[id]),
-  }));
-}
-
 const PAGE_TITLE = 'Platforms - Unstream';
 const PAGE_DESCRIPTION =
   'Every platform Unstream searches, from Bandcamp to your local library, with how much of each sale reaches the artist.';

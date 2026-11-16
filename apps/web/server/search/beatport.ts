@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { fetchWithTimeout, normalizeForComparison } from '../shared-utils';
+import { describeError, fetchWithTimeout, normalizeForComparison } from '../shared-utils';
 
 // Search Beatport via __NEXT_DATA__ JSON embedded in search page
 export async function searchBeatport(query: string): Promise<Map<string, string>> {
@@ -49,9 +49,10 @@ export async function searchBeatport(query: string): Promise<Map<string, string>
         results.set(normalizedName, `https://www.beatport.com/artist/${slug}/${artist_id}`);
       }
     }
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('Beatport search error:', error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    if (name !== 'AbortError') {
+      console.error('Beatport search error:', message);
     }
   }
 

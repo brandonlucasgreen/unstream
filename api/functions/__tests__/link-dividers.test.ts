@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mainLinkDividerIndexes, buildLinkRows, MAX_DIVIDERS } from '../../shared/link-dividers';
+import { mainLinkDividerIndexes, buildLinkRows, MAX_DIVIDERS, type LinkEntry } from '../../shared/link-dividers';
 
 // The artist page's legacy payload splits links into main (`links`) and social
 // (`socialLinks`), but divider positions are stored against the full link order — so
@@ -83,7 +83,7 @@ describe('buildLinkRows', () => {
   });
 
   it('caps dividers so a runaway payload cannot balloon the stored array', () => {
-    const entries = [entry('p0')];
+    const entries: LinkEntry[] = [entry('p0')];
     for (let i = 1; i <= MAX_DIVIDERS + 5; i++) {
       entries.push(divider, entry(`p${i}`));
     }

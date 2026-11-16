@@ -1,6 +1,6 @@
 import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import * as Sentry from '@sentry/react'
 import { initSentry } from './services/sentry'
 import { registerServiceWorker } from './services/registerServiceWorker'
@@ -15,6 +15,7 @@ import { ScrollToTop } from './components/ScrollToTop'
 // Eager, unlike every page below: the catch-all exists for navigations that have already gone
 // wrong, and a superseded build's chunks are deleted — exactly when it is most needed.
 import { NotFoundPage } from './pages/NotFoundPage.tsx'
+import { ArtistLoginRedirect, DashboardRedirect } from './pages/LegacyRedirects.tsx'
 import { lazyWithRetry } from './utils/lazyWithRetry'
 import { StaleBuildBanner } from './components/StaleBuildBanner'
 import { PendingSaveNotice } from './components/PendingSaveNotice'
@@ -85,19 +86,6 @@ const PublicSavedArtistsPage = lazyWithRetry(() => import('./pages/PublicSavedAr
 const AdminAnalyticsPage = lazyWithRetry(() => import('./pages/AdminAnalyticsPage.tsx').then(m => ({ default: m.AdminAnalyticsPage })))
 const AdminFlagsPage = lazyWithRetry(() => import('./pages/AdminFlagsPage.tsx').then(m => ({ default: m.AdminFlagsPage })))
 const CuratorComposePage = lazyWithRetry(() => import('./pages/CuratorComposePage.tsx').then(m => ({ default: m.CuratorComposePage })))
-
-// Redirect components for old routes
-function ArtistLoginRedirect() {
-  return <Navigate to="/login" replace />
-}
-
-// The dashboard split into /my-artists (artist management) and /my-collection (the fan's
-// releases and collection; saved artists later moved to /my-saved-artists). Both old routes stay for bookmarks and links in
-// emails already sent, and land on the fan half — what most accounts came for. (Sign-in
-// itself resolves between the two; see services/accountHome.ts.)
-function DashboardRedirect() {
-  return <Navigate to="/my-collection" replace />
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

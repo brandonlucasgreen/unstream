@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from './Dialog';
+import { isNavGroup, startsSection } from './MobileNavUtils';
 
 export type NavItem = {
   to: string;
@@ -32,16 +33,6 @@ export type NavGroup = {
 };
 
 export type NavEntry = NavItem | NavGroup;
-
-export function isNavGroup(entry: NavEntry): entry is NavGroup {
-  return 'items' in entry;
-}
-
-/** Whether `items[index]` opens a new section, so its heading is drawn above it. */
-export function startsSection(items: NavItem[], index: number): boolean {
-  const section = items[index].section;
-  return !!section && (index === 0 || items[index - 1].section !== section);
-}
 
 /**
  * Full-height drawer that houses the header nav on small screens: a hamburger

@@ -2,11 +2,12 @@
 // The "Tip history" list on /settings: hidden until there's a tip, then each with artist,
 // amount and status.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
 
 const state = vi.hoisted(() => ({ hash: '' }));
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
   useLocation: () => ({ pathname: '/settings', search: '', hash: state.hash }),
 }));
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: { access_token: 'tok' } }) }));

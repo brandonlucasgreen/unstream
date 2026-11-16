@@ -17,7 +17,7 @@ vi.mock('../redis', () => ({
 const mocks = vi.hoisted(() => ({
   captureMessage: vi.fn(),
   captureException: vi.fn(),
-  getArtistBySlug: vi.fn(async () => null),
+  getArtistBySlug: vi.fn(async (): ReturnType<typeof import('../db').getArtistBySlug> => null),
   getArtistsBySlugs: vi.fn(async () => new Map()),
   findKnownArtistSlugsByName: vi.fn(async () => [] as string[]),
 }));

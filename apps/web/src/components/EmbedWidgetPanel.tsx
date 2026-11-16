@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
 import { contrastRatio } from '../utils/colors';
-import { sources, sourceCategories } from '../services/sources';
+import { sources } from '../services/sources';
 import type { SourceId } from '../types';
 import { EmbedWidgetPreview } from './EmbedWidgetPreview';
 import { EmbedPlatformList } from './EmbedPlatformList';
+import { embeddablePlatforms, isCustomLink, isReordered, platformsAttribute, type EmbedLink } from './EmbedWidgetPanelUtils';
 
 type EmbedStyle = 'dark' | 'light' | 'custom';
 type EmbedLayout = 'icons' | 'text' | 'flexible' | 'full';
@@ -14,31 +15,6 @@ const LAYOUT_LABELS: Record<EmbedLayout, string> = {
   flexible: 'Flexible',
   full: 'Full width',
 };
-
-type EmbedLink = { platform: string; displayName?: string | null };
-
-/**
- * A custom link the artist added to their page. The page stores them as other_0, other_1, ... in
- * page order (api/shared/link-dividers.ts); older rows may say just "other". widget.js draws them
- * with their own label, by the same test.
- */
-export function isCustomLink(platform: string): boolean {
-  return platform === 'other' || /^other_[0-9]+$/.test(platform);
-}
-
-/**
- * What the widget can draw, once each, in the order the artist's page lists them: every platform
- * in sources.ts except the category buckets (widget.js's table, which platform-logo-copies.test.ts
- * keeps true), plus each of the artist's custom links.
- */
-export function embeddablePlatforms(links: EmbedLink[]): string[] {
-  const ids: string[] = [];
-  for (const { platform } of links) {
-    const known = platform in sources && !(platform in sourceCategories) && platform !== 'other';
-    if ((known || isCustomLink(platform)) && !ids.includes(platform)) ids.push(platform);
-  }
-  return ids;
-}
 
 /** The name the widget shows for each choice: a custom link's own label, else the platform's. */
 function embedLabels(links: EmbedLink[]): Record<string, string> {
@@ -89,25 +65,6 @@ function ColourField({ label, value, onChange }: {
       <span className="font-mono">{value}</span>
     </label>
   );
-}
-
-function isReordered(pageOrder: string[], embedOrder: string[]): boolean {
-  return embedOrder.some((id, index) => id !== pageOrder[index]);
-}
-
-/**
- * The snippet's data-platforms. Everything in page order is "all"; everything reordered keeps a
- * trailing "*", so a platform added to the page later still appears (at the end). A subset is
- * exactly that subset, in embed order.
- */
-export function platformsAttribute(
-  pageOrder: string[],
-  embedOrder: string[],
-  excluded: Set<string>,
-): string {
-  const chosen = embedOrder.filter((id) => !excluded.has(id));
-  if (chosen.length < pageOrder.length) return chosen.join(',');
-  return isReordered(pageOrder, embedOrder) ? [...chosen, '*'].join(',') : 'all';
 }
 
 /** "Embed this profile on your website": the controls, a live preview and the snippet. */

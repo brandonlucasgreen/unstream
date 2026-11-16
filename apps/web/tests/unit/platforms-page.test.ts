@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { supportPlatformGroups } from '../../src/pages/PlatformsPage';
+import { supportPlatformGroups } from '../../src/pages/PlatformsPageUtils';
 
 // /platforms is generated from services/sources.ts. These pin the shape the page promises:
 // every way to pay or borrow from an artist, and nothing that's only a profile link.
