@@ -28,6 +28,7 @@
   // Deno resolves, so `npm run typecheck:edge` (deno check) covers them instead.
   "include": [
     "functions/*.ts",
+    "functions/db/*.ts",
     "functions/__tests__/*.ts",
     "shared/*.ts",
     "lib/*.ts",
