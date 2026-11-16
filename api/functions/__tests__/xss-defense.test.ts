@@ -1,19 +1,12 @@
-// Tests for the XSS defense in the u-handle edge function and saved-artists save path.
-// The edge function itself uses Deno imports and can't run under vitest, but the
-// escapeHtml function and slug validation regex are replicated here to verify
-// the security contract: artist slugs are escaped in SSR output and validated on save.
+// Tests for the XSS defense in the edge renderers and the saved-artists save path. The edge
+// functions themselves use Deno imports and can't run under vitest, but they all escape through
+// the one function in api/shared/html.ts, which is what is tested here, along with the slug
+// validation regex: artist slugs are escaped in SSR output and validated on save.
 
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
-
-// Mirror of escapeHtml in api/edge/u-handle.ts — kept in sync.
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+import { escapeHtml } from '../../shared/html';
 
 // Mirror of the slug validation regex in api/functions/saved-artists.ts handleSave.
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
@@ -134,4 +127,21 @@ describe('XSS defense: slug validation on save rejects malicious slugs', () => {
     // And it must not reject a real slug that happens to be all hex characters.
     expect(UUID_REGEX.test('deadbeef')).toBe(false);
   });
+});
+
+// Every server-side renderer used to carry its own copy of escapeHtml, and this file tested a
+// pasted one, so a copy could change what it escaped without failing anything. They now share
+// api/shared/html.ts; this fails if a private copy comes back.
+describe('XSS defense: one escapeHtml for every server-side renderer', () => {
+  const API_DIR = join(__dirname, '..', '..');
+
+  for (const dir of ['edge', 'shared', 'lib', 'functions']) {
+    it(`api/${dir} defines no escapeHtml of its own`, () => {
+      const owners = readdirSync(join(API_DIR, dir))
+        .filter(name => name.endsWith('.ts'))
+        .filter(name => /function escapeHtml\b/.test(readFileSync(join(API_DIR, dir, name), 'utf8')))
+        .map(name => `${dir}/${name}`);
+      expect(owners).toEqual(dir === 'shared' ? ['shared/html.ts'] : []);
+    });
+  }
 });

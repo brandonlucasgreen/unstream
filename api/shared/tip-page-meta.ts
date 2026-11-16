@@ -8,6 +8,8 @@
 // api/functions/__tests__/tip-page-meta.test.ts can import it directly under Vitest, which cannot
 // load the edge handler itself while it imports https://edge.netlify.com.
 
+import { escapeHtml } from './html.ts';
+
 /** The share text the ticket asks for: "Leave [artist name] a tip on Unstream". */
 export function tipShareTitle(artistName: string): string {
   return `Leave ${artistName} a tip on Unstream`;
@@ -16,12 +18,6 @@ export function tipShareTitle(artistName: string): string {
 /** og:description — the same line the /tip/ page renders under its heading (tipPage.straightTo). */
 export function tipShareDescription(artistName: string): string {
   return `Support for their music, paid straight to ${artistName}'s own Stripe account.`;
-}
-
-// Same set as the escaping in every other edge renderer (they cannot share one copy because the
-// edge runs on Deno and the SPA build on Node — this lives in api/shared/, which both can import).
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 export interface TipPageMetaInput {

@@ -12,6 +12,7 @@
 // stored, echoed back, or attached to a Sentry event.
 
 import { Sentry, withSentry } from '../lib/sentry';
+import { internalFunctionOrigin } from '../lib/internal-origin';
 import { getClient } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
@@ -124,7 +125,9 @@ export function selfDispatchOrigin(host: string | undefined): string | null {
  */
 async function requestSync(userId: string, host: string | undefined): Promise<boolean> {
   const secret = process.env.INTERNAL_FUNCTION_SECRET;
-  const siteUrl = selfDispatchOrigin(host) ?? process.env.URL;
+  // An unrecognised host (netlify dev, or a request that reached us some other way) falls back to
+  // the same origin every other self-call uses, which is never the Cloudflare-fronted domain.
+  const siteUrl = selfDispatchOrigin(host) ?? internalFunctionOrigin();
   if (!secret || !siteUrl) {
     console.log('[me-bandcamp] sync not requested — INTERNAL_FUNCTION_SECRET or site URL not configured');
     return false;

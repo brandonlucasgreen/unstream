@@ -133,14 +133,14 @@ async function fetchWithRetry(url: string, label: string): Promise<Response> {
 async function fetchSearchResults(artistName: string): Promise<SearchResponse> {
   const url = `${API_BASE}/api/search/sources?query=${encodeURIComponent(artistName)}`;
   const response = await fetchWithRetry(url, `Search "${artistName}"`);
-  return response.json();
+  return (await response.json()) as SearchResponse;
 }
 
 async function fetchMusicBrainzData(artistName: string): Promise<MusicBrainzData | null> {
   const url = `${API_BASE}/api/search/musicbrainz?query=${encodeURIComponent(artistName)}`;
   try {
     const response = await fetchWithRetry(url, `MusicBrainz "${artistName}"`);
-    return response.json();
+    return (await response.json()) as MusicBrainzData;
   } catch {
     return null; // MusicBrainz enrichment is optional — don't fail the whole artist
   }
@@ -222,7 +222,7 @@ async function validateArtistMatch(
   try {
     const url = `https://musicbrainz.org/ws/2/release-group?artist=${artist.musicbrainzId}&type=album|single|ep&limit=50&fmt=json`;
     const response = await fetchWithRetry(url, `MB validate "${artist.name}"`);
-    const data = await response.json();
+    const data = (await response.json()) as { 'release-groups'?: { title: string }[] };
     const releaseGroups = data['release-groups'] || [];
 
     // If MB has very few releases, skip validation (too unreliable)

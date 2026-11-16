@@ -20,6 +20,7 @@ import {
 } from './release-utils';
 import { oneSourcePerPlatform } from '../shared/release-display';
 import { cacheDelete, cacheGetOrFetch } from './cache';
+import { CATALOGUEABLE_PLATFORMS } from './catalogueable-platforms';
 import { notifySavedArtistsOfNewRelease } from './notifications';
 import { Sentry } from '../lib/sentry';
 import { isNonArtistSlug } from '../lib/non-artist-names';
@@ -898,18 +899,6 @@ interface StaleCatalogRow {
     releases_found: number | null;
   }[] | null;
 }
-
-/**
- * The platforms `catalogArtist` can actually crawl.
- *
- * Deliberately **not** including `officialsite`: that link is only followed to *discover* other
- * platforms, and `catalogArtist` treats an artist with nothing but an official site as having
- * "no bandcamp, discogs, faircamp, jam.coop, or mirlo link stored" — which it records as an
- * **error**, incrementing `consecutive_failures` and writing `last_error`. Keep this list
- * identical to that condition or the sweep will spend its batch on artists with nothing to fetch
- * and turn the failure counters into noise.
- */
-const CATALOGUEABLE_PLATFORMS = ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo'] as const;
 
 /**
  * Whether a stored link is something the catalog pass can actually crawl.
@@ -1851,7 +1840,7 @@ export async function getArtistForCatalog(artistId: string): Promise<ArtistForCa
         .from('artist_links')
         .select('platform, url')
         .eq('artist_id', artistId)
-        .in('platform', ['bandcamp', 'discogs', 'faircamp', 'jamcoop', 'mirlo', 'officialsite']),
+        .in('platform', [...CATALOGUEABLE_PLATFORMS, 'officialsite']),
     ]);
 
     if (artistError || !artistRow) {

@@ -10,6 +10,7 @@
 // everything on every request, so this page can only ever be wrong about what it *shows*.
 
 import { formatUsd } from './tips.ts';
+import { escapeHtml } from './html.ts';
 
 export type StripeMode = 'live' | 'test';
 
@@ -51,10 +52,6 @@ export interface OpenGoal {
   title: string;
   targetCents: number;
   raisedCents: number;
-}
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function tipHref(slug: string, goalId?: string): string {

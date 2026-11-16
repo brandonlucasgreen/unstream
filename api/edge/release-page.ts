@@ -39,10 +39,7 @@ import {
   relativeDays,
   releaseTypeLabel,
 } from "../shared/release-display.ts";
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+import { escapeHtml } from "../shared/html.ts";
 
 const CSS = `${SITE_CHROME_CSS}
   :root { --bg: #121212; --bg2: #1a1a1a; --text: #f0f0f0; --muted: #999; --border: #2a2a2a; --accent: #ff6b35; }

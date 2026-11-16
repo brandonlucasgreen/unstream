@@ -246,3 +246,16 @@ describe('claim-artist start', () => {
     expect(mocks.tables.artist_profiles[0].email).toBe('claimant@example.com');
   });
 });
+
+describe('claim-artist and two-step verification', () => {
+  // Claiming binds an artist to the account, so it is refused for a session that signed in with a
+  // password alone on an account that has an authenticator app, like every other artist endpoint.
+  it('refuses a session that still owes its second step', async () => {
+    mocks.user = { id: 'user-1', email: 'claimant@example.com', factors: [{ status: 'verified' }] };
+
+    const res = await post({ action: 'start', slug: ARTIST.slug, websiteUrl: 'https://www.kidlightbulbs.com/' });
+
+    expect(res.statusCode).toBe(401);
+    expect(mocks.tables.artist_profiles).toHaveLength(0);
+  });
+});

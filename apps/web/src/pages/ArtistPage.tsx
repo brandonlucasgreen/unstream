@@ -13,6 +13,7 @@ import { AdminCatalogButton } from '../components/AdminCatalogButton';
 import { analytics } from '../services/analytics';
 import { useAuth } from '../contexts/AuthContext';
 import type { ArtistPagePayload } from '../types/artist-page';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 export function ArtistPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -75,7 +76,7 @@ export function ArtistPage() {
         metaDesc.setAttribute('content', desc);
       }
     }
-    return () => { document.title = 'Unstream - Support artists directly'; };
+    return () => { document.title = DEFAULT_PAGE_TITLE; };
   }, [payload?.artist.name, payload?.profile?.bio]);
 
   // Auth-aware save wiring.

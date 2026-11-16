@@ -542,6 +542,10 @@ live.
 a classic wasted-session trap: the change deploys and nothing happens. Verified in
 `docs/specs/bandcamp-coverage-research.md` §1.
 
+**Removed on 2026-11-16**, along with `api/embed/bandcamp.ts`, once a grep confirmed nothing
+imported them and no tsconfig included them. They are in git history. `api/search/` now holds
+only live code (`bandcamp-probe.ts`, `enrichment.ts`, `commons-photo.ts`).
+
 ---
 
 ## The Dispatch: what changed on 2026-04-17

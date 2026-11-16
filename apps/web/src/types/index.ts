@@ -204,10 +204,3 @@ export interface MusicBrainzHomonym {
   imageUrl?: string | null;
 }
 
-// Search state
-export interface SearchState {
-  query: string;
-  results: SearchResult[];
-  isLoading: boolean;
-  error: string | null;
-}

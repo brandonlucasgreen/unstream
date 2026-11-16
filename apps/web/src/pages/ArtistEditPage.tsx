@@ -6,6 +6,7 @@ import { sources } from '../services/sources';
 
 import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
 import { SortableList } from '../components/SortableList';
+import { AVATAR_PLATFORMS } from '../components/ClaimPageUtils';
 import { DEFAULT_SECTION_ORDER, normalizeSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
 import type { SourceId } from '../types';
 
@@ -83,9 +84,6 @@ function getStreamingWarning(url: string): string | null {
   }
   return null;
 }
-
-// Platforms that support avatar scraping
-const AVATAR_PLATFORMS = new Set(['bandcamp', 'youtube', 'mirlo']);
 
 // Check how similar two strings are (0-1 scale, Levenshtein-based)
 function stringSimilarity(a: string, b: string): number {

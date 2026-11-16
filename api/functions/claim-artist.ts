@@ -3,12 +3,13 @@
 //   action: 'start'  — create a pending claim (requires auth)
 //   action: 'verify' — scrape website, verify link-back, discover platform links
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { Sentry, withSentry } from '../lib/sentry';
 import { getClient } from './db';
+import { authenticateBearer } from './middleware';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
-import { escapeHtml } from '../lib/html';
+import { escapeHtml } from '../shared/html';
 import { safeFetch } from './safe-fetch';
 import { websiteMatchesKnownLink } from './claim-verification';
 import { sendAdminPush } from './admin-push';
@@ -42,22 +43,6 @@ const PLATFORM_PATTERNS: [string, RegExp][] = [
 // Reuse the same service client from db.ts (proven to work with RLS)
 function getServiceClient() {
   return getClient();
-}
-
-// Verify the JWT from the request and return the user ID + email
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  // Use anon client to verify the JWT
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return { userId: data.user.id, email: data.user.email || '' };
 }
 
 // Some artist sites sit behind bot protection that turns away anything but a browser.
@@ -421,7 +406,9 @@ async function handleRequest(event: {
     };
   }
 
-  const authUser = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
+  // The shared check, not a local one: claiming binds an artist to this account, so a session that
+  // still owes its second step is refused here as it is on every other artist endpoint.
+  const authUser = await authenticateBearer(event.headers.authorization || event.headers.Authorization);
   if (!authUser) {
     return {
       statusCode: 401,

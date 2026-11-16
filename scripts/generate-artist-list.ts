@@ -169,8 +169,8 @@ async function runQuery(sparql: string, label: string, attempt = 1): Promise<Wik
     throw new Error(`Wikidata query failed for "${label}": ${response.status} ${response.statusText}`);
   }
 
-  const data = await response.json();
-  const bindings: WikidataBinding[] = data.results.bindings;
+  const data = (await response.json()) as { results: { bindings: WikidataBinding[] } };
+  const bindings = data.results.bindings;
   console.log(`  Got ${bindings.length} results for ${label}`);
   return bindings;
 }

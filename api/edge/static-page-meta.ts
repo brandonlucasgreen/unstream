@@ -1,5 +1,6 @@
 import type { Context } from "../shared/edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
+import { escapeHtml } from "../shared/html.ts";
 
 // Link-preview metadata for the hand-written static pages — currently /press, /contact, /platforms
 // and /for-artists.
@@ -46,15 +47,6 @@ const OG_IMAGE = "https://unstream.stream/og-image.png";
 
 // The values are ours, not user input, but these strings land inside HTML attributes — escaping is
 // the cheap way to keep that true if someone later adds a page title with an apostrophe in it.
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function generateOgHtml(canonicalPath: string, meta: PageMeta): string {
   const title = escapeHtml(meta.title);
   const description = escapeHtml(meta.description);

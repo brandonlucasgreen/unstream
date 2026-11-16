@@ -1,5 +1,6 @@
 import type { Context } from "../shared/edge-context.ts";
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
+import { escapeHtml } from "../shared/html.ts";
 
 // Perform search to get first artist image
 async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ imageUrl?: string; artistName?: string }> {
@@ -31,11 +32,6 @@ async function getFirstArtistImage(query: string, baseUrl: string): Promise<{ im
     console.error('Error fetching artist image:', error);
     return {};
   }
-}
-
-// Edge functions run on Deno and can't import from api/functions, so each keeps its own copy.
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // Generate HTML with OG meta tags (no meta refresh — crawlers read OG tags directly).

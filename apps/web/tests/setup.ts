@@ -6,6 +6,18 @@
 // bootstrap also means the tests exercise the same resources the app ships.
 import '../src/i18n';
 
+// Node 25+ defines its own `localStorage` and `sessionStorage` globals, which read as undefined
+// unless Node is started with --localstorage-file. Vitest's jsdom environment doesn't overwrite a
+// global that already exists, so on those Node versions every jsdom test that touches storage
+// failed locally while passing in CI (Node 22). Point both names at jsdom's own storage, which is
+// what the tests mean. A no-op under the `node` environment, where there is no jsdom.
+const jsdomWindow = (globalThis as { jsdom?: { window: Window } }).jsdom?.window;
+if (jsdomWindow) {
+  for (const name of ['localStorage', 'sessionStorage'] as const) {
+    Object.defineProperty(globalThis, name, { value: jsdomWindow[name], configurable: true, writable: true });
+  }
+}
+
 // jsdom has <dialog> but none of its methods. A stand-in for the parts components rely on (see
 // src/components/Dialog.tsx): showModal opens and focuses the first autofocus or focusable
 // element as browsers do, close fires `close`. Inertness, Tab containment and Escape are the

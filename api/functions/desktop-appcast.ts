@@ -1,5 +1,6 @@
 import { withSentry } from '../lib/sentry';
 import { MAC_RELEASE, isSparkleReady, type MacRelease } from '../shared/desktop-release';
+import { escapeXml } from '../shared/feed-format';
 
 // The Sparkle appcast the Mac app reads (SUFeedURL in apps/mac/Unstream/Info-macOS.plist).
 // Routed at /appcast.xml — the conventional path, and the one baked into shipped builds, so
@@ -9,15 +10,6 @@ import { MAC_RELEASE, isSparkleReady, type MacRelease } from '../shared/desktop-
 // EdDSA signature isn't in GitHub's release metadata, and an appcast without a valid one is
 // rejected by every client. Keeping version, URL, length and signature in one committed
 // object means they can't drift apart.
-
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
 
 export function buildAppcast(release: MacRelease): string {
   const items = isSparkleReady(release)

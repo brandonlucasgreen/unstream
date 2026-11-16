@@ -1,5 +1,6 @@
 import { withSentry } from '../lib/sentry';
 import { checkRateLimit, getClientIp } from './ratelimit';
+import { FETCH_USER_AGENT } from './safe-fetch';
 
 // Helper to fetch with timeout
 async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs: number = 5000): Promise<Response> {
@@ -59,7 +60,7 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
     if (spotifyMatch) {
       const response = await fetchWithTimeout(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          'User-Agent': FETCH_USER_AGENT,
         },
       }, 5000);
 
@@ -116,7 +117,7 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
     if (appleMatch) {
       const response = await fetchWithTimeout(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          'User-Agent': FETCH_USER_AGENT,
         },
       }, 5000);
 

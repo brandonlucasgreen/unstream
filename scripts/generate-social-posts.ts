@@ -450,7 +450,7 @@ SELECT DISTINCT ?mbid WHERE {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as { results: { bindings: { mbid?: { value: string } }[] } };
         const found = data.results.bindings.length;
         if (found > 0) {
           for (const binding of data.results.bindings) {
@@ -714,7 +714,15 @@ async function pickSpotlight<T extends { slug: string; name: string; imageUrl: s
 
 const BUFFER_GRAPHQL = 'https://api.buffer.com';
 
-async function bufferGraphQL(query: string, variables?: Record<string, unknown>) {
+// A GraphQL answer's `data` is shaped by the query that asked for it, so it stays loose here and
+// each caller reads the fields its own query named.
+interface BufferGraphQLResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any;
+  errors?: { message: string }[];
+}
+
+async function bufferGraphQL(query: string, variables?: Record<string, unknown>): Promise<BufferGraphQLResponse> {
   const token = process.env.BUFFER_ACCESS_TOKEN;
   if (!token) throw new Error('BUFFER_ACCESS_TOKEN not set');
 
@@ -727,10 +735,10 @@ async function bufferGraphQL(query: string, variables?: Record<string, unknown>)
     body: JSON.stringify({ query, variables }),
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as BufferGraphQLResponse;
 
   if (!res.ok || data.errors) {
-    const errMsg = data.errors?.map((e: { message: string }) => e.message).join('; ') || JSON.stringify(data);
+    const errMsg = data.errors?.map(e => e.message).join('; ') || JSON.stringify(data);
     throw new Error(`Buffer API error (${res.status}): ${errMsg}`);
   }
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { analytics } from '../services/analytics';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 export function ExtensionPage() {
   useEffect(() => {
@@ -10,7 +11,7 @@ export function ExtensionPage() {
     if (metaDesc) {
       metaDesc.setAttribute('content', 'Free browser extension that detects what music is playing and shows you how to support artists on Bandcamp, Mirlo, and other platforms. Available for Chrome and Firefox.');
     }
-    return () => { document.title = 'Unstream - Support artists directly'; };
+    return () => { document.title = DEFAULT_PAGE_TITLE; };
   }, []);
 
   return (

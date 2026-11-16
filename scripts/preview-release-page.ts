@@ -247,7 +247,7 @@ const server = createServer(async (req, res) => {
   // The function's own headers, not a hand-set Content-Type: a redirect carries its answer in
   // Location and Cache-Control, and dropping those would make the redirect branches unviewable.
   const headers: Record<string, string> = {};
-  response.headers.forEach((value, key) => { headers[key] = value; });
+  response.headers.forEach((value: string, key: string) => { headers[key] = value; });
   res.writeHead(response.status, headers);
   res.end(await response.text());
 });
