@@ -2,7 +2,7 @@
 // "Pictures" and "Storage").
 //
 // **Buffer fetches a post's image on the day it publishes, not when the post is created**
-// (CLAUDE.md, "Social posts": a missing image fails the post). Bandcamp deletes old files, and a
+// (scripts/CLAUDE.md, "Social posts": a missing image fails the post). Bandcamp deletes old files, and a
 // post goes to Buffer up to three days ahead. So every image is copied into the public R2 bucket
 // the weekly social cards already use when its post is pushed, and Buffer gets that copy.
 //
