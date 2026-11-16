@@ -363,7 +363,7 @@ describe('mirlo release mapping', () => {
   it('marks a genuine future date announced without a pre-order flag', () => {
     // 2026-09-04 against a 2026-08-05 now. Mirlo really does carry dates this far out.
     const row = buildMirloRelease(NAME_YOUR_PRICE, 'timerival', new Set(), NOW);
-    expect(row?.isPreorder).toBeUndefined();
+    expect(row).not.toHaveProperty('isPreorder');
     expect(row?.status).toBe('announced');
   });
 

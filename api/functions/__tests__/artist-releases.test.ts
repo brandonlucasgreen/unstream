@@ -73,6 +73,7 @@ vi.mock('../ratelimit', () => ({
 }));
 
 const { handler } = await import('../artist-releases');
+import { answered } from './answered';
 
 const RELEASE_A = '11111111-1111-1111-1111-111111111111';
 const RELEASE_B = '22222222-2222-2222-2222-222222222222';
@@ -80,10 +81,10 @@ const headers = { authorization: 'Bearer user-token' };
 const SLUG = 'kid-lightbulbs';
 
 function get(slug = SLUG) {
-  return handler({ httpMethod: 'GET', headers, queryStringParameters: { slug } });
+  return answered(handler({ httpMethod: 'GET', headers, queryStringParameters: { slug } }));
 }
 function post(body: unknown) {
-  return handler({ httpMethod: 'POST', headers, body: JSON.stringify(body) });
+  return answered(handler({ httpMethod: 'POST', headers, body: JSON.stringify(body) }));
 }
 
 beforeEach(() => {
@@ -114,7 +115,7 @@ describe('auth', () => {
   });
 
   it('handles OPTIONS without requiring auth', async () => {
-    const r = await handler({ httpMethod: 'OPTIONS', headers: {} });
+    const r = await answered(handler({ httpMethod: 'OPTIONS', headers: {} }));
     expect(r.statusCode).toBe(204);
     expect(mocks.authenticateBearer).not.toHaveBeenCalled();
   });
@@ -143,7 +144,7 @@ describe('ownership', () => {
 
 describe('GET — the owner\'s release list', () => {
   it('requires a slug', async () => {
-    const r = await handler({ httpMethod: 'GET', headers, queryStringParameters: {} });
+    const r = await answered(handler({ httpMethod: 'GET', headers, queryStringParameters: {} }));
     expect(r.statusCode).toBe(400);
   });
 
@@ -424,7 +425,7 @@ describe('CORS', () => {
   });
 
   it('answers preflight with the same restricted headers', async () => {
-    const r = await handler({ httpMethod: 'OPTIONS', headers: {} });
+    const r = await answered(handler({ httpMethod: 'OPTIONS', headers: {} }));
     expect(r.statusCode).toBe(204);
     expect(r.headers['Access-Control-Allow-Origin']).not.toBe('*');
   });
@@ -500,12 +501,12 @@ describe('validation', () => {
   });
 
   it('rejects invalid JSON', async () => {
-    const r = await handler({ httpMethod: 'POST', headers, body: '{not json' });
+    const r = await answered(handler({ httpMethod: 'POST', headers, body: '{not json' }));
     expect(r.statusCode).toBe(400);
   });
 
   it('rejects methods other than GET/POST/OPTIONS', async () => {
-    const r = await handler({ httpMethod: 'DELETE', headers });
+    const r = await answered(handler({ httpMethod: 'DELETE', headers }));
     expect(r.statusCode).toBe(405);
   });
 });

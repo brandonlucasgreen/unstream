@@ -67,6 +67,7 @@ vi.mock('../../shared/published-artist-slugs', () => ({
 }));
 
 import { handler } from '../artist-page';
+import { answered } from './answered';
 
 const artistRow = (overrides: Record<string, unknown> = {}) => ({
   id: 'artist-1',
@@ -87,7 +88,7 @@ const links = [
   { platform: 'kofi', url: 'https://duckduckgo.com/?q=site:ko-fi.com+Funkadelic', display_name: null },
 ];
 
-const call = (slug: string) => handler({ httpMethod: 'GET', queryStringParameters: { slug }, headers: {} });
+const call = (slug: string) => answered(handler({ httpMethod: 'GET', queryStringParameters: { slug }, headers: {} }));
 
 describe('GET /api/artist-page', () => {
   beforeEach(() => {
@@ -265,7 +266,7 @@ describe('GET /api/artist-page', () => {
   });
 
   it('400s without a slug', async () => {
-    const res = await handler({ httpMethod: 'GET', queryStringParameters: {}, headers: {} });
+    const res = await answered(handler({ httpMethod: 'GET', queryStringParameters: {}, headers: {} }));
     expect(res.statusCode).toBe(400);
   });
 

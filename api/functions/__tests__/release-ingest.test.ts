@@ -1035,7 +1035,7 @@ describe('ingestFaircampPurchasePage', () => {
 describe('buildFaircampRelease', () => {
   it('combines a release page into a persistable shape with an inferred type', () => {
     const out = buildFaircampRelease(
-      { title: 'RUINED CASTLE', artworkUrl: 'https://example.com/cover.jpg' },
+      { title: 'RUINED CASTLE', artworkUrl: 'https://example.com/cover.jpg', purchaseHref: null },
       'https://music.kidlightbulbs.com/ruined-castle/',
       new Set()
     );
@@ -1049,12 +1049,12 @@ describe('buildFaircampRelease', () => {
   });
 
   it('never has a date — Faircamp has none to give', () => {
-    const out = buildFaircampRelease({ title: 'Some Release', artworkUrl: null }, 'https://x.example.com/some-release/', new Set());
+    const out = buildFaircampRelease({ title: 'Some Release', artworkUrl: null, purchaseHref: null }, 'https://x.example.com/some-release/', new Set());
     expect(out).not.toHaveProperty('releaseDate');
   });
 
   it('returns null for a title with no letters or numbers to match on', () => {
-    expect(buildFaircampRelease({ title: '...', artworkUrl: null }, 'https://x.example.com/dots/', new Set())).toBeNull();
+    expect(buildFaircampRelease({ title: '...', artworkUrl: null, purchaseHref: null }, 'https://x.example.com/dots/', new Set())).toBeNull();
   });
 });
 

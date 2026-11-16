@@ -29,7 +29,7 @@ function tokenWithAal(aal: string): string {
 const AAL1 = tokenWithAal('aal1');
 const AAL2 = tokenWithAal('aal2');
 const withFactor = { id: 'user-1', email: 'artist@example.com', factors: [{ status: 'verified' }] };
-const withoutFactor = { id: 'user-1', email: 'artist@example.com' };
+const withoutFactor: { id: string; email: string; factors?: { status: string }[] } = { id: 'user-1', email: 'artist@example.com' };
 
 beforeEach(() => {
   vi.resetAllMocks();

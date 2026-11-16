@@ -23,7 +23,8 @@
     "noUncheckedSideEffectImports": true
   },
   // Everything under api/ that Node runs is typechecked by being here: every function, every
-  // test, and the shared, lib and search modules. A new file is covered without being listed.
+  // test, and the shared, lib and search modules. A new file is covered without being listed,
+  // and there is no `exclude`: don't add one to get a test past strict mode, fix the test.
   // The edge functions are not here: they import from URLs (esm.sh, edge.netlify.com) that only
   // Deno resolves, so `npm run typecheck:edge` (deno check) covers them instead.
   "include": [
@@ -33,30 +34,5 @@
     "shared/*.ts",
     "lib/*.ts",
     "search/*.ts"
-  ],
-  // Tests that predate the rule above and don't pass strict mode yet. Most of their errors are a
-  // handler result read without a check (the function is typed with Netlify's `Handler`, which may
-  // return nothing); a few are fixtures that drifted from the type they stand in for. This list
-  // only shrinks: fix a file and delete its line, and never add one for a new test.
-  "exclude": [
-    "functions/__tests__/artist-page.test.ts",
-    "functions/__tests__/artist-profile-show-bio.test.ts",
-    "functions/__tests__/artist-releases.test.ts",
-    "functions/__tests__/check-releases-ssrf.test.ts",
-    "functions/__tests__/claim-artist.test.ts",
-    "functions/__tests__/discogs-fuzzy-review-flag.test.ts",
-    "functions/__tests__/discogs-merge-durability.test.ts",
-    "functions/__tests__/link-dividers.test.ts",
-    "functions/__tests__/mirlo-rest-ingest.test.ts",
-    "functions/__tests__/musicbrainz-enrichment.test.ts",
-    "functions/__tests__/musicbrainz-homonyms.test.ts",
-    "functions/__tests__/release-alerts.test.ts",
-    "functions/__tests__/release-ingest.test.ts",
-    "functions/__tests__/saved-artists-reporting.test.ts",
-    "functions/__tests__/search-deferred-enrichment.test.ts",
-    "functions/__tests__/search-persist-handoff.test.ts",
-    "functions/__tests__/search-suggest.test.ts",
-    "functions/__tests__/search-zero-result-capture.test.ts",
-    "functions/__tests__/two-factor-enforcement.test.ts"
   ]
 }

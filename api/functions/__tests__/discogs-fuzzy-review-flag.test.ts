@@ -34,9 +34,9 @@ function makeClient() {
               updated.push({ table, id, patch });
               const row = rows.find(r => r.id === id);
               if (row) Object.assign(row, patch);
-              const p = Promise.resolve({ data: row ?? null, error: null }) as Record<string, unknown>;
-              p.select = () => ({ single: () => Promise.resolve({ data: row ?? null, error: null }) });
-              return p;
+              return Object.assign(Promise.resolve({ data: row ?? null, error: null }), {
+                select: () => ({ single: () => Promise.resolve({ data: row ?? null, error: null }) }),
+              });
             },
           };
         },

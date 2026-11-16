@@ -30,6 +30,7 @@ vi.mock('../cache', async (importOriginal) => {
 });
 
 import { handler } from '../search-suggest';
+import { answered } from './answered';
 import { rankArtistSuggestions } from '../db';
 
 beforeEach(() => {
@@ -52,7 +53,7 @@ describe('search-suggest handler', () => {
     mocks.mockSuggestArtists.mockResolvedValue([
       { slug: 'the-argent-grub', name: 'The Argent Grub', imageUrl: null },
     ]);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await answered(handler({ queryStringParameters: { query: 'argent' } }));
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(body.suggestions).toHaveLength(1);
@@ -60,20 +61,20 @@ describe('search-suggest handler', () => {
   });
 
   it('returns an empty 200 for sub-2-character queries without hitting the DB', async () => {
-    const res = await handler({ queryStringParameters: { query: 'a' } });
+    const res = await answered(handler({ queryStringParameters: { query: 'a' } }));
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).suggestions).toEqual([]);
     expect(mocks.mockSuggestArtists).not.toHaveBeenCalled();
   });
 
   it('rejects a missing query', async () => {
-    const res = await handler({ queryStringParameters: {} });
+    const res = await answered(handler({ queryStringParameters: {} }));
     expect(res.statusCode).toBe(400);
   });
 
   it('does not cache a DB failure as "no suggestions"', async () => {
     mocks.mockSuggestArtists.mockResolvedValue(null);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await answered(handler({ queryStringParameters: { query: 'argent' } }));
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).suggestions).toEqual([]);
     expect(mocks.lastShouldCache.value).toBe(false);
@@ -108,7 +109,7 @@ describe('search-suggest handler', () => {
 
   it('sends the shared public CORS headers', async () => {
     mocks.mockSuggestArtists.mockResolvedValue([]);
-    const res = await handler({ queryStringParameters: { query: 'argent' } });
+    const res = await answered(handler({ queryStringParameters: { query: 'argent' } }));
     expect(res.headers['X-Content-Type-Options']).toBe('nosniff');
     expect(res.headers['Access-Control-Allow-Origin']).toBe('*');
   });
