@@ -19,13 +19,7 @@ import { withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { resolveArtistPages } from './collection-utils';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 /** Rows per upsert batch — keeps each PostgREST request comfortably sized (matches bandcamp-sync). */
 const UPSERT_CHUNK = 500;
@@ -79,24 +73,31 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, DELETE, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   if (event.httpMethod === 'POST') {
@@ -104,16 +105,16 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     if (body.source !== 'apple_music') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "source must be 'apple_music'" }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: "source must be 'apple_music'" }) };
     }
 
     const parsed = parseSignals(body.signals);
     if (typeof parsed === 'string') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: parsed }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: parsed }) };
     }
 
     // Dedupe by artist name, keeping the highest count — a duplicate in one upsert batch is
@@ -140,7 +141,7 @@ async function handleRequest(event: {
         'listening_signals'
       );
       if (!existing.ok) {
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to read existing signals' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to read existing signals' }) };
       }
 
       const stored = new Map(existing.rows.map(r => [r.artist_name, r.play_count]));
@@ -162,13 +163,13 @@ async function handleRequest(event: {
           .upsert(chunk, { onConflict: 'user_id,source,artist_name' });
         if (error) {
           console.error('[me-listening] Upsert failed:', error.message);
-          return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to save listening signals' }) };
+          return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to save listening signals' }) };
         }
       }
 
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           received: byName.size,
           written: rows.length,
@@ -177,7 +178,7 @@ async function handleRequest(event: {
       };
     } catch (error) {
       console.error('[me-listening] POST error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
@@ -191,13 +192,13 @@ async function handleRequest(event: {
 
       if (error) {
         console.error('[me-listening] Delete failed:', error.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to delete listening signals' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to delete listening signals' }) };
       }
 
-      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ deleted: true }) };
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ deleted: true }) };
     } catch (error) {
       console.error('[me-listening] DELETE error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
@@ -217,7 +218,7 @@ async function handleRequest(event: {
     if (!signals.ok) {
       // A read that failed is not an empty gap. Reporting one would read as "you already
       // support everyone you listen to" — the most misleading answer this endpoint can give.
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load listening signals' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load listening signals' }) };
     }
 
     const saved = await readAllPages<{ artist_slug: string | null; artist_name: string | null; supported: boolean }>(
@@ -289,7 +290,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         gap: ranked.map(r => ({
           artistName: r.artistName,
@@ -302,7 +303,7 @@ async function handleRequest(event: {
     };
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 export const handler = withSentry(handleRequest);

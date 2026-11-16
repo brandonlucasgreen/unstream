@@ -11,6 +11,7 @@ import { withSentry } from '../lib/sentry';
 import { getClient, readAllPages } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
+import { buildAccountCorsHeaders } from './account-cors';
 import {
   artistUrlFor,
   collectionArtUrl,
@@ -18,13 +19,6 @@ import {
   resolveArtistPages,
   type CollectionRowWithRelease,
 } from './collection-utils';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
 
 const ITEM_COLUMNS =
   'id, source, title, artist_name, art_url, acquired_at, provenance, acquisition, hidden, release_id';
@@ -37,24 +31,31 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const ip = getClientIp(event.headers);
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   if (event.httpMethod === 'GET') {
@@ -73,7 +74,7 @@ async function handleRequest(event: {
 
     if (!read.ok) {
       console.error('[me-collection] Error fetching items:', read.reason);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load collection' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load collection' }) };
     }
 
     const artistPages = await resolveArtistPages(read.rows.map(r => r.artist_name));
@@ -92,7 +93,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ items, total: items.length }),
     };
   }
@@ -102,15 +103,15 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     const id = typeof body.id === 'string' ? body.id : '';
     if (!id) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'id is required' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'id is required' }) };
     }
     if (typeof body.hidden !== 'boolean') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'hidden must be a boolean' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'hidden must be a boolean' }) };
     }
 
     // The user_id filter is the ownership check — the service-role client bypasses RLS,
@@ -125,20 +126,20 @@ async function handleRequest(event: {
 
     if (error) {
       console.error('[me-collection] Error updating item:', error.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update item' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update item' }) };
     }
     if (!row) {
-      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Item not found' }) };
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Item not found' }) };
     }
 
     // Hiding an item changes the public page, which is CDN-cached under this tag. Awaited:
     // a serverless response ends the invocation, so fire-and-forget purges never happen.
     await purgeUserShareCacheForUser(user.userId, 'me-collection');
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(row) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(row) };
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 export const handler = withSentry(handleRequest);

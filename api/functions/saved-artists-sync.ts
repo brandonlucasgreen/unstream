@@ -7,13 +7,7 @@
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 const SYNC_LIMIT = 500;
 
@@ -23,8 +17,17 @@ async function handleRequest(event: {
   queryStringParameters?: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token. The
+  // extension's popup syncs from here, from its own origin, so that is allowed too
+  // (account-cors.ts says why, for both).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, OPTIONS',
+    { allowExtensionOrigins: true },
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // The per-user rate-limit bucket can only exist once the token has been verified, so
@@ -32,20 +35,20 @@ async function handleRequest(event: {
   // round trip to the auth server on a warm invocation (see resolveAccountRequest).
   const ip = getClientIp(event.headers);
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   const since = event.queryStringParameters?.since;
@@ -76,7 +79,7 @@ async function handleRequest(event: {
   if (since) {
     const sinceDate = new Date(since);
     if (isNaN(sinceDate.getTime())) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid since parameter: must be ISO-8601' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid since parameter: must be ISO-8601' }) };
     }
     // Use > not >= for cursor safety — a client passing server_time from last pull
     // should not re-receive rows modified at exactly that instant
@@ -88,7 +91,7 @@ async function handleRequest(event: {
 
     if (savedError) {
       console.error('[saved-artists-sync] Error fetching:', savedError);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch saved artists' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to fetch saved artists' }) };
     }
 
     const artists = (saved || []).map(row => {
@@ -116,12 +119,12 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ artists, server_time: serverTime }),
     };
   } catch (error) {
     console.error('[saved-artists-sync] GET error:', error);
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 

@@ -7,13 +7,7 @@
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 const MAX_LENGTH = 100;
 
@@ -22,24 +16,31 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   if (event.httpMethod === 'GET') {
@@ -52,17 +53,17 @@ async function handleRequest(event: {
 
       if (error) {
         console.error('[me-location] Error fetching location:', error.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to load location' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load location' }) };
       }
 
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ location: row?.location ?? null }),
       };
     } catch (error) {
       console.error('[me-location] GET error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
@@ -70,7 +71,7 @@ async function handleRequest(event: {
   // The `username` column is NOT NULL, so an upsert insert without it fails with 23502.
   // A clean UPDATE is used when the row exists; only the absence of a row triggers the
   // "set username first" error.
-  async function hasUsernameRow(): Promise<boolean | { statusCode: number; headers: typeof CORS_HEADERS; body: string }> {
+  async function hasUsernameRow(): Promise<boolean | { statusCode: number; headers: Record<string, string>; body: string }> {
     // Captured locally: the guards above narrowed both of these, but a closure doesn't inherit
     // that narrowing — TypeScript has to assume something reassigned them in between.
     const db = client!;
@@ -83,7 +84,7 @@ async function handleRequest(event: {
 
     if (error) {
       console.error('[me-location] Error checking usernames row:', error.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update location' }) };
     }
 
     return !!existing;
@@ -94,7 +95,7 @@ async function handleRequest(event: {
     try {
       body = JSON.parse(event.body || '{}');
     } catch {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
     }
 
     const raw = body.location;
@@ -105,7 +106,7 @@ async function handleRequest(event: {
         if (typeof rowCheck !== 'boolean') return rowCheck;
         if (!rowCheck) {
           // Location is already effectively null — desired state achieved.
-          return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ location: null }) };
+          return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ location: null }) };
         }
 
         const { error: updateError } = await client
@@ -115,27 +116,27 @@ async function handleRequest(event: {
 
         if (updateError) {
           console.error('[me-location] Error clearing location:', updateError.message);
-          return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+          return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update location' }) };
         }
 
-        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ location: null }) };
+        return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ location: null }) };
       } catch (error) {
         console.error('[me-location] POST (null) error:', error);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
       }
     }
 
     const trimmed = typeof raw === 'string' ? raw.trim() : '';
 
     if (trimmed.length > MAX_LENGTH) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `Location must be ${MAX_LENGTH} characters or fewer.` }) };
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: `Location must be ${MAX_LENGTH} characters or fewer.` }) };
     }
 
     try {
       const rowCheck = await hasUsernameRow();
       if (typeof rowCheck !== 'boolean') return rowCheck;
       if (!rowCheck) {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
+        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Set a username before setting your location.' }) };
       }
 
       const { error: updateError, count: updateCount } = await client
@@ -145,27 +146,27 @@ async function handleRequest(event: {
 
       if (updateError) {
         console.error('[me-location] Error updating location:', updateError.message);
-        return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update location' }) };
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update location' }) };
       }
 
       // TOCTOU: row existed at SELECT but was deleted before UPDATE. Don't
       // claim success when nothing persisted.
       if (updateCount === 0) {
-        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username row missing — please set your username before changing your location.' }) };
+        return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'Username row missing — please set your username before changing your location.' }) };
       }
 
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ location: trimmed || null }),
       };
     } catch (error) {
       console.error('[me-location] POST error:', error);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
     }
   }
 
-  return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
 }
 
 export const handler = withSentry(handleRequest);

@@ -6,18 +6,19 @@ import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { checkRateLimit, getClientIp } from './ratelimit';
 import { authenticateBearerFast } from './middleware';
+import { buildAccountCorsHeaders } from './account-cors';
 
 function getServiceClient() {
   return getClient();
 }
 
 async function handleRequest(event: { httpMethod: string; headers: Record<string, string | undefined>; body: string | null }) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  };
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const headers = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, POST, OPTIONS',
+  );
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers, body: '' };

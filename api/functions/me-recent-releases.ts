@@ -9,13 +9,7 @@
 import { withSentry } from '../lib/sentry';
 import { getFeedReleasesForUser, type FeedReleaseRow } from './db';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 /**
  * How many rows each dashboard section shows. A shortlist, not a list: these sit beside Saved
@@ -93,26 +87,33 @@ async function handleRequest(event: {
   httpMethod: string;
   headers: Record<string, string | undefined>;
 }): Promise<JsonResponse> {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'GET, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response as JsonResponse;
 
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not signed in' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not signed in' }) };
   }
 
   const rows = await getFeedReleasesForUser(user.userId);
@@ -121,7 +122,7 @@ async function handleRequest(event: {
     statusCode: 200,
     // One fan's saved artists — never cached by anything shared, the same rule the private feed
     // follows.
-    headers: { ...CORS_HEADERS, 'Cache-Control': 'private, no-store' },
+    headers: { ...corsHeaders, 'Cache-Control': 'private, no-store' },
     body: JSON.stringify(splitRecentReleases(rows)),
   };
 }

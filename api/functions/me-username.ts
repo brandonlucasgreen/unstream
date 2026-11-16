@@ -7,17 +7,7 @@ import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
 import { isReservedHandle } from '../lib/reserved-handles';
 import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-
-// CORS: matches the hand-rolled pattern in saved-artists.ts (permissive origin).
-// The shared middleware (buildCorsHeaders) restricts to unstream.stream for
-// non-API-key requests, which would break local dev and other origins using
-// Bearer auth. This is existing CORS debt — see saved-artists.ts for the same pattern.
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { buildAccountCorsHeaders } from './account-cors';
 
 const USERNAME_REGEX = /^[a-z0-9](?:[a-z0-9-]{1,18}[a-z0-9])$/;
 
@@ -26,53 +16,60 @@ async function handleRequest(event: {
   headers: Record<string, string | undefined>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, OPTIONS',
+  );
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   const ip = getClientIp(event.headers);
   // One verification, not two: deriving the rate-limit bucket already checked the token
   // (see resolveAccountRequest), so the user it found is the user this handler uses.
   const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
+  const rl = await checkRateLimit(key, 'account', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
   }
 
   if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
   }
 
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
   const username = (body.username as string | undefined)?.trim();
 
   if (!username) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username is required' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Username is required' }) };
   }
 
   if (!USERNAME_REGEX.test(username)) {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Username must be 3-20 characters, lowercase letters, numbers, and hyphens. No leading or trailing hyphens.' }),
     };
   }
 
   if (isReservedHandle(username)) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'This username is reserved' }) };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'This username is reserved' }) };
   }
 
   try {
@@ -84,7 +81,7 @@ async function handleRequest(event: {
       .maybeSingle();
 
     if (existing?.username === username) {
-      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ username }) };
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ username }) };
     }
 
     // Check for collision before attempting the upsert
@@ -96,7 +93,7 @@ async function handleRequest(event: {
       .maybeSingle();
 
     if (conflict) {
-      return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username is already taken' }) };
+      return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'Username is already taken' }) };
     }
 
     // Upsert: insert or update the user's username row
@@ -109,16 +106,16 @@ async function handleRequest(event: {
 
     if (upsertError) {
       if (upsertError.code === '23505') {
-        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Username is already taken' }) };
+        return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'Username is already taken' }) };
       }
       console.error('[me-username] Error updating username:', upsertError.message);
-      return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to update username' }) };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update username' }) };
     }
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ username }) };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ username }) };
   } catch (error) {
     console.error('[me-username] Error:', error);
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
   }
 }
 

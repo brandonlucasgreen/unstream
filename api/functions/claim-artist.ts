@@ -13,6 +13,7 @@ import { escapeHtml } from '../shared/html';
 import { safeFetch } from './safe-fetch';
 import { websiteMatchesKnownLink } from './claim-verification';
 import { sendAdminPush } from './admin-push';
+import { buildAccountCorsHeaders } from './account-cors';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -283,13 +284,6 @@ async function scrapeAvatarFromPlatform(platform: string, pageUrl: string): Prom
   }
 }
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 // How long a claim in progress holds the artist against someone else starting one.
 const PENDING_CLAIM_HOLD_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -324,11 +318,12 @@ function siteName(websiteUrl: string): string {
  */
 async function queueClaimForReview(
   client: SupabaseClient,
-  claim: { artistId: string; artistName: string; slug: string; userId: string; email: string; websiteUrl: string }
+  claim: { artistId: string; artistName: string; slug: string; userId: string; email: string; websiteUrl: string },
+  corsHeaders: Record<string, string>
 ) {
   const pendingResponse = {
     statusCode: 200,
-    headers: CORS_HEADERS,
+    headers: corsHeaders,
     body: JSON.stringify({
       verified: false,
       pendingReview: true,
@@ -357,7 +352,7 @@ async function queueClaimForReview(
     console.error('[Claim] Failed to queue claim for review:', error);
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'We couldn\'t submit your claim for review. Please try again.' }),
     };
   }
@@ -379,20 +374,27 @@ async function handleRequest(event: {
   headers: Record<string, string>;
   body: string | null;
 }) {
+  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
+  // (account-cors.ts says why).
+  const corsHeaders = buildAccountCorsHeaders(
+    event.headers['origin'] || event.headers['Origin'],
+    'POST, OPTIONS',
+  );
+
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
   // Rate limit: strict tier (scraping endpoint)
   const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
+  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
   if (rl.limited) return rl.response;
 
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -401,7 +403,7 @@ async function handleRequest(event: {
   if (!client) {
     return {
       statusCode: 500,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Service not configured' }),
     };
   }
@@ -412,7 +414,7 @@ async function handleRequest(event: {
   if (!authUser) {
     return {
       statusCode: 401,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Authentication required' }),
     };
   }
@@ -424,7 +426,7 @@ async function handleRequest(event: {
   } catch {
     return {
       statusCode: 400,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Invalid JSON' }),
     };
   }
@@ -436,7 +438,7 @@ async function handleRequest(event: {
     if (!slug || !websiteUrl) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'slug and websiteUrl are required' }),
       };
     }
@@ -446,7 +448,7 @@ async function handleRequest(event: {
     if (!urlSafety.safe) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: urlSafety.reason || 'Invalid website URL' }),
       };
     }
@@ -461,7 +463,7 @@ async function handleRequest(event: {
     if (findError || !artist) {
       return {
         statusCode: 404,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Artist not found' }),
       };
     }
@@ -476,7 +478,7 @@ async function handleRequest(event: {
     if (existingProfile && existingProfile.verified_at && existingProfile.user_id !== userId) {
       return {
         statusCode: 409,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'This artist has already been claimed' }),
       };
     }
@@ -492,7 +494,7 @@ async function handleRequest(event: {
     ) {
       return {
         statusCode: 409,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           error: 'Someone else started claiming this artist in the last few days. If this is you, use "Request manual review" and we\'ll sort it out.',
         }),
@@ -510,7 +512,7 @@ async function handleRequest(event: {
       // Already verified — don't allow re-starting the claim flow
       return {
         statusCode: 409,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'This artist profile is already verified. You can edit it from your dashboard.', alreadyVerified: true }),
       };
     }
@@ -541,7 +543,7 @@ async function handleRequest(event: {
       console.error('[Claim] Failed to create profile:', upsertError);
       return {
         statusCode: 500,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: `Failed to start claim: ${upsertError.message}` }),
       };
     }
@@ -550,7 +552,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         verifyUrl,
         message: `Add a link to ${verifyUrl} on your website, then verify.`,
@@ -565,7 +567,7 @@ async function handleRequest(event: {
     if (!slug) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'slug is required' }),
       };
     }
@@ -580,7 +582,7 @@ async function handleRequest(event: {
     if (!artist) {
       return {
         statusCode: 404,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Artist not found' }),
       };
     }
@@ -595,7 +597,7 @@ async function handleRequest(event: {
     if (!profile) {
       return {
         statusCode: 404,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'No pending claim found. Start the claim flow first.' }),
       };
     }
@@ -603,7 +605,7 @@ async function handleRequest(event: {
     if (profile.verified_at) {
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ verified: true, message: 'Already verified' }),
       };
     }
@@ -614,7 +616,7 @@ async function handleRequest(event: {
     if (!scrapeResult) {
       return {
         statusCode: 422,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           verified: false,
           error: scrapeError?.message || "We couldn't reach your website. Make sure the URL is correct and publicly accessible.",
@@ -640,7 +642,7 @@ async function handleRequest(event: {
       console.log(`[Claim] Website ${profile.website_url} does not reference artist "${artist.name}"`);
       return {
         statusCode: 422,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           verified: false,
           error: `This website doesn't appear to belong to ${artist.name}. The page must mention the artist name in its content, title, or description.`,
@@ -678,7 +680,7 @@ async function handleRequest(event: {
       });
       return {
         statusCode: 422,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({
           verified: false,
           error: `We found your website but couldn't find a link to unstream.stream on it. Add a link to https://unstream.stream/a/${slug} and try again.`,
@@ -701,7 +703,7 @@ async function handleRequest(event: {
         userId,
         email: authUser.email,
         websiteUrl: profile.website_url,
-      });
+      }, corsHeaders);
     }
 
     // Verification passed! Discover platform links from the website.
@@ -717,7 +719,7 @@ async function handleRequest(event: {
       console.error('[Claim] Failed to set verified_at:', verifyUpdateError);
       return {
         statusCode: 500,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Verification passed but we couldn\'t update your profile. Please try again.' }),
       };
     }
@@ -808,7 +810,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         verified: true,
         discoveredLinks: discoveredLinks.length,
@@ -826,7 +828,7 @@ async function handleRequest(event: {
     if (!platform || !avatarPageUrl) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'platform and url are required' }),
       };
     }
@@ -835,14 +837,14 @@ async function handleRequest(event: {
     if (!imageUrl) {
       return {
         statusCode: 422,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Could not find a profile photo on that page' }),
       };
     }
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({ imageUrl }),
     };
   }
@@ -856,7 +858,7 @@ async function handleRequest(event: {
     if (!slug || !message || message.trim().length === 0) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'slug and message are required' }),
       };
     }
@@ -864,7 +866,7 @@ async function handleRequest(event: {
     if (message.length > 5000) {
       return {
         statusCode: 400,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Message is too long (max 5000 characters)' }),
       };
     }
@@ -879,7 +881,7 @@ async function handleRequest(event: {
     if (findError || !artist) {
       return {
         statusCode: 404,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Artist not found' }),
       };
     }
@@ -894,7 +896,7 @@ async function handleRequest(event: {
     if (existingProfile?.verified_at && existingProfile.user_id !== userId) {
       return {
         statusCode: 409,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'This artist has already been claimed' }),
       };
     }
@@ -911,7 +913,7 @@ async function handleRequest(event: {
     if (existingRequest) {
       return {
         statusCode: 409,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'You already have a pending verification request for this artist.' }),
       };
     }
@@ -932,7 +934,7 @@ async function handleRequest(event: {
       console.error('[Claim] Failed to create verification request:', insertError);
       return {
         statusCode: 500,
-        headers: CORS_HEADERS,
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Failed to submit verification request' }),
       };
     }
@@ -946,7 +948,7 @@ async function handleRequest(event: {
 
     return {
       statusCode: 200,
-      headers: CORS_HEADERS,
+      headers: corsHeaders,
       body: JSON.stringify({
         submitted: true,
         message: 'Your verification request has been submitted. We\'ll review it within a few days.',
@@ -956,7 +958,7 @@ async function handleRequest(event: {
 
   return {
     statusCode: 400,
-    headers: CORS_HEADERS,
+    headers: corsHeaders,
     body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", "fetch-avatar", or "request-manual-review".' }),
   };
 }
