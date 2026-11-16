@@ -15,6 +15,13 @@ export async function fetchWithTimeout(url: string, options: RequestInit = {}, t
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/** The name and message of something caught, which TypeScript only knows as `unknown`. A fetch
+ *  that timed out is an Error named 'AbortError'. */
+export function describeError(error: unknown): { name: string; message: string } {
+  if (error instanceof Error) return { name: error.name, message: error.message };
+  return { name: '', message: String(error) };
+}
+
 export function normalizeForComparison(str: string): string {
   return str.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -52,7 +59,7 @@ export function parseReleaseDate(dateStr: string | undefined): Date | undefined 
   }
 
   // MM/DD/YYYY format (assume US)
-  const slashDate = dateStr.match(/(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  const slashDate = dateStr.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
   if (slashDate) {
     const [, first, second, year] = slashDate;
     return new Date(parseInt(year), parseInt(first) - 1, parseInt(second));

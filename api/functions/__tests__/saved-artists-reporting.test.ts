@@ -40,6 +40,7 @@ vi.mock('../../lib/sentry', () => ({
 }));
 
 import { handler } from '../saved-artists';
+import { answered } from './answered';
 
 /** A Supabase query chain that resolves to `result` however far it is chained. */
 function query(result: unknown) {
@@ -101,7 +102,7 @@ describe('saved-artists failure reporting', () => {
 
   describe('save: a rejected identifier', () => {
     it('reports the artists-table UUID the React artist page used to send', async () => {
-      const res = await handler(post({ artistId: '550e8400-e29b-41d4-a716-446655440000', name: 'Kid Lightbulbs' }));
+      const res = await answered(handler(post({ artistId: '550e8400-e29b-41d4-a716-446655440000', name: 'Kid Lightbulbs' })));
 
       expect(res.statusCode).toBe(400);
       expect(JSON.parse(res.body).error).toBe('artistId must be an artist slug, not an id');
@@ -111,14 +112,14 @@ describe('saved-artists failure reporting', () => {
     });
 
     it('reports a slug that cannot be one', async () => {
-      const res = await handler(post({ artistId: '<script>alert(1)</script>' }));
+      const res = await answered(handler(post({ artistId: '<script>alert(1)</script>' })));
 
       expect(res.statusCode).toBe(400);
       expect(reportedReason()).toBe('save-invalid-slug-format');
     });
 
     it('reports a missing artistId', async () => {
-      const res = await handler(post({ name: 'Kid Lightbulbs' }));
+      const res = await answered(handler(post({ name: 'Kid Lightbulbs' })));
 
       expect(res.statusCode).toBe(400);
       expect(reportedReason()).toBe('save-missing-artist-id');
@@ -145,7 +146,7 @@ describe('saved-artists failure reporting', () => {
       'sopor-aeternus-the-ensemble-of-shadows',
       'nameonly-explosionsinthesky-1785600000000',
     ])('saves %s without reporting anything', async slug => {
-      const res = await handler(post({ artistId: slug, name: 'Some Artist' }));
+      const res = await answered(handler(post({ artistId: slug, name: 'Some Artist' })));
 
       expect(res.statusCode).toBe(200);
       expect(mocks.mockCaptureMessage).not.toHaveBeenCalled();
@@ -160,7 +161,7 @@ describe('saved-artists failure reporting', () => {
         return query({ data: null, error: { message: 'permission denied for table saved_artists', code: '42501' } });
       });
 
-      const res = await handler(post({ artistId: 'radiohead' }));
+      const res = await answered(handler(post({ artistId: 'radiohead' })));
 
       expect(res.statusCode).toBe(500);
       expect(reportedReason()).toBe('save-upsert-failed');
@@ -173,7 +174,7 @@ describe('saved-artists failure reporting', () => {
         throw new Error('connection reset');
       });
 
-      const res = await handler(post({ artistId: 'radiohead' }));
+      const res = await answered(handler(post({ artistId: 'radiohead' })));
 
       expect(res.statusCode).toBe(500);
       expect(mocks.mockCaptureException).toHaveBeenCalled();
@@ -187,21 +188,21 @@ describe('saved-artists failure reporting', () => {
     // Remove used to validate nothing, so a UUID matched no rows and still answered 200 —
     // a success that had done nothing at all.
     it('rejects and reports a UUID instead of answering 200', async () => {
-      const res = await handler(post({ action: 'remove', artistId: '550e8400-e29b-41d4-a716-446655440000' }));
+      const res = await answered(handler(post({ action: 'remove', artistId: '550e8400-e29b-41d4-a716-446655440000' })));
 
       expect(res.statusCode).toBe(400);
       expect(reportedReason()).toBe('remove-uuid-not-slug');
     });
 
     it('reports a missing artistId', async () => {
-      const res = await handler(post({ action: 'remove' }));
+      const res = await answered(handler(post({ action: 'remove' })));
 
       expect(res.statusCode).toBe(400);
       expect(reportedReason()).toBe('remove-missing-artist-id');
     });
 
     it('still removes a real slug without reporting', async () => {
-      const res = await handler(post({ action: 'remove', artistId: 'explosions-in-the-sky' }));
+      const res = await answered(handler(post({ action: 'remove', artistId: 'explosions-in-the-sky' })));
 
       expect(res.statusCode).toBe(200);
       expect(mocks.mockCaptureMessage).not.toHaveBeenCalled();
@@ -213,7 +214,7 @@ describe('saved-artists failure reporting', () => {
         return query({ data: null, error: { message: 'deadlock detected', code: '40P01' } });
       });
 
-      const res = await handler(post({ action: 'remove', artistId: 'radiohead' }));
+      const res = await answered(handler(post({ action: 'remove', artistId: 'radiohead' })));
 
       expect(res.statusCode).toBe(500);
       expect(reportedReason()).toBe('remove-update-failed');
@@ -234,7 +235,7 @@ describe('saved-artists failure reporting', () => {
     it('sends nothing when the reason is already deduped', async () => {
       mocks.mockCheckSentryDedup.mockResolvedValue(false);
 
-      const res = await handler(post({ artistId: '550e8400-e29b-41d4-a716-446655440000' }));
+      const res = await answered(handler(post({ artistId: '550e8400-e29b-41d4-a716-446655440000' })));
 
       // Still refused — dedup silences the report, never the validation.
       expect(res.statusCode).toBe(400);
@@ -244,7 +245,7 @@ describe('saved-artists failure reporting', () => {
     it('does not report an expired session as a failure', async () => {
       mocks.mockAuthenticateBearerFast.mockResolvedValue(null);
 
-      const res = await handler(post({ artistId: 'radiohead' }));
+      const res = await answered(handler(post({ artistId: 'radiohead' })));
 
       expect(res.statusCode).toBe(401);
       expect(mocks.mockCaptureMessage).not.toHaveBeenCalled();

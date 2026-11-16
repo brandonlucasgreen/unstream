@@ -4,7 +4,8 @@ import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { sources } from '../services/sources';
 
-import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { TabSkeleton } from './ArtistSettingsLayout';
+import { useReportArtistName } from '../hooks/useReportArtistName';
 import { SortableList } from '../components/SortableList';
 import { AVATAR_PLATFORMS } from '../components/ClaimPageUtils';
 import { DEFAULT_SECTION_ORDER, normalizeSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';

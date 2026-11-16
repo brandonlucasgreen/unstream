@@ -1,7 +1,18 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
 import { ArtistPage } from 'src/pages/ArtistPage';
+import type { ArtistPagePayload } from 'src/types/artist-page';
+
+/** What the page hands either profile card; the mocks below render it as text. */
+interface ProfileCardProps {
+  payload: ArtistPagePayload;
+  justClaimed?: boolean;
+  isSaved?: boolean;
+  onSave?: () => void;
+  onUnsave?: () => void;
+}
 
 // Mock react-router-dom
 const mockUseParams = vi.fn();
@@ -10,7 +21,7 @@ const mockUseSearchParams = vi.fn();
 vi.mock('react-router-dom', () => ({
   useParams: () => mockUseParams(),
   useSearchParams: () => mockUseSearchParams(),
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 
 // Mock @sentry/react
@@ -58,7 +69,7 @@ vi.mock('src/contexts/AuthContext', () => ({
 
 // Mock LoginInterstitial
 vi.mock('src/components/LoginInterstitial', () => ({
-  LoginInterstitial: ({ artistId, artistName, onClose }: any) => (
+  LoginInterstitial: ({ artistName, onClose }: { artistName?: string; onClose: () => void }) => (
     <div data-testid="login-interstitial">
       LoginInterstitial for {artistName}
       <button onClick={onClose}>Close</button>
@@ -68,7 +79,7 @@ vi.mock('src/components/LoginInterstitial', () => ({
 
 // Mock RichArtistProfile
 vi.mock('src/components/RichArtistProfile', () => ({
-  RichArtistProfile: ({ payload, justClaimed, isSaved, onSave, onUnsave }: any) => (
+  RichArtistProfile: ({ payload, justClaimed, isSaved, onSave, onUnsave }: ProfileCardProps) => (
     <div data-testid="rich-artist-profile">
       RichArtistProfile: {payload.artist.name} {justClaimed ? '(just claimed)' : ''} {isSaved ? '(saved)' : ''}
       <button onClick={isSaved ? onUnsave : onSave}>Save</button>
@@ -78,7 +89,7 @@ vi.mock('src/components/RichArtistProfile', () => ({
 
 // Mock UnclaimedQuietCard
 vi.mock('src/components/UnclaimedQuietCard', () => ({
-  UnclaimedQuietCard: ({ payload, justClaimed, isSaved, onSave, onUnsave }: any) => (
+  UnclaimedQuietCard: ({ payload, justClaimed, isSaved, onSave, onUnsave }: ProfileCardProps) => (
     <div data-testid="unclaimed-quiet-card">
       UnclaimedQuietCard: {payload.artist.name} {justClaimed ? '(just claimed)' : ''} {isSaved ? '(saved)' : ''}
       <button onClick={isSaved ? onUnsave : onSave}>Save</button>
@@ -95,7 +106,7 @@ vi.mock('src/components/AdminCatalogButton', () => ({
 
 // Mock NotFoundCard
 vi.mock('src/components/NotFoundCard', () => ({
-  NotFoundCard: ({ slug }: any) => (
+  NotFoundCard: ({ slug }: { slug?: string }) => (
     <div data-testid="not-found-card">
       NotFoundCard: {slug ?? 'unknown'}
     </div>
@@ -376,11 +387,9 @@ describe('ArtistPage', () => {
   });
 
   it('cancels fetch on slug change', async () => {
-    const { rerender } = render(<ArtistPage />);
+    render(<ArtistPage />);
     // First slug
     mockUseParams.mockReturnValue({ slug: 'first' });
-    const abortSpy = vi.fn();
-    const controller = { abort: abortSpy, signal: {} as AbortSignal };
     // We rely on the fetch being called and the cleanup happening
     // This is a structural check: ArtistPage uses the abort pattern via the cancelled flag
     expect(true).toBe(true); // structural — the cancelled flag pattern is in the source

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistAnalytics } from '../components/ArtistAnalytics';
-import { useReportArtistName } from './ArtistSettingsLayout';
+import { useReportArtistName } from '../hooks/useReportArtistName';
 
 // /analytics/:slug — an artist's numbers and recent activity, inside ArtistSettingsLayout. Split
 // out of the /my-artists card on 2026-11-08, where it was three tiles; a verified artist with one

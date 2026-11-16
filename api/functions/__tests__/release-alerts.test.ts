@@ -32,13 +32,14 @@ vi.mock('../db', () => ({
 }));
 
 import { handler } from '../check-releases';
+import { answered } from './answered';
 
 function post(body: unknown) {
-  return handler({
+  return answered(handler({
     httpMethod: 'POST',
     headers: { 'x-nf-client-connection-ip': '1.2.3.4' },
     body: JSON.stringify(body),
-  });
+  }));
 }
 
 async function check(body: Record<string, unknown> = {}) {

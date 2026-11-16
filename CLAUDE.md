@@ -126,7 +126,7 @@ Vitest, in three places:
 - `apps/web/tests/integration/` — search accuracy against live APIs (`tests/fixtures/expected-results.json`). Separate; not in CI.
 - `api/functions/__tests__/` — function tests (cache behavior, probe cache coverage, XSS defense, the `me-*` endpoints). In CI via `npm run test:api`.
 
-`npm run verify` runs the CI gate locally. `npm run lint` is *not* in it: ESLint reports ~67 pre-existing errors (mostly `any` and unused vars in `tests/unit/` and the `apps/web/server/` shim, plus ~15 in `src/`), so enforcing it would fail every PR for unrelated reasons — worth clearing separately, advisory until then.
+`npm run verify` runs the CI gate locally. `npm run lint` is *not* in it yet. The 2026-11-16 cleanup took ESLint from 90 errors to 14, all in `apps/web/src/` and all React Compiler rules: 13 `react-hooks/set-state-in-effect` and one `react-hooks/immutability` (`ArtistEditPage`). Fixing those changes when a component renders or what it holds in state, so each needs a look in a browser, not a mechanical edit. Until they're cleared lint stays advisory: run it after touching `apps/web`, don't add to the 14, and when it exits 0 add it to `verify`. Two habits keep the rest clean: a component file exports only components (helpers go in a `<Component>Utils.ts` beside it, like `ResultCardUtils.ts`; hooks in `src/hooks/`), and an `eslint-disable` goes on the one line it excuses, with the reason on that line.
 
 The root `vitest.config.ts` covers both trees so `npx vitest` works from the repo root; `apps/web/vitest.config.ts` covers the web tree.
 

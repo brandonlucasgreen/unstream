@@ -4,10 +4,11 @@
 // tip pages' "How tipping works" link (UNS-219) — before this, the FAQ had no anchors at all, so a
 // hash link couldn't land on an answer.
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, cleanup } from '@testing-library/react';
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 vi.mock('src/components/Header', () => ({ Header: () => null }));
 vi.mock('src/components/Footer', () => ({ Footer: () => null }));

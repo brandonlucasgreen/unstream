@@ -1,70 +1,8 @@
 import { parse } from 'node-html-parser';
-import type { LatestRelease, PlatformResult } from '../shared-types';
-import { fetchWithTimeout, normalizeForComparison } from '../shared-utils';
+import type { LatestRelease } from '../shared-types';
+import { describeError, fetchWithTimeout, normalizeForComparison } from '../shared-utils';
 
 const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36';
-
-// Search Bandcamp by scraping search results page (PRIMARY SOURCE)
-export async function searchBandcamp(query: string): Promise<PlatformResult[]> {
-  const results: PlatformResult[] = [];
-  const searchUrl = `https://bandcamp.com/search?q=${encodeURIComponent(query)}`;
-
-  try {
-    const response = await fetchWithTimeout(searchUrl, {
-      headers: { 'User-Agent': USER_AGENT },
-    }, 5000);
-
-    if (!response.ok) {
-      console.error('Bandcamp search failed:', response.status);
-      return results;
-    }
-
-    const html = await response.text();
-    const root = parse(html);
-
-    const resultItems = root.querySelectorAll('.searchresult');
-
-    for (let i = 0; i < Math.min(10, resultItems.length); i++) {
-      const item = resultItems[i];
-      const resultType = item.querySelector('.result-info .itemtype')?.textContent?.trim().toLowerCase();
-      const heading = item.querySelector('.result-info .heading a');
-      const name = heading?.textContent?.trim();
-      const url = heading?.getAttribute('href')?.split('?')[0];
-
-      const subhead = item.querySelector('.result-info .subhead')?.textContent?.trim();
-      let artist: string | undefined;
-      if (subhead && subhead.startsWith('by ')) {
-        artist = subhead.substring(3).trim();
-      }
-
-      const img = item.querySelector('.art img');
-      const imageUrl = img?.getAttribute('src');
-
-      if (name && url) {
-        let type: 'artist' | 'album' | 'track' = 'artist';
-        if (resultType === 'album') type = 'album';
-        else if (resultType === 'track') type = 'track';
-
-        results.push({
-          sourceId: 'bandcamp',
-          name,
-          artist,
-          type,
-          url,
-          imageUrl: imageUrl || undefined,
-        });
-      }
-    }
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      console.log('Bandcamp search timed out');
-    } else {
-      console.error('Bandcamp search error:', error.message);
-    }
-  }
-
-  return results;
-}
 
 // Fetch latest release from a Bandcamp artist page, then get release date from album page.
 // Uses /music endpoint to get full discography (base URL may redirect to a single release).
@@ -126,9 +64,10 @@ export async function getBandcampLatestRelease(artistUrl: string): Promise<Lates
       imageUrl: imageUrl || undefined,
       releaseDate,
     };
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('Bandcamp latest release fetch error:', error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    if (name !== 'AbortError') {
+      console.error('Bandcamp latest release fetch error:', message);
     }
     return undefined;
   }
@@ -262,8 +201,9 @@ export async function getBandcampEmbed(url: string): Promise<{ embedUrl: string;
       embedUrl: `https://bandcamp.com/EmbeddedPlayer/${itemType}=${itemId}/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/`,
       title,
     };
-  } catch (error: any) {
-    console.error('Bandcamp embed error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('Bandcamp embed error:', message);
     return null;
   }
 }

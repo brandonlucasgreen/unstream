@@ -1,5 +1,5 @@
 import type { SocialPlatform, SocialLink } from './shared-types';
-import { fetchWithTimeout } from './shared-utils';
+import { describeError, fetchWithTimeout } from './shared-utils';
 
 // Parse a URL to determine which social platform it belongs to
 export function parseSocialUrl(url: string): SocialLink | null {
@@ -49,8 +49,9 @@ export async function fetchDiscogsSocialLinks(discogsUrl: string): Promise<Socia
         socialLinks.push(socialLink);
       }
     }
-  } catch (error: any) {
-    console.error('Discogs fetch error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('Discogs fetch error:', message);
   }
 
   return socialLinks;
@@ -85,8 +86,9 @@ export async function fetchOfficialSiteSocialLinks(officialUrl: string): Promise
         socialLinks.push(socialLink);
       }
     }
-  } catch (error: any) {
-    console.error('Official site fetch error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('Official site fetch error:', message);
   }
 
   return socialLinks;

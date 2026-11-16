@@ -3,6 +3,7 @@
 // is saved by its Checkout Session id, waiting out a webhook that hasn't landed yet; and every fan
 // is told where the receipt comes from and who refunds.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 
 const SEARCH = '?artist=kid-lightbulbs&session_id=cs_test_a1B2c3D4e5F6g7H8';
@@ -10,7 +11,7 @@ const auth = vi.hoisted(() => ({ value: { session: null as null | { access_token
 const search = vi.hoisted(() => ({ value: '' }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
   useSearchParams: () => [new URLSearchParams(search.value)],
   useLocation: () => ({ pathname: '/tip/thanks', search: search.value, hash: '' }),
 }));

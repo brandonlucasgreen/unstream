@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { startsSection, type NavGroup } from './MobileNav';
+import type { NavGroup } from './MobileNav';
+import { startsSection } from './MobileNavUtils';
 
 /**
  * Desktop-only nav dropdown for a group of links (the admin pages, the account pages, and each

@@ -17,6 +17,7 @@ vi.mock('../redis', () => ({
 }));
 
 import { handler } from '../search-sources';
+import { answered } from './answered';
 
 function mockUpstreams() {
   // MusicBrainz knows nobody; every platform 404s. Enough to run the whole pipeline.
@@ -49,7 +50,7 @@ describe('search-sources enrichment=deferred', () => {
   it('skips MusicBrainz on a cache miss and tells the client enrichment is pending', async () => {
     const fetchSpy = mockUpstreams();
 
-    const response = await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    const response = await answered(handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } }));
 
     expect(response.statusCode).toBe(200);
     expect(musicBrainzCalls(fetchSpy)).toEqual([]);
@@ -59,7 +60,7 @@ describe('search-sources enrichment=deferred', () => {
   it('still fetches MusicBrainz inline when the caller did not ask to defer', async () => {
     const fetchSpy = mockUpstreams();
 
-    const response = await handler({ queryStringParameters: { query: 'zzqx test artist' } });
+    const response = await answered(handler({ queryStringParameters: { query: 'zzqx test artist' } }));
 
     expect(response.statusCode).toBe(200);
     expect(musicBrainzCalls(fetchSpy).length).toBeGreaterThan(0);
@@ -68,7 +69,7 @@ describe('search-sources enrichment=deferred', () => {
   it('reports where the time went', async () => {
     mockUpstreams();
 
-    const response = await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    const response = await answered(handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } }));
     const serverTiming = (response.headers as Record<string, string>)['Server-Timing'];
 
     expect(serverTiming).toMatch(/bandcamp;dur=\d+/);

@@ -1,4 +1,4 @@
-import { fetchWithTimeout, normalizeForComparison } from '../shared-utils';
+import { describeError, fetchWithTimeout, normalizeForComparison } from '../shared-utils';
 
 // Search EVEN via Algolia API (direct-to-fan marketplace)
 export async function searchEven(query: string): Promise<Map<string, string>> {
@@ -40,9 +40,10 @@ export async function searchEven(query: string): Promise<Map<string, string>> {
         results.set(normalizedName, `https://even.biz/artists/${slug}`);
       }
     }
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('EVEN search error:', error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    if (name !== 'AbortError') {
+      console.error('EVEN search error:', message);
     }
   }
 

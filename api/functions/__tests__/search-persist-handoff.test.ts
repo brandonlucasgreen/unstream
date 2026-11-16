@@ -12,7 +12,7 @@ vi.mock('../redis', () => ({
 
 const mocks = vi.hoisted(() => ({
   persistSearchResults: vi.fn(async () => {}),
-  requestSearchPersist: vi.fn(async () => 'background'),
+  requestSearchPersist: vi.fn(async (..._args: Parameters<typeof import('../request-persist').requestSearchPersist>) => 'background'),
   getArtistBySlug: vi.fn(async () => null),
   getArtistsBySlugs: vi.fn(async () => new Map()),
   findKnownArtistSlugsByName: vi.fn(async () => []),
@@ -67,7 +67,8 @@ describe('search persistence handoff', () => {
 
     const response = await search();
 
-    expect(response.headers?.['Server-Timing']).toMatch(/persist;dur=\d+;desc="inline-dispatch-failed"/);
+    const headers: Record<string, string> = response.headers ?? {};
+    expect(headers['Server-Timing']).toMatch(/persist;dur=\d+;desc="inline-dispatch-failed"/);
   });
 
   it('answers with the same results whether persistence ran in the background or inline', async () => {

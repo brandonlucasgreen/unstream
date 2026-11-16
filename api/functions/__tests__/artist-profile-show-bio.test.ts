@@ -24,6 +24,7 @@ vi.mock('../cache', () => ({ cacheDeleteByArtist: mocks.mockCacheDeleteByArtist 
 vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: vi.fn() } }));
 
 import { handler } from '../artist-profile';
+import { answered } from './answered';
 
 function single(data: unknown) {
   const chain = { select: () => chain, eq: () => chain, single: () => Promise.resolve({ data, error: null }) };
@@ -40,12 +41,12 @@ function mockTables(ownerId: string) {
 }
 
 function put(body: unknown) {
-  return handler({
+  return answered(handler({
     httpMethod: 'PUT',
     headers: { authorization: 'Bearer valid-token' },
     queryStringParameters: null,
     body: JSON.stringify(body),
-  } as Parameters<typeof handler>[0]);
+  } as Parameters<typeof handler>[0]));
 }
 
 describe('artist-profile PUT showBio', () => {

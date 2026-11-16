@@ -43,7 +43,7 @@ function App() {
   const [isStandalone] = useState(() =>
     typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
-     (navigator as any).standalone === true)
+     (navigator as Navigator & { standalone?: boolean }).standalone === true)
   );
 
   // Load saved artists when session is available (needed for ResultCard save buttons)

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock localStorage for node environment
 const localStorageStore: Record<string, string> = {};
@@ -34,23 +34,6 @@ vi.mock('@supabase/supabase-js', () => ({
     },
   }),
 }));
-
-// Helper to create a mock session
-function createMockSession(userId = 'user-123', email = 'test@example.com') {
-  return {
-    access_token: 'mock-access-token',
-    refresh_token: 'mock-refresh-token',
-    token_type: 'bearer',
-    expires_in: 3600,
-    expires_at: Date.now() / 1000 + 3600,
-    user: {
-      id: userId,
-      email,
-      aud: 'authenticated',
-      role: 'authenticated',
-    },
-  };
-}
 
 // Helper to create a saved artist response
 function createSavedArtist(artistId: string, name: string, slug: string) {
@@ -111,7 +94,7 @@ describe('AuthContext saved artists state management', () => {
 
       // Simulate rollback logic
       const savedArtistIds = new Set<string>();
-      const savedArtists: any[] = [];
+      const savedArtists: ReturnType<typeof createSavedArtist>[] = [];
 
       // Optimistic add
       savedArtistIds.add(artistId);
@@ -131,7 +114,7 @@ describe('AuthContext saved artists state management', () => {
 
       // Simulate rollback on fetch throw
       const savedArtistIds = new Set<string>();
-      const savedArtists: any[] = [];
+      const savedArtists: ReturnType<typeof createSavedArtist>[] = [];
 
       // Optimistic add
       savedArtistIds.add(artistId);

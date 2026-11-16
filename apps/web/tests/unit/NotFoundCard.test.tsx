@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { NotFoundCard } from 'src/components/NotFoundCard';
 
@@ -10,7 +11,7 @@ vi.mock('src/components/MacAppPromo', () => ({
 
 // Mock Link from react-router-dom
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 
 describe('NotFoundCard', () => {
