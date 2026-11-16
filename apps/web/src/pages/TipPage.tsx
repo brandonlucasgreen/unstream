@@ -6,6 +6,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { TipForm } from '../components/TipForm';
 import { getTipPage, TipsApiError, type TipPageData } from '../services/tips';
+import { DEFAULT_PAGE_TITLE } from '../data/seo';
 
 // The page renders BEFORE the API answers: the form itself (amount presets from the bundled
 // constants, the cover-the-fees checkbox, the FAQ note) is static copy and mounts immediately, and
@@ -61,7 +62,7 @@ export function TipPage() {
 
   useEffect(() => {
     if (data?.artist.name) document.title = `Tip ${data.artist.name} | Unstream`;
-    return () => { document.title = 'Unstream - Support artists directly'; };
+    return () => { document.title = DEFAULT_PAGE_TITLE; };
   }, [data?.artist.name]);
 
   return (

@@ -23,11 +23,6 @@ import {
   SyntaxKind,
   Node,
   type SourceFile,
-  type JsxText,
-  type StringLiteral,
-  type TemplateExpression,
-  type NoSubstitutionTemplateLiteral,
-  type ObjectLiteralExpression,
 } from "ts-morph";
 import { writeFileSync } from "node:fs";
 import { join, relative, dirname } from "node:path";
@@ -49,7 +44,6 @@ const UI_PROPS = new Set([
 
 const EXCLUDED_DIRS = [join(WEB_SRC, "data")];
 const SKIP_URL_RE = /^(https?:\/\/|\/|\.\/|\.\.|#|\{)/;
-const SKIP_CLASSISH_RE = /^[\w\s\-\[\]\/:.%#]+$/; // crude CSS/class/selector-ish
 const CSV_HEADER = "file,line,kind,text\n";
 
 function csvEscape(text: string): string {

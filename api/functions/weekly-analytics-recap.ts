@@ -10,7 +10,7 @@
 import { getClient } from './db';
 import { isInternalRequest } from './middleware';
 import { sendNotificationOnce, filterByPreference, subscriptionFooter, SUBSCRIPTION_EMAIL_HEADERS } from './notifications';
-import { escapeHtml } from '../lib/html';
+import { escapeHtml } from '../shared/html';
 import { Sentry, withSentry } from '../lib/sentry';
 
 const RECAP_WINDOW_DAYS = 7;

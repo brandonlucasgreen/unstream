@@ -5,7 +5,7 @@ import { getClient } from './db';
 import { authenticateAdmin, buildCorsHeaders } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
 import { sendNotificationOnce } from './notifications';
-import { escapeHtml } from '../lib/html';
+import { escapeHtml } from '../shared/html';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

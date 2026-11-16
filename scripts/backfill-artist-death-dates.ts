@@ -57,7 +57,7 @@ async function sparql(query: string): Promise<Record<string, { value: string }>[
       },
       body: new URLSearchParams({ query }),
     });
-    if (res.ok) return (await res.json()).results.bindings;
+    if (res.ok) return ((await res.json()) as { results: { bindings: Record<string, { value: string }>[] } }).results.bindings;
     if (res.status !== 429 && res.status !== 503) {
       throw new Error(`Wikidata HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
     }

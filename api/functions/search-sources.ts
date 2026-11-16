@@ -7,7 +7,7 @@ import { requestSearchPersist } from './request-persist';
 import { findStoredArtists } from './stored-artists';
 import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
-import { safeFetch } from './safe-fetch';
+import { FETCH_USER_AGENT, safeFetch } from './safe-fetch';
 import { getTipsLiveSlugs } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
 import { parseMirloArtistSearch } from './search-parsers';
@@ -160,6 +160,20 @@ async function probeBandcampForCandidates(
   return results;
 }
 
+/**
+ * Whether a link scraped from a Bandcamp page may be fetched: it has to stay on a host that page
+ * was served from (the one asked for, or the custom domain it redirected to) or on bandcamp.com.
+ */
+export function isBandcampPageLink(link: string, ...pageUrls: string[]): boolean {
+  try {
+    const host = new URL(link).host;
+    if (bandcampSubdomainOf(link) !== null) return true;
+    return pageUrls.some(page => page !== '' && new URL(page).host === host);
+  } catch {
+    return false;
+  }
+}
+
 // Fetch latest release from a Bandcamp artist page, then get release date from album page
 // Uses /music endpoint to get full discography (base URL may redirect to a single release)
 async function getBandcampLatestRelease(artistUrl: string): Promise<LatestRelease | undefined> {
@@ -168,13 +182,11 @@ async function getBandcampLatestRelease(artistUrl: string): Promise<LatestReleas
     const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
     const musicUrl = `${baseUrl}/music`;
 
-    const response = await fetchWithTimeout(musicUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
+    // safeFetch, not a plain fetch: the URL can be a MusicBrainz relation or a stored link, and
+    // either may point anywhere. It sends the same User-Agent the plain fetch did.
+    const response = await safeFetch(musicUrl, 3000);
 
-    if (!response.ok) return undefined;
+    if (!response || !response.ok) return undefined;
 
     const html = await response.text();
     const root = parse(html);
@@ -201,16 +213,16 @@ async function getBandcampLatestRelease(artistUrl: string): Promise<LatestReleas
     // Build full URL if relative
     const fullUrl = href.startsWith('http') ? href : new URL(href, artistUrl).toString();
 
-    // Fetch the album/track page to get release date
+    // Fetch the album/track page to get release date. The link came out of fetched markup, so it
+    // is only followed where Bandcamp's own pages point: the page's host or bandcamp.com itself
+    // (a label's grid links to its artists' subdomains). Anything else keeps its release, undated.
     let releaseDate: string | undefined;
     try {
-      const albumResponse = await fetchWithTimeout(fullUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        },
-      }, 3000);
+      const albumResponse = isBandcampPageLink(fullUrl, musicUrl, response.url)
+        ? await safeFetch(fullUrl, 3000)
+        : null;
 
-      if (albumResponse.ok) {
+      if (albumResponse?.ok) {
         const albumHtml = await albumResponse.text();
         // Look for release date in album-info or meta tags
         // Bandcamp format: "released December 6, 2024" or in JSON-LD
@@ -246,13 +258,9 @@ async function getBandcampReleaseTitles(artistUrl: string): Promise<string[]> {
     const baseUrl = artistUrl.replace(/\/(music|album|track).*$/, '');
     const musicUrl = `${baseUrl}/music`;
 
-    const response = await fetchWithTimeout(musicUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    }, 3000);
+    const response = await safeFetch(musicUrl, 3000);
 
-    if (!response.ok) return [];
+    if (!response || !response.ok) return [];
 
     const html = await response.text();
     const root = parse(html);
@@ -284,7 +292,7 @@ async function searchBandwagon(query: string): Promise<Map<string, NameOnlyEntry
   try {
     const response = await fetchWithTimeout(searchUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'User-Agent': FETCH_USER_AGENT,
       },
     }, 3000);
 
@@ -482,7 +490,7 @@ async function getJamcoopDirectory(): Promise<Map<string, { name: string; url: s
   try {
     const response = await fetchWithTimeout('https://jam.coop/artists', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'User-Agent': FETCH_USER_AGENT,
       },
     }, 5000);
 
@@ -565,7 +573,7 @@ async function searchPatreon(query: string, prefetched?: Promise<PrefetchedCache
         const searchUrl = `https://www.patreon.com/api/search?q=${encodeURIComponent(query)}`;
         const response = await fetchWithTimeout(searchUrl, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'User-Agent': FETCH_USER_AGENT,
             'Accept': 'application/json',
           },
         }, 5000);
@@ -668,7 +676,7 @@ async function searchBeatport(query: string, prefetched?: Promise<PrefetchedCach
         const searchUrl = `https://www.beatport.com/search?q=${encodeURIComponent(query)}`;
         const response = await fetchWithTimeout(searchUrl, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'User-Agent': FETCH_USER_AGENT,
           },
         }, 5000);
 

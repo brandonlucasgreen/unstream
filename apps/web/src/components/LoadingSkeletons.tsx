@@ -87,17 +87,6 @@ export function ArticleListSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
-/** Long-form article body. */
-export function ArticleSkeleton() {
-  return (
-    <div className="space-y-6">
-      <SkeletonText lines={4} />
-      <Skeleton className="h-5 w-1/3" />
-      <SkeletonText lines={5} />
-      <SkeletonText lines={3} />
-    </div>
-  );
-}
 
 /** Stacked form sections — settings, profile editing, admin queues. */
 export function FormSkeleton({ sections = 2, fields = 3 }: { sections?: number; fields?: number }) {

@@ -27,6 +27,7 @@ import {
   type ArtistForCatalog,
   type PersistedRelease,
 } from './db';
+import { hasCatalogueableLink } from './catalogueable-platforms';
 import { refreshDeadArtistPhoto } from './artist-photo-refresh';
 import { linkCollectionItemsForArtist } from './collection-matching';
 import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
@@ -430,15 +431,9 @@ async function catalogArtist(
     await recordCatalogOutcome(artistId, { error: 'artist not found' });
     return null;
   }
-  // Keep this list identical to CATALOGUEABLE_PLATFORMS in db.ts — the sweep picks its pool from
-  // that constant, and an artist it sweeps but this rejects is recorded as a failure.
-  if (
-    !artist.bandcampUrl &&
-    !artist.discogsUrl &&
-    !artist.faircampUrl &&
-    !artist.jamcoopUrl &&
-    !artist.mirloUrl
-  ) {
+  // The sweep picks its pool from the same list (catalogueable-platforms.ts), so an artist
+  // it sweeps is never rejected here and recorded as a failure.
+  if (!hasCatalogueableLink(artist)) {
     await recordCatalogOutcome(artistId, {
       error: 'no bandcamp, discogs, faircamp, jam.coop, or mirlo link stored',
     });

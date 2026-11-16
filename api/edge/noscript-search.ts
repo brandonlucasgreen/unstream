@@ -1,6 +1,7 @@
 import type { Context } from "../shared/edge-context.ts";
 import { PLATFORMS } from "../shared/platform-registry.ts";
 import { platformLogoSvg } from "../shared/platform-logos.ts";
+import { escapeHtml } from "../shared/html.ts";
 
 interface PlatformLink {
   sourceId: string;
@@ -39,15 +40,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   official: 'Official',
   social: 'Social',
 };
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function renderResultCard(result: SearchResult): string {
   const name = escapeHtml(result.name);

@@ -6,6 +6,7 @@ import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } f
 import { TipButton, TipLink } from './TipButton';
 import { GoalProgress } from './GoalProgress';
 import { ReleasesSection } from './ReleasesSection';
+import { getLocationText } from '../utils/artistLocation';
 
 interface RichArtistProfileProps {
   payload: ArtistPagePayload;
@@ -22,14 +23,6 @@ interface RichArtistProfileProps {
 const EmbedWidgetPanel = lazy(() =>
   import('./EmbedWidgetPanel').then((module) => ({ default: module.EmbedWidgetPanel })),
 );
-
-function getLocationText(artist: ArtistPagePayload['artist']): string {
-  const region = artist.country || artist.countryCode;
-  if (artist.city && region) return `${artist.city}, ${region}`;
-  if (artist.city) return artist.city;
-  if (region) return region;
-  return '';
-}
 
 export function RichArtistProfile({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: RichArtistProfileProps) {
   const { artist, profile, links } = payload;

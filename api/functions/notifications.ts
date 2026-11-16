@@ -10,7 +10,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { sendTransactionalEmail } from '../lib/resend';
 import { Sentry } from '../lib/sentry';
-import { escapeHtml } from '../lib/html';
+import { escapeHtml } from '../shared/html';
 import { PLATFORMS } from '../shared/platform-registry';
 import { formatReleaseDate, payoutRank } from '../shared/release-display';
 

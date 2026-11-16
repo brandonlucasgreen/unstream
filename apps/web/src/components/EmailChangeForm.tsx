@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as Sentry from '@sentry/react';
+import { EMAIL_PATTERN } from '../utils/email';
 
 interface EmailChangeFormProps {
   accessToken: string;
@@ -11,10 +12,8 @@ interface EmailChangeFormProps {
   onPendingChange: (pendingEmail: string | null) => void;
 }
 
-// Same shape as LoginPage's EMAIL_PATTERN — type="email" only validates on native form
-// submit, and the submit here is a button with an onClick-driven handler path, so the
-// explicit check is what a mistyped address actually hits.
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// type="email" only validates on native form submit, and the submit here is a button with an
+// onClick-driven handler path, so EMAIL_PATTERN is what a mistyped address actually hits.
 
 // POST /api/me/email with a new address, or DELETE to cancel the pending one.
 // The endpoint answers 202 with { pending, new_email } on request and

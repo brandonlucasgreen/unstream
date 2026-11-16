@@ -11,6 +11,7 @@ import { PageSkeleton } from '../components/PageSkeleton';
 import { FormSkeleton } from '../components/LoadingSkeletons';
 import { LegalConsent } from '../components/LegalConsent';
 import { safeNextPath } from '../utils/safeNextPath';
+import { EMAIL_PATTERN } from '../utils/email';
 import { resolveAccountHome, COLLECTION_HOME } from '../services/accountHome';
 
 type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
@@ -21,7 +22,6 @@ type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 // Supabase and comes back as a raw 400 ("Unable to validate email address: invalid
 // format") in the error box. Same shape as the server-side check in
 // api/functions/artist-auth.ts.
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INVALID_EMAIL_MESSAGE = "That email address doesn't look right. Check it and try again.";
 
 export function LoginPage() {

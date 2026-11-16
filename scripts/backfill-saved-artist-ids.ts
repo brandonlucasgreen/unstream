@@ -162,7 +162,7 @@ async function main() {
     const byName = derived ? bySlug.get(derived) : undefined;
     const aliasId = slug ? byAlias.get(slug) : undefined;
 
-    let artist: ArtistRow | undefined;
+    let artist: ArtistRow | { id: string; slug: string; name: string } | undefined;
     let rule = '';
     // A saved slug that is literally an artists.id is the strongest evidence there is — the client
     // sent the UUID instead of the slug, which ArtistPage's own comment records as a past bug.

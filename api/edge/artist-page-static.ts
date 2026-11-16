@@ -14,6 +14,7 @@ import { leadingOfferSummary, orderedSourcePlatforms, formatReleaseDate, release
 import { isSocialCrawler, isIndexingCrawler } from "../shared/crawler-detection.ts";
 import { GUESSED_SLUG_CANDIDATE_LIMIT, nameGuessPattern, pickArtistForGuessedSlug } from "../shared/guessed-slug.ts";
 import { safeEmbedStyle } from "../shared/embed-style.ts";
+import { escapeHtml } from "../shared/html.ts";
 import { MAX_OPEN_GOALS } from "../shared/tips.ts";
 import { FLAGS_HASH_KEY, TIPS_FANS_FLAG_FIELD, flagIsOn } from "../shared/tips-flag.ts";
 import {
@@ -85,10 +86,6 @@ const ALLOWED_EMBED_DOMAINS = [
 const PLATFORM_INFO: Record<string, { name: string; color: string; icon: string; category: string; payoutPercent?: string }> = {};
 for (const [id, p] of Object.entries(PLATFORMS)) {
   PLATFORM_INFO[id] = { name: p.name, color: p.color, icon: p.icon, category: p.category, ...(p.payoutPercent && { payoutPercent: p.payoutPercent }) };
-}
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**

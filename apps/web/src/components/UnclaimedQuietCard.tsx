@@ -4,6 +4,7 @@ import { analytics } from '../services/analytics';
 import { resolveSectionOrder, type PageSectionKey } from '../../../../api/shared/page-sections';
 import { SECTION_HEADINGS, resolveLinkGroups, SectionPillGroups, FollowLinks } from './ArtistLinkSections';
 import { ReleasesSection } from './ReleasesSection';
+import { getLocationText } from '../utils/artistLocation';
 
 interface UnclaimedQuietCardProps {
   payload: ArtistPagePayload;
@@ -13,14 +14,6 @@ interface UnclaimedQuietCardProps {
   onUnsave?: () => void;
   isSaved?: boolean;
   disabledSave?: boolean;
-}
-
-function getLocationText(artist: ArtistPagePayload['artist']): string {
-  const region = artist.country || artist.countryCode;
-  if (artist.city && region) return `${artist.city}, ${region}`;
-  if (artist.city) return artist.city;
-  if (region) return region;
-  return '';
 }
 
 export function UnclaimedQuietCard({ payload, slug, justClaimed, onSave, onUnsave, isSaved = false, disabledSave = false }: UnclaimedQuietCardProps) {

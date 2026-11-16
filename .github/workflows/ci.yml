@@ -41,3 +41,21 @@ jobs:
 
       - name: Web unit tests
         run: npm run test:unit
+
+  # The edge functions (api/edge/) import from URLs only Deno resolves, so the Node typecheck above
+  # can't see them, and for a long time nothing checked them at all: they render every artist and
+  # release page for crawlers, and a type error surfaced as a failed page. `deno check` does see
+  # them. A separate job so a slow esm.sh can't hold up the main gate, and with no lock file
+  # because `netlify dev` rewrites deno.lock on every run. The Deno version is pinned for the same
+  # reason the Supabase CLI is in the other workflows; bump it on purpose.
+  edge-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: "2.9.8"
+
+      - name: Typecheck edge functions
+        run: deno check --no-lock api/edge/*.ts
