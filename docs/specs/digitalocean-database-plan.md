@@ -414,7 +414,7 @@ data from hosted instead of failing.
 
 The sweep's demand gate, the frozen catalogues and the refresh cadence were all set against a
 0.5 GB shared disk budget. Revisit them **one at a time, watching the DigitalOcean graphs between
-changes**, and update the matching CLAUDE.md rationale with each. CLAUDE.md's "don't reintroduce
+changes**, and update the matching CLAUDE.md rationale with each. `api/functions/CLAUDE.md`'s "don't reintroduce
 search as a catalogue trigger" stays in force until someone deliberately re-measures and rewrites
 it.
 

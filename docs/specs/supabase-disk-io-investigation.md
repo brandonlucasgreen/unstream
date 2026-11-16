@@ -219,7 +219,7 @@ The `releases` index count matters because it multiplies everything above:
   `idx_releases_artist_chrono (artist_id, release_date, created_at)`. Postgres uses the wider
   index for any query the narrower one could serve. It is a wasted write on every insert.
 - `idx_releases_match (artist_id, release_type, match_key)` was built when identity was
-  `(release_type, match_key)`. The "Release dedup" section of `CLAUDE.md` records that type was
+  `(release_type, match_key)`. The "Release dedup" section of `api/functions/CLAUDE.md` records that type was
   removed from identity on 2026-08-29; the lookup is now by `(artist_id, match_key)` and the
   middle column only widens the index. Worth confirming its `idx_scan` before touching.
 
