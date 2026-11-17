@@ -15,7 +15,8 @@
 
 import { mediaBucketFromEnv, fitsInstagram, storeImageBytes } from './autopost-media';
 import { addAsset, listAssets, MAX_ASSETS, removeAsset, type PromoteAsset } from './promote-assets-db';
-import { authorizePromoteRequest, parseBody, type PromoteEvent } from './promote-request';
+import { authorizePromoteRequest } from './promote-request';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { Sentry, withSentry } from '../lib/sentry';
 
 /** After the browser's resize, a photo is well under this. */
@@ -29,13 +30,13 @@ function shown(assets: PromoteAsset[]) {
   };
 }
 
-async function handleRequest(event: PromoteEvent) {
-  const auth = await authorizePromoteRequest(event, ['GET', 'POST', 'DELETE']);
+async function handleRequest({ method, user, query, body }: SignedInRequest): Promise<EndpointResult> {
+  const auth = await authorizePromoteRequest(user, query);
   if ('response' in auth) return auth.response;
-  const { artist, userId, respond } = auth;
+  const { artist } = auth;
 
   try {
-    if (event.httpMethod === 'GET') return respond(200, shown(await listAssets(artist.id)));
+    if (method === 'GET') return { status: 200, body: shown(await listAssets(artist.id)) };
 
     const bucket = mediaBucketFromEnv();
     if ('missing' in bucket) {
@@ -44,24 +45,23 @@ async function handleRequest(event: PromoteEvent) {
         tags: { area: 'release-autopost', kind: 'bucket-missing' },
         extra: { missing: bucket.missing },
       });
-      return respond(503, { error: 'Uploads aren’t available right now.' });
+      return { status: 503, body: { error: 'Uploads aren’t available right now.' } };
     }
 
-    if (event.httpMethod === 'DELETE') {
-      const id = event.queryStringParameters?.id;
-      if (!id) return respond(400, { error: 'id is required' });
-      if (!(await removeAsset(bucket, artist.id, id, new Date()))) return respond(404, { error: 'That image isn’t in your library' });
-      return respond(200, shown(await listAssets(artist.id)));
+    if (method === 'DELETE') {
+      const id = query.id;
+      if (!id) return { status: 400, body: { error: 'id is required' } };
+      if (!(await removeAsset(bucket, artist.id, id, new Date()))) return { status: 404, body: { error: 'That image isn’t in your library' } };
+      return { status: 200, body: shown(await listAssets(artist.id)) };
     }
 
-    const body = parseBody(event);
-    if (!body || typeof body.data !== 'string') return respond(400, { error: 'Send the image as base64 in data' });
+    if (typeof body.data !== 'string') return { status: 400, body: { error: 'Send the image as base64 in data' } };
     const existing = await listAssets(artist.id);
-    if (existing.length >= MAX_ASSETS) return respond(400, { error: `Your library holds up to ${MAX_ASSETS} images. Remove one to add another.` });
+    if (existing.length >= MAX_ASSETS) return { status: 400, body: { error: `Your library holds up to ${MAX_ASSETS} images. Remove one to add another.` } };
 
     const bytes = new Uint8Array(Buffer.from(body.data, 'base64'));
-    if (bytes.length === 0) return respond(400, { error: 'That image is empty' });
-    if (bytes.length > MAX_UPLOAD_BYTES) return respond(413, { error: 'That image is too large. Try a smaller one.' });
+    if (bytes.length === 0) return { status: 400, body: { error: 'That image is empty' } };
+    if (bytes.length > MAX_UPLOAD_BYTES) return { status: 413, body: { error: 'That image is too large. Try a smaller one.' } };
 
     let stored;
     try {
@@ -69,12 +69,12 @@ async function handleRequest(event: PromoteEvent) {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       // The bytes themselves: say so plainly. Anything else is ours to look into.
-      if (/not a JPEG or PNG|size/.test(message)) return respond(400, { error: 'Unstream can only use JPEG and PNG images.' });
+      if (/not a JPEG or PNG|size/.test(message)) return { status: 400, body: { error: 'Unstream can only use JPEG and PNG images.' } };
       throw error;
     }
     await addAsset({
       artistId: artist.id,
-      userId,
+      userId: user.userId,
       storageKey: stored.key,
       url: stored.url,
       contentType: stored.contentType,
@@ -82,11 +82,17 @@ async function handleRequest(event: PromoteEvent) {
       height: stored.height,
       byteSize: bytes.length,
     });
-    return respond(200, shown(await listAssets(artist.id)));
+    return { status: 200, body: shown(await listAssets(artist.id)) };
   } catch (error) {
-    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `promote-assets:${event.httpMethod}` }, extra: { artistId: artist.id } });
-    return respond(500, { error: 'Something went wrong. Try again in a moment.' });
+    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `promote-assets:${method}` }, extra: { artistId: artist.id } });
+    return { status: 500, body: { error: 'Something went wrong. Try again in a moment.' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'accountWithSecondStep',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

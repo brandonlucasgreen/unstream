@@ -9,7 +9,7 @@ import { createFakeDb, type FakeDb } from './fake-supabase';
 let db: FakeDb;
 const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
-  authenticateBearerFast: vi.fn(),
+  resolveAccountRequest: vi.fn(),
   captureException: vi.fn(),
   captureMessage: vi.fn(),
   // The flag store, read the way the real one reads it: a Map standing in for the
@@ -25,10 +25,11 @@ vi.mock('../redis', () => ({
   getRedis: () => ({ hgetall: (key: string) => mocks.hgetall(key) }),
   reportRedisFailure: vi.fn(),
 }));
-vi.mock('../ratelimit', () => ({ checkRateLimit: mocks.checkRateLimit, getClientIp: () => '203.0.113.9' }));
-vi.mock('../middleware', async importOriginal => ({
-  ...(await importOriginal<typeof import('../middleware')>()),
-  authenticateBearerFast: mocks.authenticateBearerFast,
+vi.mock('../ratelimit', () => ({
+  checkRateLimit: mocks.checkRateLimit,
+  // What the endpoint wrapper asks to learn who, if anyone, is signed in.
+  resolveAccountRequest: mocks.resolveAccountRequest,
+  getClientIp: () => '203.0.113.9',
 }));
 vi.mock('../../lib/sentry', () => ({ withSentry: (handler: unknown) => handler, Sentry: { captureException: mocks.captureException, captureMessage: mocks.captureMessage } }));
 
@@ -55,7 +56,7 @@ beforeEach(() => {
   db.rpc.get_goal_progress = () => [];
   vi.resetAllMocks();
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
-  mocks.authenticateBearerFast.mockResolvedValue(null);
+  mocks.resolveAccountRequest.mockResolvedValue({ key: 'ip:203.0.113.9', user: null });
   // Tips are live for everything below except the gate tests: the fan-facing flag (tipsFans, the
   // one this surface reads) is on unless a test says otherwise, so these stay tests about tips
   // rather than about the rollout.
@@ -155,7 +156,7 @@ describe('POST — creating the payment', () => {
 
   it('attributes the tip to a signed-in fan', async () => {
     seedTippableArtist();
-    mocks.authenticateBearerFast.mockResolvedValue({ userId: 'fan-9', email: 'f@example.com' });
+    mocks.resolveAccountRequest.mockResolvedValue({ key: 'user:fan-9', user: { userId: 'fan-9', email: 'f@example.com' } });
     await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 }, { authorization: 'Bearer t' });
     expect(sentForm().get('metadata[unstream_fan_user_id]')).toBe('fan-9');
   });
@@ -164,6 +165,8 @@ describe('POST — creating the payment', () => {
     mocks.checkRateLimit.mockResolvedValue({ limited: true, response: { statusCode: 429, headers: {}, body: '' } });
     const res = await post({ artistSlug: 'kid-lightbulbs', amountCents: 500 });
     expect(res.statusCode).toBe(429);
+    // Its own bucket, not the bare address search is counted under on this same tier: a fan who
+    // has just run several searches must still be able to start a payment.
     expect(mocks.checkRateLimit).toHaveBeenCalledWith('ip:203.0.113.9', 'strict', expect.anything());
   });
 

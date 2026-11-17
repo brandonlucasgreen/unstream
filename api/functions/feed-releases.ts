@@ -23,7 +23,6 @@
 //     "well-formed but unknown" from "malformed" tells an anonymous caller more than they need.
 
 import { withSentry } from '../lib/sentry';
-import { getClientIp, checkRateLimit } from './ratelimit';
 import {
   getFeedReleasesForArtist,
   getFeedReleasesForHandle,
@@ -36,6 +35,7 @@ import { buildAtom, buildIcs, type FeedRelease } from '../shared/feed-format';
 import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
 import { PLATFORMS } from '../shared/platform-registry';
 import { decodePathSegment } from '../shared/path-segments';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 const SITE = 'https://unstream.stream';
 
@@ -44,30 +44,20 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{20,64}$/;
 
 type Format = 'ics' | 'xml';
 
-/** One response shape for every path, so callers (and tests) don't have to narrow a union. */
-interface FeedResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-}
-
 function feedHeaders(format: Format, isPrivate: boolean): Record<string, string> {
   return {
     'Content-Type':
       format === 'ics' ? 'text/calendar; charset=utf-8' : 'application/atom+xml; charset=utf-8',
     'X-Robots-Tag': 'noindex, nofollow',
     'Cache-Control': isPrivate ? 'private, no-store' : 'public, max-age=1800',
-    // A calendar client fetching cross-origin (some web clients do) needs this; the body is
-    // already public-by-token, so there is nothing further to protect with an origin check.
-    'Access-Control-Allow-Origin': '*',
   };
 }
 
-function notFound(): FeedResponse {
+function notFound(): EndpointResult {
   return {
-    statusCode: 404,
+    status: 404,
+    raw: 'Not found',
     headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex, nofollow' },
-    body: 'Not found',
   };
 }
 
@@ -103,14 +93,14 @@ function render(
   format: Format,
   opts: { title: string; selfUrl: string; feedId: string; description?: string },
   isPrivate: boolean
-): FeedResponse {
+): EndpointResult {
   const entries = toFeedReleases(releases);
   const body =
     format === 'ics'
       ? buildIcs(entries, opts.title, new Date(), opts.description)
       : buildAtom(entries, { title: opts.title, selfUrl: opts.selfUrl, feedId: opts.feedId });
 
-  return { statusCode: 200, headers: feedHeaders(format, isPrivate), body };
+  return { status: 200, raw: body, headers: feedHeaders(format, isPrivate) };
 }
 
 /**
@@ -167,26 +157,9 @@ export function parsePath(path: string):
   return null;
 }
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  path?: string;
-  rawUrl?: string;
-  headers?: Record<string, string | undefined>;
-}): Promise<FeedResponse> {
-  // Calendar clients issue GET, and some probe with HEAD first.
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD') {
-    return { statusCode: 405, headers: { 'Content-Type': 'text/plain' }, body: 'Method not allowed' };
-  }
-
-  const route = parsePath(requestPath(event));
+async function handleRequest({ path, rawUrl }: PublicRequest): Promise<EndpointResult> {
+  const route = parsePath(requestPath({ path, rawUrl }));
   if (!route) return notFound();
-
-  // 'lenient' rather than 'strict': a household behind one IP with several subscribed clients
-  // polling on their own schedules is normal traffic, not abuse.
-  const rl = await checkRateLimit(getClientIp(event.headers || {}), 'lenient', {
-    'Content-Type': 'text/plain',
-  });
-  if (rl.limited) return rl.response as FeedResponse;
 
   if (route.kind === 'token') {
     // Shape-check before touching the database, so a scan of junk paths costs nothing.
@@ -267,4 +240,15 @@ async function handleRequest(event: {
   );
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // Any origin: a calendar client fetching cross-origin (some web clients do) needs it, and the
+  // body is already public-by-token, so there is nothing further to protect with an origin check.
+  cors: 'public',
+  // Calendar clients issue GET, and some probe with HEAD first, which the wrapper answers as a GET.
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient' rather than 'strict': a household behind one IP with several subscribed clients
+  // polling on their own schedules is normal traffic, not abuse.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

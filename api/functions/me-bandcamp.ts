@@ -15,9 +15,8 @@ import { Sentry, withSentry } from '../lib/sentry';
 import { internalFunctionOrigin } from '../lib/internal-origin';
 import { getClient } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
 import { encryptCredential, isCredentialKeyConfigured } from './credential-crypto';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import {
   deriveSubsonicToken,
   subsonicPing,
@@ -161,65 +160,13 @@ async function requestSync(userId: string, host: string | undefined): Promise<bo
 
 const SYNC_START_FAILED = 'Sync could not be started. Use Re-sync to try again.';
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, POST, DELETE, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // POST carries a Bandcamp username and password that this endpoint verifies live against
-  // Bandcamp (subsonicPing), which makes it a credential-checking oracle — the one account
-  // route where that is true. It is limited per IP on the strict tier, like me-password:
-  //
-  //   - per IP, not per user, because keying it by user would let an attacker buy more
-  //     guessing budget simply by holding more Unstream accounts. For a credential path
-  //     that is backwards, even though per-user is right for the reads below.
-  //   - 'strict' (10/min), not 'account' (60/min), because nobody legitimately submits a
-  //     credential or hits Re-sync more than a few times a minute.
-  //
-  // GET and DELETE are ordinary account traffic and stay on the per-user account budget,
-  // which is what keeps the sync poll from competing with a colleague on the same network.
-  //
-  // The two orders below are deliberate, and this is the one endpoint where they differ.
-  // POST is limited *before* its token is examined at all, so a flood of unauthenticated
-  // credential attempts can't reach the auth server even on a cold invocation. GET and
-  // DELETE need the user to derive their per-user bucket, so they verify first — locally,
-  // at no round-trip cost on a warm invocation (see resolveAccountRequest).
-  const ip = getClientIp(event.headers);
-  const isCredentialWrite = event.httpMethod === 'POST';
-
-  if (isCredentialWrite) {
-    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-    if (rl.limited) return rl.response;
-  }
-
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-
-  if (!isCredentialWrite) {
-    const rl = await checkRateLimit(key, 'account', corsHeaders);
-    if (rl.limited) return rl.response;
-  }
-
+async function handleRequest({ method, user, body, headers }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     const { data: row, error } = await client
       .from('bandcamp_connections')
       .select(CONNECTION_SELECT)
@@ -228,20 +175,13 @@ async function handleRequest(event: {
 
     if (error) {
       console.error('[me-bandcamp] Error fetching connection:', error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load connection status' }) };
+      return { status: 500, body: { error: 'Failed to load connection status' } };
     }
 
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toStatusShape(row)) };
+    return { status: 200, body: toStatusShape(row) };
   }
 
-  if (event.httpMethod === 'POST') {
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
-    }
-
+  if (method === 'POST') {
     // Re-sync an existing connection.
     if (body.resync === true) {
       const { data: existing, error } = await client
@@ -251,15 +191,15 @@ async function handleRequest(event: {
         .maybeSingle();
       if (error) {
         console.error('[me-bandcamp] Error checking connection for resync:', error.message);
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { status: 500, body: { error: 'Failed to start sync' } };
       }
       if (!existing) {
-        return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'No Bandcamp connection to sync' }) };
+        return { status: 404, body: { error: 'No Bandcamp connection to sync' } };
       }
       // A stale 'syncing' row is a sync that was killed, not one still running — refusing it
       // would leave the user with no way to retry at all.
       if (existing.sync_status === 'syncing' && !isStaleSync(existing)) {
-        return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'A sync is already running' }) };
+        return { status: 409, body: { error: 'A sync is already running' } };
       }
 
       // Mark syncing before asking: the background function reads this row, so the
@@ -270,10 +210,10 @@ async function handleRequest(event: {
         .eq('user_id', user.userId);
       if (markError) {
         console.error('[me-bandcamp] Error updating sync status:', markError.message);
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { status: 500, body: { error: 'Failed to start sync' } };
       }
 
-      const started = await requestSync(user.userId, event.headers.host);
+      const started = await requestSync(user.userId, headers.host);
       if (!started) {
         await client
           .from('bandcamp_connections')
@@ -288,19 +228,19 @@ async function handleRequest(event: {
         .single();
       if (readError) {
         console.error('[me-bandcamp] Error reading connection after resync:', readError.message);
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to start sync' }) };
+        return { status: 500, body: { error: 'Failed to start sync' } };
       }
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(toStatusShape(row)) };
+      return { status: 200, body: toStatusShape(row) };
     }
 
     // Connect.
     const username = typeof body.username === 'string' ? body.username.trim() : '';
     const password = typeof body.password === 'string' ? body.password : '';
     if (!username || username.length > 200) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'The username Bandcamp generated is required' }) };
+      return { status: 400, body: { error: 'The username Bandcamp generated is required' } };
     }
     if (!password || password.length > 500) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'The password Bandcamp generated is required' }) };
+      return { status: 400, body: { error: 'The password Bandcamp generated is required' } };
     }
 
     if (!isCredentialKeyConfigured()) {
@@ -308,7 +248,7 @@ async function handleRequest(event: {
       // silently unusable until the env var lands.
       console.error('[me-bandcamp] BANDCAMP_CREDENTIAL_KEY is not configured');
       Sentry.captureMessage('me-bandcamp: BANDCAMP_CREDENTIAL_KEY not configured', 'error');
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Bandcamp connections are not available right now' }) };
+      return { status: 500, body: { error: 'Bandcamp connections are not available right now' } };
     }
 
     // Derive the salted token; the password is not referenced again after this line.
@@ -322,16 +262,14 @@ async function handleRequest(event: {
     } catch (error) {
       if (error instanceof SubsonicError && error.isAuthFailure) {
         return {
-          statusCode: 400,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Bandcamp rejected that username or password. Check both against Fan Settings → Subsonic on Bandcamp.' }),
+          status: 400,
+          body: { error: 'Bandcamp rejected that username or password. Check both against Fan Settings → Subsonic on Bandcamp.' },
         };
       }
       console.warn('[me-bandcamp] Bandcamp ping failed:', error instanceof Error ? error.message : String(error));
       return {
-        statusCode: 502,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Bandcamp didn’t respond. Their Subsonic support is in beta — try again in a minute.' }),
+        status: 502,
+        body: { error: 'Bandcamp didn’t respond. Their Subsonic support is in beta — try again in a minute.' },
       };
     }
 
@@ -362,10 +300,10 @@ async function handleRequest(event: {
 
     if (upsertError) {
       console.error('[me-bandcamp] Error storing connection:', upsertError.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to save the connection' }) };
+      return { status: 500, body: { error: 'Failed to save the connection' } };
     }
 
-    const started = await requestSync(user.userId, event.headers.host);
+    const started = await requestSync(user.userId, headers.host);
     if (!started) {
       await client
         .from('bandcamp_connections')
@@ -374,60 +312,73 @@ async function handleRequest(event: {
     }
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         connected: true,
         username,
         syncStatus: started ? 'syncing' : 'error',
         syncError: started ? null : SYNC_START_FAILED,
         artistCount,
-      }),
+      },
     };
   }
 
-  if (event.httpMethod === 'DELETE') {
-    let body: Record<string, unknown> = {};
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
-    }
+  // DELETE from here on: the wrapper has already refused every other method.
 
-    const { error: deleteError } = await client
-      .from('bandcamp_connections')
-      .delete()
-      .eq('user_id', user.userId);
+  const { error: deleteError } = await client
+    .from('bandcamp_connections')
+    .delete()
+    .eq('user_id', user.userId);
 
-    if (deleteError) {
-      console.error('[me-bandcamp] Error deleting connection:', deleteError.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to disconnect' }) };
-    }
-
-    let itemsDeleted = 0;
-    if (body.deleteItems === true) {
-      const { count, error: itemsError } = await client
-        .from('collection_items')
-        .delete({ count: 'exact' })
-        .eq('user_id', user.userId)
-        .eq('source', 'bandcamp');
-      if (itemsError) {
-        console.error('[me-bandcamp] Error deleting collection items:', itemsError.message);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Disconnected, but deleting imported items failed. Try again from Settings.' }),
-        };
-      }
-      itemsDeleted = count ?? 0;
-      // The public page rendered these items and is CDN-cached under the user-share tag.
-      await purgeUserShareCacheForUser(user.userId, 'me-bandcamp');
-    }
-
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ connected: false, itemsDeleted }) };
+  if (deleteError) {
+    console.error('[me-bandcamp] Error deleting connection:', deleteError.message);
+    return { status: 500, body: { error: 'Failed to disconnect' } };
   }
 
-  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
+  let itemsDeleted = 0;
+  if (body.deleteItems === true) {
+    const { count, error: itemsError } = await client
+      .from('collection_items')
+      .delete({ count: 'exact' })
+      .eq('user_id', user.userId)
+      .eq('source', 'bandcamp');
+    if (itemsError) {
+      console.error('[me-bandcamp] Error deleting collection items:', itemsError.message);
+      return {
+        status: 500,
+        body: { error: 'Disconnected, but deleting imported items failed. Try again from Settings.' },
+      };
+    }
+    itemsDeleted = count ?? 0;
+    // The public page rendered these items and is CDN-cached under the user-share tag.
+    await purgeUserShareCacheForUser(user.userId, 'me-bandcamp');
+  }
+
+  return { status: 200, body: { connected: false, itemsDeleted } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'account',
+  // POST carries a Bandcamp username and password that this endpoint verifies live against
+  // Bandcamp (subsonicPing), which makes it a credential-checking oracle — the one account
+  // route where that is true. It is limited per IP on the strict tier, like me-password:
+  //
+  //   - per IP, not per user, because keying it by user would let an attacker buy more
+  //     guessing budget simply by holding more Unstream accounts. For a credential path
+  //     that is backwards, even though per-user is right for the reads.
+  //   - 'strict' (10/min), not 'account' (60/min), because nobody legitimately submits a
+  //     credential or hits Re-sync more than a few times a minute.
+  //
+  // GET and DELETE are ordinary account traffic and stay on the per-user account budget,
+  // which is what keeps the sync poll from competing with a colleague on the same network.
+  //
+  // The two limits also run at different points, and this is the one endpoint where they
+  // differ. `by: 'ip'` limits POST *before* its token is examined at all, so a flood of
+  // unauthenticated credential attempts can't reach the auth server even on a cold
+  // invocation. GET and DELETE need the user to name their per-user bucket, so the token is
+  // verified first — locally, at no round-trip cost on a warm invocation.
+  rateLimit: (method) => (method === 'POST' ? { tier: 'strict', by: 'ip' } : 'account'),
+  jsonBody: true,
+}, handleRequest));

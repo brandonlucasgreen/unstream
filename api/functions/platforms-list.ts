@@ -4,7 +4,7 @@
 
 import { withSentry } from '../lib/sentry';
 import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
-import { buildPublicCorsHeaders, generateRequestId, v1Response } from './middleware';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 interface PlatformInfo {
   id: string;
@@ -13,22 +13,7 @@ interface PlatformInfo {
   url?: string;
 }
 
-async function handleRequest(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
-  const requestId = generateRequestId();
-  const corsHeaders = buildPublicCorsHeaders();
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Method not allowed. Use GET.' }, requestId)),
-    };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   const platforms: PlatformInfo[] = [];
 
   for (const id of CURATED_PLATFORMS) {
@@ -76,14 +61,12 @@ async function handleRequest(event: { httpMethod: string; headers?: Record<strin
   });
 
   return {
-    statusCode: 200,
+    status: 200,
+    body: { platforms },
     headers: {
-      ...corsHeaders,
-      'X-Request-Id': requestId,
       'Cache-Control': 'public, max-age=3600',
       'CDN-Cache-Control': 's-maxage=86400',
     },
-    body: JSON.stringify(v1Response({ platforms }, requestId)),
   };
 }
 
@@ -108,4 +91,11 @@ function getPlatformName(id: string): string {
   return names[id] || id.charAt(0).toUpperCase() + id.slice(1);
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'none',
+  jsonBody: false,
+  envelope: 'v1',
+}, handleRequest));

@@ -6,6 +6,7 @@
 //   POST   /api/me/buffer/start         begin the OAuth flow; returns the URL to send them to.
 //                                        Optional body { returnTo }: the page to come back to
 //   GET    /api/me/buffer/callback      Buffer redirects here; exchanges the code and stores tokens
+//                                        (its own function, me-buffer-callback.ts: see below)
 //   POST   /api/me/buffer/organization  which of their Buffer organizations to post from
 //   POST   /api/me/buffer/channels      which channels Unstream may post to
 //   DELETE /api/me/buffer               disconnect
@@ -17,45 +18,41 @@
 //
 // **The callback carries no Authorization header** — it's a top-level redirect from Buffer, not
 // a fetch from our page. So who it belongs to is held server-side against the opaque `state`,
-// alongside the PKCE verifier, and both are consumed on first use.
+// alongside the PKCE verifier, and both are consumed on first use. That makes it a different
+// kind of endpoint from everything else here (public, answers with a redirect), so it is a
+// function of its own, me-buffer-callback.ts, routed ahead of this one in netlify.toml. What
+// the two share (the pending flow, where a connection may return to) is exported from here.
 
 import { getRedis } from './redis';
-import {
-  buildCorsHeaders,
-  isUrlHostnameAllowed,
-  SECOND_FACTOR_REQUIRED_ERROR,
-  sessionMissingSecondFactor,
-} from './middleware';
-import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { isUrlHostnameAllowed } from './middleware';
+import { endpoint, type SignedInRequest } from './http/endpoint';
 import { listChannels, listOrganizations, type BufferChannel } from './buffer-client';
 import {
   buildAuthorizeUrl,
   bufferOAuthConfigured,
   createPkcePair,
-  exchangeCode,
 } from './buffer-oauth';
 import {
   BufferNotConnectedError,
   canUseCuratorPosts,
   clearBufferConnection,
   getBufferConnection,
-  saveBufferConnection,
   setOrganization,
   setSelectedChannels,
   usableAccessToken,
 } from './buffer-db';
 import { canUseReleaseAutopost } from './release-autopost-access';
-import { resumeAfterReconnect } from './release-autopost-db';
 import { Sentry, withSentry } from '../lib/sentry';
 import { randomBytes } from 'node:crypto';
 
 /** Long enough to sign in to Buffer and approve, short enough that a leaked state is useless. */
 const FLOW_TTL_SECONDS = 600;
 
-const flowKey = (state: string) => `buffer-oauth:${state}`;
+/** Where a pending connection is held in Redis, between /start and the callback. */
+export const flowKey = (state: string) => `buffer-oauth:${state}`;
 
 /** Where they land after connecting when the page that started it didn't say. */
-const DEFAULT_RETURN_PATH = '/curator/new';
+export const DEFAULT_RETURN_PATH = '/curator/new';
 
 /**
  * The pages that may start a connection and be returned to: the Promote page's Autopost and
@@ -68,106 +65,24 @@ export function isAllowedReturnPath(path: unknown): path is string {
     && (path === DEFAULT_RETURN_PATH || /^\/promote\/[A-Za-z0-9_-]+(\/campaigns)?$/.test(path));
 }
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string | null;
-  path?: string;
-  rawUrl?: string;
-}
+/** What /start keeps for the callback to redeem. */
+export interface PendingFlow { userId: string; verifier: string; returnTo?: string }
 
-interface PendingFlow { userId: string; verifier: string; returnTo?: string }
-
-function actionFrom(event: HandlerEvent): string {
-  const raw = event.rawUrl
-    ? (() => { try { return new URL(event.rawUrl!).pathname; } catch { return event.path ?? ''; } })()
-    : (event.path ?? '');
+/** The last path segment after `/buffer`: `start`, `organization`, `channels`, or `''` for the bare path. */
+function actionFrom(path: string, rawUrl: string | undefined): string {
+  const raw = rawUrl
+    ? (() => { try { return new URL(rawUrl).pathname; } catch { return path; } })()
+    : path;
   const last = raw.replace(/\/+$/, '').split('/').pop() ?? '';
   return last === 'buffer' ? '' : last;
 }
 
-function siteOrigin(): string {
-  return (process.env.URL ?? 'https://unstream.stream').replace(/\/+$/, '');
-}
+async function handleRequest({ method, user, body, path, rawUrl }: SignedInRequest) {
+  const respond = (status: number, answer: unknown) => ({ status, body: answer });
+  const action = actionFrom(path, rawUrl);
 
-/** Send them back to the page that started it, with a word about how it went. */
-function redirectBack(outcome: string, returnTo: string = DEFAULT_RETURN_PATH) {
-  const path = isAllowedReturnPath(returnTo) ? returnTo : DEFAULT_RETURN_PATH;
-  return { statusCode: 302, headers: { Location: `${siteOrigin()}${path}?buffer=${outcome}` }, body: '' };
-}
+  if (!bufferOAuthConfigured()) return respond(200, { available: false });
 
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS: Record<string, string> = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-
-  const action = actionFrom(event);
-
-  if (!bufferOAuthConfigured()) {
-    return action === 'callback' ? redirectBack('unavailable') : respond(200, { available: false });
-  }
-
-  // --- The callback is the one leg without a bearer token ---------------------------------
-  // It has no user to check the gate against, and needs none: it only redeems a `state` that
-  // /start minted, and /start is behind the gate below.
-  if (action === 'callback') {
-    const url = (() => { try { return new URL(event.rawUrl ?? ''); } catch { return null; } })();
-    const state = url?.searchParams.get('state') ?? '';
-    const code = url?.searchParams.get('code') ?? '';
-    const denied = url?.searchParams.get('error');
-    if (!state) return redirectBack('failed');
-
-    const redis = getRedis();
-    if (!redis) return redirectBack('failed');
-
-    // Consume the flow: read and delete together, so a replayed callback finds nothing. Read even
-    // when they declined, to know which page to send them back to.
-    const pending = await redis.get<PendingFlow>(flowKey(state));
-    await redis.del(flowKey(state));
-    const returnTo = pending?.returnTo;
-    if (denied) return redirectBack(denied === 'access_denied' ? 'cancelled' : 'failed', returnTo);
-    if (!code) return redirectBack('failed', returnTo);
-    if (!pending?.userId || !pending.verifier) return redirectBack('expired');
-
-    try {
-      const tokens = await exchangeCode(code, pending.verifier);
-      // Without a refresh token the connection can't outlive this access token: it ends in an
-      // hour, whatever happens meanwhile. Said now, with what Buffer granted, rather than only
-      // when it dies.
-      if (!tokens.refreshToken) {
-        Sentry.captureMessage('[buffer] connected without a refresh token: this connection will end within the hour', {
-          level: 'error',
-          tags: { buffer: 'connect-without-refresh-token' },
-          extra: { userId: pending.userId, scope: tokens.scope },
-        });
-      }
-      // Kept only when there's no choice to make; otherwise the page asks.
-      const organizations = await listOrganizations(tokens.accessToken);
-      await saveBufferConnection(pending.userId, tokens, organizations.length === 1 ? organizations[0].id : null);
-      // Release autopost paused for the lost connection starts again, where it posts from one of
-      // this account's organizations. Reported rather than failing the connect: the connection
-      // is saved, and the Promote page's Save also resumes.
-      try {
-        await resumeAfterReconnect(pending.userId, organizations.map(o => o.id));
-      } catch (error) {
-        Sentry.captureException(error, { tags: { buffer: 'autopost-resume' } });
-      }
-      return redirectBack('connected', returnTo);
-    } catch (error) {
-      Sentry.captureException(error, { tags: { buffer: 'oauth-callback' } });
-      return redirectBack('failed', returnTo);
-    }
-  }
-
-  // --- Everything else is a normal account endpoint ----------------------------------------
-  const { key, user } = await resolveAccountRequest(
-    event.headers.authorization || event.headers.Authorization || undefined,
-    getClientIp(event.headers),
-  );
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
-  if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
-  if (!user) return respond(401, { error: 'Not signed in' });
-  if (await sessionMissingSecondFactor(event.headers.authorization || event.headers.Authorization || undefined)) return respond(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
   const userId = user.userId;
 
   // Connecting is open to anyone either feature lets in. Each flag fails closed, and the admin is
@@ -176,7 +91,7 @@ async function handleRequest(event: HandlerEvent) {
   if (!allowed) return respond(200, { available: false });
 
   try {
-    if (event.httpMethod === 'GET' && action === '') {
+    if (method === 'GET' && action === '') {
       const connection = await getBufferConnection(userId);
       if (!connection) return respond(200, { available: true, connected: false });
 
@@ -208,8 +123,7 @@ async function handleRequest(event: HandlerEvent) {
       });
     }
 
-    if (event.httpMethod === 'POST' && action === 'organization') {
-      const body = JSON.parse(event.body || '{}') as { organizationId?: unknown };
+    if (method === 'POST' && action === 'organization') {
       const wanted = typeof body.organizationId === 'string' ? body.organizationId : '';
       // Only one of their own: an id from the browser is checked against what Buffer says
       // this account belongs to.
@@ -219,11 +133,10 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { organizationId: wanted, selectedChannelIds: [] });
     }
 
-    if (event.httpMethod === 'POST' && action === 'start') {
+    if (method === 'POST' && action === 'start') {
       const redis = getRedis();
       if (!redis) return respond(503, { error: 'Cannot start the connection right now' });
 
-      const body = JSON.parse(event.body || '{}') as { returnTo?: unknown };
       if (body.returnTo !== undefined && !isAllowedReturnPath(body.returnTo)) {
         return respond(400, { error: 'That page can’t start a Buffer connection' });
       }
@@ -238,10 +151,9 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { authorizeUrl });
     }
 
-    if (event.httpMethod === 'POST' && action === 'channels') {
+    if (method === 'POST' && action === 'channels') {
       const connection = await getBufferConnection(userId);
       if (!connection?.organizationId) return respond(409, { error: 'Choose a Buffer organization first' });
-      const body = JSON.parse(event.body || '{}') as { channelIds?: unknown };
       const wanted = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
       // Only channels this organization has and this feature can post to, so what's stored is
       // always something send can act on.
@@ -252,7 +164,7 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { selectedChannelIds: ids });
     }
 
-    if (event.httpMethod === 'DELETE' && action === '') {
+    if (method === 'DELETE' && action === '') {
       // Only our own record goes. Buffer's own revocation lives in their settings, and doing it
       // for them would be a surprise.
       await clearBufferConnection(userId);
@@ -274,4 +186,12 @@ function isSupportedChannel(channel: BufferChannel): boolean {
   return channel.service === 'instagram' || channel.service === 'facebook';
 }
 
-export const handler = withSentry(handleRequest);
+// Signed in and past the second step: this decides which Buffer account an artist's posts go out
+// from. The callback is the one leg that isn't, and it is not this function (see the header).
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'accountWithSecondStep',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

@@ -47,7 +47,7 @@ afterEach(() => {
 });
 
 async function search() {
-  const response = await handler({ queryStringParameters: { query: 'zzqx handoff artist' } });
+  const response = await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzqx handoff artist' } });
   if (!response) throw new Error('search handler returned no response');
   return response;
 }

@@ -7,14 +7,8 @@
 import { withSentry } from '../lib/sentry';
 import { createHash, createHmac } from 'crypto';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
-
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+import { getClientIp } from './ratelimit';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 const VALID_EVENT_TYPES = new Set([
   'search',
@@ -51,44 +45,24 @@ function hashSessionId(ip: string, userAgent: string): string {
   return createHmac('sha256', secret).update(raw).digest('hex');
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: '' };
-  }
-
-  // Lenient rate limit — fire-and-forget from clients
-  const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
-  if (rl.limited) return rl.response;
-
-  let body: { event_type?: string; app?: string; context?: Record<string, unknown> };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const { event_type, app, context = {} } = body;
+async function handleRequest({ body, headers }: PublicRequest): Promise<EndpointResult> {
+  const { event_type, app, context = {} } = body as {
+    event_type?: string;
+    app?: string;
+    context?: Record<string, unknown>;
+  };
 
   if (!event_type || !VALID_EVENT_TYPES.has(event_type)) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { status: 204 };
   }
 
   if (!app || !VALID_APPS.has(app)) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { status: 204 };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { status: 204 };
   }
 
   // Sanitize context: only allow primitive values, strip any PII fields
@@ -101,8 +75,8 @@ async function handleRequest(event: {
     safeContext[k] = v;
   }
 
-  const userAgent = event.headers['user-agent'] || '';
-  const sessionHash = hashSessionId(ip, userAgent);
+  const userAgent = headers['user-agent'] || '';
+  const sessionHash = hashSessionId(getClientIp(headers), userAgent);
 
   // Supabase JS client returns { error } rather than throwing — check it explicitly
   const { error: insertError } = await client.from('app_events').insert({
@@ -115,7 +89,14 @@ async function handleRequest(event: {
     console.error('[Analytics] Failed to insert app_event:', insertError);
   }
 
-  return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  return { status: 204 };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['POST'],
+  auth: 'none',
+  // Clients fire these and forget them, so a limited one is simply dropped.
+  rateLimit: 'standard',
+  jsonBody: true,
+}, handleRequest));

@@ -10,18 +10,18 @@
 // so the remaining risk (someone else holding that URL) is bounded by accepting only sessions under a
 // day old that nobody has claimed yet.
 //
-// Follows the other me-* endpoints (resolveAccountRequest, the account limiter, account-cors.ts)
-// and is in api/tsconfig.json's typecheck include — keep it there. Reads filter on the Stripe mode
-// of the configured key, so a test tip made through `npm run dev` never shows on the real site.
+// Follows the other me-* endpoints (the fast local token check, the account limiter, the account
+// CORS shape) and is in api/tsconfig.json's typecheck include — keep it there. Reads filter on the
+// Stripe mode of the configured key, so a test tip made through `npm run dev` never shows on the
+// real site.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { isLiveMode, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { markArtistSupported } from './tips-db';
 import { keptAfterRefund } from '../shared/tips';
 import { Sentry, withSentry } from '../lib/sentry';
-import { buildAccountCorsHeaders } from './account-cors';
 
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$/;
 const SESSION_ID_REGEX = /^cs_(test|live)_[A-Za-z0-9]{10,200}$/;
@@ -35,51 +35,22 @@ export const CLAIM_WINDOW_SECONDS = 24 * 60 * 60;
  */
 const TIP_HISTORY_LIMIT = 500;
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string | null;
-}
+/** A JSON answer, in the shape the endpoint wrapper takes. */
+const respond = (status: number, body: unknown): EndpointResult => ({ status, body });
 
-interface JsonResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-}
-
-/** A JSON answer; handleRequest adds the CORS headers, which depend on who is asking. */
-const respond = (statusCode: number, body: unknown): JsonResponse =>
-  ({ statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-
-async function handleRequest(event: HandlerEvent): Promise<JsonResponse> {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why). Every answer leaves through here, so none can miss it.
-  const corsHeaders = buildAccountCorsHeaders(event.headers.origin || event.headers.Origin, 'GET, POST, OPTIONS');
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
-  const response = await answer(event, corsHeaders);
-  return { ...response, headers: { ...response.headers, ...corsHeaders } };
-}
-
-async function answer(event: HandlerEvent, corsHeaders: Record<string, string>): Promise<JsonResponse> {
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, getClientIp(event.headers));
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response as JsonResponse;
-
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
-  if (!user) return respond(401, { error: 'Not signed in' });
-
+async function handleRequest({ method, user, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) return respond(500, { error: 'Database not configured' });
 
   try {
-    if (event.httpMethod === 'GET') return respond(200, { tips: await listTips(client, user.userId) });
-    return await claimTip(client, user.userId, event.body ?? null);
+    if (method === 'GET') return respond(200, { tips: await listTips(client, user.userId) });
+    return await claimTip(client, user.userId, body);
   } catch (err) {
     Sentry.captureException(err, {
-      extra: { context: `me-tips.${event.httpMethod}`, stripeCode: err instanceof StripeError ? err.code : undefined },
+      extra: { context: `me-tips.${method}`, stripeCode: err instanceof StripeError ? err.code : undefined },
     });
     return respond(502, {
-      error: event.httpMethod === 'GET'
+      error: method === 'GET'
         ? "Couldn't load your tips. Try again in a moment."
         : "Couldn't save this tip to your account. Try again in a moment.",
     });
@@ -155,13 +126,7 @@ async function listTips(client: SupabaseClient, userId: string): Promise<FanTip[
  *   202 { status: 'pending' }   Stripe has the payment but the webhook hasn't recorded it yet — retry
  *   404 / 409 / 410             not a tip we can save (unknown, someone else's, or too old)
  */
-async function claimTip(client: SupabaseClient, userId: string, rawBody: string | null): Promise<JsonResponse> {
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(rawBody || '{}');
-  } catch {
-    return respond(400, { error: 'Invalid JSON' });
-  }
+async function claimTip(client: SupabaseClient, userId: string, body: Record<string, unknown>): Promise<EndpointResult> {
   const sessionId = typeof body.sessionId === 'string' ? body.sessionId : '';
   const artistSlug = typeof body.artistSlug === 'string' ? body.artistSlug : '';
   if (!SESSION_ID_REGEX.test(sessionId) || !SLUG_REGEX.test(artistSlug)) return respond(400, { error: 'Invalid tip' });
@@ -255,4 +220,10 @@ async function claimTip(client: SupabaseClient, userId: string, rawBody: string 
   return respond(200, { status: 'saved' });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

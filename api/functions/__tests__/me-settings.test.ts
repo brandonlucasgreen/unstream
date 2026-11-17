@@ -10,13 +10,6 @@ const mocks = vi.hoisted(() => {
       getUserById: vi.fn(),
       updateUserById: vi.fn(),
     },
-    mockAuthGetUser: vi.fn(),
-    mockCreateClient: vi.fn(() => ({
-      auth: {
-        getUser: vi.fn(),
-        signInWithPassword: vi.fn(),
-      },
-    })),
     mockCheckRateLimit: vi.fn(() => Promise.resolve({ limited: false })),
     mockGetClientIp: vi.fn(() => '127.0.0.1'),
   };
@@ -28,12 +21,12 @@ vi.mock('../db', () => ({
     auth: { admin: mocks.mockAuthAdmin },
   }),
 }));
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: mocks.mockCreateClient,
-}));
 vi.mock('../ratelimit', () => ({
-  // Only a bucket name; the endpoints' own auth is mocked separately.
-  accountRateLimitKey: async () => 'user:test-user',
+  // What the endpoint wrapper asks: who the token belongs to, and which bucket to count. The
+  // email here is the one the token was issued with, which the handler must not answer with.
+  resolveAccountRequest: async (authHeader: string | undefined) => (authHeader
+    ? { key: 'user:user-1', user: { userId: 'user-1', email: 'issued-with@example.com' } }
+    : { key: 'ip:127.0.0.1', user: null }),
   checkRateLimit: mocks.mockCheckRateLimit,
   getClientIp: mocks.mockGetClientIp,
 }));
@@ -58,15 +51,9 @@ describe('me-settings handler', () => {
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
     mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
-    mocks.mockAuthGetUser.mockResolvedValue({
+    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { id: 'user-1', email: 'test@example.com' } },
       error: null,
-    });
-    mocks.mockCreateClient.mockReturnValue({
-      auth: {
-        getUser: mocks.mockAuthGetUser,
-        signInWithPassword: vi.fn(),
-      },
     });
   });
 
@@ -92,10 +79,20 @@ describe('me-settings handler', () => {
     expect(res!.statusCode).toBe(401);
   });
 
+  it('returns 401 when the auth server has no record for the token\'s user', async () => {
+    // The token verified locally, but the account behind it is gone (or the auth server
+    // didn't answer): not somebody to show settings to.
+    mocks.mockAuthAdmin.getUserById.mockResolvedValue({ data: { user: null }, error: { message: 'User not found' } });
+    stubTables();
+
+    const res = await handler(validEvent);
+    expect(res!.statusCode).toBe(401);
+    expect(mocks.mockAuthAdmin.getUserById).toHaveBeenCalledWith('user-1');
+  });
+
   it('returns settings with username, location, email, and hasPassword', async () => {
-    // has_password comes from the token-validation response (auth.getUser),
-    // not a separate admin.getUserById lookup.
-    mocks.mockAuthGetUser.mockResolvedValue({
+    // Email and has_password come from the account's current record, not the token's claims.
+    mocks.mockAuthAdmin.getUserById.mockResolvedValue({
       data: { user: { id: 'user-1', email: 'test@example.com', user_metadata: { has_password: true } } },
       error: null,
     });
@@ -112,10 +109,6 @@ describe('me-settings handler', () => {
   });
 
   it('includes the pending email-change address when one exists', async () => {
-    mocks.mockAuthGetUser.mockResolvedValue({
-      data: { user: { id: 'user-1', email: 'test@example.com' } },
-      error: null,
-    });
     stubTables({ emailChange: { data: { new_email: 'new@example.com' }, error: null } });
 
     const res = await handler(validEvent);
@@ -200,7 +193,7 @@ describe('me-settings handler', () => {
   it('returns 405 with an Allow header for non-GET methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'POST' });
     expect(res!.statusCode).toBe(405);
-    expect(headersOf(res).Allow).toBe('GET, OPTIONS');
+    expect(headersOf(res).Allow).toBe('GET, HEAD, OPTIONS');
   });
 
   it('scopes Access-Control-Allow-Origin to the site allowlist, never a wildcard', async () => {

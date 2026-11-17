@@ -1,5 +1,6 @@
 import { withSentry } from '../lib/sentry';
 import { MAC_RELEASE } from '../shared/desktop-release';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 // The pre-Sparkle update check: versions up to 3.5.0 poll this at launch and, if it reports
 // something newer, post a notification linking to the download. 3.6.0 and later use Sparkle
@@ -11,31 +12,14 @@ const VERSION_INFO = {
   releaseNotes: MAC_RELEASE.releaseNotes,
 };
 
-async function handleRequest(event: { httpMethod?: string }) {
-  // Handle CORS
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json',
-  };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(VERSION_INFO),
-  };
+async function handleRequest(): Promise<EndpointResult> {
+  return { status: 200, body: VERSION_INFO };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'none',
+  jsonBody: false,
+}, handleRequest));

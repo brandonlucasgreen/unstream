@@ -15,38 +15,19 @@ import {
   reslugArtist,
   restoreArtistDuplicatePair,
 } from './artist-merge';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-  const json = (statusCode: number, payload: unknown) => ({
-    statusCode,
-    headers: CORS_HEADERS,
-    body: JSON.stringify(payload),
-  });
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const admin = await authenticateAdmin(
-    event.headers['authorization'] || event.headers['Authorization'] || undefined,
-  );
-  if (!admin) return json(401, { error: 'Unauthorized' });
+async function handleRequest({ method, user: admin, body: parsedBody }: SignedInRequest): Promise<EndpointResult> {
+  const json = (status: number, payload: unknown): EndpointResult => ({ status, body: payload });
 
   const client = getClient();
   if (!client) return json(500, { error: 'Database not configured' });
 
   // GET: the review list — every pair, its evidence, and anything blocking a merge.
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     const [pairs, reslugs] = await Promise.all([
       findDuplicateArtistPairs(client),
       findReslugCandidates(client),
@@ -63,11 +44,8 @@ async function handleRequest(event: {
     });
   }
 
-  if (event.httpMethod !== 'POST') {
-    return json(405, { error: 'Method not allowed' });
-  }
-
-  let body: {
+  // POST from here on: the wrapper has already refused every other method.
+  const body = parsedBody as {
     action?: string;
     winnerId?: string;
     loserId?: string;
@@ -76,11 +54,6 @@ async function handleRequest(event: {
     force?: boolean;
     note?: string;
   };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return json(400, { error: 'Invalid JSON body' });
-  }
 
   // dismiss/restore act on a pair of artist ids and never touch artist data, so they share one
   // validation path and skip the dry-run convention that the destructive actions use.
@@ -180,4 +153,9 @@ async function handleRequest(event: {
   return json(400, { error: "action must be 'merge', 'reslug', 'dismiss' or 'restore'" });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

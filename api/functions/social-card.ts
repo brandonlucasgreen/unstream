@@ -26,9 +26,9 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { getArtistProfileBySlug, getArtistReleases } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { isUrlHostnameAllowed } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 import { PLATFORMS } from '../shared/platform-registry';
 import {
   cardImageUrl,
@@ -60,15 +60,6 @@ loadCardAssetsWith(() => ({
   wasm: readFileSync(require.resolve('@resvg/resvg-wasm/index_bg.wasm')),
 }));
 
-interface FunctionResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-  isBase64Encoded?: boolean;
-}
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
-
 /** A month at the CDN. The URL pins the platform and release, so the slide doesn't go stale. */
 const IMAGE_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=86400',
@@ -82,17 +73,17 @@ const MISS_CACHE_HEADERS = {
 };
 
 /** The database or an image host didn't answer. Never cached: that isn't "nothing to draw". */
-const FAILURE_HEADERS = { ...JSON_HEADERS, 'Cache-Control': 'no-store' };
+const FAILURE_HEADERS = { 'Cache-Control': 'no-store' };
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const IMAGE_TIMEOUT_MS = 8000;
 
-function notFound(reason: string): FunctionResponse {
-  return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: reason }) };
+function notFound(reason: string): EndpointResult {
+  return { status: 404, body: { error: reason }, headers: MISS_CACHE_HEADERS };
 }
 
-function unavailable(reason: string): FunctionResponse {
-  return { statusCode: 502, headers: FAILURE_HEADERS, body: JSON.stringify({ error: reason }) };
+function unavailable(reason: string): EndpointResult {
+  return { status: 502, body: { error: reason }, headers: FAILURE_HEADERS };
 }
 
 type ImageResult = { image: CardImage } | { missing: string } | { failed: string };
@@ -130,33 +121,16 @@ async function fetchCardImage(storedUrl: string): Promise<ImageResult> {
 
 const PATH_PATTERN = new RegExp(`/api/social-card/([a-z0-9-]{1,100})/(${CARD_SLIDES.join('|')})\\.png$`);
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  path?: string;
-  queryStringParameters?: Record<string, string | undefined>;
-}): Promise<FunctionResponse> {
-  // HEAD too: an image fetcher may check the type before downloading (Netlify drops the body).
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD') return notFound('Not found');
-
-  const match = (event.path ?? '').match(PATH_PATTERN);
-  const platformId = event.queryStringParameters?.platform ?? '';
-  const releaseSlug = event.queryStringParameters?.release ?? null;
+async function handleRequest({ path, query }: PublicRequest): Promise<EndpointResult> {
+  const match = path.match(PATH_PATTERN);
+  const platformId = query.platform ?? '';
+  const releaseSlug = query.release ?? null;
   const platformMeta = PLATFORMS[platformId];
   if (!match || !platformMeta || (releaseSlug !== null && !/^[a-z0-9-]{1,200}$/.test(releaseSlug))) {
-    return { statusCode: 400, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Invalid card URL' }) };
+    return { status: 400, body: { error: 'Invalid card URL' } };
   }
   const [, artistSlug, slideName] = match;
   const slide = slideName as CardSlide;
-
-  // 'lenient', not 'standard': the weekly generator used to render every card once to check it,
-  // from one IP and in the same minute as its /api/artist-page reads, and 'standard' is one
-  // 30/min bucket shared by both. The other callers are Buffer and the CDN in front of this, so
-  // the limit only bites someone rendering cards in a loop.
-  const rl = await checkRateLimit(getClientIp(event.headers), 'lenient', JSON_HEADERS);
-  if (rl.limited) {
-    return rl.response ?? { statusCode: 429, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Rate limited' }) };
-  }
 
   const { bundle, failed } = await getArtistProfileBySlug(artistSlug);
   if (failed) return unavailable('Artist lookup failed');
@@ -213,16 +187,27 @@ async function handleRequest(event: {
   try {
     const png = await renderSocialCard(slide, data, image);
     return {
-      statusCode: 200,
+      status: 200,
+      raw: Buffer.from(png).toString('base64'),
       headers: { ...IMAGE_CACHE_HEADERS, 'Content-Type': 'image/png' },
-      body: Buffer.from(png).toString('base64'),
       isBase64Encoded: true,
     };
   } catch (error) {
     Sentry.captureException(error, { tags: { slug: artistSlug, slide }, extra: { context: 'social-card.render' } });
     console.error('[social-card] render failed:', error);
-    return { statusCode: 500, headers: FAILURE_HEADERS, body: JSON.stringify({ error: 'Render failed' }) };
+    return { status: 500, body: { error: 'Render failed' }, headers: FAILURE_HEADERS };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  // An image fetcher may check the type with HEAD before downloading; the wrapper answers it as a GET.
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient', not 'standard': the weekly generator used to render every card once to check it,
+  // from one IP and in the same minute as its /api/artist-page reads, and 'standard' is one
+  // 30/min bucket shared by both. The other callers are Buffer and the CDN in front of this, so
+  // the limit only bites someone rendering cards in a loop.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

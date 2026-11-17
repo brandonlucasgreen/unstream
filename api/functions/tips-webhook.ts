@@ -29,44 +29,33 @@ import { getClient } from './db';
 import { isLiveMode, stripeRequest, verifyStripeSignature, type StripeCharge, type StripeEvent } from './stripe';
 import { markArtistSupported } from './tips-db';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
-const HEADERS = { 'Content-Type': 'application/json' };
-const ok = (note: string) => ({ statusCode: 200, headers: HEADERS, body: JSON.stringify({ received: true, note }) });
+const ok = (note: string): EndpointResult => ({ status: 200, body: { received: true, note } });
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-  isBase64Encoded?: boolean;
-}
-
-async function handleRequest(event: HandlerEvent) {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, headers: HEADERS, body: '{"error":"Method not allowed"}' };
-
+async function handleRequest({ headers, rawBody }: PublicRequest): Promise<EndpointResult> {
   const secret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
   if (!secret) {
     Sentry.captureMessage('[tips-webhook] STRIPE_CONNECT_WEBHOOK_SECRET not set', { level: 'error' });
-    return { statusCode: 500, headers: HEADERS, body: '{"error":"Not configured"}' };
+    return { status: 500, body: { error: 'Not configured' } };
   }
 
-  // Netlify may hand the body over base64-encoded; the signature is over the raw bytes.
-  const rawBody = event.isBase64Encoded
-    ? Buffer.from(event.body ?? '', 'base64').toString('utf8')
-    : (event.body ?? '');
-  const signature = event.headers['stripe-signature'] ?? event.headers['Stripe-Signature'];
+  // The signature is over the raw bytes: `rawBody` is the body as it was sent (Netlify may hand
+  // it over base64-encoded, which the wrapper has already decoded), never a re-serialized parse.
+  const signature = headers['stripe-signature'] ?? headers['Stripe-Signature'];
   if (!verifyStripeSignature(rawBody, signature, secret)) {
-    return { statusCode: 400, headers: HEADERS, body: '{"error":"Invalid signature"}' };
+    return { status: 400, body: { error: 'Invalid signature' } };
   }
 
   let stripeEvent: StripeEvent;
   try {
     stripeEvent = JSON.parse(rawBody);
   } catch {
-    return { statusCode: 400, headers: HEADERS, body: '{"error":"Invalid JSON"}' };
+    return { status: 400, body: { error: 'Invalid JSON' } };
   }
 
   const client = getClient();
-  if (!client) return { statusCode: 500, headers: HEADERS, body: '{"error":"Database not configured"}' };
+  if (!client) return { status: 500, body: { error: 'Database not configured' } };
 
   try {
     const note = await handleEvent(client, stripeEvent);
@@ -74,7 +63,7 @@ async function handleRequest(event: HandlerEvent) {
   } catch (err) {
     // A 500 makes Stripe retry, which is what we want for a transient database failure.
     Sentry.captureException(err, { extra: { context: 'tips-webhook', eventType: stripeEvent.type, eventId: stripeEvent.id } });
-    return { statusCode: 500, headers: HEADERS, body: '{"error":"Processing failed"}' };
+    return { status: 500, body: { error: 'Processing failed' } };
   }
 }
 
@@ -410,4 +399,12 @@ async function disconnect(client: SupabaseClient, evt: StripeEvent): Promise<str
   return 'disconnected';
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'none',
+  // Stripe is the only caller, and the signature is the authorization.
+  rateLimit: 'none',
+  // Stripe signs the raw body, so the handler checks the signature first and parses it itself.
+  jsonBody: false,
+}, handleRequest));

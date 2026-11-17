@@ -1,121 +1,44 @@
 // V1 API: /api/v1/search
-// Thin wrapper around search-sources that adds API key auth,
-// rate limit headers, request IDs, and standardized response envelope.
+// The same search as /api/search/sources, behind what every v1 endpoint has: an optional API
+// key, the key's own quota and its headers, a request ID and the response envelope. The wrapper
+// supplies all of those (`auth: 'apiKey'`, `envelope: 'v1'`).
 
 import { withSentry } from '../lib/sentry';
-import { authenticateApiKey, buildCorsHeaders, generateRequestId, validateQuery, v1Response } from './middleware';
-import { checkApiRateLimit, getClientIp } from './ratelimit';
-import { handler as coreSearchHandler } from './search-sources';
+import { endpoint } from './http/endpoint';
+import { searchSources } from './search-sources';
 
-interface NetlifyEvent {
-  httpMethod: string;
-  queryStringParameters?: Record<string, string>;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}
+export const handler = withSentry(endpoint({
+  cors: 'siteOrApiKey',
+  methods: ['GET'],
+  auth: 'apiKey',
+  envelope: 'v1',
+  jsonBody: false,
+}, async ({ query, apiKey }) => {
+  // The search itself, called directly: its own endpoint's rate limit is not this caller's.
+  // mode passes through untouched; the search treats anything but 'exact' as fuzzy.
+  const result = await searchSources({ query: query.query, ...(query.mode ? { mode: query.mode } : {}) });
+  const data = result.body as Record<string, unknown>;
 
-async function handleRequest(event: NetlifyEvent) {
-  const requestId = generateRequestId();
-  const origin = event.headers.origin || event.headers.Origin;
-  const apiKeyHeader = event.headers['x-api-key'] || event.headers['X-API-Key'];
-  const apiKeyInfo = await authenticateApiKey(apiKeyHeader);
-  const corsHeaders = buildCorsHeaders(origin, !!apiKeyInfo);
-
-  // CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Method not allowed. Use GET.' }, requestId)),
-    };
-  }
-
-  // Rate limit check — use API key tier if present, otherwise strict IP
-  const identifier = getClientIp(event.headers);
-  const rl = await checkApiRateLimit(apiKeyInfo, identifier, corsHeaders);
-  if (rl.limited) return rl.response;
-
-  const rateLimitHeaders: Record<string, string> = {};
-  if (rl.rateLimitInfo) {
-    rateLimitHeaders['X-RateLimit-Limit'] = String(rl.rateLimitInfo.limit);
-    rateLimitHeaders['X-RateLimit-Remaining'] = String(rl.rateLimitInfo.remaining);
-    rateLimitHeaders['X-RateLimit-Reset'] = String(rl.rateLimitInfo.reset);
-  }
-
-  // Validate query
-  const queryResult = validateQuery(event.queryStringParameters?.query);
-  if ('error' in queryResult) {
-    return {
-      statusCode: 400,
-      headers: { ...corsHeaders, ...rateLimitHeaders },
-      body: JSON.stringify(v1Response({ error: queryResult.error }, requestId)),
-    };
-  }
-  const query = queryResult.query;
-
-  // Call the core search logic, wrapping the response in v1 envelope.
-  // Pass x-internal-skip-ratelimit to prevent double rate limiting (v1 wrapper already checked).
-  const coreResult = await coreSearchHandler({
-    // mode passes through untouched; the core handler treats anything but 'exact' as fuzzy.
-    queryStringParameters: { query, ...(event.queryStringParameters?.mode ? { mode: event.queryStringParameters.mode } : {}) },
-    headers: { ...event.headers, 'x-internal-skip-ratelimit': process.env.INTERNAL_FUNCTION_SECRET ?? '' } as Record<string, string>,
-  });
-
-  if (!coreResult) {
-    return {
-      statusCode: 500,
-      headers: { ...corsHeaders, ...rateLimitHeaders, 'X-Request-Id': requestId },
-      body: JSON.stringify(v1Response({ error: 'Internal server error' }, requestId)),
-    };
-  }
-
-  // Parse the response and wrap in v1 envelope
-  try {
-    const data = JSON.parse(coreResult.body);
-
-    // Bios and Commons photos aren't part of the v1 contract yet. Wikipedia text and most
-    // Commons photos are CC BY-SA, and passing them to API consumers is a licensing decision to
-    // document in openapi.yaml on purpose, not a side effect of the app's search response
-    // growing a field.
-    if (Array.isArray(data.results)) {
-      for (const result of data.results as Record<string, unknown>[]) {
-        delete result.bio;
-        delete result.bioSuppressed;
-        delete result.commonsPhoto;
-      }
+  // Bios and Commons photos aren't part of the v1 contract yet. Wikipedia text and most
+  // Commons photos are CC BY-SA, and passing them to API consumers is a licensing decision to
+  // document in openapi.yaml on purpose, not a side effect of the app's search response
+  // growing a field.
+  if (Array.isArray(data.results)) {
+    for (const item of data.results as Record<string, unknown>[]) {
+      delete item.bio;
+      delete item.bioSuppressed;
+      delete item.commonsPhoto;
     }
-
-    if (coreResult.statusCode !== 200) {
-      return {
-        statusCode: coreResult.statusCode,
-        headers: { ...corsHeaders, ...rateLimitHeaders, 'X-Request-Id': requestId },
-        body: JSON.stringify(v1Response(data, requestId)),
-      };
-    }
-
-    return {
-      statusCode: 200,
-      headers: {
-        ...corsHeaders,
-        ...rateLimitHeaders,
-        'X-Request-Id': requestId,
-        'Cache-Control': 'public, max-age=0, must-revalidate',
-        'CDN-Cache-Control': apiKeyInfo ? 's-maxage=14400, stale-while-revalidate=3600' : 's-maxage=1800, stale-while-revalidate=300',
-      },
-      body: JSON.stringify(v1Response(data, requestId, rl.rateLimitInfo)),
-    };
-  } catch {
-    // If parsing fails, return the raw response
-    return {
-      statusCode: coreResult.statusCode,
-      headers: { ...corsHeaders, ...rateLimitHeaders, 'X-Request-Id': requestId },
-      body: coreResult.body,
-    };
   }
-}
 
-export const handler = withSentry(handleRequest);
+  if (result.status !== 200) return { status: result.status, body: data };
+
+  return {
+    status: 200,
+    headers: {
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'CDN-Cache-Control': apiKey ? 's-maxage=14400, stale-while-revalidate=3600' : 's-maxage=1800, stale-while-revalidate=300',
+    },
+    body: data,
+  };
+}));

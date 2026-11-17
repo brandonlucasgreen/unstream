@@ -10,34 +10,20 @@
 
 import { withSentry } from '../lib/sentry';
 import { persistSearchResults } from './db';
-import { isInternalRequest } from './middleware';
 import { parsePersistPayload } from './request-persist';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  headers?: Record<string, string | undefined>;
-  body?: string;
-}) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: '' };
-  }
-
-  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
-    return { statusCode: 401, body: '' };
-  }
-
-  let body: unknown;
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, body: '' };
-  }
-
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
   const results = parsePersistPayload(body);
-  if (!results) return { statusCode: 400, body: '' };
+  if (!results) return { status: 400 };
 
   await persistSearchResults(results);
-  return { statusCode: 200, body: JSON.stringify({ persisted: results.length }) };
+  return { status: 200, body: { persisted: results.length } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: true,
+}, handleRequest));

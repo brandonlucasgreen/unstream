@@ -60,7 +60,7 @@ function zeroResultCaptures() {
 }
 
 async function search(params: Record<string, string> = {}) {
-  const response = await handler({ queryStringParameters: { query: QUERY, ...params } });
+  const response = await handler({ httpMethod: 'GET', queryStringParameters: { query: QUERY, ...params } });
   if (!response) throw new Error('search handler returned no response');
   return response;
 }

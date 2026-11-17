@@ -16,7 +16,8 @@
 // series follows the GoatCounter site's own timezone setting, where app_events days are UTC.
 // The range total is the UTC one (`total_utc`), so the headline matches the search range.
 
-import { authenticateAdmin, buildCorsHeaders, isUrlHostnameAllowed } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
+import { isUrlHostnameAllowed } from './middleware';
 import { bucketStart, datesInRange, parseAnalyticsRange, type AnalyticsRange } from './analytics-range';
 import { Sentry, withSentry } from '../lib/sentry';
 
@@ -95,39 +96,20 @@ async function fetchTraffic(range: AnalyticsRange, token: string) {
   };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined> | null;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization']);
-  if (!admin) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const range = parseAnalyticsRange(event.queryStringParameters);
+async function handleRequest({ query }: SignedInRequest): Promise<EndpointResult> {
+  const range = parseAnalyticsRange(query);
   if ('error' in range) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: range.error }) };
+    return { status: 400, body: { error: range.error } };
   }
 
   const token = process.env.GOATCOUNTER_API_TOKEN;
   if (!token) {
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ configured: false }) };
+    return { status: 200, body: { configured: false } };
   }
 
   try {
     const traffic = await fetchTraffic(range, token);
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify(traffic) };
+    return { status: 200, body: traffic };
   } catch (err) {
     // Loud, not empty: a GoatCounter failure must read as "couldn't ask", never as zero visitors.
     // A timeout or network failure carries only its name ("TimeoutError") worth showing.
@@ -141,11 +123,15 @@ async function handleRequest(event: {
     // The reason goes back to the page: this endpoint is admin-only, and "502" alone sends the
     // admin to Sentry to find out which setting is wrong.
     return {
-      statusCode: 502,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'GoatCounter did not answer', detail: message }),
+      status: 502,
+      body: { error: 'GoatCounter did not answer', detail: message },
     };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET'],
+  auth: 'admin',
+  jsonBody: false,
+}, handleRequest));

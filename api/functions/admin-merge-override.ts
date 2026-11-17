@@ -3,44 +3,11 @@
 
 import { withSentry } from '../lib/sentry';
 import { getClient, invalidateAdminListCache } from './db';
-import { authenticateAdmin } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { isSearchOnlyLink, sourceIdFromUrl } from './search-utils';
-import { buildAccountCorsHeaders } from './account-cors';
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'POST, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
-  if (!admin) {
-    return {
-      statusCode: 401,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
-
-  let body: {
+async function handleRequest({ body }: SignedInRequest): Promise<EndpointResult> {
+  const { group_name, platform_urls, excluded_urls, canonical_image_url, notes } = body as {
     group_name?: string;
     platform_urls?: string[];
     excluded_urls?: string[];
@@ -48,32 +15,12 @@ async function handleRequest(event: {
     notes?: string | null;
   };
 
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Invalid JSON' }),
-    };
-  }
-
-  const { group_name, platform_urls, excluded_urls, canonical_image_url, notes } = body;
-
   if (!group_name?.trim()) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'group_name is required' }),
-    };
+    return { status: 400, body: { error: 'group_name is required' } };
   }
 
   if (!Array.isArray(platform_urls) || platform_urls.length < 2) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'At least 2 platform_urls are required' }),
-    };
+    return { status: 400, body: { error: 'At least 2 platform_urls are required' } };
   }
 
   // Strip generic search/explore URLs — they appear in every query's results
@@ -84,20 +31,12 @@ async function handleRequest(event: {
   });
 
   if (filteredPlatformUrls.length < 2) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'At least 2 non-search platform_urls are required' }),
-    };
+    return { status: 400, body: { error: 'At least 2 non-search platform_urls are required' } };
   }
 
   const client = getClient();
   if (!client) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Database not configured' }),
-    };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const { data, error } = await client
@@ -115,12 +54,11 @@ async function handleRequest(event: {
   if (error) {
     console.error('[Admin] Failed to insert merge override:', error);
     return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 500,
+      body: {
         error: 'Failed to save merge override',
         detail: error.message || error.code || String(error),
-      }),
+      },
     };
   }
 
@@ -128,11 +66,14 @@ async function handleRequest(event: {
   // the admin just merged stay unmerged for up to five minutes.
   await invalidateAdminListCache('merge-overrides');
 
-  return {
-    statusCode: 201,
-    headers: corsHeaders,
-    body: JSON.stringify({ success: true, override: data }),
-  };
+  return { status: 201, body: { success: true, override: data } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // The site and the local dev origins, never '*': this endpoint takes a Bearer token
+  // (account-cors.ts says why).
+  cors: 'account',
+  methods: ['POST'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

@@ -64,8 +64,8 @@ afterEach(() => {
 describe('auth', () => {
   it('refuses anyone who is not an admin, including anonymous callers', async () => {
     mocks.authenticateAdmin.mockResolvedValue(null);
-    expect((await get()).statusCode).toBe(403);
-    expect((await post()).statusCode).toBe(403);
+    expect((await get()).statusCode).toBe(401);
+    expect((await post()).statusCode).toBe(401);
   });
 
   it('rejects an artistId that is not a UUID', async () => {

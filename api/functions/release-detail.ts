@@ -25,22 +25,11 @@
 // below, which no client currently knows exists.
 
 import { getReleaseDetail, resolveArtistSlugAlias, type ReleaseDetailSource } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
 import { PLATFORMS } from '../shared/platform-registry';
 import { isBandcampFriday } from '../shared/bandcamp-friday';
 import { AVAILABILITY_ORDER, payoutRank } from '../shared/release-display';
-
-const CORS_HEADERS: Record<string, string> = {
-  'Content-Type': 'application/json',
-  // The wildcard is deliberate, not an oversight — the same reason check-releases.ts carries
-  // one: the Mac app and the browser extension both call this endpoint, and neither sends an
-  // Origin that the shared buildCorsHeaders() allowlist (unstream.stream) would accept. The
-  // body is the same public data the release page already serves to anyone.
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 /**
  * Both slug generators — `artistSlug()` and `releaseSlug()` in release-utils.ts — emit only
@@ -53,8 +42,8 @@ const CORS_HEADERS: Record<string, string> = {
  */
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,119}$/;
 
-function json(statusCode: number, body: unknown, extraHeaders: Record<string, string> = {}) {
-  return { statusCode, headers: { ...CORS_HEADERS, ...extraHeaders }, body: JSON.stringify(body) };
+function json(status: number, body: unknown, extraHeaders: Record<string, string> = {}): EndpointResult {
+  return { status, body, headers: extraHeaders };
 }
 
 /**
@@ -75,7 +64,7 @@ function json(statusCode: number, body: unknown, extraHeaders: Record<string, st
 export function parseSlugs(event: {
   path?: string;
   rawUrl?: string;
-  queryStringParameters?: Record<string, string> | null;
+  queryStringParameters?: Record<string, string | undefined> | null;
 }): { artist: string; release: string } | null {
   const path = (() => {
     if (event.rawUrl) {
@@ -113,28 +102,8 @@ function sortedOffers(source: ReleaseDetailSource) {
   });
 }
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  path?: string;
-  rawUrl?: string;
-  queryStringParameters?: Record<string, string> | null;
-  headers?: Record<string, string | undefined>;
-}) {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-  if (event.httpMethod && event.httpMethod !== 'GET') {
-    return json(405, { error: 'Method not allowed' });
-  }
-
-  // 'lenient' because a client fetches this when a person taps a release, and a household
-  // behind one IP browsing a few records is normal traffic rather than abuse.
-  const rl = await checkRateLimit(getClientIp(event.headers || {}), 'lenient', CORS_HEADERS);
-  // `response` is optional on the result type, so it gets a 429 of its own rather than a cast:
-  // returning `undefined` here would serve a rate-limited request as an empty 200.
-  if (rl.limited) return rl.response ?? json(429, { error: 'Rate limit exceeded' });
-
-  const slugs = parseSlugs(event);
+async function handleRequest({ path, rawUrl, query }: PublicRequest): Promise<EndpointResult> {
+  const slugs = parseSlugs({ path, rawUrl, queryStringParameters: query });
   if (!slugs) {
     return json(400, { error: 'artist and release are required' });
   }
@@ -144,121 +113,127 @@ async function handleRequest(event: {
     return json(404, { error: 'Release not found' });
   }
 
-  try {
-    // The artist slug the answer is actually about, which is not always the one asked for.
-    let artistSlug = artist;
-    let { detail, failed } = await getReleaseDetail(artistSlug, release);
+  // The artist slug the answer is actually about, which is not always the one asked for.
+  let artistSlug = artist;
+  let { detail, failed } = await getReleaseDetail(artistSlug, release);
 
-    // A retired slug still resolves, the same way /api/artist and the artist page resolve one.
-    // Most of the 44 aliases in production came from the accent-folding reslug in #410
-    // (`beyonc` -> `beyonce`), and a release URL minted before that — in an alert, a shared link,
-    // a Mac app cache — is a URL a fan can still be holding.
-    //
-    // Only on a miss, and only after the live slug has had its go, so a real artist who later
-    // takes that slug always wins. `failed` is excluded deliberately: a lookup that broke is not
-    // evidence that a slug is retired, and running the alias read anyway would spend a second
-    // query during an outage to arrive at the same 503.
-    if (!detail && !failed) {
-      const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(artistSlug);
-      if (aliasFailed) {
-        failed = true;
-      } else if (canonical && canonical !== artistSlug) {
-        artistSlug = canonical;
-        ({ detail, failed } = await getReleaseDetail(artistSlug, release));
-      }
+  // A retired slug still resolves, the same way /api/artist and the artist page resolve one.
+  // Most of the 44 aliases in production came from the accent-folding reslug in #410
+  // (`beyonc` -> `beyonce`), and a release URL minted before that — in an alert, a shared link,
+  // a Mac app cache — is a URL a fan can still be holding.
+  //
+  // Only on a miss, and only after the live slug has had its go, so a real artist who later
+  // takes that slug always wins. `failed` is excluded deliberately: a lookup that broke is not
+  // evidence that a slug is retired, and running the alias read anyway would spend a second
+  // query during an outage to arrive at the same 503.
+  if (!detail && !failed) {
+    const { canonical, failed: aliasFailed } = await resolveArtistSlugAlias(artistSlug);
+    if (aliasFailed) {
+      failed = true;
+    } else if (canonical && canonical !== artistSlug) {
+      artistSlug = canonical;
+      ({ detail, failed } = await getReleaseDetail(artistSlug, release));
     }
-
-    // The lookup itself broke. A 503 with no caching, never a 404 — a Supabase outage rendered
-    // as "this release doesn't exist" would be a convincing lie, and one the CDN would then
-    // hold for five minutes. Never cache uncertainty.
-    if (failed) {
-      Sentry.captureMessage('[release-detail] release lookup failed', {
-        level: 'error',
-        tags: { artist, release },
-        extra: { context: 'release-detail.lookupFailed' },
-      });
-      return json(503, { error: 'Release lookup temporarily unavailable' }, { 'Cache-Control': 'no-store' });
-    }
-
-    // Genuinely absent: an unknown artist, a stale link from an old alert, or a release the
-    // artist has since hidden. Deliberately one 404 for all of them — `is_hidden` exists to
-    // make a suppressed release indistinguishable from one that was never catalogued.
-    if (!detail) {
-      return json(404, { error: 'Release not found' });
-    }
-
-    const bandcampFriday = isBandcampFriday();
-
-    // Artist-paying first, the same ordering the release page and the feeds use. Without it a
-    // secondhand Discogs listing could lead over a direct purchase from the artist, which would
-    // be off-mission even though both facts are true.
-    const sources = [...detail.release.sources]
-      .sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform))
-      .map(source => {
-        const info = PLATFORMS[source.platform];
-        const isBCFriday = source.platform === 'bandcamp' && bandcampFriday;
-        // On a Bandcamp Friday Bandcamp waives its revenue share, so the registry's usual range
-        // is simply wrong for the next 24 hours. The release page already overrides it; a client
-        // rendering the same guide from this response has to get the same number.
-        return {
-          platform: source.platform,
-          name: info?.name ?? source.platform,
-          url: source.url,
-          payoutPercent: isBCFriday ? '~97%' : (info?.payoutPercent ?? null),
-          bandcampFriday: isBCFriday,
-          detailCheckedAt: source.detailCheckedAt,
-          offers: sortedOffers(source),
-        };
-      });
-
-    // The oldest check across every source is the honest freshness claim: saying "checked today"
-    // because *one* source was re-read would overstate the rest. ISO rather than the page's
-    // "3 days ago" — a native client formats dates in the user's own locale.
-    //
-    // `detail_checked_at`, not the offers' `captured_at`: the detail pass skips rewriting
-    // offers whose prices haven't moved, so `captured_at` now means "when this price last
-    // changed" — it stops advancing on a quiet release and would read as stale data we had in
-    // fact just re-verified. `detail_checked_at` is stamped on every pass, changed or not.
-    const pricesCheckedAt = sources
-      .map(s => s.detailCheckedAt)
-      .filter(Boolean)
-      .sort()[0] ?? null;
-
-    return {
-      statusCode: 200,
-      headers: {
-        ...CORS_HEADERS,
-        'Cache-Control': 'public, max-age=0, must-revalidate',
-        'CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
-        // Tagged by the canonical slug, so one purge clears the response whichever slug was
-        // asked for — an alias URL and the live URL are separate CDN entries of the same answer.
-        'Cache-Tag': `release-detail-${artistSlug}-${release}`,
-      },
-      body: JSON.stringify({
-        artist: detail.artist,
-        release: {
-          slug: detail.release.slug,
-          title: detail.release.title,
-          releaseType: detail.release.releaseType,
-          releaseDate: detail.release.releaseDate,
-          datePrecision: detail.release.datePrecision,
-          status: detail.release.status,
-          artworkUrl: detail.release.artworkUrl,
-          pricesCheckedAt,
-          sources,
-        },
-        // The page URL, so a native client can offer "open the full guide" without rebuilding
-        // the URL shape — and so the two surfaces stay tied together if it ever changes. Built
-        // from the canonical slug rather than the requested one: echoing a retired slug back
-        // would hand a client a link that only works by way of a redirect.
-        pageUrl: `https://unstream.stream/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release)}`,
-        bandcampFriday,
-      }),
-    };
-  } catch (error) {
-    console.error('[release-detail] Error:', error);
-    return json(500, { error: 'Internal server error' });
   }
+
+  // The lookup itself broke. A 503 with no caching, never a 404 — a Supabase outage rendered
+  // as "this release doesn't exist" would be a convincing lie, and one the CDN would then
+  // hold for five minutes. Never cache uncertainty.
+  if (failed) {
+    Sentry.captureMessage('[release-detail] release lookup failed', {
+      level: 'error',
+      tags: { artist, release },
+      extra: { context: 'release-detail.lookupFailed' },
+    });
+    return json(503, { error: 'Release lookup temporarily unavailable' }, { 'Cache-Control': 'no-store' });
+  }
+
+  // Genuinely absent: an unknown artist, a stale link from an old alert, or a release the
+  // artist has since hidden. Deliberately one 404 for all of them — `is_hidden` exists to
+  // make a suppressed release indistinguishable from one that was never catalogued.
+  if (!detail) {
+    return json(404, { error: 'Release not found' });
+  }
+
+  const bandcampFriday = isBandcampFriday();
+
+  // Artist-paying first, the same ordering the release page and the feeds use. Without it a
+  // secondhand Discogs listing could lead over a direct purchase from the artist, which would
+  // be off-mission even though both facts are true.
+  const sources = [...detail.release.sources]
+    .sort((a, b) => payoutRank(b.platform) - payoutRank(a.platform))
+    .map(source => {
+      const info = PLATFORMS[source.platform];
+      const isBCFriday = source.platform === 'bandcamp' && bandcampFriday;
+      // On a Bandcamp Friday Bandcamp waives its revenue share, so the registry's usual range
+      // is simply wrong for the next 24 hours. The release page already overrides it; a client
+      // rendering the same guide from this response has to get the same number.
+      return {
+        platform: source.platform,
+        name: info?.name ?? source.platform,
+        url: source.url,
+        payoutPercent: isBCFriday ? '~97%' : (info?.payoutPercent ?? null),
+        bandcampFriday: isBCFriday,
+        detailCheckedAt: source.detailCheckedAt,
+        offers: sortedOffers(source),
+      };
+    });
+
+  // The oldest check across every source is the honest freshness claim: saying "checked today"
+  // because *one* source was re-read would overstate the rest. ISO rather than the page's
+  // "3 days ago" — a native client formats dates in the user's own locale.
+  //
+  // `detail_checked_at`, not the offers' `captured_at`: the detail pass skips rewriting
+  // offers whose prices haven't moved, so `captured_at` now means "when this price last
+  // changed" — it stops advancing on a quiet release and would read as stale data we had in
+  // fact just re-verified. `detail_checked_at` is stamped on every pass, changed or not.
+  const pricesCheckedAt = sources
+    .map(s => s.detailCheckedAt)
+    .filter(Boolean)
+    .sort()[0] ?? null;
+
+  return {
+    status: 200,
+    headers: {
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'CDN-Cache-Control': 's-maxage=300, stale-while-revalidate=86400',
+      // Tagged by the canonical slug, so one purge clears the response whichever slug was
+      // asked for — an alias URL and the live URL are separate CDN entries of the same answer.
+      'Cache-Tag': `release-detail-${artistSlug}-${release}`,
+    },
+    body: {
+      artist: detail.artist,
+      release: {
+        slug: detail.release.slug,
+        title: detail.release.title,
+        releaseType: detail.release.releaseType,
+        releaseDate: detail.release.releaseDate,
+        datePrecision: detail.release.datePrecision,
+        status: detail.release.status,
+        artworkUrl: detail.release.artworkUrl,
+        pricesCheckedAt,
+        sources,
+      },
+      // The page URL, so a native client can offer "open the full guide" without rebuilding
+      // the URL shape — and so the two surfaces stay tied together if it ever changes. Built
+      // from the canonical slug rather than the requested one: echoing a retired slug back
+      // would hand a client a link that only works by way of a redirect.
+      pageUrl: `https://unstream.stream/a/${encodeURIComponent(artistSlug)}/${encodeURIComponent(release)}`,
+      bandcampFriday,
+    },
+  };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // The wildcard is deliberate, not an oversight — the same reason check-releases.ts carries
+  // one: the Mac app and the browser extension both call this endpoint, and neither sends an
+  // Origin that the site-only allowlist (unstream.stream) would accept. The body is the same
+  // public data the release page already serves to anyone.
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient' because a client fetches this when a person taps a release, and a household
+  // behind one IP browsing a few records is normal traffic rather than abuse.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

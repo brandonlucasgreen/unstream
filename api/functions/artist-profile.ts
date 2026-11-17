@@ -3,37 +3,18 @@
 // PUT    — update the profile: slug changes, bio updates, platform link edits.
 // DELETE — remove the claim, handing the page back to its unclaimed state.
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
-import { isMissingSecondFactor } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { cacheDeleteByArtist } from './cache';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { Sentry, withSentry } from '../lib/sentry';
 import { purgeCacheTags } from './purge-cache';
 import { buildLinkRows, DIVIDER_PLATFORM, type LinkEntry } from '../shared/link-dividers';
 import { safeEmbedStyle } from '../shared/embed-style';
 import { normalizeSectionOrder } from '../shared/page-sections';
-import { buildAccountCorsHeaders } from './account-cors';
 
 function getServiceClient() {
   return getClient();
-}
-
-async function authenticateRequest(authHeader: string | undefined): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  // Profile edits change an artist's payment links: refuse a session that
-  // hasn't completed the account's second factor (middleware.ts explains).
-  if (isMissingSecondFactor(data.user, token)) return null;
-  return data.user.id;
 }
 
 // Allowed embed domains for featured releases
@@ -161,10 +142,10 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
 // search data that existed before the claim and still describes a real artist; what goes is
 // everything the claim added — bio, photo, featured release, divider layout — all of which live
 // on the artist_profiles row. Platform links stay: they were discoverable before the claim too.
-async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: string, corsHeaders: Record<string, string>) {
+async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: string): Promise<EndpointResult> {
   const owned = await resolveOwnedArtist(slug, userId);
   if (!owned.ok || !owned.artistId || !owned.artistName) {
-    return { statusCode: owned.status, headers: corsHeaders, body: JSON.stringify({ error: owned.error }) };
+    return { status: owned.status, body: { error: owned.error } };
   }
 
   // Scoped to user_id as well as artist_id even though ownership is already proven: this is the
@@ -182,11 +163,11 @@ async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: s
       tags: { subsystem: 'artist-profile' },
       extra: { artistId: owned.artistId, slug },
     });
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to remove this artist. Please try again.' }) };
+    return { status: 500, body: { error: 'Failed to remove this artist. Please try again.' } };
   }
 
   if (!count) {
-    return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'This artist is no longer claimed by your account.' }) };
+    return { status: 409, body: { error: 'This artist is no longer claimed by your account.' } };
   }
 
   // Back to auto-discovered. Left flagged as claimed, the row would never expire and enrichment
@@ -210,55 +191,30 @@ async function handleRemoveClaim(client: SupabaseClient, slug: string, userId: s
   await purgeArtistCaches(owned.artistName, slug);
   console.log(`[Profile] Claim removed for "${owned.artistName}" (${slug})`);
 
-  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+  return { status: 200, body: { success: true } };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string> | null;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'PUT, DELETE, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  if (event.httpMethod !== 'PUT' && event.httpMethod !== 'DELETE') {
-    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
+async function handleRequest(request: SignedInRequest): Promise<EndpointResult> {
+  const { method, query } = request;
+  const userId = request.user.userId;
 
   const client = getServiceClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
-  }
-
-  const userId = await authenticateRequest(event.headers.authorization || event.headers.Authorization);
-  if (!userId) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Authentication required' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   // DELETE takes its slug from the query string like the other delete endpoints here — a body
   // on DELETE is inconsistently forwarded, and there's nothing else to send.
-  if (event.httpMethod === 'DELETE') {
-    const slug = event.queryStringParameters?.slug;
+  if (method === 'DELETE') {
+    const slug = query.slug;
     if (!slug) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug is required' }) };
+      return { status: 400, body: { error: 'slug is required' } };
     }
-    return handleRemoveClaim(client, slug, userId, corsHeaders);
+    return handleRemoveClaim(client, slug, userId);
   }
 
-  let body: {
+  // PUT from here on: the wrapper has already refused every other method.
+  const body = request.body as {
     slug: string;
     newSlug?: string;
     newName?: string;
@@ -276,19 +232,14 @@ async function handleRequest(event: {
     // list before any write; stored raw (the renderer normalizes).
     sectionOrder?: string[];
   };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
-  }
 
   const { slug } = body;
   if (!slug) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug is required' }) };
+    return { status: 400, body: { error: 'slug is required' } };
   }
   // Validated before any write, so a bad value can't leave half an update applied.
   if (body.showBio !== undefined && typeof body.showBio !== 'boolean') {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'showBio must be a boolean' }) };
+    return { status: 400, body: { error: 'showBio must be a boolean' } };
   }
 
   // Find the artist and verify ownership
@@ -299,7 +250,7 @@ async function handleRequest(event: {
     .single();
 
   if (findError || !artist) {
-    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Artist not found' }) };
+    return { status: 404, body: { error: 'Artist not found' } };
   }
 
   const { data: profile, error: profileError } = await client
@@ -309,15 +260,15 @@ async function handleRequest(event: {
     .single();
 
   if (profileError || !profile) {
-    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Profile not found' }) };
+    return { status: 404, body: { error: 'Profile not found' } };
   }
 
   if (profile.user_id !== userId) {
-    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'You do not own this profile' }) };
+    return { status: 403, body: { error: 'You do not own this profile' } };
   }
 
   if (!profile.verified_at) {
-    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Profile not yet verified' }) };
+    return { status: 403, body: { error: 'Profile not yet verified' } };
   }
 
   // --- Update slug ---
@@ -325,7 +276,7 @@ async function handleRequest(event: {
   if (body.newSlug && body.newSlug !== slug) {
     const newSlug = slugify(body.newSlug);
     if (!newSlug || newSlug.length < 2) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Slug must be at least 2 characters' }) };
+      return { status: 400, body: { error: 'Slug must be at least 2 characters' } };
     }
 
     // Check if slug is already taken
@@ -337,7 +288,7 @@ async function handleRequest(event: {
       .single();
 
     if (existing) {
-      return { statusCode: 409, headers: corsHeaders, body: JSON.stringify({ error: 'That URL slug is already taken' }) };
+      return { status: 409, body: { error: 'That URL slug is already taken' } };
     }
 
     const { error: slugError } = await client
@@ -347,7 +298,7 @@ async function handleRequest(event: {
 
     if (slugError) {
       console.error('[Profile] Slug update failed:', slugError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update slug' }) };
+      return { status: 500, body: { error: 'Failed to update slug' } };
     }
 
     finalSlug = newSlug;
@@ -358,10 +309,10 @@ async function handleRequest(event: {
   if (body.newName && body.newName !== artist.name) {
     const newName = body.newName.trim();
     if (!newName || newName.length < 1) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Artist name cannot be empty' }) };
+      return { status: 400, body: { error: 'Artist name cannot be empty' } };
     }
     if (newName.length > 100) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Artist name is too long' }) };
+      return { status: 400, body: { error: 'Artist name is too long' } };
     }
 
     const { error: nameError } = await client
@@ -371,7 +322,7 @@ async function handleRequest(event: {
 
     if (nameError) {
       console.error('[Profile] Name update failed:', nameError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update name' }) };
+      return { status: 500, body: { error: 'Failed to update name' } };
     }
     console.log(`[Profile] Name changed: "${artist.name}" → "${newName}" for slug "${finalSlug}"`);
   }
@@ -402,7 +353,7 @@ async function handleRequest(event: {
 
     if (locationError) {
       console.error('[Profile] Location update failed:', locationError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update location' }) };
+      return { status: 500, body: { error: 'Failed to update location' } };
     }
   }
 
@@ -416,7 +367,7 @@ async function handleRequest(event: {
 
     if (bioError) {
       console.error('[Profile] Bio update failed:', bioError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update bio' }) };
+      return { status: 500, body: { error: 'Failed to update bio' } };
     }
   }
 
@@ -429,7 +380,7 @@ async function handleRequest(event: {
 
     if (showBioError) {
       console.error('[Profile] Bio visibility update failed:', showBioError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update bio visibility' }) };
+      return { status: 500, body: { error: 'Failed to update bio visibility' } };
     }
   }
 
@@ -440,11 +391,11 @@ async function handleRequest(event: {
       try {
         const parsed = new URL(body.customImageUrl);
         if (parsed.protocol !== 'https:') {
-          return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Image URL must use HTTPS' }) };
+          return { status: 400, body: { error: 'Image URL must use HTTPS' } };
         }
         imageUrl = body.customImageUrl;
       } catch {
-        return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid image URL' }) };
+        return { status: 400, body: { error: 'Invalid image URL' } };
       }
     }
     const { error: imageError } = await client
@@ -454,7 +405,7 @@ async function handleRequest(event: {
 
     if (imageError) {
       console.error('[Profile] Image URL update failed:', imageError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update image' }) };
+      return { status: 500, body: { error: 'Failed to update image' } };
     }
   }
 
@@ -471,11 +422,10 @@ async function handleRequest(event: {
 
       if (!embed) {
         return {
-          statusCode: 400,
-          headers: corsHeaders,
-          body: JSON.stringify({
+          status: 400,
+          body: {
             error: "That embed code isn't supported. Use an embed from Bandcamp, YouTube, Spotify, SoundCloud, Apple Music, Vimeo, Tidal, or a platform you've linked on this profile.",
-          }),
+          },
         };
       }
     }
@@ -487,7 +437,7 @@ async function handleRequest(event: {
 
     if (embedError) {
       console.error('[Profile] Embed update failed:', embedError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update embed' }) };
+      return { status: 500, body: { error: 'Failed to update embed' } };
     }
   }
 
@@ -496,11 +446,7 @@ async function handleRequest(event: {
   if (body.sectionOrder !== undefined) {
     const sectionOrder = normalizeSectionOrder(body.sectionOrder);
     if (!sectionOrder) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'sectionOrder must be a list of section keys' }),
-      };
+      return { status: 400, body: { error: 'sectionOrder must be a list of section keys' } };
     }
     const { error: sectionError } = await client
       .from('artist_profiles')
@@ -509,7 +455,7 @@ async function handleRequest(event: {
 
     if (sectionError) {
       console.error('[Profile] Section order update failed:', sectionError);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update section order' }) };
+      return { status: 500, body: { error: 'Failed to update section order' } };
     }
   }
 
@@ -549,7 +495,7 @@ async function handleRequest(event: {
         tags: { subsystem: 'artist-profile' },
         extra: { artistId: artist.id, linkCount: links.length, dividerCount: dividers.length },
       });
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update links' }) };
+      return { status: 500, body: { error: 'Failed to update links' } };
     }
 
     console.log(`[Profile] Updated ${links.length} links and ${dividers.length} dividers for artist "${artist.name}"`);
@@ -557,11 +503,16 @@ async function handleRequest(event: {
 
   await purgeArtistCaches(artist.name, finalSlug);
 
-  return {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify({ success: true, slug: finalSlug }),
-  };
+  return { status: 200, body: { success: true, slug: finalSlug } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['PUT', 'DELETE'],
+  // Profile edits change an artist's payment links, so the token is checked against Supabase on
+  // every request, and that check refuses a session that hasn't completed the account's second
+  // factor (middleware.ts explains).
+  auth: 'bearer',
+  rateLimit: 'standard',
+  jsonBody: true,
+}, handleRequest));

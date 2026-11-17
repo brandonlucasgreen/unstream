@@ -18,8 +18,7 @@
 // Unstream's logo.
 
 import { getArtistsBySlugs, getPublicUsername } from './db';
-import { buildCorsHeaders } from './middleware';
-import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { BufferNotConnectedError, canUseCuratorPosts, getBufferConnection, usableAccessToken } from './buffer-db';
 import {
   addPostToContentItem,
@@ -77,14 +76,6 @@ const TAG_GRID = [
   { x: 0.25, y: 0.7 }, { x: 0.5, y: 0.7 }, { x: 0.75, y: 0.7 },
 ];
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string | null;
-  path?: string;
-  rawUrl?: string;
-}
-
 interface ComposeBody {
   artists?: { slug?: unknown; release?: unknown }[];
   template?: { postText?: unknown; lineText?: unknown; hashtags?: unknown };
@@ -106,8 +97,8 @@ const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? 
  * public path there, and `queryStringParameters` is empty whatever the rewrite's target says
  * (see api/functions/__tests__ and the release-detail incident).
  */
-function actionFrom(event: HandlerEvent): string {
-  const raw = event.rawUrl ? (() => { try { return new URL(event.rawUrl).pathname; } catch { return event.path ?? ''; } })() : (event.path ?? '');
+function actionFrom(rawUrl: string | undefined, path: string): string {
+  const raw = rawUrl ? (() => { try { return new URL(rawUrl).pathname; } catch { return path; } })() : path;
   return raw.replace(/\/+$/, '').split('/').pop() ?? '';
 }
 
@@ -243,40 +234,22 @@ function previewFor(
   };
 }
 
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS: Record<string, string> = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
-
-  const { key, user } = await resolveAccountRequest(
-    event.headers.authorization || event.headers.Authorization || undefined,
-    getClientIp(event.headers),
-  );
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
-  if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
-  if (!user) return respond(401, { error: 'Not signed in' });
-
+async function handleRequest({ user, body: parsedBody, path, rawUrl }: SignedInRequest): Promise<EndpointResult> {
   // The flag gates the whole feature and fails closed, so an unset flag hides it rather than
   // half-opening it. The admin is let through regardless, to test it before it is switched on.
-  if (!(await canUseCuratorPosts(user.email))) return respond(200, { available: false });
+  if (!(await canUseCuratorPosts(user.email))) return { status: 200, body: { available: false } };
 
   // The curator's own connection. No connection means the page should offer to make one, which
   // is a normal state rather than an error. Connected with no organization chosen means the page
   // is asking which; nothing posts until it has an answer.
   const connection = await getBufferConnection(user.userId);
-  if (!connection) return respond(200, { available: true, connected: false });
-  if (!connection.organizationId) return respond(409, { error: 'Choose a Buffer organization first' });
+  if (!connection) return { status: 200, body: { available: true, connected: false } };
+  if (!connection.organizationId) return { status: 409, body: { error: 'Choose a Buffer organization first' } };
   const orgId = connection.organizationId;
 
-  let body: ComposeBody;
-  try {
-    body = JSON.parse(event.body || '{}') as ComposeBody;
-  } catch {
-    return respond(400, { error: 'Invalid JSON' });
-  }
+  const body = parsedBody as ComposeBody;
 
-  const action = actionFrom(event);
+  const action = actionFrom(rawUrl, path);
   const template = templateFrom(body);
   const book = addressBookFrom(body);
 
@@ -284,36 +257,39 @@ async function handleRequest(event: HandlerEvent) {
     // Only captions use it, and a card is drawn ten times a send, so cards don't read it.
     const curator = profileFrom(body, action === 'cards' ? null : await getPublicUsername(user.userId));
     const { artists, missing } = await loadArtists(body);
-    if (artists.length === 0) return respond(400, { error: 'No artists we hold were named', missing });
+    if (artists.length === 0) return { status: 400, body: { error: 'No artists we hold were named', missing } };
 
     if (action === 'preview') {
       const networks: Record<string, NetworkPreview> = {};
       for (const network of NETWORKS) networks[network] = previewFor(network, artists, template, curator, book);
-      return respond(200, {
-        available: true,
-        networks,
-        missing,
-        hashtags: cleanHashtags(template.hashtags),
-        artists: artists.map(a => ({
-          slug: a.slug,
-          name: a.name,
-          release: a.release?.title ?? null,
-          payout: a.platform ? PLATFORMS[a.platform.id]?.payoutPercent ?? null : null,
-          platform: a.platform?.name ?? null,
-          handles: {
-            instagram: handleFor(a, 'instagram', book),
-            // Not a tag: Facebook Page mentions need a numeric Page id we don't hold, so this
-            // only says we know their page. See the spec's "What goes to Buffer".
-            facebook: handleFor(a, 'facebook', book),
-          },
-        })),
-        tooManyForOneCarousel: artists.length > MAX_CURATOR_ARTIST_CARDS,
-      });
+      return {
+        status: 200,
+        body: {
+          available: true,
+          networks,
+          missing,
+          hashtags: cleanHashtags(template.hashtags),
+          artists: artists.map(a => ({
+            slug: a.slug,
+            name: a.name,
+            release: a.release?.title ?? null,
+            payout: a.platform ? PLATFORMS[a.platform.id]?.payoutPercent ?? null : null,
+            platform: a.platform?.name ?? null,
+            handles: {
+              instagram: handleFor(a, 'instagram', book),
+              // Not a tag: Facebook Page mentions need a numeric Page id we don't hold, so this
+              // only says we know their page. See the spec's "What goes to Buffer".
+              facebook: handleFor(a, 'facebook', book),
+            },
+          })),
+          tooManyForOneCarousel: artists.length > MAX_CURATOR_ARTIST_CARDS,
+        },
+      };
     }
 
     if (action === 'cards') {
       const slide = str(body.slide);
-      if (slide !== 'cover' && slide !== 'curator-artist') return respond(400, { error: 'Unknown slide' });
+      if (slide !== 'cover' && slide !== 'curator-artist') return { status: 400, body: { error: 'Unknown slide' } };
 
       const frame = { kicker: curator.showName, viaHandle: curator.handles.instagram ?? null };
       let data: CuratorCardData;
@@ -322,7 +298,7 @@ async function handleRequest(event: HandlerEvent) {
       } else {
         const wanted = str(body.artistSlug);
         const one = artists.find(a => a.slug === wanted);
-        if (!one) return respond(400, { error: 'That artist is not in this post' });
+        if (!one) return { status: 400, body: { error: 'That artist is not in this post' } };
         data = { slide, frame, artist: cardArtist(one, 'instagram', book) };
       }
 
@@ -333,24 +309,24 @@ async function handleRequest(event: HandlerEvent) {
       const who = createHash('sha256').update(user.userId).digest('hex').slice(0, 16);
       const digest = createHash('sha256').update(png).digest('hex').slice(0, 32);
       const url = await publishCard(bucket, `curator/${who}/${digest}.png`, png);
-      return respond(200, { url, altText: curatorCardAltText(data) });
+      return { status: 200, body: { url, altText: curatorCardAltText(data) } };
     }
 
     if (action === 'send') {
       return await send(body, {
-        orgId, userId: user.userId, selectedChannelIds: connection.selectedChannelIds, artists, template, curator, book, respond,
+        orgId, userId: user.userId, selectedChannelIds: connection.selectedChannelIds, artists, template, curator, book,
       });
     }
 
-    return respond(404, { error: 'Unknown action' });
+    return { status: 404, body: { error: 'Unknown action' } };
   } catch (error) {
     // Buffer revoked us, or the grant expired. The page asks them to reconnect; this is not a
     // server error and must not be retried.
     if (error instanceof BufferNotConnectedError) {
-      return respond(200, { available: true, connected: false, reason: error.message });
+      return { status: 200, body: { available: true, connected: false, reason: error.message } };
     }
     Sentry.captureException(error, { tags: { curator_action: action } });
-    return respond(500, { error: error instanceof Error ? error.message : 'Something went wrong' });
+    return { status: 500, body: { error: error instanceof Error ? error.message : 'Something went wrong' } };
   }
 }
 
@@ -363,7 +339,6 @@ interface SendContext {
   template: CuratorTemplate;
   curator: CuratorProfile;
   book: AddressBook;
-  respond: (statusCode: number, body: unknown) => { statusCode: number; headers: Record<string, string>; body: string };
 }
 
 interface ChannelResult {
@@ -383,8 +358,8 @@ interface ChannelResult {
  * must not take Facebook down with it** — every channel is reported separately and the grouping
  * is best-effort.
  */
-async function send(body: ComposeBody, ctx: SendContext) {
-  const { orgId, userId, selectedChannelIds, artists, template, curator, book, respond } = ctx;
+async function send(body: ComposeBody, ctx: SendContext): Promise<EndpointResult> {
+  const { orgId, userId, selectedChannelIds, artists, template, curator, book } = ctx;
 
   // Refreshed if need be, and never read straight from storage: Buffer's access tokens last an
   // hour and its refresh tokens are single-use (see buffer-db.ts).
@@ -395,15 +370,15 @@ async function send(body: ComposeBody, ctx: SendContext) {
   // Only cards this endpoint stored: the public bucket host, under the curator's own prefix.
   // Without this the browser could hand Buffer any URL to publish under Unstream's name.
   const prefix = `${bucket.publicBaseUrl}/curator/`;
-  if (cardUrls.some(u => !u.startsWith(prefix))) return respond(400, { error: 'A card URL is not one of ours' });
-  if (cardUrls.length === 0) return respond(400, { error: 'No cards to send' });
+  if (cardUrls.some(u => !u.startsWith(prefix))) return { status: 400, body: { error: 'A card URL is not one of ours' } };
+  if (cardUrls.length === 0) return { status: 400, body: { error: 'No cards to send' } };
 
   // Read from Buffer again rather than trusted from storage: a channel disconnected since it was
   // ticked is skipped, not posted to.
   const ticked = new Set(selectedChannelIds);
   const channels = (await listChannels(token, orgId))
     .filter(c => ticked.has(c.id) && !c.isDisconnected && (c.service === 'instagram' || c.service === 'facebook'));
-  if (channels.length === 0) return respond(400, { error: 'Choose at least one channel to post to' });
+  if (channels.length === 0) return { status: 400, body: { error: 'Choose at least one channel to post to' } };
 
   const saveToDraft = str(body.mode) !== 'now';
   const tagId = await ensureTag(token, orgId, CURATOR_TAG.name, CURATOR_TAG.color);
@@ -483,12 +458,21 @@ async function send(body: ComposeBody, ctx: SendContext) {
   }
 
   const sent = Object.values(results).filter(r => r.postId).length;
-  return respond(sent > 0 ? 200 : 502, {
-    results,
-    grouping: groupingErrors.length ? groupingErrors.join('; ') : null,
-    draft: saveToDraft,
-    contentItemId: contentItemId ?? null,
-  });
+  return {
+    status: sent > 0 ? 200 : 502,
+    body: {
+      results,
+      grouping: groupingErrors.length ? groupingErrors.join('; ') : null,
+      draft: saveToDraft,
+      contentItemId: contentItemId ?? null,
+    },
+  };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['POST'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

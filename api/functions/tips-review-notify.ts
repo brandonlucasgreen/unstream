@@ -8,7 +8,7 @@
 //
 // Invoked by .github/workflows/tips-review-notify.yml (GitHub Actions cron, same precedent as
 // recatalog-sweep.yml — there are no scheduled Netlify functions in this repo), guarded by
-// isInternalRequest so only the workflow can fire it.
+// the internal secret so only the workflow can fire it.
 //
 // New-ness is decided against a watermark stored in Upstash: the set of unapproved
 // stripe_account_ids seen by the previous run (cache key tiprevwm:{livemode}). A row in Supabase
@@ -19,17 +19,12 @@
 // alert and reports an error rather than risk alert-spam.
 
 import { getClient } from './db';
-import { isInternalRequest } from './middleware';
 import { isLiveMode } from './stripe';
 import { cacheGet, cacheSet } from './cache';
 import { getRedis } from './redis';
 import { withSentry, Sentry } from '../lib/sentry';
 import { sendAdminPush } from './admin-push';
-
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-}
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 /** The account ids awaiting approval on the previous successful run. */
 const WATERMARK_TTL_SECONDS = 7 * 24 * 60 * 60;
@@ -54,13 +49,9 @@ function pushReviewAlert(artistName: string, slug: string, createdAt: string): P
   });
 }
 
-async function handleRequest(event: HandlerEvent) {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, body: '' };
-  if (!isInternalRequest(event.headers.authorization || event.headers.Authorization || undefined)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
+async function handleRequest(): Promise<EndpointResult> {
   const client = getClient();
-  if (!client) return { statusCode: 500, body: JSON.stringify({ error: 'Database not configured' }) };
+  if (!client) return { status: 500, body: { error: 'Database not configured' } };
 
   const { data, error } = await client
     .from('artist_tip_accounts')
@@ -71,7 +62,7 @@ async function handleRequest(event: HandlerEvent) {
     .limit(100);
   if (error) {
     Sentry.captureException(new Error(`tips-review-notify read failed: ${error.message}`));
-    return { statusCode: 502, body: JSON.stringify({ error: 'Read failed' }) };
+    return { status: 502, body: { error: 'Read failed' } };
   }
 
   const rows = (data ?? []) as ReviewRow[];
@@ -80,7 +71,7 @@ async function handleRequest(event: HandlerEvent) {
   const redis = getRedis();
   if (!redis) {
     // No Upstash = no reliable "new" test: refuse to alert rather than re-alert the whole list.
-    return { statusCode: 503, body: JSON.stringify({ error: 'Redis unavailable — no watermark, cannot classify' }) };
+    return { status: 503, body: { error: 'Redis unavailable — no watermark, cannot classify' } };
   }
   const previousRaw = await cacheGet<string[]>(watermarkKey());
   const previous = new Set(previousRaw ?? []);
@@ -89,7 +80,7 @@ async function handleRequest(event: HandlerEvent) {
   if (fresh.length === 0) {
     // Refresh the watermark TTL so a quiet period doesn't let it expire and re-alert everyone.
     await cacheSet(watermarkKey(), [...current], WATERMARK_TTL_SECONDS);
-    return { statusCode: 200, body: JSON.stringify({ ok: true, fresh: 0, awaiting: rows.length }) };
+    return { status: 200, body: { ok: true, fresh: 0, awaiting: rows.length } };
   }
 
   // Alert each new artist, then commit the watermark ONLY for the accounts we actually pushed.
@@ -112,7 +103,12 @@ async function handleRequest(event: HandlerEvent) {
   if (alerted.length !== fresh.length) {
     Sentry.captureMessage(`[tips-review-notify] alerted ${alerted.length}/${fresh.length} — push failures`, { extra: body });
   }
-  return { statusCode: 200, body: JSON.stringify(body) };
+  return { status: 200, body };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: false,
+}, handleRequest));

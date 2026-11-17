@@ -73,8 +73,8 @@ import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
 import { createPost, ensureTag, listChannelSchedules, listChannels, type ChannelSchedule } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
-import { isInternalRequest } from './middleware';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 /**
  * Start no new artist after this long. An ordinary function has about ten seconds, and one
@@ -426,14 +426,7 @@ async function settingsToSweep(now: Date): Promise<AutopostSettings[]> {
   return [...active, ...extra.filter((s): s is AutopostSettings => s !== null && s.pausedReason === null)];
 }
 
-async function handleRequest(event: { httpMethod?: string; headers?: Record<string, string | undefined> }) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   const started = Date.now();
   const now = new Date();
   let settingsList: AutopostSettings[];
@@ -441,7 +434,7 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
     settingsList = await settingsToSweep(now);
   } catch (error) {
     Sentry.captureException(error, { tags: { area: 'release-autopost', kind: 'settings-read' } });
-    return { statusCode: 503, body: JSON.stringify({ error: 'Could not read autopost settings' }) };
+    return { status: 503, body: { error: 'Could not read autopost settings' } };
   }
 
   // Every post may carry an image, and Buffer can only fetch it from the bucket. With anyone to
@@ -454,7 +447,7 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
       tags: { area: 'release-autopost', kind: 'bucket-missing' },
       extra: { missing: bucket.missing },
     });
-    return { statusCode: 503, body: JSON.stringify({ error: `Media bucket not configured: ${bucket.missing.join(', ')}` }) };
+    return { status: 503, body: { error: `Media bucket not configured: ${bucket.missing.join(', ')}` } };
   }
 
   const summary = {
@@ -493,7 +486,12 @@ async function handleRequest(event: { httpMethod?: string; headers?: Record<stri
   }
 
   console.log('[release-autopost-sweep]', JSON.stringify(summary));
-  return { statusCode: 200, body: JSON.stringify(summary) };
+  return { status: 200, body: summary };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: false,
+}, handleRequest));

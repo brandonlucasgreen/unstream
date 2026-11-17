@@ -1,6 +1,6 @@
 import { withSentry } from '../lib/sentry';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { safeFetch } from './safe-fetch';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 // The url parameter comes straight from the request, so both fetches go through safeFetch,
 // which refuses internal and private-network targets on every redirect hop. It isn't
@@ -91,20 +91,11 @@ async function getBandcampEmbed(url: string): Promise<{ embedUrl: string; title:
 }
 
 // Netlify function handler
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  const url = event.queryStringParameters?.url;
+async function handleRequest({ query }: PublicRequest): Promise<EndpointResult> {
+  const url = query.url;
 
   if (!url) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'URL parameter is required' }),
-    };
+    return { status: 400, body: { error: 'URL parameter is required' } };
   }
 
   try {
@@ -112,35 +103,23 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
 
     if (embedData) {
       return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 's-maxage=3600, stale-while-revalidate',
-        },
-        body: JSON.stringify(embedData),
+        status: 200,
+        body: embedData,
+        headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate' },
       };
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Could not find embeddable content' }),
-      };
+      return { status: 404, body: { error: 'Could not find embeddable content' } };
     }
   } catch (error) {
     console.error('Embed error:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Failed to fetch embed data' }),
-    };
+    return { status: 500, body: { error: 'Failed to fetch embed data' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'strict',
+  jsonBody: false,
+}, handleRequest));

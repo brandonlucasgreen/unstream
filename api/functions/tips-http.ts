@@ -1,18 +1,13 @@
 // Small shared pieces for the tips endpoints (tips-*.ts).
 
 /**
- * A JSON answer with no CORS headers. Those depend on who is asking, so each handler builds
- * them for its request and attaches them on the way out (`withCors`): tips-connect and
- * tips-settings from account-cors.ts, tips-checkout from middleware.ts. An answer returned
- * without that step carries no Access-Control-Allow-Origin, which a browser on another origin
- * refuses, so forgetting it fails closed.
+ * A JSON answer in the shape the endpoint wrapper (http/endpoint.ts) takes from a handler. The
+ * wrapper turns the body into JSON and adds the CORS headers for the request on every answer, so
+ * the tips endpoints build no header of their own.
  */
-export function respond(statusCode: number, body: unknown) {
-  return { statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+export function respond(status: number, body: unknown) {
+  return { status, body };
 }
-
-/** The methods the artist-side tips endpoints (tips-connect, tips-settings) answer between them. */
-export const TIPS_ARTIST_METHODS = 'GET, POST, PUT, OPTIONS';
 
 /**
  * The site's own origin, for Stripe's return URLs. Netlify sets URL at runtime (it is one of the

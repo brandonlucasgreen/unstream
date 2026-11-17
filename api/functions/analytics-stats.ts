@@ -5,12 +5,10 @@
 
 import { withSentry, Sentry } from '../lib/sentry';
 import { getClient, readAllPages } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
-import { authenticateBearerFast } from './middleware';
 import { isLiveMode } from './stripe';
 import { keptAfterRefund } from '../shared/tips';
 import { buildActivity, summarizeAnalytics, RELEASE_VIEW_PREFIX, type AnalyticsRow } from './artist-activity';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 /** How far back the activity list reaches, whatever period the totals cover (Brandon, 2026-11-08). */
 const ACTIVITY_DAYS = 30;
@@ -23,53 +21,21 @@ const isoDay = (daysAgo: number) => {
 
 const VALID_PERIODS = new Set(['7d', '30d', '90d', 'all']);
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string>;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently.
-  const ip = getClientIp(event.headers || {});
-  const rlPromise = checkRateLimit(ip, 'standard', corsHeaders);
-  const authPromise = authenticateBearerFast(event.headers?.authorization || event.headers?.Authorization).catch(() => null);
-  const rl = await rlPromise;
-  if (rl.limited) return rl.response;
-
-  const auth = await authPromise;
-  if (!auth) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
+async function handleRequest({ user, query }: SignedInRequest): Promise<EndpointResult> {
   // Parse params
-  const slug = event.queryStringParameters?.slug;
-  const period = event.queryStringParameters?.period || '30d';
+  const slug = query.slug;
+  const period = query.period || '30d';
 
   if (!slug) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'slug parameter required' }) };
+    return { status: 400, body: { error: 'slug parameter required' } };
   }
   if (!VALID_PERIODS.has(period)) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid period. Use 7d, 30d, 90d, or all' }) };
+    return { status: 400, body: { error: 'Invalid period. Use 7d, 30d, 90d, or all' } };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Server configuration error' }) };
+    return { status: 500, body: { error: 'Server configuration error' } };
   }
 
   // Resolve artist and verify ownership. The two lookups are independent —
@@ -85,18 +51,18 @@ async function handleRequest(event: {
     client
       .from('artist_profiles')
       .select('id, artists!inner(id)')
-      .eq('user_id', auth.userId)
+      .eq('user_id', user.userId)
       .eq('artists.slug', slug)
       .not('verified_at', 'is', null)
       .maybeSingle(),
   ]);
 
   if (!artist) {
-    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Artist not found' }) };
+    return { status: 404, body: { error: 'Artist not found' } };
   }
 
   if (!profile) {
-    return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Not authorized to view analytics for this artist' }) };
+    return { status: 403, body: { error: 'Not authorized to view analytics for this artist' } };
   }
 
   const periodSince = period === 'all'
@@ -222,12 +188,11 @@ async function handleRequest(event: {
       .slice(0, 10);
 
     return {
-      statusCode: 200,
+      status: 200,
       headers: {
-        ...corsHeaders,
         'Cache-Control': 'private, max-age=60',
       },
-      body: JSON.stringify({
+      body: {
         artistName: artist.name,
         period,
         totals: summary.totals,
@@ -240,12 +205,18 @@ async function handleRequest(event: {
         releaseViews,
         daily: summary.daily,
         activity,
-      }),
+      },
     };
   } catch (err) {
     Sentry.captureException(err, { extra: { context: 'analytics-stats', slug, period } });
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
+    return { status: 500, body: { error: 'Failed to fetch analytics' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET'],
+  auth: 'account',
+  rateLimit: { tier: 'standard', by: 'ip' },
+  jsonBody: false,
+}, handleRequest));

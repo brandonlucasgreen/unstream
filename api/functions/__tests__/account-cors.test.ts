@@ -6,7 +6,7 @@ import { join } from 'path';
  * Every endpoint a signed-in person calls with a Bearer token answers with an allowlisted
  * `Access-Control-Allow-Origin`, never `*` (account-cors.ts says why). One table covers them
  * all, so an endpoint added to the table is held to the same answers as the rest, and the scan
- * at the bottom fails on a new function that takes a token and hand-rolls a wildcard.
+ * at the bottom fails on any file that writes a wildcard origin by hand.
  */
 
 // Nothing here reaches Redis, Supabase or Stripe: each request below is either a preflight or
@@ -52,11 +52,13 @@ const ENDPOINTS: Endpoint[] = [
   { name: 'user-sharing', methods: 'GET, POST, OPTIONS', load: () => import('../user-sharing') },
   { name: 'artist-profile', methods: 'PUT, DELETE, OPTIONS', load: () => import('../artist-profile') },
   { name: 'claim-artist', methods: 'POST, OPTIONS', load: () => import('../claim-artist') },
-  { name: 'artist-auth', methods: 'GET, POST, OPTIONS', load: () => import('../artist-auth') },
+  // GET only since its POST branch, which nothing called any more, was removed.
+  { name: 'artist-auth', methods: 'GET, OPTIONS', load: () => import('../artist-auth') },
   { name: 'analytics-stats', methods: 'GET, OPTIONS', load: () => import('../analytics-stats') },
   { name: 'admin-merge-override', methods: 'POST, OPTIONS', load: () => import('../admin-merge-override') },
-  { name: 'tips-connect', methods: 'GET, POST, PUT, OPTIONS', load: () => import('../tips-connect') },
-  { name: 'tips-settings', methods: 'GET, POST, PUT, OPTIONS', load: () => import('../tips-settings') },
+  // Each its own methods since the move to the endpoint wrapper; the two shared one list before.
+  { name: 'tips-connect', methods: 'POST, OPTIONS', load: () => import('../tips-connect') },
+  { name: 'tips-settings', methods: 'GET, PUT, OPTIONS', load: () => import('../tips-settings') },
 ];
 
 const SITE = 'https://unstream.stream';
@@ -143,33 +145,24 @@ describe('buildAccountCorsHeaders', () => {
   });
 });
 
-describe('no function that takes a Bearer token hand-rolls a wildcard origin', () => {
+describe('no file hand-rolls a wildcard origin', () => {
+  // Every function declares its CORS through the endpoint wrapper's `cors` option, whose types
+  // refuse 'public' on an endpoint that takes a token (http/endpoint.ts). So the only place the
+  // wildcard is written down is the builder for public answers; a second copy anywhere here,
+  // helper files included, would be a way around that.
   const functionsDir = join(__dirname, '..');
   const WILDCARD = /'Access-Control-Allow-Origin':\s*'\*'/;
-  const TAKES_BEARER = /authenticateBearer|authenticateAdmin|resolveAccountRequest|accountRateLimitKey|sessionMissingSecondFactor|headers\??\.[aA]uthorization|headers\??\[['"][aA]uthorization['"]\]/;
-
-  /** The deliberate exceptions. Each file's own comment says why its wildcard stays. */
-  const EXCEPTIONS = new Set([
-    // Defines the public and API-key builders; it answers no request itself.
-    'middleware.ts',
-    // A CDN-cached image loaded through <img>; the Bearer path is for non-browser clients.
-    'collection-art.ts',
-  ]);
+  const BUILDER = 'middleware.ts';
 
   const offenders = readdirSync(functionsDir)
-    .filter((name) => name.endsWith('.ts') && !EXCEPTIONS.has(name))
-    .filter((name) => {
-      const source = readFileSync(join(functionsDir, name), 'utf8');
-      return WILDCARD.test(source) && TAKES_BEARER.test(source);
-    });
+    .filter((name) => name.endsWith('.ts') && name !== BUILDER)
+    .filter((name) => WILDCARD.test(readFileSync(join(functionsDir, name), 'utf8')));
 
-  it('finds none outside the documented exceptions', () => {
+  it('finds none outside the public builder', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('still needs each exception', () => {
-    for (const name of EXCEPTIONS) {
-      expect(readFileSync(join(functionsDir, name), 'utf8')).toMatch(WILDCARD);
-    }
+  it('still finds the builder, so the pattern above is matching something', () => {
+    expect(readFileSync(join(functionsDir, BUILDER), 'utf8')).toMatch(WILDCARD);
   });
 });

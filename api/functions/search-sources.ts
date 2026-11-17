@@ -5,8 +5,9 @@ import { cacheGetOrFetch, cachePrefetch, artistCacheKey, type PrefetchedCache } 
 import { getMergeOverrides, getLinkSuppressions, searchPersistSkipReason } from './db';
 import { requestSearchPersist } from './request-persist';
 import { findStoredArtists } from './stored-artists';
-import { checkRateLimit, checkSentryDedup, getClientIp } from './ratelimit';
+import { checkSentryDedup } from './ratelimit';
 import { validateQuery } from './middleware';
+import { endpoint } from './http/endpoint';
 import { FETCH_USER_AGENT, safeFetch } from './safe-fetch';
 import { getTipsLiveSlugs } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
@@ -1681,27 +1682,18 @@ export function attachArtistPageSlugs(
   }
 }
 
-// Netlify function handler
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
-  const timer = new SearchTimer();
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-
-  // Skip rate limiting when called internally from v1 wrappers (which do their own check).
-  // Requires a shared secret to prevent external clients from spoofing this header.
-  const internalSecret = process.env.INTERNAL_FUNCTION_SECRET;
-  if (!internalSecret || event.headers?.['x-internal-skip-ratelimit'] !== internalSecret) {
-    const ip = getClientIp(event.headers || {});
-    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-    if (rl.limited) return rl.response;
-  }
-
-  const queryResult = validateQuery(event.queryStringParameters?.query);
+/**
+ * One search, answered. The endpoint below is this behind its rate limit; the v1 API
+ * (search-sources-v1.ts) calls it directly, behind its own key check and quota, so one search is
+ * never counted against two limits.
+ */
+export async function searchSources(
+  params: Record<string, string | undefined>,
+  timer: SearchTimer = new SearchTimer(),
+): Promise<{ status: number; body: unknown; headers?: Record<string, string> }> {
+  const queryResult = validateQuery(params.query);
   if ('error' in queryResult) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: queryResult.error }),
-    };
+    return { status: 400, body: { error: queryResult.error } };
   }
   const query = queryResult.query;
 
@@ -1709,13 +1701,13 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   // query is the artist name from track metadata and partial-name discovery would
   // surface the wrong artist. Anything else — including absence — means a human
   // typed the query, so fuzzy is the default.
-  const mode: SearchMode = event.queryStringParameters?.mode === 'exact' ? 'exact' : 'fuzzy';
+  const mode: SearchMode = params.mode === 'exact' ? 'exact' : 'fuzzy';
 
   // 'deferred' is sent only by clients that call /api/search/musicbrainz themselves when
   // hasPendingEnrichment is true — they would rather see results now and enrichment a
   // moment later. Absent, we wait for MusicBrainz as before: the v1 API, the edge-rendered
   // pages and shipped app builds never make that second call.
-  const deferEnrichment = event.queryStringParameters?.enrichment === 'deferred';
+  const deferEnrichment = params.enrichment === 'deferred';
 
   try {
     // Normalize the query to handle accented characters (e.g., "Tanerélle" -> "Tanerelle")
@@ -1852,30 +1844,37 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     console.log(`[search-timing] query=${JSON.stringify(normalizedQuery)} mode=${mode}${deferEnrichment ? ' deferred' : ''} ${timer.toLogLine()}`);
 
     return {
-      statusCode: 200,
+      status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
         'Cache-Control': cacheControl,
         'Server-Timing': timer.toServerTiming(),
       },
-      body: JSON.stringify(response),
+      body: response,
     };
   } catch (error) {
     console.error('Search error:', error);
     return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({
+      status: 500,
+      body: {
         error: 'Failed to search',
         query,
         results: [],
-      }),
+      },
     };
   }
 }
 
-export const handler = withSentry(handleRequest);
+// GET only, and any origin: the web app, the Mac app, the extension and the edge-rendered pages
+// all search here. 'strict' is the one tier with a daily quota; it fronts search on purpose
+// (api/functions/CLAUDE.md, "Redis is metered").
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'strict',
+  jsonBody: false,
+}, async ({ query, rateLimitMs }) => {
+  const timer = new SearchTimer();
+  timer.record('ratelimit', rateLimitMs);
+  return searchSources(query, timer);
+}));

@@ -72,7 +72,7 @@ describe('Even search key', () => {
     vi.stubEnv('ALGOLIA_API_KEY', '');
     const fetchSpy = mockUpstreams();
 
-    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
 
     const evenCall = fetchSpy.mock.calls.find(([url]) => String(url).includes('algolia.net'));
     expect(evenCall).toBeDefined();
@@ -86,7 +86,7 @@ describe('Even search key', () => {
     vi.stubEnv('ALGOLIA_API_KEY', 'override-key');
     const fetchSpy = mockUpstreams();
 
-    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
 
     const evenCall = fetchSpy.mock.calls.find(([url]) => String(url).includes('algolia.net'));
     expect((evenCall![1]!.headers as Record<string, string>)['X-Algolia-API-Key']).toBe('override-key');
@@ -95,8 +95,8 @@ describe('Even search key', () => {
   it('a rejected key is not cached as "not on Even", and is reported once', async () => {
     mockUpstreams(403);
 
-    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
-    await handler({ queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
+    await handler({ httpMethod: 'GET', queryStringParameters: { query: 'zzqx test artist', enrichment: 'deferred' } });
 
     expect(cacheDecisions.get(EVEN_KEY)).toBe(false);
     expect(evenReports()).toHaveLength(1);

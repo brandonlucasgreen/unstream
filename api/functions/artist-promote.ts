@@ -15,8 +15,7 @@
 // Everything the browser sends is checked against what Buffer and the database say, so what's
 // saved is always something the sweep can act on.
 
-import { buildCorsHeaders, SECOND_FACTOR_REQUIRED_ERROR, sessionMissingSecondFactor } from './middleware';
-import { checkRateLimit, getClientIp, resolveAccountRequest } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { canUseReleaseAutopost } from './release-autopost-access';
 import {
   defaultAutopostSettings,
@@ -58,13 +57,6 @@ const MAX_VARIANTS = 5;
 const MAX_TEMPLATE_LENGTH = 1000;
 /** How far back "Recent" looks. */
 const RECENT_DAYS = 14;
-
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined> | null;
-  body?: string | null;
-}
 
 /** The image behind a key, as the page shows it. `cover` alone is a campaign's own release. */
 function imageUrlFor(key: string | null, release: AutopostRelease | null, artist: AutopostArtist, uploads: PromoteAsset[]): string | null {
@@ -336,59 +328,46 @@ async function schedulePart(artist: AutopostArtist, settings: AutopostSettings) 
   return { pausedReason: settings.pausedReason, ...(await scheduleState(artist, settings, token, releases, tips, now)) };
 }
 
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS: Record<string, string> = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'PUT') return respond(405, { error: 'Method not allowed' });
-
-  const { key, user } = await resolveAccountRequest(
-    event.headers.authorization || event.headers.Authorization || undefined,
-    getClientIp(event.headers),
-  );
-  const rl = await checkRateLimit(key, 'account', CORS_HEADERS);
-  if (rl.limited) return rl.response as { statusCode: number; headers: Record<string, string>; body: string };
-  if (!user) return respond(401, { error: 'Not signed in' });
-  if (await sessionMissingSecondFactor(event.headers.authorization || event.headers.Authorization || undefined)) return respond(403, { error: SECOND_FACTOR_REQUIRED_ERROR });
-
+async function handleRequest({ method, user, query, body }: SignedInRequest): Promise<EndpointResult> {
   // The gate first, so nothing about the feature, or the artist, is said to anyone it excludes.
-  if (!(await canUseReleaseAutopost(user.email))) return respond(200, { available: false });
+  if (!(await canUseReleaseAutopost(user.email))) return { status: 200, body: { available: false } };
   // /my-artists asks only whether to show the Promote button, before any artist is chosen, so the
   // gate's answer is the whole answer: no artist, database or Buffer read. The tips summary
   // (`/api/tips/settings?summary=1`) is the precedent.
-  if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') return respond(200, { available: true });
+  if (method === 'GET' && query.summary === '1') return { status: 200, body: { available: true } };
 
-  const slug = event.queryStringParameters?.artist;
-  if (!slug) return respond(400, { error: 'artist is required' });
+  const slug = query.artist;
+  if (!slug) return { status: 400, body: { error: 'artist is required' } };
 
   try {
     const artist = await getAutopostArtist({ slug });
-    if (!artist) return respond(404, { error: 'Artist not found' });
-    if (artist.verifiedOwnerId !== user.userId) return respond(403, { error: 'Only this artist’s verified owner can set this up' });
+    if (!artist) return { status: 404, body: { error: 'Artist not found' } };
+    if (artist.verifiedOwnerId !== user.userId) return { status: 403, body: { error: 'Only this artist’s verified owner can set this up' } };
 
     const stored = await getAutopostSettings(artist.id);
     // A claim that changed hands: the old owner's settings (and Buffer) are not the new owner's.
     const current = stored && stored.userId === user.userId ? stored : defaultAutopostSettings(artist.id, user.userId);
 
-    if (event.httpMethod === 'GET') {
-      if (event.queryStringParameters?.part === 'schedule') return respond(200, await schedulePart(artist, current));
-      return respond(200, await pageState(artist, current, Boolean(stored)));
+    if (method === 'GET') {
+      if (query.part === 'schedule') return { status: 200, body: await schedulePart(artist, current) };
+      return { status: 200, body: await pageState(artist, current, Boolean(stored)) };
     }
 
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return respond(400, { error: 'Invalid JSON' });
-    }
+    // PUT from here on: the wrapper has already refused every other method.
     const result = await validatedSettings(body, current);
-    if ('error' in result) return respond(400, result);
+    if ('error' in result) return { status: 400, body: result };
     await saveAutopostSettings(result.settings);
-    return respond(200, await pageState(artist, result.settings, true));
+    return { status: 200, body: await pageState(artist, result.settings, true) };
   } catch (error) {
-    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `artist-promote:${event.httpMethod}` }, extra: { slug } });
-    return respond(500, { error: 'Something went wrong. Try again in a moment.' });
+    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `artist-promote:${method}` }, extra: { slug } });
+    return { status: 500, body: { error: 'Something went wrong. Try again in a moment.' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'PUT'],
+  auth: 'accountWithSecondStep',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

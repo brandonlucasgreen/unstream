@@ -3,94 +3,28 @@
 // Used by the /settings page to populate the form on load.
 
 import { withSentry } from '../lib/sentry';
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, accountRateLimitKey, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type SignedInRequest } from './http/endpoint';
 
-// getUser(token) validates the token against the auth server and returns the
-// user's *current* record (not the stale token claims), so email and
-// user_metadata here are as fresh as a separate admin.getUserById lookup.
-//
-// This is the one account endpoint that still pays for that round trip. The others take
-// their user from resolveAccountRequest, which verifies the JWT locally — but local
-// verification surfaces only `sub` and `email`, and this endpoint needs
-// `user_metadata.has_password`. Reading that from token claims would be a guess about what
-// Supabase puts in an access token, and getting it wrong shows somebody who has a password
-// the "your account was created with a magic link" branch of /settings. So it stays.
-//
-// The cost is smaller here than it looks: the call below is started *before* the rate-limit
-// check and awaited after, so the round trip overlaps Redis rather than following it.
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string; hasPassword: boolean } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(token);
-  if (error || !data.user) return null;
-  return {
-    userId: data.user.id,
-    email: data.user.email || '',
-    hasPassword: !!data.user.user_metadata?.has_password,
-  };
-}
-
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin — never '*' on an endpoint that takes a Bearer token
-  // (fix list item 1 on UNS-212; the old wildcard here was borrowed debt from saved-artists).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // Rate-limit check (Redis) and token validation (Supabase Auth) are both
-  // network round-trips with no data dependency — run them concurrently. Deriving
-  // the rate-limit key first costs nothing to that: it verifies the JWT locally.
-  const ip = getClientIp(event.headers);
-  const rlKey = await accountRateLimitKey(event.headers.authorization, ip);
-  const rlPromise = checkRateLimit(rlKey, 'account', corsHeaders);
-  const userPromise = authenticateRequest(event.headers.authorization).catch(() => null);
-  const rl = await rlPromise;
-  if (rl.limited) return rl.response;
-
-  // GET is the whole surface; a wrong method is a 405, not a missing resource (repo
-  // convention — see artist-releases.ts).
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: { ...corsHeaders, Allow: 'GET, OPTIONS' },
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
+// The wrapper verifies the token locally, which surfaces only the user's id and the email the
+// token was issued with. This endpoint needs the user's *current* record: the email as it is
+// now (it can change after the token was issued) and `user_metadata.has_password`. Reading
+// either from token claims would be a guess about what Supabase puts in an access token, and
+// getting it wrong shows somebody who has a password the "your account was created with a magic
+// link" branch of /settings. So it asks the auth server for the record, alongside the two table
+// reads rather than ahead of them.
+async function handleRequest({ user }: SignedInRequest) {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
-  }
-
-  const user = await userPromise;
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   try {
     // Read username + location from public.usernames (PostgREST-accessible table).
-    // Email and has_password already came back with the token validation above.
     // A pending email change (UNS-212) means the Settings page should show the
     // "confirmation sent to <new address>" notice instead of a quiet success.
-    const [usernameResult, pendingResult] = await Promise.all([
+    const [accountResult, usernameResult, pendingResult] = await Promise.all([
+      client.auth.admin.getUserById(user.userId),
       client
         .from('usernames')
         .select('username, location')
@@ -108,9 +42,16 @@ async function handleRequest(event: {
         .maybeSingle(),
     ]);
 
+    // No record for a token that verified: the account is gone, or the auth server didn't
+    // answer. Either way this is not somebody we can show settings to.
+    const account = accountResult.data?.user;
+    if (accountResult.error || !account) {
+      return { status: 401, body: { error: 'Not authenticated' } };
+    }
+
     if (usernameResult.error) {
       console.error('[me-settings] Error fetching username:', usernameResult.error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
+      return { status: 500, body: { error: 'Failed to load settings' } };
     }
     // pendingResult.error is non-fatal when it's just the table not existing yet: the
     // email_change_requests migration lands with the merge (supabase-migrate.yml on main),
@@ -123,7 +64,7 @@ async function handleRequest(event: {
       /relation .* does not exist|schema cache/i.test(pendingResult.error?.message || '');
     if (pendingResult.error && !PENDING_TABLE_MISSING) {
       console.error('[me-settings] Error fetching pending email change:', pendingResult.error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load settings' }) };
+      return { status: 500, body: { error: 'Failed to load settings' } };
     }
     if (PENDING_TABLE_MISSING) {
       console.warn('[me-settings] email_change_requests table not present yet — pendingEmailChange reported as null');
@@ -132,20 +73,25 @@ async function handleRequest(event: {
     // pendingEmailChange is only ever an unexpired request, so the Settings page can show
     // "waiting for confirmation" without hedging about how stale the row might be.
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         username: usernameResult.data?.username || null,
         location: usernameResult.data?.location ?? null,
-        email: user.email,
-        hasPassword: user.hasPassword,
+        email: account.email || '',
+        hasPassword: !!account.user_metadata?.has_password,
         pendingEmailChange: pendingResult.data?.new_email ?? null,
-      }),
+      },
     };
   } catch (error) {
     console.error('[me-settings] Error:', error);
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { status: 500, body: { error: 'Internal server error' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: false,
+}, handleRequest));

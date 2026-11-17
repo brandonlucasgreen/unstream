@@ -6,14 +6,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Sentry, withSentry } from '../lib/sentry';
 import { getClient } from './db';
-import { authenticateBearer } from './middleware';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { sendNotificationOnce, notifySavedArtistsOfNewLinks } from './notifications';
 import { escapeHtml } from '../shared/html';
 import { safeFetch } from './safe-fetch';
 import { websiteMatchesKnownLink } from './claim-verification';
 import { sendAdminPush } from './admin-push';
-import { buildAccountCorsHeaders } from './account-cors';
 
 const PLATFORM_PATTERNS: [string, RegExp][] = [
   ['bandcamp', /([a-z0-9-]+)\.bandcamp\.com/i],
@@ -319,16 +317,14 @@ function siteName(websiteUrl: string): string {
 async function queueClaimForReview(
   client: SupabaseClient,
   claim: { artistId: string; artistName: string; slug: string; userId: string; email: string; websiteUrl: string },
-  corsHeaders: Record<string, string>
-) {
+): Promise<EndpointResult> {
   const pendingResponse = {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify({
+    status: 200,
+    body: {
       verified: false,
       pendingReview: true,
       message: 'We found the link on your website. Because it isn\'t a site we already have on record for this artist, a person will review your claim, usually within a few days.',
-    }),
+    },
   };
 
   const { data: existingRequest } = await client
@@ -351,9 +347,8 @@ async function queueClaimForReview(
   if (error) {
     console.error('[Claim] Failed to queue claim for review:', error);
     return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'We couldn\'t submit your claim for review. Please try again.' }),
+      status: 500,
+      body: { error: 'We couldn\'t submit your claim for review. Please try again.' },
     };
   }
 
@@ -369,67 +364,19 @@ async function queueClaimForReview(
   return pendingResponse;
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'POST, OPTIONS',
-  );
-
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // Rate limit: strict tier (scraping endpoint)
-  const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
+async function handleRequest(request: SignedInRequest): Promise<EndpointResult> {
   const client = getServiceClient();
   if (!client) {
     return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Service not configured' }),
+      status: 500,
+      body: { error: 'Service not configured' },
     };
   }
 
-  // The shared check, not a local one: claiming binds an artist to this account, so a session that
-  // still owes its second step is refused here as it is on every other artist endpoint.
-  const authUser = await authenticateBearer(event.headers.authorization || event.headers.Authorization);
-  if (!authUser) {
-    return {
-      statusCode: 401,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Authentication required' }),
-    };
-  }
+  const authUser = request.user;
   const userId = authUser.userId;
 
-  let body: { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string; message?: string };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Invalid JSON' }),
-    };
-  }
+  const body = request.body as { action: string; slug?: string; websiteUrl?: string; email?: string; platform?: string; url?: string; message?: string };
 
   // --- ACTION: START ---
   // Creates a pending claim with a verification code
@@ -437,9 +384,8 @@ async function handleRequest(event: {
     const { slug, websiteUrl } = body;
     if (!slug || !websiteUrl) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'slug and websiteUrl are required' }),
+        status: 400,
+        body: { error: 'slug and websiteUrl are required' },
       };
     }
 
@@ -447,9 +393,8 @@ async function handleRequest(event: {
     const urlSafety = isUrlSafeToFetch(websiteUrl);
     if (!urlSafety.safe) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: urlSafety.reason || 'Invalid website URL' }),
+        status: 400,
+        body: { error: urlSafety.reason || 'Invalid website URL' },
       };
     }
 
@@ -462,9 +407,8 @@ async function handleRequest(event: {
 
     if (findError || !artist) {
       return {
-        statusCode: 404,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Artist not found' }),
+        status: 404,
+        body: { error: 'Artist not found' },
       };
     }
 
@@ -477,9 +421,8 @@ async function handleRequest(event: {
 
     if (existingProfile && existingProfile.verified_at && existingProfile.user_id !== userId) {
       return {
-        statusCode: 409,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'This artist has already been claimed' }),
+        status: 409,
+        body: { error: 'This artist has already been claimed' },
       };
     }
 
@@ -493,11 +436,10 @@ async function handleRequest(event: {
       Date.now() - new Date(existingProfile.updated_at).getTime() < PENDING_CLAIM_HOLD_MS
     ) {
       return {
-        statusCode: 409,
-        headers: corsHeaders,
-        body: JSON.stringify({
+        status: 409,
+        body: {
           error: 'Someone else started claiming this artist in the last few days. If this is you, use "Request manual review" and we\'ll sort it out.',
-        }),
+        },
       };
     }
 
@@ -511,9 +453,8 @@ async function handleRequest(event: {
     if (existingClaimProfile?.verified_at) {
       // Already verified — don't allow re-starting the claim flow
       return {
-        statusCode: 409,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'This artist profile is already verified. You can edit it from your dashboard.', alreadyVerified: true }),
+        status: 409,
+        body: { error: 'This artist profile is already verified. You can edit it from your dashboard.', alreadyVerified: true },
       };
     }
 
@@ -542,21 +483,19 @@ async function handleRequest(event: {
     if (upsertError) {
       console.error('[Claim] Failed to create profile:', upsertError);
       return {
-        statusCode: 500,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `Failed to start claim: ${upsertError.message}` }),
+        status: 500,
+        body: { error: `Failed to start claim: ${upsertError.message}` },
       };
     }
 
     const verifyUrl = `https://unstream.stream/a/${slug}`;
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         verifyUrl,
         message: `Add a link to ${verifyUrl} on your website, then verify.`,
-      }),
+      },
     };
   }
 
@@ -566,9 +505,8 @@ async function handleRequest(event: {
     const { slug } = body;
     if (!slug) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'slug is required' }),
+        status: 400,
+        body: { error: 'slug is required' },
       };
     }
 
@@ -581,9 +519,8 @@ async function handleRequest(event: {
 
     if (!artist) {
       return {
-        statusCode: 404,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Artist not found' }),
+        status: 404,
+        body: { error: 'Artist not found' },
       };
     }
 
@@ -596,17 +533,15 @@ async function handleRequest(event: {
 
     if (!profile) {
       return {
-        statusCode: 404,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'No pending claim found. Start the claim flow first.' }),
+        status: 404,
+        body: { error: 'No pending claim found. Start the claim flow first.' },
       };
     }
 
     if (profile.verified_at) {
       return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ verified: true, message: 'Already verified' }),
+        status: 200,
+        body: { verified: true, message: 'Already verified' },
       };
     }
 
@@ -615,12 +550,11 @@ async function handleRequest(event: {
 
     if (!scrapeResult) {
       return {
-        statusCode: 422,
-        headers: corsHeaders,
-        body: JSON.stringify({
+        status: 422,
+        body: {
           verified: false,
           error: scrapeError?.message || "We couldn't reach your website. Make sure the URL is correct and publicly accessible.",
-        }),
+        },
       };
     }
 
@@ -641,12 +575,11 @@ async function handleRequest(event: {
       });
       console.log(`[Claim] Website ${profile.website_url} does not reference artist "${artist.name}"`);
       return {
-        statusCode: 422,
-        headers: corsHeaders,
-        body: JSON.stringify({
+        status: 422,
+        body: {
           verified: false,
           error: `This website doesn't appear to belong to ${artist.name}. The page must mention the artist name in its content, title, or description.`,
-        }),
+        },
       };
     }
 
@@ -679,12 +612,11 @@ async function handleRequest(event: {
         tags: { failureMode: 'missing_linkback' },
       });
       return {
-        statusCode: 422,
-        headers: corsHeaders,
-        body: JSON.stringify({
+        status: 422,
+        body: {
           verified: false,
           error: `We found your website but couldn't find a link to unstream.stream on it. Add a link to https://unstream.stream/a/${slug} and try again.`,
-        }),
+        },
       };
     }
 
@@ -703,7 +635,7 @@ async function handleRequest(event: {
         userId,
         email: authUser.email,
         websiteUrl: profile.website_url,
-      }, corsHeaders);
+      });
     }
 
     // Verification passed! Discover platform links from the website.
@@ -718,9 +650,8 @@ async function handleRequest(event: {
     if (verifyUpdateError) {
       console.error('[Claim] Failed to set verified_at:', verifyUpdateError);
       return {
-        statusCode: 500,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Verification passed but we couldn\'t update your profile. Please try again.' }),
+        status: 500,
+        body: { error: 'Verification passed but we couldn\'t update your profile. Please try again.' },
       };
     }
 
@@ -809,15 +740,14 @@ async function handleRequest(event: {
     }
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         verified: true,
         discoveredLinks: discoveredLinks.length,
         allLinks: Array.from(allLinksMap.values()),
         imageUrl: artist.image_url || null,
         message: `Profile verified! Found ${discoveredLinks.length} platform links on your website.`,
-      }),
+      },
     };
   }
 
@@ -827,25 +757,22 @@ async function handleRequest(event: {
     const { platform, url: avatarPageUrl } = body;
     if (!platform || !avatarPageUrl) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'platform and url are required' }),
+        status: 400,
+        body: { error: 'platform and url are required' },
       };
     }
 
     const imageUrl = await scrapeAvatarFromPlatform(platform, avatarPageUrl);
     if (!imageUrl) {
       return {
-        statusCode: 422,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Could not find a profile photo on that page' }),
+        status: 422,
+        body: { error: 'Could not find a profile photo on that page' },
       };
     }
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ imageUrl }),
+      status: 200,
+      body: { imageUrl },
     };
   }
 
@@ -857,17 +784,15 @@ async function handleRequest(event: {
 
     if (!slug || !message || message.trim().length === 0) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'slug and message are required' }),
+        status: 400,
+        body: { error: 'slug and message are required' },
       };
     }
 
     if (message.length > 5000) {
       return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Message is too long (max 5000 characters)' }),
+        status: 400,
+        body: { error: 'Message is too long (max 5000 characters)' },
       };
     }
 
@@ -880,9 +805,8 @@ async function handleRequest(event: {
 
     if (findError || !artist) {
       return {
-        statusCode: 404,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Artist not found' }),
+        status: 404,
+        body: { error: 'Artist not found' },
       };
     }
 
@@ -895,9 +819,8 @@ async function handleRequest(event: {
 
     if (existingProfile?.verified_at && existingProfile.user_id !== userId) {
       return {
-        statusCode: 409,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'This artist has already been claimed' }),
+        status: 409,
+        body: { error: 'This artist has already been claimed' },
       };
     }
 
@@ -912,9 +835,8 @@ async function handleRequest(event: {
 
     if (existingRequest) {
       return {
-        statusCode: 409,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'You already have a pending verification request for this artist.' }),
+        status: 409,
+        body: { error: 'You already have a pending verification request for this artist.' },
       };
     }
 
@@ -933,9 +855,8 @@ async function handleRequest(event: {
     if (insertError) {
       console.error('[Claim] Failed to create verification request:', insertError);
       return {
-        statusCode: 500,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Failed to submit verification request' }),
+        status: 500,
+        body: { error: 'Failed to submit verification request' },
       };
     }
 
@@ -947,20 +868,28 @@ async function handleRequest(event: {
     await alertClaimAwaitingReview(artist.name, slug, 'They asked for manual verification and left a note.');
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         submitted: true,
         message: 'Your verification request has been submitted. We\'ll review it within a few days.',
-      }),
+      },
     };
   }
 
   return {
-    statusCode: 400,
-    headers: corsHeaders,
-    body: JSON.stringify({ error: 'Invalid action. Use "start", "verify", "fetch-avatar", or "request-manual-review".' }),
+    status: 400,
+    body: { error: 'Invalid action. Use "start", "verify", "fetch-avatar", or "request-manual-review".' },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['POST'],
+  // The shared check against Supabase, not a local one: claiming binds an artist to this account,
+  // so a session that still owes its second step is refused here as it is on every other artist
+  // endpoint.
+  auth: 'bearer',
+  // Strict tier: this is a scraping endpoint.
+  rateLimit: 'strict',
+  jsonBody: true,
+}, handleRequest));

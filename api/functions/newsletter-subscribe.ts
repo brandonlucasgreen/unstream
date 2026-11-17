@@ -26,18 +26,7 @@
 // friction": it converts the form into a way to sign strangers up for mail.
 
 import { Sentry, withSentry } from '../lib/sentry';
-import { checkRateLimit, getClientIp } from './ratelimit';
-
-// Matches the permissive pattern used by the other browser-facing POST endpoints
-// (me-username.ts, saved-artists.ts). No credentials are involved — the request carries
-// only an email address the visitor just typed.
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'X-Content-Type-Options': 'nosniff',
-};
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 // A module constant, not built from request input, so there's no SSRF surface here and
 // nothing for ALLOWED_OUTBOUND_HOSTNAMES to guard. Don't make this configurable.
@@ -56,34 +45,11 @@ const ALLOWED_SOURCES = new Set(['changelog', 'contact', 'platforms', 'artist', 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 254; // RFC 5321 maximum path length
 
-function json(statusCode: number, body: Record<string, unknown>) {
-  return { statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) };
+function json(status: number, body: Record<string, unknown>): EndpointResult {
+  return { status, body };
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'strict', CORS_HEADERS);
-  if (rl.limited && rl.response) return rl.response;
-
-  if (event.httpMethod !== 'POST') {
-    return json(405, { error: 'Method not allowed' });
-  }
-
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return json(400, { error: 'Invalid JSON' });
-  }
-
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
   const email = typeof body.email === 'string' ? body.email.trim() : '';
   if (!email) {
     return json(400, { error: 'Enter your email address.' });
@@ -158,4 +124,12 @@ async function handleRequest(event: {
   return json(502, { error: "Something went wrong signing you up. Please try again." });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // Any origin. No credentials are involved — the request carries only an email address the
+  // visitor just typed.
+  cors: 'public',
+  methods: ['POST'],
+  auth: 'none',
+  rateLimit: 'strict',
+  jsonBody: true,
+}, handleRequest));
