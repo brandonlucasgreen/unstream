@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { fetchWithTimeout, normalizeForComparison } from '../shared-utils';
+import { describeError, fetchWithTimeout, normalizeForComparison } from '../shared-utils';
 
 // Search Bandwagon for artists by scraping search results.
 // Returns a map of normalized artist name -> direct Bandwagon artist URL.
@@ -43,9 +43,10 @@ export async function searchBandwagon(query: string): Promise<Map<string, string
         }
       }
     }
-  } catch (error: any) {
-    if (error.name !== 'AbortError') {
-      console.error('Bandwagon search error:', error.message);
+  } catch (error) {
+    const { name, message } = describeError(error);
+    if (name !== 'AbortError') {
+      console.error('Bandwagon search error:', message);
     }
   }
 

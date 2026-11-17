@@ -76,7 +76,7 @@ describe('embed widget platforms', () => {
 
   it('has no raw non-ASCII text outside its comments', () => {
     const code = widget.split('\n').filter((line) => !line.trimStart().startsWith('//'));
-    expect(code.filter((line) => /[^\x00-\x7F]/.test(line))).toEqual([]);
+    expect(code.filter((line) => /[\u0080-￿]/.test(line))).toEqual([]);
   });
 
   const widgetTable = new Map(

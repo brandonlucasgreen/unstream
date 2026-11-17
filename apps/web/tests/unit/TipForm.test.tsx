@@ -3,10 +3,11 @@
 // than an invisible selection sent to checkout; and Back from Stripe (a bfcache restore) un-sticks
 // "Opening Stripe…".
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ComponentProps } from 'react';
 import { render, screen, fireEvent, cleanup, act, waitFor } from '@testing-library/react';
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 vi.mock('src/contexts/AuthContext', () => ({ useAuth: () => ({ session: null }) }));
 vi.mock('@sentry/react', () => ({ captureException: vi.fn() }));

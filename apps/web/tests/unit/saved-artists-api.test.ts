@@ -97,7 +97,6 @@ describe('saved-artists API - Validation logic', () => {
         artists: null,
       };
 
-      const artistRow = (row as any).artists;
       const result = {
         lastModified: row.last_modified,
         deviceId: row.device_id,

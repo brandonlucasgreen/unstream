@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from '../shared-utils';
+import { describeError, fetchWithTimeout } from '../shared-utils';
 
 // Faircamp webring directory cache (refreshed every 10 minutes)
 let faircampDirectoryCache: Record<string, { title: string; artists: string[]; description: string }> | null = null;
@@ -20,8 +20,9 @@ export async function getFaircampDirectory(): Promise<Record<string, { title: st
     faircampDirectoryCache = await response.json() as Record<string, { title: string; artists: string[]; description: string }>;
     faircampCacheTime = now;
     return faircampDirectoryCache;
-  } catch (error: any) {
-    console.error('Faircamp directory fetch error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('Faircamp directory fetch error:', message);
     return faircampDirectoryCache || {};
   }
 }
@@ -44,8 +45,9 @@ export async function searchFaircamp(query: string): Promise<Map<string, string>
 
       if (results.size >= 10) break;
     }
-  } catch (error: any) {
-    console.error('Faircamp search error:', error.message);
+  } catch (error) {
+    const { message } = describeError(error);
+    console.error('Faircamp search error:', message);
   }
 
   return results;

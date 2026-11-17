@@ -4,8 +4,9 @@
 // straight from disk — no build step, no TypeScript — so it cannot import `api/shared/
 // release-display.ts` the way the edge function and the API do. That makes it a hand-maintained
 // second implementation of claims about someone's income, which is precisely the shape of the
-// bug CLAUDE.md keeps warning about: payout figures are already duplicated across eight files,
-// and one of those copies quoted an unsourced rate to Discord users for months.
+// bug api/CLAUDE.md ("Platform registry") keeps warning about: payout figures are already
+// duplicated across eight files, and one of those copies quoted an unsourced rate to Discord
+// users for months.
 //
 // So rather than restating the expected strings a second time and hoping both copies get edited
 // together, this drives the two implementations over the same inputs and asserts they agree.

@@ -25,7 +25,7 @@ const mockSet = vi.fn();
 // getRedis() calls `new Redis(...)`. Using vi.fn().mockImplementation()
 // creates a proper mock constructor.
 vi.mock('@upstash/redis', () => ({
-  Redis: vi.fn().mockImplementation(function(this: any) {
+  Redis: vi.fn().mockImplementation(function(this: { get: unknown; set: unknown }) {
     this.get = mockGet;
     this.set = mockSet;
   }),

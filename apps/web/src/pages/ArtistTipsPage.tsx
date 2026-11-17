@@ -3,7 +3,8 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArtistTipsPanel } from '../components/ArtistTipsPanel';
-import { TabSkeleton, useReportArtistName } from './ArtistSettingsLayout';
+import { TabSkeleton } from './ArtistSettingsLayout';
+import { useReportArtistName } from '../hooks/useReportArtistName';
 import { connectStripe, getTipSettings, TipsApiError, type TipSettings } from '../services/tips';
 import { useResetOnPageShow } from '../hooks/useResetOnPageShow';
 

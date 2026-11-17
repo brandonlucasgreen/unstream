@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { KIND_COPY } from './PromoteTemplatesEditor';
+import { KIND_COPY } from './PromoteTemplatesEditorUtils';
 import { stepLabel } from '../../../../api/shared/campaign-steps';
-import { needsAttention, PromotePostStatus } from './PromotePostStatus';
+import { PromotePostStatus } from './PromotePostStatus';
+import { needsAttention } from './PromotePostStatusUtils';
 import type { ScheduledPost } from '../services/promote';
 import { addDays, daysBetween } from '../../../../api/shared/calendar-dates';
 

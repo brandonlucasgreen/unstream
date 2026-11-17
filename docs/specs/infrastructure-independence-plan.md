@@ -570,7 +570,7 @@ Behind the same function signatures in `cache.ts`, `ratelimit.ts`, `feature-flag
 | Feature flags, tips-review-notify state, Sentry dedup | KV | Small and rarely written |
 
 - **KV is metered too:** 1M writes a month on Workers Paid. A search can write ~10 platform cache
-  entries, so that's tens of thousands of searches a month. CLAUDE.md's "Redis is metered"
+  entries, so that's tens of thousands of searches a month. `api/functions/CLAUDE.md`'s "Redis is metered"
   section becomes the same rule for KV writes.
 - Delete `upstash-keepalive.yml` and the Upstash env vars; close the account.
 - **Rollback:** revert the PR; Upstash keeps working until its account is closed.

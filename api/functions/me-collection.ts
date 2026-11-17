@@ -10,8 +10,7 @@
 import { withSentry } from '../lib/sentry';
 import { getClient, readAllPages } from './db';
 import { purgeUserShareCacheForUser } from './purge-cache';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import {
   artistUrlFor,
   collectionArtUrl,
@@ -26,39 +25,13 @@ const ITEM_COLUMNS =
 /** The same columns plus the joins the grid needs to build release and artist links. */
 const ITEM_COLUMNS_WITH_LINKS = `${ITEM_COLUMNS}, releases!left (slug, artwork_url, artists (slug))`;
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, POST, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // One verification, not two: deriving the rate-limit bucket already checked the token
-  // (see resolveAccountRequest), so the user it found is the user this handler uses.
-  const ip = getClientIp(event.headers);
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
+async function handleRequest({ method, user, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     // Paged read: a real Bandcamp collection can exceed PostgREST's silent 1,000-row cap.
     const read = await readAllPages<Record<string, unknown> & CollectionRowWithRelease & { id: string }>(
       (from, to) =>
@@ -74,7 +47,7 @@ async function handleRequest(event: {
 
     if (!read.ok) {
       console.error('[me-collection] Error fetching items:', read.reason);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load collection' }) };
+      return { status: 500, body: { error: 'Failed to load collection' } };
     }
 
     const artistPages = await resolveArtistPages(read.rows.map(r => r.artist_name));
@@ -92,54 +65,49 @@ async function handleRequest(event: {
     }));
 
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ items, total: items.length }),
+      status: 200,
+      body: { items, total: items.length },
     };
   }
 
-  if (event.httpMethod === 'POST') {
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
-    }
-
-    const id = typeof body.id === 'string' ? body.id : '';
-    if (!id) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'id is required' }) };
-    }
-    if (typeof body.hidden !== 'boolean') {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'hidden must be a boolean' }) };
-    }
-
-    // The user_id filter is the ownership check — the service-role client bypasses RLS,
-    // so it has to be in the query, not assumed from it.
-    const { data: row, error } = await client
-      .from('collection_items')
-      .update({ hidden: body.hidden })
-      .eq('id', id)
-      .eq('user_id', user.userId)
-      .select(ITEM_COLUMNS)
-      .maybeSingle();
-
-    if (error) {
-      console.error('[me-collection] Error updating item:', error.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update item' }) };
-    }
-    if (!row) {
-      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Item not found' }) };
-    }
-
-    // Hiding an item changes the public page, which is CDN-cached under this tag. Awaited:
-    // a serverless response ends the invocation, so fire-and-forget purges never happen.
-    await purgeUserShareCacheForUser(user.userId, 'me-collection');
-
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(row) };
+  // POST from here on: the wrapper has already refused every other method.
+  const id = typeof body.id === 'string' ? body.id : '';
+  if (!id) {
+    return { status: 400, body: { error: 'id is required' } };
+  }
+  if (typeof body.hidden !== 'boolean') {
+    return { status: 400, body: { error: 'hidden must be a boolean' } };
   }
 
-  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
+  // The user_id filter is the ownership check — the service-role client bypasses RLS,
+  // so it has to be in the query, not assumed from it.
+  const { data: row, error } = await client
+    .from('collection_items')
+    .update({ hidden: body.hidden })
+    .eq('id', id)
+    .eq('user_id', user.userId)
+    .select(ITEM_COLUMNS)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[me-collection] Error updating item:', error.message);
+    return { status: 500, body: { error: 'Failed to update item' } };
+  }
+  if (!row) {
+    return { status: 404, body: { error: 'Item not found' } };
+  }
+
+  // Hiding an item changes the public page, which is CDN-cached under this tag. Awaited:
+  // a serverless response ends the invocation, so fire-and-forget purges never happen.
+  await purgeUserShareCacheForUser(user.userId, 'me-collection');
+
+  return { status: 200, body: row };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

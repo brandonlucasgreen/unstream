@@ -191,8 +191,10 @@ describe('me-notifications handler', () => {
     expect(res!.statusCode).toBe(204);
   });
 
-  it('returns 404 for non-GET/POST methods', async () => {
+  // 405 since the move to the shared endpoint wrapper: a wrong method is a method error, not a
+  // missing resource. (It was a 404 that fell out of the end of the hand-written handler.)
+  it('returns 405 for non-GET/POST methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'DELETE' });
-    expect(res!.statusCode).toBe(404);
+    expect(res!.statusCode).toBe(405);
   });
 });

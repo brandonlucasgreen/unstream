@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { Navigate, Outlet, useLocation, useOutletContext, useParams } from 'react-router-dom';
+import { Suspense, useMemo, useState } from 'react';
+import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { ArtistSettingsHeader, type ArtistSettingsSection } from '../components/ArtistSettingsHeader';
@@ -13,17 +13,6 @@ import { FormSkeleton } from '../components/LoadingSkeletons';
 
 export interface ArtistSettingsContext {
   setArtistName: (name: string) => void;
-}
-
-/**
- * Each page already loads the artist's name with its own data; this hands it up to the header.
- * Outside the layout (a test rendering one page) it does nothing.
- */
-export function useReportArtistName(name: string | undefined) {
-  const context = useOutletContext<ArtistSettingsContext | undefined>();
-  useEffect(() => {
-    if (name) context?.setArtistName(name);
-  }, [context, name]);
 }
 
 export function ArtistSettingsLayout({ section }: { section: ArtistSettingsSection }) {

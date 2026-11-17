@@ -92,7 +92,7 @@ unstream/
 └── docs/                   # Engineering history, specs, postmortems, OpenAPI spec
 ```
 
-[`CLAUDE.md`](CLAUDE.md) is the detailed development guide: how search works, local-dev traps, and the rules behind the code.
+[`CLAUDE.md`](CLAUDE.md) is the development guide: the rules for every change, local-dev traps, and a map. Each area has its own `CLAUDE.md` with the detail (how search works is in [`api/functions/CLAUDE.md`](api/functions/CLAUDE.md), the web app's features in [`apps/web/CLAUDE.md`](apps/web/CLAUDE.md), and so on); the root file lists them.
 
 ## Development
 

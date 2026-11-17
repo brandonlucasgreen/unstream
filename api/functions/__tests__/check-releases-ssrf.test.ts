@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => ({
   isStoredArtistLink: vi.fn(),
   // Null by default: "this artist has never been catalogued", which is what sends every test
   // in this file down the live-scrape path the SSRF rules govern.
-  getReleasesForAlerts: vi.fn(async () => null),
+  getReleasesForAlerts: vi.fn(async (): ReturnType<typeof import('../db').getReleasesForAlerts> => null),
   fetch: vi.fn(),
   lookup: vi.fn(),
 }));
@@ -39,14 +39,15 @@ vi.mock('../db', () => ({
 }));
 
 import { handler } from '../check-releases';
+import { answered } from './answered';
 import { isPrivateIpAddress, isSafePublicHostname, isUrlHostnameAllowed } from '../middleware';
 
 function post(body: unknown) {
-  return handler({
+  return answered(handler({
     httpMethod: 'POST',
     headers: { 'x-nf-client-connection-ip': '1.2.3.4' },
     body: JSON.stringify(body),
-  });
+  }));
 }
 
 /** A minimal Response stand-in; only what safeFetch and the parsers read. */
@@ -564,12 +565,12 @@ describe('backward compatibility with shipped clients', () => {
   });
 
   it('still rejects a non-POST method', async () => {
-    const r = await handler({ httpMethod: 'GET', headers: {} });
+    const r = await answered(handler({ httpMethod: 'GET', headers: {} }));
     expect(r.statusCode).toBe(405);
   });
 
   it('answers the CORS preflight with a wildcard origin for native clients', async () => {
-    const r = await handler({ httpMethod: 'OPTIONS', headers: {} });
+    const r = await answered(handler({ httpMethod: 'OPTIONS', headers: {} }));
     expect(r.statusCode).toBe(204);
     expect(r.headers['Access-Control-Allow-Origin']).toBe('*');
   });
