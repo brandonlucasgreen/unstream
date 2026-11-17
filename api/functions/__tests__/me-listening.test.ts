@@ -150,10 +150,12 @@ describe('me-listening handler', () => {
     expect(res!.statusCode).toBe(204);
   });
 
-  it('returns 404 for other methods', async () => {
+  // 405 since the move to the shared endpoint wrapper: a wrong method is a method error, not a
+  // missing resource. (It was a 404 that fell out of the end of the hand-written handler.)
+  it('returns 405 for other methods', async () => {
     mockTable([]);
     const res = await handler({ httpMethod: 'PUT', headers: { authorization: 'Bearer valid-token' }, body: null });
-    expect(res!.statusCode).toBe(404);
+    expect(res!.statusCode).toBe(405);
   });
 
   it('POST rejects invalid JSON', async () => {

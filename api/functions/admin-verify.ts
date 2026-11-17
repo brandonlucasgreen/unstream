@@ -2,45 +2,24 @@
 // Admin-only endpoint for reviewing artist verification requests.
 
 import { getClient } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { Sentry, withSentry } from '../lib/sentry';
 import { sendNotificationOnce } from './notifications';
 import { escapeHtml } from '../shared/html';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization'] || undefined);
-  if (!admin) {
-    return {
-      statusCode: 401,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
-
+async function handleRequest({ method, user: admin, body: parsedBody }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
     return {
-      statusCode: 500,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Database not configured' }),
+      status: 500,
+      body: { error: 'Database not configured' },
     };
   }
 
   // GET: List all verification requests (pending first, then past decisions)
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     const { data, error } = await client
       .from('verification_requests')
       .select(`
@@ -54,9 +33,8 @@ async function handleRequest(event: {
     if (error) {
       console.error('[Admin] Failed to fetch verification requests:', error);
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to fetch verification requests' }),
+        status: 500,
+        body: { error: 'Failed to fetch verification requests' },
       };
     }
 
@@ -74,9 +52,8 @@ async function handleRequest(event: {
       if (profileError) {
         console.error('[Admin] Failed to fetch artist profiles:', profileError);
         return {
-          statusCode: 500,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({ error: 'Failed to fetch artist profiles' }),
+          status: 500,
+          body: { error: 'Failed to fetch artist profiles' },
         };
       }
 
@@ -117,69 +94,45 @@ async function handleRequest(event: {
     });
 
     return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ requests }),
+      status: 200,
+      body: { requests },
     };
   }
 
-  // POST: Approve or reject a verification request
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  let body: {
+  // POST: Approve or reject a verification request. The wrapper has already refused every
+  // other method.
+  const { action, requestId, reviewerNotes, ownershipVerified } = parsedBody as {
     action?: 'approve' | 'reject';
     requestId?: string;
     reviewerNotes?: string;
     ownershipVerified?: boolean;
   };
 
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Invalid JSON' }),
-    };
-  }
-
-  const { action, requestId, reviewerNotes, ownershipVerified } = body;
-
   if (reviewerNotes && reviewerNotes.length > 2000) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'reviewerNotes must be 2000 characters or fewer' }),
+      status: 400,
+      body: { error: 'reviewerNotes must be 2000 characters or fewer' },
     };
   }
 
   if (!action || !['approve', 'reject'].includes(action)) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'action must be "approve" or "reject"' }),
+      status: 400,
+      body: { error: 'action must be "approve" or "reject"' },
     };
   }
 
   if (!requestId) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'requestId is required' }),
+      status: 400,
+      body: { error: 'requestId is required' },
     };
   }
 
   if (!UUID_REGEX.test(requestId)) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'requestId must be a UUID' }),
+      status: 400,
+      body: { error: 'requestId must be a UUID' },
     };
   }
 
@@ -192,17 +145,15 @@ async function handleRequest(event: {
 
   if (fetchError || !request) {
     return {
-      statusCode: 404,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Verification request not found' }),
+      status: 404,
+      body: { error: 'Verification request not found' },
     };
   }
 
   if (request.status !== 'pending') {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: `Request already ${request.status}` }),
+      status: 400,
+      body: { error: `Request already ${request.status}` },
     };
   }
 
@@ -220,9 +171,8 @@ async function handleRequest(event: {
     // Security gate: admin must explicitly confirm they verified ownership.
     if (!ownershipVerified) {
       return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Approval requires ownership verification' }),
+        status: 400,
+        body: { error: 'Approval requires ownership verification' },
       };
     }
 
@@ -238,17 +188,15 @@ async function handleRequest(event: {
     if (profileLookupError) {
       console.error('[Admin] Failed to look up artist profile:', profileLookupError);
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to look up artist profile' }),
+        status: 500,
+        body: { error: 'Failed to look up artist profile' },
       };
     }
 
     if (existingProfile?.verified_at && existingProfile.user_id !== request.user_id) {
       return {
-        statusCode: 409,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Artist was claimed by another user while this request was pending' }),
+        status: 409,
+        body: { error: 'Artist was claimed by another user while this request was pending' },
       };
     }
 
@@ -264,9 +212,8 @@ async function handleRequest(event: {
       if (verifyError) {
         console.error('[Admin] Failed to verify artist profile:', verifyError);
         return {
-          statusCode: 500,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({ error: 'Failed to update artist profile' }),
+          status: 500,
+          body: { error: 'Failed to update artist profile' },
         };
       }
     } else {
@@ -283,9 +230,8 @@ async function handleRequest(event: {
       if (createError) {
         console.error('[Admin] Failed to create artist profile:', createError);
         return {
-          statusCode: 500,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({ error: 'Failed to create artist profile' }),
+          status: 500,
+          body: { error: 'Failed to create artist profile' },
         };
       }
     }
@@ -314,9 +260,8 @@ async function handleRequest(event: {
     if (updateError) {
       console.error('[Admin] Failed to update verification request:', updateError);
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to update verification request' }),
+        status: 500,
+        body: { error: 'Failed to update verification request' },
       };
     }
 
@@ -353,9 +298,8 @@ async function handleRequest(event: {
     if (updateError) {
       console.error('[Admin] Failed to update verification request:', updateError);
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to update verification request' }),
+        status: 500,
+        body: { error: 'Failed to update verification request' },
       };
     }
 
@@ -371,10 +315,14 @@ async function handleRequest(event: {
   }
 
   return {
-    statusCode: 200,
-    headers: CORS_HEADERS,
-    body: JSON.stringify({ success: true, action, requestId }),
+    status: 200,
+    body: { success: true, action, requestId },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

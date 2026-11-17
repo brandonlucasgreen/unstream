@@ -41,7 +41,8 @@ import {
 import { planForArtist, toTemplateRelease } from './release-autopost-schedule';
 import { listAssets, type PromoteAsset } from './promote-assets-db';
 import { cancelCampaign, createCampaign, listCampaigns, updateCampaign, type Campaign, type NewPost } from './release-campaigns-db';
-import { authorizePromoteRequest, parseBody, type PromoteEvent } from './promote-request';
+import { authorizePromoteRequest } from './promote-request';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { fitsInstagram } from './autopost-media';
 import { bufferState, bufferToken, usableChannels, type BufferState } from './promote-buffer';
 import { AUTOPOST_NETWORK_LIMITS, isImageFirstNetwork } from '../shared/autopost-networks';
@@ -260,47 +261,46 @@ async function pageState(
   };
 }
 
-async function handleRequest(event: PromoteEvent) {
-  const auth = await authorizePromoteRequest(event, ['GET', 'POST', 'PUT', 'DELETE']);
+async function handleRequest({ method, user, query, body }: SignedInRequest): Promise<EndpointResult> {
+  const auth = await authorizePromoteRequest(user, query);
   if ('response' in auth) return auth.response;
-  const { artist, userId, respond } = auth;
+  const { artist } = auth;
+  const { userId } = user;
   const now = new Date();
-  const action = event.queryStringParameters?.action;
-  const id = event.queryStringParameters?.id;
+  const action = query.action;
+  const id = query.id;
 
   try {
-    const organizationId = event.queryStringParameters?.organizationId || null;
-    if (event.httpMethod === 'GET') return respond(200, await pageState(artist, userId, now, organizationId));
+    const organizationId = query.organizationId || null;
+    if (method === 'GET') return { status: 200, body: await pageState(artist, userId, now, organizationId) };
 
     const campaigns = await listCampaigns(artist.id);
-    if (event.httpMethod === 'DELETE') {
-      if (!id || !campaigns.some(c => c.id === id)) return respond(404, { error: 'Campaign not found' });
+    if (method === 'DELETE') {
+      if (!id || !campaigns.some(c => c.id === id)) return { status: 404, body: { error: 'Campaign not found' } };
       await cancelCampaign(id);
-      return respond(200, await pageState(artist, userId, now));
+      return { status: 200, body: await pageState(artist, userId, now) };
     }
 
-    const body = parseBody(event);
-    if (!body) return respond(400, { error: 'Invalid JSON' });
     const settings = await ownSettings(artist.id, userId);
     const today = localDate(now.toISOString(), settings?.timezone ?? 'America/New_York');
     const [releases, uploads] = await Promise.all([getAutopostReleases(artist.id), listAssets(artist.id)]);
 
-    const existing = event.httpMethod === 'PUT' ? campaigns.find(c => c.id === id) : undefined;
-    if (event.httpMethod === 'PUT' && !existing) return respond(404, { error: 'Campaign not found' });
+    const existing = method === 'PUT' ? campaigns.find(c => c.id === id) : undefined;
+    if (method === 'PUT' && !existing) return { status: 404, body: { error: 'Campaign not found' } };
     const releaseId = existing?.releaseId ?? (typeof body.releaseId === 'string' ? body.releaseId : '');
     const release = releases.find(r => r.id === releaseId);
-    if (!release) return respond(400, { error: 'Choose one of your releases' });
+    if (!release) return { status: 400, body: { error: 'Choose one of your releases' } };
 
     if (action === 'overlay') {
       const dates = Array.isArray(body.dates) ? body.dates.filter(isDate).slice(0, MAX_POSTS) : [];
       const history = await getAutopostHistory(artist.id, now);
       const campaignId = typeof body.campaignId === 'string' ? body.campaignId : null;
-      return respond(200, { autopost: autopostAround({ artist, settings, releases, history, uploads, campaigns }, { releaseId, dates, campaignId }, now) });
+      return { status: 200, body: { autopost: autopostAround({ artist, settings, releases, history, uploads, campaigns }, { releaseId, dates, campaignId }, now) } };
     }
 
     const releaseDate = body.releaseDate;
-    if (!isDate(releaseDate)) return respond(400, { error: 'Choose the release date' });
-    if (daysBetween(today, releaseDate) > MAX_DAYS_AHEAD) return respond(400, { error: 'That release date is too far ahead' });
+    if (!isDate(releaseDate)) return { status: 400, body: { error: 'Choose the release date' } };
+    if (daysBetween(today, releaseDate) > MAX_DAYS_AHEAD) return { status: 400, body: { error: 'That release date is too far ahead' } };
 
     if (action === 'propose') {
       const startDate = isDate(body.startDate) ? body.startDate : today;
@@ -317,32 +317,32 @@ async function handleRequest(event: PromoteEvent) {
       });
       const history = await getAutopostHistory(artist.id, now);
       const autopost = autopostAround({ artist, settings, releases, history, uploads, campaigns }, { releaseId, dates: posts.map(p => p.date), campaignId: null }, now);
-      return respond(200, { posts, autopost });
+      return { status: 200, body: { posts, autopost } };
     }
 
-    if (action) return respond(400, { error: 'Unknown action' });
+    if (action) return { status: 400, body: { error: 'Unknown action' } };
 
     // Saving: there has to be somewhere to post. The channels are this campaign's own, checked
     // against what Buffer says now, so a channel removed there can't be stored.
     const wantedOrg = typeof body.organizationId === 'string' && body.organizationId ? body.organizationId : null;
     const buffer = await promoteBuffer(userId, wantedOrg ?? settings?.organizationId ?? null);
-    if (!buffer.connected) return respond(400, { error: 'Connect Buffer first' });
-    if (!buffer.organizationId) return respond(400, { error: 'Choose which Buffer organization to post from' });
+    if (!buffer.connected) return { status: 400, body: { error: 'Connect Buffer first' } };
+    if (!buffer.organizationId) return { status: 400, body: { error: 'Choose which Buffer organization to post from' } };
     const wanted = Array.isArray(body.channelIds) ? body.channelIds.filter((id): id is string => typeof id === 'string') : [];
     const channels = usableChannels(buffer, [...new Set(wanted)]);
-    if (channels.length === 0) return respond(400, { error: 'Choose at least one channel for this campaign' });
+    if (channels.length === 0) return { status: 400, body: { error: 'Choose at least one channel for this campaign' } };
     const services = [...new Set(channels.map(c => c.service))];
     const timezone = typeof body.timezone === 'string' && isValidTimezone(body.timezone) ? body.timezone : null;
 
-    if (event.httpMethod === 'POST' && campaigns.some(c => c.releaseId === releaseId)) {
-      return respond(400, { error: 'This release already has a campaign' });
+    if (method === 'POST' && campaigns.some(c => c.releaseId === releaseId)) {
+      return { status: 400, body: { error: 'This release already has a campaign' } };
     }
     const sent = existing?.posts.filter(p => p.status === 'pushing' || p.status === 'pushed') ?? [];
     const otherCampaignDates = campaigns.filter(c => c.id !== existing?.id).flatMap(c => c.posts.map(p => p.postDate));
     const result = validatePosts(body.posts, {
       release, releaseDate, artist, uploads, services, today, sentDates: sent.map(p => p.postDate), otherCampaignDates,
     });
-    if ('error' in result) return respond(400, result);
+    if ('error' in result) return { status: 400, body: result };
 
     // Only once everything is valid: settling the organization is a write of its own.
     await rememberOrganization(artist.id, userId, settings, buffer.organizationId, timezone);
@@ -351,13 +351,19 @@ async function handleRequest(event: PromoteEvent) {
       await updateCampaign(existing.id, releaseDate, channelIds, result.posts);
     } else {
       const created = await createCampaign({ artistId: artist.id, userId, releaseId, releaseDate, channelIds, posts: result.posts });
-      if (!created) return respond(400, { error: 'This release already has a campaign' });
+      if (!created) return { status: 400, body: { error: 'This release already has a campaign' } };
     }
-    return respond(200, await pageState(artist, userId, now, null, { buffer, releases, uploads }));
+    return { status: 200, body: await pageState(artist, userId, now, null, { buffer, releases, uploads }) };
   } catch (error) {
-    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `artist-campaigns:${event.httpMethod}` }, extra: { artistId: artist.id, action } });
-    return respond(500, { error: 'Something went wrong. Try again in a moment.' });
+    Sentry.captureException(error, { tags: { area: 'release-autopost', kind: `artist-campaigns:${method}` }, extra: { artistId: artist.id, action } });
+    return { status: 500, body: { error: 'Something went wrong. Try again in a moment.' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  auth: 'accountWithSecondStep',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

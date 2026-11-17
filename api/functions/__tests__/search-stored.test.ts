@@ -76,7 +76,7 @@ afterEach(() => {
 
 describe('/api/search/stored', () => {
   it('returns the claimed profile first, then known artists, each once', async () => {
-    const response = await storedHandler({ queryStringParameters: { query: 'Kid Lightbulbs' } });
+    const response = await storedHandler({ httpMethod: 'GET', queryStringParameters: { query: 'Kid Lightbulbs' } });
 
     expect(response.statusCode).toBe(200);
     const { results } = JSON.parse(response.body);
@@ -87,8 +87,8 @@ describe('/api/search/stored', () => {
   });
 
   it('returns exactly the cards the full search returns for the same artists', async () => {
-    const early = JSON.parse((await storedHandler({ queryStringParameters: { query: 'Kid Lightbulbs' } })).body).results;
-    const fullResponse = await searchHandler({ queryStringParameters: { query: 'Kid Lightbulbs' } });
+    const early = JSON.parse((await storedHandler({ httpMethod: 'GET', queryStringParameters: { query: 'Kid Lightbulbs' } })).body).results;
+    const fullResponse = await searchHandler({ httpMethod: 'GET', queryStringParameters: { query: 'Kid Lightbulbs' } });
     if (!fullResponse) throw new Error('search handler returned no response');
     const full = JSON.parse(fullResponse.body).results;
     expect(full.length).toBeGreaterThan(0);
@@ -103,14 +103,14 @@ describe('/api/search/stored', () => {
     dbMocks.findKnownArtistSlugsByName.mockRejectedValue(new Error('connection reset'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const response = await storedHandler({ queryStringParameters: { query: 'Kid Lightbulbs' } });
+    const response = await storedHandler({ httpMethod: 'GET', queryStringParameters: { query: 'Kid Lightbulbs' } });
 
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body).results).toEqual([]);
   });
 
   it('rejects a missing query', async () => {
-    const response = await storedHandler({ queryStringParameters: {} });
+    const response = await storedHandler({ httpMethod: 'GET', queryStringParameters: {} });
     expect(response.statusCode).toBe(400);
   });
 });

@@ -40,6 +40,10 @@ export function buildCorsHeaders(
 /**
  * Build public CORS headers for endpoints that don't require auth.
  * Allows any origin (existing behavior for public endpoints).
+ *
+ * No `Vary: Origin`: the answer is `*` whoever asks, so it doesn't vary, and saying it does
+ * would have a cache keep one copy of the same public answer per calling origin (every site
+ * embedding the widget, every extension install's origin).
  */
 export function buildPublicCorsHeaders(): Record<string, string> {
   return {
@@ -47,7 +51,6 @@ export function buildPublicCorsHeaders(): Record<string, string> {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Vary': 'Origin',
     'X-Content-Type-Options': 'nosniff',
   };
 }

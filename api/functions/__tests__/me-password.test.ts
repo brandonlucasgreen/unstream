@@ -8,10 +8,8 @@ const mocks = vi.hoisted(() => {
     mockAuthAdmin: {
       getUserById: vi.fn(),
       updateUserById: vi.fn(),
-      mfa: {
-        listFactors: vi.fn(),
-      },
     },
+    mockGetUser: vi.fn(),
     mockSignInWithPassword: vi.fn(),
     mockCreateClient: vi.fn(() => ({
       auth: {
@@ -28,8 +26,8 @@ const mocks = vi.hoisted(() => {
 });
 
 // A JWT-shaped access token whose payload carries the given claims, so the
-// aal2 path can be exercised without the real signing key — me-password only
-// decodes the payload; the token was verified by getUser, mocked above.
+// aal2 path can be exercised without the real signing key — the shared sign-in
+// check only decodes the payload; the token was verified by getUser, mocked above.
 function tokenWithClaims(payload: Record<string, unknown>): string {
   const part = (obj: unknown) => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return `${part({ alg: 'HS256', typ: 'JWT' })}.${part(payload)}.sig`;
@@ -63,20 +61,17 @@ describe('me-password handler', () => {
     process.env.SUPABASE_ANON_KEY = 'anon-key';
     process.env.SUPABASE_SERVICE_KEY = 'service-key';
     mocks.mockCheckRateLimit.mockResolvedValue({ limited: false });
-    mocks.mockCreateClient.mockReturnValue({
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: { id: 'user-1', email: 'test@example.com' } },
-          error: null,
-        }),
-        signInWithPassword: mocks.mockSignInWithPassword,
-      },
-    });
     // No factors by default: the common account has no second step, and
     // 'valid-token' is not a decodable JWT, so its session reads as aal1.
-    mocks.mockAuthAdmin.mfa.listFactors.mockResolvedValue({
-      data: { factors: [] },
+    mocks.mockGetUser.mockResolvedValue({
+      data: { user: { id: 'user-1', email: 'test@example.com' } },
       error: null,
+    });
+    mocks.mockCreateClient.mockReturnValue({
+      auth: {
+        getUser: mocks.mockGetUser,
+        signInWithPassword: mocks.mockSignInWithPassword,
+      },
     });
   });
 
@@ -143,16 +138,21 @@ describe('me-password handler', () => {
     expect(res!.statusCode).toBe(204);
   });
 
-  describe('two-step verification (defense in depth)', () => {
+  // The second-step check moved from this handler to the shared sign-in check the endpoint
+  // wrapper runs (auth: 'bearer'), which reads the account's factors off the user record getUser
+  // returns and refuses a half-signed-in session as a 401, before the handler runs at all.
+  describe('two-step verification', () => {
+    /** What getUser answers for an account with one factor in the given state. */
+    const userWithFactor = (status: string) => ({
+      data: { user: { id: 'user-1', email: 'test@example.com', factors: [{ id: 'f1', status }] } },
+      error: null,
+    });
+
     it('refuses an aal1 session when the account has a verified factor, without touching the password', async () => {
-      mocks.mockAuthAdmin.mfa.listFactors.mockResolvedValue({
-        data: { factors: [{ id: 'f1', status: 'verified' }] },
-        error: null,
-      });
+      mocks.mockGetUser.mockResolvedValue(userWithFactor('verified'));
 
       const res = await handler(validEvent);
-      expect(res!.statusCode).toBe(403);
-      expect(JSON.parse(res!.body).error).toContain('two-step verification');
+      expect(res!.statusCode).toBe(401);
       expect(mocks.mockSignInWithPassword).not.toHaveBeenCalled();
       expect(mocks.mockAuthAdmin.updateUserById).not.toHaveBeenCalled();
     });
@@ -163,15 +163,11 @@ describe('me-password handler', () => {
 
       const res = await handler(validEvent);
       expect(res!.statusCode).toBe(200);
-      expect(mocks.mockAuthAdmin.mfa.listFactors).toHaveBeenCalledTimes(1);
       expect(mocks.mockAuthAdmin.updateUserById).toHaveBeenCalledTimes(1);
     });
 
     it('treats an unverified factor as no second step', async () => {
-      mocks.mockAuthAdmin.mfa.listFactors.mockResolvedValue({
-        data: { factors: [{ id: 'f1', status: 'unverified' }] },
-        error: null,
-      });
+      mocks.mockGetUser.mockResolvedValue(userWithFactor('unverified'));
       mocks.mockSignInWithPassword.mockResolvedValue({ error: null });
       mocks.mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
 
@@ -179,7 +175,8 @@ describe('me-password handler', () => {
       expect(res!.statusCode).toBe(200);
     });
 
-    it('does not ask about factors at all when the session completed the second step (aal2)', async () => {
+    it('proceeds for an account with a verified factor when the session completed the second step (aal2)', async () => {
+      mocks.mockGetUser.mockResolvedValue(userWithFactor('verified'));
       mocks.mockSignInWithPassword.mockResolvedValue({ error: null });
       mocks.mockAuthAdmin.updateUserById.mockResolvedValue({ error: null });
 
@@ -188,17 +185,13 @@ describe('me-password handler', () => {
         headers: { authorization: `Bearer ${tokenWithClaims({ sub: 'user-1', aal: 'aal2' })}` },
       });
       expect(res!.statusCode).toBe(200);
-      expect(mocks.mockAuthAdmin.mfa.listFactors).not.toHaveBeenCalled();
     });
 
-    it('fails closed when the factor lookup errors', async () => {
-      mocks.mockAuthAdmin.mfa.listFactors.mockResolvedValue({
-        data: null,
-        error: { message: 'supabase down' },
-      });
+    it('fails closed when Supabase cannot vouch for the session', async () => {
+      mocks.mockGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'supabase down' } });
 
       const res = await handler(validEvent);
-      expect(res!.statusCode).toBe(500);
+      expect(res!.statusCode).toBe(401);
       expect(mocks.mockSignInWithPassword).not.toHaveBeenCalled();
       expect(mocks.mockAuthAdmin.updateUserById).not.toHaveBeenCalled();
     });

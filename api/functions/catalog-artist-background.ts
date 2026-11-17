@@ -30,7 +30,8 @@ import {
 import { hasCatalogueableLink } from './catalogueable-platforms';
 import { refreshDeadArtistPhoto } from './artist-photo-refresh';
 import { linkCollectionItemsForArtist } from './collection-matching';
-import { isInternalRequest, isUrlHostnameAllowed } from './middleware';
+import { isUrlHostnameAllowed } from './middleware';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 import { safeFetch, safeHostname } from './safe-fetch';
 import {
   bandcampMusicUrl,
@@ -306,34 +307,13 @@ const MIRLO_API_KEY = process.env.MIRLO_API_KEY;
 
 const MIRLO_USER_AGENT = 'Unstream/1.0 (https://unstream.stream - ethical music finder)';
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  headers?: Record<string, string | undefined>;
-  body?: string;
-}) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: '' };
-  }
-
-  // The blast radius of the shared internal secret is small here: cooldown and hourly caps are
-  // enforced below regardless of who calls, and only artists already in our database can be named.
-  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
-    return { statusCode: 401, body: '' };
-  }
-
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
   // Checked here as well as at the caller. The caller-side gate stops a preview from asking;
   // this one means the guarantee holds no matter who asks, since this function is what actually
   // writes to the production database.
   if (!isCatalogEnabled()) {
     console.log('[catalog] refusing — RELEASE_CATALOG_ENABLED is not set on this deploy');
-    return { statusCode: 403, body: JSON.stringify({ skipped: 'cataloging disabled on this deploy' }) };
-  }
-
-  let body: { artistIds?: unknown; trigger?: unknown };
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, body: '' };
+    return { status: 403, body: { skipped: 'cataloging disabled on this deploy' } };
   }
 
   const artistIds = Array.isArray(body.artistIds)
@@ -344,7 +324,7 @@ async function handleRequest(event: {
   const trigger: CatalogTrigger =
     body.trigger === 'saved' || body.trigger === 'scheduled' ? body.trigger : 'searched';
 
-  if (artistIds.length === 0) return { statusCode: 400, body: '' };
+  if (artistIds.length === 0) return { status: 400 };
 
   let catalogued = 0;
   let skipped = 0;
@@ -404,7 +384,7 @@ async function handleRequest(event: {
   }
 
   console.log(`[catalog] trigger=${trigger} catalogued=${catalogued} skipped=${skipped}`);
-  return { statusCode: 200, body: JSON.stringify({ catalogued, skipped }) };
+  return { status: 200, body: { catalogued, skipped } };
 }
 
 /**
@@ -1237,4 +1217,12 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  // The blast radius of the shared internal secret is small here: cooldown and hourly caps are
+  // enforced in the handler regardless of who calls, and only artists already in our database
+  // can be named.
+  auth: 'internal',
+  jsonBody: true,
+}, handleRequest));

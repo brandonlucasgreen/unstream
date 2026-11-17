@@ -6,7 +6,7 @@
 // Bandcamp presence at all.
 
 import { getClient, deleteStoredLinksForUrl, invalidateAdminListCache } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { normalizeForComparison, normalizeUrlForMatch } from './search-utils';
 import { Sentry, withSentry } from '../lib/sentry';
 
@@ -32,41 +32,17 @@ function isStorableLinkUrl(url: string): boolean {
   }
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string> | null;
-  body?: string;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const admin = await authenticateAdmin(
-    event.headers['authorization'] || event.headers['Authorization'] || undefined
-  );
-  if (!admin) {
-    return {
-      statusCode: 401,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
-
+async function handleRequest({ method, user: admin, query, body: parsedBody }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
     return {
-      statusCode: 500,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Database not configured' }),
+      status: 500,
+      body: { error: 'Database not configured' },
     };
   }
 
   // GET: list suppressions, newest first, for review and undo
-  if (event.httpMethod === 'GET') {
+  if (method === 'GET') {
     const { data, error } = await client
       .from('platform_link_suppressions')
       .select('id, url, source_id, artist_name, artist_name_norm, reason, created_by, created_at')
@@ -80,27 +56,24 @@ async function handleRequest(event: {
         extra: { detail: error.message },
       });
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to load suppressions' }),
+        status: 500,
+        body: { error: 'Failed to load suppressions' },
       };
     }
 
     return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ suppressions: data || [] }),
+      status: 200,
+      body: { suppressions: data || [] },
     };
   }
 
   // DELETE: undo a suppression. The link comes back on the next uncached search.
-  if (event.httpMethod === 'DELETE') {
-    const id = event.queryStringParameters?.id;
+  if (method === 'DELETE') {
+    const id = query.id;
     if (!id || !UUID_REGEX.test(id)) {
       return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'A valid suppression id is required' }),
+        status: 400,
+        body: { error: 'A valid suppression id is required' },
       };
     }
 
@@ -108,9 +81,8 @@ async function handleRequest(event: {
     if (error) {
       console.error('[Admin] Failed to delete link suppression:', error);
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to remove suppression' }),
+        status: 500,
+        body: { error: 'Failed to remove suppression' },
       };
     }
 
@@ -118,18 +90,11 @@ async function handleRequest(event: {
     // suppressed for up to five minutes after an admin undid the suppression.
     await invalidateAdminListCache('link-suppressions');
 
-    return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true }) };
+    return { status: 200, body: { success: true } };
   }
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
-  let body: {
+  // POST from here on: the wrapper has already refused every other method.
+  const body = parsedBody as {
     url?: string;
     source_id?: string | null;
     artist_name?: string | null;
@@ -137,30 +102,18 @@ async function handleRequest(event: {
     reason?: string | null;
   };
 
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'Invalid JSON' }),
-    };
-  }
-
   const url = (body.url || '').trim();
   if (!url) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'url is required' }),
+      status: 400,
+      body: { error: 'url is required' },
     };
   }
 
   if (!isStorableLinkUrl(url)) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'url must be an http(s) link' }),
+      status: 400,
+      body: { error: 'url must be an http(s) link' },
     };
   }
 
@@ -168,9 +121,8 @@ async function handleRequest(event: {
   const artistName = (body.artist_name || '').trim();
   if (scope === 'artist' && !artistName) {
     return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: 'artist_name is required unless scope is "global"' }),
+      status: 400,
+      body: { error: 'artist_name is required unless scope is "global"' },
     };
   }
 
@@ -203,12 +155,11 @@ async function handleRequest(event: {
       extra: { detail: error.message, url: normalizedUrl, scope },
     });
     return {
-      statusCode: 500,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({
+      status: 500,
+      body: {
         error: 'Failed to save suppression',
         detail: error.message || error.code || String(error),
-      }),
+      },
     };
   }
 
@@ -224,15 +175,19 @@ async function handleRequest(event: {
   );
 
   return {
-    statusCode: 201,
-    headers: CORS_HEADERS,
-    body: JSON.stringify({
+    status: 201,
+    body: {
       success: true,
       suppression: data ?? null,
       alreadySuppressed,
       storedLinksRemoved: storedRemoved,
-    }),
+    },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

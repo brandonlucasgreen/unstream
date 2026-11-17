@@ -72,13 +72,15 @@ vi.mock('../../lib/sentry', () => ({
   withSentry: (h: unknown) => h,
 }));
 
-const { handler } = await import('../me-buffer');
+const { handler: accountHandler } = await import('../me-buffer');
+const { handler: callbackHandler } = await import('../me-buffer-callback');
 const { Sentry } = await import('../../lib/sentry');
 
 type Res = { statusCode: number; headers: Record<string, string>; body: string };
 
+// Routed as netlify.toml does: the callback is a function of its own, everything else is me-buffer.
 const call = (method: string, path: string, query = '', body?: unknown) =>
-  handler({
+  (path === '/callback' ? callbackHandler : accountHandler)({
     httpMethod: method,
     headers: { authorization: 'Bearer t' },
     rawUrl: `https://unstream.stream/api/me/buffer${path}${query}`,

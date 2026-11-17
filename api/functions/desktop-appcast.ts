@@ -1,6 +1,7 @@
 import { withSentry } from '../lib/sentry';
 import { MAC_RELEASE, isSparkleReady, type MacRelease } from '../shared/desktop-release';
 import { escapeXml } from '../shared/feed-format';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 // The Sparkle appcast the Mac app reads (SUFeedURL in apps/mac/Unstream/Info-macOS.plist).
 // Routed at /appcast.xml — the conventional path, and the one baked into shipped builds, so
@@ -39,7 +40,7 @@ export function buildAppcast(release: MacRelease): string {
 `;
 }
 
-async function handleRequest(event: { httpMethod?: string }) {
+async function handleRequest(): Promise<EndpointResult> {
   const headers = {
     'Content-Type': 'application/xml; charset=utf-8',
     // Sparkle checks once a day per install, so this only smooths bursts — but it also means
@@ -47,11 +48,13 @@ async function handleRequest(event: { httpMethod?: string }) {
     'Cache-Control': 'public, max-age=900',
   };
 
-  if (event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD') {
-    return { statusCode: 405, headers, body: '' };
-  }
-
-  return { statusCode: 200, headers, body: buildAppcast(MAC_RELEASE) };
+  return { status: 200, raw: buildAppcast(MAC_RELEASE), headers };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'none',
+  jsonBody: false,
+}, handleRequest));

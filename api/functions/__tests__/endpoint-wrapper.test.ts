@@ -9,18 +9,26 @@ const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   resolveAccountRequest: vi.fn(),
   authenticateAdmin: vi.fn(),
+  authenticateBearer: vi.fn(),
+  authenticateApiKey: vi.fn(),
+  isInternalRequest: vi.fn(),
+  checkApiRateLimit: vi.fn(),
   sessionMissingSecondFactor: vi.fn(),
   captureException: vi.fn(),
 }));
 
 vi.mock('../ratelimit', () => ({
   checkRateLimit: mocks.checkRateLimit,
+  checkApiRateLimit: mocks.checkApiRateLimit,
   resolveAccountRequest: mocks.resolveAccountRequest,
   getClientIp: () => '203.0.113.7',
 }));
 vi.mock('../middleware', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../middleware')>()),
   authenticateAdmin: mocks.authenticateAdmin,
+  authenticateBearer: mocks.authenticateBearer,
+  authenticateApiKey: mocks.authenticateApiKey,
+  isInternalRequest: mocks.isInternalRequest,
   sessionMissingSecondFactor: mocks.sessionMissingSecondFactor,
 }));
 vi.mock('../../lib/sentry', () => ({
@@ -29,7 +37,10 @@ vi.mock('../../lib/sentry', () => ({
 
 import {
   endpoint,
+  type ApiKeyEndpointOptions,
+  type ApiKeyRequest,
   type EndpointEvent,
+  type InternalEndpointOptions,
   type PublicEndpointOptions,
   type PublicRequest,
   type SignedInEndpointOptions,
@@ -58,6 +69,28 @@ const PUBLIC: PublicEndpointOptions = {
   rateLimit: 'lenient',
   jsonBody: false,
 };
+const BEARER: SignedInEndpointOptions = {
+  cors: 'account',
+  methods: ['GET', 'POST'],
+  auth: 'bearer',
+  rateLimit: 'standard',
+  jsonBody: true,
+};
+const INTERNAL: InternalEndpointOptions = {
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: true,
+};
+const V1: ApiKeyEndpointOptions = {
+  cors: 'siteOrApiKey',
+  methods: ['GET'],
+  auth: 'apiKey',
+  envelope: 'v1',
+  jsonBody: false,
+};
+const API_KEY = { id: 'key-1', keyPrefix: 'uns_abc', tier: 'free' as const, dailyLimit: 100, perMinute: 30, ownerEmail: 'dev@example.com' };
+const QUOTA = { limit: 30, remaining: 29, reset: 1790000000 };
 
 /** An endpoint function that records what it was handed and answers 200. */
 function recorder<Request>() {
@@ -81,6 +114,10 @@ beforeEach(() => {
   mocks.checkRateLimit.mockResolvedValue({ limited: false });
   mocks.resolveAccountRequest.mockResolvedValue({ key: 'user:user-1', user: FAN });
   mocks.authenticateAdmin.mockResolvedValue(ADMIN);
+  mocks.authenticateBearer.mockResolvedValue(FAN);
+  mocks.authenticateApiKey.mockResolvedValue(null);
+  mocks.isInternalRequest.mockReturnValue(true);
+  mocks.checkApiRateLimit.mockResolvedValue({ limited: false, rateLimitInfo: QUOTA });
   mocks.sessionMissingSecondFactor.mockResolvedValue(false);
 });
 
@@ -144,7 +181,7 @@ describe('preflight and methods', () => {
 
     expect(response.statusCode).toBe(405);
     expect(errorOf(response)).toBe('Method not allowed');
-    expect(response.headers.Allow).toBe('GET, POST, OPTIONS');
+    expect(response.headers.Allow).toBe('GET, HEAD, POST, OPTIONS');
     expect(originOf(response)).toBe(LOCAL_DEV);
     expect(mocks.resolveAccountRequest).not.toHaveBeenCalled();
     expect(mocks.checkRateLimit).not.toHaveBeenCalled();
@@ -166,7 +203,9 @@ describe("auth: 'none'", () => {
     expect(response.statusCode).toBe(200);
     expect(mocks.checkRateLimit).toHaveBeenCalledTimes(1);
     expect(mocks.checkRateLimit).toHaveBeenCalledWith('203.0.113.7', 'lenient', expect.objectContaining({ 'Access-Control-Allow-Origin': '*' }));
-    expect(calls).toEqual([{ method: 'GET', query: { query: 'argent' }, body: {} }]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ method: 'GET', query: { query: 'argent' }, body: {} });
+    expect(calls[0]).not.toHaveProperty('user');
     // No token is ever looked at on a public endpoint.
     expect(mocks.resolveAccountRequest).not.toHaveBeenCalled();
     expect(mocks.authenticateAdmin).not.toHaveBeenCalled();
@@ -434,5 +473,337 @@ describe('an error the function throws', () => {
       throw new Error('secret detail');
     })(event());
     expect(response.body).not.toContain('secret detail');
+  });
+});
+
+describe("CORS: the endpoint's own methods, and 'none'", () => {
+  it("'site' and 'public' advertise the methods the endpoint listed, not the builder's fixed list", async () => {
+    const site = await endpoint({ ...ACCOUNT, cors: 'site', methods: ['GET', 'PUT'] }, recorder<SignedInRequest>().respond)(event({ httpMethod: 'OPTIONS' }));
+    expect(site.headers['Access-Control-Allow-Methods']).toBe('GET, PUT, OPTIONS');
+
+    const open = await endpoint(PUBLIC, recorder<PublicRequest>().respond)(event({ httpMethod: 'OPTIONS' }));
+    expect(open.headers['Access-Control-Allow-Methods']).toBe('GET, OPTIONS');
+  });
+
+  it("'public' does not say it varies by Origin: the answer is the same for everyone", async () => {
+    const response = await endpoint(PUBLIC, recorder<PublicRequest>().respond)(event({ headers: { origin: FOREIGN } }));
+    expect(response.headers.Vary).toBeUndefined();
+  });
+
+  it("'none' sends no CORS header at all, and still says its JSON is JSON", async () => {
+    const response = await endpoint({ ...PUBLIC, cors: 'none' }, recorder<PublicRequest>().respond)(event({ headers: { origin: FOREIGN } }));
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers).toEqual({ 'Content-Type': 'application/json' });
+  });
+
+  it("'none' has no preflight: OPTIONS is a 405 like any other method it didn't list", async () => {
+    const response = await endpoint({ ...PUBLIC, cors: 'none' }, recorder<PublicRequest>().respond)(event({ httpMethod: 'OPTIONS' }));
+
+    expect(response.statusCode).toBe(405);
+    expect(response.headers.Allow).toBe('GET, HEAD');
+  });
+});
+
+describe('rateLimit shapes', () => {
+  it("'none' spends no Redis command", async () => {
+    const response = await endpoint({ ...PUBLIC, rateLimit: 'none' }, recorder<PublicRequest>().respond)(event());
+
+    expect(response.statusCode).toBe(200);
+    expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+  });
+
+  it('a function of the method picks the tier for each', async () => {
+    const options: PublicEndpointOptions = {
+      ...PUBLIC,
+      methods: ['GET', 'POST'],
+      rateLimit: (method) => (method === 'POST' ? 'strict' : 'standard'),
+    };
+    await endpoint(options, recorder<PublicRequest>().respond)(event());
+    await endpoint(options, recorder<PublicRequest>().respond)(event({ httpMethod: 'POST' }));
+
+    expect(mocks.checkRateLimit.mock.calls.map(([key, tier]) => [key, tier])).toEqual([
+      ['203.0.113.7', 'standard'],
+      ['203.0.113.7', 'strict'],
+    ]);
+  });
+
+  it("{ tier, by: 'ip' } on an account endpoint limits by IP before the token is read", async () => {
+    const order: string[] = [];
+    mocks.checkRateLimit.mockImplementation(async () => { order.push('limit'); return { limited: false }; });
+    mocks.resolveAccountRequest.mockImplementation(async () => { order.push('token'); return { key: 'user:user-1', user: FAN }; });
+
+    const { calls, respond } = recorder<SignedInRequest>();
+    await endpoint({ ...ACCOUNT, rateLimit: { tier: 'strict', by: 'ip' } }, respond)(event());
+
+    expect(order).toEqual(['limit', 'token']);
+    // Still one rate-limit call, against the IP rather than the account.
+    expect(mocks.checkRateLimit).toHaveBeenCalledTimes(1);
+    expect(mocks.checkRateLimit).toHaveBeenCalledWith('203.0.113.7', 'strict', expect.anything());
+    expect(calls[0].user).toEqual(FAN);
+  });
+
+  it("a request over an IP limit never has its token read", async () => {
+    mocks.checkRateLimit.mockResolvedValue({ limited: true, response: { statusCode: 429, headers: {}, body: '{}' } });
+    const response = await endpoint({ ...ACCOUNT, rateLimit: { tier: 'strict', by: 'ip' } }, recorder<SignedInRequest>().respond)(event());
+
+    expect(response.statusCode).toBe(429);
+    expect(mocks.resolveAccountRequest).not.toHaveBeenCalled();
+  });
+
+  it('tells the function how long the limit check took', async () => {
+    const { calls, respond } = recorder<PublicRequest>();
+    await endpoint(PUBLIC, respond)(event());
+    expect(calls[0].rateLimitMs).toEqual(expect.any(Number));
+
+    const unlimited = recorder<PublicRequest>();
+    await endpoint({ ...PUBLIC, rateLimit: 'none' }, unlimited.respond)(event());
+    expect(unlimited.calls[0].rateLimitMs).toBe(0);
+  });
+});
+
+describe("auth: 'bearer'", () => {
+  it('limits by IP, then checks the token against Supabase, and hands over the user', async () => {
+    const order: string[] = [];
+    mocks.checkRateLimit.mockImplementation(async () => { order.push('limit'); return { limited: false }; });
+    mocks.authenticateBearer.mockImplementation(async () => { order.push('supabase'); return FAN; });
+
+    const { calls, respond } = recorder<SignedInRequest>();
+    const response = await endpoint(BEARER, respond)(event());
+
+    expect(response.statusCode).toBe(200);
+    expect(order).toEqual(['limit', 'supabase']);
+    expect(mocks.checkRateLimit).toHaveBeenCalledTimes(1);
+    expect(mocks.checkRateLimit).toHaveBeenCalledWith('203.0.113.7', 'standard', expect.objectContaining({ 'Access-Control-Allow-Origin': LOCAL_DEV }));
+    expect(mocks.authenticateBearer).toHaveBeenCalledWith('Bearer token');
+    expect(calls[0].user).toEqual(FAN);
+    // The fast local check is the other modes' business.
+    expect(mocks.resolveAccountRequest).not.toHaveBeenCalled();
+  });
+
+  it('answers 401 with CORS to a token Supabase refuses, a half-finished two-step sign-in included', async () => {
+    // authenticateBearer answers null for both: a bad token, and a session that owes its second step.
+    mocks.authenticateBearer.mockResolvedValue(null);
+    const { calls, respond } = recorder<SignedInRequest>();
+    const response = await endpoint(BEARER, respond)(event());
+
+    expect(response.statusCode).toBe(401);
+    expect(errorOf(response)).toBe('Authentication required');
+    expect(originOf(response)).toBe(LOCAL_DEV);
+    expect(calls).toEqual([]);
+  });
+
+  it('a request over the limit never reaches Supabase', async () => {
+    mocks.checkRateLimit.mockResolvedValue({ limited: true, response: { statusCode: 429, headers: {}, body: '{}' } });
+    const response = await endpoint(BEARER, recorder<SignedInRequest>().respond)(event());
+
+    expect(response.statusCode).toBe(429);
+    expect(mocks.authenticateBearer).not.toHaveBeenCalled();
+  });
+
+  it("rateLimit 'none' spends nothing and still authenticates", async () => {
+    const response = await endpoint({ ...BEARER, rateLimit: 'none' }, recorder<SignedInRequest>().respond)(event());
+
+    expect(response.statusCode).toBe(200);
+    expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+    expect(mocks.authenticateBearer).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("auth: 'internal'", () => {
+  it('lets a call with the internal secret through, with no rate limit and no CORS', async () => {
+    const { calls, respond } = recorder<PublicRequest>();
+    const response = await endpoint(INTERNAL, respond)(event({ httpMethod: 'POST', body: '{"userId":"u1"}' }));
+
+    expect(response.statusCode).toBe(200);
+    expect(mocks.isInternalRequest).toHaveBeenCalledWith('Bearer token');
+    expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+    expect(response.headers['Access-Control-Allow-Origin']).toBeUndefined();
+    expect(calls[0].body).toEqual({ userId: 'u1' });
+  });
+
+  it('answers 401 to anything else, before the body is parsed or the function runs', async () => {
+    mocks.isInternalRequest.mockReturnValue(false);
+    const { calls, respond } = recorder<PublicRequest>();
+    const response = await endpoint(INTERNAL, respond)(event({ httpMethod: 'POST', body: 'not json' }));
+
+    expect(response.statusCode).toBe(401);
+    expect(errorOf(response)).toBe('Unauthorized');
+    expect(calls).toEqual([]);
+  });
+});
+
+describe("auth: 'apiKey' (the v1 API)", () => {
+  const dataOf = (response: { body: string }) => JSON.parse(response.body);
+
+  it('without a key: unstream.stream only, the anonymous quota, and the envelope', async () => {
+    const { calls, respond } = recorder<ApiKeyRequest>();
+    const response = await endpoint(V1, respond)(event({ headers: { origin: FOREIGN } }));
+
+    expect(response.statusCode).toBe(200);
+    expect(originOf(response)).toBe(SITE);
+    expect(mocks.checkApiRateLimit).toHaveBeenCalledTimes(1);
+    expect(mocks.checkApiRateLimit).toHaveBeenCalledWith(null, '203.0.113.7', expect.anything());
+    // The ordinary limiter is not also spent.
+    expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+    expect(calls[0].apiKey).toBeNull();
+    expect(dataOf(response)).toEqual({
+      data: { ok: true },
+      meta: { api_version: '1', request_id: expect.any(String), rate_limit: QUOTA },
+    });
+  });
+
+  it('with a valid key: any origin, the key\'s own quota, and the key handed to the function', async () => {
+    mocks.authenticateApiKey.mockResolvedValue(API_KEY);
+    const { calls, respond } = recorder<ApiKeyRequest>();
+    const response = await endpoint(V1, respond)(event({ headers: { origin: FOREIGN, 'x-api-key': 'uns_abc123' } }));
+
+    expect(mocks.authenticateApiKey).toHaveBeenCalledWith('uns_abc123');
+    expect(originOf(response)).toBe('*');
+    expect(mocks.checkApiRateLimit).toHaveBeenCalledWith(API_KEY, '203.0.113.7', expect.anything());
+    expect(calls[0].apiKey).toEqual(API_KEY);
+  });
+
+  it('puts the quota headers and the request id on every answer after the check', async () => {
+    const response = await endpoint(V1, async () => ({ status: 404, body: { error: 'Artist not found' } }))(event());
+
+    expect(response.headers).toMatchObject({
+      'X-RateLimit-Limit': '30',
+      'X-RateLimit-Remaining': '29',
+      'X-RateLimit-Reset': '1790000000',
+      'X-Request-Id': expect.any(String),
+    });
+    // The envelope names the quota only on a success.
+    expect(dataOf(response)).toEqual({
+      data: { error: 'Artist not found' },
+      meta: { api_version: '1', request_id: response.headers['X-Request-Id'] },
+    });
+  });
+
+  it("hands the limiter's own 429 back untouched", async () => {
+    const limited = { statusCode: 429, headers: { 'Retry-After': '60' }, body: '{"error":"Daily request limit exceeded. Please try again tomorrow."}' };
+    mocks.checkApiRateLimit.mockResolvedValue({ limited: true, response: limited });
+    const { calls, respond } = recorder<ApiKeyRequest>();
+
+    expect(await endpoint(V1, respond)(event())).toBe(limited);
+    expect(calls).toEqual([]);
+  });
+
+  it('wraps its own refusals in the envelope too', async () => {
+    const response = await endpoint(V1, recorder<ApiKeyRequest>().respond)(event({ httpMethod: 'POST' }));
+
+    expect(response.statusCode).toBe(405);
+    expect(dataOf(response).data).toEqual({ error: 'Method not allowed' });
+    expect(dataOf(response).meta.request_id).toBe(response.headers['X-Request-Id']);
+  });
+});
+
+describe("envelope: 'v1' on a public endpoint", () => {
+  it('wraps the body and adds the request id, with no quota to name', async () => {
+    const response = await endpoint({ ...PUBLIC, rateLimit: 'none', envelope: 'v1' }, recorder<PublicRequest>().respond)(event());
+
+    expect(JSON.parse(response.body)).toEqual({
+      data: { ok: true },
+      meta: { api_version: '1', request_id: response.headers['X-Request-Id'] },
+    });
+  });
+});
+
+describe('what the function is handed, beyond the body', () => {
+  it('the headers, the path and the whole URL', async () => {
+    const { calls, respond } = recorder<PublicRequest>();
+    await endpoint(PUBLIC, respond)(event({
+      headers: { 'stripe-signature': 't=1,v1=abc' },
+      path: '/api/v1/artist/low',
+      rawUrl: 'https://unstream.stream/api/v1/artist/low?x=1',
+    }));
+
+    expect(calls[0].headers['stripe-signature']).toBe('t=1,v1=abc');
+    expect(calls[0].path).toBe('/api/v1/artist/low');
+    expect(calls[0].rawUrl).toBe('https://unstream.stream/api/v1/artist/low?x=1');
+  });
+
+  it('the body as it was sent, for a signature check, decoded when Netlify base64-encoded it', async () => {
+    const { calls, respond } = recorder<PublicRequest>();
+    const raw = '{"id":"evt_1",  "type":"checkout.session.completed"}';
+    await endpoint({ ...PUBLIC, methods: ['POST'] }, respond)(event({ httpMethod: 'POST', body: raw }));
+    await endpoint({ ...PUBLIC, methods: ['POST'] }, respond)(event({
+      httpMethod: 'POST',
+      body: Buffer.from(raw).toString('base64'),
+      isBase64Encoded: true,
+    }));
+
+    expect(calls.map((call) => call.rawBody)).toEqual([raw, raw]);
+    // jsonBody is false here, so nothing was parsed.
+    expect(calls[0].body).toEqual({});
+  });
+
+  it('parses a base64-encoded JSON body like any other', async () => {
+    const { calls, respond } = recorder<SignedInRequest>();
+    await endpoint(ACCOUNT, respond)(event({
+      httpMethod: 'POST',
+      body: Buffer.from('{"location":"Brooklyn"}').toString('base64'),
+      isBase64Encoded: true,
+    }));
+
+    expect(calls[0].body).toEqual({ location: 'Brooklyn' });
+  });
+
+  it('answers HEAD wherever GET is served, as a GET, without parsing a body', async () => {
+    // Calendar clients, image fetchers and uptime checks probe with HEAD; Netlify drops the body.
+    const { calls, respond } = recorder<PublicRequest>();
+    const response = await endpoint({ ...PUBLIC, jsonBody: true }, respond)(event({ httpMethod: 'HEAD', body: 'not json' }));
+
+    expect(response.statusCode).toBe(200);
+    expect(calls[0].method).toBe('GET');
+    // Counted like the GET it is.
+    expect(mocks.checkRateLimit).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses HEAD where GET is not served', async () => {
+    const response = await endpoint({ ...PUBLIC, methods: ['POST'] }, recorder<PublicRequest>().respond)(event({ httpMethod: 'HEAD' }));
+
+    expect(response.statusCode).toBe(405);
+    expect(response.headers.Allow).toBe('POST, OPTIONS');
+  });
+});
+
+describe('answers that are not a JSON body', () => {
+  it('a result with no body is sent with an empty one', async () => {
+    const response = await endpoint(PUBLIC, async () => ({ status: 204 }))(event());
+
+    expect(response.statusCode).toBe(204);
+    expect(response.body).toBe('');
+    expect(originOf(response)).toBe('*');
+  });
+
+  it('a raw result is sent as it is, under its own Content-Type, with the CORS headers', async () => {
+    const response = await endpoint(PUBLIC, async () => ({
+      status: 200,
+      raw: 'iVBORw0KGgo=',
+      headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' },
+      isBase64Encoded: true,
+    }))(event());
+
+    expect(response).toEqual({
+      statusCode: 200,
+      headers: expect.objectContaining({ 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' }),
+      body: 'iVBORw0KGgo=',
+      isBase64Encoded: true,
+    });
+  });
+
+  it("a redirect from an endpoint with no CORS carries its Location and nothing else", async () => {
+    const response = await endpoint({ ...PUBLIC, cors: 'none', rateLimit: 'none' }, async () => ({
+      status: 302,
+      raw: '',
+      headers: { Location: 'https://unstream.stream/curator/new?buffer=connected' },
+    }))(event());
+
+    expect(response).toEqual({
+      statusCode: 302,
+      headers: { Location: 'https://unstream.stream/curator/new?buffer=connected' },
+      body: '',
+    });
   });
 });

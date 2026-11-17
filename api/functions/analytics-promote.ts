@@ -18,34 +18,16 @@
 // usage count.
 
 import { getClient, readAllPages } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult } from './http/endpoint';
 import { Sentry, withSentry } from '../lib/sentry';
 
 interface SettingsRow { artist_id: string; paused_reason: string | null }
 interface CampaignRow { id: string; artist_id: string }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-}) {
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization']);
-  if (!admin) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const today = new Date().toISOString().slice(0, 10);
@@ -82,13 +64,12 @@ async function handleRequest(event: {
       extra: { reasons },
       tags: { context: 'analytics.promote' },
     });
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch Promote usage' }) };
+    return { status: 500, body: { error: 'Failed to fetch Promote usage' } };
   }
 
   return {
-    statusCode: 200,
-    headers: CORS_HEADERS,
-    body: JSON.stringify({
+    status: 200,
+    body: {
       autopost: {
         enabled: settings.rows.length,
         paused: settings.rows.filter(r => r.paused_reason !== null).length,
@@ -97,8 +78,13 @@ async function handleRequest(event: {
         running: campaigns.rows.length,
         artists: new Set(campaigns.rows.map(r => r.artist_id)).size,
       },
-    }),
+    },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET'],
+  auth: 'admin',
+  jsonBody: false,
+}, handleRequest));

@@ -4,7 +4,7 @@
 // to its caller immediately and then runs for up to 15 minutes — Bandcamp warns that large
 // libraries sync slowly in the beta, so this must be off the request path.
 //
-// Authenticated with the shared internal secret (isInternalRequest), same as
+// Authenticated with the shared internal secret (`auth: 'internal'`), same as
 // catalog-artist-background.ts: an open endpoint that makes Unstream hit Bandcamp with a
 // stored credential on demand would be both an amplifier and a credential oracle.
 //
@@ -19,7 +19,6 @@ import { Sentry, withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { cacheGetOrFetch } from './cache';
 import { purgeUserShareCacheForUser } from './purge-cache';
-import { isInternalRequest } from './middleware';
 import { decryptCredential } from './credential-crypto';
 import {
   subsonicFetchCollection,
@@ -30,8 +29,7 @@ import {
 import { resolveCollectionArtists, type CollectionResolveSummary } from './collection-matching';
 import { releaseMatchKey } from './release-utils';
 import { normalizeForComparison } from './search-utils';
-
-const RESPONSE_HEADERS = { 'Content-Type': 'application/json' };
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 /** Rows per upsert batch — keeps each PostgREST request comfortably sized. */
 const UPSERT_CHUNK = 500;
@@ -225,32 +223,15 @@ export function missingArtistsNote(missingArtists: string[]): string | null {
   return `Bandcamp failed to import the following artists: ${list}. Please re-sync to try those again. If they’re still missing, sign out of bandcamp.com and back in, then re-sync. If neither of these succeed, contact us.`;
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-  if (!isInternalRequest(event.headers.authorization)) {
-    return { statusCode: 401, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  let userId: string;
-  try {
-    const body = JSON.parse(event.body || '{}');
-    userId = typeof body.userId === 'string' ? body.userId : '';
-  } catch {
-    return { statusCode: 400, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
-  }
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
+  const userId = typeof body.userId === 'string' ? body.userId : '';
   if (!userId) {
-    return { statusCode: 400, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'userId is required' }) };
+    return { status: 400, body: { error: 'userId is required' } };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const { data: connection, error: connectionError } = await client
@@ -261,12 +242,12 @@ async function handleRequest(event: {
 
   if (connectionError) {
     console.error('[bandcamp-sync] Error loading connection:', connectionError.message);
-    return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Failed to load connection' }) };
+    return { status: 500, body: { error: 'Failed to load connection' } };
   }
   if (!connection) {
     // Disconnected between request and run — nothing to do, and no row to mark.
     console.log('[bandcamp-sync] no connection row for user — skipping');
-    return { statusCode: 200, headers: RESPONSE_HEADERS, body: JSON.stringify({ skipped: true }) };
+    return { status: 200, body: { skipped: true } };
   }
 
   async function recordFailure(message: string) {
@@ -276,7 +257,7 @@ async function handleRequest(event: {
       .eq('user_id', userId);
   }
 
-  let outcome: { statusCode: number; body: Record<string, unknown> };
+  let outcome: { status: number; body: Record<string, unknown> };
 
   try {
     let credential: SubsonicCredential;
@@ -298,7 +279,7 @@ async function handleRequest(event: {
         extra: { stage: 'decrypt' },
       });
       await recordFailure('The stored credential is no longer readable. Disconnect and reconnect Bandcamp.');
-      return { statusCode: 500, headers: RESPONSE_HEADERS, body: JSON.stringify({ error: 'Credential unusable' }) };
+      return { status: 500, body: { error: 'Credential unusable' } };
     }
 
     const { albums, missingArtists, listFailure } = await subsonicFetchCollection(credential);
@@ -422,7 +403,7 @@ async function handleRequest(event: {
     console.log(`[bandcamp-sync] imported ${uniqueAlbums.length} albums (${toWrite.length} written, ${uniqueAlbums.length - toWrite.length} unchanged, ${matches.releases.size} matched to releases, ${matches.artists.size} artists)${listFailure ? `, artist by artist after "${listFailure}", ${missingArtists.length} artists missing` : ''}`);
 
     outcome = {
-      statusCode: 200,
+      status: 200,
       body: {
         imported: uniqueAlbums.length,
         missingArtists: missingArtists.length,
@@ -449,17 +430,21 @@ async function handleRequest(event: {
         // failing sync (2026-11-06). Ends "contact us." so the settings page can link it.
         : 'Bandcamp returned an error when Unstream asked for your collection. Please try signing out of bandcamp.com and back in, then re-sync. If that doesn’t work, disconnect Bandcamp below and connect it again. If neither of these succeed, contact us.'
     );
-    outcome = { statusCode: 500, body: { error: 'Sync failed' } };
+    outcome = { status: 500, body: { error: 'Sync failed' } };
   }
 
   // Discovery for the items we hold, on both paths — see resolveArtistsSafely.
   const resolved = await resolveArtistsSafely(userId);
 
   return {
-    statusCode: outcome.statusCode,
-    headers: RESPONSE_HEADERS,
-    body: JSON.stringify({ ...outcome.body, resolved }),
+    status: outcome.status,
+    body: { ...outcome.body, resolved },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: true,
+}, handleRequest));

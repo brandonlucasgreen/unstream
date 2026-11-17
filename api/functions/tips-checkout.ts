@@ -14,13 +14,11 @@
 // Signed-in fans may send their Bearer token so the tip is attributed to them (their goal
 // contributions, "supported" on their saved artist). Signed-out fans can tip too.
 //
-// Anonymous and public, so CORS is restricted to unstream.stream (buildCorsHeaders), like the
-// site's other anonymous endpoints: no other site's page should be able to start a payment form.
 // Stripe's own error messages never reach a fan; Sentry gets them.
 
 import { getClient } from './db';
-import { authenticateBearerFast, buildCorsHeaders } from './middleware';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { endpoint, type EndpointResult, type OptionalUserRequest } from './http/endpoint';
+import type { BearerUser } from './middleware';
 import { isStripeRejection, stripeMode, stripeRequest, StripeError, type StripeCheckoutSession } from './stripe';
 import { getGoals, tipEligibility } from './tips-db';
 import { getFeatureFlag } from './feature-flags';
@@ -40,24 +38,7 @@ import { Sentry, withSentry } from '../lib/sentry';
 const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]{0,98}[a-z0-9])?$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-  queryStringParameters?: Record<string, string | undefined> | null;
-}
-
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const withCors = (res: { statusCode: number; body: string }) => ({ ...res, headers: CORS_HEADERS });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-
-  const ip = getClientIp(event.headers);
-  // POST creates a payment form, so it gets the strict limiter (card-testing defence, spec §9);
-  // GET only reads the page's data.
-  const rl = await checkRateLimit(`ip:${ip}`, event.httpMethod === 'POST' ? 'strict' : 'standard', CORS_HEADERS);
-  if (rl.limited) return rl.response!;
-
+async function handleRequest({ method, query, body, user }: OptionalUserRequest): Promise<EndpointResult> {
   try {
     // UNS-215: the fan-facing tips flag (tipsFans) gates this surface as well. A flag that is off
     // — or a flag store that cannot be read, since that store fails closed — means no tip page and
@@ -65,13 +46,12 @@ async function handleRequest(event: HandlerEvent) {
     // the fan half of the split: what lets an artist register is tipsArtists, a separate flag, and
     // a fan can still be refused here after the artist has onboarded.
     const tipsFlagOn = await getFeatureFlag('tipsFans');
-    if (event.httpMethod === 'GET') return withCors(await readTipPage(event.queryStringParameters?.slug ?? '', tipsFlagOn));
-    if (event.httpMethod === 'POST') return withCors(await createCheckout(event, tipsFlagOn));
-    return withCors(respond(405, { error: 'Method not allowed' }));
+    if (method === 'GET') return await readTipPage(query.slug ?? '', tipsFlagOn);
+    return await createCheckout(body, user, tipsFlagOn);
   } catch (err) {
     Sentry.captureException(err, {
       extra: {
-        context: `tips-checkout.${event.httpMethod}`,
+        context: `tips-checkout.${method}`,
         stripeStatus: err instanceof StripeError ? err.status : undefined,
         stripeCode: err instanceof StripeError ? err.code : undefined,
       },
@@ -81,8 +61,8 @@ async function handleRequest(event: HandlerEvent) {
     // codes are programmatic, documented identifiers meant for display; the raw message may carry
     // account details we don't broadcast). The tip page surfaces it to the artist-side ops flow,
     // and it turns "can't take tips" from a guess into a diagnosis when it happens in production.
-    if (isStripeRejection(err)) return withCors(respond(409, { error: "This artist can't take tips right now.", code: err.code ?? null }));
-    return withCors(respond(502, { error: "Couldn't start the payment. Try again in a moment." }));
+    if (isStripeRejection(err)) return respond(409, { error: "This artist can't take tips right now.", code: err.code ?? null });
+    return respond(502, { error: "Couldn't start the payment. Try again in a moment." });
   }
 }
 
@@ -152,18 +132,11 @@ interface TipPagePayload {
   maxCents?: number;
 }
 
-async function createCheckout(event: HandlerEvent, tipsFlagOn: boolean) {
-  // First, before the body is even parsed: while the flag is off there is no way to start a
+async function createCheckout(body: Record<string, unknown>, fan: BearerUser | null, tipsFlagOn: boolean) {
+  // First, before anything in the body is read: while the flag is off there is no way to start a
   // payment. A 409 with the same words every other refusal uses — the answer an old client
   // already knows how to show, and nothing that looks like a session it could redirect to.
   if (!tipsFlagOn) return respond(409, { error: "This artist can't take tips right now." });
-
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return respond(400, { error: 'Invalid JSON' });
-  }
 
   const slug = typeof body.artistSlug === 'string' ? body.artistSlug : '';
   if (!SLUG_REGEX.test(slug)) return respond(400, { error: 'Invalid artist' });
@@ -184,9 +157,6 @@ async function createCheckout(event: HandlerEvent, tipsFlagOn: boolean) {
     if (!open.some(g => g.id === body.goalId)) return respond(400, { error: 'That goal is closed' });
     goalId = body.goalId;
   }
-
-  // Optional attribution. A bad token is ignored rather than refused: the tip still works.
-  const fan = event.headers.authorization ? await authenticateBearerFast(event.headers.authorization).catch(() => null) : null;
 
   const breakdown = tipBreakdown(amountCents, coverFees, effectiveFeeBasisPoints(account));
 
@@ -242,4 +212,16 @@ function effectiveFeeBasisPoints(account: { fee_basis_points: number; country: s
   return canChargeApplicationFee(account.country) ? account.fee_basis_points : 0;
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // Anonymous and public, so CORS is restricted to unstream.stream, like the site's other
+  // anonymous endpoints: no other site's page should be able to start a payment form.
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  // Tipping needs no account. A fan who is signed in is handed over as `user`, so the tip can
+  // be credited to them; nobody is refused for not being one.
+  auth: 'optional',
+  // POST creates a payment form, so it gets the strict limiter (card-testing defence, spec §9);
+  // GET only reads the page's data.
+  rateLimit: (method) => (method === 'POST' ? 'strict' : 'standard'),
+  jsonBody: true,
+}, handleRequest));

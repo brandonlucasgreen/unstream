@@ -8,10 +8,10 @@
 // direct read of artist_analytics needs no RPC wrapper.
 
 import { getClient } from './db';
-import { isInternalRequest } from './middleware';
 import { sendNotificationOnce, filterByPreference, subscriptionFooter, SUBSCRIPTION_EMAIL_HEADERS } from './notifications';
 import { escapeHtml } from '../shared/html';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 const RECAP_WINDOW_DAYS = 7;
 
@@ -45,21 +45,10 @@ function summarize(rows: AnalyticsRow[]): { searches: number; views: number; cli
   return { searches, views, clicks };
 }
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  headers?: Record<string, string | undefined>;
-}) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const { data: profiles, error: profilesError } = await client
@@ -72,12 +61,12 @@ async function handleRequest(event: {
       level: 'error',
       extra: { error: profilesError.message },
     });
-    return { statusCode: 503, body: JSON.stringify({ error: profilesError.message }) };
+    return { status: 503, body: { error: profilesError.message } };
   }
 
   const rows = (profiles || []) as VerifiedProfileRow[];
   if (rows.length === 0) {
-    return { statusCode: 200, body: JSON.stringify({ sent: 0, skipped: 0, optedOut: 0 }) };
+    return { status: 200, body: { sent: 0, skipped: 0, optedOut: 0 } };
   }
 
   const enabledUserIds = new Set(
@@ -140,7 +129,12 @@ async function handleRequest(event: {
     sent++;
   }
 
-  return { statusCode: 200, body: JSON.stringify({ sent, skipped, optedOut }) };
+  return { status: 200, body: { sent, skipped, optedOut } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: false,
+}, handleRequest));

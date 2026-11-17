@@ -3,8 +3,8 @@
 
 import { withSentry } from '../lib/sentry';
 import { persistEnrichment, getLinkSuppressions } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { validateQuery } from './middleware';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 import { normalizeSearchQuery, isUrlSuppressed, bandcampSubdomainOf, type LinkSuppression } from './search-utils';
 import {
   getMusicBrainzEnrichment,
@@ -78,19 +78,10 @@ function stripSuppressedLinks(
 }
 
 // Netlify function handler
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  const queryResult = validateQuery(event.queryStringParameters?.query);
+async function handleRequest({ query: params }: PublicRequest): Promise<EndpointResult> {
+  const queryResult = validateQuery(params.query);
   if ('error' in queryResult) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: queryResult.error }),
-    };
+    return { status: 400, body: { error: queryResult.error } };
   }
   const query = queryResult.query;
 
@@ -121,14 +112,12 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       // and the failure is only cached for the one-minute TTL, so a recovery is seen immediately.
       console.log('[MusicBrainz] unavailable; enrichment skipped (upstream)');
       return {
-        statusCode: 200,
+        status: 200,
+        body: unavailableResult(query),
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
           // Do not let the CDN cache an unavailable upstream either.
           'Cache-Control': 'no-store',
         },
-        body: JSON.stringify(unavailableResult(query)),
       };
     }
 
@@ -153,23 +142,15 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     }
 
     return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 's-maxage=300, stale-while-revalidate',
-      },
-      body: JSON.stringify(filtered),
+      status: 200,
+      body: filtered,
+      headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate' },
     };
   } catch (error) {
     console.error('MusicBrainz endpoint error:', error);
     return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({
+      status: 500,
+      body: {
         query,
         artistName: null,
         officialUrl: null,
@@ -179,9 +160,15 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
         discoveredPlatforms: [],
         wikipediaSummary: null,
         wikipediaUrl: null,
-      }),
+      },
     };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'strict',
+  jsonBody: false,
+}, handleRequest));

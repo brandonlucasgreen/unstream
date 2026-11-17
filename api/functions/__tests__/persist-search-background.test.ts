@@ -19,7 +19,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../db', () => ({ persistSearchResults: mocks.persistSearchResults }));
-vi.mock('../ratelimit', () => ({ checkSentryDedup: mocks.checkSentryDedup }));
+// The endpoint wrapper reads the caller's IP from the real module; only the dedup is faked.
+vi.mock('../ratelimit', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../ratelimit')>()),
+  checkSentryDedup: mocks.checkSentryDedup,
+}));
 vi.mock('../../lib/sentry', () => ({
   Sentry: { captureMessage: mocks.captureMessage, captureException: mocks.captureException },
   withSentry: <T>(fn: T) => fn,

@@ -49,7 +49,7 @@ describe('collection-art rate limiting', () => {
   });
 
   it('spends the lenient bucket, not the standard one shared with account endpoints', async () => {
-    await handler({ httpMethod: 'GET', headers: {}, pathParameters: { id: ITEM_ID } });
+    await handler({ httpMethod: 'GET', headers: {}, path: `/api/collection/art/${ITEM_ID}` });
 
     expect(mocks.mockCheckRateLimit).toHaveBeenCalledWith(
       '203.0.113.7',
@@ -64,7 +64,7 @@ describe('collection-art rate limiting', () => {
       response: { statusCode: 429, headers: {}, body: '{"error":"Rate limit exceeded"}' },
     });
 
-    const res = await handler({ httpMethod: 'GET', headers: {}, pathParameters: { id: ITEM_ID } });
+    const res = await handler({ httpMethod: 'GET', headers: {}, path: `/api/collection/art/${ITEM_ID}` });
 
     expect(res.statusCode).toBe(429);
     // Refused before any database work — the point of checking first.

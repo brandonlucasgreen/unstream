@@ -5,7 +5,7 @@
 
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 import { CURATED_PLATFORMS, SEARCH_ONLY_PLATFORMS } from './search-utils';
 import { RELEASE_VIEW_PREFIX, STREAMING_METRIC } from './artist-activity';
 
@@ -33,13 +33,6 @@ const VALID_SOURCE_IDS = new Set<string>([
   'tip',
 ]);
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
 // Valid metrics (see artist-activity.ts for what each one means): 'search', 'streaming', 'view',
 // 'click:{valid_source_id}', and 'release_view:{release id}' — the last checked against the
 // artist below, since its id can't be checked against a fixed list.
@@ -62,48 +55,23 @@ const releaseOwnerCache = new Set<string>();
 // More slugs than any real search renders is abuse, not analytics.
 const MAX_BATCH_SLUGS = 24;
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body?: string;
-}) {
-  // CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: '{"error":"Method not allowed"}' };
-  }
-
-  // Rate limit
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
-  if (rl.limited) return rl.response;
-
-  // Parse and validate. Two body shapes: { slug, metric } — one event, what the extension and
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
+  // Validate. Two body shapes: { slug, metric } — one event, what the extension and
   // Mac app send — and { slugs: [...], metric } — the web app's batched search appearances,
   // one request for every claimed artist a search rendered instead of one request per card.
-  let slugs: string[];
-  let metric: string;
-  try {
-    const body = JSON.parse(event.body || '{}');
-    metric = body.metric;
-    slugs = Array.isArray(body.slugs) ? body.slugs : [body.slug];
-  } catch {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op on bad JSON
-  }
+  const metric = body.metric as string;
+  let slugs: string[] = Array.isArray(body.slugs) ? body.slugs : [body.slug];
 
   slugs = [...new Set(slugs.filter(s => typeof s === 'string' && s.length > 0 && s.length <= 200))]
     .slice(0, MAX_BATCH_SLUGS);
 
   if (slugs.length === 0 || !metric || !isValidMetric(metric)) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // silent no-op
+    return { status: 204 }; // silent no-op
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' }; // DB not configured
+    return { status: 204 }; // DB not configured
   }
 
   // Resolve artist ids from slugs — cache first, then one query for whatever's left
@@ -127,14 +95,14 @@ async function handleRequest(event: {
   }
 
   if (ids.length === 0) {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    return { status: 204 };
   }
 
   // A release view must name one of this artist's releases. Otherwise anyone could write rows
   // that the artist's Analytics page would then go looking up. One artist per release view: the
   // release page sends exactly one.
   if (metric.startsWith(RELEASE_VIEW_PREFIX)) {
-    if (ids.length !== 1) return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+    if (ids.length !== 1) return { status: 204 };
     const releaseId = metric.slice(RELEASE_VIEW_PREFIX.length);
     const key = `${ids[0]}:${releaseId}`;
     if (!releaseOwnerCache.has(key)) {
@@ -144,7 +112,7 @@ async function handleRequest(event: {
         .eq('id', releaseId)
         .eq('artist_id', ids[0])
         .maybeSingle();
-      if (!release) return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+      if (!release) return { status: 204 };
       releaseOwnerCache.add(key);
     }
   }
@@ -170,7 +138,13 @@ async function handleRequest(event: {
     // Silent fail — don't break the caller's experience for analytics
   }
 
-  return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  return { status: 204 };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['POST'],
+  auth: 'none',
+  rateLimit: 'standard',
+  jsonBody: true,
+}, handleRequest));

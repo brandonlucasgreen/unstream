@@ -2,29 +2,25 @@
 // Health check endpoint — no authentication required.
 
 import { withSentry } from '../lib/sentry';
-import { buildPublicCorsHeaders, generateRequestId, v1Response } from './middleware';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
-async function handleRequest(event: { httpMethod: string; headers?: Record<string, string | undefined> }) {
-  const requestId = generateRequestId();
-  const corsHeaders = buildPublicCorsHeaders();
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   return {
-    statusCode: 200,
-    headers: {
-      ...corsHeaders,
-      'X-Request-Id': requestId,
-      'Cache-Control': 'public, max-age=60',
-    },
-    body: JSON.stringify(v1Response({
+    status: 200,
+    body: {
       status: 'ok',
       version: '1',
       timestamp: new Date().toISOString(),
-    }, requestId)),
+    },
+    headers: { 'Cache-Control': 'public, max-age=60' },
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'none',
+  jsonBody: false,
+  envelope: 'v1',
+}, handleRequest));

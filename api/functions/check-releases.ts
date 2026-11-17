@@ -25,10 +25,10 @@
 import { withSentry } from '../lib/sentry';
 import { parse } from 'node-html-parser';
 import { isSafePublicHostname, isUrlHostnameAllowed } from './middleware';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { getReleasesForAlerts, isStoredArtistLink, type AlertRelease } from './db';
 import { safeFetch, safeHostname } from './safe-fetch';
 import { leadingOfferSummary, orderedSourcePlatforms } from '../shared/release-display';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 interface PlatformUrls {
   bandcamp?: string;
@@ -438,55 +438,15 @@ function toCatalogResults(artistSlug: string, releases: AlertRelease[]): Catalog
   return out;
 }
 
-const CORS_HEADERS = {
-  'Content-Type': 'application/json',
-  // The wildcard is deliberate, not an oversight: the Mac app and the browser extension
-  // both call this endpoint, and neither sends an Origin that the shared
-  // buildCorsHeaders() allowlist (unstream.stream) would accept.
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
 const PLATFORM_KEYS = ['bandcamp', 'faircamp', 'mirlo'] as const;
 
-function jsonResponse(statusCode: number, body: unknown, extraHeaders: Record<string, string> = {}) {
-  return { statusCode, headers: { ...CORS_HEADERS, ...extraHeaders }, body: JSON.stringify(body) };
+function jsonResponse(status: number, body: unknown, extraHeaders: Record<string, string> = {}): EndpointResult {
+  return { status, body, headers: extraHeaders };
 }
 
 // Netlify function handler
-async function handleRequest(event: {
-  httpMethod?: string;
-  headers?: Record<string, string | undefined>;
-  body?: string;
-  queryStringParameters?: Record<string, string>;
-}) {
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  // Only allow POST
-  if (event.httpMethod !== 'POST') {
-    return jsonResponse(405, { error: 'Method not allowed. Use POST.' });
-  }
-
-  // 'lenient' (120/min, 5000/day) rather than 'strict' (10/min): the Mac app and the
-  // extension both loop once per saved artist with no delay and swallow errors, so a
-  // strict tier would silently stop release alerts for every artist past the tenth.
-  // A batch request shape is the real fix; until shipped clients support one, the limit
-  // has to fit the caller it already has.
-  const ip = getClientIp(event.headers || {});
-  const rl = await checkRateLimit(ip, 'lenient', CORS_HEADERS);
-  if (rl.limited) return rl.response;
-
-  // Parse request body
-  let request: CheckReleasesRequest;
-  try {
-    request = JSON.parse(event.body || '{}');
-  } catch {
-    return jsonResponse(400, { error: 'Invalid JSON body' });
-  }
+async function handleRequest({ body }: PublicRequest): Promise<EndpointResult> {
+  const request = body as unknown as CheckReleasesRequest;
 
   // Validate request
   if (!request.artistName || typeof request.artistName !== 'string' || !request.platforms) {
@@ -592,4 +552,18 @@ async function handleRequest(event: {
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // The wildcard is deliberate, not an oversight: the Mac app and the browser extension
+  // both call this endpoint, and neither sends an Origin that the site-only allowlist
+  // (unstream.stream) would accept.
+  cors: 'public',
+  methods: ['POST'],
+  auth: 'none',
+  // 'lenient' (120/min, 5000/day) rather than 'strict' (10/min): the Mac app and the
+  // extension both loop once per saved artist with no delay and swallow errors, so a
+  // strict tier would silently stop release alerts for every artist past the tenth.
+  // A batch request shape is the real fix; until shipped clients support one, the limit
+  // has to fit the caller it already has.
+  rateLimit: 'lenient',
+  jsonBody: true,
+}, handleRequest));

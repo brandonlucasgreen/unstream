@@ -3,6 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { isDirectLink, readAllPages } from './db';
 import { cacheGetOrFetch } from './cache';
 import { PLATFORMS } from '../shared/platform-registry';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 /**
  * Platforms where a fan's money reaches the artist, derived from the registry rather than listed
@@ -60,17 +61,16 @@ async function readVerifiedArtists(supabase: SupabaseClient): Promise<KnownArtis
  */
 const ID_CHUNK = 200;
 
-const JSON_HEADERS = {
-  'Content-Type': 'application/json',
+const CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=300, s-maxage=300',
 };
 
-async function handleRequest(event: { queryStringParameters?: Record<string, string> }) {
+async function handleRequest({ query }: PublicRequest): Promise<EndpointResult> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Server configuration error' }) };
+    return { status: 500, body: { error: 'Server configuration error' } };
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -97,7 +97,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   // can't learn by following one. It exists so the weekly social-posts Action can post canonical
   // URLs without holding the service key (`artist_slug_aliases` is server-only under RLS).
   // Read once a week, so no Redis entry: the CDN window above is plenty.
-  if (event.queryStringParameters?.scope === 'aliases') {
+  if (query.scope === 'aliases') {
     const result = await readAllPages<{ alias: string; artists: { slug: string } | null }>(
       (from, to) =>
         supabase
@@ -107,15 +107,15 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       'artist slug aliases'
     );
     if (!result.ok) {
-      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch aliases' }) };
+      return { status: 500, body: { error: 'Failed to fetch aliases' } };
     }
     const aliases = result.rows
       .filter(row => row.alias && row.artists?.slug)
       .map(row => ({ alias: row.alias, slug: row.artists!.slug }));
-    return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ aliases }) };
+    return { status: 200, body: { aliases }, headers: CACHE_HEADERS };
   }
 
-  if (event.queryStringParameters?.scope === 'known') {
+  if (query.scope === 'known') {
     // Redis-cached: this is the single largest-volume read in the codebase — every verified
     // artist WITH their links embedded, ~3 paged requests of 1,000 rows each — behind only a
     // 5-minute CDN window on a crawlable page. The index changes when an artist gains a
@@ -140,10 +140,10 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     );
 
     if (!artists) {
-      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
+      return { status: 500, body: { error: 'Failed to fetch artists' } };
     }
 
-    return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ artists }) };
+    return { status: 200, body: { artists }, headers: CACHE_HEADERS };
   }
 
   // Fetch all verified (claimed) artist profiles — 128 today, so the paging is headroom rather
@@ -162,11 +162,11 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   // list, which the Cache-Control above then pinned for five minutes — a blank directory served
   // long after the transient error cleared. 5xx isn't cached, and ArtistIndexPage retries it.
   if (!profiles.ok) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
+    return { status: 500, body: { error: 'Failed to fetch artists' } };
   }
 
   if (profiles.rows.length === 0) {
-    return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ artists: [] }) };
+    return { status: 200, body: { artists: [] }, headers: CACHE_HEADERS };
   }
 
   // Fetch artist details
@@ -180,7 +180,7 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
       .in('id', artistIds.slice(i, i + ID_CHUNK));
 
     if (error) {
-      return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch artists' }) };
+      return { status: 500, body: { error: 'Failed to fetch artists' } };
     }
     artistRows.push(...(data || []));
   }
@@ -197,7 +197,13 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  return { statusCode: 200, headers: JSON_HEADERS, body: JSON.stringify({ artists }) };
+  return { status: 200, body: { artists }, headers: CACHE_HEADERS };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'none',
+  jsonBody: false,
+}, handleRequest));

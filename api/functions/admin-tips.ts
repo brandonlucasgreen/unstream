@@ -14,7 +14,7 @@
 //   POST { action: 'revoke', artistId }                    switch tips off for abuse or misrepresentation
 
 import { getClient } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
 import { tipsState, type TipAccountRow } from './tips-db';
 import { sendTipsApprovedEmail } from './notifications';
@@ -23,27 +23,15 @@ import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined> | null;
-  body?: string | null;
-}
-
-async function handleRequest(event: HandlerEvent) {
-  const CORS_HEADERS = buildCorsHeaders(event.headers.origin || event.headers.Origin, false);
-  const respond = (statusCode: number, body: unknown) => ({ statusCode, headers: CORS_HEADERS, body: JSON.stringify(body) });
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-
-  const admin = await authenticateAdmin(event.headers.authorization || event.headers.Authorization || undefined);
-  if (!admin) return respond(401, { error: 'Unauthorized' });
+async function handleRequest({ method, query, body }: SignedInRequest): Promise<EndpointResult> {
+  const respond = (status: number, body: unknown): EndpointResult => ({ status, body });
 
   const client = getClient();
   if (!client) return respond(500, { error: 'Database not configured' });
   if (!stripeMode()) return respond(200, { available: false, accounts: [] });
 
   try {
-    if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
+    if (method === 'GET' && query.summary === '1') {
       // The rows tipsState calls 'awaiting_approval': charges enabled, not disconnected, not yet
       // approved. One still onboarding can't be approved, so counting it would badge the menu
       // with work the admin can't do.
@@ -58,7 +46,7 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { available: true, pending: (data ?? []).length });
     }
 
-    if (event.httpMethod === 'GET') {
+    if (method === 'GET') {
       const { data, error } = await client
         .from('artist_tip_accounts')
         .select('*, artists(name, slug, artist_profiles(user_id, email, verified_at))')
@@ -114,14 +102,7 @@ async function handleRequest(event: HandlerEvent) {
       return respond(200, { available: true, livemode: isLiveMode(), accounts });
     }
 
-    if (event.httpMethod !== 'POST') return respond(405, { error: 'Method not allowed' });
-
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return respond(400, { error: 'Invalid JSON' });
-    }
+    // POST from here on: the wrapper has already refused every other method.
     const artistId = typeof body.artistId === 'string' ? body.artistId : '';
     if (!UUID_REGEX.test(artistId)) return respond(400, { error: 'Invalid artist' });
 
@@ -141,7 +122,7 @@ async function handleRequest(event: HandlerEvent) {
 
     return respond(400, { error: 'Unknown action' });
   } catch (err) {
-    Sentry.captureException(err, { extra: { context: `admin-tips.${event.httpMethod}` } });
+    Sentry.captureException(err, { extra: { context: `admin-tips.${method}` } });
     return respond(500, { error: 'Something went wrong' });
   }
 }
@@ -210,4 +191,9 @@ async function approve(client: Client, artistId: string, stripeAccountId: string
   return [200, { ok: true }];
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  auth: 'admin',
+  jsonBody: true,
+}, handleRequest));

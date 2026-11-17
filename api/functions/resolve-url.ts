@@ -1,5 +1,5 @@
 import { withSentry } from '../lib/sentry';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { endpoint } from './http/endpoint';
 import { FETCH_USER_AGENT } from './safe-fetch';
 
 // Helper to fetch with timeout
@@ -178,27 +178,18 @@ async function resolveStreamingUrl(url: string): Promise<{ artistName: string; s
   }
 }
 
-// Netlify function handler
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
-  const corsHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-
-  // Skip rate limiting when called internally from v1 wrappers (which do their own check).
-  // Requires a shared secret to prevent external clients from spoofing this header.
-  const internalSecret = process.env.INTERNAL_FUNCTION_SECRET;
-  if (!internalSecret || event.headers?.['x-internal-skip-ratelimit'] !== internalSecret) {
-    const ip = getClientIp(event.headers || {});
-    const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-    if (rl.limited) return rl.response;
-  }
-
-  const url = event.queryStringParameters?.url;
+/**
+ * One streaming URL, resolved to an artist. The endpoint below is this behind its rate limit;
+ * the v1 API (resolve-url-v1.ts) calls it directly, behind its own key check and quota, so one
+ * lookup is never counted against two limits.
+ */
+export async function resolveUrl(
+  params: Record<string, string | undefined>,
+): Promise<{ status: number; body: unknown; headers?: Record<string, string> }> {
+  const url = params.url;
 
   if (!url) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'URL parameter is required' }),
-    };
+    return { status: 400, body: { error: 'URL parameter is required' } };
   }
 
   try {
@@ -206,35 +197,23 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
 
     if (result) {
       return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 's-maxage=86400, stale-while-revalidate',
-        },
-        body: JSON.stringify(result),
+        status: 200,
+        headers: { 'Cache-Control': 's-maxage=86400, stale-while-revalidate' },
+        body: result,
       };
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Could not resolve artist from URL' }),
-      };
+      return { status: 404, body: { error: 'Could not resolve artist from URL' } };
     }
   } catch (error) {
     console.error('Resolve error:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Failed to resolve URL' }),
-    };
+    return { status: 500, body: { error: 'Failed to resolve URL' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  rateLimit: 'strict',
+  jsonBody: false,
+}, async ({ query }) => resolveUrl(query)));

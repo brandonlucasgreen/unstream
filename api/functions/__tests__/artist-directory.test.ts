@@ -68,7 +68,7 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(body.artists).toEqual([
@@ -87,7 +87,7 @@ describe('artist-directory handler', () => {
     const eq = vi.fn(() => cappedQuery(rows));
     mocks.mockFrom.mockReturnValue({ select: vi.fn(() => ({ eq })) });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     expect(res.statusCode).toBe(200);
 
     const body = JSON.parse(res.body);
@@ -110,7 +110,7 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     expect(res.statusCode).toBe(500);
   });
 
@@ -129,7 +129,7 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['living']);
   });
 
@@ -154,7 +154,7 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     // Qobuz is a marketplace, so Nine Inch Nails qualifies; a social account and a search URL do not.
     expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['nine-inch-nails']);
   });
@@ -177,7 +177,7 @@ describe('artist-directory handler', () => {
       }),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'known' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'known' } });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).artists.map((a: { slug: string }) => a.slug)).toEqual(['a']);
     expect(selects[0]).toContain('died_on');
@@ -200,7 +200,7 @@ describe('artist-directory handler', () => {
         })),
       });
 
-    const res = await handler({});
+    const res = await handler({ httpMethod: 'GET' });
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(body.artists).toEqual([
@@ -243,7 +243,7 @@ describe('artist-directory handler', () => {
       };
     });
 
-    const res = await handler({});
+    const res = await handler({ httpMethod: 'GET' });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).artists).toHaveLength(1150);
 
@@ -261,10 +261,10 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({});
+    const res = await handler({ httpMethod: 'GET' });
     expect(res.statusCode).toBe(500);
     // A 200 here would be cached for five minutes as "there are no claimed artists".
-    expect(res.headers).toBeUndefined();
+    expect(res.headers['Cache-Control']).toBeUndefined();
   });
 
   it('an unrecognized scope value falls back to the claimed (default) path', async () => {
@@ -274,7 +274,7 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'bogus' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'bogus' } });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body).artists).toEqual([]);
     expect(mocks.mockFrom).toHaveBeenCalledWith('artist_profiles');
@@ -292,7 +292,7 @@ describe('artist-directory handler', () => {
       }),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'aliases' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'aliases' } });
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res.body)).toEqual({ aliases: [{ alias: 'trentem-ller', slug: 'trentemoller' }] });
     expect(mocks.mockFrom).toHaveBeenCalledWith('artist_slug_aliases');
@@ -306,8 +306,8 @@ describe('artist-directory handler', () => {
       })),
     });
 
-    const res = await handler({ queryStringParameters: { scope: 'aliases' } });
+    const res = await handler({ httpMethod: 'GET', queryStringParameters: { scope: 'aliases' } });
     expect(res.statusCode).toBe(500);
-    expect(res.headers).toBeUndefined();
+    expect(res.headers['Cache-Control']).toBeUndefined();
   });
 });

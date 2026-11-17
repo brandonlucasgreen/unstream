@@ -5,112 +5,29 @@
 
 import { withSentry } from '../lib/sentry';
 import { createClient } from '@supabase/supabase-js';
-import { decodeJwt } from 'jose';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
-async function authenticateRequest(authHeader: string | undefined): Promise<{ userId: string; email: string; accessToken: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const accessToken = authHeader.slice(7);
-
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-
-  const anonClient = createClient(url, anonKey);
-  const { data, error } = await anonClient.auth.getUser(accessToken);
-  if (error || !data.user) return null;
-  return { userId: data.user.id, email: data.user.email || '', accessToken };
-}
-
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'POST, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  // Strict tier (10/min) — auth-sensitive endpoint
-  const rl = await checkRateLimit(ip, 'strict', corsHeaders);
-  if (rl.limited) return rl.response;
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
-  }
-
+async function handleRequest({ user, body }: SignedInRequest): Promise<EndpointResult> {
   const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   if (!url || !serviceKey || !anonKey) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
-  }
-
-  const user = await authenticateRequest(event.headers.authorization);
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const currentPassword = body.current_password as string | undefined;
   const newPassword = body.new_password as string | undefined;
 
   if (!currentPassword || !newPassword) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Current password and new password are required' }) };
+    return { status: 400, body: { error: 'Current password and new password are required' } };
   }
 
   if (newPassword.length < 8) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'New password must be at least 8 characters' }) };
-  }
-
-  // Two-step verification, defense in depth (see docs/specs/two-factor-auth-spec.md).
-  // The web client holds any account that has a verified factor behind
-  // MfaChallengeGate until the session completes it, so honest traffic arrives
-  // here at aal2 — but a stolen aal1 session (a password-only sign-in) must not
-  // be able to rotate the password and take the account over. When the presented
-  // token hasn't completed the second factor, the service role is asked whether
-  // the account has one; the lookup runs only on that path, and fails closed:
-  // if Supabase can't answer, the change is refused rather than guessed at.
-  // decodeJwt only reads the payload — the token itself was already verified
-  // against the auth server by authenticateRequest above.
-  let completedSecondFactor = false;
-  try {
-    completedSecondFactor = decodeJwt(user.accessToken).aal === 'aal2';
-  } catch {
-    completedSecondFactor = false;
+    return { status: 400, body: { error: 'New password must be at least 8 characters' } };
   }
 
   const serviceClient = getClient() ?? createClient(url, serviceKey);
-
-  if (!completedSecondFactor) {
-    const { data: factorsResult, error: factorsError } = await serviceClient.auth.admin.mfa.listFactors({
-      userId: user.userId,
-    });
-    if (factorsError) {
-      console.error('[me-password] Error listing MFA factors:', factorsError.message);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Could not verify two-step verification status. Please try again.' }) };
-    }
-    const hasVerifiedFactor = (factorsResult?.factors ?? []).some(f => f.status === 'verified');
-    if (hasVerifiedFactor) {
-      return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Your account uses two-step verification. Complete the second step at sign-in before changing your password.' }) };
-    }
-  }
 
   // Verify the current password by attempting a sign-in with the user's email.
   // Supabase's updateUser doesn't require the old password, so we verify it ourselves.
@@ -121,7 +38,7 @@ async function handleRequest(event: {
   });
 
   if (verifyError) {
-    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Current password is incorrect' }) };
+    return { status: 400, body: { error: 'Current password is incorrect' } };
   }
 
   // Update the password using the service role (admin API).
@@ -133,10 +50,22 @@ async function handleRequest(event: {
 
   if (updateError) {
     console.error('[me-password] Error updating password:', updateError.message);
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to update password' }) };
+    return { status: 500, body: { error: 'Failed to update password' } };
   }
 
-  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+  return { status: 200, body: { success: true } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['POST'],
+  // The token is checked against Supabase on every request, and that check also refuses a session
+  // that still owes its two-step verification (see docs/specs/two-factor-auth-spec.md), so one
+  // never gets here. The web client holds such a session behind MfaChallengeGate, but that gate is
+  // only UI: a stolen password-only session must not be able to rotate the password and take the
+  // account over.
+  auth: 'bearer',
+  // Strict tier (10/min) — auth-sensitive endpoint
+  rateLimit: 'strict',
+  jsonBody: true,
+}, handleRequest));

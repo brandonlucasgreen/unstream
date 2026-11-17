@@ -21,7 +21,7 @@ type ViewMode = 'form' | 'magicLinkSent' | 'resetSent';
 // the browser never checks them. Without this a mistyped address goes straight to
 // Supabase and comes back as a raw 400 ("Unable to validate email address: invalid
 // format") in the error box. Same shape as the server-side check in
-// api/functions/artist-auth.ts.
+// api/functions/me-email.ts.
 const INVALID_EMAIL_MESSAGE = "That email address doesn't look right. Check it and try again.";
 
 export function LoginPage() {

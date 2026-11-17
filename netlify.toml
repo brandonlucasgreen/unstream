@@ -337,11 +337,20 @@
 
 # The curator's own Buffer connection (api/functions/me-buffer.ts). Two entries, because a splat
 # does not match the bare path: /api/me/buffer is the status and disconnect, and the sub-paths are
-# /start, /callback and /channels. The callback is where Buffer redirects the curator back to, so
-# its URL has to stay exactly this — it is registered with the OAuth client.
+# /start, /organization and /channels.
+#
+# /callback is where Buffer redirects the curator back to, so its URL has to stay exactly this —
+# it is registered with the OAuth client. It is a function of its own (me-buffer-callback.ts: the
+# one leg with no signed-in user), and its entry must stay ABOVE the splat, because the first
+# matching rule wins.
 [[redirects]]
   from = "/api/me/buffer"
   to = "/.netlify/functions/me-buffer"
+  status = 200
+
+[[redirects]]
+  from = "/api/me/buffer/callback"
+  to = "/.netlify/functions/me-buffer-callback"
   status = 200
 
 [[redirects]]

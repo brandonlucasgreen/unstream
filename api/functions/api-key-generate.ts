@@ -6,7 +6,7 @@
 
 import { withSentry } from '../lib/sentry';
 import { getClient } from './db';
-import { authenticateBearer, buildCorsHeaders, generateRequestId, v1Response } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 const MAX_KEYS_PER_USER = 3;
 
@@ -23,87 +23,28 @@ function isEmailAllowedForApiKeys(email: string): boolean {
   return allowlist.includes(email.toLowerCase());
 }
 
-interface NetlifyEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string>;
-  body?: string;
-}
-
-async function handleRequest(event: NetlifyEvent) {
-  const requestId = generateRequestId();
-  const origin = event.headers.origin || event.headers.Origin;
-  const corsHeaders = buildCorsHeaders(origin, false, {
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'X-Request-Id': requestId,
-  });
-
-  // CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  // Authenticate user via Supabase JWT
-  const authHeader = event.headers.authorization || event.headers.Authorization;
-  const user = await authenticateBearer(authHeader);
-
-  if (!user) {
-    return {
-      statusCode: 401,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Authentication required' }, requestId)),
-    };
-  }
-
+async function handleRequest({ method, user, query, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Server configuration error' }, requestId)),
-    };
+    return { status: 500, body: { error: 'Server configuration error' } };
   }
 
-  try {
-    switch (event.httpMethod) {
-      case 'POST': {
-        // Invitation-only: check if user is allowed to create API keys
-        if (!isEmailAllowedForApiKeys(user.email)) {
-          return {
-            statusCode: 403,
-            headers: corsHeaders,
-            body: JSON.stringify(v1Response({ error: 'API key creation is currently available by invitation only. Contact api@unstream.stream to request access.' }, requestId)),
-          };
-        }
-        return await handleCreateKey(user, client, corsHeaders, requestId);
-      }
-      case 'GET':
-        return await handleListKeys(user, client, corsHeaders, requestId);
-      case 'DELETE':
-        return await handleDeleteKey(user, event, client, corsHeaders, requestId);
-      default:
-        return {
-          statusCode: 405,
-          headers: corsHeaders,
-          body: JSON.stringify(v1Response({ error: 'Method not allowed' }, requestId)),
-        };
+  if (method === 'POST') {
+    // Invitation-only: check if user is allowed to create API keys
+    if (!isEmailAllowedForApiKeys(user.email)) {
+      return { status: 403, body: { error: 'API key creation is currently available by invitation only. Contact api@unstream.stream to request access.' } };
     }
-  } catch (err) {
-    console.error('[API Keys] Error:', err);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Internal server error' }, requestId)),
-    };
+    return await handleCreateKey(user, client);
   }
+  if (method === 'GET') return await handleListKeys(user, client);
+  // DELETE from here on: the wrapper has already refused every other method.
+  return await handleDeleteKey(user, query, body, client);
 }
 
 async function handleCreateKey(
   user: { userId: string; email: string },
   client: NonNullable<ReturnType<typeof getClient>>,
-  corsHeaders: Record<string, string>,
-  requestId: string,
-) {
+): Promise<EndpointResult> {
   // Check key count limit
   const { data: existingKeys, error: countError } = await client
     .from('api_keys')
@@ -113,19 +54,11 @@ async function handleCreateKey(
 
   if (countError) {
     console.error('[API Keys] Error checking existing keys:', countError);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Failed to check existing keys' }, requestId)),
-    };
+    return { status: 500, body: { error: 'Failed to check existing keys' } };
   }
 
   if (existingKeys && existingKeys.length >= MAX_KEYS_PER_USER) {
-    return {
-      statusCode: 403,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: `Maximum of ${MAX_KEYS_PER_USER} API keys allowed per account` }, requestId)),
-    };
+    return { status: 403, body: { error: `Maximum of ${MAX_KEYS_PER_USER} API keys allowed per account` } };
   }
 
   // Generate a new API key
@@ -168,17 +101,12 @@ async function handleCreateKey(
 
   if (error) {
     console.error('[API Keys] Error creating key:', error);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Failed to create API key' }, requestId)),
-    };
+    return { status: 500, body: { error: 'Failed to create API key' } };
   }
 
   return {
-    statusCode: 201,
-    headers: corsHeaders,
-    body: JSON.stringify(v1Response({
+    status: 201,
+    body: {
       api_key: keyValue, // Only returned once, on creation
       key_info: {
         id: data.id,
@@ -188,16 +116,14 @@ async function handleCreateKey(
         per_minute: data.per_minute,
         created_at: data.created_at,
       },
-    }, requestId)),
+    },
   };
 }
 
 async function handleListKeys(
   user: { userId: string; email: string },
   client: NonNullable<ReturnType<typeof getClient>>,
-  corsHeaders: Record<string, string>,
-  requestId: string,
-) {
+): Promise<EndpointResult> {
   const { data, error } = await client
     .from('api_keys')
     .select('id, key_prefix, tier, daily_limit, per_minute, is_active, created_at, last_used_at, description')
@@ -205,49 +131,23 @@ async function handleListKeys(
 
   if (error) {
     console.error('[API Keys] Error listing keys:', error);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Failed to list API keys' }, requestId)),
-    };
+    return { status: 500, body: { error: 'Failed to list API keys' } };
   }
 
-  return {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify(v1Response({ keys: data || [] }, requestId)),
-  };
+  return { status: 200, body: { keys: data || [] } };
 }
 
 async function handleDeleteKey(
   user: { userId: string; email: string },
-  event: NetlifyEvent,
+  query: SignedInRequest['query'],
+  body: SignedInRequest['body'],
   client: NonNullable<ReturnType<typeof getClient>>,
-  corsHeaders: Record<string, string>,
-  requestId: string,
-) {
-  let keyId: string | undefined;
+): Promise<EndpointResult> {
   // Accept key ID from query string or request body
-  keyId = event.queryStringParameters?.id;
-  if (!keyId && event.body) {
-    try {
-      const body = JSON.parse(event.body);
-      keyId = body.id;
-    } catch {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify(v1Response({ error: 'Invalid JSON body' }, requestId)),
-      };
-    }
-  }
+  const keyId = query.id || (body.id as string | undefined);
 
   if (!keyId) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'Key ID is required' }, requestId)),
-    };
+    return { status: 400, body: { error: 'Key ID is required' } };
   }
 
   // Revoke the key (soft delete by setting is_active = false)
@@ -261,18 +161,18 @@ async function handleDeleteKey(
     .single();
 
   if (error || !data) {
-    return {
-      statusCode: 404,
-      headers: corsHeaders,
-      body: JSON.stringify(v1Response({ error: 'API key not found or already revoked' }, requestId)),
-    };
+    return { status: 404, body: { error: 'API key not found or already revoked' } };
   }
 
-  return {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify(v1Response({ message: 'API key revoked' }, requestId)),
-  };
+  return { status: 200, body: { message: 'API key revoked' } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'site',
+  methods: ['POST', 'GET', 'DELETE'],
+  auth: 'bearer',
+  rateLimit: 'none',
+  // Only DELETE reads a body (the key's id, when it isn't in the query string).
+  jsonBody: true,
+  envelope: 'v1',
+}, handleRequest));

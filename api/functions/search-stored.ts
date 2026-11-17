@@ -9,28 +9,18 @@
 
 import { withSentry } from '../lib/sentry';
 import { findStoredArtists } from './stored-artists';
-import { checkRateLimit, getClientIp } from './ratelimit';
-import { validateQuery, buildPublicCorsHeaders } from './middleware';
+import { validateQuery } from './middleware';
 import { normalizeSearchQuery } from './search-utils';
 import { SearchTimer } from './search-timing';
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
-async function handleRequest(event: { queryStringParameters?: Record<string, string>; headers?: Record<string, string> }) {
+async function handleRequest({ query: params, rateLimitMs }: PublicRequest): Promise<EndpointResult> {
   const timer = new SearchTimer();
-  const corsHeaders = buildPublicCorsHeaders();
+  timer.record('ratelimit', rateLimitMs);
 
-  // 'lenient', not 'strict': this rides along with a search that already spent a unit of
-  // the strict daily quota, and a search must not cost an anonymous caller two.
-  const ip = getClientIp(event.headers || {});
-  const rl = await timer.time('ratelimit', checkRateLimit(ip, 'lenient', corsHeaders));
-  if (rl.limited && rl.response) return rl.response;
-
-  const queryResult = validateQuery(event.queryStringParameters?.query);
+  const queryResult = validateQuery(params.query);
   if ('error' in queryResult) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: queryResult.error }),
-    };
+    return { status: 400, body: { error: queryResult.error } };
   }
   const query = queryResult.query;
 
@@ -38,16 +28,23 @@ async function handleRequest(event: { queryStringParameters?: Record<string, str
   const results = await timer.time('stored', findStoredArtists(normalizeSearchQuery(query), 'fuzzy'));
 
   return {
-    statusCode: 200,
+    status: 200,
+    body: { query, results },
     headers: {
-      ...corsHeaders,
       // Short: a claimed artist's profile edit should reach this preview about as soon as
       // it reaches the full search.
       'Cache-Control': 'public, max-age=60, s-maxage=60',
       'Server-Timing': timer.toServerTiming(),
     },
-    body: JSON.stringify({ query, results }),
   };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient', not 'strict': this rides along with a search that already spent a unit of
+  // the strict daily quota, and a search must not cost an anonymous caller two.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

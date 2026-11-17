@@ -18,8 +18,7 @@
 import { withSentry } from '../lib/sentry';
 import { artistSlug, getClient, readAllPages } from './db';
 import { resolveArtistPages } from './collection-utils';
-import { checkRateLimit, resolveAccountRequest, getClientIp } from './ratelimit';
-import { buildAccountCorsHeaders } from './account-cors';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 
 /** Rows per upsert batch — keeps each PostgREST request comfortably sized (matches bandcamp-sync). */
 const UPSERT_CHUNK = 500;
@@ -68,53 +67,20 @@ function parseSignals(raw: unknown): Signal[] | string {
   return clean;
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-}) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why).
-  const corsHeaders = buildAccountCorsHeaders(
-    event.headers['origin'] || event.headers['Origin'],
-    'GET, POST, DELETE, OPTIONS',
-  );
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  // One verification, not two: deriving the rate-limit bucket already checked the token
-  // (see resolveAccountRequest), so the user it found is the user this handler uses.
-  const { key, user } = await resolveAccountRequest(event.headers.authorization, ip);
-  const rl = await checkRateLimit(key, 'account', corsHeaders);
-  if (rl.limited) return rl.response;
-
+async function handleRequest({ method, user, body }: SignedInRequest): Promise<EndpointResult> {
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  if (!user) {
-    return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Not authenticated' }) };
-  }
-
-  if (event.httpMethod === 'POST') {
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) };
-    }
-
+  if (method === 'POST') {
     if (body.source !== 'apple_music') {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: "source must be 'apple_music'" }) };
+      return { status: 400, body: { error: "source must be 'apple_music'" } };
     }
 
     const parsed = parseSignals(body.signals);
     if (typeof parsed === 'string') {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: parsed }) };
+      return { status: 400, body: { error: parsed } };
     }
 
     // Dedupe by artist name, keeping the highest count — a duplicate in one upsert batch is
@@ -141,7 +107,7 @@ async function handleRequest(event: {
         'listening_signals'
       );
       if (!existing.ok) {
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to read existing signals' }) };
+        return { status: 500, body: { error: 'Failed to read existing signals' } };
       }
 
       const stored = new Map(existing.rows.map(r => [r.artist_name, r.play_count]));
@@ -163,26 +129,25 @@ async function handleRequest(event: {
           .upsert(chunk, { onConflict: 'user_id,source,artist_name' });
         if (error) {
           console.error('[me-listening] Upsert failed:', error.message);
-          return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to save listening signals' }) };
+          return { status: 500, body: { error: 'Failed to save listening signals' } };
         }
       }
 
       return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({
+        status: 200,
+        body: {
           received: byName.size,
           written: rows.length,
           unchanged: byName.size - rows.length,
-        }),
+        },
       };
     } catch (error) {
       console.error('[me-listening] POST error:', error);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { status: 500, body: { error: 'Internal server error' } };
     }
   }
 
-  if (event.httpMethod === 'DELETE') {
+  if (method === 'DELETE') {
     try {
       const { error } = await client
         .from('listening_signals')
@@ -192,118 +157,121 @@ async function handleRequest(event: {
 
       if (error) {
         console.error('[me-listening] Delete failed:', error.message);
-        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to delete listening signals' }) };
+        return { status: 500, body: { error: 'Failed to delete listening signals' } };
       }
 
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ deleted: true }) };
+      return { status: 200, body: { deleted: true } };
     } catch (error) {
       console.error('[me-listening] DELETE error:', error);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Internal server error' }) };
+      return { status: 500, body: { error: 'Internal server error' } };
     }
   }
 
-  if (event.httpMethod === 'GET') {
-    // Deliberately unfiltered by source: the same artist can arrive from the library scan and
-    // (later) the now-playing monitor, and the gap should rank them on total plays. DELETE
-    // stays scoped to apple_music because it answers for the one source the app owns.
-    const signals = await readAllPages<{ artist_name: string; play_count: number; last_played: string | null }>(
-      (from, to) => client
-        .from('listening_signals')
-        .select('artist_name, play_count, last_played')
-        .eq('user_id', user.userId)
-        .order('play_count', { ascending: false })
-        .range(from, to),
-      'listening_signals (gap)'
-    );
-    if (!signals.ok) {
-      // A read that failed is not an empty gap. Reporting one would read as "you already
-      // support everyone you listen to" — the most misleading answer this endpoint can give.
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to load listening signals' }) };
-    }
+  // GET from here on: the wrapper has already refused every other method.
 
-    const saved = await readAllPages<{ artist_slug: string | null; artist_name: string | null; supported: boolean }>(
-      (from, to) => client
-        .from('saved_artists')
-        .select('artist_slug, artist_name, supported')
-        .eq('user_id', user.userId)
-        .eq('deleted', false)
-        .range(from, to),
-      'saved_artists (gap)'
-    );
-    const collection = await readAllPages<{ artist_name: string }>(
-      (from, to) => client
-        .from('collection_items')
-        .select('artist_name')
-        .eq('user_id', user.userId)
-        .range(from, to),
-      'collection_items (gap)'
-    );
-
-    // Who is already covered: an artist you marked supported, or one you own a record by.
-    // Everything is compared on the derived slug — the same key the collection matcher and the
-    // feed use — so the halves cannot disagree about who counts as covered.
-    //
-    // Unlike the signals read, a failure here degrades instead of failing: the cost is a gap
-    // row for somebody already supported, where blanking the report is the bigger wrong.
-    // readAllPages has already logged the reason.
-    const covered = new Set<string>();
-    for (const row of saved.ok ? saved.rows : []) {
-      if (!row.supported) continue;
-      // Both spellings. A row saved from a search result carries a *synthetic* slug
-      // (`sufjanstevens`) that the canonical one never equals, and re-deriving from the name is
-      // the only thing that recovers it — the same two candidates `savedArtistIdsForUser`
-      // resolves in db.ts, for the same reason.
-      if (row.artist_slug) covered.add(row.artist_slug.toLowerCase());
-      if (row.artist_name) {
-        const derived = artistSlug(row.artist_name);
-        if (derived) covered.add(derived);
-      }
-    }
-    for (const row of collection.ok ? collection.rows : []) {
-      const slug = artistSlug(row.artist_name);
-      if (slug) covered.add(slug);
-    }
-
-    // One artist, one row: merge on the slug so a name arriving from two sources ranks by its
-    // combined plays rather than appearing twice.
-    const totals = new Map<string, { artistName: string; playCount: number; lastPlayed: string | null }>();
-    for (const row of signals.rows) {
-      const slug = artistSlug(row.artist_name);
-      if (!slug || covered.has(slug)) continue;
-      const existing = totals.get(slug);
-      if (!existing) {
-        totals.set(slug, {
-          artistName: row.artist_name,
-          playCount: row.play_count,
-          lastPlayed: row.last_played,
-        });
-        continue;
-      }
-      existing.playCount += row.play_count;
-      if (row.last_played && (!existing.lastPlayed || row.last_played > existing.lastPlayed)) {
-        existing.lastPlayed = row.last_played;
-      }
-    }
-
-    const ranked = [...totals.values()].sort((a, b) => b.playCount - a.playCount).slice(0, GAP_LIMIT);
-    const artistPages = await resolveArtistPages(ranked.map(r => r.artistName));
-
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        gap: ranked.map(r => ({
-          artistName: r.artistName,
-          playCount: r.playCount,
-          lastPlayed: r.lastPlayed,
-          artistUrl: artistPages.has(r.artistName) ? `/a/${artistPages.get(r.artistName)}` : null,
-        })),
-        totalArtists: signals.rows.length,
-      }),
-    };
+// Deliberately unfiltered by source: the same artist can arrive from the library scan and
+  // (later) the now-playing monitor, and the gap should rank them on total plays. DELETE
+  // stays scoped to apple_music because it answers for the one source the app owns.
+  const signals = await readAllPages<{ artist_name: string; play_count: number; last_played: string | null }>(
+    (from, to) => client
+      .from('listening_signals')
+      .select('artist_name, play_count, last_played')
+      .eq('user_id', user.userId)
+      .order('play_count', { ascending: false })
+      .range(from, to),
+    'listening_signals (gap)'
+  );
+  if (!signals.ok) {
+    // A read that failed is not an empty gap. Reporting one would read as "you already
+    // support everyone you listen to" — the most misleading answer this endpoint can give.
+    return { status: 500, body: { error: 'Failed to load listening signals' } };
   }
 
-  return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Not found' }) };
+  const saved = await readAllPages<{ artist_slug: string | null; artist_name: string | null; supported: boolean }>(
+    (from, to) => client
+      .from('saved_artists')
+      .select('artist_slug, artist_name, supported')
+      .eq('user_id', user.userId)
+      .eq('deleted', false)
+      .range(from, to),
+    'saved_artists (gap)'
+  );
+  const collection = await readAllPages<{ artist_name: string }>(
+    (from, to) => client
+      .from('collection_items')
+      .select('artist_name')
+      .eq('user_id', user.userId)
+      .range(from, to),
+    'collection_items (gap)'
+  );
+
+  // Who is already covered: an artist you marked supported, or one you own a record by.
+  // Everything is compared on the derived slug — the same key the collection matcher and the
+  // feed use — so the halves cannot disagree about who counts as covered.
+  //
+  // Unlike the signals read, a failure here degrades instead of failing: the cost is a gap
+  // row for somebody already supported, where blanking the report is the bigger wrong.
+  // readAllPages has already logged the reason.
+  const covered = new Set<string>();
+  for (const row of saved.ok ? saved.rows : []) {
+    if (!row.supported) continue;
+    // Both spellings. A row saved from a search result carries a *synthetic* slug
+    // (`sufjanstevens`) that the canonical one never equals, and re-deriving from the name is
+    // the only thing that recovers it — the same two candidates `savedArtistIdsForUser`
+    // resolves in db.ts, for the same reason.
+    if (row.artist_slug) covered.add(row.artist_slug.toLowerCase());
+    if (row.artist_name) {
+      const derived = artistSlug(row.artist_name);
+      if (derived) covered.add(derived);
+    }
+  }
+  for (const row of collection.ok ? collection.rows : []) {
+    const slug = artistSlug(row.artist_name);
+    if (slug) covered.add(slug);
+  }
+
+  // One artist, one row: merge on the slug so a name arriving from two sources ranks by its
+  // combined plays rather than appearing twice.
+  const totals = new Map<string, { artistName: string; playCount: number; lastPlayed: string | null }>();
+  for (const row of signals.rows) {
+    const slug = artistSlug(row.artist_name);
+    if (!slug || covered.has(slug)) continue;
+    const existing = totals.get(slug);
+    if (!existing) {
+      totals.set(slug, {
+        artistName: row.artist_name,
+        playCount: row.play_count,
+        lastPlayed: row.last_played,
+      });
+      continue;
+    }
+    existing.playCount += row.play_count;
+    if (row.last_played && (!existing.lastPlayed || row.last_played > existing.lastPlayed)) {
+      existing.lastPlayed = row.last_played;
+    }
+  }
+
+  const ranked = [...totals.values()].sort((a, b) => b.playCount - a.playCount).slice(0, GAP_LIMIT);
+  const artistPages = await resolveArtistPages(ranked.map(r => r.artistName));
+
+  return {
+    status: 200,
+    body: {
+      gap: ranked.map(r => ({
+        artistName: r.artistName,
+        playCount: r.playCount,
+        lastPlayed: r.lastPlayed,
+        artistUrl: artistPages.has(r.artistName) ? `/a/${artistPages.get(r.artistName)}` : null,
+      })),
+      totalArtists: signals.rows.length,
+    },
+  };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'POST', 'DELETE'],
+  auth: 'account',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));

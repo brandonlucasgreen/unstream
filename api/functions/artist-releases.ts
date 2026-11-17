@@ -27,10 +27,9 @@ import {
   clearCatalogCooldown,
   clearReleaseDetailCooldown,
 } from './db';
-import { authenticateBearer, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { cacheDeleteByArtist } from './cache';
 import { purgeArtistReleaseCaches } from './purge-cache';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { triggerCatalogNow } from './request-catalog';
 import { PLATFORMS } from '../shared/platform-registry';
 
@@ -116,47 +115,23 @@ async function purgeArtistCaches(artistName: string, slug: string): Promise<void
   await purgeArtistReleaseCaches(slug, 'ArtistReleases');
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string>;
-  body?: string | null;
-}) {
-  // The shared helper rather than a hand-rolled wildcard: this endpoint performs writes
-  // (hide/merge/update/create/catalog), so it's restricted to unstream.stream like every other
-  // authenticated surface. Safe for deploy previews — the SPA calls `/api/...` as a same-origin
-  // relative request, and CORS doesn't apply to those at all.
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  const ip = getClientIp(event.headers);
-  const rl = await checkRateLimit(ip, 'standard', CORS_HEADERS);
-  if (rl.limited) return rl.response;
+async function handleRequest(request: SignedInRequest): Promise<EndpointResult> {
+  const { method, user, query } = request;
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
-  const authHeader = event.headers.authorization || event.headers.Authorization;
-  const user = await authenticateBearer(authHeader);
-  if (!user) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Authentication required' }) };
-  }
-
-  if (event.httpMethod === 'GET') {
-    const slug = event.queryStringParameters?.slug;
+  if (method === 'GET') {
+    const slug = query.slug;
     if (!slug) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+      return { status: 400, body: { error: 'slug is required' } };
     }
 
     const owned = await resolveOwnedArtist(slug, user.userId);
     if (!owned.ok || !owned.artistId) {
-      return { statusCode: owned.status, headers: CORS_HEADERS, body: JSON.stringify({ error: owned.error }) };
+      return { status: owned.status, body: { error: owned.error } };
     }
 
     const releases = await getArtistReleasesForOwner(owned.artistId);
@@ -168,9 +143,8 @@ async function handleRequest(event: {
     const stateResult = await getCatalogState(owned.artistId);
 
     return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         // For the artist settings header, which this page shares with the profile and tips tabs.
         artistName: owned.artistName,
         releases,
@@ -181,15 +155,12 @@ async function handleRequest(event: {
             ? nextScanAvailableAt(stateResult.state?.last_attempted_at)
             : null,
         },
-      }),
+      },
     };
   }
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  let body: {
+  // POST from here on: the wrapper has already refused every other method.
+  const body = request.body as {
     slug?: string;
     action?:
       | 'hide'
@@ -214,20 +185,14 @@ async function handleRequest(event: {
     url?: string;
   };
 
-  try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid JSON' }) };
-  }
-
   const { slug, action } = body;
   if (!slug) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'slug is required' }) };
+    return { status: 400, body: { error: 'slug is required' } };
   }
 
   const owned = await resolveOwnedArtist(slug, user.userId);
   if (!owned.ok || !owned.artistId || !owned.artistName) {
-    return { statusCode: owned.status, headers: CORS_HEADERS, body: JSON.stringify({ error: owned.error }) };
+    return { status: owned.status, body: { error: owned.error } };
   }
   const artistId = owned.artistId;
 
@@ -244,11 +209,7 @@ async function handleRequest(event: {
     'resetOrder',
   ];
   if (!action || !VALID_ACTIONS.includes(action)) {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({ error: `action must be one of: ${VALID_ACTIONS.join(', ')}` }),
-    };
+    return { status: 400, body: { error: `action must be one of: ${VALID_ACTIONS.join(', ')}` } };
   }
 
   // Cataloguing returns 202 and is settled by polling the GET, so it doesn't fit the
@@ -261,21 +222,20 @@ async function handleRequest(event: {
     if (!stateResult.ok) {
       // Not knowing whether a scan is allowed is not permission to run one. The same answer
       // `claimArtistForCatalog` gives itself when it can't read the row.
-      return { statusCode: 503, headers: CORS_HEADERS, body: JSON.stringify({ error: stateResult.reason }) };
+      return { status: 503, body: { error: stateResult.reason } };
     }
 
     const readyAt = nextScanAvailableAt(stateResult.state?.last_attempted_at);
     if (readyAt) {
       return {
-        statusCode: 429,
+        status: 429,
         headers: {
-          ...CORS_HEADERS,
           'Retry-After': String(Math.ceil((new Date(readyAt).getTime() - Date.now()) / 1000)),
         },
-        body: JSON.stringify({
+        body: {
           error: 'We checked your links in the last day — a scan runs at most once a day.',
           nextScanAvailableAt: readyAt,
-        }),
+        },
       };
     }
 
@@ -285,12 +245,12 @@ async function handleRequest(event: {
     await clearReleaseDetailCooldown(artistId);
     const queued = await triggerCatalogNow(artistId);
     if (!queued.ok) {
-      return { statusCode: queued.status, headers: CORS_HEADERS, body: JSON.stringify({ error: queued.error }) };
+      return { status: queued.status, body: { error: queued.error } };
     }
 
     // No cache purge here: nothing has been written yet. The crawl runs asynchronously, and the
     // page polls the GET for its outcome.
-    return { statusCode: 202, headers: CORS_HEADERS, body: JSON.stringify({ queued: true }) };
+    return { status: 202, body: { queued: true } };
   }
 
   let ok = false;
@@ -299,62 +259,62 @@ async function handleRequest(event: {
   if (action === 'hide' || action === 'unhide') {
     const { releaseId } = body;
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
+      return { status: 400, body: { error: 'releaseId must be a UUID' } };
     }
     ok = await setReleaseHidden(artistId, releaseId, action === 'hide');
   } else if (action === 'dismiss') {
     const { releaseId } = body;
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
+      return { status: 400, body: { error: 'releaseId must be a UUID' } };
     }
     if (!(await verifyReleaseOwnership(artistId, [releaseId]))) {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not your release' }) };
+      return { status: 403, body: { error: 'Not your release' } };
     }
     ok = await dismissReleaseReview(releaseId);
   } else if (action === 'merge') {
     const { keepId, dropId } = body;
     if (!keepId || !UUID_REGEX.test(keepId) || !dropId || !UUID_REGEX.test(dropId)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'keepId and dropId must both be UUIDs' }) };
+      return { status: 400, body: { error: 'keepId and dropId must both be UUIDs' } };
     }
     // Both sides, not just one — an artist could otherwise merge one of their own releases
     // with someone else's by supplying a dropId (or keepId) they don't own.
     if (!(await verifyReleaseOwnership(artistId, [keepId, dropId]))) {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not your release' }) };
+      return { status: 403, body: { error: 'Not your release' } };
     }
     const result = await mergeReleases(keepId, dropId);
     ok = result.ok;
     if (!ok) {
-      return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: result.error || 'Failed to merge releases' }) };
+      return { status: 409, body: { error: result.error || 'Failed to merge releases' } };
     }
   } else if (action === 'update') {
     const { releaseId, title, releaseDate, artworkUrl } = body;
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
+      return { status: 400, body: { error: 'releaseId must be a UUID' } };
     }
     // The declared types are compile-time only — a client can send `"title": 123`. Without
     // this, a non-string reaches `patch.title.trim()` in db.ts and throws inside an async
     // function with no try/catch around it, surfacing as a bare 500 rather than the 400 every
     // other malformed field in this handler returns.
     if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'title must be a non-empty string' }) };
+      return { status: 400, body: { error: 'title must be a non-empty string' } };
     }
     if (typeof title === 'string' && title.length > MAX_TITLE_LENGTH) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` }) };
+      return { status: 400, body: { error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` } };
     }
     // null is meaningful here — it clears the date. Anything other than null or a string is not.
     if (releaseDate !== undefined && releaseDate !== null && typeof releaseDate !== 'string') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseDate must be a string or null' }) };
+      return { status: 400, body: { error: 'releaseDate must be a string or null' } };
     }
     if (artworkUrl !== undefined && artworkUrl !== null) {
       if (typeof artworkUrl !== 'string') {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'artworkUrl must be a string or null' }) };
+        return { status: 400, body: { error: 'artworkUrl must be a string or null' } };
       }
       try {
         if (new URL(artworkUrl).protocol !== 'https:') {
-          return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Artwork URL must use HTTPS' }) };
+          return { status: 400, body: { error: 'Artwork URL must use HTTPS' } };
         }
       } catch {
-        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid artwork URL' }) };
+        return { status: 400, body: { error: 'Invalid artwork URL' } };
       }
     }
     ok = await updateArtistReleaseFields(artistId, releaseId, { title, releaseDate, artworkUrl });
@@ -363,59 +323,55 @@ async function handleRequest(event: {
     // "clear every position and go back to newest first".
     const releaseIds: unknown = action === 'resetOrder' ? [] : body.releaseIds;
     if (!Array.isArray(releaseIds) || releaseIds.some(id => typeof id !== 'string' || !UUID_REGEX.test(id))) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseIds must be an array of UUIDs' }) };
+      return { status: 400, body: { error: 'releaseIds must be an array of UUIDs' } };
     }
     if (releaseIds.length > MAX_ORDERED_RELEASES) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `releaseIds must contain ${MAX_ORDERED_RELEASES} ids or fewer` }) };
+      return { status: 400, body: { error: `releaseIds must contain ${MAX_ORDERED_RELEASES} ids or fewer` } };
     }
     // A repeated id means the editor sent an arrangement that isn't one — the last occurrence
     // would silently win and a release the artist can see would vanish from their order.
     if (new Set(releaseIds).size !== releaseIds.length) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseIds must not repeat' }) };
+      return { status: 400, body: { error: 'releaseIds must not repeat' } };
     }
     // Same rule as hide/merge: owning the profile says nothing about who owns the ids in the
     // body. `verifyReleaseOwnership` reports false for an empty list, so only ask when there's
     // something to check — a reset touches nothing but this artist's own rows.
     if (releaseIds.length > 0 && !(await verifyReleaseOwnership(artistId, releaseIds as string[]))) {
-      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not your release' }) };
+      return { status: 403, body: { error: 'Not your release' } };
     }
     ok = await setReleaseDisplayOrder(artistId, releaseIds as string[]);
   } else if (action === 'addLink') {
     const { releaseId, platform, url } = body;
     if (!releaseId || !UUID_REGEX.test(releaseId)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseId must be a UUID' }) };
+      return { status: 400, body: { error: 'releaseId must be a UUID' } };
     }
     if (typeof url !== 'string' || !isHttpUrl(url)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'A valid http(s) url is required' }) };
+      return { status: 400, body: { error: 'A valid http(s) url is required' } };
     }
     if (typeof platform !== 'string' || !isKnownPlatform(platform)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unknown platform' }) };
+      return { status: 400, body: { error: 'Unknown platform' } };
     }
     ok = await addArtistReleaseLink(artistId, releaseId, platform, url);
   } else {
     // create
     const { title, releaseType, releaseDate, platform, url } = body;
     if (typeof title !== 'string' || !title.trim() || typeof url !== 'string' || !isHttpUrl(url)) {
-      return {
-        statusCode: 400,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'title and a valid http(s) url are required' }),
-      };
+      return { status: 400, body: { error: 'title and a valid http(s) url are required' } };
     }
     if (title.length > MAX_TITLE_LENGTH) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` }) };
+      return { status: 400, body: { error: `title must be ${MAX_TITLE_LENGTH} characters or fewer` } };
     }
     if (typeof platform !== 'string' || !isKnownPlatform(platform)) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unknown platform' }) };
+      return { status: 400, body: { error: 'Unknown platform' } };
     }
     if (releaseDate !== undefined && releaseDate !== null && typeof releaseDate !== 'string') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseDate must be a string or null' }) };
+      return { status: 400, body: { error: 'releaseDate must be a string or null' } };
     }
     // `releaseType` is mapped through `mapReleaseType`, which returns 'other' for anything it
     // doesn't recognize — so a junk value degrades rather than needing its own rejection. Only
     // its *type* matters here.
     if (releaseType !== undefined && typeof releaseType !== 'string') {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'releaseType must be a string' }) };
+      return { status: 400, body: { error: 'releaseType must be a string' } };
     }
     const result = await createArtistRelease(artistId, {
       title,
@@ -427,17 +383,27 @@ async function handleRequest(event: {
     ok = result.ok;
     responseExtra = { releaseId: result.releaseId };
     if (!ok) {
-      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: result.error || 'Failed to create release' }) };
+      return { status: 400, body: { error: result.error || 'Failed to create release' } };
     }
   }
 
   if (!ok) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Action failed' }) };
+    return { status: 500, body: { error: 'Action failed' } };
   }
 
   await purgeArtistCaches(owned.artistName, slug);
 
-  return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ success: true, action, ...responseExtra }) };
+  return { status: 200, body: { success: true, action, ...responseExtra } };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // The site-only shape rather than a wildcard: this endpoint performs writes
+  // (hide/merge/update/create/catalog), so it's restricted to unstream.stream like every other
+  // authenticated surface. Safe for deploy previews — the SPA calls `/api/...` as a same-origin
+  // relative request, and CORS doesn't apply to those at all.
+  cors: 'site',
+  methods: ['GET', 'POST'],
+  auth: 'bearer',
+  rateLimit: 'standard',
+  jsonBody: true,
+}, handleRequest));

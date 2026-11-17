@@ -83,7 +83,7 @@ function setupDb({ item, sharingPublic = false, hasConnection = true }: Setup) {
 const PUBLIC_ITEM = { user_id: OWNER, external_id: 'al-1', provenance: 'purchased', hidden: false };
 
 function get(headers: Record<string, string | undefined> = {}) {
-  return handler({ httpMethod: 'GET', headers, pathParameters: { id: ITEM_ID } });
+  return handler({ httpMethod: 'GET', headers, path: `/api/collection/art/${ITEM_ID}` });
 }
 
 function signedInAs(userId: string | null) {
@@ -119,7 +119,7 @@ describe('collection-art handler', () => {
   });
 
   it('rejects a malformed item id without touching the database', async () => {
-    const res = await handler({ httpMethod: 'GET', headers: {}, pathParameters: { id: '../secrets' } });
+    const res = await handler({ httpMethod: 'GET', headers: {}, path: '/api/collection/art/../secrets' });
     expect(res.statusCode).toBe(400);
     expect(mocks.mockFrom).not.toHaveBeenCalled();
   });
@@ -153,11 +153,16 @@ describe('collection-art handler', () => {
     expect((await get()).statusCode).toBe(404);
   });
 
-  it('serves the owner their own hidden item even with sharing off', async () => {
+  it('does not open a hidden item to a sign-in token, even its owner\'s: only the URL decides', async () => {
+    // The answer is cached at the CDN by URL, so anything served on the strength of a header
+    // would then be served to whoever asked for the same URL next. The owner's own pages mint
+    // a `?t=` token instead (see the token tests below).
     setupDb({ item: { ...PUBLIC_ITEM, hidden: true }, sharingPublic: false });
     signedInAs(OWNER);
     const res = await get({ authorization: 'Bearer owner-token' });
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(404);
+    expect(mocks.mockFetchCoverArt).not.toHaveBeenCalled();
+    expect(mocks.mockCreateClient).not.toHaveBeenCalled();
   });
 
   it('does not let one signed-in user read another user\'s private art', async () => {
@@ -223,7 +228,7 @@ describe('collection-art handler', () => {
       const res = await handler({
         httpMethod: 'GET',
         headers: {},
-        pathParameters: { id: ITEM_ID },
+        path: `/api/collection/art/${ITEM_ID}`,
         queryStringParameters: { t: await mintedToken() },
       });
 
@@ -241,7 +246,7 @@ describe('collection-art handler', () => {
       const res = await handler({
         httpMethod: 'GET',
         headers: {},
-        pathParameters: { id: ITEM_ID },
+        path: `/api/collection/art/${ITEM_ID}`,
         queryStringParameters: { t: 'f'.repeat(32) },
       });
 

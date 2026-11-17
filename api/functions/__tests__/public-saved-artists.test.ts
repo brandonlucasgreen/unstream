@@ -33,7 +33,7 @@ describe('public-saved-artists handler', () => {
     httpMethod: 'GET',
     headers: {},
     body: null,
-    pathParameters: { handle: 'testuser' },
+    path: '/api/public/saved-artists/testuser',
   };
 
   beforeEach(() => {
@@ -287,13 +287,13 @@ describe('public-saved-artists handler', () => {
   it('returns 400 when no handle provided', async () => {
     const res = await handler({
       ...validEvent,
-      pathParameters: {},
+      path: '/api/public/saved-artists/',
     });
     expect(res!.statusCode).toBe(400);
   });
 
-  it('returns 405-equivalent (404) for non-GET methods', async () => {
+  it('returns 405 for non-GET methods', async () => {
     const res = await handler({ ...validEvent, httpMethod: 'POST' });
-    expect(res!.statusCode).toBe(404);
+    expect(res!.statusCode).toBe(405);
   });
 });

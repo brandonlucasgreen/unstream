@@ -3,7 +3,7 @@
 // it reports the last 30 days (analytics-range.ts).
 
 import { getClient } from './db';
-import { authenticateAdmin, buildCorsHeaders } from './middleware';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { bucketStart, datesInRange, parseAnalyticsRange } from './analytics-range';
 import { Sentry, withSentry } from '../lib/sentry';
 
@@ -31,38 +31,15 @@ function totalsByValue(rows: ContextRow[]): { value: string; events: number }[] 
   return [...totals].map(([value, events]) => ({ value, events })).sort((a, b) => b.events - a.events);
 }
 
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined> | null;
-}) {
-  // Restricted to unstream.stream like every other admin endpoint. The '*' this used
-  // to send wasn't exploitable — a cross-origin page can't get the bearer token — but
-  // it read as though permissive CORS were intended here, which it isn't.
-  const origin = event.headers['origin'] || event.headers['Origin'];
-  const CORS_HEADERS = buildCorsHeaders(origin, false);
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  const admin = await authenticateAdmin(event.headers['authorization'] || event.headers['Authorization']);
-  if (!admin) {
-    return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
-  const range = parseAnalyticsRange(event.queryStringParameters);
+async function handleRequest({ query }: SignedInRequest): Promise<EndpointResult> {
+  const range = parseAnalyticsRange(query);
   if ('error' in range) {
-    return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: range.error }) };
+    return { status: 400, body: { error: range.error } };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const bounds = { p_since: range.since, p_until: range.until };
@@ -106,9 +83,8 @@ async function handleRequest(event: {
         tags: { context: 'analytics.dashboard' },
       });
       return {
-        statusCode: 500,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: 'Failed to fetch analytics' }),
+        status: 500,
+        body: { error: 'Failed to fetch analytics' },
       };
     }
 
@@ -185,9 +161,8 @@ async function handleRequest(event: {
       : null;
 
     return {
-      statusCode: 200,
-      headers: CORS_HEADERS,
-      body: JSON.stringify({
+      status: 200,
+      body: {
         range: { from: range.from, to: range.to, days: range.days, granularity: range.granularity },
         summary: {
           searches,
@@ -201,12 +176,20 @@ async function handleRequest(event: {
         search_kinds: searchKindsByApp,
         platforms: platformTotals,
         streaming_services: serviceTotals,
-      }),
+      },
     };
   } catch (err) {
     console.error('[Analytics Dashboard] Error:', err);
-    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Failed to fetch analytics' }) };
+    return { status: 500, body: { error: 'Failed to fetch analytics' } };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // Restricted to unstream.stream like every other admin endpoint. The '*' this used
+  // to send wasn't exploitable — a cross-origin page can't get the bearer token — but
+  // it read as though permissive CORS were intended here, which it isn't.
+  cors: 'site',
+  methods: ['GET'],
+  auth: 'admin',
+  jsonBody: false,
+}, handleRequest));

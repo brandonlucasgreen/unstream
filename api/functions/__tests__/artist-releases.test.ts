@@ -43,20 +43,12 @@ vi.mock('../db', () => ({
   clearReleaseDetailCooldown: mocks.clearReleaseDetailCooldown,
 }));
 
-// buildCorsHeaders is NOT stubbed to a constant — this endpoint performs writes, and one thing
-// worth asserting is that it no longer hands back a wildcard origin. Mirrors the real helper's
-// non-API-key behaviour (pin to the canonical origin).
-vi.mock('../middleware', () => ({
+// Only the sign-in check is stubbed. The endpoint wrapper builds the CORS headers with the real
+// buildCorsHeaders: this endpoint performs writes, and one thing worth asserting is that it never
+// hands back a wildcard origin.
+vi.mock('../middleware', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../middleware')>()),
   authenticateBearer: mocks.authenticateBearer,
-  buildCorsHeaders: (origin: string | undefined, apiKeyPresent: boolean) => ({
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': apiKeyPresent
-      ? '*'
-      : origin === 'https://unstream.stream'
-        ? origin
-        : 'https://unstream.stream',
-    Vary: 'Origin',
-  }),
 }));
 
 vi.mock('../cache', () => ({

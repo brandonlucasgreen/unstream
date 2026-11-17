@@ -16,9 +16,7 @@
 // the burst on a cold cache.
 
 import { withSentry } from '../lib/sentry';
-import { createClient } from '@supabase/supabase-js';
 import { getClient } from './db';
-import { checkRateLimit, getClientIp } from './ratelimit';
 import { decryptCredential } from './credential-crypto';
 import { isValidCollectionArtToken } from './collection-utils';
 import {
@@ -26,19 +24,7 @@ import {
   subsonicFetchCoverArt,
   type SubsonicCredential,
 } from './bandcamp-subsonic';
-
-// The wildcard is deliberate, though the owner's Bearer token is one of three ways in (see
-// "Three ways to be allowed" below). The answer is an image that browsers load through <img>,
-// which never consults CORS, and it is cached at the CDN by URL for a month, so an origin
-// echoed per request (account-cors.ts) would be frozen into the cache for whoever asked
-// first. The Bearer path is for non-browser clients; nothing here changes account state.
-const BASE_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
-
-const JSON_HEADERS = { ...BASE_HEADERS, 'Content-Type': 'application/json' };
+import { endpoint, type EndpointResult, type PublicRequest } from './http/endpoint';
 
 /** A month at the CDN, a day in the browser. Album art for a bought record doesn't change. */
 const IMAGE_CACHE_HEADERS = {
@@ -106,59 +92,15 @@ async function connectionForUser(
   return (data as ConnectionRow | null) ?? null;
 }
 
-/** Declared so header lookups stay typed — this handler returns images as well as JSON. */
-interface FunctionResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-  isBase64Encoded?: boolean;
-}
-
-async function authenticatedUserId(authHeader: string | undefined): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const url = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
-  const { data, error } = await createClient(url, anonKey).auth.getUser(authHeader.slice(7));
-  if (error || !data.user) return null;
-  return data.user.id;
-}
-
-async function handleRequest(event: {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  path?: string;
-  pathParameters?: Record<string, string | undefined>;
-  queryStringParameters?: Record<string, string | undefined>;
-}): Promise<FunctionResponse> {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: BASE_HEADERS, body: '' };
-  }
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
-  }
-
-  // 'lenient', not 'standard'. One collection page renders 15 tiles and most of them miss
-  // `art_url` (only ~28% of a real import matches an Unstream release), so a single page view
-  // fires a dozen or more requests here. On the 30/min 'standard' bucket that spends a
-  // person's whole budget in two page views and 429s them out of their own settings and
-  // release lists — which is exactly the failure the lenient tier's own comment describes for
-  // typeahead. High-frequency and low-cost (a CDN hit after the first view) is the same shape.
-  const rl = await checkRateLimit(getClientIp(event.headers), 'lenient', JSON_HEADERS);
-  // `response` is optional on the rate-limit result, so returning it bare can hand Netlify
-  // `undefined`. Substitute a plain 429 rather than relying on the caller's shape.
-  if (rl.limited) {
-    return rl.response ?? { statusCode: 429, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Rate limited' }) };
-  }
-
-  const itemId = (event.pathParameters?.id || event.path?.split('/').pop() || '').replace(/\/$/, '');
+async function handleRequest({ path, query }: PublicRequest): Promise<EndpointResult> {
+  const itemId = (path.split('/').pop() || '').replace(/\/$/, '');
   if (!/^[0-9a-f-]{36}$/i.test(itemId)) {
-    return { statusCode: 400, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Invalid item id' }) };
+    return { status: 400, body: { error: 'Invalid item id' } };
   }
 
   const client = getClient();
   if (!client) {
-    return { statusCode: 500, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Database not configured' }) };
+    return { status: 500, body: { error: 'Database not configured' } };
   }
 
   const { data: item, error: itemError } = await client
@@ -169,33 +111,32 @@ async function handleRequest(event: {
 
   if (itemError) {
     console.error('[collection-art] item lookup failed:', itemError.message);
-    return { statusCode: 500, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Internal server error' }) };
+    return { status: 500, body: { error: 'Internal server error' } };
   }
   if (!item || !item.external_id) {
-    return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'Not found' }) };
+    return { status: 404, body: { error: 'Not found' }, headers: MISS_CACHE_HEADERS };
   }
 
-  // Three ways to be allowed to see this, checked cheapest first:
+  // Two ways to be allowed to see this, checked cheapest first:
   //
   // 1. The URL carries a valid token, minted by an endpoint that already decided this viewer
   //    may see this item (the owner's dashboard, or the public page after its own filters).
   //    This is the only path a browser's <img> tag can actually take with credentials — images
   //    carry no Authorization header, which is why non-public owners used to 404 on their own
   //    dashboard art — and it costs zero extra reads.
-  // 2. You own it (a non-browser client sending a bearer token).
-  // 3. It is on a page anyone can see — the legacy bare-URL path, kept for URLs minted before
+  // 2. It is on a page anyone can see — the legacy bare-URL path, kept for URLs minted before
   //    tokens existed (u-handle's crawler pages also still mint bare URLs; the check mirrors
   //    the public page exactly: purchased, not hidden, sharing on).
-  let allowed = isValidCollectionArtToken(itemId, event.queryStringParameters?.t);
-
-  if (!allowed) {
-    const viewerId = await authenticatedUserId(event.headers.authorization);
-    allowed = viewerId === item.user_id;
-  }
+  //
+  // There was a third until 2026-11-16: the owner's own sign-in token in an Authorization
+  // header. No client ever sent one, and it could not be made safe: the answer is cached at the
+  // CDN by URL for a month, so art served to its owner that way would then have been served to
+  // anyone who asked for the same bare URL. Whatever decides access has to be in the URL.
+  let allowed = isValidCollectionArtToken(itemId, query.t);
 
   if (!allowed) {
     if (item.provenance !== 'purchased' || item.hidden) {
-      return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+      return { status: 404, body: { error: 'Not found' } };
     }
     const { data: owner } = await client
       .from('usernames')
@@ -207,13 +148,13 @@ async function handleRequest(event: {
 
   if (!allowed) {
     // 404 rather than 403, matching the public page: don't confirm the item exists.
-    return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
+    return { status: 404, body: { error: 'Not found' } };
   }
 
   const connection = await connectionForUser(client, item.user_id);
 
   if (!connection) {
-    return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'No art available' }) };
+    return { status: 404, body: { error: 'No art available' }, headers: MISS_CACHE_HEADERS };
   }
 
   let credential: SubsonicCredential;
@@ -224,7 +165,7 @@ async function handleRequest(event: {
     // Never forward the caught error: a JSON.parse failure would carry a snippet of the
     // decrypted credential in its message. Same rule as bandcamp-sync-background.
     console.error('[collection-art] credential decrypt failed');
-    return { statusCode: 404, headers: JSON_HEADERS, body: JSON.stringify({ error: 'No art available' }) };
+    return { status: 404, body: { error: 'No art available' } };
   }
 
   try {
@@ -235,17 +176,16 @@ async function handleRequest(event: {
     const art = coverArtId ? await subsonicFetchCoverArt(credential, coverArtId, 600) : null;
 
     if (!art) {
-      return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'No art available' }) };
+      return { status: 404, body: { error: 'No art available' }, headers: MISS_CACHE_HEADERS };
     }
 
     return {
-      statusCode: 200,
+      status: 200,
+      raw: Buffer.from(art.bytes).toString('base64'),
       headers: {
-        ...BASE_HEADERS,
         ...IMAGE_CACHE_HEADERS,
         'Content-Type': art.contentType,
       },
-      body: Buffer.from(art.bytes).toString('base64'),
       isBase64Encoded: true,
     };
   } catch (error) {
@@ -253,8 +193,24 @@ async function handleRequest(event: {
     // title placeholder now and can recover on the next request — never a long cache, which
     // would freeze a transient failure into a permanent gap.
     console.warn('[collection-art] art fetch failed:', error instanceof Error ? error.message : String(error));
-    return { statusCode: 404, headers: { ...JSON_HEADERS, ...MISS_CACHE_HEADERS }, body: JSON.stringify({ error: 'No art available' }) };
+    return { status: 404, body: { error: 'No art available' }, headers: MISS_CACHE_HEADERS };
   }
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  // Any origin, deliberately. The answer is an image that browsers load through <img>, which
+  // never consults CORS, and it is cached at the CDN by URL for a month, so an origin echoed per
+  // request (account-cors.ts) would be frozen into the cache for whoever asked first. It takes
+  // no sign-in token (see "Two ways to be allowed" above), and nothing here changes account state.
+  cors: 'public',
+  methods: ['GET'],
+  auth: 'none',
+  // 'lenient', not 'standard'. One collection page renders 15 tiles and most of them miss
+  // `art_url` (only ~28% of a real import matches an Unstream release), so a single page view
+  // fires a dozen or more requests here. On the 30/min 'standard' bucket that spends a
+  // person's whole budget in two page views and 429s them out of their own settings and
+  // release lists — which is exactly the failure the lenient tier's own comment describes for
+  // typeahead. High-frequency and low-cost (a CDN hit after the first view) is the same shape.
+  rateLimit: 'lenient',
+  jsonBody: false,
+}, handleRequest));

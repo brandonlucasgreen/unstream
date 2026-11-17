@@ -77,7 +77,7 @@ afterEach(() => {
 
 describe('tips-review-notify', () => {
   it('refuses unsigned requests', async () => {
-    const res = await handler({ httpMethod: 'GET', headers: {} });
+    const res = await handler({ httpMethod: 'POST', headers: {} });
     expect(res.statusCode).toBe(401);
   });
 
@@ -86,7 +86,7 @@ describe('tips-review-notify', () => {
     mocks.cacheGet.mockResolvedValue(['acct_old']); // watermark: old pending account seen last run
     mocks.fetchMock.mockResolvedValue(new Response('OK', { status: 200 }));
 
-    const res = await handler({ httpMethod: 'GET', headers: secretHeaders() });
+    const res = await handler({ httpMethod: 'POST', headers: secretHeaders() });
     const body = JSON.parse(res.body as string);
     expect(body).toEqual({ ok: true, fresh: 1, alerted: 1, awaiting: 1 });
     expect(mocks.fetchMock).toHaveBeenCalledTimes(1);
@@ -109,7 +109,7 @@ describe('tips-review-notify', () => {
       ),
     );
     mocks.cacheGet.mockResolvedValue(['acct_a', 'acct_b']);
-    const res = await handler({ httpMethod: 'GET', headers: secretHeaders() });
+    const res = await handler({ httpMethod: 'POST', headers: secretHeaders() });
     const body = JSON.parse(res.body as string);
     expect(body).toMatchObject({ ok: true, fresh: 0, awaiting: 2 });
     expect(mocks.fetchMock).not.toHaveBeenCalled();
@@ -119,7 +119,7 @@ describe('tips-review-notify', () => {
   it('refuses to classify when the watermark store is down, rather than re-alarm everything', async () => {
     mocks.client.from.mockReturnValue(rows({ id: 'acct_x', name: 'X', slug: 'x', createdAt: '2026-10-18T01:00:00Z' }));
     mocks.getRedis.mockReturnValue(null);
-    const res = await handler({ httpMethod: 'GET', headers: secretHeaders() });
+    const res = await handler({ httpMethod: 'POST', headers: secretHeaders() });
     expect(res.statusCode).toBe(503);
     expect(mocks.fetchMock).not.toHaveBeenCalled();
   });
@@ -129,7 +129,7 @@ describe('tips-review-notify', () => {
     mocks.cacheGet.mockResolvedValue([]);
     mocks.fetchMock.mockResolvedValue(new Response('err', { status: 500 }));
 
-    const res = await handler({ httpMethod: 'GET', headers: secretHeaders() });
+    const res = await handler({ httpMethod: 'POST', headers: secretHeaders() });
     const body = JSON.parse(res.body as string);
     expect(body).toEqual({ ok: true, fresh: 1, alerted: 0, awaiting: 1 });
     // The failed account is NOT committed — next run sees it as fresh again.

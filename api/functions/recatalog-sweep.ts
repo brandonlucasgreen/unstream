@@ -34,9 +34,9 @@
 // stalest one was, the workflow prints that, and a non-2xx fails the workflow out loud.
 
 import { getStaleCatalogCandidates } from './db';
-import { isInternalRequest } from './middleware';
 import { isCatalogEnabled, requestArtistCatalog } from './request-catalog';
 import { Sentry, withSentry } from '../lib/sentry';
+import { endpoint, type EndpointResult } from './http/endpoint';
 
 /**
  * How many artists one sweep asks for.
@@ -58,18 +58,7 @@ import { Sentry, withSentry } from '../lib/sentry';
  */
 const SWEEP_BATCH_SIZE = 25;
 
-async function handleRequest(event: {
-  httpMethod?: string;
-  headers?: Record<string, string | undefined>;
-}) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  if (!isInternalRequest(event.headers?.authorization ?? event.headers?.Authorization)) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
-
+async function handleRequest(): Promise<EndpointResult> {
   // Reported, not logged. On a deploy where cataloging is off this sweep can never do anything,
   // and a scheduled job whose whole output is "200, nothing to do" is indistinguishable from one
   // that is working — which is how release cataloging stayed broken for days before a refusal
@@ -80,8 +69,8 @@ async function handleRequest(event: {
       tags: { area: 'release-catalog', kind: 'sweep-disabled' },
     });
     return {
-      statusCode: 503,
-      body: JSON.stringify({ error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).' }),
+      status: 503,
+      body: { error: 'Cataloging is disabled on this deploy (RELEASE_CATALOG_ENABLED is not set).' },
     };
   }
 
@@ -93,7 +82,7 @@ async function handleRequest(event: {
       tags: { area: 'release-catalog', kind: 'sweep-selection-failed' },
       extra: { reason: selection.reason },
     });
-    return { statusCode: 503, body: JSON.stringify({ error: selection.reason }) };
+    return { status: 503, body: { error: selection.reason } };
   }
 
   const {
@@ -144,7 +133,7 @@ async function handleRequest(event: {
 
   if (candidates.length === 0) {
     console.log('[recatalog-sweep] nothing to do:', JSON.stringify(summary));
-    return { statusCode: 200, body: JSON.stringify(summary) };
+    return { status: 200, body: summary };
   }
 
   // Awaited: the 202 handshake only, but an un-awaited fetch is killed when the Lambda freezes
@@ -159,11 +148,16 @@ async function handleRequest(event: {
       tags: { area: 'release-catalog', kind: 'sweep-dispatch-failed' },
       extra: summary,
     });
-    return { statusCode: 502, body: JSON.stringify({ error: 'Could not reach the cataloging function', ...summary }) };
+    return { status: 502, body: { error: 'Could not reach the cataloging function', ...summary } };
   }
 
   console.log('[recatalog-sweep]', JSON.stringify(summary));
-  return { statusCode: 200, body: JSON.stringify(summary) };
+  return { status: 200, body: summary };
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'none',
+  methods: ['POST'],
+  auth: 'internal',
+  jsonBody: false,
+}, handleRequest));

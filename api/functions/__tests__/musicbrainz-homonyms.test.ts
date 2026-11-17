@@ -159,7 +159,7 @@ describe('getMusicBrainzEnrichment: same-name artists', () => {
   it('gives no card to the matched artist when the name is shared and their lookup failed', async () => {
     mockMusicBrainz({ failLookupOf: ORLANDO });
 
-    const response = await answered(handler({ queryStringParameters: { query: 'Paracosm' } }));
+    const response = await answered(handler({ httpMethod: 'GET', queryStringParameters: { query: 'Paracosm' } }));
     const body = JSON.parse(response.body) as { results: { name: string; platforms: { url: string }[] }[]; hasPendingEnrichment: boolean };
 
     // A card saying only "Paracosm" can't be told apart from the others; the retry fills it in.
@@ -208,7 +208,7 @@ describe('search-sources: three Paracosms', () => {
   it('shows each artist on their own card, with only their own links', async () => {
     mockMusicBrainz();
 
-    const response = await answered(handler({ queryStringParameters: { query: 'Paracosm' } }));
+    const response = await answered(handler({ httpMethod: 'GET', queryStringParameters: { query: 'Paracosm' } }));
     const { results } = JSON.parse(response.body) as {
       results: { id: string; name: string; platforms: { sourceId: string; url: string }[]; location?: { city?: string } }[];
     };

@@ -11,12 +11,10 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getClient, resolveOwnedArtist } from './db';
-import { authenticateBearer } from './middleware';
-import { checkRateLimit, getClientIp } from './ratelimit';
+import { endpoint, type EndpointResult, type SignedInRequest } from './http/endpoint';
 import { isLiveMode, stripeMode, stripeRequest, type StripeAccount } from './stripe';
 import { getGoals, getTipAccount, stripeHold, tipsOpenToArtist, tipsState, type StripeHold, type TipAccountRow } from './tips-db';
-import { TIPS_ARTIST_METHODS, respond } from './tips-http';
-import { buildAccountCorsHeaders } from './account-cors';
+import { respond } from './tips-http';
 import { purgeCacheTags } from './purge-cache';
 import {
   MAX_GOAL_TITLE_LENGTH,
@@ -30,63 +28,30 @@ import { Sentry, withSentry } from '../lib/sentry';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-interface HandlerEvent {
-  httpMethod: string;
-  headers: Record<string, string | undefined>;
-  body: string | null;
-  queryStringParameters?: Record<string, string | undefined> | null;
-}
-
-async function handleRequest(event: HandlerEvent) {
-  // Per-request, allowlisted origin: never '*' on an endpoint that takes a Bearer token
-  // (account-cors.ts says why). Every answer leaves through here, so none can miss it.
-  const corsHeaders = buildAccountCorsHeaders(event.headers.origin || event.headers.Origin, TIPS_ARTIST_METHODS);
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: corsHeaders, body: '' };
-  const response = await answer(event, corsHeaders);
-  return { ...response, headers: { ...response.headers, ...corsHeaders } };
-}
-
-async function answer(event: HandlerEvent, corsHeaders: Record<string, string>) {
-
-  const user = await authenticateBearer(event.headers.authorization);
-  const rl = await checkRateLimit(user ? `user:${user.userId}` : `ip:${getClientIp(event.headers)}`, 'account', corsHeaders);
-  if (rl.limited) return rl.response!;
-  if (!user) return respond(401, { error: 'Not authenticated' });
-
+async function handleRequest({ method, user, query, body }: SignedInRequest): Promise<EndpointResult> {
   // /my-artists asks only whether to show the Tips button (tipsOpenToArtist). No profile, database
   // or Stripe read here.
   const tipsOpenToCaller = await tipsOpenToArtist(user.email);
-  if (event.httpMethod === 'GET' && event.queryStringParameters?.summary === '1') {
+  if (method === 'GET' && query.summary === '1') {
     return respond(200, { available: tipsOpenToCaller });
   }
 
   const client = getClient();
   if (!client) return respond(500, { error: 'Database not configured' });
 
-  let body: Record<string, unknown> = {};
-  if (event.httpMethod === 'PUT') {
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch {
-      return respond(400, { error: 'Invalid JSON' });
-    }
-  } else if (event.httpMethod !== 'GET') {
-    return respond(405, { error: 'Method not allowed' });
-  }
-
-  const slug = (event.httpMethod === 'GET' ? event.queryStringParameters?.slug : body.slug) ?? '';
+  const slug = (method === 'GET' ? query.slug : body.slug) ?? '';
   const owned = await resolveOwnedArtist(String(slug), user.userId);
   if (!owned.ok) return respond(owned.status, { error: owned.error });
   const artistId = owned.artistId!;
 
   // Private for now (canSetUpTips): anyone else gets the page's "not available" state, and no writes.
   if (!tipsOpenToCaller) {
-    if (event.httpMethod === 'GET') return respond(200, { available: false, artistName: owned.artistName });
+    if (method === 'GET') return respond(200, { available: false, artistName: owned.artistName });
     return respond(403, { error: "Tips aren't open to artists yet" });
   }
 
   try {
-    if (event.httpMethod === 'GET') return respond(200, await readSettings(client, artistId, owned.artistName!, user.userId));
+    if (method === 'GET') return respond(200, await readSettings(client, artistId, owned.artistName!, user.userId));
 
     let result: ReturnType<typeof respond>;
     switch (body.action) {
@@ -104,10 +69,10 @@ async function answer(event: HandlerEvent, corsHeaders: Record<string, string>) 
     }
     // The server-rendered artist page shows the Tip link and open goals and is CDN-cached for a
     // day under this tag; without the purge a change looks like it didn't save. Best effort.
-    if (result.statusCode === 200) await purgeCacheTags([`artist-${String(slug)}`], 'TipsSettings');
+    if (result.status === 200) await purgeCacheTags([`artist-${String(slug)}`], 'TipsSettings');
     return result;
   } catch (err) {
-    Sentry.captureException(err, { extra: { context: `tips-settings.${event.httpMethod}` } });
+    Sentry.captureException(err, { extra: { context: `tips-settings.${method}` } });
     return respond(500, { error: 'Something went wrong. Try again.' });
   }
 }
@@ -294,4 +259,10 @@ async function closeGoal(client: SupabaseClient, artistId: string, body: Record<
   return respond(200, { goals: await getGoals(client, artistId, { openOnly: false }) });
 }
 
-export const handler = withSentry(handleRequest);
+export const handler = withSentry(endpoint({
+  cors: 'account',
+  methods: ['GET', 'PUT'],
+  auth: 'bearer',
+  rateLimit: 'account',
+  jsonBody: true,
+}, handleRequest));
