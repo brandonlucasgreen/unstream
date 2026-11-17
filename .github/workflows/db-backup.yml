@@ -142,6 +142,27 @@ jobs:
           # runner-image port being free.
           sed -i 's/^port = 54322$/port = 54722/' supabase/config.toml
           grep -q '^port = 54722$' supabase/config.toml
+          # Run the same Auth version as production. The auth tables come from the local Auth
+          # container's own migrations, not from the dump, so a local Auth older than
+          # production's is missing columns the dump fills: on 2026-11-16 production reached
+          # Auth v2.198 (auth.one_time_tokens.link_token_hash) while CLI 2.121.0 starts v2.197,
+          # and the restore failed. Supabase upgrades hosted Auth on its own schedule, so the
+          # version is read from production each run, the way `supabase link` does, and the CLI
+          # picks it up from supabase/.temp/gotrue-version. The project URL and anon key are
+          # public (they ship in the extension); reading them from there keeps one copy.
+          supabase_url=$(sed -n "s/^const SUPABASE_URL = '\(.*\)';$/\1/p" "$GITHUB_WORKSPACE/apps/extension/lib/supabase.js")
+          anon_key=$(sed -n "s/^const SUPABASE_ANON_KEY = '\(.*\)';$/\1/p" "$GITHUB_WORKSPACE/apps/extension/lib/supabase.js")
+          auth_version=$(curl -fsS --max-time 20 -H "apikey: $anon_key" "$supabase_url/auth/v1/health" \
+            | jq -r '.version // empty' || true)
+          if [[ "$auth_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            mkdir -p supabase/.temp
+            printf '%s' "$auth_version" > supabase/.temp/gotrue-version
+            echo "Restoring with production's Auth $auth_version"
+          else
+            # Don't fail the run over this alone: the CLI's own Auth still restores whenever
+            # production hasn't added columns since, and if it has, the restore fails loudly.
+            echo "::warning::Couldn't read production's Auth version (got '${auth_version}'); using the CLI's default"
+          fi
           # Only Postgres and Auth: Auth creates the auth tables the users are restored into.
           supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
           "$GITHUB_WORKSPACE/.github/scripts/db-restore-check.sh" "$RUNNER_TEMP/dump" \
