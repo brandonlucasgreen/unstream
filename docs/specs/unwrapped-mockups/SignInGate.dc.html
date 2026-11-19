@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Unwrapped sign-in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #121212; color: #f0f0f0; font-family: 'Stack Sans Headline', system-ui, sans-serif; display: flex; flex-direction: column; padding: 20px 24px 32px 24px;">
+  <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 20px; padding-top: 14px;">unstream <span style="color: #ff6b35;">unwrapped</span></span>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 22px;">
+    <div style="display: flex; align-items: flex-end; gap: 8px; height: 72px;" aria-hidden="true">
+      <span style="width: 28px; height: 40px; background: #ff6b35; border-radius: 3px;"></span>
+      <span style="width: 28px; height: 72px; background: #4ecdc4; border-radius: 3px;"></span>
+      <span style="width: 28px; height: 28px; background: #ffe66d; border-radius: 3px;"></span>
+      <span style="width: 28px; height: 56px; background: #ff6b35; border-radius: 3px;"></span>
+    </div>
+    <h1 style="margin: 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 58px; line-height: 0.88; letter-spacing: -1px;">Who could you back before the year's out?</h1>
+    <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #c9c9c9;">Unwrapped looks at the artists you saved, opened and played on Unstream, and helps you pick a few to pay directly by 31 December.</p>
+    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #c9c9c9;">
+      <span style="display: flex; gap: 8px; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>Private unless you choose to share it</span>
+      <span style="display: flex; gap: 8px; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>Unstream never touches the money</span>
+      <span style="display: flex; gap: 8px; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>Play counts from your app wait here while you sign in</span>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <label for="email" style="font-size: 13px; color: #999999;">Email</label>
+    <input id="email" type="email" placeholder="you@example.com" style="height: 48px; padding: 0 14px; border-radius: 10px; border: 1px solid #3a3a3a; background: #1a1a1a; color: #f0f0f0; font: inherit; font-size: 15px;">
+    <a href="#" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: #ff6b35; color: #160b05; font-size: 16px; font-weight: 600; text-decoration: none;">Email me a sign-in link</a>
+    <span style="font-size: 12px; color: #8a8a8a; text-align: center;">No account yet? Same link — it makes one.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

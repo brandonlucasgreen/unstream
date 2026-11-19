@@ -1,10 +1,15 @@
 ---
-status: Draft
+status: Deferred
 ---
 # Unstream Unwrapped — the end-of-year recap
 
 **Written:** 2026-11-19
-**Status:** Decisions from Brandon's first review folded in (§10). Ready to build from.
+**Status:** **Deferred to the 2027 season** (Brandon, 2026-11-19). The audience numbers in §9 are
+too small for a year-end campaign to be worth building this year: fewer than 15 people would get a
+useful recap. **Only §4's play and click logging was built now** (§4.0 says what shipped and where it
+differs from the plan below), so next year's recap has a year of counts to start from. Everything
+else here is the plan to pick up in autumn 2027, after re-running §9's numbers. Mockups:
+[`unwrapped-mockups/`](unwrapped-mockups/README.md).
 **Name (decided 2026-11-19):** the feature is **Unwrapped** ("Unstream Unwrapped 2026"). Inside it,
 the headline is "Your 2026 in support".
 **Builds on:** [artist-patronage-spec.md](artist-patronage-spec.md) §3.7 ("Year in support", which
@@ -103,6 +108,35 @@ presenting five weeks as a year. 2027 gets the full picture.
 
 ## 4. Play and click logging in the apps
 
+### 4.0 What was built on 2026-11-19
+
+The log in §4.1, counted on the device, with an off switch, and nothing else. Specifically:
+
+- **Extension:** `lib/listening-log.js` (pure, tested by
+  `apps/web/tests/unit/extension-listening-log.test.ts`); the service worker counts plays from
+  `MUSIC_DETECTED` / `MUSIC_STOPPED` and clicks from the popup's result links, through one queue so
+  the log has a single writer. Settings tab: "Play Counts" switch (off deletes), a summary line and a
+  Clear button. A one-time notice on the Discover tab links to the switch.
+- **Mac app:** `Models/ListeningLog.swift` (the log and the play rule, tested by
+  `UnstreamTests/ListeningLogTests.swift`, the same cases as the extension's) and
+  `Platform/macOS/PlayCountStore.swift` (fed by `MediaObserver` in `UnstreamApp.swift`, clicks from
+  `AppState.trackLinkClick`; JSON in Application Support). Settings → General: "Count plays on this
+  Mac" (off deletes), a summary and Clear. A one-time notice in the popover.
+- **Disclosures:** the privacy policy's "Play counts" paragraph, a line in the Terms, and
+  `data-collection-audit.md`'s "Client-side only" section.
+
+**Differences from the plan below:**
+
+- **One play rule in both clients: 30 seconds of playback**, measured when the track changes or
+  stops, instead of the Mac using the half-or-4-minutes scrobble rule. Neither client needs a timer,
+  the counts mean the same thing in both, and the extension can't know durations anyway.
+- **The web app logs no clicks.** Only the two apps count; §4.2's web `localStorage` log waits for
+  the recap that would read it.
+- **No handoff, no `/api/unwrapped/resolve`, no recap.** Nothing reads the log off the device, so
+  the store listings' data-use answers don't change yet. §4.3–4.5 apply when the recap is built.
+- **No confirmation before deleting** when the switch goes off: Firefox popups can't show
+  `confirm()`, so the setting's description says it deletes, in both clients.
+
 ### Principles
 
 - **On the device, and nowhere else.** No account needed, no server table, no sync.
@@ -138,10 +172,9 @@ The same shape in both apps, so the web page reads one format:
 
 ### 4.2 What counts
 
-- **A play** is a track heard for half its length or 4 minutes, whichever is shorter — the same
-  threshold `ScrobbleManager` already applies for ListenBrainz, and Last.fm's. Mac: reuse that timer.
-  Extension: content scripts already report track changes (`MUSIC_DETECTED`); where a site gives no
-  duration, count a track after 30 seconds of continuous detection.
+- **A play** is a track that was playing for at least 30 seconds before the next track started or
+  playback stopped, in both clients (§4.0). A track counted in the last 10 minutes isn't counted
+  again, so a pause and resume is one play.
 - **A click** is opening any platform link for an artist from the popup, the result rows, or the
   now-playing card. The web app logs its own clicks in `localStorage` (same shape, key
   `unstream.listeningLog`), next to the existing anonymous `platform_click` event. Nothing about the

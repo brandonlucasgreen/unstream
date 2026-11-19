@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Extension play count opt-out</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 380px; height: 640px; box-sizing: border-box; background: #121212; color: #f0f0f0; font-family: 'Stack Sans Headline', system-ui, sans-serif; border: 1px solid #2a2a2a; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #2a2a2a;">
+    <button aria-label="Back" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #999999; display: flex; align-items: center; justify-content: center; padding: 0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </button>
+    <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 22px;">Settings</span>
+  </div>
+
+  <div style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 12px; background: #1a1a1a; border: 1px solid #2a2a2a;">
+      <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+        <span style="font-size: 14px; font-weight: 600;">Count plays and link clicks in this browser</span>
+        <span style="font-size: 12px; line-height: 1.5; color: #a8a8a8;">For Unwrapped. Per artist, per month, kept in this browser only. Leaves only when you open Unwrapped.</span>
+        <span style="font-size: 12px; color: {{statusColor}};">{{status}}</span>
+      </div>
+      <button onClick="{{toggle}}" role="switch" aria-checked="{{checked}}" aria-label="Count plays and link clicks in this browser" style="width: 48px; height: 28px; border-radius: 14px; border: 0; background: {{trackBg}}; padding: 3px; display: flex; justify-content: {{knobSide}}; flex-shrink: 0;">
+        <span style="width: 22px; height: 22px; border-radius: 50%; background: #ffffff;"></span>
+      </button>
+    </div>
+
+    <div style="display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 12px; background: #1a1a1a; border: 1px solid #2a2a2a;">
+      <span style="font-size: 14px; flex-grow: 1;">Release alerts</span>
+      <span style="width: 48px; height: 28px; border-radius: 14px; background: #4ecdc4; padding: 3px; box-sizing: border-box; display: flex; justify-content: flex-end;" aria-hidden="true"><span style="width: 22px; height: 22px; border-radius: 50%; background: #ffffff;"></span></span>
+    </div>
+  </div>
+
+  <sc-if value="{{confirming}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end;">
+      <div role="dialog" aria-label="Turn off play counts" style="width: 100%; box-sizing: border-box; background: #1a1a1a; border-top: 1px solid #3a3a3a; border-radius: 16px 16px 0 0; padding: 20px 16px 16px 16px; display: flex; flex-direction: column; gap: 12px;">
+        <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 28px; line-height: 1;">Turn off play counts?</span>
+        <span style="font-size: 13px; line-height: 1.5; color: #c9c9c9;">This deletes the 412 plays and 9 clicks counted in this browser. Unwrapped will still work, built from your saved artists.</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+          <button onClick="{{cancel}}" style="height: 44px; border-radius: 8px; border: 1px solid #3a3a3a; background: transparent; color: #f0f0f0; font-size: 14px;">Keep counting</button>
+          <button onClick="{{confirm}}" style="height: 44px; border-radius: 8px; border: 0; background: #f87171; color: #2a0707; font-size: 14px; font-weight: 600;">Turn off and delete</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":380,"height":640}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { on: true, confirming: false, cleared: false };
+  }
+  renderVals() {
+    const on = this.state.on;
+    return {
+      checked: on ? 'true' : 'false',
+      trackBg: on ? '#4ecdc4' : '#3a3a3a',
+      knobSide: on ? 'flex-end' : 'flex-start',
+      status: on ? 'On · 412 plays, 9 clicks this year' : (this.state.cleared ? 'Off · nothing stored' : 'Off'),
+      statusColor: on ? '#4ecdc4' : '#999999',
+      confirming: this.state.confirming,
+      toggle: () => on ? this.setState({ confirming: true }) : this.setState({ on: true, cleared: false }),
+      cancel: () => this.setState({ confirming: false }),
+      confirm: () => this.setState({ on: false, confirming: false, cleared: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

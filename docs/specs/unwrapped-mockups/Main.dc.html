@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mac popover entry point</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+</style>
+</helmet>
+<div style="width: 380px; height: 640px; box-sizing: border-box; background: #1c1c1e; color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; border-radius: 12px; border: 1px solid #3a3a3c; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px 16px;">
+    <div style="display: flex; align-items: flex-end; gap: 2px; height: 16px;" aria-hidden="true">
+      <span style="width: 3px; height: 10px; background: #ff6b35; border-radius: 1px;"></span>
+      <span style="width: 3px; height: 16px; background: #4ecdc4; border-radius: 1px;"></span>
+      <span style="width: 3px; height: 7px; background: #ffe66d; border-radius: 1px;"></span>
+      <span style="width: 3px; height: 13px; background: #ff6b35; border-radius: 1px;"></span>
+    </div>
+    <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.2px;">unstream</span>
+    <span style="flex-grow: 1;"></span>
+    <button aria-label="Settings" style="width: 28px; height: 28px; border: 0; background: transparent; color: #a1a1a6; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+  </div>
+
+  <div style="padding: 0 16px 12px 16px;">
+    <label style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; background: #2c2c2e; border-radius: 8px; color: #a1a1a6; font-size: 13px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <input type="text" placeholder="Search for an artist" aria-label="Search for an artist" style="flex-grow: 1; border: 0; background: transparent; color: #f0f0f0; font: inherit; outline: none;">
+    </label>
+  </div>
+
+  <div style="margin: 4px 16px 0 16px; background: #121212; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden;">
+    <div style="display: flex; height: 4px;" aria-hidden="true">
+      <span style="flex-grow: 1; background: #ff6b35;"></span>
+      <span style="flex-grow: 1; background: #4ecdc4;"></span>
+      <span style="flex-grow: 1; background: #ffe66d;"></span>
+    </div>
+    <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #4ecdc4;">Your year in support · until 31 Dec</span>
+      <h2 style="margin: 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 40px; line-height: 0.9; letter-spacing: -0.5px;">Unwrapped<br><span style="color: #ff6b35;">2026</span></h2>
+      <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #c7c7cc;">Who you saved, clicked and played this year — and the 9 you could still back before it's over.</p>
+      <a href="#" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 8px; background: #ff6b35; color: #160b05; font-size: 14px; font-weight: 600; text-decoration: none; margin-top: 4px;">
+        Open Unwrapped
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg>
+      </a>
+      <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #8e8e93;">Opens in your browser. Your play counts from this Mac go with it, and Unstream doesn't store them.</p>
+    </div>
+  </div>
+
+  <div style="margin: 12px 16px 0 16px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #2c2c2e;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe66d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+    <span style="font-size: 12px; color: #e5e5ea; flex-grow: 1;">Bandcamp Friday · Fri 4 Dec</span>
+    <span style="font-size: 12px; color: #a1a1a6;">15 days</span>
+  </div>
+
+  <div style="margin: 16px 16px 0 16px; display: flex; flex-direction: column; gap: 2px;">
+    <span style="font-size: 11px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.6px; padding-bottom: 6px;">Recently saved</span>
+    <div style="display: flex; align-items: center; gap: 10px; height: 40px;">
+      <span style="width: 28px; height: 28px; border-radius: 6px; background: #3a3a3c;" aria-hidden="true"></span>
+      <span style="font-size: 13px; flex-grow: 1;">Wednesday</span>
+      <span style="font-size: 11px; color: #8e8e93;">Bandcamp · Mirlo</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; height: 40px;">
+      <span style="width: 28px; height: 28px; border-radius: 6px; background: #3a3a3c;" aria-hidden="true"></span>
+      <span style="font-size: 13px; flex-grow: 1;">Hand Habits</span>
+      <span style="font-size: 11px; color: #8e8e93;">Bandcamp</span>
+    </div>
+  </div>
+
+  <span style="flex-grow: 1;"></span>
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid #2c2c2e; font-size: 11px; color: #8e8e93;">
+    <span>Nothing playing</span>
+    <span>Quit</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":380,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

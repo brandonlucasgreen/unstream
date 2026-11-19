@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bandcamp Friday reminder email</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#c2410c}a:hover{color:#9a3412}
+</style>
+</helmet>
+<div style="width: 600px; height: 900px; box-sizing: border-box; background: #f5f5f5; color: #1a1a1a; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 32px 0;">
+  <div style="width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 0;">
+    <div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #555555; padding-bottom: 16px;">
+      <span><strong style="color: #1a1a1a;">From</strong> Unstream</span>
+      <span><strong style="color: #1a1a1a;">Subject</strong> It's Bandcamp Friday: 3 artists left on your plan</span>
+    </div>
+    <div style="background: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+      <div style="display: flex; height: 6px;" aria-hidden="true">
+        <span style="flex-grow: 1; background: #ff6b35;"></span>
+        <span style="flex-grow: 1; background: #4ecdc4;"></span>
+        <span style="flex-grow: 1; background: #ffe66d;"></span>
+      </div>
+      <div style="padding: 32px; display: flex; flex-direction: column; gap: 16px;">
+        <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 24px;">unstream</span>
+        <h1 style="margin: 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 44px; line-height: 0.92; letter-spacing: -0.6px;">Today Bandcamp takes no cut.</h1>
+        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #333333;">Bandcamp waives its fee all day, so artists get everything after payment processing. Three artists on your plan sell there:</p>
+
+        <div style="display: flex; flex-direction: column; border-top: 1px solid #e0e0e0;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e0e0e0;">
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+              <span style="font-size: 15px; font-weight: 600;">Wednesday</span>
+              <span style="font-size: 13px; color: #555555;">Rat Saw God · $10</span>
+            </div>
+            <a href="#" style="display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; background: #e55a2b; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none;">Buy</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e0e0e0;">
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+              <span style="font-size: 15px; font-weight: 600;">Nilüfer Yanya</span>
+              <span style="font-size: 13px; color: #555555;">My Method Actor · $9</span>
+            </div>
+            <a href="#" style="display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; background: #e55a2b; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none;">Buy</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #e0e0e0;">
+            <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+              <span style="font-size: 15px; font-weight: 600;">Horse Jumper of Love</span>
+              <span style="font-size: 13px; color: #555555;">Disappear Completely · $8</span>
+            </div>
+            <a href="#" style="display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; background: #e55a2b; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none;">Buy</a>
+          </div>
+        </div>
+
+        <p style="margin: 0; font-size: 15px; line-height: 1.55; color: #333333;">Bought one? <a href="#">Tick it off your plan</a> so we stop reminding you about it.</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6d6d6d;">27 days until 31 December. One more reminder on 15 December, and a last one on the 28th.</p>
+      </div>
+    </div>
+    <p style="margin: 16px 0 0 0; font-size: 12px; line-height: 1.5; color: #6d6d6d; text-align: center;">You're getting this because you made an Unwrapped plan on Unstream. <a href="#">Stop plan reminders</a></p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":600,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
