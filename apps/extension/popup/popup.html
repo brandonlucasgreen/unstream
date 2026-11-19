@@ -27,6 +27,19 @@
     <div class="tab-content">
       <!-- Discover Tab -->
       <div id="tab-discover" class="tab-panel active">
+        <!-- Shown once after updating into play counting (lib/listening-log.js), so nobody finds
+             out about it from a settings page they never open. -->
+        <section id="play-counting-notice" class="section hidden">
+          <div class="support-reminder" role="note" aria-label="Play counts">
+            <button id="play-counting-notice-close" class="support-reminder-close" aria-label="Dismiss">&times;</button>
+            <div class="support-reminder-title">Unstream now counts plays</div>
+            <p class="support-reminder-text">How many times you play each artist, kept in this browser and never sent anywhere. Next year it'll power a look back at who you listened to.</p>
+            <div class="support-reminder-actions">
+              <button id="play-counting-notice-settings" class="support-reminder-already">Turn it off in Settings</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Now Playing Section -->
         <section id="now-playing" class="section hidden">
           <h2 class="section-title">Now Playing</h2>
@@ -210,6 +223,19 @@
             <input type="checkbox" id="artist-notifications-toggle" checked>
             <span class="toggle-switch"></span>
           </label>
+        </section>
+
+        <!-- Play counts (lib/listening-log.js) -->
+        <section id="play-counting-section" class="section">
+          <h2 class="section-title">Play Counts</h2>
+          <p class="setting-description">Unstream counts how many times you play each artist, and how often you open their links, per month. That's all it keeps: no song titles, sites or times. It stays in this browser and is never sent anywhere. Turning this off deletes it.</p>
+          <label class="toggle-setting">
+            <span class="toggle-label">Count plays in this browser</span>
+            <input type="checkbox" id="play-counting-toggle" checked>
+            <span class="toggle-switch"></span>
+          </label>
+          <p id="play-counting-summary" class="setting-description"></p>
+          <button id="clear-play-counts-btn" class="check-now-btn">Clear play counts</button>
         </section>
 
         <!-- Custom Sites -->

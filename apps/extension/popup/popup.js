@@ -25,6 +25,13 @@ import {
   snoozeSupportReminder,
 } from '../lib/support-reminder.js';
 import { tipTarget, renderTipButton } from '../lib/tip-button.js';
+import {
+  LISTENING_LOG_KEY,
+  PLAY_COUNTING_KEY,
+  PLAY_COUNTING_NOTICE_KEY,
+  isPlayCountingOn,
+  yearTotals,
+} from '../lib/listening-log.js';
 
 const API_BASE = 'https://unstream.stream/api';
 
@@ -720,8 +727,64 @@ async function init() {
   const { artistNotifications } = await chrome.storage.sync.get('artistNotifications');
   document.getElementById('artist-notifications-toggle').checked = artistNotifications !== false; // default enabled
 
+  await setupPlayCounting();
+
   // Setup event listeners
   setupEventListeners();
+}
+
+// Play counts: the Settings switch, its summary line, and the one-time notice. The counting itself
+// happens in the service worker; every change goes through it so the log has a single writer.
+async function setupPlayCounting() {
+  const toggle = document.getElementById('play-counting-toggle');
+  const clearBtn = document.getElementById('clear-play-counts-btn');
+  const notice = document.getElementById('play-counting-notice');
+
+  const stored = await chrome.storage.local.get([PLAY_COUNTING_KEY, PLAY_COUNTING_NOTICE_KEY]);
+  toggle.checked = isPlayCountingOn(stored[PLAY_COUNTING_KEY]);
+  await renderPlayCountingSummary();
+
+  toggle.addEventListener('change', async () => {
+    await chrome.runtime.sendMessage({ type: 'SET_PLAY_COUNTING', on: toggle.checked });
+    await renderPlayCountingSummary();
+  });
+  clearBtn.addEventListener('click', async () => {
+    await chrome.runtime.sendMessage({ type: 'CLEAR_PLAY_COUNTS' });
+    await renderPlayCountingSummary();
+  });
+
+  if (!stored[PLAY_COUNTING_NOTICE_KEY]) {
+    const dismiss = () => {
+      notice.classList.add('hidden');
+      chrome.storage.local.set({ [PLAY_COUNTING_NOTICE_KEY]: true });
+    };
+    document.getElementById('play-counting-notice-close').addEventListener('click', dismiss);
+    document.getElementById('play-counting-notice-settings').addEventListener('click', () => {
+      dismiss();
+      switchToTab('settings');
+      document.getElementById('play-counting-section').scrollIntoView();
+    });
+    notice.classList.remove('hidden');
+  }
+}
+
+async function renderPlayCountingSummary() {
+  const summary = document.getElementById('play-counting-summary');
+  const clearBtn = document.getElementById('clear-play-counts-btn');
+  const stored = await chrome.storage.local.get([PLAY_COUNTING_KEY, LISTENING_LOG_KEY]);
+
+  if (!isPlayCountingOn(stored[PLAY_COUNTING_KEY])) {
+    summary.textContent = 'Off. Nothing is stored.';
+    clearBtn.classList.add('hidden');
+    return;
+  }
+
+  const year = new Date().getFullYear();
+  const { plays, clicks, artists } = yearTotals(stored[LISTENING_LOG_KEY], year);
+  summary.textContent = artists === 0
+    ? `Nothing counted yet in ${year}.`
+    : `${year} so far: ${plays} ${plays === 1 ? 'play' : 'plays'} and ${clicks} link ${clicks === 1 ? 'click' : 'clicks'} across ${artists} ${artists === 1 ? 'artist' : 'artists'}.`;
+  clearBtn.classList.toggle('hidden', artists === 0);
 }
 
 // The occasional "consider supporting Unstream" callout. Rules in lib/support-reminder.js.
@@ -891,6 +954,8 @@ function renderResults(results) {
     link.title = config.name;
     link.addEventListener('click', () => {
       chrome.runtime.sendMessage({ type: 'TRACK_APP_EVENT', event_type: 'platform_click', context: { platform: platform.sourceId } });
+      // On-device only; the service worker drops it when play counting is off.
+      if (currentArtist) chrome.runtime.sendMessage({ type: 'LOG_ARTIST_CLICK', artist: currentArtist });
       if (claimedSlug) {
         chrome.runtime.sendMessage({ type: 'TRACK_ANALYTICS', slug: claimedSlug, metric: `click:${platform.sourceId}` });
       }

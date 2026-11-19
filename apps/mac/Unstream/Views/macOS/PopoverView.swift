@@ -31,6 +31,7 @@ struct PopoverView: View {
     @State private var selectedTab: PopoverTab = .search
     @State private var showSignIn = false
     @State private var showSupportReminder = false
+    @State private var showPlayCountingNotice = false
     @State private var pollTask: Task<Void, Never>?
     /// Where the popover has drilled to. Empty means the normal Search/Saved tabs.
     ///
@@ -81,6 +82,7 @@ struct PopoverView: View {
             // Decided per open, and only when the empty state is what's showing: an artist on
             // screen always comes first, and a hidden callout shouldn't use up its turn.
             showSupportReminder = appState.displayMode == .empty && SupportReminderStore.evaluate()
+            showPlayCountingNotice = !UserDefaults.standard.bool(forKey: PlayCountStore.noticeSeenKey)
         }
         .onChange(of: selectedTab) { tab in
             if tab == .search { focusSearchField() }
@@ -263,6 +265,12 @@ struct PopoverView: View {
                         }
                     } else {
                         // Search tab content
+                        // Shown in every state, once: someone who always has music playing
+                        // would never see it in the empty state.
+                        if showPlayCountingNotice {
+                            PlayCountingNoticeView(isVisible: $showPlayCountingNotice)
+                        }
+
                         switch appState.displayMode {
                         case .searchResults:
                             if appState.isSearching {

@@ -21,6 +21,8 @@ struct SettingsView: View {
     @AppStorage("musicListeningEnabled") private var musicListeningEnabled = true
     @AppStorage("artistNotificationsEnabled") private var artistNotificationsEnabled = true
     @AppStorage("listenBrainzEnabled") private var listenBrainzEnabled = false
+    @AppStorage(PlayCountStore.enabledKey) private var playCountingEnabled = true
+    @ObservedObject private var playCounts = PlayCountStore.shared
     @State private var launchAtLogin = false
     @State private var selectedTab: SettingsTab = .general
 
@@ -82,6 +84,28 @@ struct SettingsView: View {
                     .help("Show a notification when a new artist is detected while playing music")
             } footer: {
                 Text("Unstream watches your music players so it can show where the current artist sells directly.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section {
+                Toggle("Count plays on this Mac", isOn: $playCountingEnabled)
+                    .onChange(of: playCountingEnabled) { on in
+                        if !on { playCounts.clear() }
+                    }
+                if playCountingEnabled {
+                    HStack {
+                        Text(playCountSummary)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        if playCounts.log.totals(forYear: currentYear).artists > 0 {
+                            Button("Clear Play Counts") { playCounts.clear() }
+                        }
+                    }
+                }
+            } footer: {
+                Text("Unstream counts how many times you play each artist, and how often you open their links, per month. That's all it keeps: no song titles or times. It stays on this Mac and is never sent anywhere. Turning this off deletes it.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -155,6 +179,19 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var currentYear: Int {
+        Calendar.current.component(.year, from: Date())
+    }
+
+    private var playCountSummary: String {
+        let totals = playCounts.log.totals(forYear: currentYear)
+        guard totals.artists > 0 else { return "Nothing counted yet in \(currentYear)." }
+        let plays = totals.plays == 1 ? "1 play" : "\(totals.plays) plays"
+        let clicks = totals.clicks == 1 ? "1 link click" : "\(totals.clicks) link clicks"
+        let artists = totals.artists == 1 ? "1 artist" : "\(totals.artists) artists"
+        return "\(currentYear) so far: \(plays) and \(clicks) across \(artists)."
     }
 
     // MARK: - Integrations Tab

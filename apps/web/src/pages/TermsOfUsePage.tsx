@@ -24,7 +24,7 @@ export function TermsOfUsePage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-link text-text-primary">
             <h1 className="font-display text-3xl font-semibold text-text-primary mb-6">Terms of Use</h1>
-            <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: November 19, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -317,6 +317,10 @@ export function TermsOfUsePage() {
                 same thing, and sync your saved artists if you sign in. Apple's App Store terms apply alongside these
                 Terms, and Apple isn't responsible for the apps — we are. Optional scrobbling to ListenBrainz only
                 happens if you connect it, and is governed by ListenBrainz's own terms.
+              </P>
+              <P>
+                <strong>Play counts.</strong> The extension and the macOS app keep a count of the artists you play, on
+                your device only, as our Privacy Policy describes. You can turn it off in their settings.
               </P>
               <P>
                 Where a component of the Service is also published as open source, the licence on that source code

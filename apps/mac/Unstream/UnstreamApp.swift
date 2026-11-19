@@ -54,6 +54,7 @@ class AppStateContainer: ObservableObject {
                     await self.appState.updateNowPlaying(nowPlaying)
                 }
                 self.scrobbleManager.trackChanged(to: nowPlaying)
+                PlayCountStore.shared.nowPlayingChanged(to: nowPlaying)
             }
             .store(in: &cancellables)
         #endif

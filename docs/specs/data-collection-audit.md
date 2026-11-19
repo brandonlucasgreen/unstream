@@ -171,6 +171,19 @@ receive an artist name to search for and nothing about the person searching.
   preference in `chrome.storage.sync`. `lib/supabase.js` only ever calls `/auth/v1` endpoints.
 - **Apple apps** — saved artists on device; ListenBrainz and Plex tokens in the keychain.
   Scrobbles go from the device straight to ListenBrainz; they never pass through us.
+- **Play counts (extension and macOS app, added 2026-11-19)** — per calendar month, per artist: a
+  display name, a play count and a link-click count. No track titles, albums, sites, players or
+  timestamps. Kept for 24 months, pruned on write. Extension: `chrome.storage.local`
+  (`listeningLog`, plus `listeningTrack`, the track currently being timed), written only by the
+  service worker (`lib/listening-log.js`). macOS app: `Application Support/Unstream/listening-log.json`
+  inside the sandbox container, not iCloud (`PlayCountStore.swift`). **Nothing reads it off the
+  device**: there is no endpoint for it and no sync. On by default; the off switch in each client's
+  settings deletes it, and a Clear button deletes it while leaving counting on. A play is a track
+  that was playing for 30 seconds before the next change; a link click is a platform link opened
+  from the popup or popover. The privacy policy's "Play counts" paragraph and the Terms' line under
+  "API, apps, extension, and bot" describe it. When a future recap reads it
+  (`docs/specs/unwrapped-spec.md` §4.3), that is data leaving the device: update this row, the
+  policy, and the Chrome Web Store and AMO data-use answers in the same change.
 
 ## Open items
 
