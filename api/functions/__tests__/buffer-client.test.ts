@@ -13,6 +13,7 @@ import {
   createContentItem,
   createPost,
   ensureTag,
+  isQueueFullError,
   listChannelPosts,
   listChannels,
 } from '../buffer-client';
@@ -263,5 +264,13 @@ describe('addPostToContentItem', () => {
   it('swallows a thrown error into a message', async () => {
     fetchMock.mockRejectedValue(new Error('socket hang up'));
     await expect(addPostToContentItem(TOKEN, 'item_1', 'post_ig')).resolves.toBe('socket hang up');
+  });
+});
+
+describe('isQueueFullError', () => {
+  it('knows Buffer’s refusal for a channel at its scheduled-post limit, and nothing else', () => {
+    expect(isQueueFullError('Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed.')).toBe(true);
+    expect(isQueueFullError('Rate limited')).toBe(false);
+    expect(isQueueFullError('Tag limit reached')).toBe(false);
   });
 });

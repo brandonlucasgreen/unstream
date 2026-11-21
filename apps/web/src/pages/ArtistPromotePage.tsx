@@ -160,7 +160,9 @@ export function ArtistPromotePage() {
           : p));
       } catch (err) {
         // The next poll tries again; reported once per visit, so a page left open on a bad day
-        // doesn't send Sentry an event every two minutes.
+        // doesn't send Sentry an event every two minutes. A 4xx isn't a fault, as for the first
+        // load: mostly a session that ran out while the page sat open in a background tab.
+        if (err instanceof PromoteApiError && err.status < 500) return;
         if (!pollReported.current) {
           pollReported.current = true;
           Sentry.captureException(err, { extra: { context: 'ArtistPromotePage.poll', slug } });

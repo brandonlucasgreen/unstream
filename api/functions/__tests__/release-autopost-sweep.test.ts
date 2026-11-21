@@ -32,6 +32,8 @@ const mocks = vi.hoisted(() => {
     artistsWithCampaignPostsDue: vi.fn(),
     claimCampaignPost: vi.fn(),
     finishCampaignPost: vi.fn(),
+    releaseSlot: vi.fn(),
+    releaseCampaignPost: vi.fn(),
   };
 });
 
@@ -43,6 +45,7 @@ vi.mock('../release-autopost-db', () => ({
   getUserEmail: mocks.getUserEmail,
   claimSlot: mocks.claimSlot,
   finishSlot: mocks.finishSlot,
+  releaseSlot: mocks.releaseSlot,
   pauseAutopost: mocks.pauseAutopost,
   getAutopostSettings: mocks.getAutopostSettings,
   MAX_ATTEMPTS: 3,
@@ -54,10 +57,12 @@ vi.mock('../release-campaigns-db', async importOriginal => ({
   artistsWithCampaignPostsDue: mocks.artistsWithCampaignPostsDue,
   claimCampaignPost: mocks.claimCampaignPost,
   finishCampaignPost: mocks.finishCampaignPost,
+  releaseCampaignPost: mocks.releaseCampaignPost,
 }));
 vi.mock('../release-autopost-access', () => ({ canUseReleaseAutopost: mocks.canUseReleaseAutopost }));
 vi.mock('../buffer-db', () => ({ BufferNotConnectedError: mocks.BufferNotConnectedError, usableAccessToken: mocks.usableAccessToken }));
-vi.mock('../buffer-client', () => ({
+vi.mock('../buffer-client', async importOriginal => ({
+  isQueueFullError: (await importOriginal<typeof import('../buffer-client')>()).isQueueFullError,
   listChannels: mocks.listChannels,
   listChannelSchedules: mocks.listChannelSchedules,
   ensureTag: mocks.ensureTag,
@@ -71,6 +76,13 @@ vi.mock('../autopost-media', async importOriginal => ({
 }));
 
 const { handler } = await import('../release-autopost-sweep');
+const { Sentry } = await import('../../lib/sentry');
+
+/** Buffer's refusal when a channel already holds its plan's 10 scheduled posts (Sentry, 2026-11-17). */
+const QUEUE_FULL = 'Scheduled posts limit reached. You have 10 scheduled posts out of 10 allowed.';
+const queueFullOn = (...full: string[]) => async (_token: string, input: { channelId: string }) => (full.includes(input.channelId)
+  ? { created: [], errors: [{ channelId: input.channelId, message: QUEUE_FULL }] }
+  : { created: [{ id: `post-${input.channelId}`, status: 'scheduled', channelId: input.channelId }], errors: [] });
 
 const SECRET = 'test-internal-secret';
 const BUCKET_ENV = {
@@ -151,6 +163,7 @@ describe('release-autopost-sweep', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
     process.env = { ...savedEnv };
   });
@@ -261,6 +274,30 @@ describe('release-autopost-sweep', () => {
       expect(JSON.parse(res.body).unscheduled).toEqual([
         { artistId: 'artist-1', date: '2026-11-13', reasons: ['none of this campaign’s channels is in Buffer any more'] },
       ]);
+    });
+
+    it('hands a campaign post back without spending an attempt when every channel’s Buffer queue is full', async () => {
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost({ status: 'failed', attempts: 1 })])]);
+      mocks.createPost.mockImplementation(queueFullOn('bsky', 'ig'));
+      const captured = vi.spyOn(Sentry, 'captureMessage');
+      const summary = JSON.parse((await run()).body);
+
+      expect(mocks.finishCampaignPost).not.toHaveBeenCalled();
+      expect(mocks.releaseCampaignPost).toHaveBeenCalledWith(expect.objectContaining({ id: 'cp-1', attempts: 1 }), expect.stringContaining('bluesky: Scheduled posts limit reached'));
+      expect(summary).toMatchObject({ pushed: 0, failed: 0 });
+      expect(summary.unscheduled[0].reasons).toHaveLength(2);
+      expect(captured).not.toHaveBeenCalled();
+    });
+
+    it('doesn’t send a handed-back campaign post once its time that day has passed', async () => {
+      // Friday 13 November, 11:00 New York: the post's 10:00 has gone, though its day hasn't.
+      vi.setSystemTime(new Date('2026-11-13T16:00:00Z'));
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost({ status: 'failed', attempts: 0, error: QUEUE_FULL })])]);
+      const summary = JSON.parse((await run()).body);
+
+      expect(mocks.claimCampaignPost).not.toHaveBeenCalled();
+      expect(mocks.createPost).not.toHaveBeenCalled();
+      expect(summary.unscheduled).toContainEqual(expect.objectContaining({ date: '2026-11-13', reasons: expect.arrayContaining(['bluesky: its posting time on 2026-11-13 has passed']) }));
     });
 
     it('fails a campaign post whose release no longer qualifies, rather than posting it', async () => {
@@ -411,5 +448,48 @@ describe('release-autopost-sweep', () => {
     const summary = JSON.parse((await run()).body);
     expect(summary).toMatchObject({ pushed: 0, failed: 1 });
     expect(mocks.finishSlot).toHaveBeenCalledWith('slot-row-1', expect.objectContaining({ status: 'failed' }));
+  });
+
+  describe('a full Buffer queue', () => {
+    it('hands the slot back without spending an attempt, and doesn’t report it', async () => {
+      mocks.createPost.mockImplementation(queueFullOn('bsky', 'ig'));
+      const captured = vi.spyOn(Sentry, 'captureMessage');
+      const summary = JSON.parse((await run()).body);
+
+      expect(mocks.finishSlot).not.toHaveBeenCalled();
+      expect(mocks.releaseSlot).toHaveBeenCalledWith('slot-row-1', `bluesky: ${QUEUE_FULL} · instagram: ${QUEUE_FULL}`);
+      expect(summary).toMatchObject({ pushed: 0, failed: 0 });
+      expect(summary.unscheduled).toEqual([{ artistId: 'artist-1', date: '2026-11-13', reasons: [`bluesky: ${QUEUE_FULL}`, `instagram: ${QUEUE_FULL}`] }]);
+      expect(captured).not.toHaveBeenCalled();
+    });
+
+    it('pushes to the channels with room, records the full one, and doesn’t report it', async () => {
+      mocks.createPost.mockImplementation(queueFullOn('ig'));
+      const captured = vi.spyOn(Sentry, 'captureMessage');
+      await run();
+
+      expect(mocks.releaseSlot).not.toHaveBeenCalled();
+      expect(mocks.finishSlot).toHaveBeenCalledWith('slot-row-1', expect.objectContaining({
+        status: 'pushed',
+        bufferPostIds: [{ channelId: 'bsky', postId: 'post-bsky' }],
+        error: `instagram: ${QUEUE_FULL}`,
+      }));
+      expect(captured).not.toHaveBeenCalled();
+    });
+
+    it('still fails, and reports, a slot where another channel refused for some other reason', async () => {
+      mocks.createPost.mockImplementation(async (_token: string, input: { channelId: string }) => ({
+        created: [],
+        errors: [{ channelId: input.channelId, message: input.channelId === 'ig' ? QUEUE_FULL : 'Rate limited' }],
+      }));
+      const captured = vi.spyOn(Sentry, 'captureMessage');
+      await run();
+
+      expect(mocks.releaseSlot).not.toHaveBeenCalled();
+      expect(mocks.finishSlot).toHaveBeenCalledWith('slot-row-1', expect.objectContaining({ status: 'failed' }));
+      expect(captured).toHaveBeenCalledWith('[release-autopost] a slot did not reach every channel', expect.objectContaining({
+        extra: expect.objectContaining({ errors: ['bluesky: Rate limited'], queueFull: [`instagram: ${QUEUE_FULL}`] }),
+      }));
+    });
   });
 });

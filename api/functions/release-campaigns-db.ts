@@ -224,6 +224,20 @@ export async function claimCampaignPost(post: CampaignPost, slotAt: string): Pro
   return (data?.length ?? 0) > 0;
 }
 
+/**
+ * Hand back a claimed campaign post that no channel took because every channel's Buffer queue
+ * was full, without spending an attempt: releaseSlot's reasoning (release-autopost-db.ts). It's
+ * left `failed` at the attempt count it was claimed from, with Buffer's words in `error`.
+ */
+export async function releaseCampaignPost(post: CampaignPost, error: string): Promise<void> {
+  const { error: writeError } = await client()
+    .from('release_campaign_posts')
+    .update({ status: 'failed', attempts: post.attempts, error, updated_at: new Date().toISOString() })
+    .eq('id', post.id)
+    .eq('status', 'pushing');
+  if (writeError) throw new Error(`releasing a campaign post failed: ${writeError.message}`);
+}
+
 export async function finishCampaignPost(id: string, outcome: {
   status: 'pushed' | 'failed';
   bufferPostIds: CampaignPost['bufferPostIds'];

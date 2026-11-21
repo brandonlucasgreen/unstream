@@ -30,16 +30,25 @@
 //
 // ## Why 72 hours ahead
 //
-// Far inside Buffer's free-plan queue limit (10 scheduled posts per channel), a change in the
-// meantime (a release hidden, autopost switched off) is caught before posting, and the artist
-// sees every post in Buffer before it goes.
+// Only a few of Unstream's own posts sit in a channel's queue at once, a change in the meantime
+// (a release hidden, autopost switched off) is caught before posting, and the artist sees every
+// post in Buffer before it goes.
+//
+// ## A full Buffer queue
+//
+// Buffer's free plan holds 10 scheduled posts per channel, **the artist's own included**, so a
+// channel can be full whatever Unstream does. A post every channel refused for that alone is
+// handed back without spending an attempt (`releaseSlot`, `releaseCampaignPost`): nothing reached
+// Buffer, and the queue frees up only as the artist's other posts go out, so later runs keep
+// trying until its time passes. A full queue is the artist's Buffer, not a fault here, so it
+// isn't reported to Sentry; the Promote page shows Buffer's words, and the summary lists it.
 //
 // ## Why it returns a real summary
 //
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import { addDays, localDate, localInstant, queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
+import { addDays, localDate, localInstant, QUEUE_LEAD_MS, queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
 import { AUTOPOST_TAG, CAMPAIGN_TAG, PUSH_AHEAD_HOURS, isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildCampaignChannelPost, buildChannelPost, imageAltText, isAutopostNetwork, type ChannelPost } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
@@ -49,6 +58,7 @@ import {
   claimCampaignPost,
   finishCampaignPost,
   listCampaigns,
+  releaseCampaignPost,
   type Campaign,
   type CampaignPost,
 } from './release-campaigns-db';
@@ -63,6 +73,7 @@ import {
   getUserEmail,
   MAX_ATTEMPTS,
   pauseAutopost,
+  releaseSlot,
   type AutopostArtist,
   type AutopostRelease,
   type AutopostSettings,
@@ -70,7 +81,7 @@ import {
 } from './release-autopost-db';
 import { canUseReleaseAutopost } from './release-autopost-access';
 import { BufferNotConnectedError, usableAccessToken } from './buffer-db';
-import { createPost, ensureTag, listChannelSchedules, listChannels, type ChannelSchedule } from './buffer-client';
+import { createPost, ensureTag, isQueueFullError, listChannelSchedules, listChannels, type ChannelSchedule } from './buffer-client';
 import { getFeatureFlag } from './feature-flags';
 import { getTipsLiveSlugs } from './tips-db';
 import { Sentry, withSentry } from '../lib/sentry';
@@ -91,9 +102,10 @@ interface ArtistResult {
   pushed: number;
   failed: number;
   /**
-   * Posts no channel could take, with why: left unclaimed, never failed. A day no channel has a
-   * posting time for (one the artist paused in Buffer), or a campaign whose channels have all
-   * gone from Buffer — neither is retried away, and both come round again on the next run.
+   * Posts no channel could take, with why: left unclaimed (or handed back), never failed. A day
+   * no channel has a posting time for (one the artist paused in Buffer), a campaign whose
+   * channels have all gone from Buffer, or every channel's Buffer queue full: none is retried
+   * away, and each comes round again on the next run.
    */
   unscheduled: { date: string; reasons: string[] }[];
 }
@@ -102,10 +114,16 @@ type SweepChannel = { id: string; service: string; schedule: ChannelSchedule | n
 
 /**
  * When this slot goes out on one channel: the artist's set time, or with "Pick days & times
- * for me", a time from that channel's Buffer posting schedule that day.
+ * for me", a time from that channel's Buffer posting schedule that day. A set time that has
+ * passed is none, as queueTimeOn's are: a campaign post handed back for a full Buffer queue is
+ * retried through its own day (its filter is by date), and must not reach Buffer in the past.
  */
 function channelTime(slot: { at: string; date: string }, channel: SweepChannel, settings: AutopostSettings, now: Date): QueueTime {
-  if (settings.postTime !== null) return { at: slot.at };
+  if (settings.postTime !== null) {
+    return new Date(slot.at).getTime() >= now.getTime() + QUEUE_LEAD_MS
+      ? { at: slot.at }
+      : { none: `its posting time on ${slot.date} has passed` };
+  }
   if (!channel.schedule) return { none: 'Buffer sent no posting schedule for it' };
   return queueTimeOn(slot.date, channel.schedule.postingSchedule, channel.schedule.timezone || settings.timezone, now);
 }
@@ -148,14 +166,21 @@ async function resolveImage(imageKey: string | null, releaseId: string | null, c
   }
 }
 
+type Sent = Pick<SlotOutcome, 'bufferPostIds' | 'captions'> & {
+  /** Channels Buffer was asked to take the post on. */
+  asked: number;
+  /** One line per channel whose Buffer queue was full: kept apart from `errors`, never reported. */
+  queueFull: string[];
+};
+
 /** Hand one post to Buffer on each channel that has a time for it. Throws only BufferNotConnectedError. */
 async function sendToChannels(
   timed: { channel: SweepChannel; time: QueueTime }[],
   token: string,
   build: (channel: SweepChannel, at: string) => ChannelPost,
   errors: string[],
-): Promise<Pick<SlotOutcome, 'bufferPostIds' | 'captions'>> {
-  const sent: Pick<SlotOutcome, 'bufferPostIds' | 'captions'> = { bufferPostIds: [], captions: {} };
+): Promise<Sent> {
+  const sent: Sent = { bufferPostIds: [], captions: {}, asked: 0, queueFull: [] };
   for (const { channel, time } of timed) {
     if ('none' in time) continue;
     const post = build(channel, time.at);
@@ -163,6 +188,7 @@ async function sendToChannels(
       errors.push(`${channel.service}: ${post.reason}`);
       continue;
     }
+    sent.asked++;
     try {
       const result = await createPost(token, post.input);
       const created = result.created[0];
@@ -170,7 +196,8 @@ async function sendToChannels(
         sent.bufferPostIds.push({ channelId: channel.id, postId: created.id });
         sent.captions[channel.id] = { service: channel.service, text: post.text, imageUrl: post.imageUrl };
       } else {
-        errors.push(`${channel.service}: ${result.errors.map(e => e.message).join('; ') || 'Buffer refused the post'}`);
+        const message = result.errors.map(e => e.message).join('; ') || 'Buffer refused the post';
+        (isQueueFullError(message) ? sent.queueFull : errors).push(`${channel.service}: ${message}`);
       }
     } catch (error) {
       if (error instanceof BufferNotConnectedError) throw error;
@@ -178,6 +205,11 @@ async function sendToChannels(
     }
   }
   return sent;
+}
+
+/** Every channel Buffer was asked refused only because its queue was full: hand the post back. */
+function onlyQueueFull(sent: Sent): boolean {
+  return sent.bufferPostIds.length === 0 && sent.asked > 0 && sent.queueFull.length === sent.asked;
 }
 
 async function takesTips(slug: string): Promise<boolean> {
@@ -224,7 +256,7 @@ async function pushSlot(
   const { image, error: imageError } = await resolveImage(slot.imageKey, slot.releaseId, ctx);
   const errors: string[] = [...(imageError ? [imageError] : []), ...untimed];
 
-  const sent = await sendToChannels(timed, ctx.token, (channel, at) => buildChannelPost({
+  const { asked, queueFull, ...sent } = await sendToChannels(timed, ctx.token, (channel, at) => buildChannelPost({
     slot: { ...slot, at },
     channel,
     artist: { name: artist.name, slug: artist.slug },
@@ -236,23 +268,24 @@ async function pushSlot(
     tagId: ctx.tagId,
   }), errors);
 
+  const recorded = [...errors, ...queueFull];
+  const released = onlyQueueFull({ ...sent, asked, queueFull });
   // Pushed once Buffer took it on any channel. A channel that refused is recorded, not retried:
   // retrying the slot would post again to the channels that accepted it.
-  const outcome: SlotOutcome = {
-    ...sent,
-    status: sent.bufferPostIds.length > 0 ? 'pushed' : 'failed',
-    error: errors.length ? errors.join(' · ') : null,
-  };
-  await finishSlot(id, outcome);
+  const status = sent.bufferPostIds.length > 0 ? 'pushed' : 'failed';
+  if (released) await releaseSlot(id, recorded.join(' · '));
+  else await finishSlot(id, { ...sent, status, error: recorded.length ? recorded.join(' · ') : null });
 
+  // Everything but a full queue, as before: a refusal that isn't the artist's Buffer being full
+  // is worth knowing about whether or not the slot is handed back.
   if (errors.length) {
     Sentry.captureMessage('[release-autopost] a slot did not reach every channel', {
-      level: outcome.status === 'failed' ? 'error' : 'warning',
-      tags: { area: 'release-autopost', kind: outcome.status === 'failed' ? 'slot-failed' : 'channel-skipped' },
-      extra: { artistId: artist.id, slotAt: slot.at, kind: slot.kind, errors },
+      level: status === 'failed' ? 'error' : 'warning',
+      tags: { area: 'release-autopost', kind: status === 'failed' ? 'slot-failed' : 'channel-skipped' },
+      extra: { artistId: artist.id, slotAt: slot.at, kind: slot.kind, errors, queueFull },
     });
   }
-  return outcome.status;
+  return released ? { unscheduled: recorded } : status;
 }
 
 /**
@@ -278,7 +311,7 @@ async function pushCampaignPost(
 
   const release = ctx.releases.get(campaign.releaseId);
   const errors: string[] = [...untimed];
-  let sent: Pick<SlotOutcome, 'bufferPostIds' | 'captions'> = { bufferPostIds: [], captions: {} };
+  let sent: Sent = { bufferPostIds: [], captions: {}, asked: 0, queueFull: [] };
   if (!release) {
     // Hidden, merged away or no longer sold on the artist's own links since the campaign began.
     errors.push('The release no longer qualifies');
@@ -299,16 +332,24 @@ async function pushCampaignPost(
     }), errors);
   }
 
+  const recorded = [...errors, ...sent.queueFull];
+  const released = onlyQueueFull(sent);
   const status = sent.bufferPostIds.length > 0 ? 'pushed' : 'failed';
-  await finishCampaignPost(post.id, { ...sent, status, error: errors.length ? errors.join(' · ') : null });
+  if (released) await releaseCampaignPost(post, recorded.join(' · '));
+  else await finishCampaignPost(post.id, {
+    bufferPostIds: sent.bufferPostIds,
+    captions: sent.captions,
+    status,
+    error: recorded.length ? recorded.join(' · ') : null,
+  });
   if (errors.length) {
     Sentry.captureMessage('[release-autopost] a campaign post did not reach every channel', {
       level: status === 'failed' ? 'error' : 'warning',
       tags: { area: 'release-autopost', kind: status === 'failed' ? 'campaign-failed' : 'campaign-channel-skipped' },
-      extra: { artistId: artist.id, campaignId: campaign.id, postDate: post.postDate, errors },
+      extra: { artistId: artist.id, campaignId: campaign.id, postDate: post.postDate, errors, queueFull: sent.queueFull },
     });
   }
-  return status;
+  return released ? { unscheduled: recorded } : status;
 }
 
 async function sweepArtist(settings: AutopostSettings, bucket: MediaBucket, now: Date): Promise<ArtistResult> {
