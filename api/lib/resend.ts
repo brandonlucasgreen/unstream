@@ -22,6 +22,10 @@ export interface SendEmailParams {
   text: string;
   /** Extra MIME headers, e.g. List-Unsubscribe on the subscription emails. */
   headers?: Record<string, string>;
+  /** Overrides FROM_ADDRESS. Must be on the verified unstream.stream domain, or Resend refuses it. */
+  from?: string;
+  /** Where replies go. Without it a reply goes to the from address. */
+  replyTo?: string;
 }
 
 export interface SendEmailResult {
@@ -48,12 +52,13 @@ export async function sendTransactionalEmail(params: SendEmailParams): Promise<S
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM_ADDRESS,
+        from: params.from ?? FROM_ADDRESS,
         to: params.to,
         subject: params.subject,
         html: params.html,
         text: params.text,
         ...(params.headers ? { headers: params.headers } : {}),
+        ...(params.replyTo ? { reply_to: params.replyTo } : {}),
       }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });

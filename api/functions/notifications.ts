@@ -24,6 +24,9 @@ interface NotifyOnceParams {
   text: string;
   /** Extra MIME headers — SUBSCRIPTION_EMAIL_HEADERS for anything with an opt-out toggle. */
   headers?: Record<string, string>;
+  /** Sender and reply address, when it isn't notifications@ (the welcome email comes from support@). */
+  from?: string;
+  replyTo?: string;
 }
 
 const UNIQUE_VIOLATION = '23505';
@@ -34,7 +37,7 @@ const UNIQUE_VIOLATION = '23505';
  * notification email is never allowed to fail the request that triggered it.
  */
 export async function sendNotificationOnce(params: NotifyOnceParams): Promise<void> {
-  const { client, notificationType, referenceId, recipientEmail, subject, html, text, headers } = params;
+  const { client, notificationType, referenceId, recipientEmail, subject, html, text, headers, from, replyTo } = params;
 
   const { data: logRow, error: insertError } = await client
     .from('email_log')
@@ -57,7 +60,7 @@ export async function sendNotificationOnce(params: NotifyOnceParams): Promise<vo
     return;
   }
 
-  const result = await sendTransactionalEmail({ to: recipientEmail, subject, html, text, headers });
+  const result = await sendTransactionalEmail({ to: recipientEmail, subject, html, text, headers, from, replyTo });
 
   const { error: updateError } = await client
     .from('email_log')

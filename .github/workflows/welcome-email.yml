@@ -1,0 +1,55 @@
+name: Welcome email
+
+# Sends each new account a short welcome email from Brandon (support@unstream.stream), a few hours
+# after it signs up, asking how they found Unstream. See api/functions/welcome-email.ts for who
+# is due (created 3 to 24 hours ago, confirmed address) and the email itself; email_log makes sure
+# nobody gets it twice.
+#
+# A GitHub Actions cron rather than a scheduled Netlify function: there are no scheduled Netlify
+# functions in this repo — same precedent as tips-review-notify.yml and recatalog-sweep.yml.
+#
+# Cadence: hourly. "A few hours later" doesn't need to be exact, and the 21-hour window leaves
+# room for a missed run to be caught by the next one.
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch: # Manual trigger from the GitHub UI
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send the welcome email to accounts that are due
+        env:
+          INTERNAL_FUNCTION_SECRET: ${{ secrets.INTERNAL_FUNCTION_SECRET }}
+        run: |
+          if [ -z "$INTERNAL_FUNCTION_SECRET" ]; then
+            echo "::error::INTERNAL_FUNCTION_SECRET secret is not set"
+            exit 1
+          fi
+
+          response=$(curl -sS -X POST -w '\n%{http_code}' \
+            -H "Authorization: Bearer $INTERNAL_FUNCTION_SECRET" \
+            https://unstream.netlify.app/.netlify/functions/welcome-email)
+
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "$body"
+
+          case "$status" in
+            200) echo "::notice::run completed: $body" ;;
+            *)   echo "::error::welcome-email responded $status: $body"; exit 1 ;;
+          esac
+      - name: Alert on failure (ntfy push)
+        if: failure()
+        env:
+          NTFY_CI_TOPIC: ${{ secrets.NTFY_CI_TOPIC }}
+        run: |
+          # Same alert path as tips-review-notify.yml: ntfy.sh, topic name as the credential.
+          curl -sS -X POST -o /dev/null -w 'ntfy alert: %{http_code}\n' \
+            -H "Title: Welcome email FAILED" \
+            -H "Priority: default" \
+            -H "Tags: warning" \
+            -d "Welcome email workflow failed ($(date -u +%FT%TZ)). Check: gh run list --workflow=welcome-email.yml" \
+            "https://ntfy.sh/$NTFY_CI_TOPIC"
