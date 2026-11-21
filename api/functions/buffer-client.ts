@@ -229,6 +229,17 @@ export interface BufferWriteResult {
   contentItemId?: string;
 }
 
+/**
+ * Buffer refused a post because the channel already holds as many scheduled posts as its plan
+ * allows (10 on the free plan), in Buffer's words: "Scheduled posts limit reached. You have 10
+ * scheduled posts out of 10 allowed." (seen from createPost, 2026-11-13 to 11-17). The artist's
+ * own posts count toward it, so Unstream pushing only a few days ahead doesn't keep it clear.
+ * Matched on the words because createPost reads only MutationError's message.
+ */
+export function isQueueFullError(message: string): boolean {
+  return /scheduled posts limit reached/i.test(message);
+}
+
 /** One post on one channel. */
 export async function createPost(token: string, input: Record<string, unknown>): Promise<BufferWriteResult> {
   const data = await bufferGraphQL<{ createPost: { post?: BufferCreatedPost; message?: string } }>(token, `

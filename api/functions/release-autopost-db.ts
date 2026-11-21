@@ -430,6 +430,37 @@ export interface SlotOutcome {
   error: string | null;
 }
 
+/**
+ * Hand back a claimed slot that no channel took because every channel's Buffer queue was full,
+ * without spending one of its attempts. Nothing reached Buffer, so retrying can't post twice;
+ * the queue frees up only as the artist's other posts go out, and three tries six hours apart
+ * would give the post up while it still had days to wait. It's left `failed` with Buffer's words
+ * in `error`, so the Promote page shows why, and later runs retake it until its time passes.
+ */
+export async function releaseSlot(id: string, error: string): Promise<void> {
+  const { data, error: readError } = await client()
+    .from('release_autopost_posts')
+    .select('attempts')
+    .eq('id', id)
+    .maybeSingle();
+  if (readError) throw new Error(`reading a slot to release failed: ${readError.message}`);
+  const attempts = (data as { attempts: number } | null)?.attempts ?? 1;
+  const { error: writeError } = await client()
+    .from('release_autopost_posts')
+    .update({
+      status: 'failed',
+      attempts: Math.max(0, attempts - 1),
+      buffer_post_ids: [],
+      captions: null,
+      error,
+      pushed_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('status', 'pushing');
+  if (writeError) throw new Error(`releasing a slot failed: ${writeError.message}`);
+}
+
 export async function finishSlot(id: string, outcome: SlotOutcome): Promise<void> {
   const now = new Date().toISOString();
   const { error } = await client()
