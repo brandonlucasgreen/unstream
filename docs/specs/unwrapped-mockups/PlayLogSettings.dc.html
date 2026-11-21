@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mac play count setting</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#ff8a5c}a:hover{color:#ffa680}
+</style>
+</helmet>
+<div style="width: 560px; height: 460px; box-sizing: border-box; background: #1e1e1e; color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif; border-radius: 12px; border: 1px solid #3a3a3c; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="height: 52px; display: flex; align-items: center; justify-content: center; gap: 24px; border-bottom: 1px solid #2c2c2e; background: #2a2a2a; font-size: 12px; color: #a1a1a6;">
+    <span>General</span>
+    <span>Release alerts</span>
+    <span style="color: #ff8a5c; font-weight: 600;">Listening</span>
+    <span>Account</span>
+  </div>
+  <div style="padding: 24px 32px; display: flex; flex-direction: column; gap: 18px;">
+    <div style="display: flex; gap: 16px; align-items: flex-start;">
+      <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+        <label for="playlog" style="font-size: 13px; font-weight: 600;">Count plays and link clicks on this Mac</label>
+        <span style="font-size: 12px; line-height: 1.5; color: #a1a1a6;">For your year in support. Unstream keeps how many times you played each artist and opened their links, per month. No song titles, no times, nothing else.</span>
+      </div>
+      <input id="playlog" type="checkbox" checked aria-label="Count plays and link clicks on this Mac" style="width: 38px; height: 22px; accent-color: #34c759; flex-shrink: 0; margin: 2px 0 0 0;">
+    </div>
+
+    <div style="border-radius: 8px; background: #2a2a2a; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.6px;">What's on this Mac · December</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 12px; font-size: 12px;">
+        <span style="color: #8e8e93;">Artist</span><span style="color: #8e8e93; text-align: right;">Plays</span><span style="color: #8e8e93; text-align: right;">Link clicks</span>
+        <span>Wednesday</span><span style="text-align: right;">41</span><span style="text-align: right;">2</span>
+        <span>Black Country, New Road</span><span style="text-align: right;">27</span><span style="text-align: right;">0</span>
+        <span>Nilüfer Yanya</span><span style="text-align: right;">19</span><span style="text-align: right;">1</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 13px; font-weight: 600;">When does it leave this Mac?</span>
+      <span style="font-size: 12px; line-height: 1.5; color: #a1a1a6;">Only when you open your recap. Your top artists go to the page in your browser, which looks up their Unstream pages and stores nothing. It isn't synced to iCloud or your account.</span>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button style="height: 28px; padding: 0 14px; border-radius: 6px; border: 1px solid #48484a; background: #3a3a3c; color: #f0f0f0; font: inherit; font-size: 13px;">Clear play counts…</button>
+      <a href="#" style="font-size: 12px;">Open my 2026 recap</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":560,"height":460}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

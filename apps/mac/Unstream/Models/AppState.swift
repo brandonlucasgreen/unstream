@@ -259,5 +259,9 @@ class AppState: ObservableObject {
             api.trackAnalyticsEvent(slug: slug, metric: "click:\(platformId)")
         }
         api.trackAppEvent(eventType: "platform_click", context: ["platform": platformId])
+        #if os(macOS)
+        // On this Mac only; dropped when play counting is off.
+        PlayCountStore.shared.recordClick(artist: artist.name)
+        #endif
     }
 }

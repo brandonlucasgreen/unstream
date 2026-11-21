@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Recap budget and picks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #121212; color: #f0f0f0; font-family: 'Stack Sans Headline', system-ui, sans-serif; display: flex; flex-direction: column; padding: 20px 24px 28px 24px;">
+  <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px;" aria-hidden="true">
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+  </div>
+
+  <h2 style="margin: 30px 0 0 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 42px; line-height: 0.9; letter-spacing: -0.8px;">What can you give before 31 December?</h2>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 18px;">
+    <sc-for list="{{budgets}}" as="b" hint-placeholder-count="4">
+      <button onClick="{{b.pick}}" aria-pressed="{{b.pressed}}" style="height: 44px; border-radius: 8px; border: 1px solid {{b.border}}; background: {{b.bg}}; color: {{b.fg}}; font-size: 15px; font-weight: 600;">{{b.label}}</button>
+    </sc-for>
+  </div>
+
+  <span style="font-size: 12px; color: #999999; margin-top: 18px;">Pick who it goes to. Here's one way to do it for each.</span>
+
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+    <sc-for list="{{rows}}" as="row" hint-placeholder-count="5">
+      <button onClick="{{row.toggle}}" aria-pressed="{{row.pressed}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; min-height: 56px; border-radius: 10px; border: 1px solid {{row.border}}; background: #1a1a1a; color: #f0f0f0; text-align: left;">
+        <span style="width: 22px; height: 22px; border-radius: 6px; border: 2px solid {{row.boxBorder}}; background: {{row.boxBg}}; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+          <sc-if value="{{row.on}}" hint-placeholder-val="{{false}}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#160b05" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>
+          </sc-if>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <span style="font-size: 14px; font-weight: 600;">{{row.name}}</span>
+          <span style="font-size: 12px; color: #a8a8a8;">{{row.action}}</span>
+        </span>
+        <span style="font-size: 14px; font-weight: 600;">{{row.priceLabel}}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <span style="flex-grow: 1;"></span>
+
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+      <span>{{summary}}</span>
+      <span style="color: {{leftColor}};">{{leftLabel}}</span>
+    </div>
+    <div style="height: 8px; border-radius: 4px; background: #2a2a2a; display: flex; overflow: hidden;">
+      <span style="width: {{fill}}; background: {{fillColor}};"></span>
+    </div>
+  </div>
+  <sc-if value="{{canCommit}}" hint-placeholder-val="{{false}}">
+    <a href="#" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: #ff6b35; color: #160b05; font-size: 16px; font-weight: 600; text-decoration: none;">{{commitLabel}}</a>
+  </sc-if>
+  <sc-if value="{{cannotCommit}}" hint-placeholder-val="{{true}}">
+    <span style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: #2a2a2a; color: #8a8a8a; font-size: 16px; font-weight: 600;">Pick at least one artist</span>
+  </sc-if>
+  <span style="font-size: 11px; color: #8a8a8a; text-align: center; margin-top: 10px;">Unstream never takes the money. You pay each artist directly.</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { budget: 50, picked: {} };
+  }
+  renderVals() {
+    const artists = [
+      { id: 'w', name: 'Wednesday', action: 'Rat Saw God on Bandcamp', price: 10 },
+      { id: 'n', name: 'Nilüfer Yanya', action: 'My Method Actor on Bandcamp', price: 9 },
+      { id: 'r', name: 'Ratboys', action: 'A tip on Unstream', price: 5 },
+      { id: 'h', name: 'Horse Jumper of Love', action: 'Disappear Completely on Bandcamp', price: 8 },
+      { id: 'l', name: 'Lomelda', action: 'A month on Patreon', price: 5 }
+    ];
+    const budget = this.state.budget;
+    const picked = this.state.picked;
+    const budgets = [20, 50, 100].map((v) => {
+      const on = budget === v;
+      return {
+        label: '$' + v,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#ff6b35' : 'transparent',
+        fg: on ? '#160b05' : '#f0f0f0',
+        border: on ? '#ff6b35' : '#3a3a3a',
+        pick: () => this.setState({ budget: v })
+      };
+    }).concat([{ label: 'Other', pressed: 'false', bg: 'transparent', fg: '#f0f0f0', border: '#3a3a3a', pick: () => {} }]);
+    let total = 0;
+    let count = 0;
+    const rows = artists.map((a) => {
+      const on = !!picked[a.id];
+      if (on) { total += a.price; count += 1; }
+      return {
+        ...a,
+        on,
+        pressed: on ? 'true' : 'false',
+        priceLabel: '$' + a.price,
+        border: on ? '#ff6b35' : '#2a2a2a',
+        boxBorder: on ? '#ff6b35' : '#555555',
+        boxBg: on ? '#ff6b35' : 'transparent',
+        toggle: () => this.setState({ picked: { ...picked, [a.id]: !on } })
+      };
+    });
+    const left = budget - total;
+    const over = left < 0;
+    return {
+      budgets,
+      rows,
+      summary: count === 0 ? 'Nothing picked yet' : (count + (count === 1 ? ' artist · $' : ' artists · $') + total),
+      leftLabel: over ? ('$' + (-left) + ' over budget') : ('$' + left + ' left'),
+      leftColor: over ? '#fbbf24' : '#999999',
+      fill: Math.min(100, Math.round((total / budget) * 100)) + '%',
+      fillColor: over ? '#fbbf24' : '#4ecdc4',
+      canCommit: count > 0,
+      cannotCommit: count === 0,
+      commitLabel: 'Commit to ' + count + (count === 1 ? ' artist' : ' artists') + ' by 31 Dec'
+    };
+  }
+}
+</script>
+</body>
+</html>

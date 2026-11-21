@@ -27,7 +27,7 @@ export function PrivacyPolicyPage() {
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-lg dark:prose-invert max-w-none prose-a:text-link text-text-primary">
             <h1 className="font-display text-3xl font-semibold text-text-primary mb-6">Privacy Policy</h1>
-            <p className="text-text-muted text-sm mb-8">Last updated: October 4, 2026</p>
+            <p className="text-text-muted text-sm mb-8">Last updated: November 19, 2026</p>
 
             <div className="mb-10 p-5 rounded-lg bg-bg-secondary border border-border not-prose">
               <h3 className="font-display text-xl font-semibold text-text-primary mb-3">The short version</h3>
@@ -267,13 +267,23 @@ export function PrivacyPolicyPage() {
                 token and server address stay in your device's keychain and talk only to your own
                 server.
               </P>
+              <P>
+                <strong>Play counts.</strong> The extension and the macOS app count how many times
+                you play each artist, and how often you open an artist's links, per month. That's
+                all they keep: an artist's name and two numbers, with no song titles, sites, players
+                or times, for up to 24 months. The count stays on your device: in the extension's
+                local storage, or in a file in the macOS app's own storage. It isn't synced, and it
+                isn't sent to us or anyone else. It's on by default so that a future year-end recap
+                has something to show; you can turn it off in the extension's or the app's
+                settings, which deletes what was counted, or clear it at any time.
+              </P>
             </Section>
 
             <Section title="What we don't collect">
               <ul className="list-disc ml-5 text-text-primary/90 mb-3 space-y-1">
                 <li>A history of your searches, tied to you.</li>
                 <li>Credentials for any streaming service.</li>
-                <li>Your listening history or playlists, except where you've explicitly connected ListenBrainz, which we don't see.</li>
+                <li>Your listening history or playlists. The play counts above stay on your device, and if you connect ListenBrainz your listens go straight to them; we see neither.</li>
                 <li>Advertising or cross-site tracking cookies. We don't run ads.</li>
                 <li>Your payment details.</li>
                 <li>Anything from web pages other than the streaming player pages the extension supports.</li>
@@ -337,8 +347,9 @@ export function PrivacyPolicyPage() {
                 authority.
               </P>
               <P>
-                You can clear local data without involving us at all: remove the browser extension
-                or clear its storage, or delete the app from your device.
+                You can clear local data without involving us at all: clear play counts from the
+                extension's or the app's settings, remove the browser extension or clear its
+                storage, or delete the app from your device.
               </P>
             </Section>
 

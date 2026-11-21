@@ -16,6 +16,15 @@ import {
   extensionBrowser,
 } from '../lib/search-tracking.js';
 import {
+  LISTENING_LOG_KEY,
+  LISTENING_TRACK_KEY,
+  PLAY_COUNTING_KEY,
+  addToLog,
+  isPlayCountingOn,
+  playbackStopped,
+  trackStarted,
+} from '../lib/listening-log.js';
+import {
   releasesFromResponse,
   releaseNotificationBody,
   releaseNotificationTitle,
@@ -97,6 +106,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     trackAppEvent(message.event_type, message.context || {});
   } else if (message.type === 'MUSIC_STOPPED') {
     handleMusicStopped();
+  } else if (message.type === 'LOG_ARTIST_CLICK') {
+    logArtistClick(message.artist);
+  } else if (message.type === 'SET_PLAY_COUNTING') {
+    setPlayCounting(message.on === true).then(() => sendResponse({ ok: true }));
+    return true;
+  } else if (message.type === 'CLEAR_PLAY_COUNTS') {
+    clearPlayCounts().then(() => sendResponse({ ok: true }));
+    return true;
   } else if (message.type === 'CHECK_RELEASES_NOW') {
     checkForNewReleases().then(sendResponse);
     return true;
@@ -208,6 +225,11 @@ async function handleMusicDetection(data, tabId) {
 
   if (!artist) return;
 
+  // Before the debounce below: play counting needs every track change, including a quick
+  // second track by the same artist.
+  const detectedAt = Date.now();
+  updateListening(state => trackStarted(state, artist, title, detectedAt));
+
   // Debounce: don't re-search same artist within 2 seconds
   const now = Date.now();
   if (artist.toLowerCase() === currentArtist?.toLowerCase() && now - lastSearchTime < DEBOUNCE_MS) {
@@ -284,6 +306,62 @@ async function handleMusicDetection(data, tabId) {
 function handleMusicStopped() {
   currentArtist = null;
   updateBadge('idle');
+  const stoppedAt = Date.now();
+  updateListening(state => playbackStopped(state, stoppedAt));
+}
+
+// --- Play counts (lib/listening-log.js) ---
+//
+// Every read-modify-write of the log runs through one promise chain. Track changes, clicks and the
+// Settings switch arrive as separate messages, and two of them interleaving their get and set
+// would lose a count, or write one back after the switch deleted the log.
+let listeningQueue = Promise.resolve();
+
+function enqueueListening(task) {
+  listeningQueue = listeningQueue.then(task).catch(error => {
+    console.error('Play counting failed:', error);
+  });
+  return listeningQueue;
+}
+
+async function playCountingOn() {
+  const { [PLAY_COUNTING_KEY]: stored } = await chrome.storage.local.get(PLAY_COUNTING_KEY);
+  return isPlayCountingOn(stored);
+}
+
+// `step` takes the stored track state and returns { state, countedArtist }.
+function updateListening(step) {
+  return enqueueListening(async () => {
+    if (!(await playCountingOn())) return;
+    const stored = await chrome.storage.local.get([LISTENING_TRACK_KEY, LISTENING_LOG_KEY]);
+    const { state, countedArtist } = step(stored[LISTENING_TRACK_KEY]);
+    const update = { [LISTENING_TRACK_KEY]: state };
+    if (countedArtist) {
+      update[LISTENING_LOG_KEY] = addToLog(stored[LISTENING_LOG_KEY], countedArtist, 'plays', Date.now());
+    }
+    await chrome.storage.local.set(update);
+  });
+}
+
+function logArtistClick(artist) {
+  if (typeof artist !== 'string' || !artist.trim()) return;
+  enqueueListening(async () => {
+    if (!(await playCountingOn())) return;
+    const { [LISTENING_LOG_KEY]: log } = await chrome.storage.local.get(LISTENING_LOG_KEY);
+    await chrome.storage.local.set({ [LISTENING_LOG_KEY]: addToLog(log, artist, 'clicks', Date.now()) });
+  });
+}
+
+// Turning counting off deletes everything it stored; turning it back on starts from nothing.
+function setPlayCounting(on) {
+  return enqueueListening(async () => {
+    await chrome.storage.local.set({ [PLAY_COUNTING_KEY]: on });
+    if (!on) await chrome.storage.local.remove([LISTENING_LOG_KEY, LISTENING_TRACK_KEY]);
+  });
+}
+
+function clearPlayCounts() {
+  return enqueueListening(() => chrome.storage.local.remove([LISTENING_LOG_KEY, LISTENING_TRACK_KEY]));
 }
 
 // Search for artist via Unstream API.

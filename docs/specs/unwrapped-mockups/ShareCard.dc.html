@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share image</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 540px; height: 675px; box-sizing: border-box; background: #ff6b35; color: #160b05; font-family: 'Stack Sans Headline', system-ui, sans-serif; padding: 40px; display: flex; flex-direction: column;">
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 26px;">unstream unwrapped</span>
+    <span style="font-size: 14px; font-weight: 600;">2026</span>
+  </div>
+
+  <h2 style="margin: 36px 0 0 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 72px; line-height: 0.85; letter-spacing: -1.5px;">I'm backing {{count}} artists before the year's out.</h2>
+
+  <div style="margin-top: 32px; display: flex; flex-direction: column; border-top: 3px solid #160b05;">
+    <sc-for list="{{artists}}" as="a" hint-placeholder-count="4">
+      <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 3px solid #160b05;">
+        <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 30px; line-height: 1; flex-grow: 1;">{{a.name}}</span>
+        <span style="font-size: 13px; font-weight: 600;">{{a.state}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <span style="flex-grow: 1;"></span>
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;">
+    <span style="font-size: 15px; line-height: 1.4; max-width: 300px;">Find who you could back at unstream.stream/unwrapped</span>
+    <div style="display: flex; align-items: flex-end; gap: 4px; height: 40px;" aria-hidden="true">
+      <span style="width: 9px; height: 24px; background: #160b05;"></span>
+      <span style="width: 9px; height: 40px; background: #160b05;"></span>
+      <span style="width: 9px; height: 16px; background: #160b05;"></span>
+      <span style="width: 9px; height: 32px; background: #160b05;"></span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showProgress":{"editor":"boolean","default":true},"$preview":{"width":540,"height":675}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const progress = this.props.showProgress ?? true;
+    const artists = [
+      { name: 'Wednesday', done: true },
+      { name: 'Ratboys', done: true },
+      { name: 'Nilüfer Yanya', done: false },
+      { name: 'Horse Jumper of Love', done: false }
+    ].map((a) => ({ name: a.name, state: progress ? (a.done ? 'Backed' : 'Next up') : '' }));
+    return { artists, count: artists.length };
+  }
+}
+</script>
+</body>
+</html>

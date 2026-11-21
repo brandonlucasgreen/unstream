@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Start your list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #121212; color: #f0f0f0; font-family: 'Stack Sans Headline', system-ui, sans-serif; display: flex; flex-direction: column; padding: 20px 24px 28px 24px;">
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px;" aria-hidden="true">
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #f0f0f0;"></span>
+    <span style="height: 3px; border-radius: 2px; background: #333333;"></span>
+  </div>
+
+  <h2 style="margin: 36px 0 0 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 50px; line-height: 0.88; letter-spacing: -0.8px;">Start your list</h2>
+  <p style="margin: 10px 0 0 0; font-size: 14px; line-height: 1.45; color: #b5b5b5;">Who have you had on repeat this year? Save a few, then decide who to back.</p>
+
+  <label style="margin-top: 18px; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 14px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 10px; color: #8a8a8a; font-size: 15px;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+    <input type="text" placeholder="Search for an artist" aria-label="Search for an artist" style="flex-grow: 1; border: 0; background: transparent; color: #f0f0f0; font: inherit; outline: none;">
+  </label>
+
+  <span style="font-size: 11px; font-weight: 600; color: #8a8a8a; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 20px;">You opened these on Unstream</span>
+  <div style="display: flex; flex-direction: column; margin-top: 6px;">
+    <sc-for list="{{rows}}" as="row" hint-placeholder-count="4">
+      <div style="display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #2a2a2a;">
+        <span style="width: 44px; height: 44px; border-radius: 6px; background: #2a2a2a; flex-shrink: 0;" aria-hidden="true"></span>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+          <span style="font-size: 15px; font-weight: 600;">{{row.name}}</span>
+          <span style="font-size: 11px; color: #4ade80;">{{row.links}}</span>
+        </div>
+        <button onClick="{{row.toggle}}" aria-pressed="{{row.pressed}}" style="height: 36px; min-width: 76px; padding: 0 12px; border-radius: 18px; border: 1px solid {{row.border}}; background: {{row.bg}}; color: {{row.fg}}; font-size: 13px; font-weight: 600;">{{row.label}}</button>
+      </div>
+    </sc-for>
+  </div>
+  <span style="font-size: 12px; color: #8a8a8a; margin-top: 10px; line-height: 1.45;">Saving an artist also sends you their new releases. You can turn that off in settings.</span>
+
+  <span style="flex-grow: 1;"></span>
+  <sc-if value="{{ready}}" hint-placeholder-val="{{false}}">
+    <a href="#" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: #ff6b35; color: #160b05; font-size: 16px; font-weight: 600; text-decoration: none;">{{cta}}</a>
+  </sc-if>
+  <sc-if value="{{notReady}}" hint-placeholder-val="{{true}}">
+    <span style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: #2a2a2a; color: #8a8a8a; font-size: 16px; font-weight: 600;">Save an artist to continue</span>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { saved: { a: true } };
+  }
+  renderVals() {
+    const artists = [
+      { id: 'a', name: 'Wednesday', links: 'Bandcamp 80-85% · Mirlo 86-90%' },
+      { id: 'b', name: 'Ratboys', links: 'Mirlo 86-90% · tips on Unstream' },
+      { id: 'c', name: 'Lomelda', links: 'Bandcamp 80-85% · Patreon 86-90%' },
+      { id: 'd', name: 'Hand Habits', links: 'Bandcamp 80-85%' }
+    ];
+    const saved = this.state.saved;
+    let count = 0;
+    const rows = artists.map((a) => {
+      const on = !!saved[a.id];
+      if (on) count += 1;
+      return {
+        ...a,
+        pressed: on ? 'true' : 'false',
+        label: on ? 'Saved' : 'Save',
+        bg: on ? '#4ecdc4' : 'transparent',
+        fg: on ? '#08201e' : '#f0f0f0',
+        border: on ? '#4ecdc4' : '#3a3a3a',
+        toggle: () => this.setState({ saved: { ...saved, [a.id]: !on } })
+      };
+    });
+    return {
+      rows,
+      ready: count > 0,
+      notReady: count === 0,
+      cta: 'Next: set a budget (' + count + ' saved)'
+    };
+  }
+}
+</script>
+</body>
+</html>

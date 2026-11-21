@@ -14,7 +14,7 @@
     }
   },
   "description": "Streaming on Spotify, Apple Music or YouTube? Unstream shows where the artist you're hearing sells music or takes tips directly, and how much of each sale they keep. Free, open source, no ads, no account needed.",
-  "version": "2.9.3",
+  "version": "2.10.0",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

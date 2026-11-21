@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Extension popup entry point</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@600;800;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ff6b35}a:hover{color:#ff8a5c}
+</style>
+</helmet>
+<div style="width: 380px; height: 640px; box-sizing: border-box; background: #121212; color: #f0f0f0; font-family: 'Stack Sans Headline', system-ui, sans-serif; border: 1px solid #2a2a2a; display: flex; flex-direction: column; overflow: hidden;">
+  <div style="display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid #2a2a2a;">
+    <span style="font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.3px;">unstream</span>
+    <span style="flex-grow: 1;"></span>
+    <button aria-label="Saved artists" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #999999; display: flex; align-items: center; justify-content: center; padding: 0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+    <button aria-label="Settings" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #999999; display: flex; align-items: center; justify-content: center; padding: 0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
+  </div>
+
+  <div style="margin: 14px 16px 0 16px; border-radius: 12px; background: #ffe66d; color: #160b05; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">Unwrapped 2026</span>
+      <span style="flex-grow: 1;"></span>
+      <button aria-label="Hide until next week" style="width: 28px; height: 28px; border: 0; background: transparent; color: #160b05; padding: 0; display: flex; align-items: center; justify-content: center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <h2 style="margin: 0; font-family: 'Darker Grotesque', system-ui, sans-serif; font-weight: 900; font-size: 30px; line-height: 0.95; letter-spacing: -0.4px;">You saved 23 artists this year. 9 of them are still waiting.</h2>
+    <p style="margin: 0; font-size: 13px; line-height: 1.45;">Set a budget, pick a few, back them before 31 December.</p>
+    <a href="#" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 8px; background: #160b05; color: #ffe66d; font-size: 14px; font-weight: 600; text-decoration: none; margin-top: 4px;">
+      Open Unwrapped
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+
+  <div style="margin: 16px 16px 0 16px; display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px dashed #3a3a3a; border-radius: 12px;">
+    <div style="display: flex; align-items: flex-end; gap: 3px; height: 18px;" aria-hidden="true">
+      <span style="width: 3px; height: 6px; background: #3a3a3a; border-radius: 1px;"></span>
+      <span style="width: 3px; height: 6px; background: #3a3a3a; border-radius: 1px;"></span>
+      <span style="width: 3px; height: 6px; background: #3a3a3a; border-radius: 1px;"></span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-size: 13px; font-weight: 500;">Nothing playing</span>
+      <span style="font-size: 12px; color: #999999;">Play something on Spotify, YouTube Music or Apple Music in a tab.</span>
+    </div>
+  </div>
+
+  <label style="margin: 16px 16px 0 16px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: #8a8a8a; font-size: 13px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+    <input type="text" placeholder="Search for an artist" aria-label="Search for an artist" style="flex-grow: 1; border: 0; background: transparent; color: #f0f0f0; font: inherit; outline: none;">
+  </label>
+
+  <span style="flex-grow: 1;"></span>
+  <p style="margin: 0; padding: 12px 16px; border-top: 1px solid #2a2a2a; font-size: 11px; line-height: 1.45; color: #8a8a8a;">Unstream counts plays and link clicks on this device so your recap can show them. They leave only when you open your recap. <a href="#">Turn off</a></p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":380,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
