@@ -73,6 +73,14 @@
   included_files = ["scripts/social-card-fonts/*.ttf"]
   external_node_modules = ["@resvg/resvg-wasm"]
 
+# The welcome email (api/functions/welcome-email.ts), every 5 minutes, so a new account gets it 15
+# to 20 minutes after signing up. The repo's one scheduled function: a GitHub Actions cron can run
+# hours late, which a "thanks for signing up" can't. Netlify fires this only on the published
+# production deploy, and nothing can call it by URL, which is why the function needs no secret.
+# Removing this line stops the email; welcome-email.test.ts fails if it goes.
+[functions."welcome-email"]
+  schedule = "*/5 * * * *"
+
 # The staleness probe in buildFreshness.ts compares this file's id against the one baked into
 # the running bundle. A cached response would echo the tab's own build back to it forever, so
 # the banner would never appear. `no-store` on the request isn't enough on its own — the CDN
