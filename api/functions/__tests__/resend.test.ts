@@ -42,6 +42,26 @@ describe('sendTransactionalEmail', () => {
     expect(result).toEqual({ ok: true, messageId: 'msg_123' });
   });
 
+  it('sends from notifications@ with no reply-to unless told otherwise', async () => {
+    fetchMock.mockResolvedValue(resendReply(200, { id: 'msg_123' }));
+
+    await sendTransactionalEmail(params);
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.from).toBe('Unstream <notifications@unstream.stream>');
+    expect(body).not.toHaveProperty('reply_to');
+  });
+
+  it('passes a custom sender and reply-to through to Resend', async () => {
+    fetchMock.mockResolvedValue(resendReply(200, { id: 'msg_123' }));
+
+    await sendTransactionalEmail({ ...params, from: 'Brandon <support@unstream.stream>', replyTo: 'support@unstream.stream' });
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.from).toBe('Brandon <support@unstream.stream>');
+    expect(body.reply_to).toBe('support@unstream.stream');
+  });
+
   it('sends the API key as a Bearer header and never in the body', async () => {
     fetchMock.mockResolvedValue(resendReply(200, { id: 'msg_123' }));
 
