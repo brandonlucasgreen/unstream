@@ -48,7 +48,7 @@
 // Same reason as recatalog-sweep: a scheduled job that reports success unconditionally is a
 // silent failure. The workflow prints the summary and fails on anything but a 200.
 
-import { addDays, localDate, localInstant, queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
+import { addDays, localDate, localInstant, QUEUE_LEAD_MS, queueTimeOn, type PlannedPost, type QueueTime } from './autopost-plan';
 import { AUTOPOST_TAG, CAMPAIGN_TAG, PUSH_AHEAD_HOURS, isDueToPush, planForArtist } from './release-autopost-schedule';
 import { buildCampaignChannelPost, buildChannelPost, imageAltText, isAutopostNetwork, type ChannelPost } from './autopost-channel-post';
 import { fitsInstagram, mediaBucketFromEnv, storeImageFromUrl, type MediaBucket, type StoredImage } from './autopost-media';
@@ -114,10 +114,16 @@ type SweepChannel = { id: string; service: string; schedule: ChannelSchedule | n
 
 /**
  * When this slot goes out on one channel: the artist's set time, or with "Pick days & times
- * for me", a time from that channel's Buffer posting schedule that day.
+ * for me", a time from that channel's Buffer posting schedule that day. A set time that has
+ * passed is none, as queueTimeOn's are: a campaign post handed back for a full Buffer queue is
+ * retried through its own day (its filter is by date), and must not reach Buffer in the past.
  */
 function channelTime(slot: { at: string; date: string }, channel: SweepChannel, settings: AutopostSettings, now: Date): QueueTime {
-  if (settings.postTime !== null) return { at: slot.at };
+  if (settings.postTime !== null) {
+    return new Date(slot.at).getTime() >= now.getTime() + QUEUE_LEAD_MS
+      ? { at: slot.at }
+      : { none: `its posting time on ${slot.date} has passed` };
+  }
   if (!channel.schedule) return { none: 'Buffer sent no posting schedule for it' };
   return queueTimeOn(slot.date, channel.schedule.postingSchedule, channel.schedule.timezone || settings.timezone, now);
 }

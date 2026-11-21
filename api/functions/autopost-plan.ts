@@ -205,7 +205,7 @@ export function isValidTimezone(tz: string): boolean {
 }
 
 /** Leave Buffer this long to take a post before its time. */
-const QUEUE_LEAD_MS = 10 * 60_000;
+export const QUEUE_LEAD_MS = 10 * 60_000;
 
 /** A post's time on one channel, or why that channel has none that day. */
 export type QueueTime = { at: string } | { none: string };

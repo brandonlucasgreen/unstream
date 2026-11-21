@@ -289,6 +289,17 @@ describe('release-autopost-sweep', () => {
       expect(captured).not.toHaveBeenCalled();
     });
 
+    it('doesn’t send a handed-back campaign post once its time that day has passed', async () => {
+      // Friday 13 November, 11:00 New York: the post's 10:00 has gone, though its day hasn't.
+      vi.setSystemTime(new Date('2026-11-13T16:00:00Z'));
+      mocks.listCampaigns.mockResolvedValue([campaign([campaignPost({ status: 'failed', attempts: 0, error: QUEUE_FULL })])]);
+      const summary = JSON.parse((await run()).body);
+
+      expect(mocks.claimCampaignPost).not.toHaveBeenCalled();
+      expect(mocks.createPost).not.toHaveBeenCalled();
+      expect(summary.unscheduled).toContainEqual(expect.objectContaining({ date: '2026-11-13', reasons: expect.arrayContaining(['bluesky: its posting time on 2026-11-13 has passed']) }));
+    });
+
     it('fails a campaign post whose release no longer qualifies, rather than posting it', async () => {
       mocks.getActiveAutopostSettings.mockResolvedValue([{ ...settings, enabled: false }]);
       mocks.getAutopostReleases.mockResolvedValue([]);
