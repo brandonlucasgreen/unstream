@@ -44,7 +44,7 @@ export function isDueForWelcome(user: Pick<User, 'created_at' | 'email' | 'email
   return ageMs >= WELCOME_DELAY_HOURS * HOUR_MS && ageMs < WELCOME_WINDOW_HOURS * HOUR_MS;
 }
 
-export const WELCOME_SUBJECT = 'Thanks for joining Unstream (and one quick question)';
+export const WELCOME_SUBJECT = 'Welcome to Unstream! (+ one quick question)';
 
 export const WELCOME_TEXT =
   'Hi there!\n\n' +
