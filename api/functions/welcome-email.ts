@@ -47,26 +47,23 @@ export function isDueForWelcome(user: Pick<User, 'created_at' | 'email' | 'email
 export const WELCOME_SUBJECT = 'Thanks for joining Unstream (and one quick question)';
 
 export const WELCOME_TEXT =
-  'Hi,\n\n' +
-  "Thanks for signing up for Unstream. I'm Brandon, and I build it, mostly on Fridays.\n\n" +
+  'Hi there!\n\n' +
+  'Thanks for signing up for Unstream. It means a lot! My goals with Unstream are to get more funds into the hands ' +
+  'of artists, and slowly change how people think about supporting the arts.\n\n' +
   'One question: how did you find Unstream? A friend, a post, a search, an artist pointing you here? ' +
-  'One line is plenty. Just hit reply, it comes straight to me.\n\n' +
-  "If you haven't yet, save a few artists you listen to most, and I'll email you when they put out something new, " +
-  "with links to buy it where they actually get paid. If you make music, you can claim your own artist page: " +
-  'search for yourself on https://unstream.stream and tap "Claim your artist page" under your name.\n\n' +
-  "And if something's broken or missing, reply with that too.\n\n" +
-  'Brandon';
+  'I would love to know.\n\n' +
+  "And if something's broken or missing, or you have an idea to make Unstream better, reply with that too.\n\n" +
+  'Thanks so much!\n' +
+  'Brandon / Unstream';
 
 export const WELCOME_HTML =
-  '<p>Hi,</p>' +
-  "<p>Thanks for signing up for Unstream. I'm Brandon, and I build it, mostly on Fridays.</p>" +
-  '<p>One question: <strong>how did you find Unstream?</strong> A friend, a post, a search, an artist pointing you here? ' +
-  'One line is plenty. Just hit reply, it comes straight to me.</p>' +
-  "<p>If you haven't yet, save a few artists you listen to most, and I'll email you when they put out something new, " +
-  'with links to buy it where they actually get paid. If you make music, you can claim your own artist page: ' +
-  'search for yourself on <a href="https://unstream.stream">unstream.stream</a> and tap "Claim your artist page" under your name.</p>' +
-  "<p>And if something's broken or missing, reply with that too.</p>" +
-  '<p>Brandon</p>';
+  '<p>Hi there!</p>' +
+  '<p>Thanks for signing up for Unstream. It means a lot! My goals with Unstream are to get more funds into the hands ' +
+  'of artists, and slowly change how people think about supporting the arts.</p>' +
+  '<p><strong>One question: how did you find Unstream?</strong> A friend, a post, a search, an artist pointing you here? ' +
+  'I would love to know.</p>' +
+  "<p>And if something's broken or missing, or you have an idea to make Unstream better, reply with that too.</p>" +
+  '<p>Thanks so much!<br>Brandon / Unstream</p>';
 
 async function listAllUsers(client: SupabaseClient): Promise<User[] | { error: string }> {
   const users: User[] = [];
