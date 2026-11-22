@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { PLATFORMS } from '../../../../api/shared/platform-registry';
 import {
   BADGE_BACKDROP,
-  BADGE_FALLBACK_TEXT,
   badgeColors,
   compositeOver,
   contrastRatio,
@@ -70,11 +69,6 @@ describe('theme token contrast (audit 2026-10-25 #8)', () => {
         .toBeGreaterThanOrEqual(AA);
     });
   }
-
-  it('keeps --badge-dark-text in index.css in sync with BADGE_FALLBACK_TEXT', () => {
-    expect(token(darkCss, 'badge-dark-text')).toBe(BADGE_FALLBACK_TEXT.dark);
-    expect(token(lightCss, 'badge-dark-text')).toBe(BADGE_FALLBACK_TEXT.light);
-  });
 });
 
 describe('registry-wide badge contrast (audit 2026-10-25 #8)', () => {

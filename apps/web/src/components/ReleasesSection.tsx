@@ -69,12 +69,16 @@ export function ReleasesSection({
 
         Plain <a>, not react-router <Link>: these are served by a Netlify function, so a
         client-side navigation would try to render them in-app and fail.
+
+        Each 14px icon is padded to a 26px tap area (the negative margin keeps the layout).
+        `gap-3` keeps the two padded areas from overlapping: at `gap-2` the RSS link covered
+        4px of the calendar link, leaving it 22px wide and under the 24px minimum.
       */}
-      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3 flex items-center gap-2">
+      <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3 flex items-center gap-3">
         Releases
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
-          className="text-text-muted hover:text-link transition-colors"
+          className="text-text-muted hover:text-link transition-colors inline-flex p-1.5 -m-1.5"
           aria-label="Subscribe to this artist's releases in a calendar app"
           title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
         >
@@ -82,7 +86,7 @@ export function ReleasesSection({
         </a>
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
-          className="text-text-muted hover:text-link transition-colors"
+          className="text-text-muted hover:text-link transition-colors inline-flex p-1.5 -m-1.5"
           aria-label="Subscribe to this artist's releases in an RSS reader"
           title="Subscribe in an RSS reader"
         >
