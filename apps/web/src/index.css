@@ -41,7 +41,7 @@
   --color-error: #f87171;
 
   --color-text-primary: #f0f0f0;
-  --color-text-secondary: #999999;
+  --color-text-secondary: #a6a6a6;
   /* #808080 read at 4.41:1 on the #1a1a1a card surface — a shade under AA. */
   --color-text-muted: #8a8a8a;
 
@@ -95,7 +95,7 @@
     --color-accent-tertiary: #b8910a;
     --color-fill-secondary: #3bb5ac;
     --color-fill-tertiary: #ffd84d;
-    --color-link: #c2410c;
+    --color-link: #b83a09;
     --color-success: #166534;
     --color-warning: #92400e;
     --color-error: #b91c1c;

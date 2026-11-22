@@ -74,7 +74,7 @@ export function ReleasesSection({
         Releases
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.ics`}
-          className="text-text-muted hover:text-link transition-colors"
+          className="text-text-muted hover:text-link transition-colors inline-flex p-1.5 -m-1.5"
           aria-label="Subscribe to this artist's releases in a calendar app"
           title="Subscribe in Apple Calendar, Google Calendar or another calendar app"
         >
@@ -82,7 +82,7 @@ export function ReleasesSection({
         </a>
         <a
           href={`/a/${encodeURIComponent(artistSlug)}/releases.xml`}
-          className="text-text-muted hover:text-link transition-colors"
+          className="text-text-muted hover:text-link transition-colors inline-flex p-1.5 -m-1.5"
           aria-label="Subscribe to this artist's releases in an RSS reader"
           title="Subscribe in an RSS reader"
         >

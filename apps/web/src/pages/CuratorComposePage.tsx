@@ -571,7 +571,7 @@ export function CuratorComposePage() {
 
             {shown === 'instagram' && (
               coverUrl
-                ? <img src={coverUrl} alt="The cover card as it will be posted" className="w-full max-w-sm rounded-lg border border-border" />
+                ? <img src={coverUrl} alt="The cover card as it will be posted" className="w-full max-w-sm aspect-[4/5] object-cover rounded-lg border border-border" />
                 : <div className="w-full max-w-sm aspect-[4/5] rounded-lg border border-dashed border-border flex items-center justify-center text-text-muted text-sm">
                     {busy ?? 'The cover card appears here'}
                   </div>

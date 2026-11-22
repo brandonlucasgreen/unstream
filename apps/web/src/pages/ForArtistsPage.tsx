@@ -187,11 +187,15 @@ export function ForArtistsPage() {
                 src="/screenshots/macos-kidlightbulbs.webp"
                 alt="The Unstream menu bar app showing Kid Lightbulbs playing, with links to Faircamp, Subvert, Bandcamp, Ampwall, Bandwagon and Qobuz."
                 caption="The Mac menu bar app"
+                width={640}
+                height={783}
               />
               <Screenshot
                 src="/screenshots/extension-popup.webp"
                 alt="The Unstream browser extension showing the artist that's playing, their support links with payout percentages, and releases with what reaches the artist."
                 caption="The browser extension"
+                width={740}
+                height={1160}
               />
             </div>
             <p className="text-sm text-text-muted mt-4">
@@ -209,6 +213,8 @@ export function ForArtistsPage() {
                   src="/screenshots/web-claimed-artist.webp"
                   alt="A claimed artist page for Kid Lightbulbs: photo, verified badge, bio, a Tip button, support links with payout percentages, and a featured release."
                   caption="A claimed page"
+                  width={1600}
+                  height={2160}
                 />
               </div>
             </div>
@@ -301,10 +307,10 @@ function FeatureGrid({ features }: { features: Feature[] }) {
   );
 }
 
-function Screenshot({ src, alt, caption }: { src: string; alt: string; caption: string }) {
+function Screenshot({ src, alt, caption, width, height }: { src: string; alt: string; caption: string; width: number; height: number }) {
   return (
     <figure>
-      <img src={src} alt={alt} className="w-full rounded-xl border border-border" loading="lazy" />
+      <img src={src} alt={alt} width={width} height={height} className="w-full h-auto rounded-xl border border-border" loading="lazy" />
       <figcaption className="text-xs text-text-muted mt-2 text-center">{caption}</figcaption>
     </figure>
   );

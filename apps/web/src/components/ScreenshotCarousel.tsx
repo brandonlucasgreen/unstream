@@ -121,7 +121,7 @@ export function ScreenshotCarousel() {
         </button>
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-3">
+      <div className="flex items-center justify-center mt-1">
         {SLIDES.map((slide, slideIndex) => (
           <button
             key={slide.src}
@@ -129,12 +129,16 @@ export function ScreenshotCarousel() {
             onClick={() => { stopAutoplay(); go(slideIndex); }}
             aria-label={`Show screenshot ${slideIndex + 1} of ${SLIDES.length}`}
             aria-current={slideIndex === index}
-            className={`h-2 rounded-full transition-all ${
-              slideIndex === index
-                ? 'w-6 bg-accent-primary'
-                : 'w-2 bg-border-hover hover:bg-text-muted'
-            }`}
-          />
+            className="group flex h-6 min-w-6 items-center justify-center"
+          >
+            <span
+              className={`h-2 rounded-full transition-all ${
+                slideIndex === index
+                  ? 'w-6 bg-accent-primary'
+                  : 'w-2 bg-border-hover group-hover:bg-text-muted'
+              }`}
+            />
+          </button>
         ))}
       </div>
 

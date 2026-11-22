@@ -21,10 +21,14 @@
 
 export type ThemeName = 'dark' | 'light';
 
-/** The card surface badges and chips render on (`bg-bg-card` in index.css). */
+/** The surface badges and chips render on. Dark is the card (`bg-bg-card`). Light is
+ * the darkest light surface they sit on (`surface-secondary` / `bg-hover`, #f0f0f0),
+ * not the white card: dark text that clears AA there clears it on every lighter
+ * surface too, and fitting against white left chips at 4.3–4.4:1 on the off-white
+ * page and homepage panels (a11y pass 2026-11-21). */
 export const BADGE_BACKDROP: Record<ThemeName, string> = {
   dark: '#1a1a1a',
-  light: '#ffffff',
+  light: '#f0f0f0',
 };
 
 /** Mirrors `--badge-dark-text` in index.css for each theme; kept in sync and

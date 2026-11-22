@@ -19,10 +19,12 @@ import { HomeFeatures } from './components/HomeFeatures';
 import { Footer } from './components/Footer';
 import { PlatformIcon } from './components/PlatformIcon';
 import { badgeColors } from './utils/colors';
+import { usePrefersLightTheme } from './hooks/usePrefersLightTheme';
 import { DEFAULT_PAGE_TITLE } from './data/seo';
 import './index.css';
 
 function App() {
+  const lightTheme = usePrefersLightTheme();
   const { t } = useTranslation();
   const { isAdmin, session, loadSavedArtists } = useAuth();
   const navigate = useNavigate();
@@ -560,7 +562,7 @@ function App() {
                       <div className="flex flex-wrap gap-2">
                         {category.sources.map(sourceId => {
                           const source = sources[sourceId];
-                          const { textColor, bgColor } = badgeColors(source.color);
+                          const { textColor, bgColor } = badgeColors(source.color, lightTheme ? 'light' : 'dark');
                           return (
                             <a
                               key={sourceId}
