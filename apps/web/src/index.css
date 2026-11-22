@@ -51,8 +51,6 @@
   --color-surface: #111111;
   --color-surface-secondary: #161616;
 
-  --badge-dark-text: #999999;
-
   /* UNS-224: legibility bump. In Tailwind v4 the type scale is theme variables,
      so overriding these resizes every text-* class app-wide (the dominant body
      copy is text-sm) without touching hundreds of call sites. Line-height vars
@@ -101,8 +99,6 @@
     --color-error: #b91c1c;
     --color-surface: #f8f8f8;
     --color-surface-secondary: #f0f0f0;
-
-    --badge-dark-text: #333333;
 
     --skeleton-base: #e3e3e3;
     --skeleton-sheen: rgba(255, 255, 255, 0.7);

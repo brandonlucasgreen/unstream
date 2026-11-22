@@ -89,7 +89,7 @@ export const FOOTER_LINKS: ChromeLink[] = [
 // on — or fight with — whatever variables the page around it defines. Sizes follow the app's
 // enlarged type scale: Tailwind's text-sm is 16px there, text-xs 14px, text-base 18px.
 export const SITE_CHROME_CSS = `
-  :root { --sc-bg: #121212; --sc-bg2: #161616; --sc-hover: #222222; --sc-text: #f0f0f0; --sc-secondary: #999999; --sc-muted: #8a8a8a; --sc-border: #2a2a2a; --sc-accent: #ff6b35; --sc-on-accent: #160b05; }
+  :root { --sc-bg: #121212; --sc-bg2: #161616; --sc-hover: #222222; --sc-text: #f0f0f0; --sc-secondary: #a6a6a6; --sc-muted: #8a8a8a; --sc-border: #2a2a2a; --sc-accent: #ff6b35; --sc-on-accent: #160b05; }
   @media (prefers-color-scheme: light) {
     :root { --sc-bg: #fafafa; --sc-bg2: #f5f5f5; --sc-hover: #f0f0f0; --sc-text: #1a1a1a; --sc-secondary: #555555; --sc-muted: #6d6d6d; --sc-border: #e0e0e0; --sc-accent: #e55a2b; }
   }

@@ -31,9 +31,8 @@ export const BADGE_BACKDROP: Record<ThemeName, string> = {
   light: '#f0f0f0',
 };
 
-/** Mirrors `--badge-dark-text` in index.css for each theme; kept in sync and
- * pinned by color-contrast.test.ts. */
-export const BADGE_FALLBACK_TEXT: Record<ThemeName, string> = {
+/** Starting text color for brands too dark to use as text; fitted to AA from here. */
+const BADGE_FALLBACK_TEXT: Record<ThemeName, string> = {
   dark: '#999999',
   light: '#333333',
 };
@@ -160,32 +159,13 @@ const TINT_ALPHA: Record<ColorBand, string> = {
 };
 
 /**
- * Returns CSS color values for a source badge.
- *
- * - Without a theme (the homepage source pills), the legacy rendering is kept:
- *   the fallback text rides the theme-adaptive `--badge-dark-text` CSS var, and
- *   light brands are darkened by a fixed ratio.
- * - With a theme, the text color is fitted against the badge's tint composited
- *   over that theme's card surface until it clears WCAG AA.
+ * Returns CSS color values for a source badge: the text color is fitted against the
+ * badge's tint composited over that theme's backdrop until it clears WCAG AA.
  */
-export function badgeColors(hex: string, theme?: ThemeName): { textColor: string; bgColor: string } {
+export function badgeColors(hex: string, theme: ThemeName): { textColor: string; bgColor: string } {
   const color = normalizeHexColor(hex);
   const band = colorBand(color);
   const bgColor = withAlpha(color, TINT_ALPHA[band]);
-
-  if (!theme) {
-    switch (band) {
-      case 'dark':
-        // Too dark for direct use — use theme-aware text, subtle brand bg tint
-        return { textColor: 'var(--badge-dark-text)', bgColor };
-      case 'light':
-        // Too light for direct use — darken for text, use moderate bg tint
-        return { textColor: darkenHex(color, 0.45), bgColor };
-      default:
-        // Brand color works as-is for both text and bg tint
-        return { textColor: color, bgColor };
-    }
-  }
 
   const backdrop = compositeOver(bgColor, BADGE_BACKDROP[theme]);
   const start = band === 'dark'
